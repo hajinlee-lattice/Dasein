@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 
 import java.io.IOException;
@@ -46,10 +47,12 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         mockVdbImport(BusinessEntity.Account, 0, ACCOUNT_IMPORT_SIZE_1);
         mockVdbImport(BusinessEntity.Contact, 0, CONTACT_IMPORT_SIZE_1);
         mockVdbImport(BusinessEntity.Product, 0, PRODUCT_IMPORT_SIZE_1);
+        mockVdbImport(BusinessEntity.Transaction, 0, TRANSACTION_IMPORT_SIZE_1);
         Thread.sleep(2000);
         mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, 100);
         mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 100);
         mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, 100);
+        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1, 50);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
@@ -64,7 +67,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     }
 
     private void verifyConsolidate() {
-        verifyConsolidateReport(consolidateAppId, 1, 0, 0, PRODUCT_IMPORT_SIZE_1);
+        verifyConsolidateReport(consolidateAppId, 2, 0, 0, PRODUCT_IMPORT_SIZE_1, TRANSACTION_IMPORT_SIZE_1);
         verifyDataFeedStatsu(DataFeed.Status.InitialConsolidated);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
@@ -73,6 +76,8 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         Assert.assertEquals(numContacts, CONTACT_IMPORT_SIZE_1);
         long numProducts = countTableRole(BusinessEntity.Product.getBatchStore());
         Assert.assertEquals(numProducts, PRODUCT_IMPORT_SIZE_1);
+        long numTransactions = countTableRole(BusinessEntity.Transaction.getServingStore());
+        Assert.assertEquals(numTransactions, TRANSACTION_IMPORT_SIZE_1);
 
         verifyActiveVersion(DataCollection.Version.Blue);
     }

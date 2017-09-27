@@ -111,6 +111,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             }
             appendTableMap.put(entity, true);
             putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), redshiftTable.getName(), servingStore,
+                    activeVersion);
         }
 
         if (BusinessEntity.Account.equals(getBusinessEntity())) {

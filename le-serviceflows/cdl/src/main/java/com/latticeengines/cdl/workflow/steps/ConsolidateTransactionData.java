@@ -92,7 +92,6 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(servingStoreTablePrefix);
-        targetTable.setPrimaryKey(servingStorePrimaryKey);
         step2.setTargetTable(targetTable);
         step2.setConfiguration(getPartitionConfig());
         return step2;
@@ -163,7 +162,6 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
             Set<String> dates = getDeltaDates(aggregateTable);
             List<String> dateFiles = getDeltaDateFiles(aggregateTable, dates);
             Table deltaTable = createTable(dateFiles, servingStoreTablePrefix);
-            metadataProxy.updateTable(customerSpace.toString(), deltaTable.getName(), deltaTable);
             return deltaTable;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -226,6 +224,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         Table table = new Table();
         String fullTableName = TableUtils.getFullTableName(tableName, pipelineVersion);
         table.setName(fullTableName);
+        table.setDisplayName(fullTableName);
         for (String file : dateFiles) {
             addExtract(table, file);
         }

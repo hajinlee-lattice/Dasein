@@ -1,0 +1,209 @@
+{
+    "doc": "", 
+    "uuid": "ad6267b4-976d-4cb7-b730-23a5ae109bf7", 
+    "type": "record", 
+    "name": "PurchaseTransaction_Stream_1", 
+    "fields": [
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "ID", 
+            "name": "Id", 
+            "InterfaceName": "TransactionId", 
+            "logicalType": "Id", 
+            "Nullable": "false", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "1522d857-3c5f-4952-a571-50056674c9cc", 
+            "SourceAttrName": "ID", 
+            "DataSource": "[VO_Top5Contacts_Import, S_Transaction_Import, S_Contact_Import, S_Account_Import, S_Account_CurrentlyMatched_Import, SFDC_Account_Key_XW_Import, Queue_Admin_AccountsForPurchaseHistory_Import, Queue_AccountsFromRecentTxns_Import, PD_MatchingSource_OrbIntelligence_Source_Import, PD_MatchingSource_HGData_Source_Import, PD_MatchingSource_DerivedColumns_Import, PD_MatchingSource_BuiltWith_Source_Import, PD_MatchingSourceWeekly_IntentAlgo_Source_Import, FlatFile_Account_Key_XW_Import, FlatFile_AccountId_CustomerId_XW_Import, Fit_Score_Import, Extensions_for_FS_LEAccount_Mas_Import, Extensions_for_FS_LEAccount_Mas_Alerts_Import, Domain_Account_Key_XW_Import, 1In5000_SampleOfAccounts_Import, 1In160K_SampleOfAccounts_Import]", 
+            "sourceLogicalType": "NVarChar(MAX)", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "FundamentalType": "alpha", 
+            "type": [
+                "string", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[ID, TRANSACTION_ID, TRANSACTION ID]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "Account_ID", 
+            "name": "AccountId", 
+            "InterfaceName": "AccountId", 
+            "logicalType": "Id", 
+            "Nullable": "true", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "dabfbad4-2be7-48df-b996-f15003cd7149", 
+            "SourceAttrName": "Account_ID", 
+            "DataSource": "[S_Transaction_Import]", 
+            "sourceLogicalType": "VarChar(50)", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "FundamentalType": "alpha", 
+            "type": [
+                "string", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[ACCOUNTID, ACCOUNT ID, ACCOUNT, ACCOUNT_ID, ACCOUNT_EXTERNAL_ID]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "Contact_ID", 
+            "name": "ContactId", 
+            "InterfaceName": "ContactId", 
+            "logicalType": "Id", 
+            "Nullable": "true", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "f29ac547-c787-4d07-ae63-78e4ae850d11", 
+            "SourceAttrName": "Contact_ID", 
+            "DataSource": "", 
+            "sourceLogicalType": "NVarChar(256)", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "FundamentalType": "alpha", 
+            "type": [
+                "string", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[CONTACT_EXTERNAL_ID, CONTACT_ID, CONTACT, CONTACT ID, CONTACTID]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "Product_ID", 
+            "name": "ProductId", 
+            "InterfaceName": "ProductId", 
+            "logicalType": "Id", 
+            "Nullable": "false", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "00cf3fd9-5555-4b7d-a10f-0fae9db04496", 
+            "SourceAttrName": "Product_ID", 
+            "DataSource": "[HierarchyMappingTable_Import]", 
+            "sourceLogicalType": "NVarChar(MAX)", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "FundamentalType": "alpha", 
+            "type": [
+                "string", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[PRODUCT_EXTERNAL_ID, PRODUCT ID, PRODUCT_ID, PRODUCTID]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "Quantity", 
+            "name": "Quantity", 
+            "InterfaceName": "Quantity", 
+            "logicalType": "Metric", 
+            "Nullable": "true", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "82470dda-aeac-434e-99f6-1f76ba2fc501", 
+            "SourceAttrName": "Quantity", 
+            "DataSource": "[S_Transaction_Import]", 
+            "sourceLogicalType": "Long", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "FundamentalType": "numeric", 
+            "type": [
+                "long", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[QUANTITY]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "Amount", 
+            "name": "Amount", 
+            "InterfaceName": "Amount", 
+            "logicalType": "Metric", 
+            "Nullable": "true", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "c384c64a-7012-4522-b589-f55bff20b12b", 
+            "SourceAttrName": "Amount", 
+            "DataSource": "[S_Transaction_Import]", 
+            "sourceLogicalType": "Long", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "FundamentalType": "numeric", 
+            "type": [
+                "long", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[AMOUNT]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "TransactionTime", 
+            "name": "TransactionTime", 
+            "InterfaceName": "TransactionTime", 
+            "logicalType": "Timestamp", 
+            "Nullable": "true", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "55eb60ac-6733-4e53-811c-b23336f56400", 
+            "SourceAttrName": "TransactionTime", 
+            "DataSource": "[S_Transaction_Import, Cfg_FiscalPeriod_Import]", 
+            "sourceLogicalType": "DateTime", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "FundamentalType": "DATE", 
+            "type": [
+                "long", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[TRANSACTION_TIME, TIME STAMP, TRANSACTION TIME, TIMESTAMP]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "Tags": "", 
+            "displayName": "Type", 
+            "name": "TransactionType", 
+            "InterfaceName": "TransactionType", 
+            "FundamentalType": "alpha", 
+            "Nullable": "true", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "1c717cdc-b730-4907-875f-0e6b0775f642", 
+            "SourceAttrName": "Type", 
+            "DataSource": "", 
+            "sourceLogicalType": "NVarChar(8)", 
+            "ApprovedUsage": "", 
+            "DataQuality": "", 
+            "type": [
+                "string", 
+                "null"
+            ], 
+            "AllowedDisplayNames": "[TRANSACTION TYPE, TYPE, TRANSACTION_TYPE]", 
+            "Description": ""
+        }, 
+        {
+            "Category": "Default", 
+            "displayName": "Peirod", 
+            "name": "peirod", 
+            "Nullable": "true", 
+            "Tags": "", 
+            "DisplayDiscretizationStrategy": "", 
+            "uuid": "439496a1-1134-48bd-9f5e-50e7c829d963", 
+            "DataSource": "[S_Transaction_Import, Cfg_FiscalPeriod_Import]", 
+            "sourceLogicalType": "NVarChar(MAX)", 
+            "ApprovedUsage": "", 
+            "type": [
+                "string", 
+                "null"
+            ], 
+            "SourceAttrName": "Peirod", 
+            "Description": ""
+        }
+    ]
+}

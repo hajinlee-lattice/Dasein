@@ -210,12 +210,18 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             Schema schema = getVdbImportSchema(entity);
             importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
             importTemplate.setTableType(TableType.IMPORTTABLE);
-            if (BusinessEntity.Account.equals(entity)) {
+            switch (entity) {
+            case Account:
                 importTemplate.setName(SchemaInterpretation.Account.name());
-            } else if (BusinessEntity.Contact.equals(entity)) {
+                break;
+            case Contact:
                 importTemplate.setName(SchemaInterpretation.Contact.name());
-            } else {
+                break;
+            case Product:
                 importTemplate.setName(SchemaInterpretation.Product.name());
+                break;
+            default:
+                importTemplate.setName(SchemaInterpretation.Transaction.name());
             }
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setImportTemplate(importTemplate);
@@ -314,6 +320,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             case Contact:
                 schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
                 break;
+            case Transaction:
+                schemaIs = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("end2end/vdb/Transaction.avsc");
+                schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
+                break;
             case Account:
             default:
             }
@@ -340,6 +351,14 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                         .anyMatch(n -> InterfaceName.Id.name().equals(n));
                 Assert.assertTrue(hasId);
                 break;
+            case Transaction:
+                hasId = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.Id.name().equals(n));
+                hasAccountId = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
+                Assert.assertTrue(hasId);
+                Assert.assertTrue(hasAccountId);
+                break;
             default:
             }
         } catch (IOException e) {
@@ -354,8 +373,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
-        InputStream dataIs = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("end2end/vdb/Account.avro");
+        InputStream dataIs = null;
+        if (entity.equals(BusinessEntity.Transaction)) {
+            dataIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("end2end/vdb/Transaction.avro");
+        } else {
+            dataIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("end2end/vdb/Account.avro");
+        }
         try {
             List<GenericRecord> records = AvroUtils.readFromInputStream(dataIs);
             AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro",
@@ -514,7 +537,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     protected void verifyConsolidateReport(String appId, int publishReportSize, long exportedAccounts,
-            long exportedContacts, long exportedProducts) {
+            long exportedContacts, long exportedProducts, long exportedTransactions) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 2);
         Report publishReport = reports.get(1);
@@ -523,13 +546,16 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 });
         assertEquals(map.entrySet().size(), publishReportSize);
         if (publishReportSize != 0) {
-            if (publishReportSize == 1) {
-                assertEquals(map.get(TableRoleInCollection.SortedProduct.name()).longValue(), exportedProducts);
-            }
-            if (publishReportSize > 1) {
+            if (exportedAccounts != 0)
                 assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).longValue(), exportedAccounts);
+            if (exportedContacts != 0)
                 assertEquals(map.get(TableRoleInCollection.SortedContact.name()).longValue(), exportedContacts);
-            }
+            if (exportedProducts != 0)
+                assertEquals(map.get(TableRoleInCollection.SortedProduct.name()).longValue(), exportedProducts);
+            if (exportedTransactions != 0)
+                assertEquals(map.get(TableRoleInCollection.AggregatedTransaction.name()).longValue(),
+                        exportedTransactions);
+
         }
     }
 
