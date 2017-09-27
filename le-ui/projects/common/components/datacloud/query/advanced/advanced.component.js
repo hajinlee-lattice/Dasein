@@ -85,6 +85,14 @@ angular.module('common.datacloud.query.builder', [
         var segmentId = Object.keys(map.segmentIdModelRulesCoverageMap)[0];
 
         vm.coverage_map = map.segmentIdModelRulesCoverageMap[segmentId];
+        vm.buckets = [
+            { bucket: 'A',  count: 0 },
+            { bucket: 'A-', count: 0 },
+            { bucket: 'B',  count: 0 },
+            { bucket: 'C',  count: 0 },
+            { bucket: 'D',  count: 0 },
+            { bucket: 'F',  count: 0 }
+        ];
         
         if (vm.coverage_map) {
             vm.coverage_map.bucketCoverageCounts.forEach(function(bkt) {
