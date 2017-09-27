@@ -253,6 +253,19 @@ angular.module('lp.ratingsengine')
         return this.type;
     }
 
+    this.checkRatingsBuckets = function(map) {
+        var buckets = ['A','A-','B','C','D','F'];
+        var generated = this.generateRatingsBuckets();
+
+        buckets.forEach(function(key, value) {
+            var bucket = map[key];
+
+            if (!bucket) {
+                map[key] = generated[key];
+            }
+        })
+    }
+
     this.generateRatingsBuckets = function() {
         var restriction = {
             logicalRestriction: {

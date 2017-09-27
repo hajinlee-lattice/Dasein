@@ -84,11 +84,24 @@ angular
     }
 
     this.sanitizeRuleBuckets = function(rule) {
-        var map = rule.ratingRule.bucketToRuleMap;
-        var buckets = ['A','A-','B','C','D','F'];
+        var map = rule.ratingRule.bucketToRuleMap,
+            prune = [];
 
-        buckets.forEach(function(key, index) {
-            var bucket = map[key];
+        Object.keys(map).forEach(function(bucketName) {
+            var account = map[bucketName].account_restriction.logicalRestriction.restrictions;
+            var contact = map[bucketName].contact_restriction.logicalRestriction.restrictions;
+
+            if (account.length + contact.length == 0) {
+                prune.push(bucketName);
+            }
+        });
+
+        for (var i = prune.length - 1; i >= 0; i--) {
+            delete map[prune[i]];
+        }
+
+        Object.keys(map).forEach(function(bucketName) {
+            var bucket = map[bucketName];
 
             if (bucket) {
                 SegmentStore.removeEmptyBuckets([ bucket.account_restriction ]);

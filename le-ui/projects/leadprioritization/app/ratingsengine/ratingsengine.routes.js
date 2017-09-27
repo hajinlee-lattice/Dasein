@@ -235,6 +235,8 @@ angular
                             model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
                         }
 
+                        RatingsEngineStore.checkRatingsBuckets(model.rule.ratingRule.bucketToRuleMap);
+
                         deferred.resolve(model);
                     });
                     return deferred.promise;
