@@ -86,12 +86,17 @@ angular
     this.sanitizeRuleBuckets = function(rule) {
         var map = rule.ratingRule.bucketToRuleMap;
         var buckets = ['A','A-','B','C','D','F'];
+
         buckets.forEach(function(key, index) {
             var bucket = map[key];
 
-console.log(index, key, bucket.account_restriction, bucket.contact_restriction);
-            SegmentStore.sanitizeSegmentRestriction([ bucket.account_restriction ]);
-            SegmentStore.sanitizeSegmentRestriction([ bucket.contact_restriction ]);
+            if (bucket) {
+                SegmentStore.removeEmptyBuckets([ bucket.account_restriction ]);
+                SegmentStore.sanitizeSegmentRestriction([ bucket.account_restriction ]);
+
+                SegmentStore.removeEmptyBuckets([ bucket.contact_restriction ]);
+                SegmentStore.sanitizeSegmentRestriction([ bucket.contact_restriction ]);
+            }
         });
 
         return rule;
@@ -99,7 +104,6 @@ console.log(index, key, bucket.account_restriction, bucket.contact_restriction);
 
     this.sanitizeSegmentRestriction = function(tree) {
         tree.forEach(function(branch) {
-            console.log(branch);
             if (branch && typeof branch.labelGlyph != undefined) {
                 delete branch.labelGlyph;
             }
@@ -112,6 +116,20 @@ console.log(index, key, bucket.account_restriction, bucket.contact_restriction);
                 SegmentStore.sanitizeSegmentRestriction(branch.logicalRestriction.restrictions);
             }
         });
+    }
+
+    this.removeEmptyBuckets = function(tree) {
+        for (var branch, i = tree.length - 1; i >= 0; i--) {
+            branch = tree[i];
+
+            if (branch && branch.bucketRestriction && (!branch.bucketRestriction.bkt || !branch.bucketRestriction.bkt.Id)) {
+                tree.splice(i, 1);
+            }
+
+            if (branch && branch.logicalRestriction) {
+                SegmentStore.removeEmptyBuckets(branch.logicalRestriction.restrictions);
+            }
+        };
     }
 })
 .service('SegmentService', function($http, $q, $state) {

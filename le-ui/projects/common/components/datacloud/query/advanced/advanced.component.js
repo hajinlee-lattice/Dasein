@@ -224,7 +224,7 @@ angular.module('common.datacloud.query.builder', [
             var restrictions = bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions;
             
             filtered = filtered.concat(restrictions.filter(function(value, index) {
-                return value.bucketRestriction.bkt.Id;
+                return value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
             }));
         })
 

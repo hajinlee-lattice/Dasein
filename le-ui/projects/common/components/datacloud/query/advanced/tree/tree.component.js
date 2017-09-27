@@ -288,7 +288,7 @@ angular
 
             vm.buckRestrictionSortBy = function() {
                 return function(object) {
-                    return object.bucketRestriction && object.bucketRestriction.bkt.Id;
+                    return object.bucketRestriction && object.bucketRestriction.bkt && object.bucketRestriction.bkt.Id;
                 }
             }
 
