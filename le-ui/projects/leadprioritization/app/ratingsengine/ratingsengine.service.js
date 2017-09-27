@@ -1,14 +1,17 @@
 angular.module('lp.ratingsengine')
-.service('RatingsEngineStore', function($q, $state, $stateParams, RatingsEngineService, DataCloudStore, BrowserStorageUtility){
+.service('RatingsEngineStore', function(
+    $q, $state, $stateParams, RatingsEngineService, DataCloudStore, 
+    BrowserStorageUtility, SegmentStore
+){
     var RatingsEngineStore = this;
 
     this.init = function() {
         this.settings = {};
 
         this.validation = {
-            segment: false,
-            attributes: false,
-            rules: false
+            segment: true,
+            attributes: true,
+            rules: true
         }
 
         this.segment_form = {
@@ -16,6 +19,7 @@ angular.module('lp.ratingsengine')
         }
 
         this.currentRating = {};
+        this.rule = null;
         this.rating = null;
         this.ratings = null;
         this.type = null;
@@ -26,6 +30,7 @@ angular.module('lp.ratingsengine')
     this.init();
     
     this.clear = function() {
+        console.log('clear')
         this.init();
     }
 
@@ -71,6 +76,7 @@ angular.module('lp.ratingsengine')
         var data = RatingsEngineModels[0],
             rule = (data && data.rule ? data.rule : {}),
             rule = rule || {};
+
         return rule;
     }
 
@@ -85,6 +91,31 @@ angular.module('lp.ratingsengine')
         });
     }
 
+    this.nextSaveRules = function(nextState) {
+        var current = RatingsEngineStore.getRule();
+
+        var opts = {
+            rating_id: $stateParams.rating_id,
+            model_id: current.rule.id,
+            model: { 
+                rule: SegmentStore.sanitizeRuleBuckets(current.rule) 
+            }
+        };
+
+        console.log('nextSaveRules', opts, current);
+        RatingsEngineService.saveRules(opts).then(function(rating) {
+            $state.go(nextState, { rating_id: rating.id });
+        });
+    }
+
+    this.setRule = function(rule) {
+        this.rule = rule;
+    }
+
+    this.getRule = function(rule) {
+        return this.rule;
+    }
+
     this.setRating = function(rating) {
         this.currentRating = rating;
     }
@@ -92,10 +123,11 @@ angular.module('lp.ratingsengine')
     this.getRating = function(id) {
         var deferred = $q.defer();
 
-        if(this.rating) {
-            deferred.resolve(this.rating)
+        if (this.currentRating.id) {
+            deferred.resolve(this.currentRating)
         } else {
             RatingsEngineService.getRating(id).then(function(data) {
+                console.log('setRating', data);
                 RatingsEngineStore.setRating(data);
                 deferred.resolve(data);
             });
@@ -170,13 +202,12 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     };
 
-    this.getCoverageMap = function(CurrentRatingsEngine){
-        console.log('getCoverageMap', CurrentRatingsEngine);
+    this.getCoverageMap = function(CurrentRatingsEngine, segmentId){
         var deferred = $q.defer();
         var CoverageMap = {
             "restrictNotNullSalesforceId":false,
             "segmentIdModelRules": [{
-                "segmentId": "segment1504822371239",
+                "segmentId": segmentId,
                 "ratingRule": {
                     "bucketToRuleMap": CurrentRatingsEngine.rule.ratingRule.bucketToRuleMap,
                     "defaultBucketName": CurrentRatingsEngine.rule.ratingRule.defaultBucketName
@@ -223,6 +254,28 @@ angular.module('lp.ratingsengine')
         return this.type;
     }
 
+    this.generateRatingsBuckets = function() {
+        var restriction = {
+            logicalRestriction: {
+                operator: "AND",
+                restrictions: []
+            }
+        };
+
+        var template = {
+            account_restriction: angular.copy(restriction),
+            contact_restriction: angular.copy(restriction)
+        }
+
+        return {
+            "A":  angular.copy(template),
+            "A-": angular.copy(template),
+            "B":  angular.copy(template),
+            "C":  angular.copy(template),
+            "D":  angular.copy(template),
+            "F":  angular.copy(template)
+        };
+    }
 })
 .service('RatingsEngineService', function($q, $http, $state) {
     this.getRatings = function() {
@@ -323,6 +376,20 @@ angular.module('lp.ratingsengine')
             method: 'POST',
             url: '/pls/ratingengines',
             data: opts
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+
+        return deferred.promise;
+    }
+
+    this.saveRules = function(opts) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'POST',
+            url: '/pls/ratingengines/' + opts.rating_id + '/ratingmodels/' + opts.model_id,
+            data: opts.model
         }).then(function(response){
             deferred.resolve(response.data);
         });

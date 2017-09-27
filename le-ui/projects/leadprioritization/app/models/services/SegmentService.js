@@ -72,7 +72,7 @@ angular
         var aRestriction = segment.account_restriction
             ? segment.account_restriction.restriction
             : {};
-        
+
         var cRestriction = segment.contact_restriction
             ? segment.contact_restriction.restriction
             : {};
@@ -83,8 +83,23 @@ angular
         return segment;
     }
 
+    this.sanitizeRuleBuckets = function(rule) {
+        var map = rule.ratingRule.bucketToRuleMap;
+        var buckets = ['A','A-','B','C','D','F'];
+        buckets.forEach(function(key, index) {
+            var bucket = map[key];
+
+console.log(index, key, bucket.account_restriction, bucket.contact_restriction);
+            SegmentStore.sanitizeSegmentRestriction([ bucket.account_restriction ]);
+            SegmentStore.sanitizeSegmentRestriction([ bucket.contact_restriction ]);
+        });
+
+        return rule;
+    }
+
     this.sanitizeSegmentRestriction = function(tree) {
         tree.forEach(function(branch) {
+            console.log(branch);
             if (branch && typeof branch.labelGlyph != undefined) {
                 delete branch.labelGlyph;
             }

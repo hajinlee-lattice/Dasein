@@ -2,6 +2,7 @@ angular
 .module('lp.ratingsengine', [
     'common.wizard',
     'common.datacloud',
+    'lp.models.segments',
     'lp.ratingsengine.ratingsenginetabs',
     'lp.ratingsengine.ratingslist',
     'lp.ratingsengine.creationhistory',
@@ -144,7 +145,7 @@ angular
                     return [
                         { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveRatingEngine },
                         { label: 'Attributes', state: 'segment.attributes' },
-                        { label: 'Rules', state: 'segment.attributes.rules' }
+                        { label: 'Rules', state: 'segment.attributes.rules', nextFn: RatingsEngineStore.nextSaveRules }
                     ];
                 }
             },
@@ -197,6 +198,15 @@ angular
             resolve: {
                 Segments: function(SegmentService) {
                     return SegmentService.GetSegments();
+                },
+                CurrentRatingEngine: function($q, $stateParams, RatingsEngineStore) {
+                    var deferred = $q.defer();
+
+                    RatingsEngineStore.getRating($stateParams.rating_id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
             views: {
@@ -216,10 +226,15 @@ angular
                 gotoNonemptyCategory: true
             },
             resolve: angular.extend({}, DataCloudResolvesProvider.$get().main, {
-                RatingsEngineModels: function($q, $stateParams, DataCloudStore) {
+                RatingsEngineModels: function($q, $stateParams, DataCloudStore, RatingsEngineStore) {
                     var deferred = $q.defer();
                     DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
                         var model = (data && data[0] ? data[0] : {});
+
+                        if (!model.rule.ratingRule.bucketToRuleMap) {
+                            model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
+                        }
+
                         deferred.resolve(model);
                     });
                     return deferred.promise;
@@ -254,20 +269,10 @@ angular
                     
                     return deferred.promise;
                 },
-                CurrentRatingsEngine: function($q, $stateParams, DataCloudStore) {
+                CoverageMap: function($q, $stateParams, RatingsEngineStore, RatingsEngineModels, CurrentRatingEngine) {
                     var deferred = $q.defer();
-
-                    DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(result) {
-                        var model = (result && result[0] ? result[0] : {});
-                        deferred.resolve(model);
-                    }); 
-
-                    return deferred.promise;
-                },
-                CoverageMap: function($q, $stateParams, RatingsEngineStore, CurrentRatingsEngine) {
-                    var deferred = $q.defer();
-
-                    RatingsEngineStore.getCoverageMap(CurrentRatingsEngine).then(function(result) {
+                    
+                    RatingsEngineStore.getCoverageMap(RatingsEngineModels, CurrentRatingEngine.segment.name).then(function(result) {
                         deferred.resolve(result);
                     }); 
 

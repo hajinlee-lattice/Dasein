@@ -53,7 +53,7 @@ angular.module('common.wizard.controls', [])
         for (var i=0; i<vm.items.length; i++) {
             item = vm.items[i];
             state = item.state;
-
+            
             if (vm.rootState + state == current) {
                 split = state.split('.');
                 last = split[split.length-1];
