@@ -313,19 +313,31 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private Schema getVdbImportSchema(BusinessEntity entity) {
         Schema schema;
         try {
-            InputStream schemaIs = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("end2end/vdb/Account.avsc");
-            String schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
+            InputStream schemaIs = null;
+            String schemaStr = null;
             switch (entity) {
+            case Account:
+                schemaIs = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("end2end/vdb/Account.avsc");
+                schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
+                break;
             case Contact:
-                schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
+                schemaIs = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("end2end/vdb/Account.avsc");
+                schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
+                schemaStr = schemaStr.replaceAll("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
+                break;
+            case Product:
+                schemaIs = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("end2end/vdb/Transaction.avsc");
+                schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
+                schemaStr = schemaStr.replaceAll("\"[Pp]eirod\"", "\"" + InterfaceName.ProductName.name() + "\"");
                 break;
             case Transaction:
                 schemaIs = Thread.currentThread().getContextClassLoader()
                         .getResourceAsStream("end2end/vdb/Transaction.avsc");
                 schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
                 break;
-            case Account:
             default:
             }
 
@@ -374,7 +386,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
         InputStream dataIs = null;
-        if (entity.equals(BusinessEntity.Transaction)) {
+        if (entity.equals(BusinessEntity.Transaction) || entity.equals(BusinessEntity.Product)) {
             dataIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("end2end/vdb/Transaction.avro");
         } else {
             dataIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("end2end/vdb/Account.avro");

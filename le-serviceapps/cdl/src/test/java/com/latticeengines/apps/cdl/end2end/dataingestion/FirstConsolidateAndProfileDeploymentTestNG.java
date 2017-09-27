@@ -52,7 +52,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, 100);
         mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 100);
         mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, 100);
-        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1, 50);
+        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1, 100);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
@@ -67,7 +67,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     }
 
     private void verifyConsolidate() {
-        verifyConsolidateReport(consolidateAppId, 2, 0, 0, PRODUCT_IMPORT_SIZE_1, TRANSACTION_IMPORT_SIZE_1);
+        verifyConsolidateReport(consolidateAppId, 2, 0, 0, 46, TRANSACTION_IMPORT_SIZE_1);
         verifyDataFeedStatsu(DataFeed.Status.InitialConsolidated);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
@@ -75,7 +75,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
         Assert.assertEquals(numContacts, CONTACT_IMPORT_SIZE_1);
         long numProducts = countTableRole(BusinessEntity.Product.getBatchStore());
-        Assert.assertEquals(numProducts, PRODUCT_IMPORT_SIZE_1);
+        Assert.assertEquals(numProducts, 46);
         long numTransactions = countTableRole(BusinessEntity.Transaction.getServingStore());
         Assert.assertEquals(numTransactions, TRANSACTION_IMPORT_SIZE_1);
 
