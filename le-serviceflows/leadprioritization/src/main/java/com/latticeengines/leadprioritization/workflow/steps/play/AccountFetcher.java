@@ -24,6 +24,10 @@ public class AccountFetcher {
     private long pageSize;
 
     public long getCount(PlayLaunchContext playLaunchContext) {
+        log.info(String.format("Requesting count for payload: %s", //
+                playLaunchContext.getAccountFrontEndQuery() == null //
+                        ? "null" : JsonUtils.serialize(playLaunchContext.getAccountFrontEndQuery())));
+
         return entityProxy.getCount( //
                 playLaunchContext.getCustomerSpace().toString(), //
                 playLaunchContext.getAccountFrontEndQuery());

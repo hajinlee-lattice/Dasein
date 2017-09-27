@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,14 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingRule;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
+import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
@@ -52,6 +57,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
+    @Autowired
+    private RuleBasedModelEntityMgr ruleBasedModelEntityMgr;
+
     private boolean shouldSkipAutoTenantCreation = false;
 
     @BeforeClass(groups = "deployment")
@@ -68,10 +76,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         MetadataSegment retrievedSegment = createSegment();
 
-        createRatingEngine(retrievedSegment);
+        createRatingEngine(retrievedSegment, new RatingRule());
     }
 
-    public void createRatingEngine(MetadataSegment retrievedSegment) {
+    public void createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
         ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
         ratingEngine1.setCreatedBy(CREATED_BY);
@@ -83,6 +91,16 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
 
+        Set<RatingModel> models = createdRatingEngine.getRatingModels();
+        for (RatingModel model : models) {
+            if (model instanceof RuleBasedModel) {
+                ((RuleBasedModel) model).setRatingRule(ratingRule);
+                ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel((RuleBasedModel) model,
+                        createdRatingEngine.getId());
+            }
+        }
+
+        ratingEngine1 = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
     }
 
     MetadataSegment createSegment() {
