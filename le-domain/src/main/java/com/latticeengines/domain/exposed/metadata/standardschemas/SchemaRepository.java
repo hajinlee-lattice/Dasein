@@ -996,7 +996,6 @@ public class SchemaRepository {
 
     private Table getTransactionSchema() {
         Table table = createTable(SchemaInterpretation.Transaction);
-        table.setLastModifiedKey(createLastModifiedKey(InterfaceName.LastModifiedDate.name()));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr(InterfaceName.Id.name()) //
