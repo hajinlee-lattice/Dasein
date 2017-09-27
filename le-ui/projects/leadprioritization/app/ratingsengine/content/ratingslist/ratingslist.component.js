@@ -102,7 +102,11 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
 
     vm.tileClick = function ($event, ratingId) {
         $event.preventDefault();
-        $state.go('home.ratingsengine.wizard.segment', {rating_id: ratingId} );
+        if(ratingId === 'rating_engine__ah4xaql-q1-heoxcocectq') {
+            $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
+        } else {
+            $state.go('home.ratingsengine.wizard.segment', {rating_id: ratingId} );
+        }
     };
 
     var oldRatingDisplayName = '';

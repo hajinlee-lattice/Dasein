@@ -30,7 +30,6 @@ angular.module('lp.ratingsengine')
     this.init();
     
     this.clear = function() {
-        console.log('clear')
         this.init();
     }
 
@@ -158,7 +157,7 @@ angular.module('lp.ratingsengine')
 
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
         opts.type = opts.type || 'RULE_BASED',
-        opts.displayName = 'testing making new engine';
+        opts.displayName = opts.displayName || 'testing making new engine';
         opts.segment = {'name': segment.name };
         RatingsEngineService.saveRating(opts).then(function(data){
             deferred.resolve(data);

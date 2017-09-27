@@ -1,3 +1,11 @@
 <section class="ratingsengine dashboard container">
     <h1>Ratings Dashboard</h1>
+
+    <ul>
+        <li>{{vm.rating.summary.displayName}}</li>
+        <li>{{vm.rating.summary.createdBy}} on {{vm.rating.summary.created|date}}</li>
+        <li>Last Data Refresh: {{vm.TimestampIntervalUtility.timeAgo(vm.rating.summary.lastRefreshedDate)}}</li>
+    </ul>
+
+    <pre>{{vm.rating|json}}</pre>
 </section>

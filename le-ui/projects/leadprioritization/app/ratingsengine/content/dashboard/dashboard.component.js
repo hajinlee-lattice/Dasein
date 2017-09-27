@@ -1,12 +1,12 @@
 angular.module('lp.ratingsengine.dashboard', [])
-.controller('RatingsEngineDashboard', function($q, $stateParams, $state, RatingsEngineStore, Rating) {
+.controller('RatingsEngineDashboard', function($q, $stateParams, $state, 
+    RatingsEngineStore, Rating, TimestampIntervalUtility) {
     var vm = this;
 
     angular.extend(vm, {
-        rating: Rating
+        rating: Rating,
+        TimestampIntervalUtility: TimestampIntervalUtility
     });
-
-console.log(Rating);
 
     // RatingsEngineStore.getRating($stateParams.rating_id).then(function(results){
     //     console.log(results);

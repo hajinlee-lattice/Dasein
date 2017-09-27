@@ -113,13 +113,13 @@ angular
                     template: ''
                 },
                 "navigation@": {
-                    controller: function($scope, $stateParams, $state, $rootScope) {
+                    controller: function($scope, $stateParams, $state, $rootScope, Rating) {
                         $scope.stateName = function() {
                             return $state.current.name;
                         }
                         $rootScope.$broadcast('header-back', { 
                             path: '^home.rating.dashboard',
-                            displayName: 'Rating name',
+                            displayName: Rating.summary.displayName,
                             sref: 'home.ratingsengine'
                         });
                     },
