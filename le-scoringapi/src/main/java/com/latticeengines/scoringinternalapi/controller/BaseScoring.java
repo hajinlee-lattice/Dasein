@@ -50,6 +50,8 @@ public abstract class BaseScoring extends CommonBase {
 
     private static final String TOTAL_RECORDS = "TotalRecords";
 
+    private static final String TOTAL_FAILED_RECORDS = "TotalFailedRecords";
+
     private static final String ENFORCE_FUZZY_MATCH = "EnforceFuzzyMatch";
 
     private static final String ID_TYPE = "IdType";
@@ -289,10 +291,22 @@ public abstract class BaseScoring extends CommonBase {
                 requestInfo.logSummary(stopWatchSplits);
             } else {
                 requestInfo.put(TOTAL_RECORDS, String.valueOf(responseList.size()));
+
+                // get total number of errors
+                Long totalFailedRecords = //
+                        responseList.stream() //
+                                .flatMap(resp -> resp.getScores().stream()) //
+                                .filter(sco -> !com.latticeengines.common.exposed.util.StringStandardizationUtils
+                                        .objectIsNullOrEmptyString(sco.getError())) //
+                                .count();
+
+                requestInfo.put(TOTAL_FAILED_RECORDS, totalFailedRecords.toString());
+
                 Map<String, String> totalDurationStopWatchSplits = new HashMap<>();
 
                 processDurationMSForLogging(responseList, stopWatchSplits, totalDurationStopWatchSplits);
                 logTotalDurationSummary(totalDurationStopWatchSplits);
+                requestInfo.remove(TOTAL_FAILED_RECORDS);
 
                 int idx = 0;
                 for (RecordScoreResponse resp : responseList) {
