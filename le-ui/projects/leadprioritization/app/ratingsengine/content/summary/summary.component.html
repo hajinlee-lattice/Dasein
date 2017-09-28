@@ -8,7 +8,7 @@
             
             <ul class="query-rules-buckets-container">
                 <li
-                    ng-repeat="bucket in vm.buckets"
+                    ng-repeat="bucket in vm.rating.ratingModels"
                     ng-class="{ 'active': bucket.bucket == vm.bucket }"
                     ng-click="vm.clickBucketTile(bucket)"
                     class="query-rules-buckets-bucket">
@@ -31,20 +31,26 @@
                     <label>Rating Engine Name
                         <input 
                             type="text" 
-                            class="form-control"/>
+                            class="form-control"
+                            ng-model="vm.rating.displayName"/>
                         <!-- <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required /> -->
                     </label>
                 </div>
                  <div class="form-group">
                     <label>Notes
-                        <textarea rows="2" class="form-control"></textarea>
+                        <textarea 
+                            rows="2" 
+                            class="form-control"
+                            ng-model="vm.rating.note"></textarea>
                         <!-- <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required /> -->
                     </label>
                 </div>
                 <div class="form-group">
                     <label>Activate Rating Engine</label>
-                    <label class="switch-label">
-                        <label type="checkbox" class="switch-input" />
+                    <label class="switch">
+                      <input type="checkbox" class="switch-input">
+                      <span class="switch-label" data-on="Yes" data-off="No"></span>
+                      <span class="switch-handle"></span>
                     </label>
                 </div>
             </form>

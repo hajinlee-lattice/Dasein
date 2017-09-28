@@ -9,7 +9,8 @@ angular
     'lp.ratingsengine.ratingsenginetype',
     'lp.ratingsengine.dashboard',
     'lp.ratingsengine.wizard.segment',
-    'lp.ratingsengine.wizard.attributes'
+    'lp.ratingsengine.wizard.attributes',
+    'lp.ratingsengine.wizard.summary'
 ])
 .config(function($stateProvider, DataCloudResolvesProvider) {
     $stateProvider
@@ -295,6 +296,17 @@ angular
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Create Rating Engine',
+            },
+            resolve: {
+                Rating: function($q, $stateParams, RatingsEngineStore){
+                    var deferred = $q.defer();
+
+                    RatingsEngineStore.getRating($stateParams.rating_id).then(function(result){
+                        deferred.resolve(result)
+                    });
+
+                    return deferred.promise;
+                }
             },
             views: {
                 'wizard_content@home.ratingsengine.wizard': {
