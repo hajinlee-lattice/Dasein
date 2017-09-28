@@ -15,7 +15,8 @@ public class RatingRuleUnitTestNG {
     @Test(groups = "unit")
     public void testSortedBucketToRuleMap() {
         Assert.assertEquals(ratingRule.getDefaultBucketName(), RuleBucketName.C.getName());
-        Assert.assertNull(ratingRule.getBucketToRuleMap());
+        Assert.assertNotNull(ratingRule.getBucketToRuleMap());
+        Assert.assertEquals(ratingRule.getBucketToRuleMap().size(), 0);
         assertOrderOfMap(RatingRule.generateDefaultBuckets());
         System.out.println("ratingRule is " + ratingRule);
         System.out.println("ratingRule.generateDefaultBuckets() is " + RatingRule.generateDefaultBuckets());

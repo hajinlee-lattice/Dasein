@@ -15,7 +15,7 @@ public class RatingRule {
     public static final String DEFAULT_BUCKET_NAME = RuleBucketName.C.getName();
 
     @JsonProperty("bucketToRuleMap")
-    private TreeMap<String, Map<String, Restriction>> bucketToRuleMap;
+    private TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
 
     @JsonProperty("defaultBucketName")
     private String defaultBucketName = DEFAULT_BUCKET_NAME;
