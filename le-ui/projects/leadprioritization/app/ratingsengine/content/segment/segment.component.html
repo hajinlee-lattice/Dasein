@@ -19,55 +19,55 @@
             </div>
             <div class="content-body">
 
-            <div class="filters">
-                <div class="ng-search">
-                    <input type="text" class="form-control" placeholder="Search {{vm.segments.length}} Segments" ng-model="vm.search" />
-                    <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
-                        <span class="fa fa-search" ng-show="!vm.search.length"></span>
-                        <span class="fa fa-times" ng-show="vm.search.length"></span>
-                    </a>
+                <div class="filters">
+                    <div class="ng-search">
+                        <input type="text" class="form-control" placeholder="Search {{vm.segments.length}} Segments" ng-model="vm.search" />
+                        <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
+                            <span class="fa fa-search" ng-show="!vm.search.length"></span>
+                            <span class="fa fa-times" ng-show="vm.search.length"></span>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <ul class="list">
-                <li class="item header segment">
-                    <ul>
-                        <li class="name">Segment</li>
-                        <li class="accounts">Accounts</li>
-                        <li class="contacts">Contacts</li>
-                    </ul>
-                </li>
-                <li 
-                    ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
-                    ng-disabled="vm.block_user"
-                    class="item segment">
-                    <ul>
-                        <li class="name">
-                            <input  type="radio" 
-                                    id="{{segment.name}}" 
-                                    name="segment.name" 
-                                    ng-value="segment.name"
-                                    ng-model="vm.stored.segment_selection" 
-                                    ng-click="vm.setSegment(segment)" />
-                            <label for="{{segment.name}}">{{segment.display_name}}</label></li>
-                        <!--  <li class="accounts">{{ vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number }}</li>
-                        <li class="contacts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li> -->
-                        <li class="accounts">
-                            <span ng-if="!vm.loadingSupplementaryData">{{segment.numAccounts|number}}</span>
-                            <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
-                        </li>
-                        <li class="contacts">
-                            <span ng-if="!vm.loadingSupplementaryData">{{segment.numContacts|number}}</span>
-                            <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-            <pd-pagination-controls
-                current="vm.currentPage"
-                max="filteredList.length / vm.pageSize">
-            </pd-pagination-controls>
+                <ul class="list">
+                    <li class="item header segment">
+                        <ul>
+                            <li class="name">Segment</li>
+                            <li class="accounts">Accounts</li>
+                            <li class="contacts">Contacts</li>
+                        </ul>
+                    </li>
+                    <li 
+                        ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
+                        ng-disabled="vm.block_user"
+                        class="item segment">
+                        <ul>
+                            <li class="name">
+                                <input  type="radio" 
+                                        id="{{segment.name}}" 
+                                        name="segment.name" 
+                                        ng-value="segment.name"
+                                        ng-model="vm.stored.segment_selection" 
+                                        ng-click="vm.setSegment(segment)" />
+                                <label for="{{segment.name}}">{{segment.display_name}}</label></li>
+                            <!--  <li class="accounts">{{ vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number }}</li>
+                            <li class="contacts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li> -->
+                            <li class="accounts">
+                                <span ng-if="!vm.loadingSupplementaryData">{{segment.numAccounts|number}}</span>
+                                <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                            </li>
+                            <li class="contacts">
+                                <span ng-if="!vm.loadingSupplementaryData">{{segment.numContacts|number}}</span>
+                                <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <pd-pagination-controls
+                    current="vm.currentPage"
+                    max="filteredList.length / vm.pageSize">
+                </pd-pagination-controls>
 
-            </div>
+            </div><!-- End .content-body -->
             <button class="button blue-button" ng-if="vm.stateParams.section === 'dashboard.segment'" ng-click="vm.savePlay()" ng-disabled="!vm.stored.segment_selection">Save</button>
         </form>
     </div>

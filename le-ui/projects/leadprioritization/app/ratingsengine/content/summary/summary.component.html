@@ -1,0 +1,54 @@
+<div class="ratingengine-summary playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
+    <div class="inner-container">
+        <div class="header">
+            <h2>Summary</h2>
+            <p>Review your rating engine, assign a name and choose whether you would like to activate it.</p>
+        </div>
+        <div class="content-body">
+            
+            <ul class="query-rules-buckets-container">
+                <li
+                    ng-repeat="bucket in vm.buckets"
+                    ng-class="{ 'active': bucket.bucket == vm.bucket }"
+                    ng-click="vm.clickBucketTile(bucket)"
+                    class="query-rules-buckets-bucket">
+                    
+                    <div class="bucket-box">
+                        <div class="bucket-label"><h2>{{ bucket.bucket }}</h2></div>
+                        <div class="bucket-resource">{{ bucket.resource }}</div>
+                        <div class="bucket-resource-count">
+                            <span class="count-number">{{ bucket.count }}</span>
+                            <span class="count-percentage">({{ (bucket.count / vm.coverage_map.accountCount) * 100 | number:1 }}%)</span>
+                        </div>
+                    </div>
+
+                    <div  class="bucket-rulecount">{{ vm.getRuleCount(bucket) }} Rules</div>
+                </li>
+            </ul>
+
+            <form>
+                 <div class="form-group">
+                    <label>Rating Engine Name
+                        <input 
+                            type="text" 
+                            class="form-control"/>
+                        <!-- <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required /> -->
+                    </label>
+                </div>
+                 <div class="form-group">
+                    <label>Notes
+                        <textarea rows="2" class="form-control"></textarea>
+                        <!-- <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required /> -->
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Activate Rating Engine</label>
+                    <label class="switch-label">
+                        <label type="checkbox" class="switch-input" />
+                    </label>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

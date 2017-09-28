@@ -44,14 +44,26 @@
 				display: flex;
 				justify-content: center;
 				align-items: flex-end;
-				vertical-align: bottom;
+				height: 96px;
 				& > li {
-					flex: 0 0 1;
+					display: flex;
+					justify-content: flex-end;
+					align-items: center;
+					flex-direction: column;
+					height: 100%;
 					width: 15%;
 					margin: 0 2px;
 					text-align: center;
+					& > div {
+						flex: 0 0 1;
+						&:nth-child(1), &:nth-child(3){
+							height: 22px;
+						}
+					}
 					.rating-bar {
 						background-color: rgba(0,0,0,.5);
+						width: 100%;
+						min-height: 2px;
 	            	}
 					&:nth-child(1) {
 						.value {

@@ -25,8 +25,13 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     $scope.$watch('vm.currentPage', function(newValue, oldValue) {
         if(vm.currentPage != oldValue) {
         	vm.filteredSegments = vm.segments.slice((15 * (vm.currentPage - 1)), (15 * vm.currentPage));
-        	vm.loadingSupplementaryData = true;
-        	vm.getCounts(vm.filteredSegments);
+        	
+        	console.log(vm.filteredSegments);
+
+        	if(!vm.filteredSegments[0].numAccounts) {
+	        	vm.loadingSupplementaryData = true;
+	        	vm.getCounts(vm.filteredSegments);
+	        }
         }
     });
 

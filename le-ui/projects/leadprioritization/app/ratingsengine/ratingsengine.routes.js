@@ -145,7 +145,8 @@ angular
                     return [
                         { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveRatingEngine },
                         { label: 'Attributes', state: 'segment.attributes' },
-                        { label: 'Rules', state: 'segment.attributes.rules', nextFn: RatingsEngineStore.nextSaveRules }
+                        { label: 'Rules', state: 'segment.attributes.rules', nextFn: RatingsEngineStore.nextSaveRules },
+                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextFn: RatingsEngineStore.nextSaveSummary }
                     ];
                 }
             },
@@ -288,5 +289,19 @@ angular
                     templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
                 }
             }
+        })
+        .state('home.ratingsengine.wizard.segment.attributes.rules.summary', {
+            url: '/summary',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Create Rating Engine',
+            },
+            views: {
+                'wizard_content@home.ratingsengine.wizard': {
+                    controller: 'RatingsEngineSummary',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/summary/summary.component.html'
+                }
+            },
         });
 });

@@ -82,7 +82,7 @@ angular.module('lp.ratingsengine')
     this.nextSaveRatingEngine = function(nextState) {
         var changed = false,
             opts = RatingsEngineStore.settings,
-            currentRating = RatingsEngineStore.getCurrentRating(),
+            currentRating = RatingsEngineStore.getRating(),
             segment = RatingsEngineStore.getSegment();
 
         RatingsEngineStore.saveRating(currentRating).then(function(rating) {
@@ -105,6 +105,10 @@ angular.module('lp.ratingsengine')
         RatingsEngineService.saveRules(opts).then(function(rating) {
             $state.go(nextState, { rating_id: rating.id });
         });
+    }
+
+    this.nextSaveRules = function(nextState) {
+        console.log("rogue one");
     }
 
     this.setRule = function(rule) {
@@ -160,8 +164,8 @@ angular.module('lp.ratingsengine')
         opts.displayName = opts.displayName || 'testing making new engine';
         opts.segment = {'name': segment.name };
         RatingsEngineService.saveRating(opts).then(function(data){
-            deferred.resolve(data);
             RatingsEngineStore.setRating(data);
+            deferred.resolve(data);
         });
 
         return deferred.promise;

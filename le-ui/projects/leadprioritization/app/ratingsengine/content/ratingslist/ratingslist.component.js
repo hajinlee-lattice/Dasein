@@ -52,7 +52,7 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
 
             vm.tileStates[ratingId] = {
                 showCustomMenu: false,
-                editRating: false,
+                editRating: false
             };
 
             arrayofIds.push(ratingId);
@@ -65,7 +65,10 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
             vm.buckets = response;
 
             angular.forEach(vm.ratings, function(rating) {
-                rating.bucketInformation = vm.buckets.ratingEngineIdCoverageMap[rating.id];
+                rating.bucketInfo = vm.buckets.ratingEngineIdCoverageMap[rating.id];
+
+                var bucketArray = rating.bucketInfo.bucketCoverageCounts;
+                rating.tallestBarHeight = Math.max.apply(Math,bucketArray.map(function(o){return o.count;}))
             });
 
         });  

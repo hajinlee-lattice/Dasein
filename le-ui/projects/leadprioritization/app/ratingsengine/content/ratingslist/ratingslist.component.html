@@ -36,7 +36,7 @@
                     ng-class="{editing: vm.tileStates[rating.id].editRating}">
 
                     <div class="tile-header" ng-if="!vm.tileStates[rating.id].editRating">
-                        <h2 title="{{rating.displayName}}">{{rating.displayName | limitTo: 29 }}{{rating.displayName.length > 29 ? '&hellip;' : ''}}</h2>
+                        <h2 title="{{rating.displayName}}">{{rating.displayName | limitTo: 27 }}{{rating.displayName.length > 27 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button
                                     type="button"
@@ -88,22 +88,32 @@
 
                         <div ng-class="{'inactive': rating.status === 'INACTIVE'}">
                             <h4>Account Ratings</h4>
-
                             <ul class="barChart ratings"
                                 ng-if="!vm.loadingRatingChart">
-                               <li ng-repeat="bucket in rating.bucketInformation.bucketCoverageCounts">
-                                    <div class="value">{{bucket.count}}</div>
-                                    <div class="rating-bar" ng-style="{ height: ((10 / bucket.count) * 10) }"></div>
+                               <li ng-repeat="bucket in rating.bucketInfo.bucketCoverageCounts">
+
+                                    <div class="value">{{bucket.count|number}}</div>
+                                    
+                                    <div 
+                                        class="rating-bar"
+                                        ng-if="rating.tallestBarHeight === bucket.count"
+                                        style="height: 50%">
+                                    </div>
+
+                                    <div 
+                                        class="rating-bar"
+                                        ng-if="rating.tallestBarHeight != bucket.count"
+                                        ng-attr-style="{{'height: '+ ((bucket.count / rating.tallestBarHeight) * 100) / 2 + '%' }}">
+                                    </div>
+
                                     <div class="meta">{{bucket.bucket}}</div>
                                 </li>
                             </ul>
-
                             <span 
                                 ng-if="vm.loadingRatingChart" 
                                 class="bucket-loading">
                                 <i class="fa fa-spinner fa-spin"></i>
                             </span>
-
                         </div>
 
                     </div><!-- End .tile-body -->
