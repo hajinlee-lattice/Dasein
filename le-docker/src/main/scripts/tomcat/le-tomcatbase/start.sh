@@ -68,7 +68,7 @@ term_handler() {
     echo 'in SIGTERM handler'
     JACOCO_DEST_FILE="/mnt/efs/jacoco/${HOSTNAME}.exec"
     if [ -f "${JACOCO_DEST_FILE}" ]; then
-        chmod a+r ${JACOCO_DEST_FILE}
+        chmod a+wr ${JACOCO_DEST_FILE}
     fi
     kill -SIGTERM "$pid"
     wait "$pid"
