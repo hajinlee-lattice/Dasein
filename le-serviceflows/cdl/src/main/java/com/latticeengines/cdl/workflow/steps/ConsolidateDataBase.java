@@ -86,7 +86,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
-        if (newMasterTable != null) {
+        if (newMasterTable != null && !BusinessEntity.Transaction.equals(entity)) {
             dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore,
                     activeVersion);
         }
@@ -111,8 +111,10 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             }
             appendTableMap.put(entity, true);
             putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
-            dataCollectionProxy.upsertTable(customerSpace.toString(), redshiftTable.getName(), servingStore,
-                    activeVersion);
+            if (BusinessEntity.Transaction.equals(entity)) {
+                dataCollectionProxy.upsertTable(customerSpace.toString(), redshiftTable.getName(), batchStore,
+                        activeVersion);
+            }
         }
 
         if (BusinessEntity.Account.equals(getBusinessEntity())) {

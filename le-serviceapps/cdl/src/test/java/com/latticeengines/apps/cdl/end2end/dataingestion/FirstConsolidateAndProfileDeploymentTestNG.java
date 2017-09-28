@@ -76,7 +76,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         Assert.assertEquals(numContacts, CONTACT_IMPORT_SIZE_1);
         long numProducts = countTableRole(BusinessEntity.Product.getBatchStore());
         Assert.assertEquals(numProducts, 46);
-        long numTransactions = countTableRole(BusinessEntity.Transaction.getServingStore());
+        long numTransactions = countTableRole(BusinessEntity.Transaction.getBatchStore());
         Assert.assertEquals(numTransactions, TRANSACTION_IMPORT_SIZE_1);
 
         verifyActiveVersion(DataCollection.Version.Blue);
