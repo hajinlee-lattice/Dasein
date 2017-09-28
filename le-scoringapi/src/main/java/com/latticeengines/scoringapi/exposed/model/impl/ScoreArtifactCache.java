@@ -56,13 +56,15 @@ public class ScoreArtifactCache {
                                             + "Current cache size = %d",
                                     key.getKey(), key.getValue(), scoreArtifactCache.asMap().size()));
                         }
+                        long beforeLoad = System.currentTimeMillis();
                         ScoringArtifacts artifact = modelRetriever.retrieveModelArtifactsFromHdfs(key.getKey(),
                                 key.getValue());
                         if (log.isInfoEnabled()) {
                             log.info(String.format(
                                     "Load completed model artifacts for tenant %s and model %s. "//
-                                            + "Current cache size = %d",
-                                    key.getKey(), key.getValue(), scoreArtifactCache.asMap().size() + 1));
+                                            + "Current cache size=%d. Duration=%d ms",
+                                    key.getKey(), key.getValue(), scoreArtifactCache.asMap().size() + 1,
+                                    System.currentTimeMillis() - beforeLoad));
                         }
                         return artifact;
                     };

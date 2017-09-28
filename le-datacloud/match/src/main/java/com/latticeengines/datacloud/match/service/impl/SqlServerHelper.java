@@ -140,15 +140,22 @@ public class SqlServerHelper implements DbHelper {
         return matchContext;
     }
 
-    private void checkStuckFetcher(String rootUid) {
+    private void checkSlowFetcher(String rootUid) {
+        int slowNum = 0;
+        List<String> slowFetchers = new ArrayList<>();
         synchronized (fetcherActivity) {
             for (Map.Entry<String, Pair<Boolean, Long>> entry : fetcherActivity.entrySet()) {
                 if (entry.getValue().getLeft() == Boolean.TRUE && System.currentTimeMillis()
                         - entry.getValue().getRight() > TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE_REALTIME)) {
-                    throw new RuntimeException(
-                            "Dropping request due to some stuck fetchers. RootOperationUID=" + rootUid);
+                    slowNum++;
+                    slowFetchers.add(entry.getKey());
                 }
             }
+        }
+        if (slowNum > fetcherActivity.size() / 2) {
+            throw new RuntimeException(
+                    String.format("Dropping request due to some stuck fetchers. RootOperationUID=%s. Slow fetchers: %s",
+                            rootUid, String.join(",", slowFetchers)));
         }
     }
 
@@ -156,7 +163,7 @@ public class SqlServerHelper implements DbHelper {
     public MatchContext fetch(MatchContext matchContext) {
         if (enableFetchers) {
             init();
-            checkStuckFetcher(matchContext.getOutput().getRootOperationUID());
+            checkSlowFetcher(matchContext.getOutput().getRootOperationUID());
             queue.add(matchContext);
             return waitForResult(matchContext.getOutput().getRootOperationUID());
         } else {
