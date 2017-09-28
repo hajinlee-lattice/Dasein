@@ -1,2 +1,69 @@
-section.ratingsengine.dashboard.container {
+section.ratingsengine.dashboard-layout.dashboard.container {
+    .account-ratings {
+        .graph {
+            @include flex-container;
+            height: 200px;
+            margin: 40px 0;
+            justify-content: center;
+            -webkit-align-items: flex-end;
+            -ms-flex-align: end;
+            align-items: flex-end;
+            ._rating {
+                @include flex-item(1 1 auto);
+                max-width: 70px;
+                min-height: 4px;
+                position: relative;
+                margin: 0 10px;
+                & > ._label,
+                & > ._count {
+                    position: absolute;
+                    right: 0;
+                    left: 0;
+                    text-align: center;
+                }
+                & > ._label {
+                    bottom: -25px;
+                    font-weight: bold;
+                }
+                & > ._count {
+                    top: -25px;
+                    color: inherit;
+                }
+                &.bucket-a {
+                    color: #70bf4a;
+                    background-color: #70bf4a;
+                }
+                &.bucket-a- {
+                    color: #6ebe4c;
+                    background-color: #6ebe4c;
+                }
+                &.bucket-b {
+                    color: #33bdb7;
+                    background-color: #33bdb7;
+                }
+                &.bucket-c {
+                    color: #cd80bc;
+                    background-color: #cd80bc;
+                }
+                &.bucket-d {
+                    color: #8e71b2;
+                    background-color: #8e71b2;
+                }
+                &.bucket-e {
+                    color: #457eba;
+                    background-color: #457eba;
+                }
+                &.empty {
+                    background: black;
+                    color: black;
+                    opacity: .2;
+                }
+            }
+        }
+    }
+    .dashboard-section.segment {
+        p em {
+            color: blue;
+        }
+    }
 }

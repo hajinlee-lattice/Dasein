@@ -62,7 +62,6 @@ angular.module('lp.ratingsengine')
         // });
     }
 
-
     this.setSegment = function(segment) {
         this.savedSegment = segment;
     }
@@ -82,7 +81,7 @@ angular.module('lp.ratingsengine')
     this.nextSaveRatingEngine = function(nextState) {
         var changed = false,
             opts = RatingsEngineStore.settings,
-            currentRating = RatingsEngineStore.getRating(),
+            currentRating = RatingsEngineStore.getCurrentRating(),
             segment = RatingsEngineStore.getSegment();
 
         RatingsEngineStore.saveRating(currentRating).then(function(rating) {
@@ -130,7 +129,6 @@ angular.module('lp.ratingsengine')
             deferred.resolve(this.currentRating)
         } else {
             RatingsEngineService.getRating(id).then(function(data) {
-                console.log('setRating', data);
                 RatingsEngineStore.setRating(data);
                 deferred.resolve(data);
             });

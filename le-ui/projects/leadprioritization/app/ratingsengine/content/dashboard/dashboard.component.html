@@ -1,11 +1,93 @@
-<section class="ratingsengine dashboard container">
-    <h1>Ratings Dashboard</h1>
-
-    <ul>
-        <li>{{vm.rating.summary.displayName}}</li>
-        <li>{{vm.rating.summary.createdBy}} on {{vm.rating.summary.created|date}}</li>
-        <li>Last Data Refresh: {{vm.TimestampIntervalUtility.timeAgo(vm.rating.summary.lastRefreshedDate)}}</li>
-    </ul>
-
-    <pre>{{vm.rating|json}}</pre>
+<section class="ratingsengine dashboard-layout dashboard container">
+    <div class="container-body">
+        <div class="dashboard-column">
+            <div class="dashboard-section ratingengine">
+                <div class="dashboard-section-container">
+                    <div class="dashboard-section-header">
+                        <h2>
+                            <div class="contenteditable title" ng-class="{editing: focus.title}" ng-focus="focus = {}; focus.title = true; vm.autofocus($event);" tabindex="-1">
+                                <span ng-show="!focus.title">{{ vm.rating.summary.displayName || 'Rating Name' }}</span>
+                                <div class="editor" ng-show="focus.title">
+                                    <input autofocus maxlength="50" ng-blur="vm.edited('displayName'); focus = {};" name="displayName" ng-model="vm.editing.displayName" ng-value="vm.rating.summary.displayName" />
+                                </div>
+                            </div>
+                        </h2>
+                    </div>
+                    <div class="dashboard-section-content">
+                        <p>
+                            {{vm.rating.summary.createdBy}} on {{vm.rating.summary.created|date}}
+                        </p>
+                        <p>
+                            Last Data Refresh: {{vm.TimestampIntervalUtility.timeAgo(vm.rating.summary.lastRefreshedDate)}}
+                        </p>
+                    </div>
+                    <div class="dashboard-section-content account-ratings" ng-if="vm.buckets">
+                        <div class="dashboard-subsection-header">
+                            <h3>Account ratings</h3>
+                        </div>
+                        <ul class="ratings graph">
+                            <li class="_rating bucket-{{label|lowercase}}" 
+                                ng-repeat="(label, count) in vm.buckets.data" 
+                                ng-style="{height: vm.NumberUtility.MakePercentage(count, vm.buckets.total, '%')}"
+                                ng-class="{empty: !count}">
+                                <div class="_label">{{label}}</div>
+                                <div class="_count">{{count|number}}</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="dashboard-section-footer">
+                        <button class="button blue-button" ui-sref="home.ratingsengine.wizard">
+                            <span>Edit</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-section plays">
+                <div class="dashboard-section-container">
+                    <div class="dashboard-section-header">
+                        <h2>
+                            Plays Using this Rating
+                        </h2>
+                    </div>
+                    <div class="dashboard-section-content">
+                        <ul class="plays" ng-if="vm.rating.plays">
+                            <li class="play" ng-repeat="play in vm.rating.plays">
+                                {{play.displayName}} 
+                                <span ng-if="play.launchHistory.playLaunch.updated">Launched {{vm.TimestampIntervalUtility.timeAgo(play.launchHistory.playLaunch.updated)}}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="dashboard-section-footer">
+                        <button class="button blue-button" ui-sref="home.ratingsengine.wizard.segment.attributes.rules({rating_id: vm.rating.id})">
+                            <span>Create a new play</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-column">
+            <div class="dashboard-section segment">
+                <div class="dashboard-section-container">
+                    <div class="dashboard-section-header">
+                        <h2>
+                            {{vm.rating.segment.display_name}}
+                        </h2>
+                    </div>
+                    <div class="dashboard-section-content">
+                        <p>
+                            Created on: <em>{{vm.rating.segment.created|date}}</em><br />
+                            Description: <em>{{vm.rating.segment.description}}</em>
+                        </p>
+                    </div>
+                    <!--
+                    <div class="dashboard-section-footer">
+                        <button class="edit button blue-button">
+                            <span>Edit</span>
+                        </button>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </div>
+    </div>
 </section>

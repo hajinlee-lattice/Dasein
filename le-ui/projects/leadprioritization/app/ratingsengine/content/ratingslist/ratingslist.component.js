@@ -72,7 +72,7 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
 
                 rating.bucketInfo = vm.buckets.ratingEngineIdCoverageMap[rating.id];
 
-                var bucketArray = rating.bucketInfo.bucketCoverageCounts;
+                var bucketArray = (rating && rating.bucketInfo ? rating.bucketInfo.bucketCoverageCounts || [] : []);
                 rating.tallestBarHeight = Math.max.apply(Math,bucketArray.map(function(o){return o.count;}))
             });
 

@@ -227,7 +227,68 @@ angular
                 section: 'wizard.ratingsengine_attributes',
                 gotoNonemptyCategory: true
             },
-            resolve: angular.extend({}, DataCloudResolvesProvider.$get().main, {
+            //resolve: angular.extend({}, DataCloudResolvesProvider.$get().main, {
+            /**
+             * for now we're ducplciating these here from datacloud.routes because when minified the resolves fail
+             */
+            resolve: {
+                EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
+
+                    DataCloudStore.getCount().then(function(result) {
+                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                        deferred.resolve(result.data);
+                    });
+
+                    return deferred.promise;
+                }],
+                Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
+
+                    DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }],
+                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
+
+                    DataCloudStore.getAllTopAttributes().then(function(result) {
+                        deferred.resolve(result['Categories'] || result || {});
+                    });
+
+                    return deferred.promise;
+                }], 
+                EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
+
+                    DataCloudStore.getPremiumSelectMaximum().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }],
+                // below resolves are needed. Do not removed
+                // override at child state when needed
+                LookupResponse: [function() {
+                    return { attributes: null };
+                }],
+                QueryRestriction: [function() {
+                    return null;
+                }],
+                CurrentConfiguration: [function() {
+                    return null;
+                }],
+                // end duplicates
                 RatingsEngineModels: function($q, $stateParams, DataCloudStore, RatingsEngineStore) {
                     var deferred = $q.defer();
                     DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
@@ -243,7 +304,7 @@ angular
                     });
                     return deferred.promise;
                 }
-            }),
+            },
             views: {
                 'wizard_content@home.ratingsengine.wizard': {
                     controller: 'DataCloudController',
