@@ -1,6 +1,5 @@
 package com.latticeengines.query.functionalframework;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -11,16 +10,17 @@ public class QueryTestUtils {
 
     private static AttributeRepository attrRepo;
 
-    public static AttributeRepository getCustomerAttributeRepo() {
+    public static final String ATTR_REPO_S3_DIR = "le-query/attrrepo";
+    public static final String ATTR_REPO_S3_FILENAME = "attrrepo.json.gz";
+    public static final String ATTR_REPO_S3_VERSION = "1";
+
+    public static AttributeRepository getCustomerAttributeRepo(InputStream is) {
         if (attrRepo == null) {
-            synchronized (QueryTestUtils.class) {
-                try {
-                    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("attrrepo.json.gz");
-                    GZIPInputStream gis = new GZIPInputStream(is);
-                    attrRepo = JsonUtils.deserialize(gis, AttributeRepository.class);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to read attrrepo.json.gz", e);
-                }
+            try {
+                GZIPInputStream gis = new GZIPInputStream(is);
+                attrRepo = JsonUtils.deserialize(gis, AttributeRepository.class);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to read attrrepo.json.gz", e);
             }
         }
         return attrRepo;

@@ -1,5 +1,11 @@
 package com.latticeengines.query.functionalframework;
 
+import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_DIR;
+import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_FILENAME;
+import static com.latticeengines.query.functionalframework.QueryTestUtils.ATTR_REPO_S3_VERSION;
+
+import java.io.InputStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -16,6 +22,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-query-context.xml" })
@@ -26,6 +33,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Autowired
     protected QueryEvaluatorService queryEvaluatorService;
+
+    @Autowired
+    private TestArtifactService testArtifactService;
 
     protected static AttributeRepository attrRepo;
     protected static String accountTableName;
@@ -70,18 +80,23 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
         Restriction accountWithSelectedContact = Restriction.builder().and(accountIdRestriction, subQueryRestriction)
                 .build();
-        Query query = Query.builder().where(accountWithSelectedContact).select(accountIdAttrLookup)
+        return Query.builder().where(accountWithSelectedContact).select(accountIdAttrLookup)
                 .from(BusinessEntity.Account) //
                 .build();
-        return query;
     }
 
-    private static AttributeRepository getCustomerAttributeRepo() {
+    private AttributeRepository getCustomerAttributeRepo() {
         if (attrRepo == null) {
-            attrRepo = QueryTestUtils.getCustomerAttributeRepo();
-            synchronized (QueryFunctionalTestNGBase.class) {
-                accountTableName = attrRepo.getTableName(TableRoleInCollection.BucketedAccount);
-                contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+            synchronized (this) {
+                if (attrRepo == null) {
+                    InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
+                            ATTR_REPO_S3_VERSION, ATTR_REPO_S3_FILENAME);
+                    attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
+                    synchronized (QueryFunctionalTestNGBase.class) {
+                        accountTableName = attrRepo.getTableName(TableRoleInCollection.BucketedAccount);
+                        contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+                    }
+                }
             }
         }
         return attrRepo;

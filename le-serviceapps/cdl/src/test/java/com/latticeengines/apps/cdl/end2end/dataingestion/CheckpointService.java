@@ -53,6 +53,7 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -61,6 +62,9 @@ import net.lingala.zip4j.exception.ZipException;
 public class CheckpointService {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
+
+    private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/end2end/checkpoints";
+    private static final String S3_CHECKPOINTS_VERSION = "1";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 200;
@@ -90,6 +94,9 @@ public class CheckpointService {
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private TestArtifactService testArtifactService;
 
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
@@ -175,8 +182,9 @@ public class CheckpointService {
 
     private void unzipCheckpoint(String checkpoint) throws IOException {
         checkpointDir = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
-        String resourcePath = String.format("end2end/%s.zip", checkpoint);
-        String zipFilePath = Thread.currentThread().getContextClassLoader().getResource(resourcePath).getPath();
+        File downloadedFile = testArtifactService
+                .downloadTestArtifact(S3_CHECKPOINTS_DIR, S3_CHECKPOINTS_VERSION, checkpoint + ".zip");
+        String zipFilePath = downloadedFile.getPath();
         try {
             ZipFile zipFile = new ZipFile(zipFilePath);
             zipFile.extractAll(checkpointDir);
@@ -420,7 +428,7 @@ public class CheckpointService {
         String targetPath = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data").toString();
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, targetPath, localDir);
         logger.info("Downloaded hdfs path " + targetPath + " to " + localDir);
-        Collection<File> crcFiles = FileUtils.listFiles(new File(localDir), new String[]{"crc"}, true);
+        Collection<File> crcFiles = FileUtils.listFiles(new File(localDir), new String[] { "crc" }, true);
         crcFiles.forEach(FileUtils::deleteQuietly);
     }
 
@@ -437,8 +445,7 @@ public class CheckpointService {
         }
     }
 
-    private void saveStatsIfExists(DataCollection.Version version, String checkpoint)
-            throws IOException {
+    private void saveStatsIfExists(DataCollection.Version version, String checkpoint) throws IOException {
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId(), version);
         if (statisticsContainer != null) {
             String jsonFile = String.format("checkpoints/%s/%s/stats_container.json", checkpoint, version.name());
