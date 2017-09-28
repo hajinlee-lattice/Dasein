@@ -2,7 +2,10 @@ package com.latticeengines.pls.controller.datacollection;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +14,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.pls.service.MetadataSegmentService;
+import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.util.SecurityUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,8 +27,14 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/datacollection/segments")
 public class MetadataSegmentResource {
 
-    @Autowired
-    private MetadataSegmentService metadataSegmentService;
+    private final MetadataSegmentService metadataSegmentService;
+    private final SessionService sessionService;
+
+    @Inject
+    public MetadataSegmentResource(MetadataSegmentService metadataSegmentService, SessionService sessionService) {
+        this.metadataSegmentService = metadataSegmentService;
+        this.sessionService = sessionService;
+    }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -41,7 +53,15 @@ public class MetadataSegmentResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create or update a segment by name")
-    public MetadataSegment createOrUpdateSegmentWithName(@RequestBody MetadataSegment metadataSegment) {
+    public MetadataSegment createOrUpdateSegmentWithName(@RequestBody MetadataSegment metadataSegment,
+            HttpServletRequest request) {
+        Session session = SecurityUtils.getSessionFromRequest(request, sessionService);
+        if (session != null) {
+            String email = session.getEmailAddress();
+            if (StringUtils.isNotBlank(email)) {
+                metadataSegment.setCreatedBy(email);
+            }
+        }
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);
     }
 

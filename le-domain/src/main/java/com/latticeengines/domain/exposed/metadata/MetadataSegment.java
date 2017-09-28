@@ -65,13 +65,17 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Column(name = "DESCRIPTION", length = 1000)
     private String description;
 
+    @JsonProperty("created_by")
+    @Column(name = "CREATED_BY")
+    private String createdBy;
+
     @JsonIgnore
-    @Column(name = "RESTRICTION", nullable = true)
+    @Column(name = "RESTRICTION")
     @Type(type = "text")
     private String restrictionString;
 
     @JsonIgnore
-    @Column(name = "CONTACT_RESTRICTION", nullable = true)
+    @Column(name = "CONTACT_RESTRICTION")
     @Type(type = "text")
     private String contactRestrictionString;
 
@@ -232,6 +236,14 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setMasterSegment(Boolean masterSegment) {
         isMasterSegment = masterSegment;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     @Override

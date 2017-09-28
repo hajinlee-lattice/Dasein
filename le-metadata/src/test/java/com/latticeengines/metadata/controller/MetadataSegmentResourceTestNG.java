@@ -31,6 +31,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
     private static final String METADATA_SEGMENT_NAME_2 = "NAME";
     private static final String METADATA_SEGMENT_DISPLAY_NAME = "DISPLAY_NAME";
     private static final String METADATA_SEGMENT_DESCRIPTION = "SEGMENT_DESCRIPTION";
+    private static final String METADATA_SEGMENT_CREATED_BY = "abc@lattice-engines.com";
     private static final Date CREATED_UPDATED_DATE = new Date();
 
     private static final String BASE_URL_DATA_COLLECTION = "/metadata/customerspaces/%s/datacollections/";
@@ -53,6 +54,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         METADATA_SEGMENT
                 .setContactRestriction(Restriction.builder().let(BusinessEntity.Contact, "EMAIL").isNull().build());
         METADATA_SEGMENT.setDataCollection(DATA_COLLECTION);
+        METADATA_SEGMENT.setCreatedBy(METADATA_SEGMENT_CREATED_BY);
     }
 
     @Test(groups = "functional")
@@ -68,6 +70,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         assertNotNull(retrieved);
         assertEquals(retrieved.getName(), METADATA_SEGMENT_NAME);
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT_DISPLAY_NAME);
+        assertEquals(retrieved.getCreatedBy(), METADATA_SEGMENT_CREATED_BY);
         assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.IS_NULL);
         assertEquals(((ConcreteRestriction) retrieved.getContactRestriction()).getRelation(), ComparisonType.IS_NULL);
     }
