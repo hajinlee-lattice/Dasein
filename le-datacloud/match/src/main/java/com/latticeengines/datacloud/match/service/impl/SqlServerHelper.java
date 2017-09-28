@@ -58,7 +58,7 @@ public class SqlServerHelper implements DbHelper {
 
     private static final Integer QUEUE_SIZE = 20000;
     private static final Integer TIMEOUT_MINUTE_REALTIME = 1;
-    private static final Integer TIMEOUT_MINUTE_BULK = 10;
+    private static final Integer TIMEOUT_MINUTE_BULK = 8;
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
@@ -78,6 +78,9 @@ public class SqlServerHelper implements DbHelper {
 
     @Value("${datacloud.match.num.fetchers:16}")
     private Integer numFetchers;
+
+    @Value("${datacloud.match.num.slowfetchers:8}")
+    private Integer numSlowFetchers;
 
     @Value("${datacloud.match.realtime.fetchers.enable:false}")
     private boolean enableFetchers;
@@ -152,7 +155,7 @@ public class SqlServerHelper implements DbHelper {
                 }
             }
         }
-        if (slowNum > fetcherActivity.size() / 2) {
+        if (slowNum > numSlowFetchers) {
             throw new RuntimeException(
                     String.format("Dropping request due to some stuck fetchers. RootOperationUID=%s. Slow fetchers: %s",
                             rootUid, String.join(",", slowFetchers)));
