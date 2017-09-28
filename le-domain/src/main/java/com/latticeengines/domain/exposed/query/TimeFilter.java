@@ -10,22 +10,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class SubQueryLookup extends Lookup {
-    @JsonProperty("subquery")
-    private SubQuery subQuery;
+public class TimeFilter {
+    @JsonProperty("Cmp")
+    private ComparisonType comparisonType;
 
-    private SubQueryLookup() {}
+    @JsonProperty("Vals")
+    private List<Object> values;
 
-    public SubQueryLookup(SubQuery subQuery) {
-        this.subQuery = subQuery;
+    public TimeFilter() {
     }
 
-    public SubQuery getSubQuery() {
-        return subQuery;
+    public TimeFilter(ComparisonType comparisonType, List<Object> values) {
+        this.comparisonType = comparisonType;
+        this.values = values;
     }
 
-    public void setSubQuery(SubQuery subQuery) {
-        this.subQuery = subQuery;
+    public ComparisonType getComparisonType() {
+        return comparisonType;
+    }
+
+    public List<Object> getValues() {
+        return values;
     }
 
 }

@@ -13,11 +13,14 @@ import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
 /**
@@ -83,14 +86,20 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testTransactionSelect() {
-        Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Transaction, ATTR_ACCOUNT_ID).eq(1802) //
-                .build();
+        TransactionRestriction txRestriction = new TransactionRestriction();
+        txRestriction.setTimeFilter(new TimeFilter(ComparisonType.EVER, null));
+        txRestriction.setProductId("1");
+        Restriction restriction = txRestriction.convert(BusinessEntity.Account);
+        Restriction countryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
+                .eq("LEICESTER").build();
+        Restriction idRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(1802).build();
+        Restriction cityAndTx = Restriction.builder().and(countryRestriction, restriction).build();
+        Restriction idOrCityAndTx = Restriction.builder().or(idRestriction, cityAndTx).build();
         Query query = Query.builder() //
-                .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
-                .where(restriction).build();
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(idOrCityAndTx).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
-        Assert.assertEquals(results.size(), 1);
+        Assert.assertEquals(results.size(), 2);
     }
 
     @Test(groups = "functional", enabled = false)

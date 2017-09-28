@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -38,7 +39,8 @@ public class QueryTranslator {
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
-        Restriction restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery));
+        Restriction restriction = translateFrontEndRestriction(mainEntity,
+                getEntityFrontEndRestriction(mainEntity, frontEndQuery));
 
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
 
@@ -136,7 +138,7 @@ public class QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction);
+        Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction);
         return addExistsRestriction(outerRestriction, innerEntity, innerRestriction);
     }
 
@@ -145,7 +147,8 @@ public class QueryTranslator {
                 : Restriction.builder().and(outerRestriction, innerRestriction).build();
     }
 
-    private static Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
+    private static Restriction translateFrontEndRestriction(BusinessEntity entity,
+            FrontEndRestriction frontEndRestriction) {
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return null;
         }
@@ -162,12 +165,21 @@ public class QueryTranslator {
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(bucket);
                     parent.getRestrictions().add(concrete);
+                } else if (object instanceof TransactionRestriction) {
+                    TransactionRestriction txRestriction = (TransactionRestriction) object;
+                    Restriction concrete = txRestriction.convert(entity);
+                    LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                    parent.getRestrictions().remove(txRestriction);
+                    parent.getRestrictions().add(concrete);
                 }
             });
             translated = restriction;
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
             translated = bucket.convert();
+        } else if (restriction instanceof TransactionRestriction) {
+            TransactionRestriction txRestriction = (TransactionRestriction) restriction;
+            translated = txRestriction.convert(entity);
         } else {
             translated = restriction;
         }
@@ -198,11 +210,11 @@ public class QueryTranslator {
         ratingRule.getBucketToRuleMap().forEach((key, val) -> {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
-            Restriction accountRestriction = translateFrontEndRestriction(frontEndRestriction);
+            Restriction accountRestriction = translateFrontEndRestriction(BusinessEntity.Account, frontEndRestriction);
 
             frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
-            Restriction contactRestriction = translateFrontEndRestriction(frontEndRestriction);
+            Restriction contactRestriction = translateFrontEndRestriction(BusinessEntity.Contact, frontEndRestriction);
 
             BusinessEntity innerEntity;
             Restriction outerRestriction, innerRestriction;

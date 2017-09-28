@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PurchaseRestriction extends Restriction {
+public class AggregationFilter {
     @JsonProperty("selector")
     private AggregationSelector selector;
 
@@ -21,12 +21,13 @@ public class PurchaseRestriction extends Restriction {
     @JsonProperty("Val")
     private Object value;
 
-    PurchaseRestriction() { }
+    AggregationFilter() {
+    }
 
-    public PurchaseRestriction(AggregationSelector selector,
-                               AggregationType aggregationType,
-                               ComparisonType comparisonType,
-                               Object value) {
+    public AggregationFilter(AggregationSelector selector,
+                             AggregationType aggregationType,
+                             ComparisonType comparisonType,
+                             Object value) {
         this.selector = selector;
         this.aggregationType = aggregationType;
         this.comparisonType = comparisonType;
@@ -37,7 +38,7 @@ public class PurchaseRestriction extends Restriction {
         return selector;
     }
 
-    public AggregationType getTransformationType() {
+    public AggregationType getAggregationType() {
         return aggregationType;
     }
 
