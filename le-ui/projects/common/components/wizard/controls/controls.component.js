@@ -1,7 +1,7 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
     $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressItems,
-    WizardProgressContext, WizardControlsOptions, WizardValidationStore
+    WizardProgressContext, WizardControlsOptions, WizardValidationStore, ImportWizardService, ImportWizardStore
 ) {
     var vm = this;
 
@@ -28,10 +28,14 @@ angular.module('common.wizard.controls', [])
         vm.setButtons();
 
         if (vm.next && !isPrev) {
+            if (vm.next == 'home.import.wizard.accounts.one.two.three.four.five') {
+                ImportWizardService.SaveFieldDocuments(ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument());
+        	} 
             vm.go(vm.next, isPrev);
         } else if (isPrev && vm.prev) {
             vm.go(vm.prev, isPrev);
         } else if (!isPrev && !vm.next) {
+            ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
             vm.go(WizardControlsOptions.nextState, isPrev);
         }
     }

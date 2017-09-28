@@ -7,10 +7,15 @@ angular.module('lp.import.wizard.customfields', [])
     angular.extend(vm, {
         parent_name: $state.current.name.split('.')[3],
         full_name: $state.current.name,
-        customFieldsIgnore: []
+        customFieldsIgnore: [],
+        FieldDocument: ImportWizardStore.getFieldDocument(),
+        AvailableFields: ImportWizardStore.getAvailableFields(),
+        ignoredFields: ImportWizardStore.getFieldDocumentAttr('ignoredFields'),
+        fieldMappings: ImportWizardStore.getFieldDocumentAttr('fieldMappings'),
     });
 
     vm.init = function() {
+        vm.size= vm.AvailableFields.lengh;
         vm.customFields = ImportWizardStore.getCustomFields(vm.parent_name);
 
         vm.customFields.forEach(function(item){
@@ -24,7 +29,15 @@ angular.module('lp.import.wizard.customfields', [])
             });
         }
 
-    }
+    };
 
+    vm.filterStandardList = function(input) {
+        for (var i =0 ; i < vm.AvailableFields.length; i++) {
+            if (vm.AvailableFields[i] === input.userField) {
+                return true;
+            }
+        }
+        return false;
+    };
     vm.init();
 });

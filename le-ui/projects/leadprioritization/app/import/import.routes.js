@@ -127,6 +127,26 @@ angular
                     controllerAs: 'vm',
                     templateUrl: 'app/import/content/accountids/accountids.component.html'
                 }
+            },
+            resolve: {
+            	FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
             }
         })
         .state('home.import.wizard.accounts.one.two', {
@@ -150,6 +170,12 @@ angular
         .state('home.import.wizard.accounts.one.two.three', {
             url: '/latticefields',
             resolve: {
+                FieldDocument: function($q, ImportWizardStore) {
+            	    return ImportWizardStore.getFieldDocument();
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    return ImportWizardStore.getUnmappedFields();
+                },
                 Type: function(){
                     return "Account";
                 },

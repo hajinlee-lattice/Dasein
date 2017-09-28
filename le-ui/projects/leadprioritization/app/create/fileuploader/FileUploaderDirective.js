@@ -43,7 +43,7 @@ angular
             });
         },
         controllerAs: 'vm_uploader',
-        controller: function ($scope, $state, $q, $element, $timeout, ResourceUtility, StringUtility, ImportService, ImportStore, ServiceErrorUtility) {
+        controller: function ($scope, $state, $q, $element, $timeout, ResourceUtility, StringUtility, ImportService, ImportStore, ImportWizardStore, ServiceErrorUtility) {
             var vm = this,
                 options = {
                     compress_percent: 0,
@@ -351,6 +351,7 @@ angular
                     modelName = vm.modelDisplayName = vm.modelDisplayName || vm.selectedFileName, options;
                 if($state.includes('home.import.entry')) {
                     var fileName = "file_" + (new Date).getTime() + ".csv";
+                    ImportWizardStore.setCsvFileName(fileName);
                     options = {
                             file: file,
                             url: vm.params.url || '/pls/models/uploadfile/cdl',

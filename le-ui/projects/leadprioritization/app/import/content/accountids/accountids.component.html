@@ -15,14 +15,28 @@
             <div class="text-block">
                 If you have unique identifiers for each record, select this option. It is important that every account has a unique ID, and that they do not change on subsequent uploads.
             </div>
-            <div>
+            <div ng-init="fieldMapping = vm.idFieldMapping">
                 <label for="dedupeField">Unique Identifier</label>
-                <select id="dedupeField" class="form-control"
+               <!--  <select id="dedupeField" class="form-control"
                     ng-model="vm.state.selectedField"
                     ng-disabled="vm.state.dedupeType !== 'custom'"
                     ng-options="f as f for f in vm.state.fields">
                     <option ng-if="!vm.state.selectedField" ng-selected="!vm.state.accountDedupeField" value="">Select an Unique Identifier</option>
-                </select>
+                </select> -->
+                <select class="form-control"
+                ng-model="fieldMapping.userField"
+                ng-change="vm.changeLatticeField(fieldMapping)"
+	            ng-class="{'required': true}" >
+			    <option value="{{ fieldMapping.userField }}"
+						ng-selected="true">
+					{{ vm.AvailableFields.length === 0  ? '-- No Fields Available --' : fieldMapping.userField }}
+				</option>
+                <option value="{{ AvailableField }}"
+						ng-repeat="AvailableField in vm.AvailableFields"
+						>
+					{{ AvailableField }}
+				</option>
+               </select>
             </div>
         </div>
         <div class="dedupe-options-item">

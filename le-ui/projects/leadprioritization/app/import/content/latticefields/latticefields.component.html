@@ -1,4 +1,4 @@
-<div class="lattice-fields container">
+<div class="lattice-fields container" ng-if="vm.initialized">
     
     <h2>Lattice Fields</h2>
     <p>Lattice uses several account fields that you should provide for each record, if possible. Please review the fields below to make sure everything is mapping correctly.</p>
@@ -6,10 +6,27 @@
     <h3 class="{{vm.importType}}-matching">{{vm.importType}} Matching Fields</h3>
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
     <ul>
-    	<li ng-repeat="field in vm.matchingFields">
-    		<label>{{field.name}}</label>
-    		<select class="form-control">
-    			<option ng-repeat="option in field.options">{{ option.name }}</option>
+
+    	<li ng-repeat="field in vm.matchingFieldsList"
+    	ng-init="fieldMapping = vm.matchingFieldMappings[field]">
+    		<label>{{field}}</label>
+    		<select class="form-control"
+    		    ng-model="fieldMapping.userField"
+			    ng-change="vm.changeLatticeField(fieldMapping)"
+			    ng-class="{'required': true}" >
+			    <option value="{{::vm.ignoredFieldLabel }}"
+						ng-if="fieldMapping.userField && fieldMapping.userField !== vm.ignoredFieldLabel">
+					{{ ::vm.ignoredFieldLabel }}
+				</option>
+				<option value="{{ fieldMapping.userField }}"
+						ng-selected="true">
+					{{ (vm.AvailableFields.length === 0 && fieldMapping.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : fieldMapping.userField }}
+				</option>
+    			<option value="{{ AvailableField }}"
+						ng-repeat="AvailableField in vm.AvailableFields"
+						ng-if="fieldMapping.userField !== AvailableField">
+					{{ AvailableField }}
+				</option>
     		</select>
     	</li>
     </ul>
@@ -18,10 +35,26 @@
     <h3 class="analysis">Analysis Fields</h3>
     <p>These optional fields are used for analysis and are useful if you can provide them.</p>
     <ul>
-    	<li ng-repeat="field in vm.analysisFields">
-    		<label>{{field.name}}</label>
-    		<select class="form-control">
-    			<option ng-repeat="option in field.options">{{ option.name }}</option>
+    	<li ng-repeat="field in vm.analysisFieldsList"
+    	ng-init="fieldMapping = vm.analysisFieldMappings[field]">
+    		<label>{{field}}</label>
+    		<select class="form-control"
+    		    ng-model="fieldMapping.userField"
+			    ng-change="vm.changeLatticeField(fieldMapping)"
+			    ng-class="{'required': true}" >
+			    <option value="{{::vm.ignoredFieldLabel }}"
+						ng-if="fieldMapping.userField && fieldMapping.userField !== vm.ignoredFieldLabel">
+					{{ ::vm.ignoredFieldLabel }}
+				</option>
+				<option value="{{ fieldMapping.userField }}"
+						ng-selected="true">
+					{{ (vm.AvailableFields.length === 0 && fieldMapping.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : fieldMapping.userField }}
+				</option>
+    			<option value="{{ AvailableField }}"
+						ng-repeat="AvailableField in vm.AvailableFields"
+						ng-if="fieldMapping.userField !== AvailableField">
+					{{ AvailableField }}
+				</option>
     		</select>
     	</li>
     </ul>

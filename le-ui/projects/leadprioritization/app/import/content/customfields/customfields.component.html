@@ -5,7 +5,7 @@
             You can add custom fields by adding columns in your CSV file with whatever data you wish to provide.  All unmapped fields (non-ID and non-Lattice fields) are considered Custom Fields unless you choose to ignore them.  You can always add more Custom Fields later.
         </p>
     </div>
-    <div class="alert">7 new Custom Fields have been found.</div>
+    <div class="alert">{{ vm.AvailableFields.length }} new Custom Fields have been found.</div>
     <ul class="customfields">
         <li class="customfield">
             <ul class="field">
@@ -47,18 +47,23 @@
                 </li>
             </ul>
         </li>
-        <li ng-repeat="field in vm.customFields" class="customfield">
+        <li ng-repeat="fieldMapping in vm.fieldMappings | filter:vm.filterStandardList" class="customfield">
             <ul class="field">
-                <li class="field-name">{{field.CustomField}}</li>
+                <li class="field-name">{{fieldMapping.userField}}</li>
                 <li class="type">
-                    <select name="" id="">
-                        <option value="" ng-selected="field.Type == 'Text'">Text</option>
-                        <option value="" ng-selected="field.Type == 'Number'">Number</option>
-                        <option value="" ng-selected="field.Type == 'Boolean'">Boolean</option>
-                        <option value="" ng-selected="field.Type == 'Date'">Date</option>
-                    </select>
+                    <select
+							class="custom-select"
+							name="columnType_{{ ::fieldMapping.userField }}"
+							ng-model="fieldMapping.fieldType"
+							ng-init="fieldMapping.fieldType=fieldMapping.fieldType"
+							value="{{fieldMapping.fieldType}}">
+						<option value="TEXT" selected>Text</option>
+						<option value="NUMBER">Number</option>
+						<option value="BOOLEAN">Boolean</option>
+						<option value="DATE">Date</option>
+					</select>
                 </li>
-                <li class="ignore"><input type="checkbox" ng-model="vm.customFieldsIgnore[field.CustomField]" ng-checked="field.Ignore" ng-click="vm.toggleIgnore = false" id="customFieldsIgnore[{{field.CustomField}}]"/> <label for="customFieldsIgnore[{{field.CustomField}}]">Ignore</label></li>
+                <li class="ignore"><input type="checkbox" ng-model="fieldMapping.ignored" ng-checked="field.Ignore" ng-click="" id=""/> <label for="customFieldsIgnore[{{field.CustomField}}]">Ignore</label></li>
             </ul>
         </li>
     </ul>

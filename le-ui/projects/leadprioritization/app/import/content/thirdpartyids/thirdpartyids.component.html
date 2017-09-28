@@ -3,13 +3,30 @@
     <h2>3rd Party Identifiers</h2>
     <p>3rd Party Identifiers are used to lookup accounts in other applications, such as SalesForce, Marketo and Eloqua. Please map the relevant lookup fields and, if possible, make sure your CSV file has columns with data for each account. If you are uploading an existing account, you do not need to provide it again (as it is already stored in the system).</p>
 
-    <ul>
-    	<li ng-repeat="identifier in vm.identifiers">
-    		<label>{{identifier.name}}</label>
-    		<input type="text" class="form-control" />
-    	</li>
-    </ul>
-
+    		<div ng-init="fieldMapping = vm.idFieldMapping">
+                <label for="dedupeField">CRM ID</label>
+               <!--  <select id="dedupeField" class="form-control"
+                    ng-model="vm.state.selectedField"
+                    ng-disabled="vm.state.dedupeType !== 'custom'"
+                    ng-options="f as f for f in vm.state.fields">
+                    <option ng-if="!vm.state.selectedField" ng-selected="!vm.state.accountDedupeField" value="">Select an Unique Identifier</option>
+                </select> -->
+                <select class="form-control"
+    		    ng-model="fieldMapping.userField"
+    		    ng-change="vm.changeLatticeField(fieldMapping)"
+			    ng-class="{'required': true}" >
+			    <option value="{{ fieldMapping.userField }}"
+						ng-selected="true">
+					{{ vm.AvailableFields.length === 0  ? '-- No Fields Available --' : fieldMapping.userField }}
+				</option>
+    			<option value="{{ AvailableField }}"
+						ng-repeat="AvailableField in vm.AvailableFields"
+						>
+					{{ AvailableField }}
+				</option>
+    		</select>
+            </div>
+</br>
 	<button 
 		class="button white-button" 
 		type="button"
