@@ -43,6 +43,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
 
+    public PlayLaunch() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -114,7 +117,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("bucketsToLaunch")
     @Column(name = "BUCKETS_TO_LAUNCH")
     @Type(type = "text")
-    private String bucketsToLaunch = JsonUtils.serialize(RuleBucketName.values());
+    private String bucketsToLaunch;
 
     @Override
     public Long getPid() {
@@ -260,5 +263,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setBucketsToLaunch(Set<RuleBucketName> bucketsToLaunch) {
         this.bucketsToLaunch = JsonUtils.serialize(bucketsToLaunch);
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
@@ -32,6 +34,8 @@ import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -163,7 +167,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
     public void createPlayLaunch() {
         playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches", null, PlayLaunch.class);
+                "/pls/play/" + name + "/launches", createDefaultPlayLaunch(), PlayLaunch.class);
 
         assertPlayLaunch(playLaunch);
     }
@@ -276,6 +280,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playLaunch.getCreated());
         Assert.assertNotNull(playLaunch.getApplicationId());
         Assert.assertNotNull(playLaunch.getLaunchState());
+        Assert.assertNotNull(playLaunch.getBucketsToLaunch());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
     }
 
@@ -322,6 +327,13 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     public PlayLaunch getPlayLaunch() {
+        return playLaunch;
+    }
+
+    @SuppressWarnings("unchecked")
+    private PlayLaunch createDefaultPlayLaunch() {
+        PlayLaunch playLaunch = new PlayLaunch();
+        playLaunch.setBucketsToLaunch(new TreeSet<>(Arrays.asList(RuleBucketName.values())));
         return playLaunch;
     }
 

@@ -116,12 +116,14 @@ public class PlayResource {
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Create play launch for a given play")
-    public PlayLaunch createPlayLaunch(@PathVariable("playName") String playName, HttpServletResponse response) {
+    public PlayLaunch createPlayLaunch( //
+            @PathVariable("playName") String playName, //
+            @RequestBody PlayLaunch playLaunch, //
+            HttpServletResponse response) {
         Play play = playService.getPlayByName(playName);
         validatePlayBeforeLaunch(play);
-        PlayLaunch playLaunch = null;
+        validatePlayLaunchBeforeLaunch(playLaunch, play);
         if (play != null) {
-            playLaunch = new PlayLaunch();
             playLaunch.setLaunchState(LaunchState.Launching);
             playLaunch.setPlay(play);
             playLaunchService.create(playLaunch);
@@ -142,6 +144,12 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
         }
 
+    }
+
+    private void validatePlayLaunchBeforeLaunch(PlayLaunch playLaunch, Play play) {
+        if (playLaunch.getBucketsToLaunch() == null) {
+            throw new LedpException(LedpCode.LEDP_18156, new String[] { play.getName() });
+        }
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)

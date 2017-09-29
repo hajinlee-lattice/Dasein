@@ -266,6 +266,7 @@ public enum LedpCode {
     LEDP_18153("Segment not defined for Rating Engine {0}."), //
     LEDP_18154("Type not defined for Rating Engine {0}."), //
     LEDP_18155("Play {0} cannot be launched since corresponding ratings engine is not active."), //
+    LEDP_18156("PlayLaunch for Play {0} cannot be started since it does not have buckets specified."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
