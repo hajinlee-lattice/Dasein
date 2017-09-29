@@ -71,12 +71,18 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
             for (Map<String, Object> accExtRec : data) {
 
-                if (accExtRec.containsKey(PlaymakerConstants.AccountID)) {
+                if (accExtRec.containsKey(PlaymakerConstants.AccountID)
+                        && accExtRec.get(PlaymakerConstants.AccountID) != null) {
                     String accountId = (String) accExtRec.get(PlaymakerConstants.AccountID);
                     if (StringUtils.isNotBlank(accountId) && StringUtils.isNumeric(accountId)) {
                         Long longAccId = Long.parseLong(accountId);
                         accExtRec.put(PlaymakerConstants.AccountID, longAccId);
+                    } else {
+                        // remove AccountID from response as BIS expects it into
+                        // numerical format
+                        accExtRec.put(PlaymakerConstants.AccountID, null);
                     }
+                    accExtRec.put(PlaymakerConstants.AccountID + PlaymakerConstants.V2, accountId);
                 }
 
                 if (accExtRec.containsKey(PlaymakerConstants.PlayID)) {
