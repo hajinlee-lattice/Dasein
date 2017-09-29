@@ -18,7 +18,7 @@ angular.module('lp.create.import.job', [
 
     var REFRESH_JOB_INTERVAL_ID;
     var REFRESH_PERFORM_CALC_ID; 
-    var TIME_BETWEEN_JOB_REFRESH = 10 * 1000;
+    var TIME_BETWEEN_JOB_REFRESH = 30 * 1000;
 
     getJobStatusFromAppIdAndPerformCalc();
 
