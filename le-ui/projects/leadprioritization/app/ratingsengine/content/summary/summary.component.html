@@ -8,21 +8,20 @@
             
             <ul class="query-rules-buckets-container">
                 <li
-                    ng-repeat="bucket in vm.rating.ratingModels"
+                    ng-repeat="bucket in vm.buckets"
                     ng-class="{ 'active': bucket.bucket == vm.bucket }"
-                    ng-click="vm.clickBucketTile(bucket)"
                     class="query-rules-buckets-bucket">
                     
                     <div class="bucket-box">
                         <div class="bucket-label"><h2>{{ bucket.bucket }}</h2></div>
                         <div class="bucket-resource">{{ bucket.resource }}</div>
                         <div class="bucket-resource-count">
-                            <span class="count-number">{{ bucket.count }}</span>
+                            <span class="count-number">{{ bucket.count | number }}</span>
                             <span class="count-percentage">({{ (bucket.count / vm.coverage_map.accountCount) * 100 | number:1 }}%)</span>
                         </div>
                     </div>
 
-                    <div  class="bucket-rulecount">{{ vm.getRuleCount(bucket) }} Rules</div>
+                    <!-- <div  class="bucket-rulecount">{{ vm.getRuleCount(bucket) }} Rules</div> -->
                 </li>
             </ul>
 

@@ -204,9 +204,15 @@ angular
                 CurrentRatingEngine: function($q, $stateParams, RatingsEngineStore) {
                     var deferred = $q.defer();
 
-                    RatingsEngineStore.getRating($stateParams.rating_id).then(function(result) {
-                        deferred.resolve(result);
-                    });
+                    console.log($stateParams);
+
+                    if (!$stateParams.rating_id) {
+                        deferred.resolve(RatingsEngineStore.currentRating);
+                    } else {
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    }
 
                     return deferred.promise;
                 }
@@ -356,6 +362,15 @@ angular
                     RatingsEngineStore.getRating($stateParams.rating_id).then(function(result){
                         deferred.resolve(result)
                     });
+
+                    return deferred.promise;
+                },
+                CoverageMap: function($q, $stateParams, RatingsEngineStore, RatingsEngineModels, CurrentRatingEngine) {
+                    var deferred = $q.defer();
+                    
+                    RatingsEngineStore.getCoverageMap(RatingsEngineModels, CurrentRatingEngine.segment.name).then(function(result) {
+                        deferred.resolve(result);
+                    }); 
 
                     return deferred.promise;
                 }

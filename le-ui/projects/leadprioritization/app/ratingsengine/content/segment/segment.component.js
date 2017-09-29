@@ -1,10 +1,11 @@
 angular.module('lp.ratingsengine.wizard.segment', [])
 .controller('RatingsEngineSegment', function(
-    $scope, $state, $stateParams, ResourceUtility, RatingsEngineStore, DataCloudStore, Segments, QueryStore
+    $scope, $state, $stateParams, ResourceUtility, RatingsEngineStore, DataCloudStore, Segments, QueryStore, CurrentRatingEngine
 ) {
     var vm = this;
 
     angular.extend(vm, {
+        currentRating: CurrentRatingEngine,
         stored: RatingsEngineStore.segment_form,
         savedSegment: RatingsEngineStore.getSegment() || null,
         // SegmentsUtility: SegmentsUtility,
@@ -36,6 +37,8 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     });
 
     vm.init = function() {
+
+        console.log(vm.currentRating);
 
     	vm.filteredSegments = vm.segments.slice(0, 15);
     	vm.getCounts(vm.filteredSegments);
