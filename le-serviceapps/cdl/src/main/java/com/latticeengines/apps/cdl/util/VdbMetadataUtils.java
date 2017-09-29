@@ -47,9 +47,11 @@ public class VdbMetadataUtils {
             if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
                 attr.setDataQuality(metadata.getDataQuality().get(0));
             }
-            if (Sets.newHashSet("DATE", "DATETIME").contains(attr.getSourceLogicalDataType().toUpperCase())) {
+            if (attr.getSourceLogicalDataType() != null
+                    && Sets.newHashSet("DATE", "DATETIME").contains(attr.getSourceLogicalDataType().toUpperCase())) {
                 attr.setLogicalDataType(LogicalDataType.Date);
-            } else if (Sets.newHashSet("TIME", "TIMESTAMP").contains(attr.getSourceLogicalDataType().toUpperCase())) {
+            } else if (attr.getSourceLogicalDataType() != null
+                    && Sets.newHashSet("TIME", "TIMESTAMP").contains(attr.getSourceLogicalDataType().toUpperCase())) {
                 attr.setLogicalDataType(LogicalDataType.Timestamp);
             }
             setAttributeExtensions(attr, metadata.getExtensions());
