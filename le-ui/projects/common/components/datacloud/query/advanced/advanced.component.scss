@@ -34,7 +34,7 @@ div.advanced-query-builder {
             display: inline-block;
             text-align: center;
             width: 15%;
-            margin: 2em 1%;
+            margin: 1em 1% 0.5em;
             
             &:first-child {
                 margin-left: 0;
@@ -111,7 +111,7 @@ div.advanced-query-builder {
             }
 
             div.bucket-rulecount {
-                margin: 2em 0 1em;
+                margin: 1.5em 0 1em;
             }
         }
     }

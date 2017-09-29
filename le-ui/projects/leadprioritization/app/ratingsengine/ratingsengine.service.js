@@ -189,7 +189,7 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer();
         
         RatingsEngineService.getRatingsChartData({
-                ratingEngineIds: arrayofIds
+            ratingEngineIds: arrayofIds
         }).then(function(response){
             RatingsEngineStore.setCoverage(response);
             deferred.resolve(response);
@@ -200,6 +200,9 @@ angular.module('lp.ratingsengine')
 
     this.getCoverageMap = function(CurrentRatingsEngine, segmentId){
         var deferred = $q.defer();
+
+        SegmentStore.sanitizeRuleBuckets(CurrentRatingsEngine.rule, true);
+
         var CoverageMap = {
             "restrictNotNullSalesforceId":false,
             "segmentIdModelRules": [{
@@ -213,6 +216,34 @@ angular.module('lp.ratingsengine')
 
         RatingsEngineService.getRatingsChartData(CoverageMap).then(function(response){
             RatingsEngineStore.setCoverage(response);
+            deferred.resolve(response);
+        });
+
+        return deferred.promise;
+    };
+
+    this.getBucketRuleCounts = function(restrictions, segmentId){
+        var deferred = $q.defer();
+
+        var buckets = restrictions.map(function(bucket, index) {
+            var label = bucket.bucketRestriction.attr,
+                type = label.split('.')[0] == 'Contact' ? 'contact' : 'account',
+                object = {
+                    "segmentId": segmentId,
+                    "responseKeyId": label + '_' +  index
+                };
+
+            object[type + '_restriction'] = SegmentStore.sanitizeSegmentRestriction([ angular.copy(bucket) ]);
+
+            return object;
+        });
+
+        var CoverageMap = {
+            "restrictNotNullSalesforceId": false,
+            "segmentIdAndSingleRules": buckets
+        };
+
+        RatingsEngineService.getRatingsChartData(CoverageMap).then(function(response){
             deferred.resolve(response);
         });
 

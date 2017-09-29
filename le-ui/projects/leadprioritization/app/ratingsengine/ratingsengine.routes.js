@@ -293,7 +293,7 @@ angular
                     var deferred = $q.defer();
                     DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
                         var model = (data && data[0] ? data[0] : {});
-                        
+
                         if (!model.rule.ratingRule.bucketToRuleMap) {
                             model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
                         }
@@ -332,15 +332,6 @@ angular
                         deferred.resolve(result.data.Stats);
                     });
                     
-                    return deferred.promise;
-                },
-                CoverageMap: function($q, $stateParams, RatingsEngineStore, RatingsEngineModels, CurrentRatingEngine) {
-                    var deferred = $q.defer();
-                    
-                    RatingsEngineStore.getCoverageMap(RatingsEngineModels, CurrentRatingEngine.segment.name).then(function(result) {
-                        deferred.resolve(result);
-                    }); 
-
                     return deferred.promise;
                 }
             },

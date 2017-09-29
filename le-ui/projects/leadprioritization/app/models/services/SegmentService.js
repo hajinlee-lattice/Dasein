@@ -83,21 +83,23 @@ angular
         return segment;
     }
 
-    this.sanitizeRuleBuckets = function(rule) {
+    this.sanitizeRuleBuckets = function(rule, keepEmptyBuckets) {
         var map = rule.ratingRule.bucketToRuleMap,
             prune = [];
 
-        Object.keys(map).forEach(function(bucketName) {
-            var account = map[bucketName].account_restriction.logicalRestriction.restrictions;
-            var contact = map[bucketName].contact_restriction.logicalRestriction.restrictions;
+        if (!keepEmptyBuckets) {
+            Object.keys(map).forEach(function(bucketName) {
+                var account = map[bucketName].account_restriction.logicalRestriction.restrictions;
+                var contact = map[bucketName].contact_restriction.logicalRestriction.restrictions;
 
-            if (account.length + contact.length == 0) {
-                prune.push(bucketName);
+                if (account.length + contact.length == 0) {
+                    prune.push(bucketName);
+                }
+            });
+
+            for (var i = prune.length - 1; i >= 0; i--) {
+                delete map[prune[i]];
             }
-        });
-
-        for (var i = prune.length - 1; i >= 0; i--) {
-            delete map[prune[i]];
         }
 
         Object.keys(map).forEach(function(bucketName) {

@@ -175,7 +175,6 @@ angular
             }
             
             vm.editBucket = function() {
-                console.log('editBucket', vm.editing, vm.type, vm);
                 if (!vm.editing && (vm.type == 'Boolean' || vm.type == 'Numerical')) {
                     if (vm.unused) {
                         vm.unused = false;
@@ -193,13 +192,17 @@ angular
             }
 
             vm.updateBucketCount = function() {
-                vm.tree.bucketRestriction.bkt.Cnt = -1;
+                if (vm.root.mode == 'rules') {
+                    vm.root.getRuleRecordCounts([ vm.tree ]);
+                } else {
+                    vm.tree.bucketRestriction.bkt.Cnt = -1;
 
-                vm.root.updateBucketCount(vm.tree.bucketRestriction).then(function(data) {
-                    if (typeof data == 'number') {
-                        vm.tree.bucketRestriction.bkt.Cnt = data;
-                    }
-                });
+                    vm.root.updateBucketCount(vm.tree.bucketRestriction).then(function(data) {
+                        if (typeof data == 'number') {
+                            vm.tree.bucketRestriction.bkt.Cnt = data;
+                        }
+                    });
+                }
             }
 
             vm.addAttribute = function(tree) {
