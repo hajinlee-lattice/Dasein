@@ -23,6 +23,7 @@ angular.module('lp.ratingsengine')
         this.rule = null;
         this.rating = null;
         this.ratings = null;
+        this.rating_id
         this.type = null;
         this.coverage = {};
         this.savedSegment = "";
@@ -72,14 +73,7 @@ angular.module('lp.ratingsengine')
         var changed = false,
             opts = RatingsEngineStore.settings;
         
-        $state.go(nextState, {rating_id: $stateParams.rating_id});
-    }
-
-    this.nextSaveRatingEngine = function(nextState) {
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        RatingsEngineStore.saveRating(currentRating).then(function(rating) {
-            $state.go(nextState, {rating_id: rating.id});
-        });
+        $state.go(nextState, { rating_id: $stateParams.rating_id });
     }
 
     this.nextSaveRules = function(nextState) {
@@ -94,6 +88,15 @@ angular.module('lp.ratingsengine')
         };
 
         RatingsEngineService.saveRules(opts).then(function(rating) {
+            $state.go(nextState, { rating_id: $stateParams.rating_id });
+        });
+    }
+
+    this.nextSaveSummary = function(nextState) {
+        var currentRating = RatingsEngineStore.getCurrentRating();
+        
+        console.log('nextSaveSummary', nextState, currentRating, $stateParams.rating_id)
+        RatingsEngineStore.saveRating(currentRating).then(function(rating) {
             $state.go(nextState, { rating_id: $stateParams.rating_id });
         });
     }
@@ -318,6 +321,14 @@ angular.module('lp.ratingsengine')
             "D":  angular.copy(template),
             "F":  angular.copy(template)
         };
+    }
+
+    this.getRatingId = function() {
+        return vm.rating_id;
+    }
+
+    this.setRatingId = function() {
+        this.rating_id = $stateParams.rating_id;
     }
 })
 .service('RatingsEngineService', function($q, $http, $state) {

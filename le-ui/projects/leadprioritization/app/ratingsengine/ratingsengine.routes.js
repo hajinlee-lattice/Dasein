@@ -102,7 +102,9 @@ angular
                 Rating: function($q, $stateParams, RatingsEngineStore) {
                     var deferred = $q.defer();
 
-                    RatingsEngineStore.getRatingDashboard($stateParams.rating_id).then(function(data) {
+                    var rating_id = $stateParams.rating_id || RatingsEngineStore.getRatingId();
+
+                    RatingsEngineStore.getRatingDashboard(rating_id).then(function(data) {
                         deferred.resolve(data);
                     });
 
@@ -147,7 +149,7 @@ angular
                         { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveRatingEngine },
                         { label: 'Attributes', state: 'segment.attributes' },
                         { label: 'Rules', state: 'segment.attributes.rules', nextFn: RatingsEngineStore.nextSaveRules },
-                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextFn: RatingsEngineStore.saveSummary }
+                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextFn: RatingsEngineStore.nextSaveSummary }
                     ];
                 }
             },
@@ -179,11 +181,10 @@ angular
                 },
                 'wizard_controls@home.ratingsengine.wizard': {
                     resolve: {
-                        WizardControlsOptions: function($stateParams) {
+                        WizardControlsOptions: function(RatingsEngineStore) {
                             return { 
                                 backState: 'home.ratingsengine', 
-                                nextState: 'home.ratingsengine.dashboard',
-                                nextStateParams: { rating_id: $stateParams.rating_id }
+                                nextState: 'home.ratingsengine.dashboard'
                             };
                         }
                     },
