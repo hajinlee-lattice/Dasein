@@ -38,8 +38,6 @@ angular.module('lp.ratingsengine.wizard.segment', [])
 
     vm.init = function() {
 
-        console.log(vm.currentRating);
-
     	vm.filteredSegments = vm.segments.slice(0, 15);
     	vm.getCounts(vm.filteredSegments);
 
@@ -63,7 +61,6 @@ angular.module('lp.ratingsengine.wizard.segment', [])
             var segmentId = segment.name;
             segmentIds.push(segmentId);
         });
-        console.log(segmentIds);
         RatingsEngineStore.getSegmentsCounts(segmentIds).then(function(response){
             angular.forEach(filteredSegments, function(segment) {
             	segment.numAccounts = response.segmentIdCoverageMap[segment.name].accountCount;

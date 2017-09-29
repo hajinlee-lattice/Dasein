@@ -38,8 +38,6 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
     });
 
     vm.init = function($q, $filter) {
-
-        console.log(vm.ratings);
         
         var checkLaunchState,
             arrayofIds = [];
@@ -54,9 +52,6 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
                 showCustomMenu: false,
                 editRating: false
             };
-
-            console.log(rating);
-
             arrayofIds.push(ratingId);
 
         });
@@ -67,8 +62,6 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
             vm.buckets = response;
 
             angular.forEach(vm.ratings, function(rating) {
-
-                // console.log(vm.buckets.ratingEngineIdCoverageMap[rating.id]);
 
                 rating.bucketInfo = vm.buckets.ratingEngineIdCoverageMap[rating.id];
 

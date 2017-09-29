@@ -6,16 +6,15 @@
         </div>
         <div class="content-body">
             
-
             <ul class="query-rules-buckets-container">
                 <li
                     ng-repeat="bucket in vm.buckets"
-                    ng-class="{ 'active': bucket.bucket == vm.bucket }"
+                    ng-class="{ 'disable': bucket.count === 0 }"
                     class="query-rules-buckets-bucket">
                     
                     <div class="bucket-box">
                         <div class="bucket-label"><h2>{{ bucket.bucket }}</h2></div>
-                        <div class="bucket-resource">{{ bucket.resource }}</div>
+                        <div class="bucket-resource">{{ vm.treeMode | uppercase }}</div>
 
                         <div class="bucket-resource-count" ng-if="bucket.count < 0">
                             <span class="query-section-item-records-number">
@@ -33,16 +32,15 @@
                 </li>
             </ul>
 
-
-
             <form>
                  <div class="form-group">
                     <label>Rating Engine Name
                         <input 
                             type="text" 
                             class="form-control"
-                            ng-model="vm.rating.displayName"/>
-                        <!-- <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required /> -->
+                            ng-change="vm.changeDetails()"
+                            ng-model="vm.rating.displayName"
+                            ng-model-options="{ debounce: 300 }"/>
                     </label>
                 </div>
                  <div class="form-group">
@@ -50,8 +48,9 @@
                         <textarea 
                             rows="2" 
                             class="form-control"
-                            ng-model="vm.rating.note"></textarea>
-                        <!-- <input type="radio" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" required /> -->
+                            ng-change="vm.changeDetails()"
+                            ng-model="vm.rating.note"
+                            ng-model-options="{ debounce: 300 }"></textarea>
                     </label>
                 </div>
                 <div class="form-group">
@@ -60,7 +59,9 @@
                       <input 
                         type="checkbox" 
                         class="switch-input"
-                        ng-model="vm.rating.status">
+                        ng-change="vm.changeDetails()"
+                        ng-model="vm.ratingStatus"
+                        ng-model-options="{ debounce: 300 }">
                       <span class="switch-label" data-on="Yes" data-off="No"></span>
                       <span class="switch-handle"></span>
                     </label>

@@ -98,11 +98,15 @@ angular.module('lp.ratingsengine')
         });
     }
 
-    this.saveSummary = function(){
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        RatingsEngineStore.saveRating(currentRating).then(function(rating) {
-            $state.go('home.ratingsengine');
+    this.saveSummary = function(nextState){
+
+        console.log($stateParams.opts);
+
+        RatingsEngineStore.saveRating($stateParams.opts).then(function(result) {
+            console.log(result);
+            $state.go(nextState, { rating_id: $stateParams.rating_id });
         });
+        
     }
 
     this.setRule = function(rule) {
@@ -119,8 +123,6 @@ angular.module('lp.ratingsengine')
 
     this.getRating = function(id) {
         var deferred = $q.defer();
-
-        console.log(this.currentRating, id);
 
         if (this.currentRating === {}) {
             deferred.resolve(this.currentRating);

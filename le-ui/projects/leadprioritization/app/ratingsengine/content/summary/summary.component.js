@@ -14,7 +14,8 @@ angular.module('lp.ratingsengine.wizard.summary', [])
         coverage_map: {},
         rating_id: $stateParams.rating_id,
         ratings: RatingsEngineStore.ratings,
-        treeMode: 'account'
+        treeMode: 'account',
+        ratingStatus: false
     });
 
     vm.init = function() {
@@ -38,6 +39,22 @@ angular.module('lp.ratingsengine.wizard.summary', [])
 
     };
 
+    vm.changeDetails = function(){
+    	
+    	if(vm.ratingStatus === true){
+    		vm.rating.status = 'ACTIVE';
+    	} else {
+    		vm.rating.status = 'INACTIVE';
+    	}
+
+    	$stateParams.opts = {
+    		rating_id: $stateParams.rating_id,
+    		displayName: vm.rating.displayName,
+    		note: vm.rating.note,
+    		status: vm.rating.status
+    	}
+
+    }
 
     vm.initCoverageMap = function(map) {
         var n = (map ? 0 : -1);
