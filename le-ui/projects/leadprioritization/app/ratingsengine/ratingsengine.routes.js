@@ -293,7 +293,7 @@ angular
                     var deferred = $q.defer();
                     DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
                         var model = (data && data[0] ? data[0] : {});
-
+                        
                         if (!model.rule.ratingRule.bucketToRuleMap) {
                             model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
                         }

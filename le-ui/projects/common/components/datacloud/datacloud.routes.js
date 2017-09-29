@@ -397,7 +397,7 @@ angular
                     
                     return deferred.promise;
                 }],
-                CurrentRatingsEngine: [function() {
+                CurrentRatingEngine: [function() {
                     return null;
                 }],
                 CoverageMap: [function() {

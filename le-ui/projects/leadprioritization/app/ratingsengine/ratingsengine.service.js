@@ -51,17 +51,6 @@ angular.module('lp.ratingsengine')
         }
     }
 
-    this.nextSaveGeneric = function(nextState) {
-        var changed = false,
-            opts = RatingsEngineStore.settings;
-        
-        $state.go(nextState, {rating_id: $stateParams.rating_id});
-
-        // RatingsEngineStore.saveRating().then(function(rating) {
-        //     $state.go(nextState, {rating_id: rating.id});
-        // });
-    }
-
     this.setSegment = function(segment) {
         this.savedSegment = segment;
     }
@@ -76,6 +65,17 @@ angular.module('lp.ratingsengine')
             rule = rule || {};
 
         return rule;
+    }
+
+    this.nextSaveGeneric = function(nextState) {
+        var changed = false,
+            opts = RatingsEngineStore.settings;
+        
+        $state.go(nextState, {rating_id: $stateParams.rating_id});
+
+        // RatingsEngineStore.saveRating().then(function(rating) {
+        //     $state.go(nextState, {rating_id: rating.id});
+        // });
     }
 
     this.nextSaveRatingEngine = function(nextState) {
@@ -96,18 +96,13 @@ angular.module('lp.ratingsengine')
             rating_id: $stateParams.rating_id,
             model_id: current.rule.id,
             model: { 
-                rule: SegmentStore.sanitizeRuleBuckets(current.rule) 
+                rule: SegmentStore.sanitizeRuleBuckets(angular.copy(current.rule)) 
             }
         };
 
-        console.log('nextSaveRules', opts, current);
         RatingsEngineService.saveRules(opts).then(function(rating) {
-            $state.go(nextState, { rating_id: rating.id });
+            $state.go(nextState, { rating_id: $stateParams.rating_id });
         });
-    }
-
-    this.nextSaveRules = function(nextState) {
-        console.log("rogue one");
     }
 
     this.setRule = function(rule) {

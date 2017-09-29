@@ -25,8 +25,15 @@
                     class="query-rules-buckets-bucket">
                 <div class="bucket-box">
                     <div class="bucket-label"><h2>{{ bucket.bucket }}</h2></div>
-                    <div class="bucket-resource">{{ bucket.resource }}</div>
-                    <div class="bucket-resource-count">
+                    <div class="bucket-resource">{{ vm.treeMode | uppercase }}</div>
+
+                    <div class="bucket-resource-count" ng-if="bucket.count < 0">
+                        <span class="query-section-item-records-number">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </span>
+                    </div>
+
+                    <div class="bucket-resource-count" ng-if="bucket.count >= 0">
                         <span class="count-number">{{ bucket.count }}</span>
                         <span class="count-percentage">({{ (bucket.count / vm.coverage_map.accountCount) * 100 | number:1 }}%)</span>
                     </div>
