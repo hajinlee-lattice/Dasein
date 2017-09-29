@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.util;
 
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -10,11 +9,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
@@ -25,8 +26,7 @@ public class VdbMetadataUtils {
     private static final Logger log = LoggerFactory.getLogger(VdbMetadataUtils.class);
 
     static final Set<String> unparsableFundamentalTypes = new HashSet<>(Arrays.asList( //
-            "alert", "segment", "unknown"
-    ));
+            "alert", "segment", "unknown"));
 
     public static Attribute convertToAttribute(VdbSpecMetadata metadata) {
         try {
@@ -47,11 +47,17 @@ public class VdbMetadataUtils {
             if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
                 attr.setDataQuality(metadata.getDataQuality().get(0));
             }
+            if (Sets.newHashSet("DATE", "DATETIME").contains(attr.getSourceLogicalDataType().toUpperCase())) {
+                attr.setLogicalDataType(LogicalDataType.Date);
+            } else if (Sets.newHashSet("TIME", "TIMESTAMP").contains(attr.getSourceLogicalDataType().toUpperCase())) {
+                attr.setLogicalDataType(LogicalDataType.Timestamp);
+            }
             setAttributeExtensions(attr, metadata.getExtensions());
             return attr;
         } catch (Exception e) {
             // see the log to add unit test
-            throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)), e);
+            throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)),
+                    e);
         }
     }
 
@@ -168,8 +174,8 @@ public class VdbMetadataUtils {
         try {
             return StatisticalType.fromName(vdbStatisticalType);
         } catch (IllegalArgumentException e) {
-            if (metadata.getApprovedUsage() != null &&
-                    metadata.getApprovedUsage().contains(ApprovedUsage.NONE.getName())) {
+            if (metadata.getApprovedUsage() != null
+                    && metadata.getApprovedUsage().contains(ApprovedUsage.NONE.getName())) {
                 return null;
             } else {
                 metadata.setApprovedUsage(Arrays.asList(ApprovedUsage.NONE.getName()));
