@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -85,7 +87,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testTransactionSelect() {
+    public void testTransactionSelect() throws ParseException {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setTimeFilter(new TimeFilter(ComparisonType.EVER, null));
         txRestriction.setProductId("1");
@@ -100,6 +102,16 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .where(idOrCityAndTx).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), 2);
+
+        restriction = Restriction.builder() //
+                .let(BusinessEntity.Transaction, InterfaceName.TransactionDate.name())//
+                .before("2018-03-14") //
+                .build();
+        query = Query.builder() //
+                .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
+                .where(restriction).build();
+        long count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 6);
     }
 
     @Test(groups = "functional", enabled = false)

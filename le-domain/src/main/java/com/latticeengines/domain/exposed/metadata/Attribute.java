@@ -986,6 +986,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setColumnName(getName());
         metadata.setColumnId(getName());
         metadata.setDescription(getDescription());
+        metadata.setLogicalDataType(getLogicalDataType());
         if (StringUtils.isBlank(getCategory())) {
             metadata.setCategory(Category.DEFAULT);
         } else {

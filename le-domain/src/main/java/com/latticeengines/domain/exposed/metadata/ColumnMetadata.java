@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -17,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -51,6 +51,7 @@ public class ColumnMetadata implements HasAttributeCustomizations {
     private String approvedUsage;
     private String tags;
     private String decodeStrategy;
+    private LogicalDataType logicalDataType;
 
     @JsonProperty("BitOffset")
     private Integer bitOffset;
@@ -429,5 +430,13 @@ public class ColumnMetadata implements HasAttributeCustomizations {
 
     public void setStats(AttributeStats stats) {
         this.stats = stats;
+    }
+
+    public LogicalDataType getLogicalDataType() {
+        return logicalDataType;
+    }
+
+    public void setLogicalDataType(LogicalDataType logicalDataType) {
+        this.logicalDataType = logicalDataType;
     }
 }

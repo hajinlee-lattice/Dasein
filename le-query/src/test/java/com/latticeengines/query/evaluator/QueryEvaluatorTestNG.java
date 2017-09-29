@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -25,6 +26,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
     private static final String ACCOUNT = BusinessEntity.Account.name();
     private static final String CONTACT = BusinessEntity.Contact.name();
+    private static final String TRANSACTION = BusinessEntity.Transaction.name();
 
     @Test(groups = "functional")
     public void testAutowire() {
@@ -303,6 +305,24 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("upper(%s.LDC_Domain) like ?", ACCOUNT));
         sqlContains(sqlQuery, String.format("upper(%s.LDC_Name) like ?", ACCOUNT));
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testTimeRestriction() {
+        // time restriction
+        Restriction inner = Restriction.builder() //
+                .let(BusinessEntity.Transaction, InterfaceName.TransactionDate.name())//
+                .before("2017-08-18") //
+                .build();
+
+        Restriction restriction = Restriction.builder() //
+                .exists(BusinessEntity.Transaction) //
+                .that(inner) //
+                .build();
+        Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        System.out.println(sqlQuery);
+        sqlContains(sqlQuery, String.format("TO_DATE(TransactionDate, 'YYYY-MM-DD') < ?", TRANSACTION));
     }
 
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)

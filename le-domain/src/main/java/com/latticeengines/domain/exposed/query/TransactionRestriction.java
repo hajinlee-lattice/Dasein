@@ -35,7 +35,7 @@ public class TransactionRestriction extends Restriction {
     }
 
     public TransactionRestriction(String productName, String productId, TimeFilter timeFilter, boolean negate,
-                                  AggregationFilter spentFilter, AggregationFilter unitFilter) {
+            AggregationFilter spentFilter, AggregationFilter unitFilter) {
         this.productName = productName;
         this.productId = productId;
         this.timeFilter = timeFilter;
@@ -82,13 +82,8 @@ public class TransactionRestriction extends Restriction {
         Restriction productTimeRestriction = filterByTime(productRestriction);
 
         AttributeLookup accountId = new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name());
-        Query innerQuery = Query.builder()
-                .from(BusinessEntity.Transaction)
-                .select(accountId)
-                .where(productTimeRestriction)
-                .groupBy(accountId)
-                .having(filterByAmountQuantity())
-                .build();
+        Query innerQuery = Query.builder().from(BusinessEntity.Transaction).select(accountId)
+                .where(productTimeRestriction).groupBy(accountId).having(filterByAmountQuantity()).build();
 
         SubQuery txSubQuery = new SubQuery(innerQuery, generateAlias(BusinessEntity.Transaction));
         ConcreteRestriction accountInRestriction = (ConcreteRestriction) Restriction.builder()
@@ -100,9 +95,9 @@ public class TransactionRestriction extends Restriction {
 
     private Restriction filterByAmountQuantity() {
         AttributeLookup amountLookup = new AttributeLookup(BusinessEntity.Transaction,
-                                                           InterfaceName.TotalAmount.name());
+                InterfaceName.TotalAmount.name());
         AttributeLookup quantityLookup = new AttributeLookup(BusinessEntity.Transaction,
-                                                             InterfaceName.TotalAmount.name());
+                InterfaceName.TotalAmount.name());
         Restriction restriction;
         if (spentFilter == null && unitFilter == null) {
             // has purchased, treat it as sum(amount) > 0 or sum(unit) > 0
@@ -113,19 +108,17 @@ public class TransactionRestriction extends Restriction {
             restriction = Restriction.builder().or(amountRestriction, quantityRestriction).build();
         } else if (spentFilter != null && unitFilter == null) {
             AggregateLookup aggrAmount = getAggregateLookup(amountLookup, spentFilter);
-            restriction = convertValueComparison(aggrAmount, spentFilter.getComparisonType(),
-                                                 spentFilter.getValue());
+            restriction = convertValueComparison(aggrAmount, spentFilter.getComparisonType(), spentFilter.getValue());
         } else if (spentFilter == null && unitFilter != null) {
             AggregateLookup aggrQuantity = getAggregateLookup(quantityLookup, unitFilter);
-            restriction = convertValueComparison(aggrQuantity, unitFilter.getComparisonType(),
-                                                 unitFilter.getValue());
+            restriction = convertValueComparison(aggrQuantity, unitFilter.getComparisonType(), unitFilter.getValue());
         } else {
             AggregateLookup aggrAmount = getAggregateLookup(amountLookup, spentFilter);
             Restriction amountRestriction = convertValueComparison(aggrAmount, spentFilter.getComparisonType(),
-                                                                   spentFilter.getValue());
+                    spentFilter.getValue());
             AggregateLookup aggrQuantity = getAggregateLookup(quantityLookup, unitFilter);
             Restriction quantityRestriction = convertValueComparison(aggrQuantity, unitFilter.getComparisonType(),
-                                                                     unitFilter.getValue());
+                    unitFilter.getValue());
             restriction = Restriction.builder().and(amountRestriction, quantityRestriction).build();
         }
         return restriction;
@@ -153,8 +146,10 @@ public class TransactionRestriction extends Restriction {
     }
 
     private Restriction filterByTime(Restriction restriction) {
-        if (ComparisonType.EVER == getTimeFilter().getComparisonType()) {
-            return restriction;
+        this.getTimeFilter()
+                .setLhs(new AttributeLookup(BusinessEntity.Transaction, InterfaceName.TransactionDate.name()));
+        if (ComparisonType.EVER == getTimeFilter().getRelation()) {
+            return Restriction.builder().and(restriction, this.getTimeFilter()).build();
         } else {
             throw new UnsupportedOperationException("Time restriction is not supported yet");
         }

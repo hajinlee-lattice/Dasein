@@ -1,10 +1,12 @@
 package com.latticeengines.query.evaluator.lookup;
 
+import java.sql.Date;
 import java.util.List;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -22,7 +24,7 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup> imple
         super(repository);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<ComparableExpression<? extends Comparable>> resolveForCompare(AttributeLookup lookup) {
         if (lookup.getEntity() == null) {
@@ -32,7 +34,22 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup> imple
         if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
+        if (cm.getLogicalDataType() == LogicalDataType.Date) {
+            return resolveForTimeCompare(lookup);
+        }
         return Collections.singletonList(Expressions.asString(resolveBucketRange(lookup.getEntity(), cm, false)));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<ComparableExpression<? extends Comparable>> resolveForTimeCompare(AttributeLookup lookup) {
+        ColumnMetadata cm = getColumnMetadata(lookup);
+        if (cm.getJavaClass() == null || cm.getJavaClass().equals((String.class.getSimpleName()))) {
+            return Collections.singletonList(Expressions.dateTemplate(Date.class,
+                    String.format("TO_DATE(%s, %s)", lookup.getAttribute(), "'YYYY-MM-DD'"),
+                    QueryUtils.getAttributePath(lookup.getAttribute())));
+        }
+        return Collections.singletonList(Expressions.asDate(QueryUtils.getAttributePath(lookup.getAttribute())));
     }
 
     @Override

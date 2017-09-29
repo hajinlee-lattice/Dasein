@@ -15,26 +15,23 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 
-
 public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
         implements LookupResolver<SubQueryAttrLookup> {
     private QueryProcessor queryProcessor;
 
-    public SubQueryAttrResolver(AttributeRepository repository,
-                                QueryProcessor queryProcessor) {
+    public SubQueryAttrResolver(AttributeRepository repository, QueryProcessor queryProcessor) {
         super(repository);
         this.queryProcessor = queryProcessor;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ComparableExpression<String> resolveForSubselect(SubQueryAttrLookup lookup) {
         SubQuery subQuery = lookup.getSubQuery();
         SQLQuery<?> sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery());
         String alias = subQuery.getAlias();
         StringPath subQueryPath = QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
-        ComparableExpression<String> s =
-                Expressions.asComparable(SQLExpressions.select(subQueryPath).from(sqlSubQuery.as(alias)));
+        ComparableExpression<String> s = Expressions
+                .asComparable(SQLExpressions.select(subQueryPath).from(sqlSubQuery.as(alias)));
         return s;
     }
 

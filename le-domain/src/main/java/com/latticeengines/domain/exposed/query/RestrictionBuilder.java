@@ -251,6 +251,13 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder before(Object value) {
+        operator = ComparisonType.BEFORE;
+        restriction = new TimeFilter(attrLookup, operator, Arrays.asList(new Object[] { value }));
+        complete = true;
+        return this;
+    }
+
     public Restriction build() {
         if (!complete) {
             throw new IllegalArgumentException("Restriction definition is incomplete.");
