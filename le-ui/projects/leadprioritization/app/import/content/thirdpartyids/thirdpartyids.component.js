@@ -1,13 +1,12 @@
 angular.module('lp.import.wizard.thirdpartyids', [])
 .controller('ImportWizardThirdPartyIDs', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, Identifiers
+    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, Identifiers, FieldDocument
 ) {
     var vm = this;
 
     angular.extend(vm, {
         identifiers: Identifiers,
-        FieldDocument: ImportWizardStore.getFieldDocument(),
-        fieldMappings: ImportWizardStore.getFieldDocument().fieldMappings,
+        fieldMappings: FieldDocument.fieldMappings,
         fieldMappingsMap: {},
         AvailableFields: [],
         idFieldMapping: {"userField":"CRMId","mappedField":"CRMId","fieldType":"TEXT","mappedToLatticeField":true},
@@ -15,15 +14,15 @@ angular.module('lp.import.wizard.thirdpartyids', [])
      });
 
      vm.init = function() {
-
-
          vm.fieldMappings.forEach(function(fieldMapping) {
              vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
          });
 
          vm.fieldMappings.forEach(function(fieldMapping) {
              var userField = fieldMapping.userField;
-             vm.AvailableFields.push(userField);
+             if (fieldMapping.mappedField != 'Id') {
+                 vm.AvailableFields.push(userField);
+             }
          });
 
      };
@@ -33,10 +32,6 @@ angular.module('lp.import.wizard.thirdpartyids', [])
 	         vm.fieldMappingsMap[vm.Id].userField = mapping.userField;
 	         vm.fieldMappingsMap[vm.Id].mappedToLatticeField = true;
     	 }
-         vm.AvailableFields = vm.AvailableFields.filter(function(item){
-             return item !== mapping.userField;
-         });
-         ImportWizardStore.setAvailableFields(vm.AvailableFields);
          ImportWizardStore.setFieldDocument(FieldDocument);
      };
 

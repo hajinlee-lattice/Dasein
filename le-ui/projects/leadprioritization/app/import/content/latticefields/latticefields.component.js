@@ -25,7 +25,6 @@ angular.module('lp.import.wizard.latticefields', [])
 
     vm.init = function() {
         vm.initialized = true;
-//        vm.schema = 'SalesforceAccount';
         vm.UnmappedFields = UnmappedFields;
 
         vm.UnmappedFields.forEach(function(field) {
@@ -83,7 +82,7 @@ angular.module('lp.import.wizard.latticefields', [])
     };
 
     vm.refreshLatticeFields = function() {
-        vm.fieldMappingsMapped = {};
+    	vm.fieldMappingsMapped = {};
 
         vm.fieldMappings.forEach(function(fieldMapping) {
             if (fieldMapping.mappedField && !fieldMapping.ignored &&
@@ -93,47 +92,106 @@ angular.module('lp.import.wizard.latticefields', [])
             }
         });
 
-        if (!vm.NextClicked) {
-            vm.AvailableFields = [];
+        vm.AvailableFields = [];
 
-            var usedUserField = {};
+        var usedUserField = {};
 
-            for (var matchingFieldMap in vm.matchingFieldMappings) {
-                var fieldMapping = vm.matchingFieldMappings[matchingFieldMap];
+        for (var matchingFieldMap in vm.matchingFieldMappings) {
+            var fieldMapping = vm.matchingFieldMappings[matchingFieldMap];
 
-                var userField = fieldMapping.userField;
-                usedUserField[userField] = true;
-            }
-            for (var analysisFieldMap in vm.analysisFieldMappings) {
-                var fieldMapping = vm.analysisFieldMappings[analysisFieldMap];
-
-                var userField = fieldMapping.userField;
-                usedUserField[userField] = true;
-            }
-            vm.fieldMappings.forEach(function(fieldMapping) {
-                var userField = fieldMapping.userField;
-                if (!usedUserField[userField]) {
-                    vm.AvailableFields.push(userField);
-                }
-            });
+            var userField = fieldMapping.userField;
+            usedUserField[userField] = true;
         }
+        for (var analysisFieldMap in vm.analysisFieldMappings) {
+            var fieldMapping = vm.analysisFieldMappings[analysisFieldMap];
 
-        ImportWizardStore.setAvailableFields(vm.AvailableFields);
-         vm.fieldMappings.forEach(function(fieldMapping) {
-            if (fieldMapping.ignored) {
-                vm.ignoredFields.push(fieldMapping.userField);
-                delete fieldMapping.ignored;
+            var userField = fieldMapping.userField;
+            usedUserField[userField] = true;
+        }
+        vm.fieldMappings.forEach(function(fieldMapping) {
+            var userField = fieldMapping.userField;
+            if (!usedUserField[userField] && fieldMapping.mappedField != 'Id' && fieldMapping.mappedField != 'CRMId') {
+                vm.AvailableFields.push(userField);
             }
         });
-         for( var i=0 ; i< vm.fieldMappings.length; i++) {
-             if (vm.fieldMappings[i].mappedField == null) {
-        	     vm.fieldMappings[i].mappedField = vm.fieldMappings[i].userField;
-        	     vm.fieldMappings[i].mappedToLatticeField = true;
-             }
-         }
-         FieldDocument.fieldMappings = vm.fieldMappings;
-         FieldDocument.ignoredFields = vm.ignoredFields;
-         ImportWizardStore.setFieldDocument(FieldDocument);
+
+
+/*save the  fieldDocument, these should be save when click the button*/
+        var userFieldMappingsMap = {},
+        mappedFieldMappingsMap = {};
+
+	    vm.fieldMappings.forEach(function(fieldMapping) {
+	        userFieldMappingsMap[fieldMapping.userField] = fieldMapping;
+	
+	        if (fieldMapping.mappedField) {
+	            mappedFieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
+	        }
+	    });
+	
+	    for (var matchingField in vm.matchingFieldMappings) {
+	        var matchingFieldMapping = vm.matchingFieldMappings[matchingField];
+	        var userField = matchingFieldMapping.userField;
+	
+	        if (userField && userField !== vm.ignoredFieldLabel) {
+	            // clear any lattice field that has been remapped
+	            if (matchingFieldMapping.mappedField) {
+	                var mappedMapping = mappedFieldMappingsMap[matchingFieldMapping.mappedField];
+	                if (mappedMapping) {
+	                    mappedMapping.mappedField = null;
+	                    mappedMapping.mappedToLatticeField = false;
+	                }
+	            }
+	
+	            // update user fields that has been mapped
+	            var userMapping = userFieldMappingsMap[userField];
+	            if (userMapping) {
+	                userMapping.mappedField = matchingFieldMapping.mappedField;
+	                userMapping.fieldType = matchingFieldMapping.fieldType;
+	                userMapping.mappedToLatticeField = true;
+	                delete userMapping.ignored;
+	            }
+	        } else if (userField && userField === vm.ignoredFieldLabel && vm.matchingFieldsListMap[matchingField]) {
+	            // if a userfield is reserved, and was unmapped, set as custom predictor
+	            var mappedFieldMapping = mappedFieldMappingsMap[matchingField];
+	            if (mappedFieldMapping) {
+	                mappedFieldMapping.mappedField = matchingField;
+	                mappedFieldMapping.mappedToLatticeField = false;
+	            }
+	        }
+	    }
+
+	    for (var analysisField in vm.analysisFieldMappings) {
+	        var analysisFieldMapping = vm.analysisFieldMappings[analysisField];
+	        var userField = analysisFieldMapping.userField;
+	
+	        if (userField && userField !== vm.ignoredFieldLabel) {
+	            // clear any lattice field that has been remapped
+	            if (analysisFieldMapping.mappedField) {
+	                var mappedMapping = mappedFieldMappingsMap[analysisFieldMapping.mappedField];
+	                if (mappedMapping) {
+	                    mappedMapping.mappedField = null;
+	                    mappedMapping.mappedToLatticeField = false;
+	                }
+	            }
+	
+	            // update user fields that has been mapped
+	            var userMapping = userFieldMappingsMap[userField];
+	            if (userMapping) {
+	                userMapping.mappedField = analysisFieldMapping.mappedField;
+	                userMapping.fieldType = analysisFieldMapping.fieldType;
+	                userMapping.mappedToLatticeField = true;
+	                delete userMapping.ignored;
+	            }
+	        } else if (userField && userField === vm.ignoredFieldLabel && vm.analysisFieldsListMap[analysisField]) {
+	            // if a userfield is reserved, and was unmapped, set as custom predictor
+	            var mappedFieldMapping = mappedFieldMappingsMap[analysisField];
+	            if (mappedFieldMapping) {
+	                mappedFieldMapping.mappedField = analysisField;
+	                mappedFieldMapping.mappedToLatticeField = false;
+	            }
+	        }
+	    }
+        ImportWizardStore.setFieldDocument(FieldDocument);
     };
 
 

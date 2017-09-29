@@ -4,7 +4,6 @@ angular.module('lp.import')
 
     this.csvFileName = null;
     this.fieldDocument = null;
-    this.availableFields = null;
     this.unmappedFields = null;
     this.accountIdState = {
         accountDedupeField: null,
@@ -56,13 +55,6 @@ angular.module('lp.import')
         this.unmappedFields = data;
     };
 
-    this.getAvailableFields = function() {
-        return this.availableFields;
-    };
-
-    this.setAvailableFields = function(data) {
-        this.availableFields = data;
-    };
     this.getCustomFields = function(type) {
         var data = [],
             total = 7, //Math.floor(Math.random() * 10 + 1),

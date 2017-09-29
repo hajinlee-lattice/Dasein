@@ -157,6 +157,9 @@ angular
                         { name: 'CRM ID', value: '' },
                         { name: 'MAP ID', value: '' }
                     ];
+                },
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
                 }
             },
             views: {
@@ -210,6 +213,11 @@ angular
         })
         .state('home.import.wizard.accounts.one.two.three.four', {
             url: '/customfields',
+            resolve: {
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
+                }
+            },
             views: {
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardCustomFields',

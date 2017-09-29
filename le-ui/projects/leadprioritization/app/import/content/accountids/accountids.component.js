@@ -29,7 +29,6 @@ angular.module('lp.import.wizard.accountids', [])
             var userField = fieldMapping.userField;
             vm.AvailableFields.push(userField);
         });
-
     };
 
     vm.changeLatticeField = function(mapping) {
@@ -37,10 +36,6 @@ angular.module('lp.import.wizard.accountids', [])
 	        vm.fieldMappingsMap[vm.Id].userField = mapping.userField;
 	        vm.fieldMappingsMap[vm.Id].mappedToLatticeField = true;
         }
-        vm.AvailableFields = vm.AvailableFields.filter(function(item){
-            return item !== mapping.userField;
-        });
-        ImportWizardStore.setAvailableFields(vm.AvailableFields);
         ImportWizardStore.setFieldDocument(FieldDocument);
     };
 
