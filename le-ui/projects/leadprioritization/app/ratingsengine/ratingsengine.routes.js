@@ -147,7 +147,7 @@ angular
                         { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveRatingEngine },
                         { label: 'Attributes', state: 'segment.attributes' },
                         { label: 'Rules', state: 'segment.attributes.rules', nextFn: RatingsEngineStore.nextSaveRules },
-                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextFn: RatingsEngineStore.nextSaveSummary }
+                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextFn: RatingsEngineStore.nextSaveRatingEngine }
                     ];
                 }
             },

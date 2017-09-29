@@ -11,7 +11,8 @@ angular.module('lp.ratingsengine')
         this.validation = {
             segment: true,
             attributes: true,
-            rules: true
+            rules: true,
+            summary: true
         }
 
         this.segment_form = {
@@ -72,20 +73,10 @@ angular.module('lp.ratingsengine')
             opts = RatingsEngineStore.settings;
         
         $state.go(nextState, {rating_id: $stateParams.rating_id});
-
-        // RatingsEngineStore.saveRating().then(function(rating) {
-        //     $state.go(nextState, {rating_id: rating.id});
-        // });
     }
 
     this.nextSaveRatingEngine = function(nextState) {
-
-        var changed = false,
-            currentRating = RatingsEngineStore.getCurrentRating(),
-            segment = RatingsEngineStore.getSegment();
-
-        console.log("!!!!!!!!!!!!!!!!!", currentRating);
-
+        var currentRating = RatingsEngineStore.getCurrentRating();
         RatingsEngineStore.saveRating(currentRating).then(function(rating) {
             $state.go(nextState, {rating_id: rating.id});
         });
@@ -107,8 +98,11 @@ angular.module('lp.ratingsengine')
         });
     }
 
-    this.nextSaveSummary = function(nextState) {
-        console.log("rogue one",nextState);
+    this.saveSummary = function(){
+        var currentRating = RatingsEngineStore.getCurrentRating();
+        RatingsEngineStore.saveRating(currentRating).then(function(rating) {
+            $state.go('home.ratingsengine');
+        });
     }
 
     this.setRule = function(rule) {

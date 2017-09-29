@@ -19,12 +19,6 @@ angular.module('lp.ratingsengine.wizard.summary', [])
 
     vm.init = function() {
 
-    	var segmentId = vm.rating.segment.name;
-    	// vm.coverage_map = vm.CoverageMap.segmentIdModelRulesCoverageMap[segmentId];
-    	// vm.buckets = vm.CoverageMap.segmentIdModelRulesCoverageMap[segmentId].bucketCoverageCounts;
-    	// vm.rating_rule = vm.rating.ratingModels[0].rule.ratingRule;
-
-
     	vm.rating_rule = RatingsEngineModels.rule.ratingRule;
         vm.rating_buckets = vm.rating_rule.bucketToRuleMap;
         vm.default_bucket = vm.rating_rule.defaultBucketName;
@@ -39,6 +33,8 @@ angular.module('lp.ratingsengine.wizard.summary', [])
         }); 
 
         vm.getRuleRecordCounts();
+
+        vm.isValid = true;
 
     };
 

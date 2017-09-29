@@ -22,7 +22,7 @@
                                 <i class="fa fa-spinner fa-spin"></i>
                             </span>
                         </div>
-                        
+
                         <div class="bucket-resource-count" ng-if="bucket.count >= 0">
                             <span class="count-number">{{ bucket.count | number }}</span>
                             <span class="count-percentage">({{ (bucket.count / vm.coverage_map.accountCount) * 100 | number:1 }}%)</span>
@@ -57,7 +57,10 @@
                 <div class="form-group">
                     <label>Activate Rating Engine</label>
                     <label class="switch">
-                      <input type="checkbox" class="switch-input">
+                      <input 
+                        type="checkbox" 
+                        class="switch-input"
+                        ng-model="vm.rating.status">
                       <span class="switch-label" data-on="Yes" data-off="No"></span>
                       <span class="switch-handle"></span>
                     </label>
