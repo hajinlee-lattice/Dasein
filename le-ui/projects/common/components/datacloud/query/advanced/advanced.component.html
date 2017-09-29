@@ -12,7 +12,8 @@
             <div class="query-rules-header-defaultbucket">
                 If a record doesn't match any rules, it should be given this rating:
                 
-                <select ng-model="vm.rating_rule.defaultBucketName" 
+                <select ng-model="vm.rating_rule.defaultBucketName"
+                        ng-change="vm.changeDefaultBucket()"
                         ng-options="bkt.bucket as bkt.bucket for bkt in vm.buckets">
                 </select>
             </div>

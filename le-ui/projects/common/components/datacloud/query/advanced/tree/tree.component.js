@@ -287,6 +287,8 @@ angular
                         }
                     }
                 });
+
+                vm.root.updateCount();
             }
 
             vm.buckRestrictionSortBy = function() {

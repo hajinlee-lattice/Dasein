@@ -337,6 +337,15 @@ angular
                     });
                     
                     return deferred.promise;
+                },
+                RatingEngineModel: function(DataCloudStore, RatingsEngineModels) {
+                    var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
+
+                    if (selectedAttributes) {
+                        RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
+                    }
+
+                    return RatingsEngineModels;
                 }
             },
             views: {
