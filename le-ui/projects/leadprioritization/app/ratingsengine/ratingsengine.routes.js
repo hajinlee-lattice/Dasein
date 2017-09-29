@@ -204,8 +204,6 @@ angular
                 CurrentRatingEngine: function($q, $stateParams, RatingsEngineStore) {
                     var deferred = $q.defer();
 
-                    console.log($stateParams);
-
                     if (!$stateParams.rating_id) {
                         deferred.resolve(RatingsEngineStore.currentRating);
                     } else {
@@ -362,15 +360,6 @@ angular
                     RatingsEngineStore.getRating($stateParams.rating_id).then(function(result){
                         deferred.resolve(result)
                     });
-
-                    return deferred.promise;
-                },
-                CoverageMap: function($q, $stateParams, RatingsEngineStore, RatingsEngineModels, CurrentRatingEngine) {
-                    var deferred = $q.defer();
-                    
-                    RatingsEngineStore.getCoverageMap(RatingsEngineModels, CurrentRatingEngine.segment.name).then(function(result) {
-                        deferred.resolve(result);
-                    }); 
 
                     return deferred.promise;
                 }
