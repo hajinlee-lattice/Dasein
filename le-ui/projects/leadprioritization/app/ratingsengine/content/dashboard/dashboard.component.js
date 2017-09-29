@@ -1,10 +1,12 @@
 angular.module('lp.ratingsengine.dashboard', [])
 .controller('RatingsEngineDashboard', function($q, $stateParams, $state, 
-    RatingsEngineStore, Rating, TimestampIntervalUtility, NumberUtility) {
+    RatingsEngineStore, RatingsEngineService, Rating, TimestampIntervalUtility, NumberUtility) {
     var vm = this;
 
     angular.extend(vm, {
         rating: Rating,
+        editable: true,
+        editing: {},
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility
     });
@@ -30,23 +32,96 @@ angular.module('lp.ratingsengine.dashboard', [])
     }
 
     vm.init = function() {
-        console.log(vm.rating.coverageInfo.bucketCoverageCounts);
-        vm.buckets = makeGraph([
-            {bucket: 'A', count: 0},
-            {bucket: 'A-', count: 753},
-            {bucket: 'B', count: 9913},
-            {bucket: 'C', count: 32576},
-            {bucket: 'E', count: 0},
-            {bucket: 'F', count: 0},
-        ], {label: 'bucket', count: 'count'});
-        //vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
+        // vm.buckets = makeGraph([
+        //     {bucket: 'A', count: 0},
+        //     {bucket: 'A-', count: 753},
+        //     {bucket: 'B', count: 9913},
+        //     {bucket: 'C', count: 32576},
+        //     {bucket: 'E', count: 0},
+        //     {bucket: 'F', count: 0},
+        // ], {label: 'bucket', count: 'count'});
+        vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
+    }
+
+    /**
+     * contenteditable elements convert to html entities, so I removed it but want to keep this 
+     * function because it could be useful if I figure out a way around this issue
+     */
+    vm.keydown = function($event, max, debug) {
+        var element = angular.element($event.currentTarget),
+            html = element.html();
+            length = html.length,
+            max = max || 50,
+            allowedKeys = [8, 35, 36, 37, 38, 39, 40, 46]; // up, down, home, end, delete, backspace, things like that go in here
+
+        if(debug) {
+            console.log('pressed', $event.keyCode, 'length', length, 'html', html);
+        }
+        
+        if(length > (max - 1) && allowedKeys.indexOf($event.keyCode) === -1) {
+            $event.preventDefault();
+        }
+
+    }
+
+    vm.autofocus = function($event) {
+        var element = angular.element($event.currentTarget),
+            target = element.find('[autofocus]');
+
+        target.focus();
+        // set focus and put cursor at begining
+        setTimeout(function() {
+            target.focus(); // because textareas
+            target[0].setSelectionRange(0, 0);
+        }, 10);
+    }
+
+    vm.edited = function(property) {
+        if(!vm.editing[property]) {
+            return false;
+        }
+
+        var content = vm.editing[property],
+            newRating = angular.copy(vm.rating.summary),
+            save = false;
+
+        newRating[property] = content;
+
+        if(vm.rating.summary[property] != newRating[property]) {
+            save = true;
+        }
+
+        if(save) {
+            vm.editable = false; // block rapid edits
+            saveRating = {
+                id: vm.rating.summary.id,
+                displayName: newRating.displayName
+            }
+            RatingsEngineService.saveRating(saveRating).then(function(data){
+                vm.rating.summary = data;
+                vm.editable = true;
+            });
+        }
+    }
+
+
+    vm.isActive = function(status) {
+        return (status === 'ACTIVE' ? true : false);
+    }
+
+    vm.status_toggle = vm.isActive(vm.rating.summary.status);
+
+    vm.toggleActive = function() {
+        var newStatus = (vm.isActive(vm.rating.summary.status) ? 'INACTIVE' : 'ACTIVE'),
+            newRating = {
+            id: vm.rating.summary.id,
+            status: newStatus
+        }
+        RatingsEngineService.saveRating(newRating).then(function(data){
+            vm.rating.summary = data;
+            vm.status_toggle = vm.isActive(data.status);
+        });
     }
 
     vm.init();
-
-    // RatingsEngineStore.getRating($stateParams.rating_id).then(function(results){
-    //     console.log(results);
-    //     vm.ratingsengine = results;
-    // });
-
 });

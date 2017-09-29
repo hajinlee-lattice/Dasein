@@ -1,53 +1,39 @@
 angular.module('mainApp.appCommon.utilities.NumberUtility', [])
 .service('NumberUtility', function () {
    
-    /*
-        Purpose:        Given a number, will return the abbreviated version (e.g. 14000 becomes 14k)
-        Parameters:     an integer
-        Returns:        A string
-    */
-    this.AbbreviateLargeNumber = function (number, decPlaces) {
+    /**
+     * [AbbreviateLargeNumber Given a number, will return the abbreviationiated version (e.g. 14000 becomes 14k)]
+     * @param {[type]} number         an integer
+     * @param {[type]} decimal_places an integer
+     * return: a string
+     */
+    this.AbbreviateLargeNumber = function (number, decimal_places) {
         if (number == null || typeof number != "number") {
             return null;
         }
         
-        decPlaces = decPlaces != null && typeof decPlaces === 'number' ? decPlaces : 2;
-        
-        //Method acquired from: http://stackoverflow.com/questions/2685911/is-there-a-way-to-round-numbers-into-a-reader-friendly-format-e-g-1-1k
-        
-        // 2 decimal places => 100, 3 => 1000, etc
-        decPlaces = Math.pow(10,decPlaces);
+        decimal_places = decimal_places != null && typeof decimal_places === 'number' ? decimal_places : 2;
+        decimal_places = Math.pow(10,decimal_places);
 
-        // Enumerate number abbreviations
-        var abbrev = [ "K", "M", "B", "T" ];
+        var abbreviation = ["K", "M", "B", "T"];
     
-        // Go through the array backwards, so we do the largest first
-        for (var i=abbrev.length-1; i>=0; i--) {
-    
-            // Convert array index to "1000", "1000000", etc
+        for (var i = abbreviation.length-1; i>=0; i--) {
             var size = Math.pow(10,(i+1)*3);
-    
-            // If the number is bigger or equal do the abbreviation
+
             if(size <= number) {
-                 // Here, we multiply by decPlaces, round, and then divide by decPlaces.
-                 // This gives us nice rounding to a particular decimal place.
-                 number = Math.round(number*decPlaces/size)/decPlaces;
+                 number = Math.round(number*decimal_places/size)/decimal_places;
     
-                 // Handle special case where we round up to the next abbreviation
-                 if((number == 1000) && (i < abbrev.length - 1)) {
+                 if((number == 1000) && (i < abbreviation.length - 1)) {
                      number = 1;
                      i++;
                  }
     
-                 // Add the letter for the abbreviation
-                 number += abbrev[i];
+                 number += abbreviation[i];
     
-                 // We are done... stop
                  break;
             }
         }
-    
         return number;
     };
-    
+
 });

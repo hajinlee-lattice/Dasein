@@ -36,9 +36,20 @@
                         </ul>
                     </div>
                     <div class="dashboard-section-footer">
-                        <button class="button blue-button" ui-sref="home.ratingsengine.wizard">
-                            <span>Edit</span>
-                        </button>
+                        <div class="dashboard-section-footer-columns">
+                            <div class="status-toggle dashboard-section-footer-column">
+                                <label for="statusToggle">Ratings are Active:</label>
+                                <span class="toggle-switch">
+                                    <input type="checkbox" id="statusToggle" ng-model="vm.status_toggle" />
+                                    <span class="toggle-face" ng-click="vm.toggleActive()"></span>
+                                </span>
+                            </div>
+                            <div class="dashboard-section-footer-column">
+                                <button class="button blue-button" ui-sref="home.ratingsengine.wizard">
+                                    <span>Edit</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

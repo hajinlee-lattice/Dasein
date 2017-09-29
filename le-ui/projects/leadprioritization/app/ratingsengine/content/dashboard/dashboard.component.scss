@@ -66,4 +66,68 @@ section.ratingsengine.dashboard-layout.dashboard.container {
             color: blue;
         }
     }
+    .status-toggle {
+        text-align: left;
+        & > label {
+            display: inline;
+            width: auto;
+            vertical-align: middle;
+            position: relative;
+            top: 2px;
+            margin-right: 10px;
+        }
+    }
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        height: 20px;
+        width: 50px;
+        vertical-align: middle;
+        & > input[type="checkbox"] {
+            display: none;
+        }
+        & > .toggle-face {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 23px;
+            width: 55px;
+            background-color: #d0d0d0;
+            border-radius: 15px;
+            &:before { // peg
+                position: absolute;
+                display: block;
+                content: '';
+                height: 18px;
+                width: 18px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                border-radius: 50%;
+            }
+            &:after { // text
+                position: absolute;
+                display: block;
+                content: 'No';
+                right: 8px;
+                bottom: 0;
+                color: white;
+            }
+        }
+        & > input:checked + .toggle-face {
+            background-color: #6dbd4c;
+        }
+        & > input:checked + .toggle-face:before {
+            left: auto;
+            right: 3px;
+        }        
+        & > input:checked + .toggle-face:after {
+            content: 'Yes';
+            left: 8px;
+            right: auto;
+        }        
+    }
 }

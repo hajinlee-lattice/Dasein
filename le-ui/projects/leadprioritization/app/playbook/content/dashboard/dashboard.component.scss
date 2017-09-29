@@ -283,6 +283,13 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                     @include flex-item(0 1 auto);
                     border-top: 1px solid #d0d0d0;
                     text-align: right;
+                    .dashboard-section-footer-columns {
+                        @include flex-container;
+                        align-items: center;
+                        .dashboard-section-footer-column {
+                            @include flex-item(1 1 auto);
+                        }
+                    }
                 }
             }
             time {
