@@ -179,8 +179,12 @@ angular
                 },
                 'wizard_controls@home.ratingsengine.wizard': {
                     resolve: {
-                        WizardControlsOptions: function() {
-                            return { backState: 'home.ratingsengine', nextState: 'home.ratingsengine' };
+                        WizardControlsOptions: function($stateParams) {
+                            return { 
+                                backState: 'home.ratingsengine', 
+                                nextState: 'home.ratingsengine.dashboard',
+                                nextStateParams: { rating_id: $stateParams.rating_id }
+                            };
                         }
                     },
                     controller: 'ImportWizardControls',

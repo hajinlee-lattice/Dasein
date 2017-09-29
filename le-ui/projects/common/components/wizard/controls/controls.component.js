@@ -35,8 +35,10 @@ angular.module('common.wizard.controls', [])
         } else if (isPrev && vm.prev) {
             vm.go(vm.prev, isPrev);
         } else if (!isPrev && !vm.next) {
-            ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-            vm.go(WizardControlsOptions.nextState, isPrev);
+            // FIXME:  there should be no ImportWizard specific code in this generic component
+            //ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+            
+            vm.go(WizardControlsOptions.nextState, WizardControlsOptions.nextStateParams || {}, isPrev);
         }
     }
 
