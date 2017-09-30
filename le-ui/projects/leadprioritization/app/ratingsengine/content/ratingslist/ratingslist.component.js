@@ -101,13 +101,18 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
     };
 
 
-    vm.tileClick = function ($event, ratingId) {
+    vm.tileClick = function ($event, rating) {
         $event.preventDefault();
-        if(ratingId === 'rating_engine__ah4xaql-q1-heoxcocectq') {
-            $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
-        } else {
-            $state.go('home.ratingsengine.wizard.segment', {rating_id: ratingId} );
-        }
+        var ratingId = rating.id;
+        //console.log(rating);
+        // go to dash boad if there are rules in ratingModels (not yet avaliable)
+        // if(ratingId === 'rating_engine__ah4xaql-q1-heoxcocectq') {
+        //     $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
+        // } else {
+        //     $state.go('home.ratingsengine.wizard.segment', {rating_id: ratingId} );
+        // }
+        // for now go to dash board
+        $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
     };
 
     var oldRatingDisplayName = '';

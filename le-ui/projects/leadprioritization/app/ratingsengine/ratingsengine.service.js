@@ -76,6 +76,13 @@ angular.module('lp.ratingsengine')
         $state.go(nextState, { rating_id: $stateParams.rating_id });
     }
 
+    this.nextSaveRatingEngine = function(nextState) {
+        var currentRating = RatingsEngineStore.getCurrentRating();
+        RatingsEngineStore.saveRating(currentRating).then(function(rating) {
+            $state.go(nextState, { rating_id: rating.id });
+        });
+    }
+
     this.nextSaveRules = function(nextState) {
         var current = RatingsEngineStore.getRule();
 
