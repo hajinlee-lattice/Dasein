@@ -53,7 +53,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
         BucketedScoreSummary bucketedScoreSummary = new BucketedScoreSummary();
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
 
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath = null;
@@ -159,7 +159,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18126, new String[] { modelId });
         }
