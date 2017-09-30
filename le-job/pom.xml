@@ -9,20 +9,20 @@
 
     <properties>
         <component-name>job</component-name>
-        <le.dataplatform.version>4.0.0-SNAPSHOT</le.dataplatform.version>
-        <le.dataflow.version>4.0.0-SNAPSHOT</le.dataflow.version>
-        <le.camille.version>4.0.0-SNAPSHOT</le.camille.version>
-        <le.propdata.version>4.0.0-SNAPSHOT</le.propdata.version>
-        <le.pls.version>4.0.0-SNAPSHOT</le.pls.version>
-        <le.liaison.version>4.0.0-SNAPSHOT</le.liaison.version>
-        <le.scoring.version>4.0.0-SNAPSHOT</le.scoring.version>
-        <le.dellebi.version>4.0.0-SNAPSHOT</le.dellebi.version>
+        <le.dataplatform.version>4.0.1-SNAPSHOT</le.dataplatform.version>
+        <le.dataflow.version>4.0.1-SNAPSHOT</le.dataflow.version>
+        <le.camille.version>4.0.1-SNAPSHOT</le.camille.version>
+        <le.propdata.version>4.0.1-SNAPSHOT</le.propdata.version>
+        <le.pls.version>4.0.1-SNAPSHOT</le.pls.version>
+        <le.liaison.version>4.0.1-SNAPSHOT</le.liaison.version>
+        <le.scoring.version>4.0.1-SNAPSHOT</le.scoring.version>
+        <le.dellebi.version>4.0.1-SNAPSHOT</le.dellebi.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-web-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
         <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 
