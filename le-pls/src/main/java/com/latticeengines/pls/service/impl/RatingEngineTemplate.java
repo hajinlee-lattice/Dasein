@@ -33,6 +33,7 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary.setCreatedBy(ratingEngine.getCreatedBy());
         ratingEngineSummary.setCreated(ratingEngine.getCreated());
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
+        ratingEngineSummary.setRatingModels(ratingEngine.getRatingModels());
 
         Date lastRefreshedDate = findLastRefreshedDate(tenantId);
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);

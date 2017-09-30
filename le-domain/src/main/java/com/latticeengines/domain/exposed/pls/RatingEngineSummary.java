@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,6 +45,9 @@ public class RatingEngineSummary {
 
     @JsonProperty("createdBy")
     private String createdBy;
+
+    @JsonProperty("ratingModels")
+    private Set<RatingModel> ratingModels;
 
     public String getId() {
         return this.id;
@@ -131,6 +135,14 @@ public class RatingEngineSummary {
 
     public Date getLastRefreshedDate() {
         return this.lastRefreshedDate;
+    }
+
+    public void setRatingModels(Set<RatingModel> ratingModels) {
+        this.ratingModels = ratingModels;
+    }
+
+    public Set<RatingModel> getRatingModels() {
+        return this.ratingModels;
     }
 
     @Override
