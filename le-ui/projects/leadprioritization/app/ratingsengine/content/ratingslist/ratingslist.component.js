@@ -103,16 +103,12 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
 
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
-        var ratingId = rating.id;
-        //console.log(rating);
-        // go to dash boad if there are rules in ratingModels (not yet avaliable)
-        // if(ratingId === 'rating_engine__ah4xaql-q1-heoxcocectq') {
-        //     $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
-        // } else {
-        //     $state.go('home.ratingsengine.wizard.segment', {rating_id: ratingId} );
-        // }
-        // for now go to dash board
-        $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
+        // go to dashboard if there are rules in ratingModels
+        if(Object.keys(rating.ratingModels[0].rule.ratingRule.bucketToRuleMap).length) {
+            $state.go('home.ratingsengine.dashboard', {rating_id: rating.id} );
+        } else {
+            $state.go('home.ratingsengine.wizard.segment', {rating_id: rating.id} );
+        }
     };
 
     var oldRatingDisplayName = '';
