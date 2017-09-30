@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -292,7 +293,7 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
             if (productId == null) {
                 continue;
             }
-            attribute.setCategory("Product");
+            attribute.setCategory(Category.PRODUCT_SPEND.getName());
             attribute.setSubcategory(productMap.get(productId));
         }
 
