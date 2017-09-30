@@ -117,6 +117,7 @@ angular
                 },
                 "navigation@": {
                     controller: function($scope, $stateParams, $state, $rootScope, Rating) {
+                        $scope.rating_id = $stateParams.rating_id || '';
                         $scope.stateName = function() {
                             return $state.current.name;
                         }
