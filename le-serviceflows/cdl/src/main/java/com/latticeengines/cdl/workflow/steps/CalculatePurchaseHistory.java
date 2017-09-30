@@ -305,7 +305,7 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         for (Extract extract : productTable.getExtracts()) {
             List<GenericRecord> productList = AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath());
             for (GenericRecord product : productList) {
-                productMap.put(product.get(InterfaceName.Id.name()).toString(), product.get(InterfaceName.ProductName.name()).toString());
+                productMap.put(product.get(InterfaceName.ProductId.name()).toString(), product.get(InterfaceName.ProductName.name()).toString());
             }
         }
         return productMap;
