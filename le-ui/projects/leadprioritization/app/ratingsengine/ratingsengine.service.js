@@ -84,39 +84,24 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRules = function(nextState) {
-        var current = RatingsEngineStore.getRule();
-
-        var opts = {
-            rating_id: $stateParams.rating_id,
-            model_id: current.rule.id,
-            model: { 
-                rule: SegmentStore.sanitizeRuleBuckets(angular.copy(current.rule)) 
-            }
-        };
+        var current = RatingsEngineStore.getRule(),
+            opts = {
+                rating_id: $stateParams.rating_id,
+                model_id: current.rule.id,
+                model: { 
+                    rule: SegmentStore.sanitizeRuleBuckets(angular.copy(current.rule)) 
+                }
+            };
 
         RatingsEngineService.saveRules(opts).then(function(rating) {
             $state.go(nextState, { rating_id: $stateParams.rating_id });
         });
     }
 
-    this.nextSaveSummary = function(nextState) {
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        
-        console.log('nextSaveSummary', nextState, currentRating, $stateParams.rating_id)
-        RatingsEngineStore.saveRating(currentRating).then(function(rating) {
+    this.nextSaveSummary = function(nextState){
+        RatingsEngineStore.saveRating().then(function(result) {
             $state.go(nextState, { rating_id: $stateParams.rating_id });
         });
-    }
-
-    this.saveSummary = function(nextState){
-
-        console.log($stateParams.opts);
-
-        RatingsEngineStore.saveRating($stateParams.opts).then(function(result) {
-            console.log(result);
-            $state.go(nextState, { rating_id: $stateParams.rating_id });
-        });
-        
     }
 
     this.setRule = function(rule) {
@@ -164,11 +149,17 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer(),
             opts = opts || {},
             ClientSession = BrowserStorageUtility.getClientSession(),
-            segment = RatingsEngineStore.getSegment();
+            rating = RatingsEngineStore.getCurrentRating();
 
-        opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
-        opts.type = opts.type || 'RULE_BASED',
-        opts.segment = {'name': segment.name };
+        opts = {
+            createdBy: opts.createdBy || ClientSession.EmailAddress,
+            type: opts.type || 'RULE_BASED',
+            segment: rating.segment,
+            displayName: rating.displayName,
+            status: rating.status,
+            id: rating.id
+        };
+
         RatingsEngineService.saveRating(opts).then(function(data){
             RatingsEngineStore.setRating(data);
             deferred.resolve(data);
