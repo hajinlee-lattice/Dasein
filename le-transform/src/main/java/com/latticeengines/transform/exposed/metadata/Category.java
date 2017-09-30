@@ -11,7 +11,8 @@ public enum Category {
     ONLINE_PRESENCE("Online Presence"), //
     TECHNOLOGY_PROFILE("Technology Profile"), //
     WEBSITE_KEYWORDS("Website Keywords"), //
-    WEBSITE_PROFILE("Website Profile");
+    WEBSITE_PROFILE("Website Profile"), //
+    PRODUCT("Product");
 
     private final String name;
     private static Map<String, Category> nameMap;

@@ -27,13 +27,17 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidatePartitionConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
+import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 
 public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformationDeploymentTestNGBase {
 
@@ -46,16 +50,23 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private String mergedTableName2 = "MergedTrxTable2";
     private String aggregatedTableName1 = "AggregateTrxTable1";
     private String aggregatedTableName2 = "AggregateTrxTable2";
+    private String historyTableName1 = "TrxHistoryTable1";
+    private String historyTableName2 = "TrxHistoryTable2";
+    private String accountTableName = "AccountTable1";
 
     List<String> fieldNames = Arrays.asList("TransactionId", "AccountId", "ContactId", "TransactionType", "ProductId",
             "Amount", "Quantity", "OrderId", "TransactionTime", "ExtensionAttr1");
     List<Class<?>> clz = Arrays.asList((Class<?>) String.class, String.class, String.class, String.class, String.class,
             Double.class, Long.class, String.class, Long.class, String.class);
 
+    List<String> accountFieldNames = Arrays.asList("AccountId");
+    List<Class<?>> accountClz = Arrays.asList((Class<?>) String.class);
+
     private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
 
     private PipelineTransformationConfiguration currentConfig = null;
     private TableSource targetTableSource = null;
+    private HashMap<String, String> productTable = new HashMap<String, String>();
 
     @BeforeMethod(groups = "deployment")
     public void beforeMethod() {
@@ -68,6 +79,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         cleanupProgressTables();
 
         // cleanup intermediate table
+        cleanupRegisteredTable(accountTableName);
         cleanupRegisteredTable(tableName1);
         cleanupRegisteredTable(tableName2);
         cleanupRegisteredTable(tableName3);
@@ -80,6 +92,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     public void testTableToTable() {
         targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
 
+        uploadAndRegisterTableSource(accountTableName, accountTableName, null, null);
         uploadAndRegisterTableSource(tableName1, tableName1, null, null);
         uploadAndRegisterTableSource(tableName2, tableName2, null, null);
         uploadAndRegisterTableSource(tableName3, tableName3, null, null);
@@ -90,6 +103,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         finish(progress);
 
         verifyMergedTable();
+        verifyHistoryTable();
         confirmResultFile(progress);
 
     }
@@ -126,9 +140,9 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             configuration.setVersion(targetVersion);
 
             List<TransformationStepConfig> subSteps1 = createSteps(tableName1, tableName2, 0, mergedTableName1,
-                    aggregatedTableName1);
-            List<TransformationStepConfig> subSteps2 = createSteps(tableName2, tableName3, 2, mergedTableName2,
-                    aggregatedTableName2);
+                    aggregatedTableName1, historyTableName1);
+            List<TransformationStepConfig> subSteps2 = createSteps(tableName2, tableName3, 3, mergedTableName2,
+                    aggregatedTableName2, historyTableName2);
 
             /* Final */
             List<TransformationStepConfig> steps = new ArrayList<>();
@@ -144,7 +158,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     private List<TransformationStepConfig> createSteps(String tableName1, String tableName2, int stepInput,
-            String mergedTableName, String aggregatedTableName) {
+            String mergedTableName, String aggregatedTableName, String historyTableName) {
         /* Step 1: 1st Merge */
         TransformationStepConfig step1 = new TransformationStepConfig();
         List<String> baseSources = Arrays.asList(tableName2, tableName1);
@@ -175,7 +189,24 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         step2.setTargetTable(targetTable);
         step2.setConfiguration(getPartitionConfig());
 
-        return Arrays.asList(step1, step2);
+        /* Step 3: calculate purchase history */
+        TransformationStepConfig step3 = new TransformationStepConfig();
+        step3.setInputSteps(Collections.singletonList(stepInput + 1));
+        baseSources = Arrays.asList(accountTableName);
+        step3.setBaseSources(baseSources);
+        SourceTable accountTable = new SourceTable(accountTableName, customerSpace);
+        baseTables = new HashMap<>();
+        baseTables.put(accountTableName, accountTable);
+        step3.setBaseTables(baseTables);
+        step3.setTransformer(DataCloudConstants.TRANSFORMER_TRANSACTION_AGGREGATOR);
+
+        targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(historyTableName);
+        step3.setTargetTable(targetTable);
+        step3.setConfiguration(getHistoryConfig());
+
+        return Arrays.asList(step1, step2, step3);
     }
 
     private String getPartitionConfig() {
@@ -209,6 +240,34 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         return JsonUtils.serialize(config);
     }
 
+    private String getHistoryConfig() {
+        log.info("ProductTable " + productTable.size());
+        TransactionAggregateConfig conf = new TransactionAggregateConfig();
+        initProductTable();
+        conf.setProductMap(productTable);
+        conf.setTransactionType("PurchaseHistory");
+        conf.setIdField(InterfaceName.AccountId.name());
+        conf.setAccountField(InterfaceName.AccountId.name());
+        conf.setProductField(InterfaceName.ProductId.name());
+        conf.setTypeField(InterfaceName.TransactionType.name());
+        conf.setDateField(InterfaceName.TransactionDate.name());
+        conf.setQuantityField(InterfaceName.TotalQuantity.name());
+        conf.setAmountField(InterfaceName.TotalAmount.name());
+
+        List<String> periods = new ArrayList<String>();
+        List<String> metrics = new ArrayList<String>();
+
+        periods.add(NamedPeriod.HASEVER.getName());
+        metrics.add(TransactionMetrics.PURCHASED.getName());
+        periods.add(NamedPeriod.LASTQUARTER.getName());
+        metrics.add(TransactionMetrics.QUANTITY.getName());
+        periods.add(NamedPeriod.LASTQUARTER.getName());
+        metrics.add(TransactionMetrics.AMOUNT.getName());
+        conf.setPeriods(periods);
+        conf.setMetrics(metrics);
+        return JsonUtils.serialize(conf);
+   }
+
     private void cleanupRegisteredTable(String tableName) {
         metadataProxy.deleteTable(customerSpace.toString(), tableName);
     }
@@ -217,6 +276,26 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         String mergedTableFullName = TableSource.getFullTableName(mergedTableName1, targetVersion);
         verifyRegisteredTable(mergedTableFullName, fieldNames.size() + 3);
         verifyRecordsInMergedTable(mergedTableFullName);
+    }
+
+    private void verifyHistoryTable() {
+        String historyTableFullName = TableSource.getFullTableName(historyTableName1, targetVersion);
+        verifyRegisteredTable(historyTableFullName, productTable.size() * 3 + 1);
+        verifyRecordsInHistoryTable(historyTableFullName);
+    }
+
+    private void verifyRecordsInHistoryTable(String mergedTableFullName) {
+        log.info("Start to verify records one by one.");
+        List<GenericRecord> records = getRecordFromTable(mergedTableFullName);
+        Integer rowCount = 0;
+        Map<String, GenericRecord> recordMap = new HashMap<>();
+        for (GenericRecord record : records) {
+            String id = String
+                    .valueOf(record.get(TableRoleInCollection.ConsolidatedPurchaseHistory.getPrimaryKey().name()));
+            recordMap.put(id, record);
+            rowCount++;
+        }
+        Assert.assertEquals(rowCount, new Integer(5));
     }
 
     private void verifyRecordsInMergedTable(String mergedTableFullName) {
@@ -279,7 +358,6 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         assertAccount1(recordMap);
         assertAccount2(recordMap);
         assertAccount3(recordMap);
-
     }
 
     private void assertAccount1(Map<String, List<GenericRecord>> recordMap) {
@@ -329,9 +407,24 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     @Test(groups = "deployment", enabled = false)
     public void createData() {
+        uploadAccountTable();
         uploadTable1();
         uploadTable2();
         uploadTable3();
+    }
+
+    private void initProductTable() {
+        productTable.put("1", "product1");
+        productTable.put("2", "product2");
+        productTable.put("3", "product3");
+        productTable.put("4", "product4");
+    }
+
+    private void uploadAccountTable() {
+        Object[][] data = {{ "1" }, { "2" }, { "3" }, { "4" }, { "5" }};
+
+        uploadDataToHdfs(data, accountFieldNames, accountClz,
+                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + accountTableName + ".avro", accountTableName);
     }
 
     private void uploadTable1() {

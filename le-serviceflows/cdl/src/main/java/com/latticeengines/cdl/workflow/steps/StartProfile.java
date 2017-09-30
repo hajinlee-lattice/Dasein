@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortContactStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculatePurchaseHistoryConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -42,6 +43,17 @@ public class StartProfile extends BaseWorkflowStep<CalculateStatsStepConfigurati
             sortContactStepConfig.setSkipStep(true);
             putObjectInContext(SortContactStepConfiguration.class.getName(), sortContactStepConfig);
         }
-    }
 
+        Table transactionTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
+                                                              TableRoleInCollection.AggregatedTransaction);
+        Table productTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
+                                                          TableRoleInCollection.ConsolidatedProduct);
+        if ((transactionTable == null) || (productTable == null)) {
+            log.info("Skip profile purchase history since either product or transaction table does not exist");
+            CalculatePurchaseHistoryConfiguration calculatePurchaseHistoryConfig = getConfigurationFromJobParameters(
+                    CalculatePurchaseHistoryConfiguration.class);
+            calculatePurchaseHistoryConfig.setSkipStep(true);
+            putObjectInContext(CalculatePurchaseHistoryConfiguration.class.getName(), calculatePurchaseHistoryConfig);
+        }
+    }
 }

@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -51,6 +52,8 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
             + "_(?:[0-9]{2})?[0-9]{2}-[0-3]?[0-9]-[0-3]?[0-9]$";
     protected static Pattern pattern = Pattern.compile(regex);
 
+    @Autowired
+    TransactionTableBuilder transactionTableBuilder;
     private int inputMergeStep;
     private int partitionAndAggregateStep;
 
@@ -135,108 +138,16 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         String aggrTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
         Table aggregateTable = metadataProxy.getTable(customerSpace.toString(), aggrTableName);
         putObjectInContext(AGGREGATE_TABLE_KEY, aggregateTable);
-        Table masterTable = setupMasterTable(aggregateTable);
+        Table masterTable = transactionTableBuilder.setupMasterTable(batchStoreTablePrefix, pipelineVersion, aggregateTable);
         putObjectInContext(MASTER_TABLE_KEY, masterTable);
         if (isBucketing()) {
-            Table deltaTable = setupDeltaTable(aggregateTable);
+            Table deltaTable = transactionTableBuilder.setupDeltaTable(servingStoreTablePrefix, pipelineVersion, aggregateTable);
             putObjectInContext(DELTA_TABLE_KEY, deltaTable);
         }
         super.onPostTransformationCompleted();
         metadataProxy.deleteTable(customerSpace.toString(),
                 TableUtils.getFullTableName(getMergeTableName(), pipelineVersion));
 
-    }
-
-    private Table setupMasterTable(Table aggregateTable) {
-        try {
-            List<String> dateFiles = getMasterDateFiles(aggregateTable);
-            Table masterTable = createTable(dateFiles, batchStoreTablePrefix);
-            return masterTable;
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private Table setupDeltaTable(Table aggregateTable) {
-        try {
-            Set<String> dates = getDeltaDates(aggregateTable);
-            List<String> dateFiles = getDeltaDateFiles(aggregateTable, dates);
-            Table deltaTable = createTable(dateFiles, servingStoreTablePrefix);
-            return deltaTable;
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private Set<String> getDeltaDates(Table aggregateTable) {
-        String hdfsPath = aggregateTable.getExtracts().get(0).getPath();
-        Set<String> dates = new HashSet<>();
-        Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, hdfsPath);
-        while (iter.hasNext()) {
-            GenericRecord record = iter.next();
-            String date = record.get(TRANSACTION_DATE).toString();
-            if (!dates.contains(date))
-                dates.add(date);
-        }
-        return dates;
-    }
-
-    protected List<String> getDeltaDateFiles(Table aggregateTable, Set<String> dates) {
-        String baseDir = getTableBaseDir(aggregateTable);
-        List<String> files = new ArrayList<>();
-        for (String date : dates) {
-            files.add(baseDir + "/" + TableUtils.getFullTableName(batchStoreTablePrefix, date));
-        }
-        return files;
-    }
-
-    private List<String> getMasterDateFiles(Table aggregateTable) throws IOException {
-        String baseDir = getTableBaseDir(aggregateTable);
-        HdfsFilenameFilter filter = getFilter();
-        List<String> dateFiles = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir, filter);
-        return dateFiles;
-    }
-
-    protected HdfsFilenameFilter getFilter() {
-        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
-            @Override
-            public boolean accept(String fileName) {
-                Matcher matcher = pattern.matcher(fileName);
-                return matcher.matches();
-            }
-        };
-        return filter;
-    }
-
-    protected String getTableBaseDir(Table aggregateTable) {
-        String hdfsPath = aggregateTable.getExtracts().get(0).getPath();
-        int index = 0;
-        if (hdfsPath.endsWith("*.avro") || hdfsPath.endsWith("/")) {
-            index = StringUtils.lastOrdinalIndexOf(hdfsPath, "/", 2);
-        } else {
-            index = StringUtils.lastOrdinalIndexOf(hdfsPath, "/", 1);
-        }
-        String hdfsDir = hdfsPath.substring(0, index);
-        return hdfsDir;
-    }
-
-    protected Table createTable(List<String> dateFiles, String tableName) {
-        Table table = new Table();
-        String fullTableName = TableUtils.getFullTableName(tableName, pipelineVersion);
-        table.setName(fullTableName);
-        table.setDisplayName(fullTableName);
-        for (String file : dateFiles) {
-            addExtract(table, file);
-        }
-        return table;
-    }
-
-    private void addExtract(Table masterTable, String file) {
-        Extract extract = new Extract();
-        extract.setName("extract");
-        extract.setPath(file + "/*.avro");
-        extract.setExtractionTimestamp(DateTime.now().getMillis());
-        masterTable.addExtract(extract);
     }
 
     @Override

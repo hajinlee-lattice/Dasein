@@ -50,6 +50,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_STATS_CALCULATOR = "statsCalculator";
     public static final String TRANSFORMER_SORTER = "sourceSorter";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
-    
-    public static final String TRANSFORMER_CONSOLIDATE_PARTITION= "ConsolidatePartition";
+    public static final String TRANSFORMER_TRANSACTION_AGGREGATOR = "transactionAggregator";
+
+    public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
 }

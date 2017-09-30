@@ -184,6 +184,7 @@ public class DataFlowUtils {
     public static String getLocationPrefixedPath(CascadingDataFlowBuilder cascadingDataFlowBuilder, String path) {
         DataFlowContext context = cascadingDataFlowBuilder.getDataFlowCtx();
         Configuration configuration = context.getRequiredProperty("HADOOPCONF", Configuration.class);
+        System.out.println("Getting Path for " + path + " " + FileSystem.FS_DEFAULT_NAME_KEY);
 
         if (path.startsWith(FileSystem.FS_DEFAULT_NAME_KEY)) {
             path = path.substring(7);
@@ -194,7 +195,7 @@ public class DataFlowUtils {
             for (int i = 3; i < parts.length; ++i) {
                 partsSkipped.add(parts[i]);
             }
-            path = Joiner.on("/").join(partsSkipped);
+            path = "/" + Joiner.on("/").join(partsSkipped);
         }
 
         return configuration.get(FileSystem.FS_DEFAULT_NAME_KEY) + path;

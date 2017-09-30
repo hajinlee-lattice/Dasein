@@ -11,9 +11,11 @@ public enum TableRoleInCollection {
     ConsolidatedContact, //
     ConsolidatedProduct, //
     ConsolidatedTransaction, //
+    ConsolidatedPurchaseHistory, //
 
     Profile, //
     ContactProfile, //
+    PurchaseHistoryProfile, //
 
     BucketedAccount, //
     SortedContact, //
@@ -53,6 +55,9 @@ public enum TableRoleInCollection {
         ConsolidatedProduct.foreignKeys = ImmutableList.of(ConsolidatedProduct.primaryKey);
         SortedProduct.primaryKey = ConsolidatedProduct.primaryKey;
         SortedProduct.foreignKeys = ConsolidatedProduct.foreignKeys;
+
+        ConsolidatedPurchaseHistory.primaryKey = InterfaceName.AccountId;
+        ConsolidatedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }

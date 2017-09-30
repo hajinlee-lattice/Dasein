@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
@@ -15,7 +14,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ConsolidateTransactionDataUnitTestNG {
 
@@ -26,7 +24,7 @@ public class ConsolidateTransactionDataUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "getTableBaseDirData")
     public void getTableBaseDir(String tablePath, String expectedBaseDir) {
-        ConsolidateTransactionData consolidateData = new ConsolidateTransactionData();
+        TransactionTableBuilder consolidateData = new TransactionTableBuilder();
 
         Table aggregateTable = new Table();
         Extract extract = new Extract();
@@ -38,8 +36,7 @@ public class ConsolidateTransactionDataUnitTestNG {
 
     @Test(groups = "unit")
     public void getDeltaDateFiles() {
-        ConsolidateTransactionData consolidateData = new ConsolidateTransactionData();
-        consolidateData.batchStoreTablePrefix = BusinessEntity.Transaction.name();
+        TransactionTableBuilder consolidateData = new TransactionTableBuilder();
         Table aggregateTable = new Table();
         Extract extract = new Extract();
         extract.setPath("/path1/path2/path3/tableName_1992-8-2/*.avro");
@@ -55,11 +52,9 @@ public class ConsolidateTransactionDataUnitTestNG {
 
     @Test(groups = "unit")
     public void createTable() {
-        ConsolidateTransactionData consolidateData = new ConsolidateTransactionData();
-        consolidateData.batchStoreTablePrefix = BusinessEntity.Transaction.name();
-        ReflectionTestUtils.setField(consolidateData, "pipelineVersion", "2009-01-30");
+        TransactionTableBuilder consolidateData = new TransactionTableBuilder();
         Table table = consolidateData.createTable(
-                Arrays.asList("/path1/path2/path3/tableName_v1", "/path1/path2/path3/tableName_v3"), "Transaction");
+                Arrays.asList("/path1/path2/path3/tableName_v1", "/path1/path2/path3/tableName_v3"), "Transaction", "2009-01-30");
         Assert.assertEquals(table.getName(), "Transaction_2009-01-30");
         Assert.assertEquals(table.getExtracts().size(), 2);
         Assert.assertEquals(table.getExtracts().get(0).getPath(), "/path1/path2/path3/tableName_v1/*.avro");
@@ -68,7 +63,7 @@ public class ConsolidateTransactionDataUnitTestNG {
 
     @Test(groups = "unit")
     public void getFilter() {
-        ConsolidateTransactionData consolidateData = new ConsolidateTransactionData();
+        TransactionTableBuilder consolidateData = new TransactionTableBuilder();
         HdfsFilenameFilter filter = consolidateData.getFilter();
         Assert.assertEquals(filter.accept("Transaction_2017-08-30"), true);
         Assert.assertEquals(filter.accept("Transaction_Aggregate_2017-08-30"), false);
