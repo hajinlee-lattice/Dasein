@@ -35,6 +35,12 @@ angular.module('lp.ratingsengine.wizard.summary', [])
 
         vm.getRuleRecordCounts();
 
+        if(vm.rating.status = 'ACTIVE') {
+        	vm.ratingStatus = true;
+        } else {
+        	vm.ratingStatus = false;
+        }
+
         vm.isValid = true;
 
     };

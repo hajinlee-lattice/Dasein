@@ -54,6 +54,7 @@ angular.module('lp.ratingsengine')
     }
 
     this.setSegment = function(segment) {
+        console.log("set segment service", segment);
         this.savedSegment = segment;
     }
 
@@ -78,6 +79,8 @@ angular.module('lp.ratingsengine')
 
     this.nextSaveRatingEngine = function(nextState) {
         var currentRating = RatingsEngineStore.getCurrentRating();
+
+        console.log("save engine", currentRating);
         RatingsEngineStore.saveRating(currentRating).then(function(rating) {
             $state.go(nextState, { rating_id: rating.id });
         });
@@ -142,6 +145,7 @@ angular.module('lp.ratingsengine')
     }
 
     this.getCurrentRating = function() {
+        console.log(this.currentRating);
         return this.currentRating;
     }
 
@@ -154,7 +158,7 @@ angular.module('lp.ratingsengine')
         opts = {
             createdBy: opts.createdBy || ClientSession.EmailAddress,
             type: opts.type || 'RULE_BASED',
-            segment: rating.segment,
+            segment: rating.segment || RatingsEngineStore.getSegment(),
             displayName: rating.displayName,
             status: rating.status,
             id: rating.id

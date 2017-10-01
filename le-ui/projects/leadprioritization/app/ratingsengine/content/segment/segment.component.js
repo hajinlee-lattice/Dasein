@@ -7,8 +7,6 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     angular.extend(vm, {
         currentRating: CurrentRatingEngine,
         stored: RatingsEngineStore.segment_form,
-        savedSegment: RatingsEngineStore.getSegment() || null,
-        // SegmentsUtility: SegmentsUtility,
         segments: Segments,
         stateParams: $stateParams,
         currentPage: 1,
@@ -71,6 +69,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     }
 
     vm.setSegment = function(segment) {
+        console.log("set segment", segment);
     	RatingsEngineStore.setSegment(segment);
     }
 
