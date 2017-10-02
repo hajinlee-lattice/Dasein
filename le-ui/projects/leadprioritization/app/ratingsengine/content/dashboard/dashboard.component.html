@@ -67,9 +67,10 @@
                                 <span ng-if="play.launchHistory.playLaunch.updated">Launched {{vm.TimestampIntervalUtility.timeAgo(play.launchHistory.playLaunch.updated)}}</span>
                             </li>
                         </ul>
+                        <div ng-if="!vm.ratings.plays">There are <strong>no</strong> Plays using this Rating</div>
                     </div>
                     <div class="dashboard-section-footer">
-                        <button class="button blue-button" ui-sref="home.playbook.wizard">
+                        <button class="button blue-button" ui-sref="home.playbook.wizard.rating({rating_id: vm.rating.summary.id})" ng-disabled="!vm.status_toggle">
                             <span>Create a new play</span>
                         </button>
                     </div>

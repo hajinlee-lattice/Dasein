@@ -19,6 +19,10 @@ angular.module('lp.playbook.wizard.rating', [])
         }
     });
 
+    if($stateParams.rating_id) {
+        vm.stored.rating_selection = $stateParams.rating_id;
+    }
+
     vm.init = function() {
         PlaybookWizardStore.setValidation('rating', false);
         if(vm.stored.rating_selection) {

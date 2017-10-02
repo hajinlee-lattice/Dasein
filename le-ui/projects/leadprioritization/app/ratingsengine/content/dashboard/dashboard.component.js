@@ -1,5 +1,5 @@
 angular.module('lp.ratingsengine.dashboard', [])
-.controller('RatingsEngineDashboard', function($q, $stateParams, $state, 
+.controller('RatingsEngineDashboard', function($q, $stateParams, $state, $rootScope,
     RatingsEngineStore, RatingsEngineService, Rating, TimestampIntervalUtility, NumberUtility) {
     var vm = this;
 
@@ -100,6 +100,11 @@ angular.module('lp.ratingsengine.dashboard', [])
             RatingsEngineService.saveRating(saveRating).then(function(data){
                 vm.rating.summary = data;
                 vm.editable = true;
+                $rootScope.$broadcast('header-back', { 
+                    path: '^home.rating.dashboard',
+                    displayName: data.displayName,
+                    sref: 'home.ratingsengine'
+                });
             });
         }
     }

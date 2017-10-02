@@ -300,21 +300,20 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
     .contenteditable,
     *[contenteditable] {
         position: relative;
-        padding: 5px;
         margin-right: 20px;
-        //border: 1px dashed transparent;
-        min-height: 34px;
+        // border: 1px dashed transparent;
+        min-height: 24px;
         &.editing {
             width: 100%;
         }
         &.empty {
-            //border: 1px dashed #f1f1f1;
+        // border: 1px dashed #f1f1f1;
         }
         &:after {
             @include font-awesome-inline("\f040");
             font-size: 12px;
             position: absolute;
-            top: 10px;
+            top: 5px;
             right: -20px;
             border: none;
             outline:none;

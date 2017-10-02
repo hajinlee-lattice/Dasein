@@ -447,7 +447,7 @@ angular
             redirectTo: 'home.playbook.wizard.rating'
         })
         .state('home.playbook.wizard.rating', {
-            url: '/rating',
+            url: '/rating/:rating_id',
             resolve: {
                 Ratings: function(PlaybookWizardStore) {
                     return PlaybookWizardStore.getRatings(true);
