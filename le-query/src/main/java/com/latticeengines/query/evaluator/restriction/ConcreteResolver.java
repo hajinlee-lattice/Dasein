@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;

@@ -34,7 +34,7 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder let(Lookup lookup) {
         if (lookup instanceof AttributeLookup || lookup instanceof SubQueryAttrLookup
-                || lookup instanceof AggregateLookup) {
+                || lookup instanceof AggregateLookup || lookup instanceof CaseLookup) {
             if (restriction != null) {
                 throw new IllegalArgumentException("Cannot chain a lookup here.");
             }
@@ -45,7 +45,7 @@ public class RestrictionBuilder {
             complete = false;
             return this;
         } else {
-            throw new UnsupportedOperationException("Only support attribute lookup and sub query attr lookup.");
+            throw new UnsupportedOperationException("Does not support lookup of type " + lookup.getClass().getSimpleName());
         }
     }
 

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.TreeMap;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -429,10 +428,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         cases.put("C", C);
         CaseLookup caseLookup = new CaseLookup(cases, "B", "Score");
 
-        Restriction restriction = Restriction.builder().let(new AttributeLookup(null, "Score")).eq("A").build();
+        Restriction restriction = Restriction.builder().let(caseLookup).eq("A").build();
         Query query = Query.builder() //
                 .select(caseLookup) //
-                .where(restriction) //
+                .where(restriction)
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
@@ -440,40 +439,41 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");
-        sqlContains(sqlQuery, "Score = ?");
+        sqlContains(sqlQuery, "then ? else ? end) = ?");
         Assert.assertTrue(
                 sqlQuery.toString().indexOf(ATTR_ACCOUNT_NAME) < sqlQuery.toString().indexOf(ATTR_ACCOUNT_CITY));
         Assert.assertTrue(sqlQuery.toString().indexOf(ATTR_ACCOUNT_CITY) < sqlQuery.toString()
                 .indexOf(BUCKETED_PHYSICAL_ATTR));
 
-//        // sub query
-//        SubQuery subQuery = new SubQuery(query, "Alias");
-//        SubQueryAttrLookup attrLookup = new SubQueryAttrLookup(subQuery, "Score");
-//        Query query2 = Query.builder() //
-//                .select(attrLookup, AggregateLookup.count().as("Count"), AggregateLookup.sum(attrLookup)) //
-//                .from(subQuery) //
-//                .groupBy(attrLookup) //
-//                .build();
-//        sqlQuery = queryEvaluator.evaluate(attrRepo, query2);
-//        sqlContains(sqlQuery, "select Alias.Score");
-//        sqlContains(sqlQuery, "count(?) as Count");
-//        sqlContains(sqlQuery, "sum(Alias.Score)");
-//        sqlContains(sqlQuery, "as Alias");
-//        sqlContains(sqlQuery, "group by Alias.Score");
 
-//        // direct group by
-//        query = Query.builder() //
-//                .select(caseLookup, AggregateLookup.count().as("Count")) //
-//                .where(Restriction.builder().or(A, B).build()) //
-//                .groupBy(caseLookup) //
-//                .build();
-//        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-//        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
-//        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_CITY));
-//        sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
-//        sqlContains(sqlQuery, "else ? end");
-//        sqlContains(sqlQuery, "as Score");
-//        sqlContains(sqlQuery, "group by Score");
+        // sub query
+        SubQuery subQuery = new SubQuery(query, "Alias");
+        SubQueryAttrLookup attrLookup = new SubQueryAttrLookup(subQuery, "Score");
+        Query query2 = Query.builder() //
+                .select(attrLookup, AggregateLookup.count().as("Count"), AggregateLookup.sum(attrLookup)) //
+                .from(subQuery) //
+                .groupBy(attrLookup) //
+                .build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query2);
+        sqlContains(sqlQuery, "select Alias.Score");
+        sqlContains(sqlQuery, "count(?) as Count");
+        sqlContains(sqlQuery, "sum(Alias.Score)");
+        sqlContains(sqlQuery, "as Alias");
+        sqlContains(sqlQuery, "group by Alias.Score");
+
+        // direct group by
+        query = Query.builder() //
+                .select(caseLookup, AggregateLookup.count().as("Count")) //
+                .where(Restriction.builder().or(A, B).build()) //
+                .groupBy(new AttributeLookup(null, "Score")) //
+                .build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_CITY));
+        sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
+        sqlContains(sqlQuery, "else ? end");
+        sqlContains(sqlQuery, "as Score");
+        sqlContains(sqlQuery, "group by Score");
 
     }
 
