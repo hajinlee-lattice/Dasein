@@ -7,6 +7,7 @@
             flex: 1 1 auto;
             margin-left: 3px;
         }
+
         &>div:last-child {
             flex: 0 1 auto;
         }
@@ -17,16 +18,18 @@
             }
         }
 
-        .tp-entry {
+        .cg-talking-point-editor-container {
             position: relative;
         }
+
         .controls {
             @include flex-container;
             position: absolute;
-            left: 340px;
             top: 0;
+            left: 340px;
+            right: 50px;
             height: 45px;
-            pointer-events: none;
+            //pointer-events: none;
             & > li {
                 @include flex-item(0 1 auto);
                 margin: 0 10px;
@@ -56,19 +59,15 @@
                         transform: translateY(-50%);
                     }
                 }
-                &.tp-error {
-                    .tp-errors {
-                        color: #d22128;
-                        font-size: .9em;
-                        display: block;
-                        position: relative;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        em {
-                            display: block;
-                        }
-                    }
-                }
+            }
+        }
+        
+        .tp-errors {
+            .tp-error {
+                display: inline;
+                margin-right: 10px;
+                color: #d22128;
+                font-size: .9em;
             }
         }
 

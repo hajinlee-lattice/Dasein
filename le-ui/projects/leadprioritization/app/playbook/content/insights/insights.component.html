@@ -25,28 +25,30 @@
                 </ul>
 
                 <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset' | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="tp-entry" ng-class="{'has-errors': tp.uiError && !tp.IsNew}">
-                    <cg-talking-point-editor
-                        tp="tp"
-                        on-delete="vm.onDelete(tp, $index)">
-                    </cg-talking-point-editor>
-                    <ul class="controls" ng-if="!tp.IsNew">
-                        <li class="tp-entry-sort" ng-if="vm.talkingPoints.length > 1">
-                             <div class="arrow">
-                                <i class="fa fa-arrow-up" ng-if="$index > 0" ng-click="vm.reorder($index, $index - 1)"></i>
-                             </div>
-                            <div class="arrow">
-                                <i class="fa fa-arrow-down" ng-if="$index < vm.talkingPoints.length - 1" ng-click="vm.reorder($index, $index + 1)"></i>
-                            </div>
-                        </li>
-                        <li class="tp-created" ng-if="!tp.IsNew">
-                            <time>Created {{tp.created-1000|date:'M/d/yyyy h:mm a'}}</time>
-                        </li>
-                        <li class="tp-error">
-                            <div class="tp-errors">
-                                <em ng-repeat="(error, message) in tp.uiError">{{message}}</em>
-                            </div>
+                    <ul class="tp-errors">
+                        <li class="tp-error" ng-repeat="(error, message) in tp.uiError">
+                            <em>{{message}}</em>
                         </li>
                     </ul>
+                    <div class="cg-talking-point-editor-container">
+                        <cg-talking-point-editor
+                            tp="tp"
+                            on-delete="vm.onDelete(tp, $index)">
+                        </cg-talking-point-editor>
+                        <ul class="controls" ng-if="!tp.IsNew">
+                            <li class="tp-entry-sort" ng-if="vm.talkingPoints.length > 1">
+                                 <div class="arrow">
+                                    <i class="fa fa-arrow-up" ng-if="$index > 0" ng-click="vm.reorder($index, $index - 1)"></i>
+                                 </div>
+                                <div class="arrow">
+                                    <i class="fa fa-arrow-down" ng-if="$index < vm.talkingPoints.length - 1" ng-click="vm.reorder($index, $index + 1)"></i>
+                                </div>
+                            </li>
+                            <li class="tp-created" ng-if="!tp.IsNew">
+                                <time>Created {{tp.created-1000|date:'M/d/yyyy h:mm a'}}</time>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="row tp-footer">
                     <span ng-click="vm.addTalkingPoint()" class="tp-add-container" ng-disabled="vm.saving">
