@@ -180,7 +180,7 @@ angular
             }
             
             vm.editBucket = function() {
-                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical')) {
+                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum')) {
                     if (vm.unused) {
                         vm.unused = false;
 

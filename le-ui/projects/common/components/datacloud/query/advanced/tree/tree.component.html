@@ -96,6 +96,16 @@
                     </span>
                 </span>
 
+                <span ng-if="vm.type == 'Enum'" class="query-section-item-operation">
+                    <select ng-model="vm.item.topbkt.Lbl" ng-change="vm.updateBucketCount()">
+                            <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
+                    </select>
+
+                    <span class="query-section-item-value" ng-if="vm.item.topbkt.Lbl != ''">
+                        <strong>Yes</strong>
+                    </span>
+                </span>
+
                 <span ng-if="vm.type == 'Numerical'" class="query-section-item-operation">
                     <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')">
                         <button type="button" 
