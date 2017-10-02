@@ -1,27 +1,17 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -30,7 +20,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidatePartitionConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -41,7 +30,6 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 @Component("consolidateTransactionData")
 public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateTransactionDataStepConfiguration> {
 
-    private static final String TRANSACTION_DATE = "TransactionDate";
     private static final String AGGREGATE_TABLE_KEY = "Aggregate";
     private static final String MASTER_TABLE_KEY = "Master";
     private static final String DELTA_TABLE_KEY = "Delta";
@@ -103,7 +91,9 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     private String getPartitionConfig() {
         ConsolidatePartitionConfig config = new ConsolidatePartitionConfig();
         config.setNamePrefix(batchStoreTablePrefix);
+        config.setAggrNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
         config.setTimeField(InterfaceName.TransactionTime.name());
+        config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setConsolidateDateConfig(getConsolidateDataConfig(false));
         config.setAggregateConfig(getAggregateConfig());
         return appendEngineConf(config, lightEngineConfig());
@@ -113,9 +103,10 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         ConsolidateAggregateConfig config = new ConsolidateAggregateConfig();
         config.setCountField(InterfaceName.Quantity.name());
         config.setSumField(InterfaceName.Amount.name());
-        config.setTrxDateField(TRANSACTION_DATE);
+        config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setGoupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
-                InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(), TRANSACTION_DATE));
+                InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
+                InterfaceName.TransactionDate.name()));
         return appendEngineConf(config, lightEngineConfig());
     }
 

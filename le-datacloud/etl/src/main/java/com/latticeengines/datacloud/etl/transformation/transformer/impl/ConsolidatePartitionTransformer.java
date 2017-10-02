@@ -17,18 +17,15 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.TableUtils;
 import com.latticeengines.datacloud.dataflow.transformation.Profile;
-import com.latticeengines.datacloud.etl.transformation.service.TransformerService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidatePartitionParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -37,17 +34,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)
-public class ConsolidatePartitionTransformer extends
-        AbstractDataflowTransformer<ConsolidatePartitionConfig, ConsolidatePartitionParameters> {
+public class ConsolidatePartitionTransformer
+        extends AbstractDataflowTransformer<ConsolidatePartitionConfig, ConsolidatePartitionParameters> {
     private static final Logger log = LoggerFactory.getLogger(ConsolidatePartitionTransformer.class);
 
     public static final String TRANSFORMER_NAME = TRANSFORMER_CONSOLIDATE_PARTITION;
-
-    @Autowired
-    private TransformerService transformerService;
-
-    @Autowired
-    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Override
     protected String getDataFlowBeanName() {
@@ -100,12 +91,30 @@ public class ConsolidatePartitionTransformer extends
 
             Table table = aggregateFiles(workflowDir, config, step, parameters, tableSource, newDates, dateFileMap,
                     dateTempFileMap, dateTableMap);
-
             Table result = moveAggregateFiles(workflowDir, config, step, tableSource, table);
+            moveDateAggrFiles(workflowDir, config, step, tableSource, newDates, dateFileMap, dateTempFileMap);
             moveDateFiles(workflowDir, config, step, tableSource, newDates, dateFileMap, dateTempFileMap);
             return result;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    private void moveDateAggrFiles(String workflowDir, ConsolidatePartitionConfig config, TransformStep step,
+            TableSource tableSource, Set<String> newDates, Map<String, String> dateFileMap,
+            Map<String, String> dateTempFileMap) throws IOException {
+        for (Map.Entry<String, String> entry : dateFileMap.entrySet()) {
+            String date = entry.getKey();
+            String localDir = getDateAggrDir(dateTempFileMap, date);
+            String tableName = TableSource.getFullTableName(config.getAggrNamePrefix(), date);
+            String hdfsPath = hdfsPathBuilder.constructTablePath(tableName, tableSource.getCustomerSpace(), "")
+                    .toString();
+            String targetDir = hdfsPath;
+            if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetDir);
+            }
+            HdfsUtils.moveGlobToDir(yarnConfiguration, localDir + "/*.avro", targetDir);
+            HdfsUtils.rmdir(yarnConfiguration, localDir);
         }
     }
 
@@ -127,7 +136,8 @@ public class ConsolidatePartitionTransformer extends
         }
     }
 
-    private Map<String, Table> createDateTables(ConsolidatePartitionConfig config, Map<String, String> dateTempFileMap) {
+    private Map<String, Table> createDateTables(ConsolidatePartitionConfig config,
+            Map<String, String> dateTempFileMap) {
         Map<String, Table> dateTableMap = new HashMap<>();
         for (String date : dateTempFileMap.keySet()) {
             String fullTableName = TableSource.getFullTableName(config.getNamePrefix(), date);
@@ -152,26 +162,71 @@ public class ConsolidatePartitionTransformer extends
         newParameter.setEngineConfiguration(parameters.getEngineConfiguration());
 
         setTargetTemplate(tableSource, newStep, tableSource.getTable().getName());
-        String localAggrDir = getLocalWorkflowDir(workflowDir);
+        String localAggrDir = getLocalAggrDir(workflowDir);
         Table result = dataFlowService.executeDataFlow(newStep, "consolidateAggregateFlow", newParameter, localAggrDir);
+
+        aggregateDateFile(step, parameters, config, tableSource, newDates, dateFileMap, dateTempFileMap, dateTableMap,
+                result);
         return result;
 
+    }
+
+    private Table aggregateDateFile(TransformStep step, ConsolidatePartitionParameters parameters,
+            ConsolidatePartitionConfig config, TableSource tableSource, Set<String> newDates,
+            Map<String, String> dateFileMap, Map<String, String> dateTempFileMap, Map<String, Table> dateTableMap,
+            Table result) throws IOException {
+        String avroDir = result.getExtracts().get(0).getPath() + "/*.avro";
+        Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, avroDir);
+        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroDir);
+        Map<String, String> dateAggrFileMap = getAggrFileMap(dateTempFileMap);
+        Map<String, List<GenericRecord>> dateRecordMap = new HashMap<>();
+        while (iter.hasNext()) {
+            GenericRecord record = iter.next();
+            String date = record.get(config.getTrxDateField()).toString();
+            if (!dateRecordMap.containsKey(date)) {
+                dateRecordMap.put(date, new ArrayList<>());
+            }
+            dateRecordMap.get(date).add(record);
+            if (dateRecordMap.get(date).size() >= 20) {
+                writeDataBuffer(schema, date, dateAggrFileMap, dateRecordMap);
+            }
+        }
+        for (Map.Entry<String, List<GenericRecord>> entry : dateRecordMap.entrySet()) {
+            writeDataBuffer(schema, entry.getKey(), dateAggrFileMap, dateRecordMap);
+        }
+
+        return result;
+    }
+
+    private Map<String, String> getAggrFileMap(Map<String, String> dateTempFileMap) {
+        Map<String, String> dateAggrFileMap = new HashMap<>();
+        dateTempFileMap.forEach((k, v) -> dateAggrFileMap.put(k, getDateAggrDir(dateTempFileMap, k)));
+        return dateAggrFileMap;
+    }
+
+    private String getDateAggrDir(Map<String, String> dateTempFileMap, String date) {
+        return dateTempFileMap.get(date) + "_aggregate";
+    }
+
+    private String getOutputDir(Map<String, String> dateTempFileMap, String date) {
+        return dateTempFileMap.get(date) + "_output";
+    }
+
+    private String getLocalAggrDir(String workflowDir) {
+        return workflowDir + "/aggregate";
     }
 
     private Table moveAggregateFiles(String workflowDir, ConsolidatePartitionConfig config, TransformStep step,
             TableSource tableSource, Table table) throws IOException {
         String targetTableName = TableSource.getFullTableName(config.getNamePrefix() + "_Aggregate",
                 step.getTargetVersion());
-        String localAggrDir = getLocalWorkflowDir(workflowDir);
+        String localAggrDir = getLocalAggrDir(workflowDir);
         HdfsUtils.moveGlobToDir(yarnConfiguration, localAggrDir + "/*.avro", workflowDir);
         HdfsUtils.rmdir(yarnConfiguration, localAggrDir);
         Table newTable = TableUtils.createTable(yarnConfiguration, targetTableName, workflowDir);
         table.setExtracts(newTable.getExtracts());
-        return table;
-    }
 
-    private String getLocalWorkflowDir(String workflowDir) {
-        return workflowDir + "/aggregate";
+        return table;
     }
 
     private void setTargetTemplate(TableSource tableSource, TransformStep newStep, String sourceName) {
@@ -242,7 +297,7 @@ public class ConsolidatePartitionTransformer extends
         newParameter.setEngineConfiguration(parameters.getEngineConfiguration());
 
         setTargetTemplate(tableSource, newStep, fullTableName);
-        String outputDir = dateTempFileMap.get(date) + "_output";
+        String outputDir = getOutputDir(dateTempFileMap, date);
         Table result = dataFlowService.executeDataFlow(newStep, "consolidateDataFlow", newParameter, outputDir);
         dateTableMap.put(date, result);
         dateTempFileMap.put(date, outputDir);
@@ -265,10 +320,10 @@ public class ConsolidatePartitionTransformer extends
         }
     }
 
-    private void writeDataBuffer(Schema schema, String date, Map<String, String> dateTempFileMap,
+    private void writeDataBuffer(Schema schema, String date, Map<String, String> dateFileMap,
             Map<String, List<GenericRecord>> dateRecordMap) throws IOException {
         List<GenericRecord> records = dateRecordMap.get(date);
-        String tempPath = dateTempFileMap.get(date);
+        String tempPath = dateFileMap.get(date);
         String fileName = tempPath + "/part-00000.avro";
         if (!HdfsUtils.fileExists(yarnConfiguration, fileName)) {
             AvroUtils.writeToHdfsFile(yarnConfiguration, schema, fileName, records);

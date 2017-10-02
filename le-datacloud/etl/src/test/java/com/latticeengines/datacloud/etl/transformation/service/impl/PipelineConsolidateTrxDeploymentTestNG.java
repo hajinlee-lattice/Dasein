@@ -212,7 +212,9 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private String getPartitionConfig() {
         ConsolidatePartitionConfig config = new ConsolidatePartitionConfig();
         config.setNamePrefix(TableRoleInCollection.ConsolidatedTransaction.name());
+        config.setAggrNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
         config.setTimeField("TransactionTime");
+        config.setTrxDateField("TransactionDate");
         config.setConsolidateDateConfig(getConsolidateDataConfig());
         config.setAggregateConfig(getAggregateConfig());
         return JsonUtils.serialize(config);

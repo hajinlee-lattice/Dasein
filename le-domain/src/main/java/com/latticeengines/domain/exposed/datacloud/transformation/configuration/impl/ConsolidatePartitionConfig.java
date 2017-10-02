@@ -6,9 +6,11 @@ public class ConsolidatePartitionConfig extends TransformerConfig {
 
     @JsonProperty("name_prefix")
     private String namePrefix;
+    private String aggrNamePrefix;
     private String consolidateDataConfig;
     private String aggregateConfig;
     private String timeField;
+    private String trxDateField;
 
     public String getNamePrefix() {
         return this.namePrefix;
@@ -16,6 +18,14 @@ public class ConsolidatePartitionConfig extends TransformerConfig {
 
     public void setNamePrefix(String namePrefix) {
         this.namePrefix = namePrefix;
+    }
+
+    public String getAggrNamePrefix() {
+        return aggrNamePrefix;
+    }
+
+    public void setAggrNamePrefix(String aggrNamePrefix) {
+        this.aggrNamePrefix = aggrNamePrefix;
     }
 
     public void setConsolidateDateConfig(String consolidateDataConfig) {
@@ -40,5 +50,13 @@ public class ConsolidatePartitionConfig extends TransformerConfig {
 
     public void setTimeField(String timeField) {
         this.timeField = timeField;
+    }
+
+    public void setTrxDateField(String trxDateField) {
+        this.trxDateField = trxDateField;
+    }
+
+    public String getTrxDateField() {
+        return trxDateField;
     }
 }
