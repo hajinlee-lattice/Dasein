@@ -123,7 +123,7 @@
                     </div>
                     <div class="dashboard-section-footer">
                         <span ng-if="vm.play.launchHistory.playLaunch && vm.play.launchHistory.playLaunch.updated">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.launchHistory.playLaunch.updated)}} <i class="fa fa-check"></i></span>
-                        <button class="launch button blue-button" ng-click="vm.launchPlay()" ng-disabled="vm.showLaunchSpinner || vm.invalid.length || vm.launchButton.state == 'Launching'">
+                        <button class="launch button blue-button" ng-click="vm.launchPlay()" ng-disabled="vm.showLaunchSpinner || vm.invalid.length || vm.launchButton.state == 'Launching' || vm.play.ratingEngine.status != 'ACTIVE'">
                             <span ng-if="vm.showLaunchSpinner"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
                             <span>{{vm.launchButton.label}}</span>
                         </button>

@@ -113,7 +113,7 @@
                             type="button"
                             class="button blue-button pull-right"
                             ng-if="!play.launchHistory.playLaunch && play.ratingEngine && !vm.tileStates[play.name].launching"
-                            ng-disabled="vm.lockLaunching"
+                            ng-disabled="vm.lockLaunching || play.ratingEngine.status != 'ACTIVE'"
                             ng-click="vm.launchPlay($event, play)">
                             Launch
                         </button>
