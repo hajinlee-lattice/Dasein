@@ -29,7 +29,7 @@
             left: 340px;
             right: 50px;
             height: 45px;
-            //pointer-events: none;
+            pointer-events: none;
             & > li {
                 @include flex-item(0 1 auto);
                 margin: 0 10px;
