@@ -39,7 +39,7 @@ angular
         .state('home.ratingsengine.ratingslist', {
             url: '/ratings',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Rating Engine'
             },
             resolve: {
@@ -64,7 +64,7 @@ angular
         .state('home.ratingsengine.creationhistory', {
             url: '/creationhistory',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Creation History'
             },
             views: {
@@ -78,7 +78,7 @@ angular
         .state('home.ratingsengine.ratingsenginetype', {
             url: '/ratingsenginetype',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Rating Engine Type'
             },
             views: {
@@ -95,7 +95,7 @@ angular
         .state('home.ratingsengine.dashboard', {
             url: '/dashboard/:rating_id',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Rating Engine'
             },
             resolve: {
@@ -199,7 +199,7 @@ angular
         .state('home.ratingsengine.wizard.segment', {
             url: '/segment',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Create Rating Engine',
                 section: 'wizard.ratingsengine_segment'
             },
@@ -232,7 +232,7 @@ angular
         .state('home.ratingsengine.wizard.segment.attributes', {
             url: '/attributes',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Create Ratings Engine',
                 section: 'wizard.ratingsengine_attributes',
                 gotoNonemptyCategory: true
@@ -333,7 +333,7 @@ angular
         .state('home.ratingsengine.wizard.segment.attributes.rules', {
             url: '/rules',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Create Rating Engine'
             },
             resolve: {
@@ -367,7 +367,7 @@ angular
         .state('home.ratingsengine.wizard.segment.attributes.rules.summary', {
             url: '/summary',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Create Rating Engine',
             },
             resolve: {
