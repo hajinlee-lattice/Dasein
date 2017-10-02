@@ -43,6 +43,7 @@ public final class DataCloudConstants {
     public static final String STATS_ATTR_BKTS = "BktCounts";
     public static final String STATS_ATTR_ALGO = PROFILE_ATTR_BKTALGO;
 
+    public static final String TRANSFORMER_AM_DECODER = "AMDecoder";
     public static final String TRANSFORMER_AM_ENRICHER = "AMAttrEnricher";
     public static final String TRANSFORMER_PROFILER = "SourceProfiler";
     public static final String TRANSFORMER_BUCKETER = "sourceBucketer";
