@@ -141,7 +141,11 @@
                     </span>
                 </span>
 
-                <button class="button blue-button" ng-click="vm.setBucket($event)">SET</button>
+                <button class="button white-button unset-button" 
+                        ng-if="vm.root.mode == 'rules'"
+                        ng-click="vm.setBucket($event, true)">UNSET</button>
+                <button class="button blue-button set-button" 
+                        ng-click="vm.setBucket($event)">SET</button>
             </span>
 
             <span class="item-bucket-data" ng-if="!vm.editing && !vm.unused">
@@ -186,7 +190,7 @@
 </div>
 
 <ul ng-if="vm.tree.logicalRestriction && !vm.tree.collapsed">
-    <li     ng-repeat="item in vm.tree.logicalRestriction.restrictions | orderBy: vm.buckRestrictionSortBy()"
+    <li     ng-repeat="item in vm.tree.logicalRestriction.restrictions"
             ng-class="{
                 'query-section-item-box-subtree':item.logicalRestriction,
                 'item-unused': item.bucketRestriction && !item.bucketRestriction.bkt.Id

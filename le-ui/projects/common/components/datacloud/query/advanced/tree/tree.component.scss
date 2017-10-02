@@ -159,7 +159,7 @@ div.advanced-query-builder {
 
             .query-section-item-unused {
                 margin-top: 0.85em;
-                margin-right: 7em;
+                margin-right: 7.75em;
                 color: red;
                 font-weight: bold;
             }
@@ -216,7 +216,8 @@ div.advanced-query-builder {
                         }
                     }
 
-                    button.blue-button {
+                    button.unset-button,
+                    button.set-button {
                         float: right;
                         margin: -0.25em 0 0 1em;
                         padding: 0.3em 0.8em .2em;
@@ -283,11 +284,15 @@ div.advanced-query-builder {
             
 
             &.item-unused {
-                border-color: #bbb;
+                border-bottom: none;
                 
                 .item-operator-and,
                 .item-operator-or {
-                    color: #bbb;
+                    display: none;
+                }
+
+                .query-section-item-label {
+                    display: none;
                 }
                 
                 .query-section-item-unused {

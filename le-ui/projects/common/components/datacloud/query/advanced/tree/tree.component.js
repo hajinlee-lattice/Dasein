@@ -10,7 +10,7 @@ angular
         },
         templateUrl: '/components/datacloud/query/advanced/tree/tree.component.html',
         controllerAs: 'vm',
-        controller: function ($scope, DataCloudStore, QueryStore) {
+        controller: function ($scope, $timeout, DataCloudStore, QueryStore) {
             var vm = this;
 
             angular.extend(vm, {
@@ -26,7 +26,8 @@ angular
                 operation: '',
                 unused: false,
                 uniqueId: $scope.tree.$$hashKey,
-                editMode: 'Custom'
+                editMode: 'Custom',
+                mouseDownTimer: false
             });
 
             vm.init = function (type, value) {
@@ -161,25 +162,31 @@ angular
                 }
             }
 
-            vm.setBucket = function($event) {
-                if (vm.editing) {
-                    vm.editing = false;
+            vm.setBucket = function($event, unset) {
+                vm.editing = false;
+                
+                if (unset) {
+                    vm.unused = true;
+                    vm.tree.bucketRestriction.bkt = {};
+                } else {
                     vm.unused = false;
-                    
-                    vm.root.updateCount();
-                    vm.updateBucketCount();
-
-                    $event.preventDefault();
-                    $event.stopPropagation();
                 }
+
+                vm.root.updateCount();
+                vm.updateBucketCount();
+
+                $event.preventDefault();
+                $event.stopPropagation();
             }
             
             vm.editBucket = function() {
-                if (!vm.editing && (vm.type == 'Boolean' || vm.type == 'Numerical')) {
+                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical')) {
                     if (vm.unused) {
                         vm.unused = false;
+
                         vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
                         vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
+
                         vm.label = vm.item.topbkt.Lbl;
                         vm.range = vm.item.topbkt.Rng;
 
@@ -212,8 +219,12 @@ angular
             }
 
             vm.mouseDown = function() {
-                vm.root.draggedItem = vm;
-                //console.log('mouseDown', vm);
+                vm.root.draggedItem = null;
+
+                vm.mouseDownTimer = $timeout(function() {
+                    vm.root.draggedItem = vm;
+                    vm.mouseDownTimer = false;
+                }, 333);
             }
 
             vm.mouseUp = function() {
@@ -232,6 +243,9 @@ angular
 
                 vm.root.draggedItem = null;
                 vm.root.droppedItem = null;
+
+                $timeout.cancel(vm.mouseDownTimer);
+                vm.mouseDownTimer = false;
             }
 
             vm.mouseOver = function() {
@@ -267,7 +281,7 @@ angular
             }
 
             this.clickEditMode = function(value) {
-                vm.editMode = value;                
+                vm.editMode = value;
             }
 
             this.clickCollapsed = function() {

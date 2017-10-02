@@ -301,6 +301,7 @@ angular
                 // end duplicates
                 RatingsEngineModels: function($q, $stateParams, DataCloudStore, RatingsEngineStore) {
                     var deferred = $q.defer();
+                    
                     DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
                         var model = (data && data[0] ? data[0] : {});
 
@@ -312,6 +313,7 @@ angular
 
                         deferred.resolve(model);
                     });
+
                     return deferred.promise;
                 }
             },
