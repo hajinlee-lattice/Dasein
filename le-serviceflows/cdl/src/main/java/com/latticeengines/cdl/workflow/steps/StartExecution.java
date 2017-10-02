@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataBaseConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -33,10 +32,6 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
     public void execute() {
         boolean isActive = Status.Active.equals(configuration.getInitialDataFeedStatus());
         putObjectInContext(IS_ACTIVE, isActive);
-        ExportDataToRedshiftConfiguration exportDataToRedshiftConfig = getConfigurationFromJobParameters(
-                ExportDataToRedshiftConfiguration.class);
-        exportDataToRedshiftConfig.setSkipStep(!isActive);
-        putObjectInContext(ExportDataToRedshiftConfiguration.class.getName(), exportDataToRedshiftConfig);
 
         DataFeedExecution execution = dataFeedProxy
                 .updateExecutionWorkflowId(configuration.getCustomerSpace().toString(), jobId);
