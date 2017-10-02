@@ -1,7 +1,10 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -19,6 +25,12 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.RatingEngineDao;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
@@ -143,6 +155,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             ruleBasedModel.setRatingRule(new RatingRule());
             ruleBasedModel.setCreated(new Date());
             ruleBasedModel.setUpdated(new Date());
+            List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
+            ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
             ratingEngine.addRatingModel(ruleBasedModel);
             ratingEngineDao.create(ratingEngine);
             break;
@@ -150,6 +164,39 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             break;
         default:
             break;
+        }
+    }
+
+    @VisibleForTesting
+    List<String> findUsedAttributes(MetadataSegment segment) {
+        Set<String> usedAttributesSetInSegment = new HashSet<>();
+
+        if (segment != null) {
+            traverseAndRastriction(usedAttributesSetInSegment, segment.getAccountRestriction());
+            traverseAndRastriction(usedAttributesSetInSegment, segment.getContactRestriction());
+        }
+
+        return new ArrayList<>(usedAttributesSetInSegment);
+    }
+
+    private void traverseAndRastriction(Set<String> usedAttributesInSegment, Restriction restriction) {
+        if (restriction != null) {
+            DepthFirstSearch search = new DepthFirstSearch();
+            search.run(restriction, (object, ctx) -> {
+                GraphNode node = (GraphNode) object;
+                if (node instanceof ConcreteRestriction) {
+                    ConcreteRestriction cr = (ConcreteRestriction) node;
+                    Lookup lookup = cr.getLhs();
+                    if (lookup instanceof AttributeLookup) {
+                        usedAttributesInSegment.add(((AttributeLookup) lookup).getAttribute());
+                    } else if (lookup instanceof SubQueryAttrLookup) {
+                        usedAttributesInSegment.add(((SubQueryAttrLookup) lookup).getAttribute());
+                    }
+                } else if (node instanceof BucketRestriction) {
+                    BucketRestriction bucket = (BucketRestriction) node;
+                    usedAttributesInSegment.add(bucket.getAttr().getAttribute());
+                }
+            });
         }
     }
 

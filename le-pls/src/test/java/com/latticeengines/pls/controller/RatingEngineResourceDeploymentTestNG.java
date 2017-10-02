@@ -22,7 +22,9 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.pls.entitymanager.impl.RatingEngineEntityMgrImplTestNG;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -60,7 +62,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         MultiTenantContext.setTenant(mainTestTenant);
 
         segment = new MetadataSegment();
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
+        Restriction accountRestriction = RatingEngineEntityMgrImplTestNG.getTestRestriction();
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         segment.setContactFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
@@ -80,16 +83,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Test(groups = "deployment")
     public void testCreate() {
-        RatingEngine createdRe1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines", re1,
-                RatingEngine.class);
-
-        RatingEngine createdRe2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines", re2,
-                RatingEngine.class);
-
-        Assert.assertNotNull(createdRe1);
-        Assert.assertNotNull(createdRe2);
-        re1.setId(createdRe1.getId());
-        re2.setId(createdRe2.getId());
+        testCreate(re1);
+        testCreate(re2);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
@@ -239,6 +234,20 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR2));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR3));
 
+    }
+
+    private void testCreate(RatingEngine re) {
+        RatingEngine createdRe = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines", re,
+                RatingEngine.class);
+        Assert.assertNotNull(createdRe);
+        re.setId(createdRe.getId());
+        Assert.assertNotNull(createdRe.getRatingModels());
+        Assert.assertNotNull(new ArrayList<>(createdRe.getRatingModels()));
+
+        RuleBasedModel ruModel = (RuleBasedModel) new ArrayList<>(createdRe.getRatingModels()).get(0);
+        Assert.assertNotNull(ruModel);
+        Assert.assertNotNull(ruModel.getSelectedAttributes());
+        Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
     }
 
     private List<String> generateSeletedAttributes() {

@@ -1,6 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
@@ -37,6 +39,8 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String LDC_NAME = "LDC_Name";
+    private static final String LE_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
 
     @Autowired
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -194,4 +198,86 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     }
 
+    @Test(groups = "functional")
+    public void testFindUsedAttributes() {
+        RatingEngineEntityMgrImpl r = new RatingEngineEntityMgrImpl();
+        Restriction restr = getTestRestriction();
+        MetadataSegment segment = new MetadataSegment();
+        segment.setAccountRestriction(restr);
+        segment.setContactRestriction(restr);
+        List<String> usedAttributesInSegment = r.findUsedAttributes(segment);
+        Assert.assertNotNull(usedAttributesInSegment);
+        Set<String> expectedResult = new HashSet<>();
+        expectedResult.add(LE_IS_PRIMARY_DOMAIN);
+        expectedResult.add(LDC_NAME);
+        Assert.assertEquals(usedAttributesInSegment.size(), expectedResult.size());
+
+        for (String attr : usedAttributesInSegment) {
+            Assert.assertTrue(expectedResult.contains(attr));
+        }
+    }
+
+    public static Restriction getTestRestriction() {
+        return JsonUtils.deserialize(TEST_RESTRICTION, Restriction.class);
+    }
+
+    private static String TEST_RESTRICTION = "{ " //
+            + "  \"logicalRestriction\": { " //
+            + "    \"operator\": \"AND\", " //
+            + "    \"restrictions\": [ " //
+            + "      { " //
+            + "        \"logicalRestriction\": { " //
+            + "          \"operator\": \"AND\", " //
+            + "          \"restrictions\": [ " //
+            + "            { " //
+            + "              \"logicalRestriction\": { " //
+            + "                \"operator\": \"AND\", " //
+            + "                \"restrictions\": [ " //
+            + "                  { " //
+            + "                    \"bucketRestriction\": { " //
+            + "                      \"bkt\": { " //
+            + "                        \"Lbl\": \"Yes\", " //
+            + "                        \"Cnt\": 2006, " //
+            + "                        \"Id\": 1 " //
+            + "                      }, " //
+            + "                      \"attr\": \"Account." + LE_IS_PRIMARY_DOMAIN + "\" " //
+            + "                    } " //
+            + "                  } " //
+            + "                ] " //
+            + "              } " //
+            + "            }, " //
+            + "            { " //
+            + "              \"bucketRestriction\": { " //
+            + "                \"bkt\": { " //
+            + "                  \"Lbl\": \"Yes\", " //
+            + "                  \"Cnt\": 2006, " //
+            + "                  \"Id\": 1 " //
+            + "                }, " //
+            + "                \"attr\": \"Account." + LE_IS_PRIMARY_DOMAIN + "\" " //
+            + "              } " //
+            + "            } " //
+            + "          ] " //
+            + "        } " //
+            + "      }, " //
+            + "      { " //
+            + "        \"concreteRestriction\": { " //
+            + "          \"negate\": false, " //
+            + "          \"lhs\": { " //
+            + "            \"attribute\": { " //
+            + "              \"entity\": \"Account\", " //
+            + "              \"attribute\": \"" + LDC_NAME + "\" " //
+            + "            } " //
+            + "          }, " //
+            + "          \"relation\": \"IN_RANGE\", " //
+            + "          \"rhs\": { " //
+            + "            \"range\": { " //
+            + "              \"min\": \"A\", " //
+            + "              \"max\": \"O\" " //
+            + "            } " //
+            + "          } " //
+            + "        } " //
+            + "      } " //
+            + "    ] " //
+            + "  } " //
+            + "} ";
 }
