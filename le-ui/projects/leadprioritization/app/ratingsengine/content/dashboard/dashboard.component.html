@@ -86,8 +86,8 @@
                     </div>
                     <div class="dashboard-section-content">
                         <p>
-                            Created on: <em>{{vm.rating.segment.created|date}}</em><br />
-                            Description: <em>{{vm.rating.segment.description}}</em>
+                            <span ng-if="vm.rating.segment.created">Created on: <em>{{vm.rating.segment.created|date}}</em></span><br />
+                            <span ng-if="vm.rating.segment.description">Description: <em>{{vm.rating.segment.description}}</em></span>
                         </p>
                     </div>
                     <!--
