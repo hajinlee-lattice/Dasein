@@ -16,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -152,7 +153,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("a").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("D").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setRatingModels(Collections.singletonList(model));
@@ -169,8 +170,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
             Assert.assertTrue(Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.C.getName()).contains(score));
         });
 
-        frontEndQuery.setLookups(Arrays.asList(new AttributeLookup(BusinessEntity.Account, "LDC_City"),
-                new AttributeLookup(BusinessEntity.Account, "LDC_Country"),
+        frontEndQuery.setLookups(Arrays.asList(new AttributeLookup(BusinessEntity.Account, "AccountId"),
                 new AttributeLookup(BusinessEntity.Rating, model.getId())));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         dataPage = entityQueryService.getData(frontEndQuery);
@@ -181,6 +181,22 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
             String score = (String) row.get(model.getId());
             Assert.assertNotNull(score);
             Assert.assertTrue(Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.C.getName()).contains(score));
+        });
+
+        // only get score = A
+        Restriction scoreIsA = Restriction.builder().let(BusinessEntity.Rating, model.getId())
+                .eq(RuleBucketName.A.getName()).build();
+        Restriction restriction2 = Restriction.builder().and(restriction, scoreIsA).build();
+        frontEndRestriction.setRestriction(restriction2);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+
+        dataPage = entityQueryService.getData(frontEndQuery);
+        Assert.assertNotNull(dataPage);
+        data = dataPage.getData();
+        data.forEach(row -> {
+            Assert.assertTrue(row.containsKey(model.getId()));
+            String score = (String) row.get(model.getId());
+            Assert.assertEquals(score, RuleBucketName.A.getName());
         });
     }
 

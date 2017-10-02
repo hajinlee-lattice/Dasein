@@ -36,7 +36,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         Lookup lhs = restriction.getLhs();
         Lookup rhs = restriction.getRhs();
 
-        if (isBucket(restriction)) {
+        if (isBitEncoded(restriction)) {
             AttributeLookup attrLookup = (AttributeLookup) lhs;
             if (restriction.getRelation().equals(ComparisonType.IS_NULL)) {
                 // is null means bktId = 0
@@ -142,10 +142,13 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         return lookup instanceof ValueLookup && ((ValueLookup) lookup).getValue() == null;
     }
 
-    private boolean isBucket(ConcreteRestriction restriction) {
+    private boolean isBitEncoded(ConcreteRestriction restriction) {
         Lookup lhs = restriction.getLhs();
         if (lhs instanceof AttributeLookup) {
             AttributeLookup attrLookup = (AttributeLookup) lhs;
+            if (attrLookup.getEntity() == null) {
+                return false;
+            }
             ColumnMetadata cm = findAttributeMetadata(attrLookup);
             if (cm == null) {
                 throw new IllegalArgumentException(

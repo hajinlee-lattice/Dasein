@@ -127,11 +127,9 @@ public class QueryProcessor {
                     .map(e -> e.join(target)) //
                     .filter(Objects::nonNull) //
                     .findAny() //
-                    .orElseThrow(() -> {
-                        return new QueryEvaluationException(
-                                "Broken Connectivity: Cannot find a connected path from entity "
-                                        + join.getSourceEntity() + " to entity " + target + ".");
-                    });
+                    .orElseThrow(() -> new QueryEvaluationException(
+                            "Broken Connectivity: Cannot find a connected path from entity "
+                                    + join.getSourceEntity() + " to entity " + target + "."));
             // JOIN T1
             EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, target);
             sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));

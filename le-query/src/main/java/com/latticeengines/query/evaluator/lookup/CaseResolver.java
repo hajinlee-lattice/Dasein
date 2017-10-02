@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator.lookup;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -27,7 +28,7 @@ public class CaseResolver extends BaseLookupResolver<CaseLookup> implements Look
     @SuppressWarnings("unchecked")
     @Override
     public List<ComparableExpression<? extends Comparable>> resolveForCompare(CaseLookup lookup) {
-        throw new UnsupportedOperationException("Using case lookup in where clause is not supported.");
+        return Collections.singletonList((StringExpression) resolveForSelect(lookup, false));
     }
 
     @SuppressWarnings("unchecked")

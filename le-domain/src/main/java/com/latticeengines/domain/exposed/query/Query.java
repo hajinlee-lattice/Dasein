@@ -191,13 +191,19 @@ public class Query implements GraphNode {
             GraphNode node = (GraphNode) object;
             if (node instanceof EntityLookup) {
                 EntityLookup unityLookup = (EntityLookup) node;
-                entitiesForJoin.add(unityLookup.getEntity());
+                if (unityLookup.getEntity() != null) {
+                    entitiesForJoin.add(unityLookup.getEntity());
+                }
             } else if (node instanceof AttributeLookup) {
                 AttributeLookup lookup = (AttributeLookup) node;
-                entitiesForJoin.add(lookup.getEntity());
+                if (lookup.getEntity() != null) {
+                    entitiesForJoin.add(lookup.getEntity());
+                }
             } else if (node instanceof ExistsRestriction) {
                 ExistsRestriction exists = (ExistsRestriction) node;
-                entitiesForExists.add(exists.getEntity());
+                if (exists.getEntity() != null) {
+                    entitiesForExists.add(exists.getEntity());
+                }
             }
         });
     }

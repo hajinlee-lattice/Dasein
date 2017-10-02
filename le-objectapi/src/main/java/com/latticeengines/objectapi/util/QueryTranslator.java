@@ -1,13 +1,16 @@
 package com.latticeengines.objectapi.util;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -16,6 +19,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -39,12 +43,14 @@ public class QueryTranslator {
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
+        Map<String, Lookup> ruleBasedModels = ruleBasedModels(mainEntity, frontEndQuery.getRatingModels());
+
         Restriction restriction = translateFrontEndRestriction(mainEntity,
-                getEntityFrontEndRestriction(mainEntity, frontEndQuery));
+                getEntityFrontEndRestriction(mainEntity, frontEndQuery), ruleBasedModels);
 
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
 
-        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction);
+        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, ruleBasedModels);
 
         if (frontEndQuery.getPageFilter() == null) {
             frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
@@ -125,7 +131,7 @@ public class QueryTranslator {
     }
 
     private static Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-            Restriction outerRestriction) {
+            Restriction outerRestriction, Map<String, Lookup> ruleBasedModels) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
         case Contact:
@@ -138,7 +144,8 @@ public class QueryTranslator {
             break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
-        Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction);
+        Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction,
+                ruleBasedModels);
         return addExistsRestriction(outerRestriction, innerEntity, innerRestriction);
     }
 
@@ -148,7 +155,7 @@ public class QueryTranslator {
     }
 
     private static Restriction translateFrontEndRestriction(BusinessEntity entity,
-            FrontEndRestriction frontEndRestriction) {
+            FrontEndRestriction frontEndRestriction, Map<String, Lookup> ruleBasedModels) {
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return null;
         }
@@ -183,7 +190,16 @@ public class QueryTranslator {
         } else {
             translated = restriction;
         }
-        return RestrictionOptimizer.optimize(translated);
+        Restriction optimized = RestrictionOptimizer.optimize(translated);
+
+        DepthFirstSearch dfs = new DepthFirstSearch();
+        dfs.run(optimized, (obj, ctx) -> {
+            if (obj instanceof ConcreteRestriction) {
+                translateRuleBasedRating((Restriction) obj, ruleBasedModels);
+            }
+        });
+
+        return optimized;
     }
 
     private static Sort translateFrontEndSort(FrontEndSort frontEndSort) {
@@ -191,6 +207,26 @@ public class QueryTranslator {
             return new Sort(frontEndSort.getAttributes(), Boolean.TRUE.equals(frontEndSort.getDescending()));
         } else {
             return null;
+        }
+    }
+
+    private static void translateRuleBasedRating(Restriction restriction, Map<String, Lookup> ruleBasedModels) {
+        if (ruleBasedModels != null && !ruleBasedModels.isEmpty()) {
+            if (restriction instanceof ConcreteRestriction
+                    && ((ConcreteRestriction) restriction).getLhs() instanceof AttributeLookup && BusinessEntity.Rating
+                    .equals(((AttributeLookup) ((ConcreteRestriction) restriction).getLhs()).getEntity())) {
+                AttributeLookup attributeLookup = (AttributeLookup) ((ConcreteRestriction) restriction).getLhs();
+                String modelId = attributeLookup.getAttribute();
+                log.info("Translating a concrete restriction involving rule based rating engine "
+                        + modelId);
+                if (ruleBasedModels.containsKey(modelId)) {
+                    Lookup ruleLookup = ruleBasedModels.get(modelId);
+                    ((ConcreteRestriction) restriction).setLhs(ruleLookup);
+                } else {
+                    // TODO: handle analytic models
+                    log.warn("Cannot find the definition of rule based model " + modelId + ".");
+                }
+            }
         }
     }
 
@@ -210,11 +246,15 @@ public class QueryTranslator {
         ratingRule.getBucketToRuleMap().forEach((key, val) -> {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
-            Restriction accountRestriction = translateFrontEndRestriction(BusinessEntity.Account, frontEndRestriction);
+            // do not support nested ratings for now
+            Restriction accountRestriction = translateFrontEndRestriction(BusinessEntity.Account, frontEndRestriction,
+                    null);
 
             frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
-            Restriction contactRestriction = translateFrontEndRestriction(BusinessEntity.Contact, frontEndRestriction);
+            // do not support nested ratings for now
+            Restriction contactRestriction = translateFrontEndRestriction(BusinessEntity.Contact, frontEndRestriction,
+                    null);
 
             BusinessEntity innerEntity;
             Restriction outerRestriction, innerRestriction;
@@ -233,8 +273,7 @@ public class QueryTranslator {
             if (forScoreCount) {
                 cases.put(String.valueOf(idx.getAndIncrement()), joinRestrictions(outerRestriction, innerRestriction));
             } else {
-                cases.put(key,
-                        addExistsRestriction(outerRestriction, innerEntity, innerRestriction));
+                cases.put(key, addExistsRestriction(outerRestriction, innerEntity, innerRestriction));
             }
         });
         if (forScoreCount) {
@@ -245,6 +284,22 @@ public class QueryTranslator {
         } else {
             return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
         }
+    }
+
+    private static Map<String, Lookup> ruleBasedModels(BusinessEntity mainEntity, List<RatingModel> models) {
+        Map<String, Lookup> lookupMap = new ConcurrentHashMap<>();
+        if (models != null) {
+            BusinessEntity entity = mainEntity != null ? mainEntity : BusinessEntity.Account;
+            models.forEach(model -> {
+                if (model instanceof RuleBasedModel) {
+                    RatingRule ratingRule = ((RuleBasedModel) model).getRatingRule();
+                    String modelId = model.getId();
+                    Lookup lookup = translateRatingRule(entity, ratingRule, modelId, false);
+                    lookupMap.put(modelId, lookup);
+                }
+            });
+        }
+        return lookupMap;
     }
 
     private static Lookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup, List<RatingModel> models) {

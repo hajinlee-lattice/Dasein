@@ -66,7 +66,7 @@ public class AttributeLookup extends Lookup {
 
     @Override
     public String toString() {
-        return entity.name() + "." + attribute;
+        return entity != null ? entity.name() + "." + attribute : attribute;
     }
 
     public static AttributeLookup fromString(String str) {
