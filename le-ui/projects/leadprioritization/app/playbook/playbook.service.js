@@ -107,9 +107,9 @@ angular.module('lp.playbook')
         return this.savedTalkingPoints;
     }
 
-    this.getRatings = function() {
+    this.getRatings = function(active) {
         var deferred = $q.defer();
-        PlaybookWizardService.getRatings().then(function(data) {
+        PlaybookWizardService.getRatings(active).then(function(data) {
             deferred.resolve(data);
         });
         return deferred.promise;
@@ -417,11 +417,11 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.getRatings = function() {
+    this.getRatings = function(active) {
         var deferred = $q.defer();
         $http({
             method: 'GET',
-            url: this.host + '/ratingengines',
+            url: this.host + '/ratingengines' + (active ? '?status=ACTIVE' : ''),
             headers: {
                 'Accept': 'application/json'
             }

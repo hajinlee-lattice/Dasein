@@ -172,10 +172,10 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
     
-    this.getRatings = function() {
+    this.getRatings = function(active) {
         var deferred = $q.defer();
 
-        RatingsEngineService.getRatings().then(function(data) {
+        RatingsEngineService.getRatings(active).then(function(data) {
             RatingsEngineStore.ratings = data;
             deferred.resolve(data);
         });
@@ -334,10 +334,10 @@ angular.module('lp.ratingsengine')
     }
 })
 .service('RatingsEngineService', function($q, $http, $state) {
-    this.getRatings = function() {
+    this.getRatings = function(active) {
         var deferred = $q.defer(),
             result,
-            url = '/pls/ratingengines';
+            url = '/pls/ratingengines' + (active ? '?status=ACTIVE' : '');
 
         $http({
             method: 'GET',

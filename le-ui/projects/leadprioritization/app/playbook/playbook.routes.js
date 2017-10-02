@@ -450,7 +450,7 @@ angular
             url: '/rating',
             resolve: {
                 Ratings: function(PlaybookWizardStore) {
-                    return PlaybookWizardStore.getRatings();
+                    return PlaybookWizardStore.getRatings(true);
                 }
             },
             views: {
