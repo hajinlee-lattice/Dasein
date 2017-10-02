@@ -68,6 +68,8 @@ public enum InterfaceName {
 
     // Data Cloud
     LatticeAccountId, // Id in AccountMaster
-    LDC_Name
+    LDC_Name,
 
+    // Internal
+    __Composite_Key__ // primary key for internal use
 }

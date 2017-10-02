@@ -9,11 +9,12 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends ConfigurableFlowBase<T> {
-    private static final String COMPOSITE_KEY = "__Composite_Key__";
+    protected static final String COMPOSITE_KEY = InterfaceName.__Composite_Key__.name();
     public static String CREATE_DATE = "CREATION_DATE";
     public static String UPDATE_DATE = "UPDATE_DATE";
 
