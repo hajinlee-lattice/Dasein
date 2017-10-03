@@ -16,7 +16,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -183,10 +182,11 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
             Assert.assertTrue(Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.C.getName()).contains(score));
         });
 
-        // only get score = A
-        Restriction scoreIsA = Restriction.builder().let(BusinessEntity.Rating, model.getId())
-                .eq(RuleBucketName.A.getName()).build();
-        Restriction restriction2 = Restriction.builder().and(restriction, scoreIsA).build();
+        // only get scores for A, A- and B
+        Restriction selectedScores = Restriction.builder().let(BusinessEntity.Rating, model.getId()).inCollection(
+                Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.A_MINUS.getName(), RuleBucketName.B.getName()))
+                .build();
+        Restriction restriction2 = Restriction.builder().and(restriction, selectedScores).build();
         frontEndRestriction.setRestriction(restriction2);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 

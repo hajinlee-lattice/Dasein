@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -172,6 +173,11 @@ public class FrontEndQuery {
         frontEndQuery.setContactRestriction(contactRestriction);
 
         return frontEndQuery;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

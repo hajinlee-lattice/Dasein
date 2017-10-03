@@ -97,12 +97,14 @@ public class RatingEngineResource {
             @RequestParam(value = "descending", required = false) Boolean descending, //
             @RequestParam(value = "lookupFieldNames", required = false) List<String> lookupFieldNames, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
-            @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch) {
+            @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
         descending = descending == null ? false : descending;
         restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
         return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
-                descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch);
+                descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
+                selectedBuckets);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")

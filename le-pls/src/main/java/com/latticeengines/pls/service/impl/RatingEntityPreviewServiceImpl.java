@@ -12,17 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
@@ -62,7 +62,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
-            boolean restrictNotNullSalesforceId, String freeFormTextSearch) {
+            boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
         Tenant tenent = MultiTenantContext.getTenant();
 
         FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
@@ -76,10 +76,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         setLookups(entityType, entityFrontEndQuery, model, lookupFieldNames);
 
-        MetadataSegment segment = ratingEngine.getSegment();
-
-        entityFrontEndQuery.setAccountRestriction(new FrontEndRestriction(segment.getAccountRestriction()));
-        entityFrontEndQuery.setContactRestriction(new FrontEndRestriction(segment.getContactRestriction()));
+        setSelectedBuckets(entityFrontEndQuery, selectedBuckets, model);
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
@@ -94,6 +91,20 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         log.info(String.format("Got # %d elements", dataPage.getData().size()));
         return dataPage;
 
+    }
+
+    @VisibleForTesting
+    void setSelectedBuckets(FrontEndQuery entityFrontEndQuery, List<String> selectedBuckets, RatingModel model) {
+        if (CollectionUtils.isNotEmpty(selectedBuckets)) {
+            log.info(String.format("Only get data for the buckets selected: %s",
+                    Arrays.toString(selectedBuckets.toArray())));
+            Restriction originalRestriction = entityFrontEndQuery.getAccountRestriction().getRestriction();
+            Restriction selectedBucketRestriction = Restriction.builder().let(BusinessEntity.Rating, model.getId())
+                    .inCollection(Arrays.asList(selectedBuckets.toArray())).build();
+            Restriction compoundRestriction = Restriction.builder().and(originalRestriction, selectedBucketRestriction)
+                    .build();
+            entityFrontEndQuery.getAccountRestriction().setRestriction(compoundRestriction);
+        }
     }
 
     private void setBasicInfo(RatingEngine ratingEngine, BusinessEntity entityType, FrontEndQuery entityFrontEndQuery,
