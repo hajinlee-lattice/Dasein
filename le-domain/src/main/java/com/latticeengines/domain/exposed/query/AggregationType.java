@@ -2,5 +2,7 @@ package com.latticeengines.domain.exposed.query;
 
 public enum AggregationType {
     SUM,
-    AVG
+    AVG,
+    EACH,
+    AT_LEAST_ONCE
 }
