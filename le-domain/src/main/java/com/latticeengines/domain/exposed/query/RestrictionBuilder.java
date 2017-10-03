@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 
 public class RestrictionBuilder {
 
@@ -45,7 +46,8 @@ public class RestrictionBuilder {
             complete = false;
             return this;
         } else {
-            throw new UnsupportedOperationException("Does not support lookup of type " + lookup.getClass().getSimpleName());
+            throw new UnsupportedOperationException(
+                    "Does not support lookup of type " + lookup.getClass().getSimpleName());
         }
     }
 
@@ -251,9 +253,18 @@ public class RestrictionBuilder {
         return this;
     }
 
-    public RestrictionBuilder before(Object value) {
+    public RestrictionBuilder before(Period period, Object value) {
         operator = ComparisonType.BEFORE;
-        restriction = new TimeFilter(attrLookup, operator, Arrays.asList(new Object[] { value }));
+        restriction = new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
+                Arrays.asList(new Object[] { value }));
+        complete = true;
+        return this;
+    }
+
+    public RestrictionBuilder inCurrentPeriod(Period period) {
+        operator = ComparisonType.IN_CURRENT_PERIOD;
+        restriction = new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
+                Arrays.asList(new Object[] { 0 }));
         complete = true;
         return this;
     }

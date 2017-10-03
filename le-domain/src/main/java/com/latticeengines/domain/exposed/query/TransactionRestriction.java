@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.Collections;
+
 import org.apache.commons.lang.RandomStringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -146,13 +148,12 @@ public class TransactionRestriction extends Restriction {
     }
 
     private Restriction filterByTime(Restriction restriction) {
-        this.getTimeFilter()
-                .setLhs(new AttributeLookup(BusinessEntity.Transaction, InterfaceName.TransactionDate.name()));
-        if (ComparisonType.EVER == getTimeFilter().getRelation()) {
-            return Restriction.builder().and(restriction, this.getTimeFilter()).build();
-        } else {
-            throw new UnsupportedOperationException("Time restriction is not supported yet");
+        if (timeFilter == null) {
+            timeFilter = new TimeFilter(ComparisonType.EVER, null, Collections.emptyList());
         }
+        timeFilter.setLhs(new DateAttributeLookup(BusinessEntity.Transaction, InterfaceName.TransactionDate.name(),
+                timeFilter.getPeriod()));
+        return Restriction.builder().and(restriction, this.getTimeFilter()).build();
     }
 
 }

@@ -8,6 +8,8 @@ import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.CollectionLookup;
+import com.latticeengines.domain.exposed.query.DateAttributeLookup;
+import com.latticeengines.domain.exposed.query.DateValueLookup;
 import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
@@ -42,6 +44,10 @@ public final class LookupResolverFactory {
             resolvers.put(lookupType.getSimpleName(), new AttributeResolver(attrRepo));
             return;
         }
+        if (lookupType.isAssignableFrom(DateAttributeLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new DateAttributeResolver(attrRepo));
+            return;
+        }
         if (lookupType.isAssignableFrom(SubQueryAttrLookup.class)) {
             resolvers.put(lookupType.getSimpleName(), new SubQueryAttrResolver(attrRepo, queryProcessor));
             return;
@@ -62,13 +68,16 @@ public final class LookupResolverFactory {
             resolvers.put(lookupType.getSimpleName(), new ValueResolver(attrRepo));
             return;
         }
+        if (lookupType.isAssignableFrom(DateValueLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new DateValueResolver(attrRepo));
+            return;
+        }
         if (lookupType.isAssignableFrom(AggregateLookup.class)) {
             resolvers.put(lookupType.getSimpleName(), new AggregateResolver(attrRepo, this));
             return;
         }
         if (lookupType.isAssignableFrom(CaseLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(),
-                    new CaseResolver(attrRepo, restrictionResolverFactory));
+            resolvers.put(lookupType.getSimpleName(), new CaseResolver(attrRepo, restrictionResolverFactory));
             return;
         }
         throw new QueryEvaluationException("Do not support lookup of type " + lookupType + " yet.");

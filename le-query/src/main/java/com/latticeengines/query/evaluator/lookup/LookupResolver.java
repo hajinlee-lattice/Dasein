@@ -25,7 +25,4 @@ public interface LookupResolver<T extends Lookup> {
         throw new UnsupportedOperationException("Resolve for select is not supported yet");
     }
 
-    default List<ComparableExpression<? extends Comparable>> resolveForTimeCompare(T lookup) {
-        throw new UnsupportedOperationException("Resolve for compare is not supported yet");
-    }
 }

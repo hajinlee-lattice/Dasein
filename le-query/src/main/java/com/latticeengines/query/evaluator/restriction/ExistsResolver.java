@@ -38,10 +38,8 @@ public class ExistsResolver extends BaseRestrictionResolver<ExistsRestriction>
         // find one-to-many relationships pointing to tgt entity
         JoinSpecification join = joins.stream() //
                 .filter(j -> j.getDestinationEntity().equals(tgtEntity)) //
-                .findAny().orElse(null);
-        if (join ==  null) {
-            throw new QueryEvaluationException("Cannot find a proper join to construct exists clause for " + tgtEntity);
-        }
+                .findAny().orElseThrow(() -> new QueryEvaluationException(
+                        "Cannot find a proper join to construct exists clause for " + tgtEntity));
         BusinessEntity srcEntity = join.getSourceEntity();
         BusinessEntity.Relationship relationship = srcEntity.join(tgtEntity);
         List<Predicate> joinPredicates = QueryUtils.getJoinPredicates(relationship);
@@ -53,7 +51,7 @@ public class ExistsResolver extends BaseRestrictionResolver<ExistsRestriction>
             RestrictionResolver innerResolver = factory.getRestrictionResolver(innerRestriction.getClass());
             innerPredicate = innerResolver.resolve(innerRestriction);
         }
-        for (Predicate p: joinPredicates) {
+        for (Predicate p : joinPredicates) {
             if (innerPredicate == null) {
                 innerPredicate = Expressions.asBoolean(p);
             } else {

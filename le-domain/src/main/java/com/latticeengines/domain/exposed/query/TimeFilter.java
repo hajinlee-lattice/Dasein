@@ -22,16 +22,20 @@ public class TimeFilter extends Restriction {
     @JsonProperty("Vals")
     private List<Object> values;
 
+    @JsonProperty("Period")
+    private Period period;
+
     public TimeFilter() {
     }
 
-    public TimeFilter(ComparisonType relation, List<Object> values) {
-        this(null, relation, values);
+    public TimeFilter(ComparisonType relation, Period p, List<Object> values) {
+        this(null, relation, p, values);
     }
 
-    public TimeFilter(Lookup lhs, ComparisonType relation, List<Object> values) {
+    public TimeFilter(Lookup lhs, ComparisonType relation, Period period, List<Object> values) {
         this.lhs = lhs;
         this.relation = relation;
+        this.period = period;
         this.values = values;
     }
 
@@ -51,4 +55,15 @@ public class TimeFilter extends Restriction {
         this.lhs = lhs;
     }
 
+    public Period getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Period period) {
+        this.period = period;
+    }
+
+    public enum Period {
+        Day, Week, Month, Quarter, Year;
+    }
 }

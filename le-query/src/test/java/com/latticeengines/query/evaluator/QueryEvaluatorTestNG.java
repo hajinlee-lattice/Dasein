@@ -8,7 +8,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
+import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.sql.SQLQuery;
@@ -311,8 +311,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     public void testTimeRestriction() {
         // time restriction
         Restriction inner = Restriction.builder() //
-                .let(BusinessEntity.Transaction, InterfaceName.TransactionDate.name())//
-                .before("2017-08-18") //
+                .let(BusinessEntity.Transaction, TRS_TRANSACTION_DATE)//
+                .inCurrentPeriod(Period.Quarter) //
                 .build();
 
         Restriction restriction = Restriction.builder() //
@@ -321,8 +321,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        System.out.println(sqlQuery);
-        sqlContains(sqlQuery, String.format("TO_DATE(TransactionDate, 'YYYY-MM-DD') < ?", TRANSACTION));
+        sqlContains(sqlQuery, String.format("DATE_TRUNC('%s', TO_DATE(%s.%s, 'YYYY-MM-DD')) >= ", Period.Quarter,
+                TRANSACTION, TRS_TRANSACTION_DATE));
+        sqlContains(sqlQuery, String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", Period.Quarter, 0));
     }
 
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
@@ -431,8 +432,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Restriction restriction = Restriction.builder().let(caseLookup).eq("A").build();
         Query query = Query.builder() //
                 .select(caseLookup) //
-                .where(restriction)
-                .build();
+                .where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
         sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_CITY));
@@ -442,9 +442,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, "then ? else ? end) = ?");
         Assert.assertTrue(
                 sqlQuery.toString().indexOf(ATTR_ACCOUNT_NAME) < sqlQuery.toString().indexOf(ATTR_ACCOUNT_CITY));
-        Assert.assertTrue(sqlQuery.toString().indexOf(ATTR_ACCOUNT_CITY) < sqlQuery.toString()
-                .indexOf(BUCKETED_PHYSICAL_ATTR));
-
+        Assert.assertTrue(
+                sqlQuery.toString().indexOf(ATTR_ACCOUNT_CITY) < sqlQuery.toString().indexOf(BUCKETED_PHYSICAL_ATTR));
 
         // sub query
         SubQuery subQuery = new SubQuery(query, "Alias");

@@ -15,6 +15,7 @@ public enum InterfaceName {
     CRMId, //
     ProductId, //
     TransactionId, //
+    PeriodId, //
 
     LastModifiedDate, //
     CreatedDate, //

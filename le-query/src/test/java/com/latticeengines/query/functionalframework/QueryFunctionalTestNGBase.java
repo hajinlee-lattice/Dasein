@@ -58,6 +58,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static final String ATTR_ACCOUNT_ID = InterfaceName.AccountId.name();
     protected static final String ATTR_CONTACT_ID = InterfaceName.ContactId.name();
     protected static final String ATTR_CONTACT_EMAIL = InterfaceName.Email.name();
+    protected static final String TRS_TRANSACTION_DATE = InterfaceName.TransactionDate.name();
 
     @BeforeClass(groups = "functional")
     public void setupBase() {
