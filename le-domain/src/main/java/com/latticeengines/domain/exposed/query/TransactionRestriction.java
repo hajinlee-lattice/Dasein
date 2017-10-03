@@ -10,10 +10,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
+import static com.latticeengines.domain.exposed.query.AggregationType.AT_LEAST_ONCE;
+import static com.latticeengines.domain.exposed.query.AggregationType.EACH;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class TransactionRestriction extends Restriction {
+    public static String PERIOD_AMOUNT = "PeriodAmount";
+    public static String PERIOD_QUANTITY = "PeriodQuantity";
 
     @JsonProperty("productName")
     private String productName;
@@ -82,12 +87,32 @@ public class TransactionRestriction extends Restriction {
         Restriction productRestriction = filterByProduct();
 
         Restriction productTimeRestriction = filterByTime(productRestriction);
-
+        AttributeLookup amountLookup = new AttributeLookup(BusinessEntity.Transaction,
+                                                           InterfaceName.TotalAmount.name());
+        AttributeLookup quantityLookup = new AttributeLookup(BusinessEntity.Transaction,
+                                                             InterfaceName.TotalQuantity.name());
+        AggregateLookup periodAmount = AggregateLookup.sum(amountLookup).as(PERIOD_AMOUNT);
+        AggregateLookup periodQuantity = AggregateLookup.sum(quantityLookup).as(PERIOD_QUANTITY);
         AttributeLookup accountId = new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name());
-        Query innerQuery = Query.builder().from(BusinessEntity.Transaction).select(accountId)
-                .where(productTimeRestriction).groupBy(accountId).having(filterByAmountQuantity()).build();
 
-        SubQuery txSubQuery = new SubQuery(innerQuery, generateAlias(BusinessEntity.Transaction));
+        Query innerQuery = Query.builder().from(BusinessEntity.Transaction)
+                .select(accountId, periodAmount, periodQuantity)
+                .where(productTimeRestriction)
+                .groupBy(groupByAccountAndPeriod(accountId))
+                .having(filterByPeriodAmountQuantity(periodAmount, periodQuantity))
+                .build();
+
+        SubQuery innerSubQuery = new SubQuery(innerQuery, generateAlias(BusinessEntity.Transaction));
+
+        SubQueryAttrLookup subQueryAccountId = new SubQueryAttrLookup(innerSubQuery, InterfaceName.AccountId.name());
+        SubQueryAttrLookup periodTotalAmountLookup = new SubQueryAttrLookup(innerSubQuery, PERIOD_AMOUNT);
+        SubQueryAttrLookup periodTotalQuantityLookup = new SubQueryAttrLookup(innerSubQuery, PERIOD_QUANTITY);
+        Query outerQuery = Query.builder().from(innerSubQuery)
+                .select(subQueryAccountId)
+                .groupBy(subQueryAccountId)
+                .having(filterByAggregatedPeriodAmountQuantity(periodTotalAmountLookup, periodTotalQuantityLookup)).build();
+
+        SubQuery txSubQuery = new SubQuery(outerQuery, generateAlias(BusinessEntity.Transaction));
         ConcreteRestriction accountInRestriction = (ConcreteRestriction) Restriction.builder()
                 .let(entity, InterfaceName.AccountId.name()).inCollection(txSubQuery, InterfaceName.AccountId.name())
                 .build();
@@ -95,47 +120,77 @@ public class TransactionRestriction extends Restriction {
         return isNegate() ? Restriction.builder().not(accountInRestriction).build() : accountInRestriction;
     }
 
-    private Restriction filterByAmountQuantity() {
-        AttributeLookup amountLookup = new AttributeLookup(BusinessEntity.Transaction,
-                InterfaceName.TotalAmount.name());
-        AttributeLookup quantityLookup = new AttributeLookup(BusinessEntity.Transaction,
-                InterfaceName.TotalAmount.name());
+    private Lookup[] groupByAccountAndPeriod(AttributeLookup accountId) {
+        // todo, add period lookup
+        return new Lookup[]{accountId};
+    }
+
+    private Restriction filterByPeriodAmountQuantity(AggregateLookup aggrAmount, AggregateLookup aggrQuantity) {
+        Restriction restriction = null;
+        if (spentFilter != null && unitFilter != null) {
+            Restriction amountRestriction = filterByAggregationType(aggrAmount, spentFilter);
+            Restriction quantityRestriction = filterByAggregationType(aggrQuantity, unitFilter);
+            restriction = Restriction.builder().and(amountRestriction, quantityRestriction).build();
+        } else if (spentFilter != null) {
+            restriction = filterByAggregationType(aggrAmount, spentFilter);
+        } else if (unitFilter != null) {
+            restriction = filterByAggregationType(aggrQuantity, unitFilter);
+        }
+        return restriction;
+    }
+
+    private Restriction filterByAggregationType(Lookup lookup, AggregationFilter filter) {
+        Restriction restriction = null;
+        if (EACH == filter.getAggregationType() || AT_LEAST_ONCE == filter.getAggregationType()) {
+            restriction = convertValueComparison(lookup, filter.getComparisonType(), filter.getValue());
+        }
+        return restriction;
+    }
+
+    private Restriction filterByAggregatedPeriodAmountQuantity(Lookup periodAmountLookup, Lookup periodQuantityLookup) {
+
         Restriction restriction;
         if (spentFilter == null && unitFilter == null) {
             // has purchased, treat it as sum(amount) > 0 or sum(unit) > 0
-            AggregateLookup aggrAmount = AggregateLookup.sum(amountLookup);
-            AggregateLookup aggrQuantity = AggregateLookup.sum(quantityLookup);
+            AggregateLookup aggrAmount = AggregateLookup.sum(periodAmountLookup);
+            AggregateLookup aggrQuantity = AggregateLookup.sum(periodQuantityLookup);
             Restriction amountRestriction = Restriction.builder().let(aggrAmount).gt(0).build();
             Restriction quantityRestriction = Restriction.builder().let(aggrQuantity).gt(0).build();
             restriction = Restriction.builder().or(amountRestriction, quantityRestriction).build();
         } else if (spentFilter != null && unitFilter == null) {
-            AggregateLookup aggrAmount = getAggregateLookup(amountLookup, spentFilter);
-            restriction = convertValueComparison(aggrAmount, spentFilter.getComparisonType(), spentFilter.getValue());
+            restriction = getAggregatedRestriction(periodAmountLookup, spentFilter);
         } else if (spentFilter == null && unitFilter != null) {
-            AggregateLookup aggrQuantity = getAggregateLookup(quantityLookup, unitFilter);
-            restriction = convertValueComparison(aggrQuantity, unitFilter.getComparisonType(), unitFilter.getValue());
+            restriction = getAggregatedRestriction(periodQuantityLookup, unitFilter);
         } else {
-            AggregateLookup aggrAmount = getAggregateLookup(amountLookup, spentFilter);
-            Restriction amountRestriction = convertValueComparison(aggrAmount, spentFilter.getComparisonType(),
-                    spentFilter.getValue());
-            AggregateLookup aggrQuantity = getAggregateLookup(quantityLookup, unitFilter);
-            Restriction quantityRestriction = convertValueComparison(aggrQuantity, unitFilter.getComparisonType(),
-                    unitFilter.getValue());
+            Restriction amountRestriction = getAggregatedRestriction(periodAmountLookup, spentFilter);
+            Restriction quantityRestriction = getAggregatedRestriction(periodQuantityLookup, unitFilter);
             restriction = Restriction.builder().and(amountRestriction, quantityRestriction).build();
         }
         return restriction;
     }
 
-    private AggregateLookup getAggregateLookup(Lookup mixin, AggregationFilter aggregationFilter) {
-        switch (aggregationFilter.getAggregationType()) {
+    private Restriction getAggregatedRestriction(Lookup mixin, AggregationFilter filter) {
+        Restriction restriction = null;
+        switch (filter.getAggregationType()) {
         case AVG:
-            return AggregateLookup.avg(mixin);
+            restriction = convertValueComparison(AggregateLookup.avg(mixin),
+                                                 filter.getComparisonType(), filter.getValue());
+            break;
         case SUM:
-            return AggregateLookup.sum(mixin);
+            restriction = convertValueComparison(AggregateLookup.sum(mixin),
+                                                 filter.getComparisonType(), filter.getValue());
+            break;
+        case AT_LEAST_ONCE:
+            restriction = Restriction.builder().let(AggregateLookup.count()).gt(0).build();
+            break;
+        case EACH:
+            // todo, calculate time period count
+            // restriction = Restriction.builder().let(AggregateLookup.count()).eq(periodCount).build();
         default:
             throw new UnsupportedOperationException(
-                    "Unsupported aggregation type " + aggregationFilter.getAggregationType());
+                    "Unsupported aggregation type " + filter.getAggregationType());
         }
+        return restriction;
     }
 
     private String generateAlias(BusinessEntity entity) {
