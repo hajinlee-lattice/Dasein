@@ -32,7 +32,9 @@ angular.module('lp.ratingsengine.dashboard', [])
     }
 
     vm.init = function() {
-        vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
+        if(vm.rating.coverageInfo && vm.rating.coverageInfo.bucketCoverageCounts) {
+            vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
+        }
         // vm.buckets = makeGraph([
         //     {bucket: 'A', count: 0},
         //     {bucket: 'A-', count: 753},

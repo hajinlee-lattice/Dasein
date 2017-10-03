@@ -100,6 +100,9 @@ angular
                 }],
                 RatingsEngineModels: [function() {
                     return null;
+                }],
+                RatingsEngineStore: [function() {
+                    return null;
                 }]
             }
         };
