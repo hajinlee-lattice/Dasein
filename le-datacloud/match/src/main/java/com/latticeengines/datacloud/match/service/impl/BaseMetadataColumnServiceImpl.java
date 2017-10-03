@@ -54,13 +54,18 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         } else {
             ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache().get(dataCloudVersion);
             for (String columnId : columnIds) {
+                E column;
                 if (blackColumnCache != null && blackColumnCache.contains(columnId)) {
-                    toReturn.add(null);
+                    column = null;
                 } else if (!whiteColumnCaches.get(dataCloudVersion).containsKey(columnId)) {
-                    toReturn.add(loadColumnMetadataById(columnId, dataCloudVersion));
+                    column = loadColumnMetadataById(columnId, dataCloudVersion);
                 } else {
-                    toReturn.add(whiteColumnCaches.get(dataCloudVersion).get(columnId));
+                    column = whiteColumnCaches.get(dataCloudVersion).get(columnId);
                 }
+                if (column == null) {
+                    log.warn("Cannot resolve metadata column for columnId=" + columnId);
+                }
+                toReturn.add(column);
             }
         }
         return toReturn;
