@@ -12,6 +12,8 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,8 @@ import com.latticeengines.monitor.exposed.service.impl.EmailServiceImpl;
 
 @Component("pagerDutyEmailService")
 public class PagerDutyEmailServiceImpl implements PagerDutyService {
+
+    private static final Logger log = LoggerFactory.getLogger(PagerDutyEmailServiceImpl.class);
 
     private static final String NA = "na";
     private static final String TEXT_PLAIN = "text/plain";
@@ -63,8 +67,10 @@ public class PagerDutyEmailServiceImpl implements PagerDutyService {
     @Override
     public String triggerEvent(String description, String clientUrl, String dedupKey,
             Iterable<? extends BasicNameValuePair> details) throws ClientProtocolException, IOException {
+        description = StringUtils.defaultString(description, NA);
         String content = getContent(null, clientUrl, dedupKey, details);
-        emailService.sendSimpleEmail(StringUtils.defaultString(description, NA), content, TEXT_PLAIN,
+        log.info("Trigger event by sending email to PagerDuty: " + description);
+        emailService.sendSimpleEmail(description, content, TEXT_PLAIN,
                 Collections.singleton(pagerDutyEmailAddress));
 
         return "success";

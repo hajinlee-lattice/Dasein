@@ -39,6 +39,7 @@ public final class EmailUtils {
             message.setContent(content, contentType);
 
             Transport.send(message);
+            log.info("Send simple email complete: " + subject);
         } catch (MessagingException e) {
             throw new LedpException(LedpCode.LEDP_19000, "Error sending a simple email", e);
         }
@@ -92,6 +93,7 @@ public final class EmailUtils {
         }
 
         Session session = Session.getInstance(props, new Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(emailSettings.getUsername(), emailSettings.getPassword());
             }
