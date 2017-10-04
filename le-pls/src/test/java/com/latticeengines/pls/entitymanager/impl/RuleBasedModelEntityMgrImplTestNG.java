@@ -137,7 +137,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(ruleBasedModel.getRatingEngine().getId(), ratingEngineId);
         Assert.assertNotNull(ruleBasedModel.getRatingRule());
         Assert.assertEquals(ruleBasedModel.getRatingRule().getDefaultBucketName(), RatingRule.DEFAULT_BUCKET_NAME);
-        Assert.assertNull(ruleBasedModel.getSelectedAttributes());
+        Assert.assertNotNull(ruleBasedModel.getSelectedAttributes());
     }
 
     private void assertUpdatedRuleBasedModel(RuleBasedModel ruleBasedModel) {
@@ -165,9 +165,12 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         bucketToRuleMap.put(RuleBucketName.A.getName(), Amap);
         bucketToRuleMap.put(RuleBucketName.D.getName(), Dmap);
         bucketToRuleMap.put(RuleBucketName.B.getName(), Bmap);
-        Amap.put(FrontEndQueryConstants.CONTACT_RESTRICTION, Restriction.builder().and(Collections.emptyList()).build());
-        Bmap.put(FrontEndQueryConstants.CONTACT_RESTRICTION, Restriction.builder().and(Collections.emptyList()).build());
-        Dmap.put(FrontEndQueryConstants.CONTACT_RESTRICTION, Restriction.builder().and(Collections.emptyList()).build());
+        Amap.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
+                Restriction.builder().and(Collections.emptyList()).build());
+        Bmap.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
+                Restriction.builder().and(Collections.emptyList()).build());
+        Dmap.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
+                Restriction.builder().and(Collections.emptyList()).build());
         Restriction r1 = and(A1, C1, A2, C2);
         Restriction r2 = and(and(A1, A2), and(C1, C2));
         Restriction r3 = or(and(A1, A2, C1), or(A1, C2, C3));
