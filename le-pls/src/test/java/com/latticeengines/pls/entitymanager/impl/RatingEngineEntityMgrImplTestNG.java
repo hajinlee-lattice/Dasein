@@ -213,6 +213,9 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(usedAttributesInSegment.size(), expectedResult.size());
 
         for (String attr : usedAttributesInSegment) {
+            if(!expectedResult.contains(attr)) {
+                log.info("Selected attribute not expected: " + attr);
+            }
             Assert.assertTrue(expectedResult.contains(attr));
         }
     }

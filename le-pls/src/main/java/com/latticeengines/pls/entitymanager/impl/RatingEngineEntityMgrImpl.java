@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -188,16 +190,29 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
                     ConcreteRestriction cr = (ConcreteRestriction) node;
                     Lookup lookup = cr.getLhs();
                     if (lookup instanceof AttributeLookup) {
-                        usedAttributesInSegment.add(((AttributeLookup) lookup).getAttribute());
+                        usedAttributesInSegment.add(sanitize(((AttributeLookup) lookup).getAttribute()));
                     } else if (lookup instanceof SubQueryAttrLookup) {
-                        usedAttributesInSegment.add(((SubQueryAttrLookup) lookup).getAttribute());
+                        usedAttributesInSegment.add(sanitize(((SubQueryAttrLookup) lookup).getAttribute()));
                     }
                 } else if (node instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) node;
-                    usedAttributesInSegment.add(bucket.getAttr().getAttribute());
+                    usedAttributesInSegment.add(sanitize(bucket.getAttr().getAttribute()));
                 }
             });
         }
+    }
+
+    private String sanitize(String attribute) {
+        if (StringUtils.isNotBlank(attribute)) {
+            attribute = attribute.trim();
+            for (BusinessEntity entity : BusinessEntity.values()) {
+                String prefix = entity.name() + ".";
+                if (attribute.startsWith(prefix)) {
+                    attribute = attribute.substring(prefix.length());
+                }
+            }
+        }
+        return attribute;
     }
 
 }
