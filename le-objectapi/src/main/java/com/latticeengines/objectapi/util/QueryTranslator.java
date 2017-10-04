@@ -192,13 +192,15 @@ public class QueryTranslator {
         }
         Restriction optimized = RestrictionOptimizer.optimize(translated);
 
-        DepthFirstSearch dfs = new DepthFirstSearch();
-        dfs.run(optimized, (obj, ctx) -> {
-            if (obj instanceof ConcreteRestriction) {
-                translateRuleBasedRating((Restriction) obj, ruleBasedModels);
-            }
-        });
-
+        if (optimized != null) {
+            DepthFirstSearch dfs = new DepthFirstSearch();
+            dfs.run(optimized, (obj, ctx) -> {
+                if (obj instanceof ConcreteRestriction) {
+                    translateRuleBasedRating((Restriction) obj, ruleBasedModels);
+                }
+            });
+        }
+        
         return optimized;
     }
 
