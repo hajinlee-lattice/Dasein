@@ -135,9 +135,6 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
                     sort, //
                     sortProfile //
             );
-            
-            
-            
             // -----------
             request.setSteps(steps);
             return request;
@@ -159,14 +156,14 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
 
     private TransformationStepConfig bucket(CustomerSpace customerSpace, String sourceTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(profileStep));
+        step.setInputSteps(Collections.singletonList(profileStep));
         String tableSourceName = "CustomerUniverse";
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
         List<String> baseSources = Collections.singletonList(tableSourceName);
@@ -176,7 +173,7 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         step.setBaseTables(baseTables);
 
         step.setTransformer(TRANSFORMER_BUCKETER);
-        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
+        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
     }
 
@@ -192,7 +189,7 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
         // conf.setDedupFields(Arrays.asList(dedupFields));
-        step.setConfiguration(appendEngineConf(conf, heavyEngineConfig()));
+        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
         return step;
     }
 

@@ -3,8 +3,11 @@ package com.latticeengines.cdl.workflow.steps.export;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -48,6 +51,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private DataCollectionProxy dataCollectionProxy;
 
     private Map<BusinessEntity, Table> entityTableMap;
+    private Map<BusinessEntity, Boolean> appendFlagMap;
 
     private String customerSpace;
 
@@ -55,25 +59,39 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     public void execute() {
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();
+
         entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
         if (entityTableMap == null) {
             entityTableMap = configuration.getSourceTables();
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         }
-        boolean createNew = configuration.getHdfsToRedshiftConfiguration().isCreateNew();
-        if (entityTableMap != null && !entityTableMap.isEmpty()) {
-            ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export",
-                    entityTableMap.size());
-            for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
-                Exporter exporter = new Exporter(createNew, entry.getKey(), entry.getValue());
-                executors.submit(exporter);
-            }
-            try {
-                executors.shutdown();
-                executors.awaitTermination(1, TimeUnit.DAYS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Waiting for exporters to finish interrupted.", e);
-            }
+
+        if (entityTableMap == null || entityTableMap.isEmpty()) {
+            log.info("No table to export, skip this step.");
+        }
+
+        appendFlagMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE, BusinessEntity.class, Boolean.class);
+        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export", entityTableMap.size());
+        List<Future<?>> futures = new ArrayList<>();
+        for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
+            boolean createNew = !appendFlagMap.get(entry.getKey());
+            Exporter exporter = new Exporter(createNew, entry.getKey(), entry.getValue());
+            futures.add(executors.submit(exporter));
+        }
+        long startTime = System.currentTimeMillis();
+        while (!futures.isEmpty() && System.currentTimeMillis() - startTime < TimeUnit.DAYS.toMillis(1)) {
+            List<Future<?>> finishedFutures = new ArrayList<>();
+            futures.forEach(future -> {
+                try {
+                    future.get(1, TimeUnit.MINUTES);
+                    finishedFutures.add(future);
+                } catch (TimeoutException e) {
+                    // ignore
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException("Failed to wait for the EAI job to finish.", e);
+                }
+            });
+            futures.removeAll(finishedFutures);
         }
     }
 
@@ -94,7 +112,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         @Override
         public void run() {
             String targetName = renameTable(entity, table);
-            log.info("Uploading to redshift table " + targetName + ", createNew=" + createNew);
+            log.info(
+                    "Uploading to redshift table " + targetName + " for entity " + entity + ", createNew=" + createNew);
             exportData(table, targetName, entity.getServingStore());
             entityTableMap.put(entity, table);
             if (createNew) {
@@ -161,7 +180,14 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                     ? RedshiftTableConfiguration.SortKeyType.Compound
                     : RedshiftTableConfiguration.SortKeyType.Interleaved;
 
-            HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
+            HdfsToRedshiftConfiguration exportConfig;
+            if (configuration.getHdfsToRedshiftConfiguration() != null) {
+                exportConfig = JsonUtils.deserialize(
+                        JsonUtils.serialize(configuration.getHdfsToRedshiftConfiguration()),
+                        HdfsToRedshiftConfiguration.class);
+            } else {
+                throw new IllegalStateException("Cannot find HdfsToRedshiftConfiguration in step configuration.");
+            }
             exportConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
             exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
             exportConfig.setExportTargetPath(sourceTable.getName());

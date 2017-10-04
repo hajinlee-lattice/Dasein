@@ -131,10 +131,10 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .build()) //
                 .accountIdField(InterfaceName.Id.name()) //
                 .bucketAccount(
-                        dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.Profile) != null) //
+                        dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile) != null) //
                 .contactIdField(InterfaceName.Id.name()) //
                 .productIdField(InterfaceName.Id.name()) //
-                .bucketContact(dataCollectionProxy.getTable(customerSpace.toString(),
+                .bucketContact(dataCollectionProxy.getTable(customerSpace, //
                         TableRoleInCollection.ContactProfile) != null) //
                 .transactionIdField(InterfaceName.Id.name()) //
                 .bucketTransaction(true) //

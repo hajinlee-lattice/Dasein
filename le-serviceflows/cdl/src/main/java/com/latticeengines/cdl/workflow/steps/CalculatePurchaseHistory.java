@@ -110,7 +110,7 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         Map<BusinessEntity, String> statsTableNameMap = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class, String.class);
         if (statsTableNameMap == null) {
-            statsTableNameMap = new HashMap<BusinessEntity, String>();
+            statsTableNameMap = new HashMap<>();
             putObjectInContext(STATS_TABLE_NAMES, statsTableNameMap);
         }
         statsTableNameMap.put(BusinessEntity.PurchaseHistory, statsTableName);

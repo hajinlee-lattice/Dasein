@@ -43,14 +43,6 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
         return post("get Data", url, dataRequest, DataPage.class);
     }
 
-    public long getAccountsCount(String customerSpace, Restriction restriction) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
-        return entityProxy.getCount(customerSpace, frontEndQuery);
-    }
-
     public DataPage getAccounts(String customerSpace, Restriction restriction, Long offset, Long pageSize,
             List<String> fields) {
         return getAccounts(customerSpace, restriction, offset, pageSize, fields, null);

@@ -27,8 +27,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidatePartitionConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -211,7 +211,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private String getPartitionConfig() {
         ConsolidatePartitionConfig config = new ConsolidatePartitionConfig();
-        config.setNamePrefix(TableRoleInCollection.ConsolidatedTransaction.name());
+        config.setNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
         config.setAggrNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
         config.setTimeField("TransactionTime");
         config.setTrxDateField("TransactionDate");
@@ -233,8 +233,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
+        config.setSrcIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
+        config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
         config.setCompositeKeys(
@@ -307,7 +307,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Map<String, GenericRecord> recordMap = new HashMap<>();
         for (GenericRecord record : records) {
             String id = String
-                    .valueOf(record.get(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name()));
+                    .valueOf(record.get(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name()));
             recordMap.put(id, record);
             rowCount++;
         }

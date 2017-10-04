@@ -6,11 +6,15 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_3;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.DISTINCT_PRODUCTS;
+
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -36,15 +40,17 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void verifyProfile() {
-        int numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
-        int numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
-        verifyProfileReport(profileAppId, 2, numAccounts, numContacts);
+        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
+        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of( //
+                BusinessEntity.Account.getServingStore(), numAccounts,
+                BusinessEntity.Contact.getServingStore(), numContacts,
+                BusinessEntity.Product.getServingStore(), (long) DISTINCT_PRODUCTS);
+        verifyProfileReport(profileAppId, expectedCounts);
         verifyDataFeedStatsu(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion.complement());
-
-        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
     }
 
 }

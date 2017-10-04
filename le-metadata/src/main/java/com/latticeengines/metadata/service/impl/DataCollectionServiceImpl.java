@@ -7,7 +7,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +146,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
+    public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
+            DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
@@ -155,7 +160,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return dataCollectionEntityMgr.getTablesOfRole(collectionName, tableRole, version);
     }
 
-    public AttributeRepository getAttrRepo(String customerSpace, String collectionName, DataCollection.Version version) {
+    public AttributeRepository getAttrRepo(String customerSpace, String collectionName,
+            DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
@@ -169,7 +175,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (statistics == null) {
             return null;
         }
-        List<TableRoleInCollection> roles = AttributeRepository.extractServingRoles(statistics);
+        List<TableRoleInCollection> roles = extractServingRoles(statistics);
         Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
         roles.forEach(role -> {
             List<Table> tables = getTables(customerSpace, notNullCollectioName, role, version);
@@ -181,11 +187,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 notNullCollectioName);
     }
 
+    private List<TableRoleInCollection> extractServingRoles(Statistics statistics) {
+        Set<BusinessEntity> entitySet = statistics.getCategories().values().stream()
+                .flatMap(cat -> cat.getSubcategories().values().stream()
+                        .flatMap(subcat -> subcat.getAttributes().keySet().stream().map(AttributeLookup::getEntity)))
+                .collect(Collectors.toSet());
+        return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
+    }
+
     private void notifyCacheWatchers(String customerSpace) {
         new Thread(() -> {
             NodeWatcher.updateWatchedData(CustomerStats.name(), customerSpace);
-            for (TableRoleInCollection role: Arrays.asList(TableRoleInCollection.BucketedAccount, TableRoleInCollection.SortedContact)) {
-                NodeWatcher.updateWatchedData(CustomerMetadata.name(), String.format("%s|%s", customerSpace, role.name()));
+            for (TableRoleInCollection role : Arrays.asList(TableRoleInCollection.BucketedAccount,
+                    TableRoleInCollection.SortedContact)) {
+                NodeWatcher.updateWatchedData(CustomerMetadata.name(),
+                        String.format("%s|%s", customerSpace, role.name()));
                 try {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {

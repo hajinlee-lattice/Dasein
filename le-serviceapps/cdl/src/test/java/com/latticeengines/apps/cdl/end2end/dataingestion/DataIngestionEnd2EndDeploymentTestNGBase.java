@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.IOUtils;
@@ -306,7 +307,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 return AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
             }
         }
-        Assert.assertTrue(false, "No data collection folder was created!");
+        Assert.fail("No data collection folder was created!");
         return 0L;
     }
 
@@ -468,10 +469,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Waiting for " + submission.getApplicationIds().get(0));
         Level jobServiceLogLevel = LogManager.getLogger(JobServiceImpl.class).getLevel();
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
-        JobStatus completedStatus = jobService.waitFinalJobStatus(submission.getApplicationIds().get(0), timeout);
-        LogManager.getLogger(JobServiceImpl.class).setLevel(jobServiceLogLevel);
-        Assert.assertEquals(completedStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
-        logger.info("Finished exporting " + role + " to redshift.");
+        try (PerformanceTimer timer = new PerformanceTimer("Finished exporting " + role + " to redshift.")) {
+            JobStatus completedStatus = jobService.waitFinalJobStatus(submission.getApplicationIds().get(0), timeout);
+            LogManager.getLogger(JobServiceImpl.class).setLevel(jobServiceLogLevel);
+            Assert.assertEquals(completedStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
+        }
     }
 
     // Copied from ExportDataToRedshift
@@ -548,41 +550,28 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Assert.assertTrue(statistics.hasCategory(Category.CONTACT_ATTRIBUTES));
     }
 
-    protected void verifyConsolidateReport(String appId, int publishReportSize, long exportedAccounts,
-            long exportedContacts, long exportedProducts, long exportedTransactions) {
+    protected void verifyConsolidateReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 2);
         Report publishReport = reports.get(1);
-        Map<String, Integer> map = JsonUtils.deserialize(publishReport.getJson().getPayload(),
-                new TypeReference<Map<String, Integer>>() {
-                });
-        assertEquals(map.entrySet().size(), publishReportSize);
-        if (publishReportSize != 0) {
-            if (exportedAccounts != 0)
-                assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).longValue(), exportedAccounts);
-            if (exportedContacts != 0)
-                assertEquals(map.get(TableRoleInCollection.SortedContact.name()).longValue(), exportedContacts);
-            if (exportedProducts != 0)
-                assertEquals(map.get(TableRoleInCollection.SortedProduct.name()).longValue(), exportedProducts);
-            if (exportedTransactions != 0)
-                assertEquals(map.get(TableRoleInCollection.AggregatedTransaction.name()).longValue(),
-                        exportedTransactions);
-
-        }
+        verifyExportToRedshiftReport(publishReport, expectedCounts);
     }
 
-    protected void verifyProfileReport(String appId, int publishReportSize, long exportedAccounts,
-            long exportedContacts) {
+    protected void verifyProfileReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 1);
         Report publishReport = reports.get(0);
+        verifyExportToRedshiftReport(publishReport, expectedCounts);
+    }
+
+    private void verifyExportToRedshiftReport(Report publishReport, Map<TableRoleInCollection, Long> expectedCounts) {
         Map<String, Integer> map = JsonUtils.deserialize(publishReport.getJson().getPayload(),
                 new TypeReference<Map<String, Integer>>() {
                 });
-        assertEquals(map.entrySet().size(), publishReportSize);
-        assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).longValue(), exportedAccounts);
-        assertEquals(map.get(TableRoleInCollection.SortedContact.name()).longValue(), exportedContacts);
-
+        assertEquals(map.entrySet().size(), expectedCounts.size(),
+                "Should have " + expectedCounts.size() + " reports for redshift exporting.");
+        expectedCounts.forEach((role, count) -> assertEquals(map.get(role.name()).longValue(), count.longValue(),
+                "The count of table " + role + " does not meet the expectation."));
     }
 
     protected void verifyDataFeedStatsu(DataFeed.Status expected) {

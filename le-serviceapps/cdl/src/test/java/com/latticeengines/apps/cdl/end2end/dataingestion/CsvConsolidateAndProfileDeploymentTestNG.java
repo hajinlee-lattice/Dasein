@@ -1,7 +1,10 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
 import java.io.IOException;
+import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -31,7 +34,10 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
     }
 
     private void verifyProfile() throws IOException {
-        verifyProfileReport(profileAppId, 2, importedAccounts, importedContacts);
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of( //
+                TableRoleInCollection.BucketedAccount, importedAccounts,
+                TableRoleInCollection.SortedContact, importedContacts);
+        verifyProfileReport(profileAppId, expectedCounts);
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
 

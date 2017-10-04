@@ -40,9 +40,6 @@ public class Bucket implements Serializable {
     @JsonProperty("En")
     private Long[] encodedCountList;
 
-    @JsonIgnore
-    private Pair<Object, Object> range;
-
     @JsonProperty("Lift")
     private Double lift;
 
@@ -51,6 +48,10 @@ public class Bucket implements Serializable {
 
     @JsonProperty("Vals")
     private List<Object> values;
+
+    @Deprecated
+    @JsonIgnore
+    private Pair<Object, Object> range;
 
     public static Bucket nullBkt() {
         return new Bucket();
@@ -189,16 +190,19 @@ public class Bucket implements Serializable {
         this.values = values;
     }
 
+    @Deprecated
     @JsonIgnore
     public Pair<Object, Object> getRange() {
         return range;
     }
 
+    @Deprecated
     @JsonIgnore
     public void setRange(Pair<Object, Object> range) {
         this.range = range;
     }
 
+    @Deprecated
     @JsonProperty("Rng")
     @ApiModelProperty("First value is the lower bound of the range, inclusive. Null is negative infinity. "
             + "Second value is the upper bound of the range, exclusive. Null is positive infinity. "
@@ -207,6 +211,7 @@ public class Bucket implements Serializable {
         return range == null ? null : Arrays.asList(range.getLeft(), range.getRight());
     }
 
+    @Deprecated
     @JsonProperty("Rng")
     @ApiModelProperty("First value is the lower bound of the range, inclusive. Null is negative infinity. "
             + "Second value is the upper bound of the range, exclusive. Null is positive infinity. "

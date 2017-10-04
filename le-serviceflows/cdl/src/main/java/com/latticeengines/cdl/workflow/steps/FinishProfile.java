@@ -42,6 +42,7 @@ public class FinishProfile extends BaseWorkflowStep<CalculateStatsStepConfigurat
         if (batchStore != null) {
             cloneTableRole(batchStore);
         }
+        copyAggregatedTransaction();
     }
 
     private void cloneTableRole(TableRoleInCollection role) {
@@ -50,6 +51,21 @@ public class FinishProfile extends BaseWorkflowStep<CalculateStatsStepConfigurat
             Table clone = metadataProxy.cloneTable(customerSpace, activeBatchStore.getName());
             dataCollectionProxy.upsertTable(customerSpace, clone.getName(), role, inactiveVersion);
             log.info("Clone and upsert " + role + " from version " + activeVersion + " to " + inactiveVersion);
+        }
+    }
+
+    private void copyAggregatedTransaction() {
+        TableRoleInCollection role = TableRoleInCollection.AggregatedTransaction;
+        Table activeTxn = dataCollectionProxy.getTable(customerSpace, role, activeVersion);
+        if (activeTxn != null) {
+            Table inactiveTxn = dataCollectionProxy.getTable(customerSpace, role, inactiveVersion);
+            if (inactiveTxn == null) {
+                log.info(role + " table exists in version " + activeVersion + " but not in version " + inactiveVersion
+                        + ", registering it in " + inactiveVersion + " as well.");
+                dataCollectionProxy.upsertTable(customerSpace, activeTxn.getName(), role, inactiveVersion);
+            } else {
+                log.info(role + " does not exists in either version. Skip copying.");
+            }
         }
     }
 

@@ -1,13 +1,11 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -27,10 +25,10 @@ import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -82,7 +80,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             TransformationStepConfig upsertMaster = mergeMaster();
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig matchDiff = matchDiff();
-            TransformationStepConfig bucket = bucketDiff();
+            TransformationStepConfig bucket = bucket(matchDiffStep, true);
             TransformationStepConfig sort = sortDiff(bucketStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
@@ -190,31 +188,12 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         return step;
     }
 
-    private TransformationStepConfig bucketDiff() {
-        if (!isBucketing()) {
-            return null;
-        }
-        TransformationStepConfig step = new TransformationStepConfig();
-        String tableSourceName = "CustomerProfile";
-        SourceTable sourceTable = new SourceTable(profileTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
-        // consolidate diff
-        step.setInputSteps(Collections.singletonList(matchDiffStep));
-        step.setTransformer(TRANSFORMER_BUCKETER);
-        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
-        return step;
-    }
-
     private String getConsolidateDataMasterConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
-        config.setColumnsFromRight(new HashSet<String>(Arrays.asList(CREATION_DATE)));
+        config.setColumnsFromRight(Collections.singleton(CREATION_DATE));
         return appendEngineConf(config, lightEngineConfig());
     }
 
@@ -239,6 +218,17 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
+    }
+
+    @Override
+    protected void findProfileTable() {
+        Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.Profile);
+        if (profileTable != null) {
+            profileTableName = profileTable.getName();
+            log.info("Set profileTableName=" + profileTableName);
+        } else {
+            log.info("There's no profileTableName");
+        }
     }
 
 }

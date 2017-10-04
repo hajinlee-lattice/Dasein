@@ -76,14 +76,6 @@ public class AttributeRepository {
         return customerSpace.getTenantId() + "-" + collectionName;
     }
 
-    public static List<TableRoleInCollection> extractServingRoles(Statistics statistics) {
-        Set<BusinessEntity> entitySet = statistics.getCategories().values().stream()
-                .flatMap(cat -> cat.getSubcategories().values().stream()
-                        .flatMap(subcat -> subcat.getAttributes().keySet().stream().map(AttributeLookup::getEntity)))
-                .collect(Collectors.toSet());
-        return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
-    }
-
     public static AttributeRepository constructRepo(Statistics statistics, Map<TableRoleInCollection, Table> tableMap,
             CustomerSpace customerSpace, String collectionName) {
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);

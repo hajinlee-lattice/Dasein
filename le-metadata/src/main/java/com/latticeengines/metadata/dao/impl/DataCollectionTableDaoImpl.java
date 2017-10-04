@@ -27,6 +27,7 @@ public class DataCollectionTableDaoImpl extends BaseDaoImpl<DataCollectionTable>
         queryPattern += " join cTbl.table as tbl";
         queryPattern += " where dc.name = :collectionName";
         queryPattern += " and tbl.name = :tableName";
+        queryPattern += " order by cTbl.pid desc";
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("collectionName", collectionName);

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.ArrayList;
@@ -55,7 +56,6 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     protected DataCollectionProxy dataCollectionProxy;
 
     protected List<String> inputTableNames = new ArrayList<>();
-    protected Boolean isActive = false;
     protected String inputMasterTableName;
     protected Table masterTable;
     protected String profileTableName;
@@ -111,10 +111,6 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             }
             appendTableMap.put(entity, true);
             putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
-            if (BusinessEntity.Transaction.equals(entity)) {
-                dataCollectionProxy.upsertTable(customerSpace.toString(), redshiftTable.getName(), batchStore,
-                        activeVersion);
-            }
         }
 
         if (BusinessEntity.Account.equals(getBusinessEntity())) {
@@ -132,13 +128,17 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         customerSpace = configuration.getCustomerSpace();
         entity = getBusinessEntity();
         batchStore = entity.getBatchStore();
-        batchStoreTablePrefix = entity.name();
-        batchStorePrimaryKey = batchStore.getPrimaryKey().name();
-        batchStoreSortKeys = batchStore.getForeignKeysAsStringList();
+        if (batchStore != null) {
+            batchStoreTablePrefix = entity.name();
+            batchStorePrimaryKey = batchStore.getPrimaryKey().name();
+            batchStoreSortKeys = batchStore.getForeignKeysAsStringList();
+        }
         servingStore = entity.getServingStore();
-        servingStoreTablePrefix = servingStore.name();
-        servingStorePrimaryKey = servingStore.getPrimaryKey().name();
-        servingStoreSortKeys = servingStore.getForeignKeysAsStringList();
+        if (servingStore != null) {
+            servingStoreTablePrefix = servingStore.name();
+            servingStorePrimaryKey = servingStore.getPrimaryKey().name();
+            servingStoreSortKeys = servingStore.getForeignKeysAsStringList();
+        }
         @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
@@ -165,16 +165,12 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         }
         log.info("Set inputMasterTableName=" + inputMasterTableName);
 
-        isActive = getObjectFromContext(IS_ACTIVE, Boolean.class);
         if (isBucketing()) {
-            Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.Profile);
-            if (profileTable != null) {
-                profileTableName = profileTable.getName();
-                log.info("Set profileTableName=" + profileTableName);
-            } else {
-                log.info("There's no profileTableName");
-            }
+            findProfileTable();
         }
+    }
+
+    protected void findProfileTable() {
     }
 
     protected TransformationWorkflowConfiguration generateWorkflowConf() {
@@ -261,6 +257,25 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         return step;
     }
 
+    protected TransformationStepConfig bucket(int inputStep, boolean heavyEngine) {
+        if (!isBucketing()) {
+            return null;
+        }
+        TransformationStepConfig step = new TransformationStepConfig();
+        String tableSourceName = "CustomerProfile";
+        SourceTable sourceTable = new SourceTable(profileTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
+        step.setInputSteps(Collections.singletonList(inputStep));
+        step.setTransformer(TRANSFORMER_BUCKETER);
+        String confStr = heavyEngine ? emptyStepConfig(heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
     protected void setupMasterTable(TransformationStepConfig step) {
         List<String> baseSources;
         Map<String, SourceTable> baseTables;
@@ -284,6 +299,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
+        config.setMasterIdField(batchStorePrimaryKey);
         setupConfig(config);
         config.setDedupeSource(isDedupeSource);
         return appendEngineConf(config, lightEngineConfig());

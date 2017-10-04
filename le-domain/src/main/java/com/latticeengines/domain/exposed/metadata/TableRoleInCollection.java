@@ -10,7 +10,6 @@ public enum TableRoleInCollection {
     ConsolidatedAccount, //
     ConsolidatedContact, //
     ConsolidatedProduct, //
-    ConsolidatedTransaction, //
     ConsolidatedPurchaseHistory, //
 
     Profile, //
@@ -46,10 +45,8 @@ public enum TableRoleInCollection {
         SortedContact.primaryKey = ConsolidatedContact.primaryKey;
         SortedContact.foreignKeys = ConsolidatedContact.foreignKeys;
 
-        ConsolidatedTransaction.primaryKey = InterfaceName.TransactionId;
-        ConsolidatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
         AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
-        AggregatedTransaction.foreignKeys = ConsolidatedTransaction.foreignKeys;
+        AggregatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
 
         ConsolidatedProduct.primaryKey = InterfaceName.ProductId;
         ConsolidatedProduct.foreignKeys = ImmutableList.of(ConsolidatedProduct.primaryKey);

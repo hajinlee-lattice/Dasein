@@ -3,10 +3,10 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +27,7 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -63,7 +64,7 @@ public class CheckpointService {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
-    private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/end2end/checkpoints";
+    private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
     private static final String S3_CHECKPOINTS_VERSION = "1";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
@@ -76,6 +77,9 @@ public class CheckpointService {
 
     static final int PRODUCT_IMPORT_SIZE_1 = 100;
     static final int TRANSACTION_IMPORT_SIZE_1 = 100;
+
+    static final int DISTINCT_PRODUCTS = 46;
+    static final int NUM_PURCHASE_HISTORY_1 = 86;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -118,18 +122,36 @@ public class CheckpointService {
     }
 
     void verifyFirstProfileCheckpoint() throws IOException {
-        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_1);
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
+                TableRoleInCollection.ConsolidatedAccount, (long) ACCOUNT_IMPORT_SIZE_1,
+                TableRoleInCollection.ConsolidatedContact, (long) CONTACT_IMPORT_SIZE_1,
+                TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS,
+                TableRoleInCollection.ConsolidatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
+        verifyCheckpoint(expectedCounts);
     }
 
     void verifySecondConsolidateCheckpoint() throws IOException {
-        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
+        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
+        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
+                TableRoleInCollection.ConsolidatedAccount, numAccounts,
+                TableRoleInCollection.ConsolidatedContact, numContacts,
+                TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS);
+        verifyCheckpoint(expectedCounts);
     }
 
     void verifySecondProfileCheckpoint() throws IOException {
-        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
+        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
+        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
+                TableRoleInCollection.ConsolidatedAccount, numAccounts,
+                TableRoleInCollection.ConsolidatedContact, numContacts,
+                TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS,
+                TableRoleInCollection.ConsolidatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
+        verifyCheckpoint(expectedCounts);
     }
 
-    private void verifyCheckpoint(long numAccounts, long numContacts) throws IOException {
+    private void verifyCheckpoint(Map<TableRoleInCollection, Long> expectedCounts) throws IOException {
         verifyHdfsCheckpoint();
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
@@ -138,8 +160,7 @@ public class CheckpointService {
 
         verifyStatistics();
 
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), numAccounts);
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), numContacts);
+        expectedCounts.forEach((role, count) -> Assert.assertEquals(countTableRole(role), count.longValue()));
     }
 
     void resumeCheckpoint(String checkpoint) throws IOException {
@@ -148,21 +169,13 @@ public class CheckpointService {
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
 
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            List<TableRoleInCollection> tables = Arrays.asList( //
-                    TableRoleInCollection.ConsolidatedAccount, //
-                    TableRoleInCollection.ConsolidatedContact, //
-                    TableRoleInCollection.BucketedAccount, //
-                    TableRoleInCollection.SortedContact, //
-                    TableRoleInCollection.Profile, //
-                    TableRoleInCollection.ContactProfile);
-            for (TableRoleInCollection role : tables) {
+            for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 Table table = parseCheckpointTable(checkpoint, role.name(), version);
                 if (table != null) {
                     metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                     dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
                 }
             }
-
             StatisticsContainer statisticsContainer = parseCheckpointStatistics(checkpoint, version);
             if (statisticsContainer != null) {
                 dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
@@ -240,7 +253,7 @@ public class CheckpointService {
         Assert.assertFalse(tables.isEmpty());
         for (String tableHdfsPath : tables) {
             String tableName = tableHdfsPath.substring(tableHdfsPath.lastIndexOf("/") + 1);
-            if (!"VisiDB".equals(tableName)) {
+            if (!"VisiDB".equals(tableName) && !tableName.contains("copy")) {
                 logger.info("Checking table " + tableName);
                 Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, tableHdfsPath + "/*.avro");
                 Assert.assertTrue(iterator.hasNext(), "Table at " + tableHdfsPath + " does not have avro record.");
@@ -391,20 +404,17 @@ public class CheckpointService {
     }
 
     void saveCheckPoint(String checkpoint) throws IOException {
+        String rootDir = "checkpoints/" + checkpoint;
+        FileUtils.deleteQuietly(new File(rootDir));
+        FileUtils.forceMkdirParent(new File(rootDir));
+
         downloadHdfsData(checkpoint);
 
         for (DataCollection.Version version : DataCollection.Version.values()) {
             String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
             FileUtils.forceMkdir(new File(tablesDir));
 
-            List<TableRoleInCollection> tables = Arrays.asList( //
-                    TableRoleInCollection.ConsolidatedAccount, //
-                    TableRoleInCollection.ConsolidatedContact, //
-                    TableRoleInCollection.BucketedAccount, //
-                    TableRoleInCollection.SortedContact, //
-                    TableRoleInCollection.Profile, //
-                    TableRoleInCollection.ContactProfile);
-            for (TableRoleInCollection role : tables) {
+            for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpoint);
             }
 

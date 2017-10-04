@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.steps;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -55,7 +54,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         try {
 
             PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("ConsolidatePipeline");
+            request.setName("ConsolidateTransactionPipeline");
 
             inputMergeStep = 0;
             partitionAndAggregateStep = 1;
@@ -90,7 +89,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
     private String getPartitionConfig() {
         ConsolidatePartitionConfig config = new ConsolidatePartitionConfig();
-        config.setNamePrefix(batchStoreTablePrefix);
+        config.setNamePrefix(BusinessEntity.Transaction.name());
         config.setAggrNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
         config.setTimeField(InterfaceName.TransactionTime.name());
         config.setTrxDateField(InterfaceName.TransactionDate.name());
@@ -114,9 +113,9 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
+        config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
-        config.setColumnsFromRight(new HashSet<String>(Arrays.asList(CREATION_DATE)));
+        config.setColumnsFromRight(Collections.singleton(CREATION_DATE));
         config.setCompositeKeys(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionTime.name()));
@@ -129,7 +128,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         String aggrTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
         Table aggregateTable = metadataProxy.getTable(customerSpace.toString(), aggrTableName);
         putObjectInContext(AGGREGATE_TABLE_KEY, aggregateTable);
-        Table masterTable = transactionTableBuilder.setupMasterTable(batchStoreTablePrefix, pipelineVersion, aggregateTable);
+        Table masterTable = transactionTableBuilder.setupMasterTable(BusinessEntity.Transaction.name(), pipelineVersion, aggregateTable);
         putObjectInContext(MASTER_TABLE_KEY, masterTable);
         if (isBucketing()) {
             Table deltaTable = transactionTableBuilder.setupDeltaTable(servingStoreTablePrefix, pipelineVersion, aggregateTable);
@@ -143,6 +142,11 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
     @Override
     protected void setupConfig(ConsolidateDataTransformerConfig config) {
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
+        config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
+    }
+
+    @Override
+    protected String getMergeTableName() {
+        return servingStore.name() + "_Merged";
     }
 }

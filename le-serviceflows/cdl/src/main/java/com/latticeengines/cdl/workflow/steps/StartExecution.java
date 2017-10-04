@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -30,9 +29,6 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
     @Override
     public void execute() {
-        boolean isActive = Status.Active.equals(configuration.getInitialDataFeedStatus());
-        putObjectInContext(IS_ACTIVE, isActive);
-
         DataFeedExecution execution = dataFeedProxy
                 .updateExecutionWorkflowId(configuration.getCustomerSpace().toString(), jobId);
         log.info(String.format("current running execution %s", execution));

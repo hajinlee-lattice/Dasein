@@ -1,7 +1,8 @@
 package com.latticeengines.cdl.workflow;
 
+import javax.inject.Inject;
+
 import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -17,28 +18,31 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("profileAndPublishWorkflow")
 public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublishWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private StartProfile startProfile;
 
-    @Autowired
+    @Inject
     private CalculateStatsWrapper calculateStatsWrapper;
 
-    @Autowired
+    @Inject
     private CalculatePurchaseHistoryWrapper calculatePurchaseHistoryWrapper;
 
-    @Autowired
+    @Inject
     private SortContactWrapper sortContactWrapper;
 
-    @Autowired
+    @Inject
+    private SortProductWrapper sortProductWrapper;
+
+    @Inject
     private UpdateStatsObjects updateStatsObjects;
 
-    @Autowired
+    @Inject
     private ProfileAndPublishListener profileAndPublishListener;
 
-    @Autowired
+    @Inject
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
 
-    @Autowired
+    @Inject
     private FinishProfile finishProfile;
 
     @Bean
@@ -52,6 +56,7 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
                 .next(startProfile) //
                 .next(calculateStatsWrapper)//
                 .next(sortContactWrapper)//
+                .next(sortProductWrapper) //
                 .next(calculatePurchaseHistoryWrapper)//
                 .next(updateStatsObjects) //
                 .next(redshiftPublishWorkflow) //
