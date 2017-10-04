@@ -51,6 +51,7 @@ public class AMSeedMergeServiceImplTestNG
     private static final String DUNS_NUMBER = "DUNS_NUMBER";
     private static final String LE_PRIMARY_DUNS = "LE_PRIMARY_DUNS";
     private static final String GLOBAL_ULTIMATE_DUNS_NUMBER = "GLOBAL_ULTIMATE_DUNS_NUMBER";
+    private static final String HEADQUARTER_PARENT_DUNS_NUMBER = "HEADQUARTER_PARENT_DUNS_NUMBER";
     private static final String DOMAIN = "Domain";
     private static final String LE_DOMAIN = "LE_DOMAIN";
     private static final String NAME = "Name";
@@ -205,71 +206,72 @@ public class AMSeedMergeServiceImplTestNG
         columns.add(Pair.of(OUT_OF_BUSINESS_INDICATOR, String.class));
         columns.add(Pair.of(EMPLOYEES_TOTAL, String.class));
         columns.add(Pair.of(CHIEF_EXECUTIVE_OFFICER_NAME, String.class));
+        columns.add(Pair.of(HEADQUARTER_PARENT_DUNS_NUMBER, String.class));
         uploadBaseSourceData(dnBCacheSeed.getSourceName(), baseSourceVersion, columns, dnbData);
     }
 
     private Object[][] dnbData = new Object[][] { //
             { "a.com", "Y", "Y", 2, "111", "111", "DnBName111", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI111", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI111", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "Y", "N", 3, "222", "222", "DnBName222", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI222", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI222", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "c.com", "Y", "Y", 4, "333", "333", "DnBName333", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI333", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI333", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "e.com", "Y", "Y", 5, "444", "444", "DnBName444", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI444", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI444", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "e.com", "N", "Y", 6, "555", "444", "DnBName555", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI555", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI555", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "Y", "Y", 7, "666", "666", "DnBName666", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI666", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI666", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "N", "N", 8, "777", "666", "DnBName777", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI777", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI777", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "N", "N", 9, "888", "999", "DnBName888", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI888", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI888", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "g.com", "Y", "Y", 10, "999", "999", "DnBName999", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI999", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI999", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "g.com", "N", "Y", 11, "101010", "999", "DnBName101010", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI101010", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI101010", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "N", "N", 12, "111111", "121212", "DnBName111111", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPI111111", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPI111111", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "h.com", "Y", "Y", 13, "121212", "121212", "DnBName121212", "CA", "United States", "England", 1000000L,
-                    1000, "DnBPI121212", null, null, null, null, null, null, null, null, null, null, null }, //
+                    1000, "DnBPI121212", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "h.com", "N", "Y", 14, "131313", "121212", "DnBName131313", "CA", "United States", "England", 1000000L,
-                    1000, "DnBPI131313", null, null, null, null, null, null, null, null, null, null, null }, //
+                    1000, "DnBPI131313", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "Y", "N", 15, "NoDu111", null, "DnBNameNoDu111", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPINoDu111", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPINoDu111", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "b.com", "Y", "Y", 16, "NoDu222", null, "DnBNameNoDu222", "CA", "United States", "England", 1000000L,
-                    1000, "DnBPINoDu222", null, null, null, null, null, null, null, null, null, null, null }, //
+                    1000, "DnBPINoDu222", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "c.com", "Y", "Y", 16, "NoDu222", null, "DnBNameNoDu222", "CA", "United States", "England", 1000000L,
-                    1000, "DnBPINoDu222", null, null, null, null, null, null, null, null, null, null, null }, //
+                    1000, "DnBPINoDu222", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "b.com", "Y", "Y", 17, "NoDu333", null, "DnBNameNoDu333", "CA", "United States", "England", 1000000L,
-                    1000, "DnBPINoDu333", null, null, null, null, null, null, null, null, null, null, null }, //
+                    1000, "DnBPINoDu333", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "c.com", "Y", "N", 17, "NoDu444", null, "DnBNameNoDu444", "CA", "United States", "England", 1000000L,
-                    1000, "DnBPINoDu444", null, null, null, null, null, null, null, null, null, null, null }, //
+                    1000, "DnBPINoDu444", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "Y", "N", 17, "NoDu555", null, "DnBNameNoDu555", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPINoDu555", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPINoDu555", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { null, "Y", "Y", 17, "NoDu666", null, "DnBNameNoDu666", "CA", "United States", "England", 1000000L, 1000,
-                    "DnBPINoDu666", null, null, null, null, null, null, null, null, null, null, null }, //
+                    "DnBPINoDu666", null, null, null, null, null, null, null, null, null, null, null, null }, //
             { "z.com", "Y", "N", 18, "DunsTestIsPriDom111", null, "DnBNameTestIsPriDom111", "CA", "United States",
                     "England", 1000000L, 1000, "DnBPITestIsPriDom111", null, null, null, null, null, null, null, null,
-                    null, null, null }, //
+                    null, null, null, null }, //
             { null, "Y", "Y", 19, "DunsTestIsPriDom222", null, "DnBNameTestIsPriDom222", "CA", "United States",
                     "England", 1000000L, 1000, "DnBPITestIsPriDom222", null, null, null, null, null, null, null, null,
-                    null, null, null }, //
+                    null, null, null, null }, //
             { "x.com", "Y", "Y", 20, "DunsTestIsPriDom333", null, "DnBNameTestIsPriDom333", "CA", "United States",
                     "England", 1000000L, 1000, "DnBPITestIsPriDom333", null, null, null, null, null, null, null, null,
-                    null, null, null }, //
+                    null, null, null, null }, //
             { "y.com", "Y", "N", 20, "DunsTestIsPriDom333", null, "DnBNameTestIsPriDom333", "CA", "United States",
                     "England", 1000000L, 1000, "DnBPITestIsPriDom333", null, null, null, null, null, null, null, null,
-                    null, null, null }, //
+                    null, null, null, null }, //
             { "zz.com", "Y", "Y", 21, "DunsTestPartialMissDom", null, "DnBNameTestPartialMissDom", "CA",
                     "United States", "England", 1000000L, 1000, "DnBPITestPartialMissDom", null, null, null, null, null,
-                    null, null, null, null, null, null }, //
+                    null, null, null, null, null, null, null }, //
             { "yy.com", "Y", "Y", 21, "DunsTestPartialMissDom", null, "DnBNameTestPartialMissDom", "CA",
                     "United States", "England", 1000000L, 1000, "DnBPITestPartialMissDom", null, null, null, null, null,
-                    null, null, null, null, null, null }, //
+                    null, null, null, null, null, null, null }, //
             { null, "Y", "Y", 21, "DunsTestPartialMissDom", null, "DnBNameTestPartialMissDom", "CA", "United States",
                     "England", 1000000L, 1000, "DnBPITestPartialMissDom", null, null, null, null, null, null, null,
-                    null, null, null, null }, //
+                    null, null, null, null, null }, //
     };
 
     private void prepareLeSeed() {
