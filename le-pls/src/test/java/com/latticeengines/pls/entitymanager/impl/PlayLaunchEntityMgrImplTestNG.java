@@ -92,6 +92,10 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         playLaunchEntityMgr.create(playLaunch1);
         Thread.sleep(2000);
         playLaunchEntityMgr.create(playLaunch2);
+        long playLaunch1Pid = playLaunch1.getPid();
+        long playLaunch2Pid = playLaunch2.getPid();
+        Assert.assertTrue(playLaunch1Pid >= playLaunch1Pid);
+        Assert.assertTrue(playLaunch2Pid >= playLaunch1Pid);
         Assert.assertNotNull(playLaunch1.getLaunchId());
         Assert.assertNotNull(playLaunch2.getLaunchId());
     }

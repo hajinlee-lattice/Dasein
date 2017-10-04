@@ -44,12 +44,14 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
 
+    public static final int PID_INIT_VALUE = 1_000_000; // 1M
+
     public PlayLaunch() {
     }
 
     @Id
     @Basic(optional = false)
-    @TableGenerator(name = "PlayLaunch_SEQ_GEN", table = "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName = "SEQUENCE_VAL", pkColumnValue = "PlayLaunch_SEQUENCE", initialValue = 1000000, allocationSize = 1)
+    @TableGenerator(name = "PlayLaunch_SEQ_GEN", table = "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName = "SEQUENCE_VAL", pkColumnValue = "PlayLaunch_SEQUENCE", initialValue = PID_INIT_VALUE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "PlayLaunch_SEQ_GEN")
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
