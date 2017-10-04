@@ -76,7 +76,7 @@ public class AttributeLookup extends Lookup {
         if (StringUtils.isNotBlank(str)) {
             try {
                 String[] tokens = str.split("\\.");
-                if (tokens.length > 2) {
+                if (tokens.length >= 2) {
                     BusinessEntity entity = BusinessEntity.valueOf(tokens[0]);
                     String attrName = str.replace(tokens[0] + ".", "");
                     return new AttributeLookup(entity, attrName);
