@@ -24,6 +24,7 @@ import com.latticeengines.actors.exposed.ActorSystemFactory;
 import com.latticeengines.actors.exposed.MetricActor;
 import com.latticeengines.actors.exposed.RoutingLogic;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DnBCacheLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryBasedMicroEngineActor;
@@ -33,6 +34,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngi
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchAnchorActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToCachedDunsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 
 import akka.actor.ActorRef;
@@ -59,6 +61,9 @@ public class MatchActorSystem {
 
     @Value("${datacloud.match.dnbLookupActor.actor.cardinality:3}")
     private int dnbLookupActorCardinality;
+
+    @Value("${datacloud.match.dnbCacheLookupActor.actor.cardinality:3}")
+    private int dnbCacheLookupActorCardinality;
 
     @Value("${datacloud.match.dynamoLookupActor.actor.cardinality:10}")
     private int dynamoLookupActorCardinality;
@@ -191,6 +196,7 @@ public class MatchActorSystem {
     private void initActors() {
         initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
         initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
+        initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
 
         initMicroEngines();
 
@@ -206,6 +212,7 @@ public class MatchActorSystem {
         initNamedActor(DomainBasedMicroEngineActor.class);
         initNamedActor(DunsBasedMicroEngineActor.class);
         initNamedActor(LocationToDunsMicroEngineActor.class);
+        initNamedActor(LocationToCachedDunsMicroEngineActor.class);
         initNamedActor(DomainCountryZipCodeBasedMicroEngineActor.class);
         initNamedActor(DomainCountryStateBasedMicroEngineActor.class);
         initNamedActor(DomainCountryBasedMicroEngineActor.class);

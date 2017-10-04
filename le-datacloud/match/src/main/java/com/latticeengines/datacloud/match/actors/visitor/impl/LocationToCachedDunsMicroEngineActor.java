@@ -21,11 +21,13 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
-@Component("locationBasedMicroEngineActor")
+@Component("locationCacheBasedMicroEngineActor")
 @Scope("prototype")
-public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<DnbLookupActor> {
-    private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
+public class LocationToCachedDunsMicroEngineActor extends MicroEngineActorTemplate<DnBCacheLookupActor> {
+    private static final Logger log = LoggerFactory.getLogger(LocationToCachedDunsMicroEngineActor.class);
 
+    private static final String HIT_WHITE_CACHE = "Retrieved a DUNS from white cache using Id=%s. Did not go to remote DnB API.";
+    private static final String HIT_BLACK_CACHE = "Fast failed by black cache with Id=%s. Did not go to remote DnB API.";
     private static final String HIT_NO_CACHE = "Did not hit either white or black cache. Went to remote DnB API.";
 
     @PostConstruct
@@ -34,8 +36,8 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     }
 
     @Override
-    protected Class<DnbLookupActor> getDataSourceActorClz() {
-        return DnbLookupActor.class;
+    protected Class<DnBCacheLookupActor> getDataSourceActorClz() {
+        return DnBCacheLookupActor.class;
     }
 
     @Override
@@ -45,14 +47,14 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
 
         if (matchKeyTuple.getDuns() != null && MapUtils.isNotEmpty(dunsOriginMap)
                 && (dunsOriginMap.containsKey(this.getClass().getName())
-                        || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName()))) {
+                        || dunsOriginMap.containsKey(LocationToDunsMicroEngineActor.class.getName()))) {
             // if DunsOriginMap has entry which was already made by this actor
             // class and current DUNS is not null then reject it
             return false;
         }
 
         MatchInput input = ((MatchTraveler) traveler).getMatchInput();
-        if (!Boolean.TRUE.equals(input.getUseRemoteDnB())) {
+        if (!Boolean.TRUE.equals(input.isUseDnBCache())) {
             return false;
         }
 
@@ -69,7 +71,8 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
             MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
             DnBMatchContext res = (DnBMatchContext) response.getResult();
-            traveler.debug(HIT_NO_CACHE);
+            traveler.debug(res.getHitWhiteCache() ? String.format(HIT_WHITE_CACHE, res.getCacheId())
+                    : (res.getHitBlackCache() ? String.format(HIT_BLACK_CACHE, res.getCacheId()) : HIT_NO_CACHE));
             String logMessage = String.format(
                     "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s, IsDunsInAM = %s.",
                     res.getDuns(), getClass().getSimpleName(),

@@ -53,7 +53,7 @@ import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
-@Component("dnBLookupService")
+@Component("dnbLookupService")
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements DnBLookupService {
     private static final Logger log = LoggerFactory.getLogger(DnBLookupServiceImpl.class);
 
@@ -221,52 +221,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setDataCloudVersion(traveler.getDataCloudVersion());
         context.setRootOperationUid(traveler.getMatchInput().getRootOperationUid());
-        if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
-            Long startTime = System.currentTimeMillis();
-            DnBCache cache = dnbCacheService.lookupCache(context);
-            if (cache != null) {
-                if (cache.isWhiteCache()) {
-                    if ((request.getMatchTravelerContext().getMatchInput() != null
-                            && request.getMatchTravelerContext().getMatchInput().isDisableDunsValidation())
-                            || adoptWhiteCache(cache, context.getDataCloudVersion())) {
-                        context.copyResultFromCache(cache);
-                        dnbMatchResultValidator.validate(context);
-                        log.info(String.format(
-                                "Found DnB match context in white cache%s: Name=%s, Country=%s, State=%s, City=%s, "
-                                        + "ZipCode=%s, PhoneNumber=%s, DUNS=%s, ConfidenceCode=%d, MatchGrade=%s, "
-                                        + "OutOfBusiness=%s, IsDunsInAM=%s, Duration=%d",
-                                context.getRootOperationUid() == null ? ""
-                                        : " (RootOperationID=" + context.getRootOperationUid() + ")",
-                                context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
-                                context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
-                                context.getInputNameLocation().getZipcode(),
-                                context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
-                                context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
-                                context.isOutOfBusinessString(), context.isDunsInAMString(),
-                                System.currentTimeMillis() - startTime));
-                        readyToReturn = true;
-                    } else {
-                        log.info(String.format(
-                                "Reject invalid white cache: Id=%s DUNS=%s OutOfBusiness=%s IsDunsInAM=%s",
-                                cache.getId(), cache.getDuns(), cache.isOutOfBusinessString(),
-                                cache.isDunsInAMString()));
-                    }
-                } else {
-                    context.copyResultFromCache(cache);
-                    log.info(String.format(
-                            "Found DnB match context in black cache%s: Name=%s, Country=%s, State=%s, City=%s, "
-                                    + "ZipCode=%s, PhoneNumber=%s, Duration=%d",
-                            context.getRootOperationUid() == null ? ""
-                                    : " (RootOperationID=" + context.getRootOperationUid() + ")",
-                            context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
-                            context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
-                            context.getInputNameLocation().getZipcode(),
-                            context.getInputNameLocation().getPhoneNumber(), System.currentTimeMillis() - startTime));
-                    readyToReturn = true;
-                }
-
-            }
-        }
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             context = dnbRealtimeLookup(context);
             readyToReturn = true;
@@ -305,55 +259,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         context.setDataCloudVersion(traveler.getDataCloudVersion());
         context.setLogDnBBulkResult(traveler.getMatchInput().isLogDnBBulkResult());
         context.setRootOperationUid(traveler.getMatchInput().getRootOperationUid());
-        if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
-            Long startTime = System.currentTimeMillis();
-            DnBCache cache = dnbCacheService.lookupCache(context);
-            if (cache != null) {
-                if (cache.isWhiteCache()) {
-                    if ((request.getMatchTravelerContext().getMatchInput() != null
-                            && request.getMatchTravelerContext().getMatchInput().isDisableDunsValidation())
-                            || adoptWhiteCache(cache, context.getDataCloudVersion())) {
-                        context.copyResultFromCache(cache);
-                        dnbMatchResultValidator.validate(context);
-                        if (context.getLogDnBBulkResult()) {
-                            log.info(String.format(
-                                    "Found DnB match context in white cache: Name=%s, Country=%s, State=%s, City=%s, "
-                                            + "ZipCode=%s, PhoneNumber=%s, DUNS=%s, ConfidenceCode=%d, MatchGrade=%s, "
-                                            + "OutOfBusiness=%s, IsDunsInAM=%s, Duration=%d",
-                                    context.getInputNameLocation().getName(),
-                                    context.getInputNameLocation().getCountry(),
-                                    context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
-                                    context.getInputNameLocation().getZipcode(),
-                                    context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
-                                    context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
-                                    context.isOutOfBusinessString(), context.isDunsInAMString(),
-                                    System.currentTimeMillis() - startTime));
-                        }
-                        readyToReturn = true;
-                    } else {
-                        log.info(String.format(
-                                "Reject invalid white cache: Id=%s DUNS=%s OutOfBusiness=%s IsDunsInAM=%s",
-                                cache.getId(), cache.getDuns(), cache.isOutOfBusinessString(),
-                                cache.isDunsInAMString()));
-                    }
-                } else {
-                    context.copyResultFromCache(cache);
-                    if (context.getLogDnBBulkResult()) {
-                        log.info(String.format(
-                                "Found DnB match context in black cache: Name=%s, Country=%s, State=%s, City=%s, "
-                                        + "ZipCode=%s, PhoneNumber=%s, Duration=%d",
-                                context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
-                                context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
-                                context.getInputNameLocation().getZipcode(),
-                                context.getInputNameLocation().getPhoneNumber(),
-                                System.currentTimeMillis() - startTime));
-                    }
-                    readyToReturn = true;
-                }
-
-            }
-        }
-
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             saveReq(lookupRequestId, returnAddress, request);
             // Bucket single contexts to batched contexts in unsubmittedReqs
@@ -654,24 +559,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 batchContext.getServiceBatchId(), batchContext.getRootOperationUid(), batchContext.getTimestamp(),
                 finishTime, batchContext.getContexts().size(),
                 (finishTime.getTime() - batchContext.getTimestamp().getTime()) / 60000));
-    }
-
-    /**
-     * Pre-validation before DnB remote lookup
-     */
-    private boolean adoptWhiteCache(DnBCache cache, String dataCloudVersion) {
-        if (cache.isDunsInAM() == null) {
-            return false;
-        }
-        if (Boolean.TRUE.equals(cache.isOutOfBusiness())) {
-            return true;
-        }
-        boolean currentIsDunsInAM = isDunsInAM(cache.getDuns(), dataCloudVersion);
-        if (currentIsDunsInAM == cache.isDunsInAM().booleanValue()) {
-            return true;    // If adopted cache has isDunsInAM == false, it will be discarded in DnBMatchResultValidator
-        } else {
-            return false;
-        }
     }
 
     /**

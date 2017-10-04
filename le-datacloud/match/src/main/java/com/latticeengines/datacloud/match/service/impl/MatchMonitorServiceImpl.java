@@ -46,7 +46,7 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
     private DnBLookupService dnbLookupService;
 
     @Autowired
-    @Resource(name = "dnBLookupService")
+    @Resource(name = "dnbLookupService")
     private DataSourceLookupService dnbDataSourceLookupService;
 
     @Autowired

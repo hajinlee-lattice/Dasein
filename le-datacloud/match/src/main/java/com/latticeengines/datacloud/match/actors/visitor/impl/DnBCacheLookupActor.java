@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 
-@Component("dnbLookupActor")
+@Component("dnbCacheLookupActor")
 @Scope("prototype")
-public class DnbLookupActor extends DataSourceWrapperActorTemplate {
-    private static final Logger log = LoggerFactory.getLogger(DnbLookupActor.class);
+public class DnBCacheLookupActor extends DataSourceWrapperActorTemplate {
+    private static final Logger log = LoggerFactory.getLogger(DnBCacheLookupActor.class);
 
     @PostConstruct
     public void postConstruct() {
@@ -23,12 +23,12 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     }
 
     @Autowired
-    @Qualifier("dnbLookupService")
-    private DataSourceLookupServiceBase dnbLookupService;
+    @Qualifier("dnbCacheLookupService")
+    private DataSourceLookupServiceBase dnBCacheLookupService;
 
     @Override
     protected DataSourceLookupService getDataSourceLookupService() {
-        return dnbLookupService;
+        return dnBCacheLookupService;
     }
 
     @Override
