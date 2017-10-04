@@ -25,13 +25,12 @@ public class CaseResolver extends BaseLookupResolver<CaseLookup> implements Look
         this.factory = restrictionResolverFactory;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ComparableExpression<? extends Comparable>> resolveForCompare(CaseLookup lookup) {
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(CaseLookup lookup) {
         return Collections.singletonList((StringExpression) resolveForSelect(lookup, false));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Expression<?> resolveForSelect(CaseLookup lookup, boolean asAlias) {
         CaseBuilder caseBuilder = new CaseBuilder();

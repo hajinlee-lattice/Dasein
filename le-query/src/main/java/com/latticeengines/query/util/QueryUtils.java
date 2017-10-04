@@ -34,11 +34,11 @@ public final class QueryUtils {
         return Expressions.stringPath(Expressions.stringPath(alias), attrName);
     }
 
-    public static NumberPath getAttributeNumberPath(BusinessEntity entity, String attrName) {
+    public static NumberPath<?> getAttributeNumberPath(BusinessEntity entity, String attrName) {
         return Expressions.numberPath(BigDecimal.class, Expressions.stringPath(entity.name()), attrName);
     }
 
-    public static NumberPath getAttributeNumberPath(SubQuery subQuery, String attrName) {
+    public static NumberPath<?> getAttributeNumberPath(SubQuery subQuery, String attrName) {
         return Expressions.numberPath(BigDecimal.class, Expressions.stringPath(subQuery.getAlias()), attrName);
     }
 

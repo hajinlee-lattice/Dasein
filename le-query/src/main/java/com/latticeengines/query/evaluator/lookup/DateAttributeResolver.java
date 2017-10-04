@@ -36,9 +36,9 @@ public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup
         return resolveForDate(lookup.getEntity(), cm, lookup.getPeriod(), false);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked"})
     @Override
-    public List<ComparableExpression<? extends Comparable>> resolveForCompare(DateAttributeLookup lookup) {
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(DateAttributeLookup lookup) {
         if (lookup.getEntity() == null) {
             return Collections.singletonList(QueryUtils.getAttributePath(lookup.getAttribute()));
         }
@@ -56,7 +56,7 @@ public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup
             datePath = ExpressionTemplateUtils.strAttrToDate(datePath);
         }
         return Expressions.dateTemplate(Date.class,
-                ExpressionTemplateUtils.getDateTemplateTruncatedOnPeriod(p, datePath));
+                ExpressionTemplateUtils.getDateOnPeriodTemplate(p, datePath));
     }
 
 }

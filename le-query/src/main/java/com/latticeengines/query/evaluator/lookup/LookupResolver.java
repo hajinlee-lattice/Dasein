@@ -17,7 +17,7 @@ public interface LookupResolver<T extends Lookup> {
         throw new UnsupportedOperationException("Resolve for subselect is not supported yet");
     }
 
-    default List<ComparableExpression<? extends Comparable>> resolveForCompare(T lookup) {
+    default List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(T lookup) {
         throw new UnsupportedOperationException("Resolve for compare is not supported yet");
     }
 

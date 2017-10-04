@@ -15,9 +15,8 @@ public class ValueResolver<T extends ValueLookup> extends BaseLookupResolver<T> 
         super(repository);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public List<ComparableExpression<? extends Comparable>> resolveForCompare(ValueLookup lookup) {
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(ValueLookup lookup) {
         return Collections.singletonList(Expressions.asComparable(lookup.getValue().toString()));
     }
 

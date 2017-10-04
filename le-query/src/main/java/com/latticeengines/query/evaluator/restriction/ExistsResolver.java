@@ -31,7 +31,7 @@ public class ExistsResolver extends BaseRestrictionResolver<ExistsRestriction>
         this.attrRepo = getAttrRepo();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public BooleanExpression resolve(ExistsRestriction restriction) {
         BusinessEntity tgtEntity = restriction.getEntity();

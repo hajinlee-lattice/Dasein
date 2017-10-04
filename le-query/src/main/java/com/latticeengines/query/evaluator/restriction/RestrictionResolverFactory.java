@@ -21,7 +21,7 @@ public final class RestrictionResolverFactory {
     private List<JoinSpecification> existsJoins;
     private QueryFactory queryFactory;
     private QueryProcessor queryProcessor;
-    private Map<String, RestrictionResolver> resolvers = new HashMap<>();
+    private Map<String, RestrictionResolver<?>> resolvers = new HashMap<>();
 
     public RestrictionResolverFactory(LookupResolverFactory lookupFactory, List<JoinSpecification> existsJoins,
             QueryFactory queryFactory, QueryProcessor queryProcessor) {

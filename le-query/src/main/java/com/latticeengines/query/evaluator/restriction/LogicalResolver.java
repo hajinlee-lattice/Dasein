@@ -14,7 +14,7 @@ public class LogicalResolver extends BaseRestrictionResolver<LogicalRestriction>
         super(factory);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public BooleanExpression resolve(LogicalRestriction restriction) {
         BooleanExpression[] childExpressions = new BooleanExpression[restriction.getRestrictions().size()];

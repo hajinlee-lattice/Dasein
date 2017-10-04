@@ -17,11 +17,11 @@ public class RangeResolver extends BaseLookupResolver<RangeLookup> implements Lo
     }
 
     @Override
-    public List<ComparableExpression<? extends Comparable>> resolveForCompare(RangeLookup lookup) {
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(RangeLookup lookup) {
         if (lookup.getMin() == null || lookup.getMax() == null) {
             throw new QueryEvaluationException("Range lookup must have both boundaries not null.");
         }
-        List<ComparableExpression<? extends Comparable>> expressions = new ArrayList<>();
+        List<ComparableExpression<? extends Comparable<?>>> expressions = new ArrayList<>();
         ComparableExpression<String> min = Expressions.asComparable(lookup.getMin().toString());
         ComparableExpression<String> max = Expressions.asComparable(lookup.getMax().toString());
         expressions.add(min);

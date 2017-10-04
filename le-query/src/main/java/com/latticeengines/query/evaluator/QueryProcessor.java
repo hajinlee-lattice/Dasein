@@ -128,8 +128,8 @@ public class QueryProcessor {
                     .filter(Objects::nonNull) //
                     .findAny() //
                     .orElseThrow(() -> new QueryEvaluationException(
-                            "Broken Connectivity: Cannot find a connected path from entity "
-                                    + join.getSourceEntity() + " to entity " + target + "."));
+                            "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity()
+                                    + " to entity " + target + "."));
             // JOIN T1
             EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, target);
             sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
@@ -169,10 +169,11 @@ public class QueryProcessor {
         return sqlQuery;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups) {
         List<Expression<?>> expressions = new ArrayList<>();
         for (Lookup lookup : lookups) {
+
             LookupResolver resolver = factory.getLookupResolver(lookup.getClass());
             Expression<?> expression = resolver.resolveForSelect(lookup, true);
             expressions.add(expression);
@@ -183,7 +184,7 @@ public class QueryProcessor {
         return Expressions.list(expressions.toArray(new Expression<?>[expressions.size()]));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private BooleanExpression processRestriction(Restriction restriction, LookupResolverFactory resolverFactory,
             List<JoinSpecification> existsJoins) {
         RestrictionResolverFactory factory = new RestrictionResolverFactory(resolverFactory, existsJoins, queryFactory,
@@ -202,7 +203,7 @@ public class QueryProcessor {
         return sqlQuery;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private SQLQuery<?> addSort(SQLQuery<?> sqlQuery, Sort sort, LookupResolverFactory resolverFactory) {
         if (sort != null) {
             LookupResolver resolver = resolverFactory.getLookupResolver(AttributeLookup.class);
@@ -221,7 +222,7 @@ public class QueryProcessor {
         return sqlQuery;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private SQLQuery<?> addGroupBy(SQLQuery<?> sqlQuery, GroupBy groupBy, LookupResolverFactory resolverFactory) {
         if (groupBy != null) {
             for (Lookup lookup : groupBy.getLookups()) {

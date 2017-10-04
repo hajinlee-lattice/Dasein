@@ -28,9 +28,8 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         this.factory = factory;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ComparableExpression<? extends Comparable>> resolveForCompare(AggregateLookup lookup) {
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(AggregateLookup lookup) {
         switch (lookup.getAggregator()) {
         case SUM:
         case AVG:
@@ -43,7 +42,6 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Expression<?> resolveForSelect(AggregateLookup lookup, boolean asAlias) {
         switch (lookup.getAggregator()) {
@@ -59,13 +57,12 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private List<ComparableExpression<? extends Comparable>> numExpressionForCompare(AggregateLookup lookup) {
-        NumberExpression numExpression = (NumberExpression) numExpressionForSelect(lookup, false);
+    private List<ComparableExpression<? extends Comparable<?>>> numExpressionForCompare(AggregateLookup lookup) {
+        NumberExpression<?> numExpression = (NumberExpression<?>) numExpressionForSelect(lookup, false);
         return Collections.singletonList(Expressions.asComparable(numExpression));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Expression<?> numExpressionForSelect(AggregateLookup lookup, boolean asAlias) {
         if (lookup.getLookup() == null) {
             throw new RuntimeException("Sum aggregation cannot be applied for empty lookup.");

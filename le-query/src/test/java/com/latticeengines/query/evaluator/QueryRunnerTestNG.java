@@ -34,7 +34,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     private static final String accountId = "12072224";
 
     @Test(groups = "functional")
-    public void testEntityLookup() {
+    public void testStartsWithLookup() {
         Restriction restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(accountId) //
                 .build();
@@ -122,7 +122,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("1");
         txRestriction.setTimeFilter(
-                new TimeFilter(ComparisonType.BEFORE, Period.Quarter, Arrays.asList(new Object[] { 2 })));
+                new TimeFilter(ComparisonType.BEFORE, Period.Quarter, Arrays.asList(new Object[] { -2 })));
         Restriction restriction = txRestriction.convert(BusinessEntity.Account);
         Restriction countryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
                 .eq("LEICESTER").build();

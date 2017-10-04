@@ -16,11 +16,10 @@ public class DateValueResolver extends BaseLookupResolver<DateValueLookup> imple
         super(repository);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public List<ComparableExpression<? extends Comparable>> resolveForCompare(DateValueLookup lookup) {
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(DateValueLookup lookup) {
         return Collections.singletonList(Expressions.dateTemplate(Date.class,
-                ExpressionTemplateUtils.getDateTemplateValueOnPeriod(lookup.getPeriod(),
+                ExpressionTemplateUtils.getDateTargetValueOnPeriodTemplate(lookup.getPeriod(),
                         Integer.valueOf(lookup.getValue().toString()), ExpressionTemplateUtils.getCurrentDate())));
     }
 

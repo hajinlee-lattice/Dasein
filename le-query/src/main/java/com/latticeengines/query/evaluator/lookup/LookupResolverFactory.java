@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.DateAttributeLookup;
 import com.latticeengines.domain.exposed.query.DateValueLookup;
 import com.latticeengines.domain.exposed.query.EntityLookup;
+import com.latticeengines.domain.exposed.query.FunctionLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
@@ -22,7 +23,7 @@ import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 public final class LookupResolverFactory {
 
     private AttributeRepository attrRepo;
-    private Map<String, LookupResolver> resolvers = new HashMap<>();
+    private Map<String, LookupResolver<?>> resolvers = new HashMap<>();
     private RestrictionResolverFactory restrictionResolverFactory;
     private QueryProcessor queryProcessor;
 
@@ -39,9 +40,10 @@ public final class LookupResolverFactory {
         return (LookupResolver<T>) resolvers.get(lookupType.getSimpleName());
     }
 
+    @SuppressWarnings("rawtypes")
     private <T extends Lookup> void initializeResolver(Class<T> lookupType) {
         if (lookupType.isAssignableFrom(AttributeLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new AttributeResolver(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new AttributeResolver<AttributeLookup>(attrRepo));
             return;
         }
         if (lookupType.isAssignableFrom(DateAttributeLookup.class)) {
@@ -65,7 +67,7 @@ public final class LookupResolverFactory {
             return;
         }
         if (lookupType.isAssignableFrom(ValueLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new ValueResolver(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new ValueResolver<ValueLookup>(attrRepo));
             return;
         }
         if (lookupType.isAssignableFrom(DateValueLookup.class)) {
@@ -78,6 +80,10 @@ public final class LookupResolverFactory {
         }
         if (lookupType.isAssignableFrom(CaseLookup.class)) {
             resolvers.put(lookupType.getSimpleName(), new CaseResolver(attrRepo, restrictionResolverFactory));
+            return;
+        }
+        if (lookupType.isAssignableFrom(FunctionLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new FunctionResolver(attrRepo));
             return;
         }
         throw new QueryEvaluationException("Do not support lookup of type " + lookupType + " yet.");
