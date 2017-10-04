@@ -19,7 +19,11 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION} || true
     mkdir -p ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}
     tar xzf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz -C ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}
-    cp -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}/* ${HADOOP_HOME}
+    if [ -d "${ARTIFACT_DIR}/hadoop-${HDP_VERSION}/hadoop-${HDP_VERSION}" ]; then
+        cp -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}/hadoop-${HDP_VERSION}/* ${HADOOP_HOME}
+    else
+        cp -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}/* ${HADOOP_HOME}
+    fi
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}
 
     rm -rf ${HADOOP_HOME}/lib/native || true
