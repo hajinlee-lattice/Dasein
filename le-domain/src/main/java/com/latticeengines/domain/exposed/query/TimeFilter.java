@@ -28,6 +28,11 @@ public class TimeFilter extends Restriction {
     public TimeFilter() {
     }
 
+    public TimeFilter(ComparisonType relation, List<Object> values) {
+        this.relation = relation;
+        this.values = values;
+    }
+
     public TimeFilter(ComparisonType relation, Period p, List<Object> values) {
         this(null, relation, p, values);
     }

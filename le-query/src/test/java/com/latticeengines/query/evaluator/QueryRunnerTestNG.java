@@ -117,7 +117,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 6);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testTransactionSelectWithTimeFilter() throws ParseException {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("1");

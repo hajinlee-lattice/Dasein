@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -28,6 +27,10 @@ public class AttributeLookup extends Lookup {
     private String attribute;
 
     public AttributeLookup() {
+    }
+
+    public AttributeLookup(String attrName) {
+        this.attribute = attrName;
     }
 
     public AttributeLookup(BusinessEntity entity, String attrName) {
