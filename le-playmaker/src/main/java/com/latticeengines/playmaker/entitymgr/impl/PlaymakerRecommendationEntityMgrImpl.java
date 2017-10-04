@@ -58,7 +58,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public Map<String, Object> getAccountExtensions(String tenantName, String lookupSource, long start, int offset,
+    public Map<String, Object> getAccountExtensions(String tenantName, String lookupSource, Long start, int offset,
             int maximum, List<String> accountIds, String filterBy, Long recStart, String columns,
             boolean hasSfdcContactId) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
@@ -70,7 +70,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public Map<String, Object> getAccountextExsionCount(String tenantName, String lookupSource, long start,
+    public Map<String, Object> getAccountextExsionCount(String tenantName, String lookupSource, Long start,
             List<String> accountIds, String filterBy, Long recStart) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 

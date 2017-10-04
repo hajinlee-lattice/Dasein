@@ -20,7 +20,7 @@ public interface PlaymakerRecommendationEntityMgr {
     Map<String, Object> getPlays(String tenantName, String lookupSource, long start, int offset, int maximum,
             List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountExtensions(String tenantName, String lookupSource, long start, int offset,
+    Map<String, Object> getAccountExtensions(String tenantName, String lookupSource, Long start, int offset,
             int maximum, List<String> accountIds, String filterBy, Long recStart, String columns,
             boolean hasSfdcContactId);
 
@@ -34,7 +34,7 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlayCount(String tenantName, String lookupSource, long start, List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountextExsionCount(String tenantName, String lookupSource, long start,
+    Map<String, Object> getAccountextExsionCount(String tenantName, String lookupSource, Long start,
             List<String> accountIds, String filterBy, Long recStart);
 
     Map<String, Object> getPlayValueCount(String tenantName, String lookupSource, long start,

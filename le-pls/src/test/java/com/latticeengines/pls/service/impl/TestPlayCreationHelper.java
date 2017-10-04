@@ -44,7 +44,7 @@ public class TestPlayCreationHelper {
 
     private PlayLaunch playLaunch;
 
-    public void setupTenantAndCreatePlay() throws Exception {
+    public void setupTenant() {
         tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
         if (tenant == null) {
             System.out.println("Creating new tenant: " + tenantIdentifier);
@@ -53,6 +53,10 @@ public class TestPlayCreationHelper {
             deploymentTestBed.loginAD();
             deploymentTestBed.getTestTenants().add(tenant);
         }
+    }
+
+    public void setupTenantAndCreatePlay() throws Exception {
+        setupTenant();
 
         playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
         playResourceDeploymentTestNG.setMainTestTenant(tenant);
@@ -95,7 +99,7 @@ public class TestPlayCreationHelper {
 
         // temporary
         propertiesMap.put("common.microservice.url",
-                "https://internal-private-lpi-b-282775961.us-east-1.elb.amazonaws.com");
+                "https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com");
 
         EntityProxy entityProxy = new EntityProxy();
 

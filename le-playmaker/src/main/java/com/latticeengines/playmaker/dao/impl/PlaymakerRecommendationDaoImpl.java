@@ -109,7 +109,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getRecommendationCount(long start, int syncDestination, List<String> idStrList) {
+    public long getRecommendationCount(long start, int syncDestination, List<String> idStrList) {
         List<Integer> playIds = idStrListToIntList(idStrList);
 
         String sql = "SELECT COUNT(*) " + getRecommendationFromWhereClause(syncDestination, playIds);
@@ -120,7 +120,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(playIds)) {
             source.addValue("playIds", playIds);
         }
-        return queryForObject(sql, source, Integer.class);
+        return queryForObject(sql, source, Long.class);
     }
 
     protected String getRecommendationFromWhereClause(int syncDestination, List<Integer> playIds) {
@@ -231,14 +231,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getPlayCount(long start, List<Integer> playgroupIds) {
+    public long getPlayCount(long start, List<Integer> playgroupIds) {
         String sql = "SELECT COUNT(*) " + getPlayFromWhereClause(playgroupIds);
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         if (!CollectionUtils.isEmpty(playgroupIds)) {
             source.addValue("playgroupIds", playgroupIds);
         }
-        return queryForObject(sql, source, Integer.class);
+        return queryForObject(sql, source, Long.class);
     }
 
     private String getPlayFromWhereClause(List<Integer> playgroupIds) {
@@ -253,7 +253,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<String> idStrList,
+    public List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, List<String> idStrList,
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
         List<Integer> accountIds = idStrListToIntList(idStrList);
 
@@ -339,7 +339,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getAccountExtensionCount(long start, List<String> idStrList, String filterBy, Long recStart) {
+    public long getAccountExtensionCount(Long start, List<String> idStrList, String filterBy, Long recStart) {
         List<Integer> accountIds = idStrListToIntList(idStrList);
 
         String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy);
@@ -355,7 +355,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(accountIds)) {
             source.addValue("accountIds", accountIds);
         }
-        return queryForObject(sql, source, Integer.class);
+        return queryForObject(sql, source, Long.class);
     }
 
     private String getAccountExtensionFromWhereClause(List<Integer> accountIds, String filterBy) {
@@ -415,7 +415,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getAccountExtensionColumnCount() {
+    public long getAccountExtensionColumnCount() {
         List<Map<String, Object>> schema = getAccountExtensionSchema();
         return schema.size();
     }
@@ -449,7 +449,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds) {
+    public long getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds) {
         String sql = "SELECT COUNT(*) " + getContactFromWhereClause(contactIds, accountIds);
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
@@ -459,7 +459,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(accountIds)) {
             source.addValue("accountIds", accountIds);
         }
-        return queryForObject(sql, source, Integer.class);
+        return queryForObject(sql, source, Long.class);
     }
 
     private String getContactFromWhereClause(List<Integer> contactIds, List<Integer> accountIds) {
@@ -508,14 +508,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getContactExtensionCount(long start, List<Integer> contactIds) {
+    public long getContactExtensionCount(long start, List<Integer> contactIds) {
         String sql = "SELECT COUNT(*) " + getContactExtensionFromWhereClause(contactIds);
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         if (!CollectionUtils.isEmpty(contactIds)) {
             source.addValue("contactIds", contactIds);
         }
-        return queryForObject(sql, source, Integer.class);
+        return queryForObject(sql, source, Long.class);
     }
 
     private String getContactExtensionFromWhereClause(List<Integer> contactIds) {
@@ -555,7 +555,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getContactExtensionColumnCount() {
+    public long getContactExtensionColumnCount() {
         List<Map<String, Object>> schema = getContactExtensionSchema();
         return schema.size();
     }
@@ -590,7 +590,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getPlayValueCount(long start, List<Integer> playgroupIds) {
+    public long getPlayValueCount(long start, List<Integer> playgroupIds) {
         String sql = "SELECT COUNT(*) " + getPlayFromWhereClause(playgroupIds);
 
         MapSqlParameterSource source = new MapSqlParameterSource();
@@ -598,7 +598,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(playgroupIds)) {
             source.addValue("playgroupIds", playgroupIds);
         }
-        return queryForObject(sql, source, Integer.class);
+        return queryForObject(sql, source, Long.class);
     }
 
     @Override
@@ -626,12 +626,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getPlayGroupCount(long start) {
+    public long getPlayGroupCount(long start) {
         String sql = "SELECT COUNT(*) " + getPlayGroupWhereClause();
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
-        return queryForObject(sql, source, Integer.class);
+        return queryForObject(sql, source, Long.class);
     }
 
     private String getPlayGroupWhereClause() {

@@ -8,7 +8,7 @@ public interface LpiPMAccountExtension {
     List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum, List<String> accountIds,
             Long recStart, String columns, boolean hasSfdcContactId);
 
-    int getAccountExtensionCount(long start, List<String> accountIds, Long recStart);
+    long getAccountExtensionCount(long start, List<String> accountIds, Long recStart);
 
     List<Map<String, Object>> getAccountExtensionSchema();
 

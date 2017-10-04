@@ -189,4 +189,14 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertNotNull(tenantNameViaToken);
         Assert.assertEquals(tenantNameViaToken, newTenant.getTenantName());
     }
+    
+    @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant")
+    public void createPrereqForRecommendations() {
+        String url = apiHostPort + "/playmaker/oauthtotenant";
+        String tenantNameViaToken = restTemplate.getForObject(url, String.class);
+        Assert.assertNotNull(tenantNameViaToken);
+        Assert.assertEquals(tenantNameViaToken, newTenant.getTenantName());
+    }
+    
+    
 }

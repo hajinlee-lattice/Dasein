@@ -49,7 +49,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getRecommendationCount(long start, int syncDestination, List<String> playIds) {
+    public long getRecommendationCount(long start, int syncDestination, List<String> playIds) {
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
         return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds);
     }
@@ -60,12 +60,12 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getPlayCount(long start, List<Integer> playgroupIds) {
+    public long getPlayCount(long start, List<Integer> playgroupIds) {
         return lpiPMPlay.getPlayCount(start, playgroupIds);
     }
 
     @Override
-    public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<String> accountIds,
+    public List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, List<String> accountIds,
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
 
         if (StringUtils.isBlank(columns)) {
@@ -81,7 +81,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getAccountExtensionCount(long start, List<String> accountIds, String filterBy, Long recStart) {
+    public long getAccountExtensionCount(Long start, List<String> accountIds, String filterBy, Long recStart) {
         return lpiPMAccountExtension.getAccountExtensionCount(start, accountIds, recStart);
     }
 
@@ -91,7 +91,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getAccountExtensionColumnCount() {
+    public long getAccountExtensionColumnCount() {
         return lpiPMAccountExtension.getAccountExtensionColumnCount();
     }
 
@@ -103,9 +103,9 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds) {
+    public long getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds) {
         // TODO - not implemented in M13
-        return 0;
+        return 0L;
     }
 
     @Override
@@ -116,9 +116,9 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getContactExtensionCount(long start, List<Integer> contactIds) {
+    public long getContactExtensionCount(long start, List<Integer> contactIds) {
         // TODO - not implemented in M13
-        return 0;
+        return 0L;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getContactExtensionColumnCount() {
+    public long getContactExtensionColumnCount() {
         return lpiPMAccountExtension.getContactExtensionColumnCount();
     }
 
@@ -138,7 +138,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getPlayValueCount(long start, List<Integer> playgroupIds) {
+    public long getPlayValueCount(long start, List<Integer> playgroupIds) {
         // TODO - not implemented in M13
         return 0;
     }
@@ -168,7 +168,6 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     public List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum) {
         // TODO - dummy impl in M13, fix in M14
         List<Map<String, Object>> result = new ArrayList<>();
-        Map<String, Object> pg1 = new HashMap<>();
 
         createPlayGroupMap(result, 1, "Enterprise", "Enterprise", 0, 1);
         createPlayGroupMap(result, 2, "Marketing", "Marketing", 0, 2);
@@ -191,7 +190,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @Override
-    public int getPlayGroupCount(long start) {
+    public long getPlayGroupCount(long start) {
         // TODO - dummy impl in M13, fix in M14
         return 2;
     }

@@ -11,10 +11,13 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.DateTimeUtils;
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -23,17 +26,24 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
+import com.latticeengines.playmakercore.service.EntityQueryGenerator;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("lpiPMAccountExtension")
 public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
+    private static final Logger log = LoggerFactory.getLogger(LpiPMAccountExtensionImpl.class);
+
     @Autowired
-    private AccountProxy accountProxy;
+    private EntityProxy entityProxy;
+
+    @Autowired
+    private EntityQueryGenerator entityQueryGenerator;
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
@@ -53,9 +63,11 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         }
 
         dataRequest.setAttributes(attributes);
-        DataPage dataPage = accountProxy.getAccounts(customerSpace,
-                DateTimeUtils.convertToStringUTCISO8601(PlaymakerUtils.dateFromEpochSeconds(start)), offset, maximum,
-                dataRequest);
+
+        FrontEndQuery frontEndQuery = entityQueryGenerator.generateEntityQuery(start, offset, maximum, dataRequest);
+
+        log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
+        DataPage dataPage = entityProxy.getData(customerSpace, frontEndQuery);
 
         return postProcess(dataPage.getData(), offset);
     }
@@ -89,12 +101,14 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     }
 
     @Override
-    public int getAccountExtensionCount(long start, List<String> accountIds, Long recStart) {
+    public long getAccountExtensionCount(long start, List<String> accountIds, Long recStart) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
-        return (int) accountProxy.getAccountsCount(customerSpace,
-                DateTimeUtils.convertToStringUTCISO8601(PlaymakerUtils.dateFromEpochSeconds(start)), dataRequest);
+
+        FrontEndQuery frontEndQuery = entityQueryGenerator.generateEntityQuery(start, dataRequest);
+        log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
+        return entityProxy.getCount(customerSpace, frontEndQuery);
     }
 
     @Override
@@ -143,6 +157,16 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         Table schemaTable = dataCollectionProxy.getTable(customerSpace, role);
         List<Attribute> schemaAttributes = schemaTable.getAttributes();
         return schemaAttributes;
+    }
+
+    @VisibleForTesting
+    void setEntityProxy(EntityProxy entityProxy) {
+        this.entityProxy = entityProxy;
+    }
+
+    @VisibleForTesting
+    void setEntityQueryGenerator(EntityQueryGenerator entityQueryGenerator) {
+        this.entityQueryGenerator = entityQueryGenerator;
     }
 
 }

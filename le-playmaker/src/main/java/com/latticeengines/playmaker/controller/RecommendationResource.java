@@ -117,7 +117,7 @@ public class RecommendationResource {
     @ApiOperation(value = "Get record count of account extension")
     public Map<String, Object> getAccountExtensionCount(HttpServletRequest request,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
-            @ApiParam(value = "Last Modification date in Unix timestamp on Account Extension", required = true) @RequestParam(value = "start", required = true) long start,
+            @ApiParam(value = "Last Modification date in Unix timestamp on Account Extension", required = true) @RequestParam(value = "start", required = true) Long start,
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified. This is mutual exclusive to filberBy/recStart.", required = false) @RequestParam(value = "accountId", required = false) List<String> accountIds,
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
                     + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
