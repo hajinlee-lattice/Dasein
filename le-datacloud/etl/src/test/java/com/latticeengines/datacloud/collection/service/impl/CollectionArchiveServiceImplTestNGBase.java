@@ -54,7 +54,7 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends DataCloudCo
     public void tearDown() throws Exception {
     }
 
-    @Test(groups = "collection", enabled = false)
+    @Test(groups = "collection", enabled = true)
     public void testWholeProgress() {
         purgeRawData();
 
