@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,7 +53,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
         BucketedScoreSummary bucketedScoreSummary = new BucketedScoreSummary();
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
 
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath = null;
@@ -159,7 +159,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18126, new String[] { modelId });
         }
