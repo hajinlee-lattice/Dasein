@@ -22,9 +22,9 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
         super(repository);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     @Override
-    public List<ComparableExpression<? extends Comparable>> resolveForCompare(AttributeLookup lookup) {
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(AttributeLookup lookup) {
         if (lookup.getEntity() == null) {
             return Collections.singletonList(QueryUtils.getAttributePath(lookup.getAttribute()));
         }
@@ -32,7 +32,7 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
         if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return Collections.singletonList(Expressions.asString(resolveBucketRange(lookup.getEntity(), cm, false)));
+        return Collections.singletonList(resolveBucketRange(lookup.getEntity(), cm, false));
     }
 
     @Override
