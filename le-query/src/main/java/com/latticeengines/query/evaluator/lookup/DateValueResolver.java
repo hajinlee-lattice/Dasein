@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.DateValueLookup;
-import com.latticeengines.query.util.ExpressionTemplateUtils;
+import com.latticeengines.domain.exposed.query.util.ExpressionTemplateUtils;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 
