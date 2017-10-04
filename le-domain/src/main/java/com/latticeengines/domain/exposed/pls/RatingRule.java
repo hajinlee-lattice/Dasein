@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 
 public class RatingRule {
 
-    public static final String DEFAULT_BUCKET_NAME = RuleBucketName.C.getName();
+    public static final String DEFAULT_BUCKET_NAME = RuleBucketName.A.getName();
 
     @JsonProperty("bucketToRuleMap")
     private TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
