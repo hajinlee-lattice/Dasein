@@ -62,11 +62,11 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void updateModelSummary() {
-        List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
+        List<ModelSummary> modelSummaries = modelSummaryEntityMgr.findAllValid();
         for (ModelSummary modelSummary : modelSummaries) {
             internalResourceRestApiProxy.activateModelSummary(modelSummary.getId());
         }
-        modelSummaries = modelSummaryEntityMgr.getAll();
+        modelSummaries = modelSummaryEntityMgr.findAll();
         for (ModelSummary modelSummary : modelSummaries) {
             Assert.assertEquals(modelSummary.getStatus(), ModelSummaryStatus.ACTIVE);
         }
@@ -75,7 +75,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "functional")
-    public void updateupdateModelSummaryNotExists() {
+    public void updateModelSummaryNotExists() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
