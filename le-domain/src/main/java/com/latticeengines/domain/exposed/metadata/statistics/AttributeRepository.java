@@ -3,11 +3,8 @@ package com.latticeengines.domain.exposed.metadata.statistics;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,7 +13,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -41,9 +37,6 @@ public class AttributeRepository {
 
     @JsonProperty("TableNameMap")
     private Map<TableRoleInCollection, String> tableNameMap;
-
-    @JsonIgnore
-    private Set<AttributeLookup> caseInsensitiveAttrs;
 
     // used for creating repository for le-query tests
     // in other cases, should always construct from data collection
@@ -79,18 +72,8 @@ public class AttributeRepository {
         return customerSpace.getTenantId() + "-" + collectionName;
     }
 
-    private Set<AttributeLookup> getCaseInsensitiveAttrs() {
-        if (caseInsensitiveAttrs == null) {
-            caseInsensitiveAttrs = new ConcurrentSkipListSet<>();
-            cmMap.forEach((attr, m) -> caseInsensitiveAttrs
-                    .add(new AttributeLookup(attr.getEntity(), attr.getAttribute().toLowerCase())));
-        }
-        return caseInsensitiveAttrs;
-    }
-
     public boolean hasAttribute(AttributeLookup lookup) {
-        return getCaseInsensitiveAttrs()
-                .contains(new AttributeLookup(lookup.getEntity(), lookup.getAttribute().toLowerCase()));
+        return cmMap.containsKey(lookup);
     }
 
     public static AttributeRepository constructRepo(Statistics statistics, Map<TableRoleInCollection, Table> tableMap,
@@ -142,9 +125,7 @@ public class AttributeRepository {
         if (tableMap.containsKey(BusinessEntity.Transaction.getServingStore())) {
             Table table = tableMap.get(BusinessEntity.Transaction.getServingStore());
             Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
-            attrMap.forEach((name, md) -> {
-                attributes.put(new AttributeLookup(BusinessEntity.Transaction, name), md);
-            });
+            attrMap.forEach((name, md) -> attributes.put(new AttributeLookup(BusinessEntity.Transaction, name), md));
         }
         return attributes;
     }
