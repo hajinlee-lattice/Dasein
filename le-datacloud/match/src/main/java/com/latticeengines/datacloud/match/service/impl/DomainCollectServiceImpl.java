@@ -46,7 +46,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss.SSS";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     private static final int BUFFER_SIZE = 800;
-    private static final int MAX_DUMP_SIZE = 120000;
+    private static final int MAX_DUMP_SIZE = 40000;
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

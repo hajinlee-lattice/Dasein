@@ -93,7 +93,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer determineNumBlocksForAM(Long count) {
-        Integer minBlockSize = 100_000;
+        Integer minBlockSize = 50_000;
         Integer maxBlockSize = 200_000;
 
         Integer numBlocks;
