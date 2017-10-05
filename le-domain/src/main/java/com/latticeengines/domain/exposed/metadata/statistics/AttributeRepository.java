@@ -101,7 +101,7 @@ public class AttributeRepository {
         return constructRepo(statistics, tableNameMap, cmMap, customerSpace, collectionName);
     }
 
-    public static AttributeRepository constructRepo(Statistics statistics,
+    private static AttributeRepository constructRepo(Statistics statistics,
             Map<TableRoleInCollection, String> tableNameMap, Map<AttributeLookup, ColumnMetadata> cmMap,
             CustomerSpace customerSpace, String collectionName) {
         Map<AttributeLookup, AttributeStats> statsMap = expandStats(statistics);
@@ -136,13 +136,16 @@ public class AttributeRepository {
                 if (attribute == null) {
                     throw new RuntimeException("Cannot find metadata for attribute " + lookup);
                 }
-                // TODO: should set category in metadata table
-                if (BusinessEntity.Account.getServingStore().equals(role)) {
-                    attribute.setCategory(Category.ACCOUNT_ATTRIBUTES);
-                }
                 attributes.put(lookup, attribute);
             }
         });
+        if (tableMap.containsKey(BusinessEntity.Transaction.getServingStore())) {
+            Table table = tableMap.get(BusinessEntity.Transaction.getServingStore());
+            Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
+            attrMap.forEach((name, md) -> {
+                attributes.put(new AttributeLookup(BusinessEntity.Transaction, name), md);
+            });
+        }
         return attributes;
     }
 

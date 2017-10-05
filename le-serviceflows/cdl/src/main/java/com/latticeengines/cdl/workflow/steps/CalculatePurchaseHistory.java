@@ -286,10 +286,12 @@ public class CalculatePurchaseHistory extends ProfileStepBase<CalculatePurchaseH
                     NamedPeriod period = NamedPeriod.fromName(periodName);
                     String metricName = TransactionMetrics.getMetricFromAttr(attribute.getName());
                     TransactionMetrics metric = TransactionMetrics.fromName(metricName);
-                    attribute.setDisplayName(getDisplayName(productName, period, metric));
+                    attribute.setDisplayName(getDisplayName(period, metric));
                 }
                 attribute.setSubcategory(productName);
             }
+
+            attribute.removeAllowedDisplayNames();
         }
 
         metadataProxy.updateTable(customerSpace, masterTableName, masterTable);
@@ -307,23 +309,17 @@ public class CalculatePurchaseHistory extends ProfileStepBase<CalculatePurchaseH
         return productMap;
     }
 
-    private String getDisplayName(String productName, NamedPeriod period, TransactionMetrics metric) {
-        StringBuilder displayName = new StringBuilder(productName);
-        displayName.append(": ");
+    private String getDisplayName(NamedPeriod period, TransactionMetrics metric) {
         switch (metric) {
         case PURCHASED:
-            displayName.append(purchasedAttrName(period));
-            break;
+            return purchasedAttrName(period);
         case AMOUNT:
-            displayName.append(amountAttrName(period));
-            break;
+            return amountAttrName(period);
         case QUANTITY:
-            displayName.append(quantityAttrName(period));
-            break;
+            return quantityAttrName(period);
         default:
             throw new UnsupportedOperationException("Transaction metric " + metric + " is not supported for now.");
         }
-        return displayName.toString();
     }
 
     private String purchasedAttrName(NamedPeriod period) {

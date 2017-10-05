@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidatePartitionConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -127,6 +128,10 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     protected void onPostTransformationCompleted() {
         String aggrTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
         Table aggregateTable = metadataProxy.getTable(customerSpace.toString(), aggrTableName);
+        enrichTableSchema(aggregateTable);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), aggrTableName, aggregateTable);
+        aggregateTable = metadataProxy.getTable(customerSpace.toString(), aggrTableName);
+
         putObjectInContext(AGGREGATE_TABLE_KEY, aggregateTable);
         Table masterTable = transactionTableBuilder.setupMasterTable(BusinessEntity.Transaction.name(), pipelineVersion, aggregateTable);
         putObjectInContext(MASTER_TABLE_KEY, masterTable);
@@ -138,6 +143,11 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         metadataProxy.deleteTable(customerSpace.toString(),
                 TableUtils.getFullTableName(getMergeTableName(), pipelineVersion));
 
+    }
+
+    private void enrichTableSchema(Table table) {
+        List<Attribute> attrs = table.getAttributes();
+        attrs.forEach(Attribute::removeAllowedDisplayNames);
     }
 
     @Override

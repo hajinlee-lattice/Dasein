@@ -16,8 +16,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
@@ -37,6 +39,9 @@ public enum BusinessEntity implements GraphNode {
 
     // Lattice Data Cloud
     LatticeAccount;
+
+    public static Set<BusinessEntity> SEGMENT_ENTITIES = //
+            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating);
 
     static {
         // Storage

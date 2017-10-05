@@ -289,6 +289,7 @@ public class CalculateStatsStep extends ProfileStepBase<CalculateStatsStepConfig
             } else if (StringUtils.isBlank(attr.getCategory())) {
                 attr.setCategory(Category.ACCOUNT_ATTRIBUTES);
             }
+            attr.removeAllowedDisplayNames();
         });
         log.info("Enriched " + count.get() + " attributes using data cloud metadata.");
     }

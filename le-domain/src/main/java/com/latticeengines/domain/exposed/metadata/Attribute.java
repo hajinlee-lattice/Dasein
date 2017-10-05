@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBa
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
@@ -770,6 +771,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     public void setAllowedDisplayNames(String allowedDisplayNamesString) {
         setListPropertyFromString("AllowedDisplayNames", allowedDisplayNamesString);
+    }
+
+    @JsonIgnore
+    @Transient
+    public void removeAllowedDisplayNames() {
+        properties.remove("AllowedDisplayNames");
     }
 
     @Transient

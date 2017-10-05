@@ -190,7 +190,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private List<TableRoleInCollection> extractServingRoles(Statistics statistics) {
         Set<BusinessEntity> entitySet = statistics.getCategories().values().stream()
                 .flatMap(cat -> cat.getSubcategories().values().stream()
-                        .flatMap(subcat -> subcat.getAttributes().keySet().stream().map(AttributeLookup::getEntity)))
+                        .flatMap(subcat -> subcat.getAttributes().keySet().stream().map(AttributeLookup::getEntity))) //
+                .map(entity -> BusinessEntity.PurchaseHistory.equals(entity) ? BusinessEntity.Transaction : entity) //
                 .collect(Collectors.toSet());
         return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
     }

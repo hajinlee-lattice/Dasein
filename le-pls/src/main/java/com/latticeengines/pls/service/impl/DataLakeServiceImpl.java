@@ -98,10 +98,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     private List<ColumnMetadata> getAllAttributes() {
         String customerSpace = MultiTenantContext.getTenant().getId();
         List<ColumnMetadata> cms = new ArrayList<>();
-        for (BusinessEntity entity : BusinessEntity.values()) {
-            if (!BusinessEntity.LatticeAccount.equals(entity)) {
-                cms.addAll(getAttributesInEntity(customerSpace, entity));
-            }
+        for (BusinessEntity entity : BusinessEntity.SEGMENT_ENTITIES) {
+            cms.addAll(getAttributesInEntity(customerSpace, entity));
         }
         return cms;
     }
@@ -158,22 +156,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         List<ColumnMetadata> cms = cmCache.get(String.format("%s|%s", customerSpace, role.name()));
         cms.forEach(cm -> cm.setEntity(entity));
-        switch (entity) {
-            case Account:
-                cms.forEach(cm -> {
-                    if (cm.getCategory() == null) {
-                        cm.setCategory(Category.ACCOUNT_ATTRIBUTES);
-                    }
-                });
-                break;
-            case Contact:
-                cms.forEach(cm -> {
-                    if (cm.getCategory() == null) {
-                        cm.setCategory(Category.CONTACT_ATTRIBUTES);
-                    }
-                });
-                break;
-        }
         return cms;
     }
 

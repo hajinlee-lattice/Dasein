@@ -217,7 +217,10 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
 
     private void enrichTableSchema(Table table) {
         List<Attribute> attrs = table.getAttributes();
-        attrs.forEach(attr -> attr.setCategory(Category.CONTACT_ATTRIBUTES));
+        attrs.forEach(attr -> {
+            attr.setCategory(Category.CONTACT_ATTRIBUTES);
+            attr.removeAllowedDisplayNames();
+        });
     }
 
 }
