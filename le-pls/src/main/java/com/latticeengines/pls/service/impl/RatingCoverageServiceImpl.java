@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private static Logger log = LoggerFactory.getLogger(RatingCoverageServiceImpl.class);
 
+    private static final String DEFAULT_ID_FOR_MODEL_RULE = "DEFAULT_ID_FOR_MODEL_RULE";
+
     @Value("${pls.rating.coverageservice.threadpool.size:10}")
     private Integer fetcherNum;
 
@@ -78,34 +81,40 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Override
     public RatingsCountResponse getCoverageInfo(RatingsCountRequest request) {
-        return getCoverageInfo(request, false);
-    }
+        RatingsCountResponse result = new RatingsCountResponse();
+        Map<String, Map<String, String>> uberErrorMap = new ConcurrentHashMap<>();
+        result.setErrorMap(uberErrorMap);
 
-    @Override
-    public RatingsCountResponse getCoverageInfo(RatingsCountRequest request, boolean getDummyCoverage) {
         if (request.getRatingEngineIds() != null) {
-            return processRatingIds(request);
-        } else if (request.getSegmentIds() != null) {
-            return processSegmentIds(request);
-        } else if (request.getRatingEngineModelIds() != null) {
-            return processRatingEngineModelIds(request);
-        } else if (request.getSegmentIdModelRules() != null) {
-            return getDummyCoverage ? processSegmentIdModelRulesDummy(request) : processSegmentIdModelRules(request);
-        } else if (request.getSegmentIdAndSingleRules() != null) {
-            return processSegmentIdSingleRules(request);
+            processRatingIds(request, result);
         }
 
-        return null;
+        if (request.getSegmentIds() != null) {
+            processSegmentIds(request, result);
+        }
+
+        if (request.getRatingEngineModelIds() != null) {
+            processRatingEngineModelIds(request, result);
+        }
+
+        if (request.getSegmentIdModelRules() != null) {
+            processSegmentIdModelRules(request, result);
+        }
+
+        if (request.getSegmentIdAndSingleRules() != null) {
+            processSegmentIdSingleRules(request, result);
+        }
+
+        return result;
     }
 
-    private RatingsCountResponse processRatingIds(RatingsCountRequest request) {
+    private void processRatingIds(RatingsCountRequest request, RatingsCountResponse result) {
         Tenant tenent = MultiTenantContext.getTenant();
 
-        RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> ratingEngineIdCoverageMap = new ConcurrentHashMap<>();
         result.setRatingEngineIdCoverageMap(ratingEngineIdCoverageMap);
         Map<String, String> errorMap = new ConcurrentHashMap<>();
-        result.setErrorMap(errorMap);
+        result.getErrorMap().put(RATING_IDS_ERROR_MAP_KEY, errorMap);
 
         if (request.getRatingEngineIds().size() < thresholdForParallelProcessing) {
             // it is more efficient to use sequential stream (will use current
@@ -127,18 +136,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     }) //
                     .join();
         }
-
-        return result;
     }
 
-    private RatingsCountResponse processSegmentIds(RatingsCountRequest request) {
+    private void processSegmentIds(RatingsCountRequest request, RatingsCountResponse result) {
         Tenant tenent = MultiTenantContext.getTenant();
 
-        RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> segmentIdCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdCoverageMap(segmentIdCoverageMap);
         Map<String, String> errorMap = new ConcurrentHashMap<>();
-        result.setErrorMap(errorMap);
+        result.getErrorMap().put(SEGMENT_IDS_ERROR_MAP_KEY, errorMap);
 
         if (request.getSegmentIds().size() < thresholdForParallelProcessing) {
             // it is more efficient to use sequential stream (will use current
@@ -159,17 +165,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     }) //
                     .join();
         }
-        return result;
     }
 
-    private RatingsCountResponse processSegmentIdModelRules(RatingsCountRequest request) {
+    private void processSegmentIdModelRules(RatingsCountRequest request, RatingsCountResponse result) {
         Tenant tenent = MultiTenantContext.getTenant();
 
-        RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdModelRulesCoverageMap(segmentIdModelRulesCoverageMap);
         Map<String, String> errorMap = new ConcurrentHashMap<>();
-        result.setErrorMap(errorMap);
+        result.getErrorMap().put(SEGMENT_ID_MODEL_RULES_ERROR_MAP_KEY, errorMap);
 
         if (request.getSegmentIdModelRules().size() < thresholdForParallelProcessing) {
             // it is more efficient to use sequential stream (will use current
@@ -191,18 +195,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     }) //
                     .join();
         }
-
-        return result;
     }
 
-    private RatingsCountResponse processSegmentIdSingleRules(RatingsCountRequest request) {
+    private void processSegmentIdSingleRules(RatingsCountRequest request, RatingsCountResponse result) {
         Tenant tenent = MultiTenantContext.getTenant();
 
-        RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdAndSingleRulesCoverageMap(segmentIdAndSingleRulesCoverageMap);
         Map<String, String> errorMap = new ConcurrentHashMap<>();
-        result.setErrorMap(errorMap);
+        result.getErrorMap().put(SEGMENT_ID_SINGLE_RULES_ERROR_MAP_KEY, errorMap);
 
         Map<String, MetadataSegment> segmentMap = loadSegments(request.getSegmentIdAndSingleRules(), errorMap);
 
@@ -232,8 +233,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     }) //
                     .join();
         }
-
-        return result;
     }
 
     private Map<String, MetadataSegment> loadSegments(List<SegmentIdAndSingleRulePair> segmentIdAndSingleRules,
@@ -452,6 +451,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             RuleBasedModel ratingModelWrapper = new RuleBasedModel();
             ratingModelWrapper.setRatingRule(segmentIdModelRulesPair.getRatingRule());
             ratingModels.add(ratingModelWrapper);
+            if (StringUtils.isEmpty(ratingModelWrapper.getId())) {
+                ratingModelWrapper.setId(DEFAULT_ID_FOR_MODEL_RULE);
+            }
             accountFrontEndQuery.setRatingModels(ratingModels);
 
             log.info("Front end queryfor Account: " + JsonUtils.serialize(accountFrontEndQuery));
@@ -587,8 +589,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return new FrontEndRestriction(finalRestriction);
     }
 
-    private RatingsCountResponse processRatingEngineModelIds(RatingsCountRequest request) {
-        RatingsCountResponse result = new RatingsCountResponse();
+    // this feature is not yet needed so impl is dummy
+    private void processRatingEngineModelIds(RatingsCountRequest request, RatingsCountResponse result) {
         HashMap<String, CoverageInfo> ratingEngineModelIdCoverageMap = new HashMap<>();
         result.setRatingEngineModelIdCoverageMap(ratingEngineModelIdCoverageMap);
 
@@ -624,7 +626,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
             ratingEngineModelIdCoverageMap.put(ratingModelSegmentId.getRatingModelId(), coverageInfo);
         }
-        return result;
     }
 
     private void logInErrorMap(final Map<String, String> errorMap, final String key, final String msg) {
@@ -633,46 +634,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         } catch (Exception ex) {
             log.info("Ignoring unexpected error while putting msg in error map for key: " + key, ex);
         }
-    }
-
-    private RatingsCountResponse processSegmentIdModelRulesDummy(RatingsCountRequest request) {
-        RatingsCountResponse result = new RatingsCountResponse();
-        HashMap<String, CoverageInfo> segmentIdAndModelRulesPairCoverageMap = new HashMap<>();
-        result.setSegmentIdModelRulesCoverageMap(segmentIdAndModelRulesPairCoverageMap);
-
-        Random rand = new Random(System.currentTimeMillis());
-
-        for (SegmentIdAndModelRulesPair segmentIdAndModelRulesPair : request.getSegmentIdModelRules()) {
-            CoverageInfo coverageInfo = new CoverageInfo();
-            Long accountCount = 5000L;
-            accountCount += rand.nextInt(1000);
-            Long contactCount = 7000L;
-            contactCount += rand.nextInt(500);
-
-            coverageInfo.setAccountCount(accountCount);
-            coverageInfo.setContactCount(contactCount);
-
-            List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
-            long totalSum = 0;
-            int totalParts = 21;
-            for (RuleBucketName bucket : RuleBucketName.values()) {
-                int partsInBucket = bucket.ordinal() + 1;
-                long countInBucket = (accountCount * partsInBucket) / totalParts;
-                if (bucket == RuleBucketName.F) {
-                    countInBucket = accountCount - totalSum;
-                } else {
-                    totalSum += countInBucket;
-                }
-
-                RatingBucketCoverage coveragePair = new RatingBucketCoverage();
-                coveragePair.setBucket(bucket.getName());
-                coveragePair.setCount(countInBucket);
-                bucketCoverageCounts.add(coveragePair);
-            }
-            coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-            segmentIdAndModelRulesPairCoverageMap.put(segmentIdAndModelRulesPair.getSegmentId(), coverageInfo);
-        }
-        return result;
     }
 
     @VisibleForTesting

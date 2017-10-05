@@ -148,11 +148,8 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
     public RatingsCountResponse getRatingEngineCoverageInfo( //
-            @RequestBody RatingsCountRequest ratingModelSegmentIds,
-            @RequestParam(value = "getDummyCoverage", required = false) Boolean getDummyCoverage) {
-        // TODO - anoop - this is only temporary, will remove it in next merge
-        getDummyCoverage = getDummyCoverage == null ? false : getDummyCoverage;
-        return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds, getDummyCoverage);
+            @RequestBody RatingsCountRequest ratingModelSegmentIds) {
+        return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")

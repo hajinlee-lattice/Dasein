@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.controller.PlayResourceDeploymentTestNG;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 @Component
@@ -38,6 +40,8 @@ public class TestPlayCreationHelper {
     // this test tenant has account data loaded in CDL
     private String tenantIdentifier = "CDLTest_Lynn_0920.CDLTest_Lynn_0920.Production";
 
+    private boolean tenantCleanupAllowed = false;
+
     private Tenant tenant;
 
     private Play play;
@@ -45,18 +49,37 @@ public class TestPlayCreationHelper {
     private PlayLaunch playLaunch;
 
     public void setupTenant() {
+        setupTenant(tenantIdentifier);
+    }
+
+    public void setupTenant(String customTenantIdentifier) {
+        if (StringUtils.isNoneBlank(customTenantIdentifier)) {
+            tenantIdentifier = customTenantIdentifier;
+        }
+
         tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
         if (tenant == null) {
             System.out.println("Creating new tenant: " + tenantIdentifier);
+            tenantCleanupAllowed = true;
             tenant = deploymentTestBed.bootstrapForProduct(tenantIdentifier, LatticeProduct.LPA3);
         } else {
             deploymentTestBed.loginAD();
             deploymentTestBed.getTestTenants().add(tenant);
         }
+
+        tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
+        MultiTenantContext.setTenant(tenant);
     }
 
     public void setupTenantAndCreatePlay() throws Exception {
-        setupTenant();
+        setupTenantAndCreatePlay(tenantIdentifier);
+    }
+
+    public void setupTenantAndCreatePlay(String customTenantIdentifier) throws Exception {
+        if (StringUtils.isNoneBlank(customTenantIdentifier)) {
+            tenantIdentifier = customTenantIdentifier;
+        }
+        setupTenant(tenantIdentifier);
 
         playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
         playResourceDeploymentTestNG.setMainTestTenant(tenant);
@@ -116,6 +139,12 @@ public class TestPlayCreationHelper {
         f1.set(entityProxy, 10);
 
         return entityProxy;
+    }
+
+    public void cleanupTenant() {
+        if (tenantCleanupAllowed) {
+            deploymentTestBed.deleteTenant(tenant);
+        }
     }
 
     String accountRestrictionJson = //
