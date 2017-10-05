@@ -217,9 +217,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RuleBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 8576L);
+                Assert.assertEquals((long) count, 50287L);
             } else if (RuleBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 55643L);
+                Assert.assertEquals((long) count, 13932L);
             }
         });
     }
@@ -246,6 +246,8 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("H", "N").build());
         rule.getBucketToRuleMap().put(RuleBucketName.C.getName(), ruleC);
+
+        rule.setDefaultBucketName(RuleBucketName.A.getName());
 
         model.setRatingRule(rule);
 

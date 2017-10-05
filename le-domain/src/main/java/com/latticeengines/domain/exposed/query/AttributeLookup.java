@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class AttributeLookup extends Lookup {
+public class AttributeLookup extends Lookup implements Comparable<AttributeLookup> {
 
     @JsonProperty("entity")
     private BusinessEntity entity;
@@ -70,6 +70,15 @@ public class AttributeLookup extends Lookup {
     @Override
     public String toString() {
         return entity != null ? entity.name() + "." + attribute : attribute;
+    }
+
+    @Override
+    public int compareTo(AttributeLookup other) {
+        if (other == null) {
+            return 1;
+        } else {
+            return this.toString().compareTo(other.toString());
+        }
     }
 
     public static AttributeLookup fromString(String str) {
