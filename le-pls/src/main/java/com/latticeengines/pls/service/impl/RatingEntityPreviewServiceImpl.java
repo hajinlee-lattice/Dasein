@@ -177,4 +177,8 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         entity.remove(modelId);
     }
 
+    @VisibleForTesting
+    void setEntityProxy(EntityProxy entityProxy) {
+        this.entityProxy = entityProxy;
+    }
 }
