@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.latticeengines.domain.exposed.query.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -136,6 +137,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         if (models != null && models.size() == 1) {
             Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
             query.setPageFilter(null);
+            query.setSort(null);
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;

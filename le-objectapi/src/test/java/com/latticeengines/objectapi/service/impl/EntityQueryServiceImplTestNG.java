@@ -158,6 +158,8 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setSort(new FrontEndSort(
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, "CompanyName")), false));
 
         DataPage dataPage = entityQueryService.getData(frontEndQuery);
         Assert.assertNotNull(dataPage);
@@ -211,6 +213,8 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setSort(new FrontEndSort(
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, "CompanyName")), false));
 
         Map<String, Long> ratingCounts = entityQueryService.getRatingCount(frontEndQuery);
         Assert.assertNotNull(ratingCounts);
