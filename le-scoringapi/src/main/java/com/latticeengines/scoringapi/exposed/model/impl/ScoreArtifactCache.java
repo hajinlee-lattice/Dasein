@@ -86,7 +86,8 @@ public class ScoreArtifactCache {
     }
 
     private void refreshCache() {
-        log.info("Begin to refresh cache");
+        log.info(String.format("Begin to refresh cache, the size of the cache is %d",
+                scoreArtifactCache.asMap().size()));
         List<ModelSummary> modelSummaryListNeedsToRefresh = modelRetriever
                 .getModelSummariesModifiedWithinTimeFrame(TimeUnit.SECONDS.toMillis(scoreArtifactCacheRefreshTime));
         if (CollectionUtils.isNotEmpty(modelSummaryListNeedsToRefresh)) {
@@ -100,10 +101,11 @@ public class ScoreArtifactCache {
                 if (scoringArtifacts != null) {
                     scoringArtifacts.setBucketMetadataList(bucketMetadataList);
                     scoringArtifacts.setModelSummary(modelsummay);
-                    scoreArtifactCache.put(new AbstractMap.SimpleEntry<>(cs, modelId),
-                            scoringArtifacts);
+                    scoreArtifactCache.put(new AbstractMap.SimpleEntry<>(cs, modelId), scoringArtifacts);
                     log.info(
                             String.format("Refresh cache for model %s in tenant %s finishes.", modelId, cs.toString()));
+                    log.info(String.format("After loading, the size of the cache is %d",
+                            scoreArtifactCache.asMap().size()));
                 }
             });
         }
