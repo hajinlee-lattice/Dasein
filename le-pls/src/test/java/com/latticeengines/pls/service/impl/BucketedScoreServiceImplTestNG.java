@@ -31,6 +31,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private static final String TENANT1 = "TENANT1";
+    private static final String TENANT2 = "TENANT2";
     private static final BucketMetadata BUCKET_METADATA_A = new BucketMetadata();
     private static final BucketMetadata BUCKET_METADATA_B = new BucketMetadata();
     private static final BucketMetadata BUCKET_METADATA_C = new BucketMetadata();
@@ -54,7 +55,8 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     private static final int NUM_LEADS_BUCKET_5 = 10000;
     private static final String MODEL_ID = "BUCKET_SCORES_MODEL_SUMMARY";
     private ModelSummary modelSummary = new ModelSummary();
-    private Tenant tenant = new Tenant();
+    private Tenant tenant1 = new Tenant();
+    private Tenant tenant2 = new Tenant();
 
     @Autowired
     private BucketedScoreService bucketedScoreService;
@@ -65,33 +67,12 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
-    private void setupTenant(String tenantId) throws Exception {
-        if (tenantService.findByTenantId(tenantId) != null) {
-            tenantService.discardTenant(tenantService.findByTenantId(tenantId));
-        }
-        tenant.setId(tenantId);
-        tenant.setName(tenantId);
-        tenantService.registerTenant(tenant);
-
-        setupSecurityContext(tenant);
-    }
-
-    private void setDetails(ModelSummary summary) throws Exception {
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary-marketo-UI-issue.json");
-        byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
-        data = CompressionUtils.compressByteArray(data);
-        KeyValue details = new KeyValue();
-        details.setData(data);
-        summary.setDetails(details);
-    }
-
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        setupTenant(TENANT1);
+        setupTenants();
         cleanupBucketMetadataDB();
 
-        MultiTenantContext.setTenant(tenant);
+        MultiTenantContext.setTenant(tenant1);
         modelSummary.setId(MODEL_ID);
         modelSummary.setDisplayName(MODEL_ID);
         modelSummary.setName(MODEL_ID);
@@ -111,7 +92,7 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
         setDetails(modelSummary);
         modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary.setLastUpdateTime(modelSummary.getConstructionTime());
-        modelSummaryService.createModelSummary(modelSummary, tenant.getId());
+        modelSummaryService.createModelSummary(modelSummary, tenant1.getId());
     }
 
     {
@@ -212,6 +193,41 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     public void testGetUpToDateModelBucketMetadata() throws Exception {
         List<BucketMetadata> bucketMetadatas = bucketedScoreService.getUpToDateModelBucketMetadata(MODEL_ID);
         testSecondGroupBucketMetadata(bucketMetadatas);
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = "testGetUpToDateModelBucketMetadata")
+    public void testGetUpToDateModelBucketMetadataAcrossTenants() throws Exception {
+        setupSecurityContext(tenant2);
+        List<BucketMetadata> bucketMetadatas = bucketedScoreService
+                .getUpToDateModelBucketMetadataAcrossTenants(MODEL_ID);
+        testSecondGroupBucketMetadata(bucketMetadatas);
+    }
+
+    private void setupTenants() throws Exception {
+        if (tenantService.findByTenantId(TENANT1) != null) {
+            tenantService.discardTenant(tenantService.findByTenantId(TENANT1));
+        }
+        if (tenantService.findByTenantId(TENANT2) != null) {
+            tenantService.discardTenant(tenantService.findByTenantId(TENANT2));
+        }
+        tenant1.setId(TENANT1);
+        tenant1.setName(TENANT1);
+        tenantService.registerTenant(tenant1);
+        tenant2.setId(TENANT2);
+        tenant2.setName(TENANT2);
+        tenantService.registerTenant(tenant2);
+
+        setupSecurityContext(tenant1);
+    }
+
+    private void setDetails(ModelSummary summary) throws Exception {
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
+                "com/latticeengines/pls/functionalframework/modelsummary-marketo-UI-issue.json");
+        byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
+        data = CompressionUtils.compressByteArray(data);
+        KeyValue details = new KeyValue();
+        details.setData(data);
+        summary.setDetails(details);
     }
 
     private void testFirstGroupBucketMetadata(List<BucketMetadata> bucketMetadataList) {

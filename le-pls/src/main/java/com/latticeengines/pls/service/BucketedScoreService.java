@@ -16,4 +16,6 @@ public interface BucketedScoreService {
 
     List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId);
 
+    List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId);
+
 }

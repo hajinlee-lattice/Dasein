@@ -160,13 +160,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
         ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18126, new String[] { modelId });
-        }
-
-        List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
-                .getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
-        return bucketMetadatas;
+        return getBucketMetadataListBasedModelSummary(modelSummary, modelId);
     }
 
     @Override
@@ -180,6 +174,22 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             bucketMetadata.setModelSummary(modelSummary);
             bucketMetadataEntityMgr.create(bucketMetadata);
         }
+    }
+
+    @Override
+    public List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        return getBucketMetadataListBasedModelSummary(modelSummary, modelId);
+    }
+
+    private List<BucketMetadata> getBucketMetadataListBasedModelSummary(ModelSummary modelSummary, String modelId) {
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18126, new String[] { modelId });
+        }
+
+        List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
+                .getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
+        return bucketMetadatas;
     }
 
 }

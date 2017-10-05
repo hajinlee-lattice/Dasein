@@ -11,12 +11,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.hdfs.BlockMissingException;
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
@@ -31,8 +33,6 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.newrelic.api.agent.Trace;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
@@ -62,8 +62,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     @Override
     @Trace(dispatcher = true)
     public Boolean call() throws Exception {
-        String startingHdfsPoint = modelServiceHdfsBaseDir + "/"
-                + CustomerSpace.parse(tenant.getId()) + "/models";
+        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId()) + "/models";
         final long acceptTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 
@@ -100,25 +99,24 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         };
 
         if (!HdfsUtils.fileExists(yarnConfiguration, startingHdfsPoint)) {
-            log.debug(String.format("No models seem to have been created yet for tenant with id %s",
-                    tenant.getId()));
+            log.debug(String.format("No models seem to have been created yet for tenant with id %s", tenant.getId()));
             return false;
         }
 
         List<String> files = new ArrayList<>();
         try {
             long startTime = System.currentTimeMillis();
-            files = HdfsUtils.getFilesForDirRecursiveWithFilterOnDir(yarnConfiguration, startingHdfsPoint, filter, folderFilter);
+            files = HdfsUtils.getFilesForDirRecursiveWithFilterOnDir(yarnConfiguration, startingHdfsPoint, filter,
+                    folderFilter);
             long recursiveGetFilesTime = System.currentTimeMillis() - startTime;
             if (recursiveGetFilesTime > 1000) {
-                log.info(String.format("Recursive get files from %s duration: %d milliseconds",
-                        startingHdfsPoint, recursiveGetFilesTime));
+                log.info(String.format("Recursive get files from %s duration: %d milliseconds", startingHdfsPoint,
+                        recursiveGetFilesTime));
             }
-            log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.",
-                    files.size(), tenant.getId()));
+            log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(),
+                    tenant.getId()));
         } catch (FileNotFoundException e) {
-            log.warn(String.format(
-                    "No models seem to have been created yet for tenant with id %s. Error message: %s",
+            log.warn(String.format("No models seem to have been created yet for tenant with id %s. Error message: %s",
                     tenant.getId(), e.getMessage()));
             return false;
         }
@@ -141,8 +139,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 }
                 String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
                 long getHdfsFileContentsTime = System.currentTimeMillis() - startTime;
-                log.info(String.format("Reading data from %s elapse %d milliseconds", file,
-                        getHdfsFileContentsTime));
+                log.info(String.format("Reading data from %s elapse %d milliseconds", file, getHdfsFileContentsTime));
                 ModelSummary summary = parser.parse(file, contents);
                 String[] tokens = file.split("/");
                 summary.setTenant(tenant);
@@ -155,9 +152,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 try {
                     summary.setApplicationId("application_" + tokens[tokens.length - 3]);
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    log.error(
-                            String.format("Cannot set application id of model summary with id %s.",
-                                    modelSummaryId));
+                    log.error(String.format("Cannot set application id of model summary with id %s.", modelSummaryId));
                 }
                 constraintViolationId = summary.getId();
                 modelSummaryEntityMgr.create(summary);
@@ -202,13 +197,13 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             throw new LedpException(LedpCode.LEDP_18127, new String[] { copiedModelId });
         }
         List<BucketMetadata> bucketMetadatas = bucketedScoreService
-                .getUpToDateModelBucketMetadata(originalModelSummary.getId());
+                .getUpToDateModelBucketMetadataAcrossTenants(originalModelSummary.getId());
         bucketedScoreService.createBucketMetadatas(copiedModelId,
                 copyBucketMetadatasForCopiedModel(bucketMetadatas, copiedModelId));
     }
 
-    private List<BucketMetadata> copyBucketMetadatasForCopiedModel(
-            List<BucketMetadata> originalBucketMetadatas, String copiedModelId) {
+    private List<BucketMetadata> copyBucketMetadatasForCopiedModel(List<BucketMetadata> originalBucketMetadatas,
+            String copiedModelId) {
         List<BucketMetadata> bucketMetadatas = new ArrayList<>();
 
         for (BucketMetadata originalBucketMetadata : originalBucketMetadatas) {
@@ -228,8 +223,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         return bucketMetadatas;
     }
 
-    private void setFeatureImportance(ModelSummary summary, String modelSummaryHdfsPath)
-            throws IOException {
+    private void setFeatureImportance(ModelSummary summary, String modelSummaryHdfsPath) throws IOException {
         String fiPath = getRandomForestFiHdfsPath(modelSummaryHdfsPath);
         Map<String, Double> fiMap = featureImportanceParser.parse(fiPath, //
                 HdfsUtils.getHdfsFileContents(yarnConfiguration, fiPath));
