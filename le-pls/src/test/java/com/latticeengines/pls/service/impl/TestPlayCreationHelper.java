@@ -99,7 +99,7 @@ public class TestPlayCreationHelper {
 
         // temporary
         propertiesMap.put("common.microservice.url",
-                "https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com");
+                "https://internal-private-lpi-b-282775961.us-east-1.elb.amazonaws.com");
 
         EntityProxy entityProxy = new EntityProxy();
 
