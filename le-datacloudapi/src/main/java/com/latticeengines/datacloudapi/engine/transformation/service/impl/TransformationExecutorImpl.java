@@ -94,7 +94,8 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         }
         throw new LedpException(LedpCode.LEDP_25015,
                 new String[] { transformationService.getSource().getSourceName(), retries.toString(),
-                        String.join("  &&  ", RequestContext.getErrors()) });
+                        RequestContext.getErrors() == null ? null
+                                : String.join("  &&  ", RequestContext.getErrors()) });
     }
 
     @SuppressWarnings("unchecked")
