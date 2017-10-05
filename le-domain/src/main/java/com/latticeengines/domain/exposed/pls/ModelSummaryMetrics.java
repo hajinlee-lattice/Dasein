@@ -16,21 +16,18 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "MODELQUALITY_SUMMARY_METRICS", uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
-        @UniqueConstraint(columnNames = { "TENANT_NAME", "TENANT_ID" }) })
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class ModelSummaryMetrics implements HasId<String>, HasPid, HasName {
-    private String id;
+@Table(name = "MODELQUALITY_SUMMARY_METRICS", uniqueConstraints = { @UniqueConstraint(columnNames = { "PID" }),
+        @UniqueConstraint(columnNames = { "TENANT_NAME", "NAME" }) })
+@Filter(name = "tenantFilter", condition = "TENANT_NAME = :tenantFilterName")
+public class ModelSummaryMetrics implements HasPid, HasName {
     private String tenantName;
     private String name;
     private Long pid;
-    private Long tenantId;
     private Double rocScore;
     private Double top20PercentLift;
     private String dataCloudVersion;
@@ -51,20 +48,6 @@ public class ModelSummaryMetrics implements HasId<String>, HasPid, HasName {
     @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
-    }
-
-    @Override
-    @JsonProperty("Id")
-    @Column(name = "ID")
-    @Index(name = "MODELQUALITY_SUMMARY_NAME_IDX")
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    @JsonProperty("Id")
-    public void setId(String id) {
-        this.id = id;
     }
 
     @JsonProperty("TenantName")
@@ -90,16 +73,6 @@ public class ModelSummaryMetrics implements HasId<String>, HasPid, HasName {
     @JsonProperty("Name")
     public void setName(String name) {
         this.name = name;
-    }
-
-    @JsonIgnore
-    @Column(name = "TENANT_ID")
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
     }
 
     @JsonProperty("RocScore")

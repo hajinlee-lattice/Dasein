@@ -246,7 +246,6 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         ModelSummaryMetrics modelSummaryMetrics = new ModelSummaryMetrics();
         modelSummaryMetrics.setTenantName(lookupId.split("\\|")[0]);
         modelSummaryMetrics.setName(config.getDataSet().getName());
-        modelSummaryMetrics.setTenantId(modelSummary.getTenantId());
         modelSummaryMetrics.setRocScore(modelSummary.getRocScore());
         modelSummaryMetrics.setTop20PercentLift(modelSummary.getTop20PercentLift());
         modelSummaryMetrics.setDataCloudVersion(modelSummary.getDataCloudVersion());

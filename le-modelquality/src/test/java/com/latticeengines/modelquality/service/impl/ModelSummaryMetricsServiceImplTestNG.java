@@ -59,7 +59,6 @@ public class ModelSummaryMetricsServiceImplTestNG extends ModelQualityFunctional
     private ModelSummaryMetrics createModelSummaryMetricsForTenant1() throws Exception {
         tenantName = "TENANT1";
         summary1 = new ModelSummaryMetrics();
-        summary1.setId("123");
         summary1.setName("Model1");
         summary1.setRocScore(0.75);
         summary1.setTop20PercentLift(4.34);
@@ -81,7 +80,6 @@ public class ModelSummaryMetricsServiceImplTestNG extends ModelQualityFunctional
         Assert.assertEquals(modelSummaryMetrics.getTop20PercentLift(), 4.34);
         Assert.assertNotNull(modelSummaryMetrics.getConstructionTime());
         Assert.assertNotNull(modelSummaryMetrics.getLastUpdateTime());
-        Assert.assertNotNull(modelSummaryMetrics.getTenantId());
     }
 
     private void deleteModelSummaryMetricsForTenant1() {
