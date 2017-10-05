@@ -11,14 +11,15 @@ import java.util.Random;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MegatronConfig;
@@ -47,8 +48,12 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
     @Override
     public boolean validateConfig(MegatronConfig config, List<String> baseSources) {
+        String error = null;
         int numAccounts = config.getNumAccounts();
         if ((numAccounts < 4 * 1024) || (numAccounts > 80 * 1024)) {
+            error = String.format("Account number is not range [%d, %d]", 4 * 1024, 80 * 1024);
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         return true;

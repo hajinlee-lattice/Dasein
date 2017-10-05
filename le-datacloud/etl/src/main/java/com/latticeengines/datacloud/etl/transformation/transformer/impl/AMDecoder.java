@@ -2,12 +2,11 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_AM_DECODER;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.TreeMap;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.avro.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +15,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AMDecoderParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
@@ -56,14 +57,20 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
 
     @Override
     protected boolean validateConfig(AMDecoderConfig config, List<String> sourceNames) {
+        String error = null;
         if (config.getDecodeFields() == null) {
-            log.error("Attributes to decode are not given.");
+            error = "Attributes to decode are not given.";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
 
         if (config.getDecodeFields().length > maxDecodeNum) {
-            log.error("Too many attributes are given. Number of given attributes is {} but the maximum is {}.",
+            error = String.format(
+                    "Too many attributes are given. Number of given attributes is %d but the maximum is %d.",
                     config.getDecodeFields().length, maxDecodeNum);
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
 

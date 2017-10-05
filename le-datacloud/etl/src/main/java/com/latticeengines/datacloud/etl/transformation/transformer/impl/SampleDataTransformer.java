@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SourceSampleFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SampleTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -32,13 +33,18 @@ public class SampleDataTransformer extends AbstractDataflowTransformer<SampleTra
 
     @Override
     public boolean validateConfig(SampleTransformerConfig config, List<String> baseSources) {
+        String error = null;
         if (baseSources.size() != 1) {
-            log.error("Sample only one result at a time");
+            error = "Sample only one result at a time";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         Float fraction = config.getFraction();
         if ((fraction <= 0) || (fraction >= 1)) {
-            log.error("Invalid sample fraction " + fraction);
+            error = "Invalid sample fraction " + fraction;
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         return true;

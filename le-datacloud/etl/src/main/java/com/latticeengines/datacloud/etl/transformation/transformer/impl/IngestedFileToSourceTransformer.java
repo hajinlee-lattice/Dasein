@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.service.impl.IngestedFileToSourceDataFlowService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IngestedFileToSourceParameters;
@@ -39,16 +40,23 @@ public class IngestedFileToSourceTransformer
 
     @Override
     protected boolean validateConfig(IngestedFileToSourceTransformerConfig config, List<String> baseSources) {
+        String error = null;
         if (config.getIngestionName() == null) {
-            log.error("Please provide ingestion name");
+            error = "Please provide ingestion name";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         if (baseSources.size() != 1) {
-            log.error("Process one ingestion at a time");
+            error = "Process one ingestion at a time";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         if (StringUtils.isEmpty(config.getFileNameOrExtension())) {
-            log.error("Please provide file name or extension");
+            error = "Please provide file name or extension";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         return true;

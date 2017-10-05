@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
@@ -20,11 +18,6 @@ public class AMStatsHQDunsTransformer
     @Override
     protected String getDataFlowBeanName() {
         return "amStatsHQDunsFlow";
-    }
-
-    @Override
-    public boolean validateConfig(AccountMasterStatisticsConfig config, List<String> baseSources) {
-        return true;
     }
 
     @Override

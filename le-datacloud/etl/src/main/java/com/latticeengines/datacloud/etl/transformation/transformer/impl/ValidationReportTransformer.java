@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SourceValidationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ValidationConfig;
@@ -33,19 +34,26 @@ public class ValidationReportTransformer extends AbstractDataflowTransformer<Val
 
     @Override
     public boolean validateConfig(ValidationReportTransformerConfig config, List<String> baseSources) {
+        String error = null;
         if (baseSources.size() != 1) {
-            log.error("Validate only one result at a time");
+            error = "Validate only one result at a time";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         List<String> reportAttrs = config.getReportAttrs();
         if ((reportAttrs == null) || (reportAttrs.size() == 0)) {
-            log.error("Must define some attrs to report");
+            error = "Must define some attrs to report";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
 
         List<ValidationConfig> rules = config.getRules();
         if ((rules == null) || (rules.size() == 0)) {
-            log.error("Must define at least one validation rule");
+            error = "Must define at least one validation rule";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
 

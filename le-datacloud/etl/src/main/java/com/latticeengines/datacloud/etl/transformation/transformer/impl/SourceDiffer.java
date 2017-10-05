@@ -18,6 +18,7 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.dataflow.transformation.Diff;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DiffferParameters;
@@ -58,23 +59,31 @@ public class SourceDiffer extends AbstractDataflowTransformer<DifferConfig, Diff
 
     @Override
     protected boolean validateConfig(DifferConfig config, List<String> sourceNames) {
+        String error;
         if (sourceNames.size() != 1 && sourceNames.size() != 2) {
-            log.error("Only support diff one source with 2 different versions or two sources");
+            error = "Only support diff one source with 2 different versions or two sources";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         if ((StringUtils.isBlank(config.getDiffVersion()) && StringUtils.isNotBlank(config.getDiffVersionCompared()))
                 || (StringUtils.isNotBlank(config.getDiffVersion())
                         && StringUtils.isBlank(config.getDiffVersionCompared()))) {
-            log.error(
-                    "Either provide both DiffVersion and DiffVersionComparedTo or by default use latest version as DiffVersion and second to latest version as DiffVersionCompared");
+            error = "Either provide both DiffVersion and DiffVersionComparedTo or by default use latest version as DiffVersion and second to latest version as DiffVersionCompared";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         if (StringUtils.isNotBlank(config.getDiffVersion()) && sourceNames.size() != 1) {
-            log.error("If diff one source with different versions, only support one base source");
+            error = "If diff one source with different versions, only support one base source";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         if (config.getKeys() == null || config.getKeys().length == 0) {
-            log.error("Please provide primary key fields");
+            error = "Please provide primary key fields";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         return true;

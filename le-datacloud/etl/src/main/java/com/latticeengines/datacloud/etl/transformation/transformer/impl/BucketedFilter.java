@@ -41,11 +41,6 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
     }
 
     @Override
-    protected boolean validateConfig(BucketedFilterConfig config, List<String> sourceNames) {
-        return true;
-    }
-
-    @Override
     protected Class<? extends TransformerConfig> getConfigurationClass() {
         return BucketedFilterConfig.class;
     }

@@ -168,7 +168,7 @@ public class Ingestion implements HasPid, Serializable {
             try {
                 providerConfiguration = mapper.readValue(getConfig(), ProviderConfiguration.class);
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_25015, e, new String[] { ingestionName });
+                throw new LedpException(LedpCode.LEDP_25016, e, new String[] { ingestionName });
             }
         }
         return this.providerConfiguration;
@@ -181,7 +181,7 @@ public class Ingestion implements HasPid, Serializable {
         try {
             setConfig(mapper.writeValueAsString(providerConfiguration));
         } catch (JsonProcessingException e) {
-            throw new LedpException(LedpCode.LEDP_25015, e, new String[] { ingestionName });
+            throw new LedpException(LedpCode.LEDP_25016, e, new String[] { ingestionName });
         }
     }
 

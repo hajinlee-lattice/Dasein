@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
@@ -24,8 +25,11 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
 
     @Override
     public boolean validateConfig(MatchTransformerConfig config, List<String> baseSources) {
+        String error = null;
         if (baseSources.size() != 1) {
-            log.error("Match only one result at a time");
+            error = "Match only one result at a time";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         return true;

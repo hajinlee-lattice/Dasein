@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.dataflow.transformation.LatticeIdAssignFlow;
 import com.latticeengines.datacloud.dataflow.transformation.LatticeIdRefreshFlow;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
@@ -84,12 +85,17 @@ public class LatticeIdAssignTransformer
 
     @Override
     protected boolean validateConfig(LatticeIdRefreshConfig config, List<String> sourceNames) {
+        String error = null;
         if (StringUtils.isEmpty(config.getStrategy())) {
-            log.error("Entity is not provided");
+            error = "Entity is not provided";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         if (CollectionUtils.isEmpty(sourceNames) || sourceNames.size() != 2) {
-            log.error("Number of base sources must be 2");
+            error = "Number of base sources must be 2";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         return true;

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloudapi.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -101,6 +102,7 @@ public class TransformationResource {
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
             HdfsPodContext.changeHdfsPodId(hdfsPod);
+            RequestContext.cleanErrors();
         }
     }
 

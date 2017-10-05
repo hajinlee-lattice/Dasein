@@ -43,11 +43,6 @@ public abstract class AbstractStatsDataflowTransformer
     protected AccountMasterReport accountMasterReport;
 
     @Override
-    public boolean validateConfig(AccountMasterStatisticsConfig config, List<String> baseSources) {
-        return true;
-    }
-
-    @Override
     protected Class<? extends TransformerConfig> getConfigurationClass() {
         return AccountMasterStatisticsConfig.class;
     }

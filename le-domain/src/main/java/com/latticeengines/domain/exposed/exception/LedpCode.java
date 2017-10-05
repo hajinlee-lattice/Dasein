@@ -402,7 +402,7 @@ public enum LedpCode {
     LEDP_25012("Error in processing dataflow for transformation for source: {0}, Reason: {1}"), //
     LEDP_25013("Error in executing workflow for transformation for source: {0}"), //
     LEDP_25014("Could not create new transformation progress entry"), //
-    LEDP_25015("Failed to find a chance to kick off a refresh of {0} after {1} retries."), //
+    LEDP_25015("Failed to find a chance to kick off a refresh of {0} after {1} retries. Errors: {2}"), //
     LEDP_25016("Invalid ingestion configuration for {0}"), //
     LEDP_25017("Failed to scan ingestion progress"), //
     LEDP_25018("Could not find schema"), //

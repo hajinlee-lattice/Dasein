@@ -32,6 +32,7 @@ import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
@@ -636,6 +637,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     public PipelineTransformationConfiguration createTransformationConfiguration(
             PipelineTransformationRequest inputRequest) {
 
+        String error = null;
         PipelineTransformationRequest request = inputRequest;
 
         String pipelineName = request.getName();
@@ -657,7 +659,10 @@ public class PipelineTransformationService extends AbstractTransformationService
                     steps = request.getSteps();
                 }
             } catch (Exception e) {
-                log.error("Failed to load pipeline template " + pipelineName + " from hdfs", e);
+                error = String.format("Failed to load pipeline template %s from hdfs: %s", pipelineName,
+                        e.getMessage());
+                log.error(error, e);
+                RequestContext.logError(error);
                 steps = null;
             }
         }
@@ -671,7 +676,9 @@ public class PipelineTransformationService extends AbstractTransformationService
         for (TransformationStepConfig step : steps) {
             Transformer transformer = transformerService.findTransformerByName(step.getTransformer());
             if (transformer == null) {
-                log.error("Transformer " + step.getTransformer() + " does not exist");
+                error = String.format("Transformer %s does not exist", step.getTransformer());
+                log.error(error);
+                RequestContext.logError(error);
                 return null;
             }
 
@@ -679,10 +686,14 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (inputSteps != null) {
                 for (Integer inputStep : inputSteps) {
                     if (inputStep < 0) {
-                        log.error("Input Step " + currentStep + " uses invalid step " + inputStep);
+                        error = String.format("Input Step %s uses invalid step %s", currentStep, inputStep);
+                        log.error(error);
+                        RequestContext.logError(error);
                         return null;
                     } else if (inputStep >= currentStep) {
-                        log.error("Step " + currentStep + " uses future step " + inputStep + " result");
+                        error = String.format("Step %s uses future step %s result", currentStep, inputStep);
+                        log.error(error);
+                        RequestContext.logError(error);
                         return null;
                     }
                 }
@@ -691,28 +702,36 @@ public class PipelineTransformationService extends AbstractTransformationService
             List<String> baseSourceNames = step.getBaseSources();
             if (((baseSourceNames == null) || (baseSourceNames.size() == 0))
                     && ((inputSteps == null) || (inputSteps.size() == 0))) {
-                log.error("Step " + currentStep + " does not have any input source specified");
+                error = String.format("Step %s does not have any input source specified", currentStep);
+                log.error(error);
+                RequestContext.logError(error);
                 return null;
             }
 
             List<String> baseVersions = step.getBaseVersions();
             if ((baseVersions != null) && (baseVersions.size() != baseSourceNames.size())) {
-                log.error("Base versions(" + baseVersions.size() + ") does match base sources(" + baseSourceNames.size()
-                        + ")");
+                error = String.format("Base versions(%d) does match base sources(%d)", baseVersions.size(),
+                        baseSourceNames.size());
+                log.error(error);
+                RequestContext.logError(error);
                 return null;
             }
 
             List<String> baseTemplates = step.getBaseTemplates();
             if (baseTemplates != null) {
                 if (baseTemplates.size() != baseSourceNames.size()) {
-                    log.error("Base templates(" + baseTemplates.size() + ") does match base sources("
-                            + baseSourceNames.size() + ")");
+                    error = String.format("Base templates(%d) does match base sources(%d)", baseTemplates.size(),
+                            baseSourceNames.size());
+                    log.error(error);
+                    RequestContext.logError(error);
                     return null;
                 } else {
                     for (String sourceName : baseTemplates) {
                         Source source = sourceService.findBySourceName(sourceName);
                         if (source == null) {
-                            log.error("Base template" + sourceName + "does not exist");
+                            error = String.format("Base template %s does not exist", sourceName);
+                            log.error(error);
+                            RequestContext.logError(error);
                             return null;
                         }
                     }
@@ -723,7 +742,9 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (targetTemplate != null) {
                 Source source = sourceService.findBySourceName(targetTemplate);
                 if (source == null) {
-                    log.error("targetTemplate source " + targetTemplate + "does not exist");
+                    error = String.format("targetTemplate source %s does not exist", targetTemplate);
+                    log.error(error);
+                    RequestContext.logError(error);
                     return null;
                 }
             }
@@ -744,7 +765,9 @@ public class PipelineTransformationService extends AbstractTransformationService
                 }
             }
             if (transformer.validateConfig(config, sourceNames) == false) {
-                log.error("Invalid configuration for step " + currentStep);
+                error = String.format("Invalid configuration for step %s", currentStep);
+                log.error(error);
+                RequestContext.logError(error);
                 return null;
             }
             currentStep++;

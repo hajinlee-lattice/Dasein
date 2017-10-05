@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationService;
@@ -68,34 +69,32 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             }
         }
         throw new LedpException(LedpCode.LEDP_25015,
-                new String[] { transformationService.getSource().getSourceName(), retries.toString() });
+                new String[] { transformationService.getSource().getSourceName(), retries.toString(), null });
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public TransformationProgress kickOffNewPipelineProgress(
             TransformationProgressEntityMgr transformationProgressEntityMgr, PipelineTransformationRequest request) {
-        Integer retries = 0;
-        while (retries++ < MAX_RETRY) {
-            try {
-                PipelineTransformationService service = (PipelineTransformationService) transformationService;
-                TransformationConfiguration transformationConfiguration = service
-                        .createTransformationConfiguration(request);
+        Integer retries = 1;
+        try {
+            PipelineTransformationService service = (PipelineTransformationService) transformationService;
+            TransformationConfiguration transformationConfiguration = service
+                    .createTransformationConfiguration(request);
 
-                if (transformationConfiguration != null) {
-                    TransformationProgress progress = transformationService
-                            .startNewProgress(transformationConfiguration, jobSubmitter);
-                    scheduleTransformationWorkflow(transformationConfiguration, progress,
-                            transformationProgressEntityMgr);
-                    return progress;
-                }
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                throw e;
+            if (transformationConfiguration != null) {
+                TransformationProgress progress = transformationService.startNewProgress(transformationConfiguration,
+                        jobSubmitter);
+                scheduleTransformationWorkflow(transformationConfiguration, progress, transformationProgressEntityMgr);
+                return progress;
             }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
         throw new LedpException(LedpCode.LEDP_25015,
-                new String[] { transformationService.getSource().getSourceName(), retries.toString() });
+                new String[] { transformationService.getSource().getSourceName(), retries.toString(),
+                        String.join("  &&  ", RequestContext.getErrors()) });
     }
 
     @SuppressWarnings("unchecked")

@@ -76,6 +76,7 @@ public class HttpClientUtils {
         PoolingHttpClientConnectionManager pool = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         pool.setDefaultMaxPerRoute(16);
         pool.setMaxTotal(1024);
+        pool.setValidateAfterInactivity(60000); // 1 mins (default 2s)
         return pool;
     }
 

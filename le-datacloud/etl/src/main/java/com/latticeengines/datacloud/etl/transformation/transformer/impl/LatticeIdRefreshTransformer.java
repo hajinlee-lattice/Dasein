@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.dataflow.transformation.LatticeIdRefreshFlow;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.LatticeIdStrategyEntityMgr;
@@ -73,12 +74,17 @@ public class LatticeIdRefreshTransformer
 
     @Override
     protected boolean validateConfig(LatticeIdRefreshConfig config, List<String> sourceNames) {
+        String error = null;
         if (StringUtils.isEmpty(config.getStrategy())) {
-            log.error("LatticeIdStrategy name is not provided");
+            error = "LatticeIdStrategy name is not provided";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         if (config.getIdSrcIdx() == null || config.getEntitySrcIdx() == null) {
-            log.error("Please provide index of ID source and Entity source in base source list");
+            error = "Please provide index of ID source and Entity source in base source list";
+            log.error(error);
+            RequestContext.logError(error);
             return false;
         }
         return true;
