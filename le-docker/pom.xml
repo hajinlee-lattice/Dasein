@@ -19,6 +19,7 @@
         <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
         <admin.docker.context>src/main/scripts/tomcat/le-admin</admin.docker.context>
         <pls.docker.context>src/main/scripts/tomcat/le-pls</pls.docker.context>
+        <pythonapp.docker.context>src/main/scripts/pythonapp</pythonapp.docker.context>
     </properties>
 
     <parent>
@@ -120,6 +121,15 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/lp/target/le-lp-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/lp.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-dataplatform/target/leframework.tar.gz" 
+                                      tofile="${project.basedir}/${pythonapp.docker.context}/leframework.tar.gz"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsdataloader.py" 
+                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsdataloader.py" 
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsgenerator.py" 
+                                      tofile="${project.basedir}/${pythonapp.docker.context}/apsgenerator.py" 
                                       overwrite="true" />
                             </tasks>
                         </configuration>
