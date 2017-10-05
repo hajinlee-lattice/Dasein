@@ -166,8 +166,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
-        final String notNullCollectioName = collectionName;
-        StatisticsContainer statisticsContainer = getStats(customerSpace, notNullCollectioName, version);
+        final String notNullCollectionName = collectionName;
+        StatisticsContainer statisticsContainer = getStats(customerSpace, notNullCollectionName, version);
         if (statisticsContainer == null) {
             return null;
         }
@@ -178,13 +178,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<TableRoleInCollection> roles = extractServingRoles(statistics);
         Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
         roles.forEach(role -> {
-            List<Table> tables = getTables(customerSpace, notNullCollectioName, role, version);
+            List<Table> tables = getTables(customerSpace, notNullCollectionName, role, version);
             if (tables != null && !tables.isEmpty()) {
                 tableMap.put(role, tables.get(0));
             }
         });
         return AttributeRepository.constructRepo(statistics, tableMap, CustomerSpace.parse(customerSpace),
-                notNullCollectioName);
+                notNullCollectionName);
     }
 
     private List<TableRoleInCollection> extractServingRoles(Statistics statistics) {
