@@ -15,12 +15,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -44,13 +45,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculatePurchaseHistoryConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component("calculatePurchaseHistory")
-public class CalculatePurchaseHistory extends BaseTransformWrapperStep<CalculatePurchaseHistoryConfiguration> {
+public class CalculatePurchaseHistory extends ProfileStepBase<CalculatePurchaseHistoryConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CalculatePurchaseHistory.class);
 
@@ -64,22 +61,16 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
 
     private Map<String, String> productMap;
 
-    @Autowired
-    private TransformationProxy transformationProxy;
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
-    private TransactionTableBuilder transactionTableBuilder;
+    @Override
+    protected BusinessEntity getEntity() {
+        return BusinessEntity.PurchaseHistory;
+    }
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Table aggregatedTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AggregatedTransaction);
+        Table aggregatedTable = dataCollectionProxy.getTable(customerSpace,
+                TableRoleInCollection.AggregatedTransaction);
         Table accountTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
         Table productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct);
         if (aggregatedTable == null) {
@@ -88,18 +79,15 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         if (productTable == null) {
             throw new IllegalStateException("Cannot find the product table in default collection");
         }
-        log.info(String.format("transactionTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
-                aggregatedTable.getName()));
+        log.info(String.format("transactionTableName for customer %s is %s",
+                configuration.getCustomerSpace().toString(), aggregatedTable.getName()));
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
 
         productMap = loadProduct(productTable);
 
-        // Table transactionTable = transactionTableBuilder.setupMasterTable("TransactionMaster", pipelineVersion, aggregatedTable);
-        // metadataProxy.createTable(customerSpace, transactionTable.getName(), transactionTable);
-        // PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), transactionTable, accountTable, productMap);
-
-        PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), aggregatedTable, accountTable, productMap);
+        PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), aggregatedTable,
+                accountTable, productMap);
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
@@ -108,17 +96,16 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         String masterTableName = TableUtils.getFullTableName(MASTER_TABLE_PREFIX, pipelineVersion);
         String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
-        Map<BusinessEntity, String> statsTableNameMap = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class, String.class);
-        if (statsTableNameMap == null) {
-            statsTableNameMap = new HashMap<>();
-            putObjectInContext(STATS_TABLE_NAMES, statsTableNameMap);
-        }
-        statsTableNameMap.put(BusinessEntity.PurchaseHistory, statsTableName);
-        upsertTables(configuration.getCustomerSpace().toString(), masterTableName, profileTableName);
+
+        upsertProfileTable(profileTableName, TableRoleInCollection.PurchaseHistoryProfile);
+        upsertMasterTable(masterTableName);
+
+        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, masterTableName, String.class);
+        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 
-    private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table transactionTable, Table accountTable,
-                                                          Map<String, String> productMap) {
+    private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table transactionTable,
+            Table accountTable, Map<String, String> productMap) {
         String transactionTableName = transactionTable.getName();
         String accountTableName = accountTable.getName();
         try {
@@ -131,7 +118,8 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
             profileStep = 1;
             bucketStep = 2;
             // -----------
-            TransformationStepConfig aggregate = aggregate(customerSpace, MASTER_TABLE_PREFIX, transactionTableName, accountTableName, productMap);
+            TransformationStepConfig aggregate = aggregate(customerSpace, MASTER_TABLE_PREFIX, transactionTableName,
+                    accountTableName, productMap);
             TransformationStepConfig profile = profile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig calc = calcStats(customerSpace, STATS_TABLE_PREFIX);
@@ -152,8 +140,8 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         }
     }
 
-    private TransformationStepConfig aggregate(CustomerSpace customerSpace, String masterTablePrefix, 
-                                               String transactionTableName, String accountTableName, Map<String, String> productMap) {
+    private TransformationStepConfig aggregate(CustomerSpace customerSpace, String masterTablePrefix,
+            String transactionTableName, String accountTableName, Map<String, String> productMap) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
 
@@ -186,8 +174,8 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         conf.setQuantityField(InterfaceName.TotalQuantity.name());
         conf.setAmountField(InterfaceName.TotalAmount.name());
 
-        List<String> periods = new ArrayList<String>();
-        List<String> metrics = new ArrayList<String>();
+        List<String> periods = new ArrayList<>();
+        List<String> metrics = new ArrayList<>();
 
         periods.add(NamedPeriod.HASEVER.getName());
         metrics.add(TransactionMetrics.PURCHASED.getName());
@@ -198,7 +186,7 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         conf.setPeriods(periods);
         conf.setMetrics(metrics);
 
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
@@ -258,56 +246,118 @@ public class CalculatePurchaseHistory extends BaseTransformWrapperStep<Calculate
         return step;
     }
 
-    private void upsertTables(String customerSpace, String masterTableName, String profileTableName) {
+    private void upsertMasterTable(String masterTableName) {
+        String customerSpace = configuration.getCustomerSpace().toString();
+
         Table masterTable = metadataProxy.getTable(customerSpace, masterTableName);
         if (masterTable == null) {
             throw new RuntimeException("Failed to find master table in customer " + customerSpace);
         } else {
             updateTable(customerSpace, masterTableName, masterTable);
         }
-        Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
-        if (profileTable == null) {
-            throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
-        }
         DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
 
-        dataCollectionProxy.upsertTable(customerSpace, masterTableName, TableRoleInCollection.ConsolidatedPurchaseHistory, inactiveVersion);
-        masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedPurchaseHistory, inactiveVersion);
+        dataCollectionProxy.upsertTable(customerSpace, masterTableName, TableRoleInCollection.CalculatedPurchaseHistory,
+                inactiveVersion);
+        masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.CalculatedPurchaseHistory,
+                inactiveVersion);
         if (masterTable == null) {
             throw new IllegalStateException("Cannot find the upserted master table in data collection.");
         }
-
-        dataCollectionProxy.upsertTable(customerSpace, profileTableName, TableRoleInCollection.PurchaseHistoryProfile, inactiveVersion);
-        profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.PurchaseHistoryProfile, inactiveVersion);
-        if (profileTable == null) {
-            throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
-        }
     }
-
 
     private void updateTable(String customerSpace, String masterTableName, Table masterTable) {
         List<Attribute> attributes = masterTable.getAttributes();
 
         for (Attribute attribute : attributes) {
-            String productId = TransactionMetrics.getProductIdFromAttr(attribute.getName());
-            if (productId == null) {
-                continue;
-            }
             attribute.setCategory(Category.PRODUCT_SPEND.getName());
-            attribute.setSubcategory(productMap.get(productId));
+
+            if (!InterfaceName.AccountId.name().equalsIgnoreCase(attribute.getName())) {
+                String productId = TransactionMetrics.getProductIdFromAttr(attribute.getName());
+                if (StringUtils.isBlank(productId)) {
+                    throw new RuntimeException("Cannot parse product id from attribute name " + attribute.getName());
+                }
+                String productName = productMap.get(productId);
+                if (StringUtils.isBlank(productName)) {
+                    System.out.println(JsonUtils.pprint(productMap));
+                    throw new IllegalArgumentException("Cannot find product name for product id " + productId);
+                } else {
+                    String periodName = TransactionMetrics.getPeriodFromAttr(attribute.getName());
+                    NamedPeriod period = NamedPeriod.fromName(periodName);
+                    String metricName = TransactionMetrics.getMetricFromAttr(attribute.getName());
+                    TransactionMetrics metric = TransactionMetrics.fromName(metricName);
+                    attribute.setDisplayName(getDisplayName(productName, period, metric));
+                }
+                attribute.setSubcategory(productName);
+            }
         }
 
         metadataProxy.updateTable(customerSpace, masterTableName, masterTable);
     }
 
     private Map<String, String> loadProduct(Table productTable) {
-        Map<String, String> productMap = new HashMap<String, String>();
+        Map<String, String> productMap = new HashMap<>();
         for (Extract extract : productTable.getExtracts()) {
             List<GenericRecord> productList = AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath());
             for (GenericRecord product : productList) {
-                productMap.put(product.get(InterfaceName.ProductId.name()).toString(), product.get(InterfaceName.ProductName.name()).toString());
+                productMap.put(product.get(InterfaceName.ProductId.name()).toString(),
+                        product.get(InterfaceName.ProductName.name()).toString());
             }
         }
         return productMap;
     }
+
+    private String getDisplayName(String productName, NamedPeriod period, TransactionMetrics metric) {
+        StringBuilder displayName = new StringBuilder(productName);
+        displayName.append(": ");
+        switch (metric) {
+        case PURCHASED:
+            displayName.append(purchasedAttrName(period));
+            break;
+        case AMOUNT:
+            displayName.append(amountAttrName(period));
+            break;
+        case QUANTITY:
+            displayName.append(quantityAttrName(period));
+            break;
+        default:
+            throw new UnsupportedOperationException("Transaction metric " + metric + " is not supported for now.");
+        }
+        return displayName.toString();
+    }
+
+    private String purchasedAttrName(NamedPeriod period) {
+        switch (period) {
+        case HASEVER:
+            return "Has Purchased";
+        default:
+            throw new UnsupportedOperationException("Transaction metric " + TransactionMetrics.PURCHASED
+                    + " does not support period " + period + " for now.");
+        }
+    }
+
+    private String amountAttrName(NamedPeriod period) {
+        switch (period) {
+            case HASEVER:
+                return "Total Spend";
+            case LASTQUARTER:
+                return "Last Quarter Spend";
+            default:
+                throw new UnsupportedOperationException("Transaction metric " + TransactionMetrics.AMOUNT
+                        + " does not support period " + period + " for now.");
+        }
+    }
+
+    private String quantityAttrName(NamedPeriod period) {
+        switch (period) {
+            case HASEVER:
+                return "Total Purchased";
+            case LASTQUARTER:
+                return "Last Quarter Purchased";
+            default:
+                throw new UnsupportedOperationException("Transaction metric " + TransactionMetrics.QUANTITY
+                        + " does not support period " + period + " for now.");
+        }
+    }
+
 }

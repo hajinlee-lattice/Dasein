@@ -8,7 +8,7 @@ import java.util.Set;
 
 public enum NamedPeriod {
     HASEVER("HasEver"), //
-    LASTQUARTER("LasterQuarter");
+    LASTQUARTER("LastQuarter");
 
     private final String name;
     private final String MIN_DATE = "1900-01-01";

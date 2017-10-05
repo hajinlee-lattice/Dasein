@@ -86,22 +86,25 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
-        if (newMasterTable != null && !BusinessEntity.Transaction.equals(entity)) {
+        if (entity.getBatchStore() != null) {
+            if (newMasterTable == null) {
+                throw new IllegalStateException("Did not generate new master table for " + entity);
+            }
             dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore,
                     activeVersion);
         }
         if (isBucketing()) {
-            Table redshiftTable = metadataProxy.getTable(customerSpace.toString(),
-                    TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion));
+            String redshiftTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
+            Table redshiftTable = metadataProxy.getTable(customerSpace.toString(), redshiftTableName);
             if (redshiftTable == null) {
                 throw new RuntimeException("Diff table has not been created.");
             }
-            Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
-                    BusinessEntity.class, Table.class);
+            Map<BusinessEntity, String> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
+                    BusinessEntity.class, String.class);
             if (entityTableMap == null) {
                 entityTableMap = new HashMap<>();
             }
-            entityTableMap.put(entity, redshiftTable);
+            entityTableMap.put(entity, redshiftTableName);
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
 
             Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,

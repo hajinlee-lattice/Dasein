@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -9,10 +10,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,13 +43,13 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
     private static final Logger log = LoggerFactory.getLogger(ExportDataToRedshift.class);
 
-    @Autowired
+    @Inject
     private EaiProxy eaiProxy;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     private Map<BusinessEntity, Table> entityTableMap;
@@ -60,8 +62,16 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();
 
-        entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
-        if (entityTableMap == null) {
+        Map<BusinessEntity, String> entityTableNames = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
+                BusinessEntity.class, String.class);
+        entityTableMap = new HashMap<>();
+        if (entityTableNames != null) {
+            entityTableNames.forEach((entity, tableName) -> {
+                Table table = metadataProxy.getTable(customerSpace, tableName);
+                entityTableMap.put(entity, table);
+            });
+        }
+        if (entityTableMap.isEmpty()) {
             entityTableMap = configuration.getSourceTables();
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         }
@@ -69,6 +79,13 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         if (entityTableMap == null || entityTableMap.isEmpty()) {
             log.info("No table to export, skip this step.");
         }
+
+        Map<BusinessEntity, Long> exportReportMap = new HashMap<>();
+        entityTableMap.forEach((entity, table) -> {
+            Long count = table.getExtracts().get(0).getProcessedRecords();
+            exportReportMap.put(entity, count);
+        });
+        putObjectInContext(REDSHIFT_EXPORT_REPORT, exportReportMap);
 
         appendFlagMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE, BusinessEntity.class, Boolean.class);
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export", entityTableMap.size());

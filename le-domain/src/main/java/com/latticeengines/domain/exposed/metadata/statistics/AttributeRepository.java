@@ -2,12 +2,12 @@ package com.latticeengines.domain.exposed.metadata.statistics;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,6 +41,9 @@ public class AttributeRepository {
 
     @JsonProperty("TableNameMap")
     private Map<TableRoleInCollection, String> tableNameMap;
+
+    @JsonIgnore
+    private Set<AttributeLookup> caseInsensitiveAttrs;
 
     // used for creating repository for le-query tests
     // in other cases, should always construct from data collection
@@ -76,6 +79,20 @@ public class AttributeRepository {
         return customerSpace.getTenantId() + "-" + collectionName;
     }
 
+    private Set<AttributeLookup> getCaseInsensitiveAttrs() {
+        if (caseInsensitiveAttrs == null) {
+            caseInsensitiveAttrs = new ConcurrentSkipListSet<>();
+            cmMap.forEach((attr, m) -> caseInsensitiveAttrs
+                    .add(new AttributeLookup(attr.getEntity(), attr.getAttribute().toLowerCase())));
+        }
+        return caseInsensitiveAttrs;
+    }
+
+    public boolean hasAttribute(AttributeLookup lookup) {
+        return getCaseInsensitiveAttrs()
+                .contains(new AttributeLookup(lookup.getEntity(), lookup.getAttribute().toLowerCase()));
+    }
+
     public static AttributeRepository constructRepo(Statistics statistics, Map<TableRoleInCollection, Table> tableMap,
             CustomerSpace customerSpace, String collectionName) {
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
@@ -84,9 +101,9 @@ public class AttributeRepository {
         return constructRepo(statistics, tableNameMap, cmMap, customerSpace, collectionName);
     }
 
-    public static AttributeRepository constructRepo(Statistics statistics, Map<TableRoleInCollection, String> tableNameMap,
-                                                    Map<AttributeLookup, ColumnMetadata> cmMap,
-                                                    CustomerSpace customerSpace, String collectionName) {
+    public static AttributeRepository constructRepo(Statistics statistics,
+            Map<TableRoleInCollection, String> tableNameMap, Map<AttributeLookup, ColumnMetadata> cmMap,
+            CustomerSpace customerSpace, String collectionName) {
         Map<AttributeLookup, AttributeStats> statsMap = expandStats(statistics);
         cmMap.forEach((lookup, cm) -> {
             AttributeStats stats = statsMap.get(lookup);
@@ -119,7 +136,7 @@ public class AttributeRepository {
                 if (attribute == null) {
                     throw new RuntimeException("Cannot find metadata for attribute " + lookup);
                 }
-                //TODO: should set category in metadata table
+                // TODO: should set category in metadata table
                 if (BusinessEntity.Account.getServingStore().equals(role)) {
                     attribute.setCategory(Category.ACCOUNT_ATTRIBUTES);
                 }
@@ -138,7 +155,7 @@ public class AttributeRepository {
     private static Map<AttributeLookup, AttributeStats> expandStats(Statistics statistics) {
         Map<AttributeLookup, AttributeStats> statsMap = new HashMap<>();
         statistics.getCategories().values().forEach(cat -> //
-                cat.getSubcategories().values().forEach(subcat -> {
+        cat.getSubcategories().values().forEach(subcat -> {
             statsMap.putAll(subcat.getAttributes());
         }));
         return statsMap;

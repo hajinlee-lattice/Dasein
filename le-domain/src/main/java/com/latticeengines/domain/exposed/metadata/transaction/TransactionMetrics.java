@@ -45,7 +45,6 @@ public enum TransactionMetrics {
         }
     }
 
-
     static public String getProductIdFromAttr(String attr) {
         return splitAttr(attr, 0);
     }
@@ -59,12 +58,15 @@ public enum TransactionMetrics {
     }
 
     static private String splitAttr(String name, int index) {
-        String[] attrs = name.split("_");
-        if ((attrs.length != 4) || !(attrs[0].equals("PH"))) {
+        if (!name.startsWith("PH_")) {
             return null;
-        } else {
-            return attrs[index];
         }
+        name = name.substring("PH_".length());
+        String[] attrs = name.split("_");
+        if (attrs.length != 3) {
+            return null;
+        }
+        return attrs[index];
     }
 
     static public String getAttrName(String product, String period, String metrics) {

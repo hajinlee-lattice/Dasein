@@ -15,10 +15,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -39,7 +40,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -51,14 +51,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component("calculateStatsStep")
-public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsStepConfiguration> {
+public class CalculateStatsStep extends ProfileStepBase<CalculateStatsStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CalculateStatsStep.class);
 
@@ -71,17 +67,13 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
     private static int profileStep;
     private static int bucketStep;
 
-    @Autowired
-    private TransformationProxy transformationProxy;
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Override
+    protected BusinessEntity getEntity() {
+        return BusinessEntity.Account;
+    }
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -101,23 +93,18 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
-        Map<BusinessEntity, String> statsTableNameMap = new HashMap<>();
-        statsTableNameMap.put(BusinessEntity.Account, statsTableName);
-        putObjectInContext(STATS_TABLE_NAMES, statsTableNameMap);
-        upsertTables(configuration.getCustomerSpace().toString(), profileTableName);
+
+        upsertProfileTable(profileTableName, TableRoleInCollection.Profile);
+
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
         enrichTableSchema(sortedTable);
         metadataProxy.updateTable(configuration.getCustomerSpace().toString(), sortedTableName, sortedTable);
-        Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
-        entityTableMap.put(BusinessEntity.Account, sortedTable);
-        putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
-        Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,
-                BusinessEntity.class, Boolean.class);
-        if (appendTableMap == null) {
-            appendTableMap = new HashMap<>();
-        }
-        appendTableMap.put(BusinessEntity.Account, false);
-        putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
+
+        updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, sortedTableName, String.class);
+        updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+
+        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, sortedTableName, String.class);
+        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
@@ -273,19 +260,6 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
         return keyMap;
-    }
-
-    private void upsertTables(String customerSpace, String profileTableName) {
-        Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
-        if (profileTable == null) {
-            throw new RuntimeException("Failed to find profile table " + profileTableName + " in customer " + customerSpace);
-        }
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-        dataCollectionProxy.upsertTable(customerSpace, profileTableName, TableRoleInCollection.Profile, inactiveVersion);
-        profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile, inactiveVersion);
-        if (profileTable == null) {
-            throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
-        }
     }
 
     private void enrichTableSchema(Table table) {

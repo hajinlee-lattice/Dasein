@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,8 @@ public class QueryEvaluatorService {
         List<Lookup> filteredLookups = new ArrayList<>();
         for (Lookup lookup: query.getLookups()) {
             if (lookup instanceof AttributeLookup) {
-                if (attrRepo.getColumnMetadata((AttributeLookup) lookup) != null) {
+                AttributeLookup attrLookup = (AttributeLookup) lookup;
+                if (BusinessEntity.Rating.equals(attrLookup.getEntity()) || attrRepo.hasAttribute(attrLookup)) {
                     filteredLookups.add(lookup);
                 } else {
                     log.warn("Cannot find metadata for attribute lookup " + lookup.toString() + ", skip it.");

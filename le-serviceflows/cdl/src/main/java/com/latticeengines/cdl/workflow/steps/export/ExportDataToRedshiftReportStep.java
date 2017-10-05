@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -16,10 +15,10 @@ public class ExportDataToRedshiftReportStep extends BaseReportStep<BaseReportSte
 
     @Override
     public void execute() {
-        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
-                BusinessEntity.class, Table.class);
-        Optional.ofNullable(entityTableMap).ifPresent(map -> map.forEach((k, v) -> {
-            getJson().put(k.getServingStore().name(), v.getExtracts().get(0).getProcessedRecords());
+        Map<BusinessEntity, Long> exportReport = getMapObjectFromContext(REDSHIFT_EXPORT_REPORT, BusinessEntity.class,
+                Long.class);
+        Optional.ofNullable(exportReport).ifPresent(map -> map.forEach((k, v) -> {
+            getJson().put(k.getServingStore().name(), v);
         }));
         super.execute();
     }

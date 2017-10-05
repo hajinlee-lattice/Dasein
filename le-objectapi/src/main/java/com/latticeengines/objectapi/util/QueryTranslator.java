@@ -200,7 +200,7 @@ public class QueryTranslator {
                 }
             });
         }
-        
+
         return optimized;
     }
 

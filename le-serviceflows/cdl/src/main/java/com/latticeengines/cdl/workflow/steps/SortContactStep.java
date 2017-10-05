@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -28,20 +27,15 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortContactStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component("sortContactStep")
-public class SortContactStep extends BaseTransformWrapperStep<SortContactStepConfiguration> {
+public class SortContactStep extends ProfileStepBase<SortContactStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SortContactStep.class);
 
@@ -51,19 +45,15 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
     private static final List<String> masterTableSortKeys = TableRoleInCollection.SortedContact
             .getForeignKeysAsStringList();
 
-    @Autowired
-    private TransformationProxy transformationProxy;
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
-
     private static int profileStep;
     private static int bucketStep;
 
     private String[] dedupFields = { "AccountId" };
+
+    @Override
+    protected BusinessEntity getEntity() {
+        return BusinessEntity.Contact;
+    }
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -83,31 +73,18 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
-        Map<BusinessEntity, String> statsTableNameMap = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
-                String.class);
-        if (statsTableNameMap == null) {
-            statsTableNameMap = new HashMap<>();
-        }
-        statsTableNameMap.put(BusinessEntity.Contact, statsTableName);
-        putObjectInContext(STATS_TABLE_NAMES, statsTableNameMap);
-        upsertTables(configuration.getCustomerSpace().toString(), profileTableName);
+
+        upsertProfileTable(profileTableName, TableRoleInCollection.ContactProfile);
+
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
-        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
-                BusinessEntity.class, Table.class);
-        if (entityTableMap == null) {
-            entityTableMap = new HashMap<>();
-        }
         enrichTableSchema(sortedTable);
         metadataProxy.updateTable(configuration.getCustomerSpace().toString(), sortedTableName, sortedTable);
-        entityTableMap.put(BusinessEntity.Contact, sortedTable);
-        putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
-        Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,
-                BusinessEntity.class, Boolean.class);
-        if (appendTableMap == null) {
-            appendTableMap = new HashMap<>();
-        }
-        appendTableMap.put(BusinessEntity.Contact, false);
-        putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
+
+        updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, sortedTableName, String.class);
+        updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+
+        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, sortedTableName, String.class);
+        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
@@ -207,7 +184,7 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         step.setTargetTable(targetTable);
 
         SorterConfig conf = new SorterConfig();
-        conf.setPartitions(500);
+        conf.setPartitions(200);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(true);
         conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
@@ -235,51 +212,6 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         targetTable.setNamePrefix(profileTablePrefix);
         step.setTargetTable(targetTable);
 
-        return step;
-    }
-
-    private void upsertTables(String customerSpace, String profileTableName) {
-        Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
-        if (profileTable == null) {
-            throw new RuntimeException(
-                    "Failed to find profile table " + profileTableName + " in customer " + customerSpace);
-        }
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-        dataCollectionProxy.upsertTable(customerSpace, profileTableName, TableRoleInCollection.ContactProfile,
-                inactiveVersion);
-        profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ContactProfile,
-                inactiveVersion);
-        if (profileTable == null) {
-            throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
-        }
-    }
-
-    private TransformationStepConfig sort(CustomerSpace customerSpace, String sourceTableName) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        String tableSourceName = "CustomerUniverse";
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
-
-        step.setTransformer(TRANSFORMER_SORTER);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(SORTED_TABLE_PREFIX);
-        targetTable.setExpandBucketedAttrs(true);
-        step.setTargetTable(targetTable);
-
-        SorterConfig conf = new SorterConfig();
-        conf.setPartitions(500);
-        conf.setSplittingThreads(maxSplitThreads);
-        conf.setCompressResult(true);
-        conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
-                                                          // single sort key now
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
         return step;
     }
 

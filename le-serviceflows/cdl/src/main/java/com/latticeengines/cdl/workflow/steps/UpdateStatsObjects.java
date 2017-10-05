@@ -6,11 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -35,10 +36,10 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
 
     private static final Logger log = LoggerFactory.getLogger(UpdateStatsObjects.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     private Map<BusinessEntity, Table> statsTableMap = new HashMap<>();
@@ -47,8 +48,13 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     public void execute() {
         log.info("Inside UpdateStatsObjects execute()");
         String customerSpaceStr = configuration.getCustomerSpace().toString();
-        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
-                BusinessEntity.class, Table.class);
+        Map<BusinessEntity, String> entityTableNames = getMapObjectFromContext(SERVING_STORE_IN_STATS,
+                BusinessEntity.class, String.class);
+        Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
+        entityTableNames.forEach((entity, tableName) -> {
+            Table table = metadataProxy.getTable(customerSpaceStr, tableName);
+            entityTableMap.put(entity, table);
+        });
         Table masterTable = entityTableMap.get(BusinessEntity.Account);
         if (masterTable == null) {
             throw new NullPointerException("Master table for stats object calculation is not found.");

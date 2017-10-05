@@ -293,7 +293,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Map<String, GenericRecord> recordMap = new HashMap<>();
         for (GenericRecord record : records) {
             String id = String
-                    .valueOf(record.get(TableRoleInCollection.ConsolidatedPurchaseHistory.getPrimaryKey().name()));
+                    .valueOf(record.get(TableRoleInCollection.CalculatedPurchaseHistory.getPrimaryKey().name()));
             recordMap.put(id, record);
             rowCount++;
         }

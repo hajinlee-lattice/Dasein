@@ -65,7 +65,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "1";
+    private static final String S3_CHECKPOINTS_VERSION = "2";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 200;
@@ -126,7 +126,7 @@ public class CheckpointService {
                 TableRoleInCollection.ConsolidatedAccount, (long) ACCOUNT_IMPORT_SIZE_1,
                 TableRoleInCollection.ConsolidatedContact, (long) CONTACT_IMPORT_SIZE_1,
                 TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS,
-                TableRoleInCollection.ConsolidatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
+                TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
         verifyCheckpoint(expectedCounts);
     }
 
@@ -147,7 +147,7 @@ public class CheckpointService {
                 TableRoleInCollection.ConsolidatedAccount, numAccounts,
                 TableRoleInCollection.ConsolidatedContact, numContacts,
                 TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS,
-                TableRoleInCollection.ConsolidatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
+                TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
         verifyCheckpoint(expectedCounts);
     }
 
