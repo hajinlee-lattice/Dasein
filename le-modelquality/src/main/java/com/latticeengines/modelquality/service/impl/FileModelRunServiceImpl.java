@@ -241,10 +241,11 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         }
     }
 
-    private ModelSummaryMetrics writeMetricsToSql(ModelSummary modelSummary) {
+    private ModelSummaryMetrics writeMetricsToSql(ModelSummary modelSummary, SelectedConfig config) {
         String lookupId = modelSummary.getLookupId();
         ModelSummaryMetrics modelSummaryMetrics = new ModelSummaryMetrics();
-        modelSummaryMetrics.setName(lookupId.split("\\|")[0]);
+        modelSummaryMetrics.setTenantName(lookupId.split("\\|")[0]);
+        modelSummaryMetrics.setName(config.getDataSet().getName());
         modelSummaryMetrics.setTenantId(modelSummary.getTenantId());
         modelSummaryMetrics.setRocScore(modelSummary.getRocScore());
         modelSummaryMetrics.setTop20PercentLift(modelSummary.getTop20PercentLift());
@@ -261,7 +262,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config, modelRunEntityNames);
         ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
-        ModelSummaryMetrics modelSummaryMetrics = writeMetricsToSql(modelSummary);
+        ModelSummaryMetrics modelSummaryMetrics = writeMetricsToSql(modelSummary, config);
         modelSummaryMetricsEntityMgr.create(modelSummaryMetrics);
     }
 }

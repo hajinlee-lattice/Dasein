@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 public class ModelSummaryMetrics implements HasId<String>, HasPid, HasName {
     private String id;
     private String tenantName;
+    private String name;
     private Long pid;
     private Long tenantId;
     private Double rocScore;
@@ -66,18 +67,29 @@ public class ModelSummaryMetrics implements HasId<String>, HasPid, HasName {
         this.id = id;
     }
 
-    @Override
     @JsonProperty("TenantName")
     @Column(name = "TENANT_NAME", nullable = false)
     @Index(name = "MODELQUALITY_SUMMARY_NAME_IDX")
-    public String getName() {
+    public String getTenantName() {
         return tenantName;
     }
 
-    @Override
     @JsonProperty("TenantName")
-    public void setName(String tenantName) {
+    public void setTenantName(String tenantName) {
         this.tenantName = tenantName;
+    }
+
+    @Override
+    @JsonProperty("Name")
+    @Column(name = "NAME", nullable = false)
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    @JsonProperty("Name")
+    public void setName(String name) {
+        this.name = name;
     }
 
     @JsonIgnore
