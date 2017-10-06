@@ -24,10 +24,6 @@ pushd le-ubuntu
 build_docker latticeengines/ubuntu ${NO_CACHE}
 popd
 
-pushd le-python
-build_docker latticeengines/python ${NO_CACHE}
-popd
-
 pushd le-httpd
 build_docker latticeengines/httpd ${NO_CACHE}
 popd
