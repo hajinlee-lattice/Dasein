@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.mockito.Mock;
@@ -110,6 +111,10 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertNull(playLaunch.getAccountsLaunched());
         Assert.assertEquals(playLaunch.getLaunchCompletionPercent(), 0.0D);
 
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        Assert.assertNotNull(recommendations);
+        Assert.assertEquals(recommendations.size(), 0);
+
         playLaunchInitStep.execute();
 
         PlayLaunch updatedPlayLaunch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, play.getName(),
@@ -119,6 +124,26 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Launched);
         Assert.assertTrue(updatedPlayLaunch.getAccountsLaunched() > 0);
         Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
+
+        recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() > 0);
+
+        recommendations.stream().forEach(rec -> {
+            Assert.assertNotNull(rec.getAccountId());
+            Assert.assertNotNull(rec.getId());
+            Assert.assertNotNull(rec.getLastUpdatedTimestamp());
+            Assert.assertNotNull(rec.getLaunchDate());
+            Assert.assertNotNull(rec.getLaunchId());
+            Assert.assertNotNull(rec.getLeAccountExternalID());
+            Assert.assertNotNull(rec.getPid());
+            Assert.assertNotNull(rec.getPlayId());
+            Assert.assertNotNull(rec.getTenantId());
+
+            Assert.assertEquals(rec.getPlayId(), play.getName());
+            Assert.assertEquals(rec.getLaunchId(), playLaunch.getId());
+
+        });
     }
 
     private PlayLaunchInitStepConfiguration createConf(CustomerSpace customerSpace, String playName,
