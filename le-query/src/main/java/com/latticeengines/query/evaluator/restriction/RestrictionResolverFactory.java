@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.JoinSpecification;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TimeRestriction;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
@@ -52,7 +52,7 @@ public final class RestrictionResolverFactory {
             resolvers.put(restrictionType.getSimpleName(), new LogicalResolver(this));
             return;
         }
-        if (restrictionType.isAssignableFrom(TimeFilter.class)) {
+        if (restrictionType.isAssignableFrom(TimeRestriction.class)) {
             resolvers.put(restrictionType.getSimpleName(), new TimeResolver(this));
             return;
         }

@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -9,17 +11,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class AggregationFilter {
-    @JsonProperty("selector")
+
+    @JsonProperty("Selector")
     private AggregationSelector selector;
 
-    @JsonProperty("aggrType")
+    @JsonProperty("Agg")
     private AggregationType aggregationType;
 
     @JsonProperty("Cmp")
     private ComparisonType comparisonType;
 
-    @JsonProperty("Val")
-    private Object value;
+    @JsonProperty("Vals")
+    private List<Object> values;
 
     AggregationFilter() {
     }
@@ -27,11 +30,11 @@ public class AggregationFilter {
     public AggregationFilter(AggregationSelector selector,
                              AggregationType aggregationType,
                              ComparisonType comparisonType,
-                             Object value) {
+                             List<Object> values) {
         this.selector = selector;
         this.aggregationType = aggregationType;
         this.comparisonType = comparisonType;
-        this.value = value;
+        this.values = values;
     }
 
     public AggregationSelector getSelector() {
@@ -46,7 +49,7 @@ public class AggregationFilter {
         return comparisonType;
     }
 
-    public Object getValue() {
-        return value;
+    public List<Object> getValues() {
+        return values;
     }
 }

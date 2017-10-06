@@ -266,16 +266,16 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder before(Period period, Object value) {
         operator = ComparisonType.BEFORE;
-        restriction = new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
-                Arrays.asList(new Object[] { value }));
+        restriction = new TimeRestriction(new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
+                Arrays.asList(new Object[] { value })));
         complete = true;
         return this;
     }
 
     public RestrictionBuilder inCurrentPeriod(Period period) {
         operator = ComparisonType.IN_CURRENT_PERIOD;
-        restriction = new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
-                Arrays.asList(new Object[] { 0 }));
+        restriction = new TimeRestriction(new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
+                Arrays.asList(new Object[] { 0 })));
         complete = true;
         return this;
     }

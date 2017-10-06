@@ -2,6 +2,7 @@ package com.latticeengines.query.evaluator;
 
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +129,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestriction.setTimeFilter(
                 new TimeFilter(ComparisonType.BEFORE, Period.Quarter, Arrays.asList(new Object[] { 1 })));
         txRestriction.setSpentFilter(
-                new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH, ComparisonType.GREATER_THAN, 9));
+                new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH, ComparisonType.GREATER_THAN, Collections.singletonList(9)));
         Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //

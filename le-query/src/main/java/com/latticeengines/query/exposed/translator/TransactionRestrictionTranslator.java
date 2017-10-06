@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.util.ExpressionTemplateUtils;
-import com.latticeengines.query.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 
@@ -133,8 +133,8 @@ public class TransactionRestrictionTranslator {
     private Restriction filterByAggregationType(Lookup lookup, AggregationFilter filter) {
         Restriction restriction = null;
         if (EACH == filter.getAggregationType() || AT_LEAST_ONCE == filter.getAggregationType()) {
-            restriction = RestrictionUtils.convertValueComparison(lookup, filter.getComparisonType(),
-                    filter.getValue());
+            restriction = RestrictionUtils.convertValueComparisons(lookup, filter.getComparisonType(),
+                    filter.getValues());
         }
         return restriction;
     }
@@ -167,12 +167,12 @@ public class TransactionRestrictionTranslator {
         Restriction restriction = null;
         switch (filter.getAggregationType()) {
         case AVG:
-            restriction = RestrictionUtils.convertValueComparison(AggregateLookup.avg(mixin),
-                    filter.getComparisonType(), filter.getValue());
+            restriction = RestrictionUtils.convertValueComparisons(AggregateLookup.avg(mixin),
+                    filter.getComparisonType(), filter.getValues());
             break;
         case SUM:
-            restriction = RestrictionUtils.convertValueComparison(AggregateLookup.sum(mixin),
-                    filter.getComparisonType(), filter.getValue());
+            restriction = RestrictionUtils.convertValueComparisons(AggregateLookup.sum(mixin),
+                    filter.getComparisonType(), filter.getValues());
             break;
         case AT_LEAST_ONCE:
             restriction = Restriction.builder().let(AggregateLookup.count()).gt(0).build();

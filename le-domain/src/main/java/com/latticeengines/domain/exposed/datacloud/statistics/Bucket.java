@@ -15,15 +15,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(Include.NON_NULL)@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-@ApiModel("Represents of a bucket. It can has a single value (Lbl) or a range (Rng) defined by a pair of boundaries. "
-        + "If both are null, meaning it is a bucket for null value.")
+@JsonInclude(Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@ApiModel("Represents of a bucket. Use Cmp and Vals fields for a normal bucket or Txn field for a transaction bucket. " +
+        "If none is provided, consider as \"equals to the label\"")
 public class Bucket implements Serializable {
 
     private static final long serialVersionUID = -8550825595883518157L;
@@ -49,6 +52,9 @@ public class Bucket implements Serializable {
     @JsonProperty("Vals")
     private List<Object> values;
 
+    @JsonProperty("Txn")
+    private Transaction transaction;
+
     @Deprecated
     @JsonIgnore
     private Pair<Object, Object> range;
@@ -62,7 +68,7 @@ public class Bucket implements Serializable {
     }
 
     public static Bucket rangeBkt(Object min, Object max, boolean minInclusive, boolean maxInclusive) {
-        Bucket bucket =  new Bucket();
+        Bucket bucket = new Bucket();
         List<Object> vals;
         ComparisonType comparator;
         if (min != null && max != null) {
@@ -99,7 +105,7 @@ public class Bucket implements Serializable {
     }
 
     public static Bucket valueBkt(String value) {
-        Bucket bucket =  new Bucket();
+        Bucket bucket = new Bucket();
         if (StringUtils.isNotBlank(value)) {
             bucket.setLabel(value);
         }
@@ -107,7 +113,7 @@ public class Bucket implements Serializable {
     }
 
     public static Bucket valueBkt(ComparisonType comparisonType, List<Object> values) {
-        Bucket bucket =  new Bucket();
+        Bucket bucket = new Bucket();
         bucket.setComparisonType(comparisonType);
         bucket.setValues(values);
         return bucket;
@@ -121,21 +127,21 @@ public class Bucket implements Serializable {
         this();
         this.label = bucket.label;
         if (bucket.count != null) {
-            this.count = new Long(bucket.count);
+            this.count = bucket.count;
         }
         this.id = bucket.id;
         if (bucket.encodedCountList != null) {
             this.encodedCountList = new Long[bucket.encodedCountList.length];
             int idx = 0;
             for (Long cnt : bucket.encodedCountList) {
-                this.encodedCountList[idx++] = new Long(cnt);
+                this.encodedCountList[idx++] = cnt;
             }
         }
         if (bucket.range != null) {
             this.range = bucket.range;
         }
         if (bucket.lift != null) {
-            this.lift = new Double(bucket.lift);
+            this.lift = bucket.lift;
         }
 
         this.comparisonType = bucket.getComparisonType();
@@ -190,6 +196,60 @@ public class Bucket implements Serializable {
         this.values = values;
     }
 
+    public Double getLift() {
+        return lift;
+    }
+
+    public void setLift(Double lift) {
+        this.lift = lift;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
+    public int getIdAsInt() {
+        return id.intValue();
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+    public static class Transaction {
+
+        @JsonProperty("PrdId")
+        private String productId;
+
+        @JsonProperty("Time")
+        private TimeFilter timeFilter;
+
+        @JsonProperty("Negate")
+        private Boolean negate;
+
+        @JsonProperty("Amt")
+        private AggregationFilter spentFilter;
+
+        @JsonProperty("Qty")
+        private AggregationFilter unitFilter;
+
+        // for jackson
+        private Transaction() {}
+
+        public Transaction(String productId, TimeFilter timeFilter, AggregationFilter spentFilter,
+                AggregationFilter unitFilter, Boolean negate) {
+            this.productId = productId;
+            this.timeFilter = timeFilter;
+            this.spentFilter = spentFilter;
+            this.unitFilter = unitFilter;
+            this.negate = negate;
+        }
+
+    }
+
     @Deprecated
     @JsonIgnore
     public Pair<Object, Object> getRange() {
@@ -220,17 +280,5 @@ public class Bucket implements Serializable {
         if (objs != null) {
             this.range = ImmutablePair.of(objs.get(0), objs.get(1));
         }
-    }
-
-    public Double getLift() {
-        return lift;
-    }
-
-    public void setLift(Double lift) {
-        this.lift = lift;
-    }
-
-    public int getIdAsInt() {
-        return id.intValue();
     }
 }

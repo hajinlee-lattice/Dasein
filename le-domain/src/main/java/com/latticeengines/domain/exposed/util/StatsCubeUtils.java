@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -38,9 +39,13 @@ import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
+import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 
 public class StatsCubeUtils {
 
@@ -191,7 +196,7 @@ public class StatsCubeUtils {
             Map<BusinessEntity, List<ColumnMetadata>> cmMap) {
         Statistics statistics = new Statistics();
 
-        for (Map.Entry<BusinessEntity, StatsCube> cubeEntry: cubeMap.entrySet()) {
+        for (Map.Entry<BusinessEntity, StatsCube> cubeEntry : cubeMap.entrySet()) {
             BusinessEntity entity = cubeEntry.getKey();
             StatsCube cube = cubeEntry.getValue();
             if (cmMap.containsKey(entity)) {
@@ -206,22 +211,30 @@ public class StatsCubeUtils {
         return statistics;
     }
 
-    private static void addStats(BusinessEntity entity, StatsCube cube, List<ColumnMetadata> cmList, Statistics statistics) {
+    private static void addStats(BusinessEntity entity, StatsCube cube, List<ColumnMetadata> cmList,
+            Statistics statistics) {
         Map<String, ColumnMetadata> cmMap = new HashMap<>();
         cmList.forEach(cm -> cmMap.put(cm.getColumnId(), cm));
         Map<String, AttributeStats> attrStatsMap = cube.getStatistics();
         for (String name : attrStatsMap.keySet()) {
             ColumnMetadata cm = cmMap.get(name);
             if (cm == null) {
-                log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity + ", skipping it.");
+                log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity
+                        + ", skipping it.");
                 continue;
+            }
+            AttributeStats statsInCube = attrStatsMap.get(name);
+            if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                statsInCube = convertPurchaseHistoryStats(name, statsInCube);
+                if (statsInCube == null) {
+                    log.warn("No valid transaction bucket left for " + name + ", skipping it");
+                    continue;
+                }
             }
 
             AttributeLookup attrLookup = new AttributeLookup(entity, name);
             Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
             String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
-
-            AttributeStats statsInCube = attrStatsMap.get(name);
             // create map entries if not there
             if (!statistics.hasCategory(category)) {
                 statistics.putCategory(category, new CategoryStatistics());
@@ -236,12 +249,88 @@ public class StatsCubeUtils {
         }
     }
 
+    private static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
+        if (!attrName.startsWith("PH_")) {
+            return attrStats;
+        }
+
+        String productId = TransactionMetrics.getProductIdFromAttr(attrName);
+        NamedPeriod namedPeriod = NamedPeriod.fromName(TransactionMetrics.getPeriodFromAttr(attrName));
+        TransactionMetrics metric = TransactionMetrics.fromName(TransactionMetrics.getMetricFromAttr(attrName));
+
+        Buckets buckets = attrStats.getBuckets();
+        buckets.setType(BucketType.TimeSeries);
+        List<Bucket> bucketList = new ArrayList<>();
+        buckets.getBucketList().forEach(bucket -> {
+            Bucket bucket1 = convertTxnBucket(productId, namedPeriod, metric, bucket);
+            if (bucket1 != null) {
+                bucketList.add(bucket1);
+            }
+        });
+        if (bucketList.isEmpty()) {
+            return null;
+        }
+        buckets.setBucketList(bucketList);
+        attrStats.setBuckets(buckets);
+        return attrStats;
+    }
+
+    private static Bucket convertTxnBucket(String productId, NamedPeriod namedPeriod, TransactionMetrics metric,
+            Bucket bucket) {
+        TimeFilter timeFilter = null;
+        AggregationFilter spentFilter = null, unitFilter = null;
+
+        TimeFilter.Period period = null;
+        ComparisonType comparator = null;
+        List<Object> values = null;
+        switch (namedPeriod) {
+        case HASEVER:
+            timeFilter = TimeFilter.ever();
+            break;
+        case LASTQUARTER:
+            period = TimeFilter.Period.Quarter;
+            comparator = ComparisonType.EQUAL;
+            values = Collections.singletonList(1);
+            timeFilter = new TimeFilter(comparator, period, values);
+            break;
+        default:
+            break;
+        }
+
+        Boolean negate = null;
+        boolean isAmount = false;
+        switch (metric) {
+        case PURCHASED:
+            negate = "No".equalsIgnoreCase(bucket.getLabel());
+            break;
+        case AMOUNT:
+            isAmount = true;
+        case QUANTITY:
+            AggregationFilter aggFilter = new AggregationFilter(null, null, bucket.getComparisonType(),
+                    bucket.getValues());
+            if (isAmount) {
+                spentFilter = aggFilter;
+            } else {
+                unitFilter = aggFilter;
+            }
+            break;
+        default:
+            break;
+        }
+
+        Bucket.Transaction transaction = new Bucket.Transaction(productId, timeFilter, spentFilter, unitFilter, negate);
+        bucket.setComparisonType(null);
+        bucket.setValues(null);
+        bucket.setTransaction(transaction);
+        return bucket;
+    }
+
     public static StatsCube toStatsCube(Statistics statistics) {
         StatsCube cube = new StatsCube();
         Map<String, AttributeStats> stats = new HashMap<>();
-        for (CategoryStatistics catStats: statistics.getCategories().values()) {
-            for (SubcategoryStatistics subCatStats: catStats.getSubcategories().values()) {
-                for (Map.Entry<AttributeLookup, AttributeStats> entry: subCatStats.getAttributes().entrySet()) {
+        for (CategoryStatistics catStats : statistics.getCategories().values()) {
+            for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
+                for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
                     stats.put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
                 }
             }
@@ -252,9 +341,9 @@ public class StatsCubeUtils {
 
     public static Map<BusinessEntity, StatsCube> toStatsCubes(Statistics statistics) {
         Map<BusinessEntity, Map<String, AttributeStats>> statsMap = new HashMap<>();
-        for (CategoryStatistics catStats: statistics.getCategories().values()) {
-            for (SubcategoryStatistics subCatStats: catStats.getSubcategories().values()) {
-                for (Map.Entry<AttributeLookup, AttributeStats> entry: subCatStats.getAttributes().entrySet()) {
+        for (CategoryStatistics catStats : statistics.getCategories().values()) {
+            for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
+                for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
                     BusinessEntity entity = entry.getKey().getEntity();
                     if (!statsMap.containsKey(entity)) {
                         statsMap.put(entity, new HashMap<>());
@@ -276,8 +365,7 @@ public class StatsCubeUtils {
         if (attributeStats.getBuckets() != null && attributeStats.getBuckets().getBucketList() != null) {
             Buckets buckets = attributeStats.getBuckets();
             List<Bucket> top5Bkts = buckets.getBucketList().stream() //
-                    .sorted(Comparator.comparing(bkt -> - bkt.getCount()))
-                    .limit(5).collect(Collectors.toList());
+                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())).limit(5).collect(Collectors.toList());
             if (attributeStats.getBuckets().getBucketList().size() > top5Bkts.size()) {
                 buckets.setHasMore(true);
             }
@@ -286,22 +374,20 @@ public class StatsCubeUtils {
         return attributeStats;
     }
 
-
     public static TopNTree toTopNTree(Statistics statistics, boolean includeTopBkt) {
         TopNTree topNTree = new TopNTree();
         Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
-        for (Map.Entry<Category, CategoryStatistics> entry: statistics.getCategories().entrySet()) {
+        for (Map.Entry<Category, CategoryStatistics> entry : statistics.getCategories().entrySet()) {
             catTrees.put(entry.getKey(), toCatTopTree(entry.getValue(), includeTopBkt));
         }
         topNTree.setCategories(catTrees);
         return topNTree;
     }
 
-
     private static CategoryTopNTree toCatTopTree(CategoryStatistics catStats, boolean includeTopBkt) {
         CategoryTopNTree topNTree = new CategoryTopNTree();
         Map<String, List<TopAttribute>> subCatTrees = new HashMap<>();
-        for (Map.Entry<String, SubcategoryStatistics> entry: catStats.getSubcategories().entrySet()) {
+        for (Map.Entry<String, SubcategoryStatistics> entry : catStats.getSubcategories().entrySet()) {
             subCatTrees.put(entry.getKey(), toSubcatTopTree(entry.getValue(), includeTopBkt));
         }
         topNTree.setSubcategories(subCatTrees);
@@ -310,7 +396,7 @@ public class StatsCubeUtils {
 
     private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats, boolean includeTopBkt) {
         return catStats.getAttributes().entrySet().stream() //
-                .sorted(Comparator.comparing(entry -> - entry.getValue().getNonNullCount())) //
+                .sorted(Comparator.comparing(entry -> -entry.getValue().getNonNullCount())) //
                 .map(entry -> toTopAttr(entry, includeTopBkt)) //
                 .collect(Collectors.toList());
     }
@@ -320,8 +406,7 @@ public class StatsCubeUtils {
         TopAttribute topAttribute = new TopAttribute(entry.getKey(), stats.getNonNullCount());
         if (includeTopBkt && stats.getBuckets() != null) {
             Bucket topBkt = stats.getBuckets().getBucketList().stream() //
-                    .sorted(Comparator.comparing(bkt -> - bkt.getCount()))
-                    .findFirst().orElse(null);
+                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())).findFirst().orElse(null);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
             }

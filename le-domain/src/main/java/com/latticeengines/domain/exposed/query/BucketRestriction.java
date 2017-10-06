@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -101,10 +102,11 @@ public class BucketRestriction extends Restriction {
         if (comparisonType == null) {
             return convertBucketRange();
         } else {
-            return convertValueComparisons(attr, comparisonType, values);
+            return RestrictionUtils.convertValueComparisons(attr, comparisonType, values);
         }
     }
 
+    @Deprecated
     private Restriction convertBucketRange() {
         if (bkt.getRange() == null && StringUtils.isBlank(bkt.getLabel())) {
             return new ConcreteRestriction(false, attr, IS_NULL, null);

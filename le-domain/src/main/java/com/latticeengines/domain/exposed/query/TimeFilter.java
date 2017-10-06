@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class TimeFilter extends Restriction {
+public class TimeFilter {
 
     @JsonIgnore
     private Lookup lhs;
@@ -24,6 +24,12 @@ public class TimeFilter extends Restriction {
 
     @JsonProperty("Period")
     private Period period;
+
+    public static TimeFilter ever() {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.EVER;
+        return filter;
+    }
 
     public TimeFilter() {
     }
