@@ -3,12 +3,22 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -110,26 +120,66 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
 
     private void uncompress(List<String> compressedFiles, Path uncompressedDir, CompressType type)
             throws IOException {
+        BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>();
+        ExecutorService uncompressExecutor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.MINUTES, runnableQueue);
+        List<Future<Pair<String, Boolean>>> futures = new ArrayList<>();
         for (String compressedFile : compressedFiles) {
-            Path compressedPath = new Path(compressedFile);
-            log.info("CompressedPath: " + compressedFile);
-            switch (type) {
-            case GZ:
-                String compressedNameOnly = compressedPath.getName();
-                String uncompressedNameOnly = StringUtils.endsWithIgnoreCase(compressedNameOnly, EngineConstants.GZ)
-                        ? compressedNameOnly.substring(0, compressedNameOnly.length() - EngineConstants.GZ.length())
-                        : compressedNameOnly;
-                Path uncompressedPath = new Path(uncompressedDir, uncompressedNameOnly);
-                log.info("UncompressedPath for gz file: " + uncompressedPath.toString());
-                HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedPath.toString());
-                break;
-            case ZIP:
-                log.info("UncompressedPath for zip file: " + uncompressedDir.toString());
-                HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedDir.toString());
-                break;
-            default:
-                throw new RuntimeException("CompressType " + type.name() + "  is not supported");
+            Callable<Pair<String, Boolean>> task = createUncompressCallable(compressedFile, uncompressedDir, type);
+            Future<Pair<String, Boolean>> future = uncompressExecutor.submit(task);
+            futures.add(future);
+        }
+        for (Future<Pair<String, Boolean>> future : futures) {
+            Pair<String, Boolean> res;
+            try {
+                res = future.get(2, TimeUnit.HOURS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
             }
+            if (!Boolean.TRUE.equals(res.getRight())) {
+                throw new RuntimeException("Fail to uncompress file " + res.getLeft());
+            }
+        }
+        uncompressExecutor.shutdown();
+    }
+
+    private Callable<Pair<String, Boolean>> createUncompressCallable(String compressedFile, Path uncompressedDir,
+            CompressType type) {
+        Callable<Pair<String, Boolean>> task = new Callable<Pair<String, Boolean>>() {
+            @Override
+            public Pair<String, Boolean> call() {
+                try {
+                    uncompress(compressedFile, uncompressedDir, type);
+                } catch (IOException e) {
+                    log.error("Failed to uncompress file " + compressedFile, e);
+                    return Pair.of(compressedFile, Boolean.FALSE);
+                }
+                return Pair.of(compressedFile, Boolean.TRUE);
+            }
+        };
+        return task;
+    }
+
+
+    private void uncompress(String compressedFile, Path uncompressedDir, CompressType type) throws IOException {
+        Path compressedPath = new Path(compressedFile);
+        log.info("CompressedPath: " + compressedFile);
+        switch (type) {
+        case GZ:
+            String compressedNameOnly = compressedPath.getName();
+            String uncompressedNameOnly = StringUtils.endsWithIgnoreCase(compressedNameOnly, EngineConstants.GZ)
+                    ? compressedNameOnly.substring(0, compressedNameOnly.length() - EngineConstants.GZ.length())
+                    : compressedNameOnly;
+            Path uncompressedPath = new Path(uncompressedDir, uncompressedNameOnly);
+            log.info("UncompressedPath for gz file: " + uncompressedPath.toString());
+            HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedPath.toString());
+            break;
+        case ZIP:
+            log.info("UncompressedPath for zip file: " + uncompressedDir.toString());
+            HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedDir.toString());
+            break;
+        default:
+            throw new RuntimeException("CompressType " + type.name() + "  is not supported");
         }
     }
 
