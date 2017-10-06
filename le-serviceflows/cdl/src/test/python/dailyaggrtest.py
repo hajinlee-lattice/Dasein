@@ -12,9 +12,9 @@ logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
 logger = logging.getLogger(name='ApsGenerator')
 
 if __name__ == '__main__':
-    os.environ['StepflowConfig']='{"inputPaths":["/Pods/Aps/input/*.avro"], "outputPath":"/Pods/Aps/output"}'
-    os.environ['PYTHON_APP']='./apsgenerator.py'
-    os.environ['SHDP_HD_FSWEB']='http://webhdfs.lattice.local:14000/webhdfs/v1'
+    os.environ['StepflowConfig'] = '{"inputPaths":["/Pods/Aps/input/*.avro"], "outputPath":"/Pods/Aps/output"}'
+    os.environ['PYTHON_APP'] = './apsgenerator.py'
+    os.environ['SHDP_HD_FSWEB'] = 'http://webhdfs.lattice.local:14000/webhdfs/v1'
 
     if not os.path.isdir('./input'):
         os.mkdir("./input")
@@ -23,14 +23,15 @@ if __name__ == '__main__':
      
     loader = ApsDataLoader()
 #     loader.downloadToLocal()
-    df = loader.readDataFrameFromAvro()
+    df = loader.readDataFrameFromAvro('./input2')
     logger.info(df.shape)
-    assert df.shape == (873967, 24)
-     
+    assert df.shape == (7785, 9)
+    df.rename(columns={'AccountId':'Account_ID', 'PeriodId':'Period_ID', 'ProductId':'Product_ID',
+                       'TotalAmount':'Amount', 'TotalQuantity':'Quantity' }, inplace=True) 
     apState = apsgenerator.createAps(df)
     loader.writeDataFrameToAvro(apState)
     logger.info(apState.shape)
-    assert  apState.shape == (833038, 202)
+    assert  apState.shape == (1186, 697)
     newApSatate = loader.readDataFrameFromAvro("./output")
     print newApSatate.shape
     assert(apState.shape == newApSatate.shape)

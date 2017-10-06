@@ -212,7 +212,9 @@ if __name__ == '__main__':
     loader.downloadToLocal()
     df = loader.readDataFrameFromAvro()
     logger.info(df.shape)
-     
+    df.rename(columns={'AccountId':'Account_ID', 'PeriodId':'Period_ID', 'ProductId':'Product_ID',
+                       'TotalAmount':'Amount', 'TotalQuantity':'Quantity' }, inplace=True) 
+ 
     apState = createAps(df)
     loader.writeDataFrameToAvro(apState)
     logger.info(apState.shape)

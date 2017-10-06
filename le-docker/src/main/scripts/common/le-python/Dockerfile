@@ -15,6 +15,8 @@ ENV PYTHON_PATH /opt/conda/bin:/:$PYTHON_PATH
 
 RUN yum install -y redhat-lsb
 RUN yum install -y gcc
+RUN yum install -y gcc-c++
+RUN yum install -y snappy-devel
 
 RUN conda create -y --name lattice python=2.7.13 pip
 RUN source activate lattice
@@ -31,6 +33,8 @@ RUN source activate v01
 RUN source activate v01 && pip install avro==1.8.1 fastavro==0.12.1 pexpect==4.2.1 psutil==5.2.0 ptyprocess==0.5.1 kazoo==2.2.1 patsy==0.4.1
 RUN source activate v01 && conda install -y pandas=0.19.2=np112py27_1
 RUN source activate v01 && pip install statsmodels==0.8.0
+RUN source activate v01 && pip install python-snappy==0.5.1
+
 RUN source activate v01 && conda install -y libiconv=1.14=0 libxml2=2.9.4=0 libxslt=1.1.29=0 lxml=3.7.3=py27_0 numpy=1.12.0=py27_0 openssl=1.0.2k=1 py=1.4.32=py27_0 \
     pytest=3.0.6=py27_0 pytz=2016.10=py27_0 readline=6.2=2 scikit-learn=0.18.1=np112py27_1 setuptools=27.2.0=py27_0 sqlite=3.13.0=0 \
     tk=8.5.18=0 wheel=0.29.0=py27_0 zlib=1.2.8=3
