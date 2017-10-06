@@ -76,6 +76,12 @@ public class AttributeRepository {
         return cmMap.containsKey(lookup);
     }
 
+    public void appendServingStore(BusinessEntity entity, Table table) {
+        Map<String, ColumnMetadata> attrs = expandAttrsInTable(table);
+        attrs.forEach((n, md) -> cmMap.put(new AttributeLookup(entity, n), md));
+        tableNameMap.put(entity.getServingStore(), table.getName());
+    }
+
     public static AttributeRepository constructRepo(Statistics statistics, Map<TableRoleInCollection, Table> tableMap,
             CustomerSpace customerSpace, String collectionName) {
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
@@ -132,7 +138,13 @@ public class AttributeRepository {
 
     private static Map<String, ColumnMetadata> expandAttrsInTable(Table table) {
         Map<String, ColumnMetadata> attrMap = new HashMap<>();
-        table.getAttributes().forEach(attr -> attrMap.put(attr.getName(), attr.getColumnMetadata()));
+        table.getAttributes().forEach(attr -> {
+            ColumnMetadata metadata = new ColumnMetadata();
+            metadata.setNumBits(attr.getNumOfBits());
+            metadata.setBitOffset(attr.getBitOffset());
+            metadata.setPhysicalName(attr.getPhysicalName());
+            attrMap.put(attr.getName(), metadata);
+        });
         return attrMap;
     }
 

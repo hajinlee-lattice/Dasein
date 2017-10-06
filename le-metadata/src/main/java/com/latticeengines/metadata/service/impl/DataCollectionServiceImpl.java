@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +24,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -183,8 +183,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 tableMap.put(role, tables.get(0));
             }
         });
-        return AttributeRepository.constructRepo(statistics, tableMap, CustomerSpace.parse(customerSpace),
-                notNullCollectionName);
+        AttributeRepository attrRepo = AttributeRepository.constructRepo(statistics, tableMap,
+                CustomerSpace.parse(customerSpace), notNullCollectionName);
+        List<Table> productTables = getTables(customerSpace, notNullCollectionName,
+                BusinessEntity.Product.getServingStore(), version);
+        if (productTables != null && !productTables.isEmpty()) {
+            Table productTable = productTables.get(0);
+            attrRepo.appendServingStore(BusinessEntity.Product, productTable);
+        }
+        return attrRepo;
     }
 
     private List<TableRoleInCollection> extractServingRoles(Statistics statistics) {
