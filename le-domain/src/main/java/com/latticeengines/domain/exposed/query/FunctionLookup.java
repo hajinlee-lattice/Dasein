@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class FunctionLookup<T, I> extends Lookup {
+public class FunctionLookup<T, I, O> extends Lookup {
 
     @JsonProperty("lookup")
     private Lookup lookup;
@@ -18,7 +18,7 @@ public class FunctionLookup<T, I> extends Lookup {
     @JsonProperty("alias")
     private String alias;
 
-    private Function<I, String> function;
+    private Function<I, O> function;
 
     private I args;
 
@@ -45,7 +45,7 @@ public class FunctionLookup<T, I> extends Lookup {
         this.alias = alias;
     }
 
-    public FunctionLookup<T, I> as(String alias) {
+    public FunctionLookup<T, I, O> as(String alias) {
         setAlias(alias);
         return this;
     }
@@ -54,11 +54,11 @@ public class FunctionLookup<T, I> extends Lookup {
         return type;
     }
 
-    public Function<I, String> getFunction() {
+    public Function<I, O> getFunction() {
         return function;
     }
 
-    public void setFunction(Function<I, String> function) {
+    public void setFunction(Function<I, O> function) {
         this.function = function;
     }
 

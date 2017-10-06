@@ -91,6 +91,17 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder eq(Lookup value) {
+        operator = ComparisonType.EQUAL;
+        if (value == null) {
+            rhsLookup = new ValueLookup(value);
+        } else {
+            rhsLookup = value;
+        }
+        completeConcrete();
+        return this;
+    }
+
     public RestrictionBuilder eq(BusinessEntity entity, String attrName) {
         operator = ComparisonType.EQUAL;
         rhsLookup = new AttributeLookup(entity, attrName);

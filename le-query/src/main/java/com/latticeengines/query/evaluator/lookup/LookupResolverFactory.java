@@ -83,7 +83,7 @@ public final class LookupResolverFactory {
             return;
         }
         if (lookupType.isAssignableFrom(FunctionLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new FunctionResolver(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new FunctionResolver(attrRepo, this));
             return;
         }
         throw new QueryEvaluationException("Do not support lookup of type " + lookupType + " yet.");

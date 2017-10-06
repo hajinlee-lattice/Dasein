@@ -9,7 +9,6 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.query.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -72,8 +71,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         if (BusinessEntity.Contact == entity) {
             List<Lookup> lookups = query.getLookups();
             if (lookups != null && lookups.stream().anyMatch(this::isContactCompanyNameLookup)) {
-                List<Lookup> filtered =
-                    lookups.stream().filter(this::isContactCompanyNameLookup).collect(Collectors.toList());
+                List<Lookup> filtered = lookups.stream().filter(this::isContactCompanyNameLookup)
+                        .collect(Collectors.toList());
                 filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.toString()));
                 filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.toString()));
                 query.setLookups(filtered);
@@ -86,8 +85,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         if (lookup instanceof AttributeLookup) {
             AttributeLookup attrLookup = (AttributeLookup) lookup;
             String attributeName = attrLookup.getAttribute();
-            if (attributeName.equals(InterfaceName.CompanyName.toString()) &&
-                BusinessEntity.Contact == attrLookup.getEntity()) {
+            if (attributeName.equals(InterfaceName.CompanyName.toString())
+                    && BusinessEntity.Contact == attrLookup.getEntity()) {
                 return true;
             }
         }
@@ -98,8 +97,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         if (BusinessEntity.Contact == entity) {
             List<Map<String, Object>> results = data.getData();
             List<Map<String, Object>> processed = results.stream().map(objectMap -> {
-                if (objectMap.containsKey(InterfaceName.CompanyName.toString()) &&
-                    objectMap.containsKey(InterfaceName.LDC_Name.toString())) {
+                if (objectMap.containsKey(InterfaceName.CompanyName.toString())
+                        && objectMap.containsKey(InterfaceName.LDC_Name.toString())) {
                     String companyName = (String) objectMap.get(InterfaceName.CompanyName.toString());
                     String ldcName = (String) objectMap.get(InterfaceName.LDC_Name.toString());
                     String consolidatedName = (ldcName != null) ? ldcName : companyName;
@@ -142,8 +141,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
                 Lookup ruleLookup = QueryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                        ruleBasedModel.getRatingRule(),
-                        QueryEvaluator.SCORE, true);
+                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true);
                 AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
                 query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();

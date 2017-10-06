@@ -36,6 +36,8 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         case MAX:
         case MIN:
             return numExpressionForCompare(lookup);
+        case COUNT:
+            return Collections.singletonList(Expressions.asComparable(countExpression(lookup, true)));
         default:
             throw new UnsupportedOperationException(
                     "Does not support aggregator " + lookup.getAggregator() + "in where clause yet.");
@@ -96,7 +98,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
             case AVG:
                 return numberPath.avg().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
             case MAX:
-                return numberExpression.max().as(lookup.getAlias());
+                return numberPath.max().as(lookup.getAlias());
             case MIN:
                 return numberExpression.min().as(lookup.getAlias());
             default:
@@ -109,7 +111,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
             case AVG:
                 return numberPath.avg().coalesce(lookup.getNvl()).asNumber();
             case MAX:
-                return numberExpression.max();
+                return numberPath.max();
             case MIN:
                 return numberExpression.min();
             default:
@@ -118,7 +120,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         }
     }
 
-    private Expression<?> countExpression(AggregateLookup lookup, boolean asAlias) {
+    private Expression<? extends Comparable<?>> countExpression(AggregateLookup lookup, boolean asAlias) {
         if (asAlias && StringUtils.isNotBlank(lookup.getAlias())) {
             return Expressions.asNumber(1).count().as(lookup.getAlias());
         } else {

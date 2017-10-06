@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DateAttributeLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.query.util.ExpressionTemplateUtils;
@@ -33,7 +32,7 @@ public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup
         if (cm == null) {
             throw new QueryEvaluationException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return resolveForDate(lookup.getEntity(), cm, lookup.getPeriod(), false);
+        return resolveForDate(lookup, cm, lookup.getPeriod(), false);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -46,12 +45,12 @@ public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup
         if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return Collections.singletonList(resolveForDate(lookup.getEntity(), cm, lookup.getPeriod(), false));
+        return Collections.singletonList(resolveForDate(lookup, cm, lookup.getPeriod(), false));
     }
 
-    private Expression<? extends Comparable<?>> resolveForDate(BusinessEntity entity, ColumnMetadata cm, Period p,
+    private Expression<? extends Comparable<?>> resolveForDate(DateAttributeLookup lookup, ColumnMetadata cm, Period p,
             boolean alias) {
-        String datePath = entity.name() + "." + cm.getName();
+        String datePath = lookup.toString();
         if (cm.getJavaClass() == null || cm.getJavaClass().equals((String.class.getSimpleName()))) {
             datePath = ExpressionTemplateUtils.strAttrToDate(datePath);
         }

@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
+import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
 
 public class QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
@@ -174,7 +175,7 @@ public class QueryTranslator {
                     parent.getRestrictions().add(concrete);
                 } else if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
-                    Restriction concrete = txRestriction.convert(entity);
+                    Restriction concrete = new TransactionRestrictionTranslator(txRestriction).convert(entity);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(txRestriction);
                     parent.getRestrictions().add(concrete);
@@ -186,7 +187,7 @@ public class QueryTranslator {
             translated = bucket.convert();
         } else if (restriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) restriction;
-            translated = txRestriction.convert(entity);
+            translated = new TransactionRestrictionTranslator(txRestriction).convert(entity);
         } else {
             translated = restriction;
         }
@@ -216,11 +217,10 @@ public class QueryTranslator {
         if (ruleBasedModels != null && !ruleBasedModels.isEmpty()) {
             if (restriction instanceof ConcreteRestriction
                     && ((ConcreteRestriction) restriction).getLhs() instanceof AttributeLookup && BusinessEntity.Rating
-                    .equals(((AttributeLookup) ((ConcreteRestriction) restriction).getLhs()).getEntity())) {
+                            .equals(((AttributeLookup) ((ConcreteRestriction) restriction).getLhs()).getEntity())) {
                 AttributeLookup attributeLookup = (AttributeLookup) ((ConcreteRestriction) restriction).getLhs();
                 String modelId = attributeLookup.getAttribute();
-                log.info("Translating a concrete restriction involving rule based rating engine "
-                        + modelId);
+                log.info("Translating a concrete restriction involving rule based rating engine " + modelId);
                 if (ruleBasedModels.containsKey(modelId)) {
                     Lookup ruleLookup = ruleBasedModels.get(modelId);
                     ((ConcreteRestriction) restriction).setLhs(ruleLookup);

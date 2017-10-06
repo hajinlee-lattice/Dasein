@@ -12,6 +12,9 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.query.AggregateLookup;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
+import com.latticeengines.domain.exposed.query.AggregationSelector;
+import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
@@ -24,6 +27,7 @@ import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
 /**
@@ -91,7 +95,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     public void testTransactionSelect() throws ParseException {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("1");
-        Restriction restriction = txRestriction.convert(BusinessEntity.Account);
+        Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
         Restriction countryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
                 .eq("LEICESTER").build();
         Restriction idRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(1802).build();
@@ -114,22 +118,21 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
                 .where(restriction).build();
         long count = queryEvaluatorService.getCount(attrRepo, query);
-        Assert.assertEquals(count, 6);
+        Assert.assertEquals(count, 7);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTransactionSelectWithTimeFilter() throws ParseException {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("1");
         txRestriction.setTimeFilter(
-                new TimeFilter(ComparisonType.BEFORE, Period.Quarter, Arrays.asList(new Object[] { -2 })));
-        Restriction restriction = txRestriction.convert(BusinessEntity.Account);
-        Restriction countryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
-                .eq("LEICESTER").build();
-        Restriction cityAndTx = Restriction.builder().and(countryRestriction, restriction).build();
+                new TimeFilter(ComparisonType.BEFORE, Period.Quarter, Arrays.asList(new Object[] { 1 })));
+        txRestriction.setSpentFilter(
+                new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH, ComparisonType.GREATER_THAN, 9));
+        Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
-                .where(cityAndTx).build();
+                .where(restriction).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), 1);
     }

@@ -29,10 +29,6 @@ public class AttributeLookup extends Lookup implements Comparable<AttributeLooku
     public AttributeLookup() {
     }
 
-    public AttributeLookup(String attrName) {
-        this.attribute = attrName;
-    }
-
     public AttributeLookup(BusinessEntity entity, String attrName) {
         this.entity = entity;
         this.attribute = attrName;
