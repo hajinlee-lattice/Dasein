@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
 logger = logging.getLogger(name='ApsGenerator')
 
 if __name__ == '__main__':
-    os.environ['StepflowConfig']='{"inputPaths":["/Pods/Aps/input/*.avro"], "outputPath\":"/Pods/Aps/output"}'
+    os.environ['StepflowConfig']='{"inputPaths":["/Pods/Aps/input/*.avro"], "outputPath":"/Pods/Aps/output"}'
     os.environ['PYTHON_APP']='./apsgenerator.py'
     os.environ['SHDP_HD_FSWEB']='http://webhdfs.lattice.local:14000/webhdfs/v1'
 
