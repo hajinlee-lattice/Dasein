@@ -199,8 +199,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private void notifyCacheWatchers(String customerSpace) {
         new Thread(() -> {
             NodeWatcher.updateWatchedData(CustomerStats.name(), customerSpace);
-            for (TableRoleInCollection role : Arrays.asList(TableRoleInCollection.BucketedAccount,
-                    TableRoleInCollection.SortedContact)) {
+            for (TableRoleInCollection role : Arrays.asList( //
+                    TableRoleInCollection.BucketedAccount, //
+                    TableRoleInCollection.SortedContact, //
+                    TableRoleInCollection.AggregatedTransaction, //
+                    TableRoleInCollection.SortedProduct)) {
                 NodeWatcher.updateWatchedData(CustomerMetadata.name(),
                         String.format("%s|%s", customerSpace, role.name()));
                 try {
