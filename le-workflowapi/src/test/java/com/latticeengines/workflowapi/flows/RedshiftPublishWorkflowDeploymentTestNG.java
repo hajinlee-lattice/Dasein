@@ -98,7 +98,8 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
 
     @Test(groups = "workflow", dependsOnMethods = "initialLoad")
     public void updateRows() throws Exception {
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(mainTestCustomerSpace.toString());
+        DataCollection.Version inactiveVersion = dataCollectionProxy
+                .getInactiveVersion(mainTestCustomerSpace.toString());
         dataCollectionProxy.switchVersion(mainTestCustomerSpace.toString(), inactiveVersion);
 
         String localFilePath = getClass().getClassLoader().getResource(RESOURCE_BASE + "/part-00001.avro").getPath();
@@ -109,12 +110,15 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         Table table = MetadataConverter.getTable(yarnConfiguration, dest);
         Map<BusinessEntity, Table> sourceTables = new HashMap<>();
         sourceTables.put(BusinessEntity.Account, table);
+        Map<BusinessEntity, Boolean> appendFlagMap = new HashMap<>();
+        appendFlagMap.put(BusinessEntity.Account, true);
 
         HdfsToRedshiftConfiguration exportConfig = createExportBaseConfig();
         RedshiftPublishWorkflowConfiguration.Builder builder = new RedshiftPublishWorkflowConfiguration.Builder();
         builder.hdfsToRedshiftConfiguration(exportConfig);
         builder.enforceTargetTableName(targetTableName);
         builder.sourceTables(sourceTables);
+        builder.appendFlagMap(appendFlagMap);
         builder.customer(mainTestCustomerSpace);
         builder.internalResourceHostPort(internalResourceHostPort);
         builder.microServiceHostPort(microserviceHostPort);

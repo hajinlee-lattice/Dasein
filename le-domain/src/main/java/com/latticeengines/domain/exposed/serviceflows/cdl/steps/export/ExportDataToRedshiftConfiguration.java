@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps.export;
 
+import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,10 +15,13 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
     private HdfsToRedshiftConfiguration hdfsToRedshiftConfiguration;
 
     @JsonProperty("source_tables_map")
-    private Map<BusinessEntity, Table> entityTableMap;
+    private Map<BusinessEntity, Table> entityTableMap = Collections.emptyMap();
 
     @JsonProperty("target_table_name")
     private String targetTableName;
+
+    @JsonProperty("append_flag_map")
+    private Map<BusinessEntity, Boolean> appendFlagMap = Collections.emptyMap();
 
     public HdfsToRedshiftConfiguration getHdfsToRedshiftConfiguration() {
         return hdfsToRedshiftConfiguration;
@@ -33,6 +37,14 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
 
     public void setSourceTables(Map<BusinessEntity, Table> entityTableMap) {
         this.entityTableMap = entityTableMap;
+    }
+
+    public Map<BusinessEntity, Boolean> getAppendFlagMap() {
+        return appendFlagMap;
+    }
+
+    public void setAppendFlagMap(Map<BusinessEntity, Boolean> appendFlagMap) {
+        this.appendFlagMap = appendFlagMap;
     }
 
     public String getTargetTableName() {

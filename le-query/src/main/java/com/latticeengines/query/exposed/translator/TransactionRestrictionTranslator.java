@@ -31,14 +31,14 @@ import com.querydsl.core.types.dsl.Expressions;
 
 public class TransactionRestrictionTranslator {
 
-    private TransactionRestriction txtRestriction;
+    private TransactionRestriction txnRestriction;
 
     public final static String PERIOD_AMOUNT = "PeriodAmount";
     public final static String PERIOD_QUANTITY = "PeriodQuantity";
     public final static String PERIOD_MAX = "PeriodMax";
 
-    public TransactionRestrictionTranslator(TransactionRestriction txtRestriction) {
-        this.txtRestriction = txtRestriction;
+    public TransactionRestrictionTranslator(TransactionRestriction txnRestriction) {
+        this.txnRestriction = txnRestriction;
     }
 
     private FunctionLookup<Integer, Object, String> createPeriodLookup() {
@@ -46,7 +46,7 @@ public class TransactionRestrictionTranslator {
                 InterfaceName.TransactionDate.name());
         AttributeLookup periodId = AttributeLookup.fromString(InterfaceName.PeriodId.name());
 
-        Period p = txtRestriction.getTimeFilter().getPeriod();
+        Period p = txnRestriction.getTimeFilter().getPeriod();
         String source = ExpressionTemplateUtils.strAttrToDate(transactionDate.toString());
         String target = ExpressionTemplateUtils.getCurrentDate();
         FunctionLookup<Integer, Object, String> period = new FunctionLookup<Integer, Object, String>(Integer.class,
@@ -57,8 +57,8 @@ public class TransactionRestrictionTranslator {
 
     public Restriction convert(BusinessEntity entity) {
         Restriction productRestriction = filterByProduct();
-        if (txtRestriction.getTimeFilter() == null) {
-            txtRestriction.setTimeFilter(new TimeFilter(ComparisonType.EVER, Period.Day, Collections.emptyList()));
+        if (txnRestriction.getTimeFilter() == null) {
+            txnRestriction.setTimeFilter(new TimeFilter(ComparisonType.EVER, Period.Day, Collections.emptyList()));
         }
         AttributeLookup amountLookup = new AttributeLookup(BusinessEntity.Transaction,
                 InterfaceName.TotalAmount.name());
@@ -106,7 +106,7 @@ public class TransactionRestrictionTranslator {
                 .let(entity, InterfaceName.AccountId.name()).inCollection(txSubQuery, InterfaceName.AccountId.name())
                 .build();
 
-        return txtRestriction.isNegate() ? Restriction.builder().not(accountInRestriction).build()
+        return txnRestriction.isNegate() ? Restriction.builder().not(accountInRestriction).build()
                 : accountInRestriction;
     }
 
@@ -116,8 +116,8 @@ public class TransactionRestrictionTranslator {
 
     private Restriction filterByPeriodAmountQuantity(AggregateLookup aggrAmount, AggregateLookup aggrQuantity) {
         Restriction restriction = null;
-        AggregationFilter spentFilter = txtRestriction.getSpentFilter();
-        AggregationFilter unitFilter = txtRestriction.getUnitFilter();
+        AggregationFilter spentFilter = txnRestriction.getSpentFilter();
+        AggregationFilter unitFilter = txnRestriction.getUnitFilter();
         if (spentFilter != null && unitFilter != null) {
             Restriction amountRestriction = filterByAggregationType(aggrAmount, spentFilter);
             Restriction quantityRestriction = filterByAggregationType(aggrQuantity, unitFilter);
@@ -141,8 +141,8 @@ public class TransactionRestrictionTranslator {
 
     private Restriction filterByAggregatedPeriodAmountQuantity(Lookup periodAmountLookup, Lookup periodQuantityLookup,
             Lookup periodMax) {
-        AggregationFilter spentFilter = txtRestriction.getSpentFilter();
-        AggregationFilter unitFilter = txtRestriction.getUnitFilter();
+        AggregationFilter spentFilter = txnRestriction.getSpentFilter();
+        AggregationFilter unitFilter = txnRestriction.getUnitFilter();
         Restriction restriction;
         if (spentFilter == null && unitFilter == null) {
             // has purchased, treat it as sum(amount) > 0 or sum(unit) > 0
@@ -192,7 +192,7 @@ public class TransactionRestrictionTranslator {
         FunctionLookup<Integer, Expression<BigDecimal>, Expression<BigDecimal>> periodRange = new FunctionLookup<Integer, Expression<BigDecimal>, Expression<BigDecimal>>(
                 Integer.class, periodMax).as("PeriodRange");
         periodRange.setFunction(exp -> Expressions.asNumber(exp)
-                .add(new BigDecimal(txtRestriction.getTimeFilter().getValues().get(0).toString()).negate()));
+                .add(new BigDecimal(txnRestriction.getTimeFilter().getValues().get(0).toString()).negate()));
         return periodRange;
     }
 
@@ -202,12 +202,12 @@ public class TransactionRestrictionTranslator {
 
     private Restriction filterByProduct() {
         return Restriction.builder().let(BusinessEntity.Transaction, InterfaceName.ProductId.name())
-                .eq(txtRestriction.getProductId()).build();
+                .eq(txnRestriction.getProductId()).build();
     }
 
     private Restriction filterByTime(Lookup periodId) {
         Restriction restriction = null;
-        switch (txtRestriction.getTimeFilter().getRelation()) {
+        switch (txnRestriction.getTimeFilter().getRelation()) {
         case EVER:
             restriction = Restriction.builder().let(periodId).isNotNull().build();
             break;
@@ -215,16 +215,16 @@ public class TransactionRestrictionTranslator {
             restriction = Restriction.builder().let(periodId).eq(0).build();
             break;
         case BEFORE:
-            restriction = Restriction.builder().let(periodId).gt(txtRestriction.getTimeFilter().getValues().get(0))
+            restriction = Restriction.builder().let(periodId).gt(txnRestriction.getTimeFilter().getValues().get(0))
                     .build();
             break;
         case AFTER:
-            restriction = Restriction.builder().let(periodId).lt(txtRestriction.getTimeFilter().getValues().get(0))
+            restriction = Restriction.builder().let(periodId).lt(txnRestriction.getTimeFilter().getValues().get(0))
                     .build();
             break;
         default:
             throw new UnsupportedOperationException(
-                    "comparator " + txtRestriction.getTimeFilter().getRelation() + " is not supported yet");
+                    "comparator " + txnRestriction.getTimeFilter().getRelation() + " is not supported yet");
         }
         return restriction;
     }

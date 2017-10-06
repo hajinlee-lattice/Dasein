@@ -76,7 +76,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         }
 
-        if (entityTableMap == null || entityTableMap.isEmpty()) {
+        if (entityTableMap.isEmpty()) {
             log.info("No table to export, skip this step.");
         }
 
@@ -88,10 +88,13 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         putObjectInContext(REDSHIFT_EXPORT_REPORT, exportReportMap);
 
         appendFlagMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE, BusinessEntity.class, Boolean.class);
+        if (appendFlagMap == null) {
+            appendFlagMap = configuration.getAppendFlagMap();
+        }
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export", entityTableMap.size());
         List<Future<?>> futures = new ArrayList<>();
         for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
-            boolean createNew = !appendFlagMap.get(entry.getKey());
+            boolean createNew = !appendFlagMap.getOrDefault(entry.getKey(), false);
             Exporter exporter = new Exporter(createNew, entry.getKey(), entry.getValue());
             futures.add(executors.submit(exporter));
         }

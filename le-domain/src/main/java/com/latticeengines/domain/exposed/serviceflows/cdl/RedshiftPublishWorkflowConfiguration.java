@@ -49,6 +49,11 @@ public class RedshiftPublishWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
+        public Builder appendFlagMap(Map<BusinessEntity, Boolean> sourceTables) {
+            exportDataToRedshiftConfiguration.setAppendFlagMap(sourceTables);
+            return this;
+        }
+
         // mainly for test
         public Builder enforceTargetTableName(String targetTableName) {
             exportDataToRedshiftConfiguration.setTargetTableName(targetTableName);
