@@ -134,55 +134,6 @@ def applyOperator(inputList, engageKey, operatorKey, aggregationKey, compareToVa
             returnval = any([ops[operatorKey](0 if y is None else y, compareToVal) for y in inputList])
         return returnval
             
-# filter function
-# assumption: dataset is already sorted by acctId, periodID
-def unifiedFilter(data,
-                  acctCol,
-                  periodCol,
-                  prodCol,
-                  engageKey='engaged',
-                  periodKey='ever',
-                  periodParam=None,
-                  operatorKey='>=',
-                  compareToVal=0,
-                  aggKey='total',
-                  dataset='target'):
-    out = None
-    minp, maxp = parsePeriods(data, periodCol, periodKey, periodParam)
-    numP = maxp - minp + 1
-    priorList = getShiftedList(data, acctCol, periodCol, prodCol, periodKey, periodParam)
-    # print priorList[10]
-    if priorList is not None:
-        out = [applyOperator(x, engageKey, operatorKey, aggKey, compareToVal, numP) for x in priorList]
-    maxPid = max([x[periodCol] for x in data])
-    if out is not None and dataset == 'target':       
-        out = [x and data[i][periodCol] == maxPid for i, x in enumerate(out)]
-    if out is not None and dataset == 'training':       
-        out = [x and data[i][periodCol] < maxPid for i, x in enumerate(out)]
-    return out
-
-def generateEvents(data,
-                  acctCol,
-                  periodCol,
-                  prodCol,
-                  engageKey='engaged',
-                  periodKey='future',
-                  periodParam=[1],
-                  operatorKey='>=',
-                  compareToVal=0,
-                  aggKey='total'):
-    out = None
-    minp, maxp = parsePeriods(data, periodCol, periodKey, periodParam)
-    numP = maxp - minp + 1
-    futureList = getShiftedList(data, acctCol, periodCol, prodCol, periodKey, periodParam)
-    # print priorList[10]
-    if futureList is not None:
-        out = [applyOperator(x, engageKey, operatorKey, aggKey, compareToVal, numP) for x in futureList]
-    maxPid = max([x[periodCol] for x in data])
-    if out is not None:
-        out = [-1 if data[i][periodCol] == maxPid else int(x) for i, x in enumerate(out)]
-    return out                
-    
 def buildAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
     # build a table with pivoted unit and amount cols for each product
     # this is a skinny version of the current analytic purchase state
@@ -244,59 +195,6 @@ def buildAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
 
     return apState, apStateDict
 
-def buildEventTable(apState, apStateDict, acctCol, periodCol, prodCol_tr,
-              engageKey_tr, periodKey_tr, periodParam_tr,
-              operatorKey_tr, compareToVal_tr, aggKey_tr,
-              prodCol_evt=None,
-              engageKey_evt='amount', periodKey_evt='future', periodParam_evt=[1],
-              operatorKey_evt='>', compareToVal_evt=0, aggKey_evt='total'):
-
-    # create training filter, which by default uses the same conditions as target
-    # filter, but applied to earlier periods, not the last one    
-    trFilter = unifiedFilter(apStateDict, acctCol, periodCol, prodCol_tr,
-                             engageKey=engageKey_tr,
-                             periodKey=periodKey_tr,
-                             periodParam=periodParam_tr,
-                             operatorKey=operatorKey_tr,
-                             compareToVal=compareToVal_tr,
-                             aggKey=aggKey_tr,
-                             dataset='training')    
-    # generates success events
-    # which by default checks target product purchase in the next period
-    if prodCol_evt is None:
-        prodCol_evt = prodCol_tr
-    events = generateEvents(apStateDict, acctCol, periodCol, prodCol_evt,
-                             engageKey=engageKey_evt,
-                             periodKey=periodKey_evt,
-                             periodParam=periodParam_evt,
-                             operatorKey=operatorKey_evt,
-                             compareToVal=compareToVal_evt,
-                             aggKey=aggKey_evt)
-    
-    apState['Train'] = trFilter
-    apState['Target'] = events
-    evtbl = apState[apState['Train'] == 1]
-
-    return evtbl
-
-def buildPreleads(apState, apStateDict, acctCol, periodCol,
-                prodCol_tg,
-                engageKey_tg, periodKey_tg, periodParam_tg,
-                operatorKey_tg, compareToVal_tg, aggKey_tg):
-    # create target filter
-    tgFilter = unifiedFilter(apStateDict, acctCol, periodCol, prodCol_tg,
-                             engageKey=engageKey_tg,
-                             periodKey=periodKey_tg,
-                             periodParam=periodParam_tg,
-                             operatorKey=operatorKey_tg,
-                             compareToVal=compareToVal_tg,
-                             aggKey=aggKey_tg,
-                             dataset='target')
-
-    preleads = apState.loc[tgFilter, 'LEAccount_ID']
-
-    return preleads
-
 def createAps(transactionDf):
     logger.info("Start to create Aps.")
     apState, apStateDict = buildAnalyticPurchaseState(transactionDf)
@@ -314,14 +212,9 @@ if __name__ == '__main__':
     loader.downloadToLocal()
     df = loader.readDataFrameFromAvro()
     logger.info(df.shape)
-#    assert df.shape == (873967, 24)
      
     apState = createAps(df)
     loader.writeDataFrameToAvro(apState)
     logger.info(apState.shape)
-#    assert  apState.shape == (833038, 202)
-#    newApSatate = loader.readDataFrameFromAvro("./output")
-#    print newApSatate.shape
-#    assert(apState.shape == newApSatate.shape)
     loader.uploadFromLocal()
     
