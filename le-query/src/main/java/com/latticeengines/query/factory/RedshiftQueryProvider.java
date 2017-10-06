@@ -18,7 +18,7 @@ public class RedshiftQueryProvider extends QueryProvider {
     @PostConstruct
     private void init() {
         jdbcTemplate = BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, JdbcTemplate.class,
-                "redshiftJdbcTemplate");
+                "redshiftSegmentJdbcTemplate");
     }
 
     @Override
