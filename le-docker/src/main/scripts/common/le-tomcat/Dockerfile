@@ -2,7 +2,7 @@ FROM latticeengines/jre:1.8
 RUN groupadd -r tomcat && useradd -r -g tomcat tomcat
 WORKDIR /opt
 
-ENV TOMCAT_VERSION=8.5.15
+ENV TOMCAT_VERSION=8.5.23
 ENV CATALINA_HOME /opt/apache-tomcat-${TOMCAT_VERSION}
 ENV TOMCAT_TAR_URL_PREFIX=http://10.41.1.10/tars
 RUN wget -q ${TOMCAT_TAR_URL_PREFIX}/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /root/chefcache/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
