@@ -8,7 +8,7 @@
 
 <ul class="filters-tabs">
     <li class="ratingsengine-selected" ng-if="vm.section == 'wizard.ratingsengine_segment'">
-        <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = (vm.metadata.selectedForRatingsEngine > 0);">
+        <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = (vm.metadata.selectedForRatingsEngine > 0) && !vm.addBucketTreeRoot;">
             <li><span class="ico ico-model ico-black"></span></li>
             <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = false;" ng-class="{selected: !vm.metadata.toggle.show.selected_ratingsengine_attributes}">All Attributes ({{vm.count|number}})</li>
             <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;" ng-class="{selected: vm.metadata.toggle.show.selected_ratingsengine_attributes}">Selected Attributes ({{vm.metadata.selectedForRatingsEngine|number}})</li>

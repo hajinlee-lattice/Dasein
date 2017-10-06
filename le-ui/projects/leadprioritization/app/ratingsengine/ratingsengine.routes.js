@@ -40,7 +40,7 @@ angular
             url: '/ratings',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Rating Engine'
+                pageTitle: 'Rating Engines'
             },
             resolve: {
                 RatingList: function($q, RatingsEngineStore) {
@@ -65,7 +65,7 @@ angular
             url: '/creationhistory',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Creation History'
+                pageTitle: 'Rating Engines'
             },
             views: {
                 "main@": {
@@ -79,7 +79,7 @@ angular
             url: '/ratingsenginetype',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Rating Engine Type'
+                pageTitle: 'Rating Engines'
             },
             views: {
                 'summary@': {
@@ -200,7 +200,7 @@ angular
             url: '/segment',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Create Rating Engine',
+                pageTitle: 'Rating Engines',
                 section: 'wizard.ratingsengine_segment'
             },
             resolve: {
@@ -233,7 +233,7 @@ angular
             url: '/attributes',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Create Ratings Engine',
+                pageTitle: 'Rating Engines',
                 section: 'wizard.ratingsengine_attributes',
                 gotoNonemptyCategory: true
             },
@@ -334,7 +334,7 @@ angular
             url: '/rules',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Create Rating Engine'
+                pageTitle: 'Rating Engines'
             },
             resolve: {
                 Cube: function($q, DataCloudStore){
@@ -368,7 +368,7 @@ angular
             url: '/summary',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Create Rating Engine',
+                pageTitle: 'Rating Engines',
             },
             resolve: {
                 Rating: function($q, $stateParams, RatingsEngineStore){

@@ -390,6 +390,10 @@ angular
         })
         .state('home.playbook.wizard', {
             url: '/wizard/:play_name',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
+            },
             resolve: {
                 WizardValidationStore: function(PlaybookWizardStore) {
                     return PlaybookWizardStore;
@@ -448,6 +452,10 @@ angular
         })
         .state('home.playbook.wizard.rating', {
             url: '/rating/:rating_id',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
+            },
             resolve: {
                 Ratings: function(PlaybookWizardStore) {
                     return PlaybookWizardStore.getRatings(true);
@@ -465,7 +473,9 @@ angular
             url: '/targets',
             params: {
                 section: 'wizard.targets',
-                currentTargetTab: 'accounts'
+                currentTargetTab: 'accounts',
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
             },
             resolve: {
                 Config: [function() {
@@ -689,7 +699,9 @@ angular
         .state('home.playbook.wizard.rating.targets.insights', {
             url: '/insights',
             params: {
-                section: 'wizard.insights'
+                section: 'wizard.insights',
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
             },
             resolve: {
                 TalkingPoints: function(CgTalkingPointStore, $stateParams) {
@@ -719,6 +731,10 @@ angular
         })
         .state('home.playbook.wizard.rating.targets.insights.preview', {
             url: '/preview',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
+            },
             resolve: {
                 Play: function(PlaybookWizardStore) {
                     return PlaybookWizardStore.getCurrentPlay();

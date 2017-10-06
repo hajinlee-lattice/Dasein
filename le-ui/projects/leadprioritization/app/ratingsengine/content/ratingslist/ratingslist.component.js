@@ -100,23 +100,10 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
         }
     };
 
-
-    var hasRules = function(rating) {
-        try {
-            if(Object.keys(rating.ratingModels[0].rule.ratingRule.bucketToRuleMap).length) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch(err) {
-            return false;
-        }
-    }
-
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
         // go to dashboard if there are rules in ratingModels
-        if(hasRules(rating)) {
+        if(RatingsEngineStore.hasRules(rating)) {
             $state.go('home.ratingsengine.dashboard', {rating_id: rating.id} );
         } else {
            $state.go('home.ratingsengine.wizard.segment', {rating_id: rating.id} ); 

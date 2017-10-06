@@ -115,6 +115,18 @@ angular.module('lp.ratingsengine')
         return this.rule;
     }
 
+    this.hasRules = function(rating) {
+        try {
+            if(Object.keys(rating.ratingModels[0].rule.ratingRule.bucketToRuleMap).length) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch(err) {
+            return false;
+        }
+    }
+
     this.setRating = function(rating) {
         this.currentRating = rating;
     }

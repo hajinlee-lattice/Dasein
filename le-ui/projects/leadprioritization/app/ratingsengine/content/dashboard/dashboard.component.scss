@@ -76,6 +76,10 @@ section.ratingsengine.dashboard-layout.dashboard.container {
             top: 2px;
             margin-right: 10px;
         }
+        &[disabled] {
+            pointer-events: none;
+            opacity: .5;
+        }
     }
     .toggle-switch {
         position: relative;

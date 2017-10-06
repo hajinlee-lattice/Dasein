@@ -37,7 +37,7 @@
                     </div>
                     <div class="dashboard-section-footer">
                         <div class="dashboard-section-footer-columns">
-                            <div class="status-toggle dashboard-section-footer-column">
+                            <div class="status-toggle dashboard-section-footer-column" ng-disabled="!vm.hasRules">
                                 <label for="statusToggle">Ratings are Active:</label>
                                 <span class="toggle-switch">
                                     <input type="checkbox" id="statusToggle" ng-model="vm.status_toggle" />

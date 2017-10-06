@@ -5,11 +5,26 @@ angular.module('lp.ratingsengine.dashboard', [])
 
     angular.extend(vm, {
         rating: Rating,
+        hasRules: RatingsEngineStore.hasRules(Rating.summary),
         editable: true,
         editing: {},
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility
     });
+
+    vm.init = function() {
+        if(vm.rating.coverageInfo && vm.rating.coverageInfo.bucketCoverageCounts) {
+            vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
+        }
+        // vm.buckets = makeGraph([
+        //     {bucket: 'A', count: 0},
+        //     {bucket: 'A-', count: 753},
+        //     {bucket: 'B', count: 9913},
+        //     {bucket: 'C', count: 32576},
+        //     {bucket: 'E', count: 0},
+        //     {bucket: 'F', count: 3310},
+        // ], {label: 'bucket', count: 'count'});
+    }
 
     var makeGraph = function(data, params) {
         if(!data) {
@@ -29,20 +44,6 @@ angular.module('lp.ratingsengine.dashboard', [])
             data: _graph
         }
         return graph;
-    }
-
-    vm.init = function() {
-        if(vm.rating.coverageInfo && vm.rating.coverageInfo.bucketCoverageCounts) {
-            vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
-        }
-        // vm.buckets = makeGraph([
-        //     {bucket: 'A', count: 0},
-        //     {bucket: 'A-', count: 753},
-        //     {bucket: 'B', count: 9913},
-        //     {bucket: 'C', count: 32576},
-        //     {bucket: 'E', count: 0},
-        //     {bucket: 'F', count: 3310},
-        // ], {label: 'bucket', count: 'count'});
     }
 
     /**
