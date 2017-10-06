@@ -65,52 +65,65 @@
 						width: 100%;
 						min-height: 2px;
 	            	}
-					&:nth-child(1) {
-						.value {
-							color: #70bf4a;
-						}
-						.rating-bar {
-			                border-bottom-color: #0f9e4d;
-			                background-color: #70bf4a;
-						}
-					}
-					&:nth-child(2) {
-						.value {
-							color: #33bdb7;
-						}
-						.rating-bar {
-				            border-bottom-color: #149188;
-				            background-color: #33bdb7;
-						}
-					}
 
-					&:nth-child(3) {
-						.value {
-							color: #cd80bc;
-						}
-						.rating-bar {
-			                border-bottom-color: #aa5299;
-			                background-color: #cd80bc;
-						}
-					}
-					&:nth-child(4) {
-						.value {
-							color: #8e71b2;
-						}
-						.rating-bar {
-				            border-bottom-color: #7851a1;
-				            background-color: #8e71b2;
-						}
-					}
-					&:nth-child(5) {
-						.value {
-							color: #457eba;
-						}
-						.rating-bar {
-				            border-bottom-color: #26649b;
-				            background-color: #457eba;
-						}
-					}
+
+	            	&.bucket-a {
+	            		.value {
+	            			color: #70bf4a;
+	            		}
+	            		.rating-bar {
+	                    	background-color: #70bf4a;
+	                    }
+	                }
+	                &.bucket-a- {
+	            		.value {
+	            			color: #33bdb7;
+	            		}
+	                	.rating-bar {
+	                    	background-color: #33bdb7;
+	                    }
+	                }
+	                &.bucket-b {
+	            		.value {
+	            			color: #cd80bc;
+	            		}
+	                	.rating-bar {
+	                    	background-color: #cd80bc;
+	                    }
+	                }
+	                &.bucket-c {
+	            		.value {
+	            			color: #8e71b2;
+	            		}
+	                	.rating-bar {
+	                    	background-color: #8e71b2;
+	                    }
+	                }
+	                &.bucket-d {
+	            		.value {
+	            			color: #457eba;
+	            		}
+	                	.rating-bar {
+	                    	background-color: #457eba;
+	                    }
+	                }
+	                &.bucket-e {
+	            		.value {
+	            			color: #70bf4a;
+	            		}
+	                	.rating-bar {
+	                    	background-color: #70bf4a;
+	                    }
+	                }
+	                &.bucket-f {
+	            		.value {
+	            			color: #33bdb7;
+	            		}
+	                	.rating-bar {
+	                    	background-color: #33bdb7;
+	                    }
+	                }
+
 				}
 			}
 			.inactive {

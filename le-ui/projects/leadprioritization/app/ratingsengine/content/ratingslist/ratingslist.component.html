@@ -90,7 +90,9 @@
                             <h4>Account Ratings</h4>
                             <ul class="barChart ratings"
                                 ng-if="!vm.loadingRatingChart">
-                               <li ng-repeat="bucket in rating.bucketInfo.bucketCoverageCounts">
+                                <li 
+                                    ng-repeat="bucket in rating.bucketInfo.bucketCoverageCounts"
+                                    class="bucket-{{bucket.bucket|lowercase}}">
 
                                     <div class="value">{{bucket.count|number}}</div>
                                     

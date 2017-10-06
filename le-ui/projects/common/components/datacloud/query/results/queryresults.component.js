@@ -112,10 +112,37 @@ angular.module('common.datacloud.query.results', [
             vm.loading = false;
         }
 
-        if(vm.currentTargetTab === 'Accounts' || vm.section === 'segment.analysis' && vm.accountsCount > 15){
+
+        if(vm.page === 'Accounts' || vm.page === 'Available Targets'){
+            QueryStore.GetCountByQuery('accounts').then(function(data){ 
+                
+                vm.counts.accounts.value = data;
+                vm.counts.accounts.loading = false;
+
+                if(vm.counts.accounts.value > 15){
+                    vm.showAccountPagination = true;
+                    vm.showContactPagination = false;
+                }
+            });
+        } else {
+            QueryStore.GetCountByQuery('contacts').then(function(data){ 
+                
+                vm.counts.contacts.value = data;
+                vm.counts.contacts.loading = false;
+
+                if(vm.counts.contacts.value > 15){
+                    vm.showAccountPagination = false;
+                    vm.showContactPagination = true;
+                }
+            });
+        }
+
+
+
+        if((vm.page === 'Accounts' || vm.page === 'Available Targets') && vm.counts.accounts.value > 15){
             vm.showAccountPagination = true;
             vm.showContactPagination = false;
-        } else if (vm.currentTargetTab === 'Contacts' || vm.section === 'segment.analysis' && vm.accountsCount > 15){
+        } else if (vm.page === 'Contacts' && vm.counts.contacts.value > 15){
             vm.showAccountPagination = false;
             vm.showContactPagination = true;
         }

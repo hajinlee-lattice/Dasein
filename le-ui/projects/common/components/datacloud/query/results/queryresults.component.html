@@ -161,8 +161,8 @@
                 </th>
                 <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse">
                     Company Name
-                    <span ng-show="sortType == 'CompanyName' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'CompanyName' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'LDC_Name' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'LDC_Name' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>Email</th>
             </tr>
@@ -172,8 +172,9 @@
                 ng-repeat=" contact in vm.contacts | 
                             orderBy:sortType:sortReverse | 
                             filter:vm.search">
+
                 <td>{{contact.ContactName}}</td>
-                <td>{{contact.CompanyName}}</td>
+                <td>{{contact.LDC_Name}}</td>
                 <td>{{contact.Email}}</td>
             </tr>
         </tbody>

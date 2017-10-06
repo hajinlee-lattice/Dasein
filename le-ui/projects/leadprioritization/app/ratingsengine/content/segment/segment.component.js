@@ -44,6 +44,33 @@ angular.module('lp.ratingsengine.wizard.segment', [])
                 vm.stored.segment_selection = rating.segment.name;
                 vm.setSegment(rating.segment);
                 vm.block_user = false;
+
+                // if(vm.stored.segment_selection){
+                //     console.log("has stored");
+                //     vm.initSegments = vm.segments;
+                // } else {
+                //     console.log("not stored");
+                //     vm.initSegments = vm.segments;
+                // }
+
+
+                // There's probably a better way to do this with orderBy and a filter
+                // but this gets the selected segment and move it to the first position in the array
+                var move = function (array, fromIndex, toIndex) {
+                    array.splice(toIndex, 0, array.splice(fromIndex, 1)[0] );
+                    return array;
+                }
+                makeItemFirst = function (name){
+                    for (var i = 0; i < vm.segments.length; i++){
+                        if (vm.segments[i].name == name){
+                            vm.segments = move(vm.segments, i, 0);
+                        }
+                    }
+                }
+                makeItemFirst(vm.stored.segment_selection);
+
+
+
             });
         } else {
             vm.block_user = false;

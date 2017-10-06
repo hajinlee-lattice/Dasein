@@ -100,9 +100,6 @@ angular
                 }],
                 RatingsEngineModels: [function() {
                     return null;
-                }],
-                RatingsEngineStore: [function() {
-                    return null;
                 }]
             }
         };
@@ -422,61 +419,6 @@ angular
                 pageTitle: 'Accounts'
             },
             resolve: {
-                QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
-                    var getRestrictions = function(restriction) {
-                        var restrictions = restriction && restriction.restriction
-                            ? restriction.restriction.logicalRestriction.restrictions
-                            : [];
-
-                        return restrictions;
-                    }
-
-                    var resolveQueryRestriction = function() {
-                        var accountRestriction = QueryStore.getAccountRestriction(),
-                            contactRestriction = QueryStore.getContactRestriction();
-
-                        deferred.resolve({
-                            accountRestrictions: accountRestriction,
-                            contactRestrictions: contactRestriction
-                        });
-                    };
-
-                    var deferred = $q.defer(),
-                        segmentName = $stateParams.segment,
-                        modelId = $stateParams.modelId,
-                        tenantName = $stateParams.tenantName,
-                        accountRestriction = QueryStore.getAccountRestriction(),
-                        contactRestriction = QueryStore.getContactRestriction(),
-                        accountRestrictions = getRestrictions(accountRestriction),
-                        contactRestrictions = getRestrictions(contactRestriction),
-                        isCreate = segmentName === 'Create';
-
-                    if (isCreate && (accountRestrictions.length > 0 || accountRestrictions.length > 0)) {
-                        resolveQueryRestriction();
-                    } else {
-                        QueryStore.setupStore(null).then(function(){
-                            if (isCreate) {
-                                resolveQueryRestriction();
-                            } else {
-                                SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                                    if (segmentName && !result) {
-                                        if (modelId) {
-                                            $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
-                                        } else {
-                                            $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
-                                        }
-                                    } else {
-                                        QueryStore.setupStore(result);
-                                    }
-
-                                    resolveQueryRestriction();
-                                });
-                            }
-                        });
-                    }
-
-                    return deferred.promise;                    
-                }],
                 Accounts: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
                     var deferred = $q.defer(),
                         segmentName = $stateParams.segment,
@@ -543,9 +485,6 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        Accounts: [function(){
-                            return null;
-                        }],
                         Contacts: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
                             var deferred = $q.defer(),
                                 segmentName = $stateParams.segment,
@@ -584,6 +523,9 @@ angular
 
                             return deferred.promise;
 
+                        }],
+                        Accounts: [function(){
+                            return null;
                         }],
                         CountWithoutSalesForce: [function(){
                             return null;
