@@ -1,0 +1,286 @@
+{
+  "Account": {
+    "Stats":{
+      "AccountId": {
+        "Cnt": 500,
+        "Bkts": {
+          "Type": "Enum",
+          "List": [
+            {
+              "Lbl": "0012400001DOI1BAAX",
+              "Cnt": 1,
+              "Id": 1,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "0012400001DOI1BAAX"
+              ]
+            },
+            {
+              "Lbl": "0012400001DO7j7AAD",
+              "Cnt": 1,
+              "Id": 2,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "0012400001DO7j7AAD"
+              ]
+            }
+          ]
+        }
+      },
+      "Website": {
+        "Cnt": 500,
+        "Bkts": {
+          "Type": "Enum",
+          "List": [
+            {
+              "Lbl": "pacaero.com",
+              "Cnt": 1,
+              "Id": 27,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "pacaero.com"
+              ]
+            },
+            {
+              "Lbl": "miles.edu",
+              "Cnt": 1,
+              "Id": 66,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "miles.edu"
+              ]
+            },
+            {
+              "Lbl": "rahr.com",
+              "Cnt": 1,
+              "Id": 95,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "rahr.com"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "Cnt": 500
+  },
+  "PurchaseHistory": {
+    "Stats": {
+      "AccountId": {
+        "Cnt": 500,
+        "Bkts": {
+          "Type": "Enum",
+          "List": [
+            {
+              "Lbl": "0012400001DOI1BAAX",
+              "Cnt": 1,
+              "Id": 1,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "0012400001DOI1BAAX"
+              ]
+            },
+            {
+              "Lbl": "0012400001DO7j7AAD",
+              "Cnt": 1,
+              "Id": 2,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "0012400001DO7j7AAD"
+              ]
+            }
+          ]
+        }
+      },
+      "PH_E13B668B6FA64557EFF5C892755EF9EF_HasEver_Purchased": {
+        "Cnt": 500,
+        "Bkts": {
+          "Type": "Boolean",
+          "List": [
+            {
+              "Lbl": "Yes",
+              "Cnt": 2,
+              "Id": 1,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "Yes"
+              ]
+            },
+            {
+              "Lbl": "No",
+              "Cnt": 498,
+              "Id": 2,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "No"
+              ]
+            }
+          ]
+        }
+      },
+      "PH_FE5FB1286A4E60345D0E4AAD0E66E664_HasEver_Purchased": {
+        "Cnt": 500,
+        "Bkts": {
+          "Type": "Boolean",
+          "List": [
+            {
+              "Lbl": "Yes",
+              "Cnt": 99,
+              "Id": 1,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "Yes"
+              ]
+            },
+            {
+              "Lbl": "No",
+              "Cnt": 401,
+              "Id": 2,
+              "Cmp": "EQUAL",
+              "Vals": [
+                "No"
+              ]
+            }
+          ]
+        }
+      },
+      "PH_E13B668B6FA64557EFF5C892755EF9EF_LastQuarter_Quantity": {
+        "Cnt": 500,
+        "Bkts": {
+          "Type": "Numerical",
+          "List": [
+            {
+              "Lbl": ">= 0",
+              "Cnt": 500,
+              "Id": 2,
+              "Cmp": "GREATER_OR_EQUAL",
+              "Vals": [
+                0
+              ]
+            }
+          ]
+        }
+      },
+      "PH_FCEDFEEBFA5EBCCB10BB05B4B61F6F69_LastQuarter_Amount": {
+        "Cnt": 500,
+        "Bkts": {
+          "Type": "Numerical",
+          "List": [
+            {
+              "Lbl": "0 - 5",
+              "Cnt": 486,
+              "Id": 2,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                0,
+                5
+              ]
+            },
+            {
+              "Lbl": "5 - 40",
+              "Cnt": 1,
+              "Id": 3,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                5,
+                40
+              ]
+            },
+            {
+              "Lbl": "40 - 60",
+              "Cnt": 2,
+              "Id": 4,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                40,
+                60
+              ]
+            },
+            {
+              "Lbl": "60 - 70",
+              "Cnt": 1,
+              "Id": 5,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                60,
+                70
+              ]
+            },
+            {
+              "Lbl": "75 - 80",
+              "Cnt": 1,
+              "Id": 7,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                75,
+                80
+              ]
+            },
+            {
+              "Lbl": "80 - 200",
+              "Cnt": 1,
+              "Id": 8,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                80,
+                200
+              ]
+            },
+            {
+              "Lbl": "200 - 250",
+              "Cnt": 2,
+              "Id": 9,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                200,
+                250
+              ]
+            },
+            {
+              "Lbl": "250 - 350",
+              "Cnt": 2,
+              "Id": 10,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                250,
+                350
+              ]
+            },
+            {
+              "Lbl": "350 - 500",
+              "Cnt": 1,
+              "Id": 11,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                350,
+                500
+              ]
+            },
+            {
+              "Lbl": "650 - 700",
+              "Cnt": 1,
+              "Id": 13,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                650,
+                700
+              ]
+            },
+            {
+              "Lbl": "700 - 1500",
+              "Cnt": 2,
+              "Id": 14,
+              "Cmp": "GTE_AND_LT",
+              "Vals": [
+                700,
+                1500
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "Cnt": 500
+  }
+}

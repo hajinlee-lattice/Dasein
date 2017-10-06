@@ -81,7 +81,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig matchDiff = matchDiff();
             TransformationStepConfig bucket = bucket(matchDiffStep, true);
-            TransformationStepConfig sort = sortDiff(bucketStep);
+            TransformationStepConfig sort = sortDiff(bucketStep, 200);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);

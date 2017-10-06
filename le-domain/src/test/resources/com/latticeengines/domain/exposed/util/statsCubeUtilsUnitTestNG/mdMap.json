@@ -1,0 +1,76 @@
+{
+  "Account": [
+    {
+      "ColumnId": "AccountId",
+      "ColumnName": "AccountId",
+      "DisplayName": "AccountId",
+      "Subcategory": "Other",
+      "FundamentalType": "alpha",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "My Attributes"
+    },
+    {
+      "ColumnId": "Website",
+      "ColumnName": "Website",
+      "DisplayName": "Website",
+      "Subcategory": "Other",
+      "FundamentalType": "alpha",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "My Attributes"
+    }
+  ],
+  "PurchaseHistory": [
+    {
+      "ColumnId": "AccountId",
+      "ColumnName": "AccountId",
+      "DisplayName": "AccountId",
+      "Subcategory": "Other",
+      "FundamentalType": "alpha",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "Product Spend Profile"
+    },
+    {
+      "ColumnId": "PH_E13B668B6FA64557EFF5C892755EF9EF_HasEver_Purchased",
+      "ColumnName": "PH_E13B668B6FA64557EFF5C892755EF9EF_HasEver_Purchased",
+      "DisplayName": "Has Purchased",
+      "Subcategory": "CMT4: Cell Spreaders",
+      "FundamentalType": "alpha",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "Product Spend Profile"
+    },
+    {
+      "ColumnId": "PH_FE5FB1286A4E60345D0E4AAD0E66E664_HasEver_Purchased",
+      "ColumnName": "PH_FE5FB1286A4E60345D0E4AAD0E66E664_HasEver_Purchased",
+      "DisplayName": "Has Purchased",
+      "Subcategory": "CMT3: Personal Protective Equipment",
+      "FundamentalType": "alpha",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "Product Spend Profile"
+    },
+    {
+      "ColumnId": "PH_E13B668B6FA64557EFF5C892755EF9EF_LastQuarter_Quantity",
+      "ColumnName": "PH_E13B668B6FA64557EFF5C892755EF9EF_LastQuarter_Quantity",
+      "DisplayName": "Last Quarter Purchased",
+      "Subcategory": "CMT4: Cell Spreaders",
+      "FundamentalType": "alpha",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "Product Spend Profile"
+    },
+    {
+      "ColumnId": "PH_FCEDFEEBFA5EBCCB10BB05B4B61F6F69_LastQuarter_Amount",
+      "ColumnName": "PH_FCEDFEEBFA5EBCCB10BB05B4B61F6F69_LastQuarter_Amount",
+      "DisplayName": "Last Quarter Spend",
+      "Subcategory": "CMT3: Facility Safety and Maintenance",
+      "FundamentalType": "alpha",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "Product Spend Profile"
+    }
+  ]
+}

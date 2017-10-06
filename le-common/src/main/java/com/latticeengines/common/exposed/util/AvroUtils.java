@@ -778,6 +778,24 @@ public class AvroUtils {
         return data;
     }
 
+    public static List<GenericRecord> readFromInputStream(InputStream inputStream, int offset, int limit) throws IOException {
+        List<GenericRecord> data = new ArrayList<>();
+        try (DataFileStream<GenericRecord> stream = new DataFileStream<>(inputStream, //
+                new GenericDatumReader<GenericRecord>())) {
+            int count = 0;
+            for (GenericRecord datum : stream) {
+                if (count++ < offset) {
+                    continue;
+                }
+                if (count > offset + limit) {
+                    break;
+                }
+                data.add(datum);
+            }
+        }
+        return data;
+    }
+
     public static Schema readSchemaFromLocalFile(String path) throws IOException {
         Schema schema = null;
         try (FileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(new File(path),

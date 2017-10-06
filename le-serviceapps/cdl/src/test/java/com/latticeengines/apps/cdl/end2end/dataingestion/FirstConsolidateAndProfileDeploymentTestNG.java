@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.DISTINCT_PRODUCTS;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
@@ -54,9 +53,9 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         mockVdbImport(BusinessEntity.Transaction, 0, TRANSACTION_IMPORT_SIZE_1);
         Thread.sleep(2000);
         mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, 100);
-        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 100);
-        mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, 100);
-        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1, 100);
+        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 200);
+        mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, 10);
+        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1, 500);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
@@ -72,8 +71,8 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     private void verifyConsolidate() {
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
-                TableRoleInCollection.SortedProduct, (long) DISTINCT_PRODUCTS,
-                TableRoleInCollection.AggregatedTransaction, (long) TRANSACTION_IMPORT_SIZE_1);
+                BusinessEntity.Product.getServingStore(), (long) PRODUCT_IMPORT_SIZE_1,
+                BusinessEntity.Transaction.getServingStore(), (long) TRANSACTION_IMPORT_SIZE_1);
         verifyConsolidateReport(consolidateAppId, expectedCounts);
         verifyDataFeedStatsu(DataFeed.Status.InitialConsolidated);
 
@@ -82,7 +81,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
         Assert.assertEquals(numContacts, CONTACT_IMPORT_SIZE_1);
         long numProducts = countTableRole(BusinessEntity.Product.getBatchStore());
-        Assert.assertEquals(numProducts, DISTINCT_PRODUCTS);
+        Assert.assertEquals(numProducts, PRODUCT_IMPORT_SIZE_1);
         long numTransactions = countTableRole(BusinessEntity.Transaction.getServingStore());
         Assert.assertEquals(numTransactions, TRANSACTION_IMPORT_SIZE_1);
 
@@ -93,7 +92,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of( //
                 BusinessEntity.Account.getServingStore(), (long) ACCOUNT_IMPORT_SIZE_1,
                 BusinessEntity.Contact.getServingStore(), (long) CONTACT_IMPORT_SIZE_1,
-                BusinessEntity.Product.getServingStore(), (long) DISTINCT_PRODUCTS);
+                BusinessEntity.Product.getServingStore(), (long) PRODUCT_IMPORT_SIZE_1);
         verifyProfileReport(profileAppId, expectedCounts);
         verifyDataFeedStatsu(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);

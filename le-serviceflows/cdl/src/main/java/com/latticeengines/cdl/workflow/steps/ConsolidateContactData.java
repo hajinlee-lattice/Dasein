@@ -47,7 +47,7 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig bucketDiff = bucket(diffStep, false);
-            TransformationStepConfig sort = sortDiff(bucketDiffStep);
+            TransformationStepConfig sort = sortDiff(bucketDiffStep, 50);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);

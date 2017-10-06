@@ -232,7 +232,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         return step;
     }
 
-    protected TransformationStepConfig sortDiff(int diffStep) {
+    protected TransformationStepConfig sortDiff(int diffStep, int partitions) {
         if (!isBucketing()) {
             return null;
         }
@@ -248,7 +248,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         step.setTargetTable(targetTable);
 
         SorterConfig config = new SorterConfig();
-        config.setPartitions(100);
+        config.setPartitions(partitions);
         String sortingKey = servingStorePrimaryKey;
         if (!servingStoreSortKeys.isEmpty()) {
             sortingKey = servingStoreSortKeys.get(0);

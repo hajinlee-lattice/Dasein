@@ -2,11 +2,10 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_2;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_3;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_3;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.DISTINCT_PRODUCTS;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_2;
 
 import java.util.Map;
 
@@ -34,18 +33,19 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void importData() throws Exception {
-        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_3);
-        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_3);
+        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, 100);
+        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2, 200);
         Thread.sleep(2000);
     }
 
     private void verifyProfile() {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of( //
                 BusinessEntity.Account.getServingStore(), numAccounts,
                 BusinessEntity.Contact.getServingStore(), numContacts,
-                BusinessEntity.Product.getServingStore(), (long) DISTINCT_PRODUCTS);
+                BusinessEntity.Product.getServingStore(), numProducts);
         verifyProfileReport(profileAppId, expectedCounts);
         verifyDataFeedStatsu(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion.complement());

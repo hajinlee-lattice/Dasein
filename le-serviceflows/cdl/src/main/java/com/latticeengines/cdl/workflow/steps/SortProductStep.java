@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPIER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -64,9 +65,9 @@ public class SortProductStep extends ProfileStepBase<SortProductStepConfiguratio
             request.setKeepTemp(false);
             request.setEnableSlack(false);
 
-            TransformationStepConfig copy = copy(customerSpace, masterTableName);
+            TransformationStepConfig sort = sort(customerSpace, masterTableName);
             // -----------
-            List<TransformationStepConfig> steps = Collections.singletonList(copy);
+            List<TransformationStepConfig> steps = Collections.singletonList(sort);
             // -----------
             request.setSteps(steps);
             return request;
@@ -75,7 +76,7 @@ public class SortProductStep extends ProfileStepBase<SortProductStepConfiguratio
         }
     }
 
-    private TransformationStepConfig copy(CustomerSpace customerSpace, String masterTableName) {
+    private TransformationStepConfig sort(CustomerSpace customerSpace, String masterTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         String tableSourceName = "CustomerUniverse";
         SourceTable sourceTable = new SourceTable(masterTableName, customerSpace);
@@ -84,10 +85,14 @@ public class SortProductStep extends ProfileStepBase<SortProductStepConfiguratio
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
         step.setBaseTables(baseTables);
+        step.setTransformer(TRANSFORMER_SORTER);
 
-        step.setTransformer(TRANSFORMER_COPIER);
-        String confStr = emptyStepConfig(lightEngineConfig());
-        step.setConfiguration(confStr);
+        SorterConfig config = new SorterConfig();
+        config.setPartitions(20);
+        String sortingKey = TableRoleInCollection.SortedProduct.getForeignKeysAsStringList().get(0);
+        config.setSortingField(sortingKey);
+        config.setCompressResult(true);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);

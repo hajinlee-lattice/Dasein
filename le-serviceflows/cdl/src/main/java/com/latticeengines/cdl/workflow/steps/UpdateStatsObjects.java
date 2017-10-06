@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -111,6 +113,13 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         // get StatsCube from statsTable
         Map<BusinessEntity, StatsCube> cubeMap = new HashMap<>();
         statsTableMap.forEach((entity, table) -> cubeMap.put(entity, getStatsCube(table)));
+        try {
+            ObjectMapper om = new ObjectMapper();
+            om.writeValue(new File("/tmp/cubeMap.json"), cubeMap);
+            om.writeValue(new File("/tmp/mdMap.json"), mdMap);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         Statistics statistics = StatsCubeUtils.constructStatistics(cubeMap, mdMap);
         StatisticsContainer statsContainer = new StatisticsContainer();
         statsContainer.setStatistics(statistics);

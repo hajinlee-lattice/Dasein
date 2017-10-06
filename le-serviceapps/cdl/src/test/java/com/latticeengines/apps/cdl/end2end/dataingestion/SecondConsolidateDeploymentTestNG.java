@@ -4,8 +4,19 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_2;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_2;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +40,10 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         resumeCheckpoint("profile1");
         verifyFirstProfileCheckpoint();
 
-        log.info("Exporting checkpoint data to redshift. This may take more than 20 min ...");
-        exportEntityToRedshift(BusinessEntity.Account);
-        exportEntityToRedshift(BusinessEntity.Contact);
-        exportEntityToRedshift(BusinessEntity.Product);
-        exportEntityToRedshift(BusinessEntity.Transaction);
+        uploadRedshift();
+
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
 
         preConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
 
@@ -46,16 +55,46 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         saveCheckpoint("consolidate2");
     }
 
+    private void uploadRedshift() {
+        log.info("Exporting checkpoint data to redshift. This may take more than 20 min ...");
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        List<Future<Boolean>> futures = new ArrayList<>();
+        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Account)));
+        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Contact)));
+        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Transaction)));
+        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Product)));
+        while (!futures.isEmpty()) {
+            List<Future<Boolean>> toDelete = new ArrayList<>();
+            futures.forEach(future -> {
+                try {
+                    future.get(5, TimeUnit.SECONDS);
+                    toDelete.add(future);
+                } catch (TimeoutException e) {
+                    // ignore
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to upload to redshift.", e);
+                }
+            });
+            futures.removeAll(toDelete);
+        }
+        executorService.shutdown();
+    }
+
     private void importData() throws Exception {
         mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, ACCOUNT_IMPORT_SIZE_2);
         mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, PRODUCT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1, TRANSACTION_IMPORT_SIZE_2);
         Thread.sleep(2000);
     }
 
     private void verifyConsolidate() {
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
-                BusinessEntity.Account.getServingStore(), (long) ACCOUNT_IMPORT_SIZE_2,
-                BusinessEntity.Contact.getServingStore(), (long) CONTACT_IMPORT_SIZE_2);
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of( //
+                BusinessEntity.Account.getServingStore(), (long) ACCOUNT_IMPORT_SIZE_2, //
+                BusinessEntity.Contact.getServingStore(), (long) CONTACT_IMPORT_SIZE_2, //
+                BusinessEntity.Product.getServingStore(), (long) PRODUCT_IMPORT_SIZE_2, //
+                BusinessEntity.Transaction.getServingStore(),
+                (long) TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2);
         verifyConsolidateReport(consolidateAppId, expectedCounts);
         verifyDataFeedStatsu(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion);

@@ -65,21 +65,22 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "2";
+    private static final String S3_CHECKPOINTS_VERSION = "3";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
-    static final int ACCOUNT_IMPORT_SIZE_2 = 200;
-    static final int ACCOUNT_IMPORT_SIZE_3 = 300;
+    static final int ACCOUNT_IMPORT_SIZE_2 = 300;
 
-    static final int CONTACT_IMPORT_SIZE_1 = 500;
-    static final int CONTACT_IMPORT_SIZE_2 = 200;
-    static final int CONTACT_IMPORT_SIZE_3 = 300;
+    static final int CONTACT_IMPORT_SIZE_1 = 1100;
+    static final int CONTACT_IMPORT_SIZE_2 = 1200;
 
     static final int PRODUCT_IMPORT_SIZE_1 = 100;
-    static final int TRANSACTION_IMPORT_SIZE_1 = 100;
+    static final int PRODUCT_IMPORT_SIZE_2 = 49;
 
-    static final int DISTINCT_PRODUCTS = 46;
-    static final int NUM_PURCHASE_HISTORY_1 = 86;
+    static final int TRANSACTION_IMPORT_SIZE_1 = 30000;
+    static final int TRANSACTION_IMPORT_SIZE_2 = 30000;
+
+    private static final int NUM_PURCHASE_HISTORY_1 = 500;
+    private static final int NUM_PURCHASE_HISTORY_2 = 745;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -125,7 +126,7 @@ public class CheckpointService {
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
                 TableRoleInCollection.ConsolidatedAccount, (long) ACCOUNT_IMPORT_SIZE_1,
                 TableRoleInCollection.ConsolidatedContact, (long) CONTACT_IMPORT_SIZE_1,
-                TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS,
+                TableRoleInCollection.ConsolidatedProduct, (long) PRODUCT_IMPORT_SIZE_1,
                 TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
         verifyCheckpoint(expectedCounts);
     }
@@ -133,21 +134,23 @@ public class CheckpointService {
     void verifySecondConsolidateCheckpoint() throws IOException {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
                 TableRoleInCollection.ConsolidatedAccount, numAccounts,
                 TableRoleInCollection.ConsolidatedContact, numContacts,
-                TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS);
+                TableRoleInCollection.ConsolidatedProduct, numProducts);
         verifyCheckpoint(expectedCounts);
     }
 
     void verifySecondProfileCheckpoint() throws IOException {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
                 TableRoleInCollection.ConsolidatedAccount, numAccounts,
                 TableRoleInCollection.ConsolidatedContact, numContacts,
-                TableRoleInCollection.ConsolidatedProduct, (long) DISTINCT_PRODUCTS,
-                TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
+                TableRoleInCollection.ConsolidatedProduct, numProducts,
+                TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_2);
         verifyCheckpoint(expectedCounts);
     }
 

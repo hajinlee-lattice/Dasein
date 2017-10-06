@@ -40,7 +40,7 @@ public class ConsolidateProductData extends ConsolidateDataBase<ConsolidateProdu
             TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
-            TransformationStepConfig sort = sortDiff(diffStep);
+            TransformationStepConfig sort = sortDiff(diffStep, 20);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
