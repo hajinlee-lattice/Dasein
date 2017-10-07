@@ -4,7 +4,6 @@ import static com.latticeengines.domain.exposed.query.AggregationType.AT_LEAST_O
 import static com.latticeengines.domain.exposed.query.AggregationType.EACH;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 
 import org.apache.commons.lang.RandomStringUtils;
 
@@ -13,7 +12,6 @@ import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.FunctionLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
@@ -58,7 +56,7 @@ public class TransactionRestrictionTranslator {
     public Restriction convert(BusinessEntity entity) {
         Restriction productRestriction = filterByProduct();
         if (txnRestriction.getTimeFilter() == null) {
-            txnRestriction.setTimeFilter(new TimeFilter(ComparisonType.EVER, Period.Day, Collections.emptyList()));
+            txnRestriction.setTimeFilter(TimeFilter.ever());
         }
         AttributeLookup amountLookup = new AttributeLookup(BusinessEntity.Transaction,
                 InterfaceName.TotalAmount.name());

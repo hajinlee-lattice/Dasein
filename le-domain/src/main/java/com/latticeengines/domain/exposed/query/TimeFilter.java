@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -20,7 +21,7 @@ public class TimeFilter {
     private ComparisonType relation;
 
     @JsonProperty("Vals")
-    private List<Object> values;
+    private List<Object> values = Collections.emptyList();
 
     @JsonProperty("Period")
     private Period period;
@@ -28,6 +29,7 @@ public class TimeFilter {
     public static TimeFilter ever() {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.EVER;
+        filter.period = Period.Day;
         return filter;
     }
 
