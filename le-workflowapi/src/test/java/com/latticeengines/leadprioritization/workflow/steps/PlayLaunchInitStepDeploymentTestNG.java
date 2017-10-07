@@ -125,7 +125,11 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertTrue(updatedPlayLaunch.getAccountsLaunched() > 0);
         Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
 
-        recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+    }
+
+    @Test(groups = "workflow", dependsOnMethods = { "testExecute" })
+    public void verifyRecommendationsDirectly() {
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
 
@@ -142,7 +146,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
             Assert.assertEquals(rec.getPlayId(), play.getName());
             Assert.assertEquals(rec.getLaunchId(), playLaunch.getId());
-
         });
     }
 
