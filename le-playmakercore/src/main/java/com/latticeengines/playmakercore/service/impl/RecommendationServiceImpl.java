@@ -22,6 +22,11 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
+    public void delete(Recommendation entity) {
+        recommendationEntityMgr.delete(entity);
+    }
+
+    @Override
     public List<Recommendation> findByLaunchId(String launchId) {
         return recommendationEntityMgr.findByLaunchId(launchId);
     }

@@ -10,6 +10,8 @@ public interface RecommendationService {
 
     void create(Recommendation entity);
 
+    void delete(Recommendation entity);
+
     List<Recommendation> findByLaunchId(String launchId);
 
     List<Recommendation> findRecommendations(Date lastModificationDate, //

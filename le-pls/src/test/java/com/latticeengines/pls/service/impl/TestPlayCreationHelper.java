@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -19,7 +21,9 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.controller.PlayResourceDeploymentTestNG;
+import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -27,12 +31,20 @@ import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed
 
 @Component
 public class TestPlayCreationHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(TestPlayCreationHelper.class);
+
     @Autowired
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Autowired
     private PlayResourceDeploymentTestNG playResourceDeploymentTestNG;
+
+    @Autowired
+    private RatingEngineEntityMgr ratingEngineEntityMgr;
+    @Autowired
+    private SegmentService segmentService;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -47,6 +59,8 @@ public class TestPlayCreationHelper {
     private Play play;
 
     private PlayLaunch playLaunch;
+
+    private MetadataSegment segment;
 
     public void setupTenant() {
         setupTenant(tenantIdentifier);
@@ -89,7 +103,7 @@ public class TestPlayCreationHelper {
         Restriction contactRestriction = JsonUtils.deserialize(contactRestrictionJson, Restriction.class);
         RatingRule ratingRule = JsonUtils.deserialize(ratingRuleJson, RatingRule.class);
 
-        MetadataSegment segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
+        segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
         playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
 
         playResourceDeploymentTestNG.getCrud();
@@ -139,6 +153,40 @@ public class TestPlayCreationHelper {
         f1.set(entityProxy, 10);
 
         return entityProxy;
+    }
+
+    public void cleanupArtifacts() {
+        try {
+            log.info("Cleaning up play launch: " + playLaunch.getId());
+            playResourceDeploymentTestNG.deletePlayLaunch(play.getName(), playLaunch.getId());
+        } catch (Exception ex) {
+            ignoreException(ex);
+        }
+
+        try {
+            log.info("Cleaning up play: " + play.getName());
+            playResourceDeploymentTestNG.deletePlay(play.getName());
+        } catch (Exception ex) {
+            ignoreException(ex);
+        }
+
+        try {
+            log.info("Cleaning up rating engine: " + play.getRatingEngine().getId());
+            ratingEngineEntityMgr.deleteById(play.getRatingEngine().getId());
+        } catch (Exception ex) {
+            ignoreException(ex);
+        }
+
+        try {
+            log.info("Cleaning up segment: " + segment.getName());
+            segmentService.deleteSegmentByName(tenantIdentifier, segment.getName());
+        } catch (Exception ex) {
+            ignoreException(ex);
+        }
+    }
+
+    private void ignoreException(Exception ex) {
+        log.info("Could not cleanup artifact. Ignoring exception: ", ex);
     }
 
     public void cleanupTenant() {

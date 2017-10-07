@@ -248,8 +248,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = "deployment", dependsOnMethods = { "testIdempotentCreateOrUpdatePlays" })
-    private void deletePlayLaunch() {
-        restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId());
+    public void testDeletePlayLaunch() {
+        deletePlayLaunch(name, playLaunch.getLaunchId());
 
         List<PlayLaunch> launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launched, List.class);
@@ -260,16 +260,24 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = "deployment", dependsOnMethods = { "deletePlayLaunch" })
+    @Test(groups = "deployment", dependsOnMethods = { "testDeletePlayLaunch" })
     private void testPlayDelete() {
         List<Play> playList;
         Play retrievedPlay;
-        restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + name);
+        deletePlay(name);
         retrievedPlay = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/" + name, Play.class);
         Assert.assertNull(retrievedPlay);
         playList = (List) restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
+    }
+
+    public void deletePlay(String playName) {
+        restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + playName);
+    }
+
+    public void deletePlayLaunch(String playName, String playLaunchId) {
+        restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + playName + "/launches/" + playLaunchId);
     }
 
     private void assertPlayLaunch(PlayLaunch playLaunch) {

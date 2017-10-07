@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -16,6 +18,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -38,6 +41,8 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
         "classpath:test-playlaunch-properties-context.xml" })
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
+
+    private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStepDeploymentTestNG.class);
 
     private PlayLaunchInitStep playLaunchInitStep;
 
@@ -103,6 +108,22 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         customerSpace = CustomerSpace.parse(tenant.getId());
         playLaunchInitStep.setConfiguration(createConf(customerSpace, playId, playLaunchId));
+    }
+
+    @AfterClass(groups = { "workflow" })
+    public void teardown() throws Exception {
+
+        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupTenant();
+
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() > 0);
+
+        recommendations.stream().forEach(rec -> {
+            log.info("Cleaning up recommendation: " + rec.getId());
+            recommendationService.delete(rec);
+        });
     }
 
     @Test(groups = "workflow")

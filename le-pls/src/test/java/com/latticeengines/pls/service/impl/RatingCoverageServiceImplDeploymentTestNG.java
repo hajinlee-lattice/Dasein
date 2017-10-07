@@ -12,6 +12,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -81,6 +82,12 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotNull(ratingRule.getBucketToRuleMap());
         Assert.assertNotNull(ratingRule.getDefaultBucketName());
 
+    }
+
+    @AfterClass(groups = { "deployment" })
+    public void teardown() throws Exception {
+        testPlayCreationHelper.cleanupArtifacts();
+        testPlayCreationHelper.cleanupTenant();
     }
 
     @Test(groups = "deployment")
