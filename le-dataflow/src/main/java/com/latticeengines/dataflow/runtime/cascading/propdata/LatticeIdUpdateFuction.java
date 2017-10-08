@@ -24,6 +24,9 @@ public class LatticeIdUpdateFuction extends BaseOperation implements Function {
     private List<String> idsKeys;
     private List<String> entityKeys;
 
+    private final static String ACTIVE = "ACTIVE";
+    private final static String UPDATED = "UPDATED";
+
     public LatticeIdUpdateFuction(Fields fieldDeclaration, String status, String statusField,
             String timestampField, String copyIdFrom, List<String> copyIdTo, List<String> idsKeys,
             List<String> entityKeys) {
@@ -45,7 +48,7 @@ public class LatticeIdUpdateFuction extends BaseOperation implements Function {
         Tuple result = Tuple.size(getFieldDeclaration().size());
         setupTupleForGroup(result, arguments);
         String status = arguments.getString(statusField);
-        if (this.status.equals("UPDATED")) {
+        if (UPDATED.equals(this.status)) {
             if (arguments.getObject(copyIdFrom) != null) {
                 result.set(statusLoc, this.status);
                 result.set(timestampLoc, System.currentTimeMillis());
@@ -59,7 +62,8 @@ public class LatticeIdUpdateFuction extends BaseOperation implements Function {
                 result.set(namePositionMap.get(idsKeys.get(i)), arguments.getString(entityKeys.get(i)));
             }
         }
-        if (copyIdFrom != null && copyIdTo != null && arguments.getObject(copyIdFrom) != null) {
+        if (copyIdFrom != null && copyIdTo != null && arguments.getObject(copyIdFrom) != null
+                && !(ACTIVE.equals(this.status) && ACTIVE.equals(status))) {
             for (String id : copyIdTo) {
                 result.set(namePositionMap.get(id), arguments.getObject(copyIdFrom));
             }

@@ -155,10 +155,13 @@ public class LatticeIdRefreshFlow
 
     private Node processConsistentAccounts(Node node, List<String> finalFields, LatticeIdStrategy strategy) {
         node = node.retain(new FieldList(finalFields));
+        String copyIdFrom = REDIRECT_FROM_FIELD;
+        List<String> copyIdTo = new ArrayList<>();
+        copyIdTo.add(strategy.getIdName());
         node = node.apply(
                 new LatticeIdUpdateFuction(
                         new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), ACTIVE,
-                        STATUS_FIELD, TIMESTAMP_FIELD, null, null, null, null),
+                        STATUS_FIELD, TIMESTAMP_FIELD, copyIdFrom, copyIdTo, null, null),
                 new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
                 Fields.REPLACE);
         return node;
