@@ -92,7 +92,11 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
     };
 
     vm.init = function($q) {
-        angular.forEach(PlayList, function(play) {
+
+
+        console.log(vm.plays);
+
+        angular.forEach(vm.plays, function(play) {
 
             vm.tileStates[play.name] = {
                 showCustomMenu: false,

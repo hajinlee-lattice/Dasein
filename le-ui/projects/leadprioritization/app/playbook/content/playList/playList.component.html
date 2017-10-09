@@ -63,7 +63,7 @@
                         ng-if="!vm.tileStates[play.name].editPlay">
                         
                         <ul>
-                            <li>Created by <span class="blue-text">{{play.createdBy}}</span> on <span class="blue-text">{{play.timeStamp | date}}</span></li>
+                            <li>Created by <span class="blue-text">{{play.createdBy}}</span> on <span class="blue-text">{{play.created | date}}</span></li>
                             <li>
                                 Segment: 
                                 <span ng-if="play.segment != null" class="blue-text">{{play.segment}}</span>
@@ -71,7 +71,8 @@
                             </li>
                             <li>
                                 Last Data Refresh: 
-                                <span class="gray-text">No refresh data yet</span></span>                                
+                                <span class="gray-text" ng-if="!play.ratingEngine.lastRefreshedDate">No refresh data yet</span></span>
+                                <span class="blue-text" ng-if="play.ratingEngine.lastRefreshedDate">{{play.ratingEngine.lastRefreshedDate | date}}</span></span>
                             </li>
                         </ul>
 
