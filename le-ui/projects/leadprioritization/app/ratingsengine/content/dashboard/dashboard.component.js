@@ -12,6 +12,15 @@ angular.module('lp.ratingsengine.dashboard', [])
         NumberUtility: NumberUtility
     });
 
+    vm.getBarHeight = function(label, count) {
+        // find the highest bucket value and use that for total
+        var max = Object.values(vm.buckets.data).reduce(function (a, b) {
+            return (a > b ? a : b);
+        });
+
+        return vm.NumberUtility.MakePercentage(count, max, '%');
+    }
+
     vm.init = function() {
         if(vm.rating.coverageInfo && vm.rating.coverageInfo.bucketCoverageCounts) {
             vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});

@@ -59,7 +59,7 @@
                     class="job-td-row tenant-list-item {{$index}}"
                     id="{{tenant.Identifier}}"
                     ng-if="!$ctrl.deactivated"
-                    ng-click="$ctrl.select(tenant)"
+                    ng-click="$ctrl.select(tenant, username)"
                 >
                     <div class="columns two tenant-version"><span class="badge {{tenant.UIVersion == '3.0' ? 'blue' : 'gray'}}-badge">{{tenant.UIVersion}}</span></div>
                     <div class="columns seven tenant-name">{{tenant.DisplayName}}</div>

@@ -131,6 +131,8 @@ angular
                 SegmentStore.sanitizeSegmentRestriction(branch.logicalRestriction.restrictions);
             }
         });
+
+        return tree;
     }
 
     this.removeEmptyBuckets = function(tree) {

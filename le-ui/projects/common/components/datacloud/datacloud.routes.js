@@ -397,10 +397,10 @@ angular
                     
                     return deferred.promise;
                 }],
-                CurrentRatingEngine: [function() {
+                RatingEngineModel: [function() {
                     return null;
                 }],
-                CoverageMap: [function() {
+                CurrentRatingEngine: [function() {
                     return null;
                 }],
             },

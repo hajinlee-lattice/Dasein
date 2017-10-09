@@ -3,49 +3,82 @@ angular.module('login')
     templateUrl: 'app/login/login.component.html',
     controller: function(
         $scope, $state, $timeout, ResourceUtility, LoginService, 
-        SessionTimeoutUtility, LoginStore
+        SessionTimeoutUtility, BrowserStorageUtility, LoginStore
     ) {
         var vm = this,
             resolve = $scope.$parent.$resolve,
             ClientSession = resolve.ClientSession,
             LoginDocument = resolve.LoginDocument;
         
-        vm.ResourceUtility = ResourceUtility;
-        vm.login = LoginStore.login;
-        vm.state = $state;
+        angular.extend(vm, {
+            ResourceUtility: ResourceUtility,
+            login: LoginStore.login,
+            state: $state,
+            history: [],
+            loginInProgress: {}
+        });
 
-        if (SessionTimeoutUtility.hasSessionTimedOut() && LoginDocument.UserName) {
-            return LoginService.Logout();
-        } else {
-            switch($state.current.name) {
-                case 'login.form': 
-                    if (LoginDocument.UserName) {
-                        $state.go('login.tenants');
-                    }
-                    break;
-                case 'login.tenants':
-                    if (!LoginDocument.UserName) {
-                        $state.go('login.form');
-                    }
-                    break;
+        vm.init = function() {
+            if (SessionTimeoutUtility.hasSessionTimedOut() && LoginDocument.UserName) {
+                return LoginService.Logout();
+            } else {
+                switch($state.current.name) {
+                    case 'login.form': 
+                        if (LoginDocument.UserName) {
+                            $state.go('login.tenants');
+                        }
+                        break;
+                    case 'login.tenants':
+                        if (!LoginDocument.UserName) {
+                            $state.go('login.form');
+                        }
+                        break;
+                }
             }
+
+            LoginStore.set(LoginDocument, ClientSession);
+
+            $timeout(function() {
+                angular.element('body').addClass('initialized');
+            },1);
         }
 
-        LoginStore.set(LoginDocument, ClientSession);
+        vm.getHistory = function(username) {
+            vm.history = BrowserStorageUtility.getHistory(username, vm.login.tenant) || [];
 
-        $timeout(function() {
-            angular.element('body').addClass('initialized');
-        },1)
+            return vm.history;
+        }
 
-        vm.clickLogout = function ($event) {
+        vm.clearHistory = function(username) {
+            BrowserStorageUtility.clearHistory(username);
+        }
+
+        vm.clickTenant = function(tenant, username) {
+            vm.loginInProgress[tenant.DisplayName] = true;
+
+            LoginService.GetSessionDocument(tenant, username).then(function(data) {
+                vm.loginInProgress[tenant.DisplayName] = false;
+                
+                if (data != null && data.Success === true) {
+                    LoginStore.redirectToLP(tenant);
+                } else {
+                    showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
+                }
+            });
+        }
+
+        vm.clickLogout = function($event) {
             if ($event != null) {
                 $event.preventDefault();
             }
+
             LoginService.Logout();
         }
 
-        vm.clickModelList = function() {
+        vm.clickToLP = function() {
             LoginStore.redirectToLP();
         }
+
+        vm.init();
     }
 });

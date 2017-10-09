@@ -29,7 +29,7 @@ angular.module('common.datacloud.query.builder', [
         rating_rule: {},
         coverage_map: {},
         rating_id: $stateParams.rating_id,
-        ratings: RatingsEngineStore.ratings,
+        ratings: RatingsEngineStore ? RatingsEngineStore.ratings : null,
         treeMode: 'account'
     });
 
@@ -218,7 +218,7 @@ angular.module('common.datacloud.query.builder', [
             var restrictions = bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions;
             
             filtered = filtered.concat(restrictions.filter(function(value, index) {
-                return value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
+                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
             }));
         })
 

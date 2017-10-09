@@ -231,8 +231,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     '<%= pls.dist %>/app.js': [
-                        '<%= pls.dist %>/app.js',
-                        '<%= pls.dist %>/templates.js'
+                        '<%= pls.dist %>/app.js'//,'<%= pls.dist %>/templates.js'
                     ]
                 }
             }
@@ -256,7 +255,13 @@ module.exports = function (grunt) {
 
         html2js: {
             options: {
-                base: ''
+                base: '',
+                htmlmin: {
+                    removeComments: true,
+                    collapseWhitespace: true,
+                    conservativeCollapse: true,
+                    minifyCSS: true
+                }
             },
             main: {
                 src: ['<%= pls.app %>/**/*.html'],

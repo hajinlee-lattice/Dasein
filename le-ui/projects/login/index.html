@@ -22,8 +22,24 @@
     </body>
     
     <script src="/assets/vendor.min.js"></script>
+    <!-- build:template:dist -->
     <script src="/assets/lattice.min.js"></script>
-
+    <!-- /build -->
+    <!-- build:remove:dist -->
+    <script src="/app/directives/ngEnterDirective.js"></script>
+    <script src="/app/utilities/BrowserStorageUtility.js"></script>
+    <script src="/app/utilities/PasswordUtility.js"></script>
+    <script src="/app/utilities/ResourceUtility.js"></script>
+    <script src="/app/utilities/StringUtility.js"></script>
+    <script src="/app/utilities/TimestampIntervalUtility.js"></script>
+    <script src="/app/utilities/UnderscoreUtility.js"></script>
+    <script src="/app/utilities/URLUtility.js"></script>
+    <script src="/app/services/FeatureFlagService.js"></script>
+    <script src="/app/services/LoginService.js"></script>
+    <script src="/app/services/ResourceStringsService.js"></script>
+    <script src="/app/services/SessionService.js"></script>
+    <script src="/app/modules/SessionTimeout/SessionTimeoutUtility.js"></script>
+    <!-- endbuild -->
     <!-- build:js app.js -->
     <script src="app/app.component.js"></script>
     <script src="app/app.routes.js"></script>
@@ -35,10 +51,13 @@
     <script src="app/login/update/update.component.js"></script>
     <script src="app/login/tenants/tenants.component.js"></script>
     <!-- endbuild -->
-
+    <!-- build:template:dist -->
+    <script src="templates.js"></script>
+    <!-- /build -->
     <!-- build:remove:dist -->
     <script type="text/javascript">
         angular.module('templates-main', []);
     </script>
     <!-- /build -->
+
 </html>

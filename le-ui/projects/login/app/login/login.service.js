@@ -19,19 +19,19 @@ angular.module('login')
         }
     }
 
-    this.redirectToLP = function (Tenant) {
+    this.redirectToLP = function(Tenant) {
+        var pathMap = {
+                "3.0": "/lp/",
+                "2.0": "/lp2/"
+            },
+            ClientSession, UIVersion;
+
         if (!Tenant) {
-            var ClientSession = BrowserStorageUtility.getClientSession();
-            var Tenant = ClientSession.Tenant;
+            ClientSession = BrowserStorageUtility.getClientSession();
+            Tenant = ClientSession.Tenant;
         }
 
-        var UIVersion = Tenant.UIVersion || "2.0";
-        var pathMap = {
-            "3.0": "/lp/",
-            "2.0": "/lp2/"
-        };
-
-        var previousSession = BrowserStorageUtility.getClientSession();
+        UIVersion = Tenant.UIVersion || "2.0";
 
         return window.open(pathMap[UIVersion] || "/lp2", "_self");
     }

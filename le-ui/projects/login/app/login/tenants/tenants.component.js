@@ -70,7 +70,7 @@ angular.module('login.tenants', [
             vm.deactivated = true;
             vm.selected = tenant;
 
-            LoginService.GetSessionDocument(tenant).then(function(data) {
+            LoginService.GetSessionDocument(tenant, LoginStore.login.username).then(function(data) {
                 if (data != null && data.Success === true) {
                     LoginStore.redirectToLP(tenant);
                 } else {

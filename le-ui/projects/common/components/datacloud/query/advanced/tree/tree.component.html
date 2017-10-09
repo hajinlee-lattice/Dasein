@@ -150,12 +150,6 @@
                         </select>
                     </span>
                 </span>
-
-                <button class="button white-button unset-button" 
-                        ng-if="vm.root.mode == 'rules'"
-                        ng-click="vm.setBucket($event, true)">UNSET</button>
-                <button class="button blue-button set-button" 
-                        ng-click="vm.setBucket($event)">SET</button>
             </span>
 
             <span class="item-bucket-data" ng-if="!vm.editing && !vm.unused">
@@ -177,6 +171,14 @@
                     </span>
                 </span>
             </span>
+        </span>
+
+        <span class="item-edit-controls" ng-if="vm.editing && !vm.unused">
+            <button class="button blue-button set-button" 
+                    ng-click="vm.setBucket($event)">SET</button>
+            <button class="button white-button unset-button" 
+                    ng-if="vm.root.mode == 'rules'"
+                    ng-click="vm.setBucket($event, true)">UNSET</button>
         </span>
     </div>
 

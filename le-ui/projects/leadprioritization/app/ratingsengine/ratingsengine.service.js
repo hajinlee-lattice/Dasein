@@ -253,7 +253,8 @@ angular.module('lp.ratingsengine')
                     "responseKeyId": label + '_' +  index
                 };
 
-            object[type + '_restriction'] = SegmentStore.sanitizeSegmentRestriction([ angular.copy(bucket) ]);
+            object[type + '_restriction'] = SegmentStore.sanitizeSegmentRestriction([ bucket ])[0];
+            console.log('CoverageMap', object, type + '_restriction', label, SegmentStore.sanitizeSegmentRestriction([ bucket ]));
 
             return object;
         });

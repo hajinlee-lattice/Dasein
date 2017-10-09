@@ -29,17 +29,36 @@
                             class="default">[change]</span>
                         current tenant
                     </li>
-                    <li class="value" ng-if="$ctrl.login.tenant">{{$ctrl.login.tenant}}</li>
+
+                    <li class="value" ng-if="$ctrl.login.tenant">
+                        <a href="javascript:void(0)" ng-click="$ctrl.clickToLP()" class="default recent-link" title="{{$ctrl.login.tenant}}">
+                            {{$ctrl.login.tenant}}
+                        </a>
+                    </li>
+                    
+                    <span ng-if="$ctrl.getHistory($ctrl.login.username).length > 0">
+                        <li class="label">
+                            <span 
+                                ng-click="$ctrl.clearHistory($ctrl.login.username)" 
+                                class="default">[clear]</span>
+                            recent tenants
+                        </li>
+                        
+                        <li class="value">
+                            <a      href="javascript:void(0)" 
+                                    class="default recent-link"
+                                    title="[{{tenant.UIVersion}}] - {{tenant.DisplayName}} - {{tenant.RegisteredTime | date:'MM/dd/yyyy'}}"
+                                    ng-click="$ctrl.clickTenant(tenant, $ctrl.login.username)"
+                                    ng-repeat="tenant in $ctrl.history | limitTo: 5">
+                                <i ng-if="$ctrl.loginInProgress[tenant.DisplayName]" class="fa fa-spinner fa-pulse fa-fw"></i>
+                                {{tenant.DisplayName}}
+                            </a>
+                        </li>
+                    </span>
                     
                     <li class="value" ng-if="$ctrl.login.username && !$ctrl.login.tenant && $ctrl.state.current.name != 'login.tenants'">
                         <a ui-sref="login.tenants" class="default">
                             Choose a Tenant
-                        </a>
-                    </li>
-                    
-                    <li class="value" ng-if="$ctrl.login.tenant">
-                        <a href="javascript:void(0)" ng-click="$ctrl.clickModelList()" class="default">
-                            View Models
                         </a>
                     </li>
 

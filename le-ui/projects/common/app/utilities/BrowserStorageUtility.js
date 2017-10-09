@@ -177,16 +177,93 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
         }
     };
 
+    this.getHistory = function(username, currentTenant) {
+        var LatticeSettings = $.jStorage.get("LatticeSettings"),
+            username = username || '',
+            currentTenant = currentTenant || '',
+            values = {},
+            result = [],
+            history = [],
+            login, tenants, all;
+
+        if (LatticeSettings) {
+            login = LatticeSettings.Login || {}; 
+            tenants = login.TenantsList || {};
+            all = tenants.History || {};
+            history = typeof all[username] == 'object' ? all[username] : [];
+        }
+
+        for (var i=0, item, val, exists; i<history.length; i++) {
+            item = history[i];
+            val = item['DisplayName'];
+            exists = values[val];
+
+            values[val] = true;
+
+            if (!exists && (!currentTenant || item['DisplayName'] != currentTenant)) {
+                result.push(item);
+            }
+        }
+
+        return result;
+    }
+    
+    this.setHistory = function(username, tenant) {
+        if (!username) {
+            return;
+        }
+
+        var LatticeSettings = $.jStorage.get("LatticeSettings") || {};
+
+        if (!LatticeSettings.Login) {
+            LatticeSettings.Login = {};
+        }
+
+        if (!LatticeSettings.Login.TenantsList) {
+            LatticeSettings.Login.TenantsList = {};
+        }
+
+        if (!LatticeSettings.Login.TenantsList.History) {
+            LatticeSettings.Login.TenantsList.History = {};
+        }
+
+        if (!tenant) {
+            LatticeSettings.Login.TenantsList.History[username] = [];
+        } else if (!LatticeSettings.Login.TenantsList.History[username]) {
+            LatticeSettings.Login.TenantsList.History[username] = [ tenant ];
+        } else {
+            LatticeSettings.Login.TenantsList.History[username].unshift(tenant);
+        }
+
+        $.jStorage.set("LatticeSettings", LatticeSettings);
+    }
+    
+    this.clearHistory = function(username) {
+        this.setHistory(username);
+    }
+
     //This method will be used to clear out stored data on logout 
     //and possibly reset system cache
     this.clear = function(keepAuthentication) {
-        keepAuthentication = typeof keepAuthentication === 'boolean' ? keepAuthentication : false;
-        var clientSession;
+        var ClientSession, LatticeSettings;
 
-        if (keepAuthentication) clientSession = this.getClientSession();
+        keepAuthentication = typeof keepAuthentication === 'boolean' 
+            ? keepAuthentication 
+            : false;
+
+        if (keepAuthentication) {
+            ClientSession = this.getClientSession();
+        }
+
+        // cross-application cross-login settings
+        LatticeSettings = $.jStorage.get("LatticeSettings");
 
         $.jStorage.flush();
 
-        if (keepAuthentication) this.setClientSession(clientSession);
+        if (keepAuthentication) {
+            this.setClientSession(ClientSession);
+        }
+
+        $.jStorage.set("LatticeSettings", LatticeSettings);
     };
 });

@@ -44,10 +44,11 @@ angular.module('mainApp.login.services.LoginService', [
         return deferred.promise;
     };
 
-    this.GetSessionDocument = function (tenant) {
+    this.GetSessionDocument = function (tenant, username) {
         if (tenant == null) {
             return null;
         }
+
         var deferred = $q.defer();
 
         $http({
@@ -57,14 +58,19 @@ angular.module('mainApp.login.services.LoginService', [
         })
         .success(function(data, status, headers, config) {
             var result = false;
+
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.setSessionDocument(data.Result);
                 data.Result.User.Tenant = tenant;
                 result = data;
+
                 BrowserStorageUtility.setClientSession(data.Result.User, function(){
+                    BrowserStorageUtility.setHistory(username, tenant);
+                    
                     deferred.resolve(result);
                 });
             }
+
             if (result.Result.User.AccessLevel === null) {
                 status = 401;
                 SessionService.HandleResponseErrors(data, status);

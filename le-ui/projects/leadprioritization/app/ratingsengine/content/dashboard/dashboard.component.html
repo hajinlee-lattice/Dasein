@@ -28,7 +28,7 @@
                         <ul class="ratings graph">
                             <li class="_rating bucket-{{label|lowercase}}" 
                                 ng-repeat="(label, count) in vm.buckets.data" 
-                                ng-style="{height: vm.NumberUtility.MakePercentage(count, vm.buckets.total, '%')}"
+                                ng-style="{height: vm.getBarHeight(label, count)}"
                                 ng-class="{empty: !count}">
                                 <div class="_label">{{label}}</div>
                                 <div class="_count">{{count|number}}</div>
@@ -45,7 +45,7 @@
                                 </span>
                             </div>
                             <div class="dashboard-section-footer-column">
-                                <button class="button blue-button" ui-sref="home.ratingsengine.wizard.segment.attributes.rules({rating_id: vm.rating.summary.id})">
+                                <button class="button blue-button" ui-sref="home.ratingsengine.wizard.segment.attributes.rules_dashboard({rating_id: vm.rating.summary.id})">
                                     <span>Edit</span>
                                 </button>
                             </div>

@@ -19,7 +19,7 @@
             class="{{ vm.tree.logicalRestriction.operator ? 'query-input-type-' + vm.tree.logicalRestriction.operator.toLowerCase() : '' }}" 
             ng-class="{'input-section-item-box-subtree':tree.logicalRestriction.restrictions}" 
             ng-repeat="tree in vm.tree.logicalRestriction.restrictions"
-            ng-if="tree.bucketRestriction.bkt.Id"
+            ng-if="(tree.bucketRestriction && tree.bucketRestriction.bkt.Id) || tree.logicalRestriction"
             items="vm.items" tree="tree" root="vm.root">
     </li>
 </ul>

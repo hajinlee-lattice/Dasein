@@ -364,6 +364,40 @@ angular
                 }
             }
         })
+        .state('home.ratingsengine.wizard.segment.attributes.rules_dashboard', {
+            url: '/rules_dashboard',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Rating Engine - Rules'
+            },
+            resolve: {
+                Cube: function($q, DataCloudStore){
+                    var deferred = $q.defer();
+
+                    DataCloudStore.getCube().then(function(result) {
+                        deferred.resolve(result.data.Stats);
+                    });
+                    
+                    return deferred.promise;
+                },
+                RatingEngineModel: function(DataCloudStore, RatingsEngineModels) {
+                    var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
+
+                    if (selectedAttributes) {
+                        RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
+                    }
+
+                    return RatingsEngineModels;
+                }
+            },
+            views: {
+                '@main': {
+                    controller: 'AdvancedQueryCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
+                }
+            }
+        })
         .state('home.ratingsengine.wizard.segment.attributes.rules.summary', {
             url: '/summary',
             params: {

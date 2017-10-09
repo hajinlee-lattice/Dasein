@@ -165,12 +165,31 @@ div.advanced-query-builder {
             }
             
             .query-section-item-content {
+                position: relative;
                 border-right: 1px solid #ccc;
                 width: 100%;
-                padding-top: .4em;
+                padding-top: .2em;
                 padding-left: 1em;
                 line-height: 1.3em;
                 
+                span.item-edit-controls {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    
+                    button {
+                        border-radius: 0;
+                        position: relative;
+                        top: 0;
+                        bottom: 0;
+                        margin: 0 -2px;
+                        height: 100%;
+                        border-top: none;
+                        border-bottom: none;
+                    }
+                }
+
                 &.cursor-pointer {
                     cursor: pointer;
                 }
@@ -181,6 +200,7 @@ div.advanced-query-builder {
                 }
 
                 .query-section-item-category {
+                    padding-bottom: .2em;
                     font-size: .85em;
                 }
 

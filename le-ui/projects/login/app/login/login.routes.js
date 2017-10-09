@@ -2,8 +2,8 @@ angular.module('login', [
     'mainApp.appCommon.directives.ngEnterDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.login.services.LoginService',
+    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService'
 ])
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {

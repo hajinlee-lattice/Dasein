@@ -8,7 +8,7 @@ angular.module('login.form', [
 .component('loginForm', {
     templateUrl: 'app/login/form/form.component.html',
     controller: function (
-        $state, ResourceUtility, LoginService, SessionTimeoutUtility
+        $state, ResourceUtility, LoginService, BrowserStorageUtility, SessionTimeoutUtility
     ) {
         var vm = this;
 
@@ -26,7 +26,8 @@ angular.module('login.form', [
             showForgotPassword: false,
             forgotPasswordUsername: "",
             copyrightString: ResourceUtility.getString('LOGIN_COPYRIGHT', ['2010 - ' + (new Date()).getFullYear()]),
-            forgotPasswordErrorMessage: ""
+            forgotPasswordErrorMessage: "",
+            history: []
         })
 
         vm.init = function() {

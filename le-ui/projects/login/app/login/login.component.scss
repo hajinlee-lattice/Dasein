@@ -21,7 +21,22 @@
     li {
         font-size: 90%;
         line-height: 15px;
+        float: right;
+        clear: both;
         
+        a.recent-link {
+            display: block;
+            font-size: 0.85em;
+            text-overflow: ellipsis;
+            max-width: 13em;
+            text-align: right;
+            overflow: hidden;
+            
+            .fa-spinner {
+                color: black;
+            }
+        }
+
         &.label {
             font-weight: bold;
             font-size: 90%;

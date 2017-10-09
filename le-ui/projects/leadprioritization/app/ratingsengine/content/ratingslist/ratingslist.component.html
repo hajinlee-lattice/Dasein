@@ -95,17 +95,10 @@
                                     class="bucket-{{bucket.bucket|lowercase}}">
 
                                     <div class="value">{{bucket.count|number}}</div>
-                                    
-                                    <div 
-                                        class="rating-bar"
-                                        ng-if="rating.tallestBarHeight === bucket.count"
-                                        style="height: 50%">
-                                    </div>
 
                                     <div 
                                         class="rating-bar"
-                                        ng-if="rating.tallestBarHeight != bucket.count"
-                                        ng-attr-style="{{'height: '+ ((bucket.count / rating.tallestBarHeight) * 100) / 2 + '%' }}">
+                                        ng-attr-style="{{'height: '+ ((bucket.count / rating.tallestBarHeight) * 100) + '%' }}">
                                     </div>
 
                                     <div class="meta">{{bucket.bucket}}</div>
