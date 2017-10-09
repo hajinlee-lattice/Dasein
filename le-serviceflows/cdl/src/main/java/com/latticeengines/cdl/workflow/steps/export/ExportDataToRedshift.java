@@ -78,6 +78,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
         if (entityTableMap.isEmpty()) {
             log.info("No table to export, skip this step.");
+            return;
         }
 
         Map<BusinessEntity, Long> exportReportMap = new HashMap<>();
