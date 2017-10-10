@@ -1,7 +1,9 @@
 package com.latticeengines.pls.dao.impl;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.pls.dao.PlayLaunchDao;
 
 @Component("playLaunchDao")
@@ -128,5 +131,129 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             return playLaunchList.get(0);
         }
         return null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long offset, Long max, Long endTimestamp) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<PlayLaunch> entityClz = getEntityClass();
+
+        String queryStr = "";
+        Query query = createQueryForDashboard(playId, states, startTimestamp, offset, max, endTimestamp, session,
+                entityClz, queryStr);
+
+        return query.list();
+    }
+
+    @Override
+    public Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long endTimestamp) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<PlayLaunch> entityClz = getEntityClass();
+
+        String queryStr = "SELECT count(*) ";
+        Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, endTimestamp, session,
+                entityClz, queryStr);
+
+        return Long.parseLong(query.uniqueResult().toString());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Stats findTotalCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long endTimestamp) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<PlayLaunch> entityClz = getEntityClass();
+        String totalAccountsLaunched = "totalAccountsLaunched";
+        String totalAccountsSuppressed = "totalAccountsSuppressed";
+        String totalAccountsErrored = "totalAccountsErrored";
+        String totalContactsLaunched = "totalContactsLaunched";
+
+        String queryStr = "SELECT new map " + "( " //
+                + " SUM(COALESCE(accountsLaunched)) AS " + totalAccountsLaunched + ", " //
+                + " SUM(COALESCE(accountsSuppressed)) AS " + totalAccountsSuppressed + ", " //
+                + " SUM(COALESCE(accountsErrored)) AS " + totalAccountsErrored + ", " //
+                + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + " " + ") ";
+
+        Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, endTimestamp, session,
+                entityClz, queryStr);
+
+        List<Map<String, Object>> queryResult = query.list();
+        Stats totalCounts = new Stats();
+        Map<String, Object> res = queryResult.get(0);
+        totalCounts.setRecommendationsLaunched(getVal(res, totalAccountsLaunched));
+        totalCounts.setSuppressed(getVal(res, totalAccountsSuppressed));
+        totalCounts.setErrors(getVal(res, totalAccountsErrored));
+        totalCounts.setContactsWithinRecommendations(getVal(res, totalContactsLaunched));
+
+        return totalCounts;
+    }
+
+    private Long getVal(Map<String, Object> resMap, String key) {
+        Object val = resMap.get(key);
+        return val == null ? 0L : (Long) val;
+    }
+
+    private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
+            Long max, Long endTimestamp, Session session, Class<PlayLaunch> entityClz, String queryStr) {
+        queryStr += String.format(
+                " FROM %s "//
+                        + " WHERE UNIX_TIMESTAMP(created) >= :startTimestamp ", //
+                entityClz.getSimpleName());
+
+        if (endTimestamp != null) {
+            queryStr += " AND UNIX_TIMESTAMP(created) <= :endTimestamp  ";
+        }
+
+        if (playId != null) {
+            queryStr += " AND fk_play_id = :playId ";
+        }
+
+        if (CollectionUtils.isNotEmpty(states)) {
+            queryStr += " AND state IN ( :states ) ";
+        }
+
+        queryStr += " ORDER BY created DESC ";
+
+        Query query = session.createQuery(queryStr);
+        if (offset != null) {
+            query.setFirstResult(offset.intValue());
+        }
+        if (max != null) {
+            query.setMaxResults(max.intValue());
+        }
+
+        query.setBigInteger("startTimestamp", new BigInteger(startTimestamp.toString()));
+
+        if (endTimestamp != null) {
+            query.setBigInteger("endTimestamp", new BigInteger(endTimestamp.toString()));
+        }
+
+        if (playId != null) {
+            query.setLong("playId", playId);
+        }
+
+        if (CollectionUtils.isNotEmpty(states)) {
+            List<String> statesNameList = states.stream()//
+                    .map(LaunchState::name)//
+                    .collect(Collectors.toList());
+
+            query.setParameterList("states", statesNameList);
+        }
+        return query;
+    }
+
+    void updateQueryWithLastUpdatedTimestamp(Date lastModificationDate, Query query) {
+        if (lastModificationDate == null) {
+            lastModificationDate = new Date(0L);
+        }
+        query.setBigInteger("lastUpdatedTimestamp",
+                new BigInteger((dateToUnixTimestamp(lastModificationDate).toString())));
+    }
+
+    Long dateToUnixTimestamp(Date lastModificationDate) {
+        return new Long(lastModificationDate.getTime() / 1000);
     }
 }

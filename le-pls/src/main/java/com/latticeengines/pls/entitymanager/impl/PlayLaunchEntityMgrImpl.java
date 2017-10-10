@@ -13,6 +13,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.PlayLaunchDao;
 import com.latticeengines.pls.entitymanager.PlayLaunchEntityMgr;
@@ -88,6 +89,27 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         deletePlayLaunch(playLaunch);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlayLaunch> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long offset, Long max, Long endTimestamp) {
+        return playLaunchDao.findByPlayStatesAndPagination(playId, states, startTimestamp, offset, max, endTimestamp);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long findDashboardEntriesCount(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long endTimestamp) {
+        return playLaunchDao.findCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Stats findDashboardCumulativeStats(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long endTimestamp) {
+        return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp);
+    }
+
     private void deletePlayLaunch(PlayLaunch playLaunch) {
         if (playLaunch != null) {
             playLaunchDao.delete(playLaunch);
@@ -97,5 +119,4 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     private String generateLaunchId() {
         return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
     }
-
 }

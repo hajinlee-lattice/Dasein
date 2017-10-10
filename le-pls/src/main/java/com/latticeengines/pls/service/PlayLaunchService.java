@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 
 public interface PlayLaunchService {
 
@@ -23,4 +24,9 @@ public interface PlayLaunchService {
     List<PlayLaunch> findByState(LaunchState state);
 
     PlayLaunch update(PlayLaunch existingPlayLaunch);
+
+    PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long offset,
+            Long max, Long endTimestamp);
+
+    Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp);
 }

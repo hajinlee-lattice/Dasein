@@ -1,11 +1,11 @@
 package com.latticeengines.pls.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,14 +69,38 @@ public class PlayResource {
     @ResponseBody
     @ApiOperation(value = "Play launch dashboard for a tenant")
     public PlayLaunchDashboard getPlayLaunchDashboard(HttpServletRequest request, //
-            @ApiParam(value = "List of Play Ids for which to load dashboard info", required = false) @RequestParam(value = "playIds", required = false) List<String> playIds, //
-            @ApiParam(value = "List of launch states to consider", required = false) @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
-            @ApiParam(value = "Start date in Unix timestamp", required = true) @RequestParam(value = "plays", required = true) long start, //
-            @ApiParam(value = "Play launch offset from start time", required = true) @RequestParam(value = "offset", required = true) long offset, //
-            @ApiParam(value = "Maximum number of play launches to consider", required = true) @RequestParam(value = "max", required = true) long max) {
-        // adding signature
-        // TODO - add impl
-        return new PlayLaunchDashboard();
+            @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
+                    + "should consider play launches across all plays", required = false) //
+            @RequestParam(value = "playName", required = false) String playName, //
+            @ApiParam(value = "List of launch states to consider", required = false) //
+            @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
+            @ApiParam(value = "Start date in Unix timestamp", required = true) //
+            @RequestParam(value = "startTimestamp", required = true) Long startTimestamp, //
+            @ApiParam(value = "Play launch offset from start time", required = true) //
+            @RequestParam(value = "offset", required = true) Long offset, //
+            @ApiParam(value = "Maximum number of play launches to consider", required = true) //
+            @RequestParam(value = "max", required = true) Long max, //
+            @ApiParam(value = "End date in Unix timestamp", required = false) //
+            @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
+        return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max,
+                endTimestamp);
+    }
+
+    @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Play entries count for launch dashboard for a tenant")
+    public Long getPlayLaunchDashboardEntriesCount(HttpServletRequest request, //
+            @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
+                    + "should consider play launches across all plays", required = false) //
+            @RequestParam(value = "playName", required = false) String playName, //
+            @ApiParam(value = "List of launch states to consider", required = false) //
+            @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
+            @ApiParam(value = "Start date in Unix timestamp", required = true) //
+            @RequestParam(value = "startTimestamp", required = true) Long startTimestamp, //
+            @ApiParam(value = "End date in Unix timestamp", required = false) //
+            @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
+        return playLaunchService.getDashboardEntriesCount(getPlayId(playName), launchStates, startTimestamp,
+                endTimestamp);
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -157,11 +181,7 @@ public class PlayResource {
     @ApiOperation(value = "Get list of launches for a given play")
     public List<PlayLaunch> getPlayLaunches(@PathVariable("playName") String playName, //
             @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates) {
-        Play play = playService.getPlayByName(playName);
-        if (launchStates == null) {
-            launchStates = new ArrayList<>();
-        }
-        return playLaunchService.findByPlayId(play.getPid(), launchStates);
+        return playLaunchService.findByPlayId(getPlayId(playName), launchStates);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)
@@ -200,5 +220,17 @@ public class PlayResource {
         if (playLaunch != null) {
             playLaunchService.deleteByLaunchId(launchId);
         }
+    }
+
+    private Long getPlayId(String playName) {
+        Long playId = null;
+        if (StringUtils.isNotBlank(playName)) {
+            Play play = playService.getPlayByName(playName);
+            if (play == null) {
+                throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
+            }
+            playId = play.getPid();
+        }
+        return playId;
     }
 }

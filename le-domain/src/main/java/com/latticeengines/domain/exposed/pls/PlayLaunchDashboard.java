@@ -6,20 +6,20 @@ import java.util.Set;
 
 public class PlayLaunchDashboard {
 
-    private Counts totalCounts;
+    private Stats cumulativeStats;
 
     private List<LaunchSummary> launchSummaries;
 
-    public Counts getTotalCounts() {
-        return totalCounts;
+    public Stats getCumulativeStats() {
+        return cumulativeStats;
     }
 
     public List<LaunchSummary> getLaunchSummaries() {
         return launchSummaries;
     }
 
-    public void setTotalCounts(Counts totalCounts) {
-        this.totalCounts = totalCounts;
+    public void setCumulativeStats(Stats cumulativeStats) {
+        this.cumulativeStats = cumulativeStats;
     }
 
     public void setLaunchSummaries(List<LaunchSummary> launchSummaries) {
@@ -35,7 +35,7 @@ public class PlayLaunchDashboard {
 
         private Date launchTime;
 
-        private Counts counts;
+        private Stats stats;
 
         private Set<RuleBucketName> selectedBuckets;
 
@@ -57,8 +57,8 @@ public class PlayLaunchDashboard {
             return launchTime;
         }
 
-        public Counts getCounts() {
-            return counts;
+        public Stats getStats() {
+            return stats;
         }
 
         public LaunchState getLaunchState() {
@@ -81,8 +81,8 @@ public class PlayLaunchDashboard {
             this.launchTime = launchTime;
         }
 
-        public void setCounts(Counts counts) {
-            this.counts = counts;
+        public void setStats(Stats stats) {
+            this.stats = stats;
         }
 
         public void setLaunchState(LaunchState launchState) {
@@ -98,7 +98,7 @@ public class PlayLaunchDashboard {
         }
     }
 
-    public static class Counts {
+    public static class Stats {
 
         private long selectedTargets;
 

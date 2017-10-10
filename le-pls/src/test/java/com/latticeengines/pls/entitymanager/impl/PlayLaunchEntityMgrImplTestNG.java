@@ -1,8 +1,11 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 import com.latticeengines.pls.entitymanager.PlayLaunchEntityMgr;
@@ -140,6 +144,100 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
+    public void testUpdateLaunch() throws InterruptedException {
+        setupSecurityContext(tenant1);
+
+        playLaunch1 = playLaunchEntityMgr.findByLaunchId(playLaunch1.getLaunchId());
+        playLaunch1.setLaunchState(LaunchState.Launched);
+        playLaunch1.setAccountsErrored(1L);
+        playLaunch1.setAccountsLaunched(5L);
+        playLaunch1.setAccountsSuppressed(3L);
+        playLaunch1.setContactsLaunched(7L);
+
+        playLaunch2 = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId());
+        playLaunch2.setLaunchState(LaunchState.Launched);
+        playLaunch2.setAccountsErrored(2L);
+        playLaunch2.setAccountsLaunched(10L);
+        playLaunch2.setAccountsSuppressed(5L);
+        playLaunch2.setContactsLaunched(8L);
+
+        playLaunchEntityMgr.update(playLaunch1);
+        playLaunchEntityMgr.update(playLaunch2);
+        Thread.sleep(2000);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateLaunch" })
+    public void testCountDashboard() {
+        setupSecurityContext(tenant1);
+
+        Long badPlayId = Long.MAX_VALUE;
+        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
+        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+
+        checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L);
+
+        checkCountForDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L);
+
+        checkCountForDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L);
+
+        checkCountForDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
+                System.currentTimeMillis(), 0L, 0L);
+
+        checkCountForDashboard(null, goodStates, badStates, 0L, 1L, 0L, 2L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCountDashboard" })
+    public void testEntriesDashboard() {
+        setupSecurityContext(tenant1);
+
+        Long badPlayId = Long.MAX_VALUE;
+        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
+        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+
+        checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L);
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L);
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L);
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L);
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L);
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L);
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L);
+
+        checkForEntriesDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1), 0L, 10L,
+                System.currentTimeMillis(), 0L, 0L);
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, 1L, 0L, 2L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testEntriesDashboard" })
+    public void testCumulativeStatsDashboard() {
+        setupSecurityContext(tenant1);
+
+        Long badPlayId = Long.MAX_VALUE;
+        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
+        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+
+        checkForCumulativeStatsDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, 0L,
+                0L, 0L, 0L, 0L, 0L);
+
+        checkForCumulativeStatsDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 8L, 3L,
+                15L, 15L, 8L, 3L, 15L, 15L);
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 8L, 3L, 15L, 15L,
+                8L, 3L, 15L, 15L);
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
+                System.currentTimeMillis(), 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, 1L, 0L, 0L, 0L, 0L, 8L, 3L, 15L, 15L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCumulativeStatsDashboard" })
     public void testDelete() {
         setupSecurityContext(tenant1);
 
@@ -170,6 +268,85 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Tenant tenant1 = tenantService.findByTenantId("testTenant1");
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
+        }
+    }
+
+    private void checkCountForDashboard(Long playId, List<LaunchState> goodStates, List<LaunchState> badStates,
+            Long startTimestamp, Long endTimestamp, long expectedCount, long expectedCountForNullEndTimestmp) {
+        checkCountForDashboard(playId, goodStates, startTimestamp, endTimestamp, expectedCount);
+        checkCountForDashboard(playId, null, startTimestamp, endTimestamp, expectedCount);
+        checkCountForDashboard(playId, goodStates, startTimestamp, null, expectedCountForNullEndTimestmp);
+        checkCountForDashboard(playId, null, startTimestamp, null, expectedCountForNullEndTimestmp);
+        checkCountForDashboard(playId, badStates, startTimestamp, endTimestamp, 0);
+    }
+
+    private void checkCountForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp,
+            long expectedCount) {
+        Long dashboardEntriesCount = playLaunchEntityMgr.findDashboardEntriesCount(playId, states, startTimestamp,
+                endTimestamp);
+        Assert.assertNotNull(dashboardEntriesCount);
+        Assert.assertEquals(dashboardEntriesCount.longValue(), expectedCount);
+    }
+
+    private void checkForCumulativeStatsDashboard(Long playId, List<LaunchState> goodStates,
+            List<LaunchState> badStates, Long startTimestamp, Long endTimestamp, Long suppressed, Long errors,
+            Long recommendationsLaunched, Long contactsWithinRecommendations, Long suppressedWithNullEndTimestamp,
+            Long errorsWithNullEndTimestamp, Long recommendationsLaunchedWithNullEndTimestamp,
+            Long contactsWithinRecommendationsWithNullEndTimestamp) {
+        checkForCumulativeStatsDashboard(playId, goodStates, startTimestamp, endTimestamp, suppressed, errors,
+                recommendationsLaunched, contactsWithinRecommendations);
+        checkForCumulativeStatsDashboard(playId, null, startTimestamp, endTimestamp, suppressed, errors,
+                recommendationsLaunched, contactsWithinRecommendations);
+        checkForCumulativeStatsDashboard(playId, goodStates, startTimestamp, null, suppressedWithNullEndTimestamp,
+                errorsWithNullEndTimestamp, recommendationsLaunchedWithNullEndTimestamp,
+                contactsWithinRecommendationsWithNullEndTimestamp);
+        checkForCumulativeStatsDashboard(playId, null, startTimestamp, null, suppressedWithNullEndTimestamp,
+                errorsWithNullEndTimestamp, recommendationsLaunchedWithNullEndTimestamp,
+                contactsWithinRecommendationsWithNullEndTimestamp);
+        checkForCumulativeStatsDashboard(playId, badStates, startTimestamp, endTimestamp, 0L, 0L, 0L, 0L);
+    }
+
+    private void checkForCumulativeStatsDashboard(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long endTimestamp, Long suppressed, Long errors, Long recommendationsLaunched,
+            Long contactsWithinRecommendations) {
+        Stats cumulativeStats = playLaunchEntityMgr.findDashboardCumulativeStats(playId, states, startTimestamp,
+                endTimestamp);
+        Assert.assertNotNull(cumulativeStats);
+        Assert.assertEquals(cumulativeStats.getSuppressed(), suppressed.longValue());
+        Assert.assertEquals(cumulativeStats.getErrors(), errors.longValue());
+        Assert.assertEquals(cumulativeStats.getRecommendationsLaunched(), recommendationsLaunched.longValue());
+        Assert.assertEquals(cumulativeStats.getContactsWithinRecommendations(),
+                contactsWithinRecommendations.longValue());
+    }
+
+    private void checkForEntriesDashboard(Long playId, List<LaunchState> goodStates, List<LaunchState> badStates,
+            Long startTimestamp, Long offset, Long max, Long endTimestamp, long expectedCount,
+            long expectedCountForNullEndTimestmp) {
+        checkForEntriesDashboard(playId, goodStates, startTimestamp, offset, max, endTimestamp, expectedCount);
+        checkForEntriesDashboard(playId, null, startTimestamp, offset, max, endTimestamp, expectedCount);
+        checkForEntriesDashboard(playId, goodStates, startTimestamp, offset, max, null,
+                expectedCountForNullEndTimestmp);
+        checkForEntriesDashboard(playId, null, startTimestamp, offset, max, null, expectedCountForNullEndTimestmp);
+        checkForEntriesDashboard(playId, badStates, startTimestamp, offset, max, endTimestamp, 0);
+    }
+
+    private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
+            Long max, Long endTimestamp, long expectedCount) {
+        List<PlayLaunch> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
+                offset, max, endTimestamp);
+        Assert.assertNotNull(dashboardEntries);
+        Assert.assertEquals(dashboardEntries.size(), expectedCount);
+
+        Set<String> launchIds = new HashSet<>();
+        launchIds.add(playLaunch1.getId());
+        launchIds.add(playLaunch2.getId());
+
+        if (dashboardEntries.size() > 0) {
+            dashboardEntries.stream() //
+                    .forEach(entry -> {
+                        Assert.assertNotNull(entry.getId());
+                        Assert.assertTrue(launchIds.contains(entry.getId()));
+                    });
         }
     }
 
