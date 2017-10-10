@@ -89,7 +89,7 @@ public class TransactionRestriction extends Restriction {
     }
 
     public void setUnitFilter(AggregationFilter unitFilter) {
-        this.spentFilter = unitFilter;
+        this.unitFilter = unitFilter;
     }
 
 }

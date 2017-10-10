@@ -27,6 +27,12 @@ public class AggregationFilter {
     AggregationFilter() {
     }
 
+    public AggregationFilter(ComparisonType comparisonType,
+                             List<Object> values) {
+        this.comparisonType = comparisonType;
+        this.values = values;
+    }
+
     public AggregationFilter(AggregationSelector selector,
                              AggregationType aggregationType,
                              ComparisonType comparisonType,

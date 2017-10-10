@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
 
 public class QueryTranslator {
@@ -169,10 +170,14 @@ public class QueryTranslator {
             search.run(restriction, (object, ctx) -> {
                 if (object instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) object;
-                    Restriction concrete = bucket.convert();
+                    Restriction converted = RestrictionUtils.convertBucketRestriction(bucket);
+                    if (converted instanceof TransactionRestriction) {
+                        converted = new TransactionRestrictionTranslator((TransactionRestriction) converted)
+                                .convert(entity);
+                    }
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(bucket);
-                    parent.getRestrictions().add(concrete);
+                    parent.getRestrictions().add(converted);
                 } else if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
                     Restriction concrete = new TransactionRestrictionTranslator(txRestriction).convert(entity);
@@ -184,7 +189,11 @@ public class QueryTranslator {
             translated = restriction;
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
-            translated = bucket.convert();
+            translated = RestrictionUtils.convertBucketRestriction(bucket);
+            if (translated instanceof TransactionRestriction) {
+                translated = new TransactionRestrictionTranslator((TransactionRestriction) translated)
+                        .convert(entity);
+            }
         } else if (restriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) restriction;
             translated = new TransactionRestrictionTranslator(txRestriction).convert(entity);

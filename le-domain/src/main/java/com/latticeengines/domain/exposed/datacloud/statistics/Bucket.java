@@ -119,6 +119,12 @@ public class Bucket implements Serializable {
         return bucket;
     }
 
+    public static Bucket txnBkt(Transaction txn) {
+        Bucket bucket = new Bucket();
+        bucket.setTransaction(txn);
+        return bucket;
+    }
+
     public Bucket() {
     }
 
@@ -248,6 +254,25 @@ public class Bucket implements Serializable {
             this.negate = negate;
         }
 
+        public String getProductId() {
+            return productId;
+        }
+
+        public TimeFilter getTimeFilter() {
+            return timeFilter;
+        }
+
+        public Boolean getNegate() {
+            return negate;
+        }
+
+        public AggregationFilter getSpentFilter() {
+            return spentFilter;
+        }
+
+        public AggregationFilter getUnitFilter() {
+            return unitFilter;
+        }
     }
 
     @Deprecated

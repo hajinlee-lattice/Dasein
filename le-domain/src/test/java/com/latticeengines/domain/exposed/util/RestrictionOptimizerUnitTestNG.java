@@ -55,50 +55,6 @@ public class RestrictionOptimizerUnitTestNG {
         };
     }
 
-    @Test(groups = "unit", dataProvider = "groupTestData")
-    public void testGroup(Restriction restriction, Restriction expected) {
-        Restriction grouped = RestrictionOptimizer.group(restriction);
-        Assert.assertEquals(JsonUtils.serialize(grouped), JsonUtils.serialize(expected));
-    }
-
-    @DataProvider(name = "groupTestData", parallel = true)
-    public Object[][] provideGroupTestData() {
-        Restriction r1 = and(A1, C1, A2, C2);
-        Restriction e1 = and(and(A1, A2), and(C1, C2));
-
-        Restriction r2 = or(and(A1, A2, C1), or(A1, C2, C3));
-        Restriction e2 = or(and(and(A1, A2), C1), or(A1, or(C2, C3)));
-
-        return new Object[][] { //
-                { r1, e1 }, //
-                { r2, e2 }, //
-        };
-    }
-
-    @Test(groups = "unit", dataProvider = "optimizeAndGroupTestData")
-    public void testOptimizeAndGroup(Restriction restriction, Restriction expected) {
-        Restriction optimized = RestrictionOptimizer.group(RestrictionOptimizer.optimize(restriction));
-        Assert.assertEquals(JsonUtils.serialize(optimized), JsonUtils.serialize(expected));
-    }
-
-    @DataProvider(name = "optimizeAndGroupTestData", parallel = true)
-    public Object[][] provideOptimizeAndGroupTestData() {
-        Restriction r1 = and(A1, C1, A2, C2);
-        Restriction e1 = and(and(A1, A2), and(C1, C2));
-
-        Restriction r2 = or(and(A1, A2, C1), or(A1, C2, C3));
-        Restriction e2 = or(and(and(A1, A2), C1), A1, or(C2, C3));
-
-        Restriction r3 = and(C1, or(A2), and(C3, or(C4, A5)));
-        Restriction e3 = and(or(A5, C4), A2, and(C1, C3));
-
-        return new Object[][] { //
-                { r1, e1 }, //
-                { r2, e2 }, //
-                { r3, e3 }, //
-        };
-    }
-
     @Test(groups = "unit", dataProvider = "nullTestData")
     public void testNull(Restriction restriction) {
         Assert.assertNull(RestrictionOptimizer.optimize(restriction));

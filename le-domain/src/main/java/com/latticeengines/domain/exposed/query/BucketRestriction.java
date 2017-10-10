@@ -1,16 +1,11 @@
 package com.latticeengines.domain.exposed.query;
 
-import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.latticeengines.domain.exposed.util.RestrictionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -88,47 +83,6 @@ public class BucketRestriction extends Restriction {
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
-    }
-
-    // from UI to backend
-    public Restriction convert() {
-        if (bkt == null) {
-            throw new IllegalArgumentException("cannot convert null bucket restriction");
-        }
-
-        ComparisonType comparisonType = bkt.getComparisonType();
-        List<Object> values = bkt.getValues();
-
-        if (comparisonType == null) {
-            return convertBucketRange();
-        } else {
-            return RestrictionUtils.convertValueComparisons(attr, comparisonType, values);
-        }
-    }
-
-    @Deprecated
-    private Restriction convertBucketRange() {
-        if (bkt.getRange() == null && StringUtils.isBlank(bkt.getLabel())) {
-            return new ConcreteRestriction(false, attr, IS_NULL, null);
-        } else if (bkt.getRange() != null) {
-            if (bkt.getRange().getLeft() != null && bkt.getRange().getRight() != null) {
-                if (bkt.getRange().getLeft().equals(bkt.getRange().getRight())) {
-                    return Restriction.builder().let(attr).eq(bkt.getRange().getLeft()).build();
-                } else {
-                    Restriction lowerBound = Restriction.builder().let(attr).gte(bkt.getRange().getLeft()).build();
-                    Restriction upperBound = Restriction.builder().let(attr).lt(bkt.getRange().getRight()).build();
-                    return Restriction.builder().and(lowerBound, upperBound).build();
-                }
-            } else if (bkt.getRange().getLeft() != null) {
-                return Restriction.builder().let(attr).gte(bkt.getRange().getLeft()).build();
-            } else if (bkt.getRange().getRight() != null) {
-                return Restriction.builder().let(attr).lt(bkt.getRange().getRight()).build();
-            } else {
-                throw new IllegalArgumentException("A range cannot have both boundaries null.");
-            }
-        } else {
-            return Restriction.builder().let(attr).eq(bkt.getLabel()).build();
-        }
     }
 
 }
