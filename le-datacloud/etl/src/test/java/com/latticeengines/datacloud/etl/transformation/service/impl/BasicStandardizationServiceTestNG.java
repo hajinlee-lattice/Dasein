@@ -40,7 +40,7 @@ public class BasicStandardizationServiceTestNG
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
-        prepareLocations();
+        prepareInput();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -94,9 +94,14 @@ public class BasicStandardizationServiceTestNG
         String[][] copyFields = { { "Name", "CopiedName" } };
         conf.setCopyFields(copyFields);
         conf.setChecksumField("Checksum");
+        String[] updateFields = { "CHIEF_EXECUTIVE_OFFICER_NAME" };
+        String[] updateExpressions = { "ID == 2 ? \"CEO2Fixed\" : CHIEF_EXECUTIVE_OFFICER_NAME" };
+        conf.setUpdateFields(updateFields);
+        conf.setUpdateExpressions(updateExpressions);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.COUNTRY,
                 StandardizationStrategy.STATE, StandardizationStrategy.STRING, StandardizationStrategy.DUNS,
-                StandardizationStrategy.ADD_ID, StandardizationStrategy.COPY, StandardizationStrategy.CHECKSUM };
+                StandardizationStrategy.ADD_ID, StandardizationStrategy.COPY, StandardizationStrategy.CHECKSUM,
+                StandardizationStrategy.UPDATE };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
@@ -123,14 +128,14 @@ public class BasicStandardizationServiceTestNG
         return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
-    private Object[][] locations = new Object[][] { //
-            { 1, "Name1", "United States", "CA", "  94404  ", "0123456789" }, //
-            { 2, "Name2", "England", "Scotland &.", null, "123456789" }, //
-            { 3, "Name3", null, "Scotland &.", "", "6789" }, //
-            { 4, "Name4", "USA", null, null, null }, //
+    private Object[][] input = new Object[][] { //
+            { 1, "Name1", "United States", "CA", "  94404  ", "0123456789", null }, //
+            { 2, "Name2", "England", "Scotland &.", null, "123456789", "CEO2" }, //
+            { 3, "Name3", null, "Scotland &.", "", "6789", "CEO3" }, //
+            { 4, "Name4", "USA", null, null, null, "" }, //
     };
 
-    private void prepareLocations() {
+    private void prepareInput() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("ID", Integer.class));
         columns.add(Pair.of("Name", String.class));
@@ -138,14 +143,15 @@ public class BasicStandardizationServiceTestNG
         columns.add(Pair.of("State", String.class));
         columns.add(Pair.of("ZipCode", String.class));
         columns.add(Pair.of("DUNS", String.class));
-        uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, locations);
+        columns.add(Pair.of("CHIEF_EXECUTIVE_OFFICER_NAME", String.class));
+        uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, input);
     }
 
     private Object[][] expected = { //
-            { 1, "Name1", "USA", "CALIFORNIA", "94404", null, "Name1" }, //
-            { 2, "Name2", "UNITED KINGDOM", "SCOTLAND", null, "123456789", "Name2" }, //
-            { 3, "Name3", null, null, null, "000006789", "Name3" }, //
-            { 4, "Name4", "USA", null, null, null, "Name4" } //
+            { 1, "Name1", "USA", "CALIFORNIA", "94404", null, "Name1", null }, //
+            { 2, "Name2", "UNITED KINGDOM", "SCOTLAND", null, "123456789", "Name2", "CEO2Fixed" }, //
+            { 3, "Name3", null, null, null, "000006789", "Name3", "CEO3" }, //
+            { 4, "Name4", "USA", null, null, null, "Name4", "" } //
     };
 
     @Override
@@ -168,6 +174,7 @@ public class BasicStandardizationServiceTestNG
             Assert.assertTrue(isObjEquals(record.get("ZipCode"), expectedResult[4]));
             Assert.assertTrue(isObjEquals(record.get("DUNS"), expectedResult[5]));
             Assert.assertTrue(isObjEquals(record.get("CopiedName"), expectedResult[6]));
+            Assert.assertTrue(isObjEquals(record.get("CHIEF_EXECUTIVE_OFFICER_NAME"), expectedResult[7]));
             Assert.assertFalse(rowIdSet.contains((Long) record.get("RowId")));
             rowIdSet.add((Long) record.get("RowId"));
             Assert.assertFalse(uuidSet.contains(record.get("UUID").toString()));

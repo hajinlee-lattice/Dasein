@@ -451,6 +451,30 @@ public class StandardizationTransformer
                 break;
             case CHECKSUM:
                 break;
+            case UPDATE:
+                if (config.getUpdateFields() == null || config.getUpdateFields().length == 0
+                        || config.getUpdateExpressions() == null || config.getUpdateExpressions().length == 0) {
+                    error = "UpdateFields and UpdateExpressions cannot be empty";
+                    log.error(error);
+                    RequestContext.logError(error);
+                    return false;
+                }
+                if (config.getUpdateFields().length != config.getUpdateExpressions().length) {
+                    error = "UpdateFields and UpdateExpressions are not in same size";
+                    log.error(error);
+                    RequestContext.logError(error);
+                    return false;
+                }
+                for (int i = 0; i < config.getUpdateFields().length; i++) {
+                    if (StringUtils.isBlank(config.getUpdateFields()[i])
+                            || StringUtils.isBlank(config.getUpdateExpressions()[i])) {
+                        error = "UpdateFields and UpdateExpressions cannot be empty strings";
+                        log.error(error);
+                        RequestContext.logError(error);
+                        return false;
+                    }
+                }
+                break;
             default:
                 error = String.format("Standardization strategy %s is not supported", strategy.name());
                 log.error(error);
@@ -513,6 +537,8 @@ public class StandardizationTransformer
         parameters.setCopyFields(config.getCopyFields());
         parameters.setChecksumExcludeFields(config.getChecksumExcludeFields());
         parameters.setChecksumField(config.getChecksumField());
+        parameters.setUpdateFields(config.getUpdateFields());
+        parameters.setUpdateExpressions(config.getUpdateExpressions());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

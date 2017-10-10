@@ -133,12 +133,26 @@ public class SourceStandardizationFlow
             case CHECKSUM:
                 source = checksum(source, parameters.getChecksumExcludeFields(), parameters.getChecksumField());
                 break;
+            case UPDATE:
+                source = update(source, parameters.getUpdateFields(), parameters.getUpdateExpressions());
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Standardization strategy %s is not supported", strategy.name()));
             }
         }
 
+        return source;
+    }
+
+    private Node update(Node source, String[] updateFields, String[] updateExpressions) {
+        for (int i = 0; i < updateFields.length; i++) {
+            FieldMetadata fm = new FieldMetadata("_UPDATE_NEW_" + updateFields[i],
+                    source.getSchema(updateFields[i]).getJavaType());
+            source = source.apply(updateExpressions[i], new FieldList(source.getFieldNames()), fm)
+                    .discard(new FieldList(updateFields[i]))
+                    .rename(new FieldList("_UPDATE_NEW_" + updateFields[i]), new FieldList(updateFields[i]));
+        }
         return source;
     }
 

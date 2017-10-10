@@ -124,6 +124,12 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("ChecksumField")
     private String checksumField;
 
+    @JsonProperty("UpdateFields")
+    private String[] updateFields;
+
+    @JsonProperty("UpdateExpressions")
+    private String[] updateExpressions;
+
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
 
@@ -439,5 +445,20 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         this.checksumField = checksumField;
     }
 
+    public String[] getUpdateFields() {
+        return updateFields;
+    }
+
+    public void setUpdateFields(String[] updateFields) {
+        this.updateFields = updateFields;
+    }
+
+    public String[] getUpdateExpressions() {
+        return updateExpressions;
+    }
+
+    public void setUpdateExpressions(String[] updateExpressions) {
+        this.updateExpressions = updateExpressions;
+    }
 
 }

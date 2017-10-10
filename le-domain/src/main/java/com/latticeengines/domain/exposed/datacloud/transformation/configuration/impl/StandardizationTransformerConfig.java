@@ -131,8 +131,34 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String checksumField; // for strategy CHECKSUM: field name of
                                   // checksum
 
+    @JsonProperty("UpdateFields")
+    private String[] updateFields; // for strategy UPDATE
+
+    @JsonProperty("UpdateExpressions")
+    private String[] updateExpressions; // for strategy UPDATE
+
     public enum StandardizationStrategy {
-        ADD_ID, DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE, COPY, CHECKSUM
+        ADD_ID, //
+        DOMAIN, //
+        DUNS, //
+        COUNTRY, //
+        STATE, //
+        STRING, //
+        CONVERT_TYPE, //
+        DEDUP, //
+        FILTER, //
+        UPLOAD_TIMESTAMP, //
+        MARKER, //
+        RENAME, //
+        RETAIN, //
+        DISCARD, //
+        ADD_FIELD, //
+        VALID_DOMAIN, //
+        CONSOLIDATE_INDUSTRY, //
+        CONSOLIDATE_RANGE, //
+        COPY, //
+        CHECKSUM, //
+        UPDATE //
     }
 
     public enum FieldType {
@@ -455,5 +481,20 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         this.checksumField = checksumField;
     }
 
+    public String[] getUpdateFields() {
+        return updateFields;
+    }
+
+    public void setUpdateFields(String[] updateFields) {
+        this.updateFields = updateFields;
+    }
+
+    public String[] getUpdateExpressions() {
+        return updateExpressions;
+    }
+
+    public void setUpdateExpressions(String[] updateExpressions) {
+        this.updateExpressions = updateExpressions;
+    }
 
 }
