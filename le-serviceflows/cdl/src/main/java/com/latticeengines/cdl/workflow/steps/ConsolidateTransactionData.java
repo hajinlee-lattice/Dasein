@@ -114,7 +114,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
-        config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
+        config.setMasterIdField(InterfaceName.TransactionId.name());
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(Collections.singleton(CREATION_DATE));
         config.setCompositeKeys(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
@@ -152,7 +152,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
     @Override
     protected void setupConfig(ConsolidateDataTransformerConfig config) {
-        config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
+        config.setMasterIdField(InterfaceName.TransactionId.name());
     }
 
     @Override
