@@ -31,11 +31,21 @@ public final class QueryUtils {
     }
 
     public static StringPath getAttributePath(String alias, String attrName) {
-        return Expressions.stringPath(Expressions.stringPath(alias), attrName);
+        try {
+            return Expressions.stringPath(Expressions.stringPath(alias), attrName);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create sql string expression for attribute " + alias + "." + attrName,
+                    e);
+        }
     }
 
     public static NumberPath<?> getAttributeNumberPath(BusinessEntity entity, String attrName) {
-        return Expressions.numberPath(BigDecimal.class, Expressions.stringPath(entity.name()), attrName);
+        try {
+            return Expressions.numberPath(BigDecimal.class, Expressions.stringPath(entity.name()), attrName);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to create sql number expression for attribute " + entity + "." + attrName, e);
+        }
     }
 
     public static NumberPath<?> getAttributeNumberPath(SubQuery subQuery, String attrName) {

@@ -146,7 +146,7 @@ public class CalculatePurchaseHistory extends ProfileStepBase<CalculatePurchaseH
         step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
 
         String transactionSourceName = "Transaction";
-        String accountSourceName = "Acount";
+        String accountSourceName = "Account";
         SourceTable transactionTable = new SourceTable(transactionTableName, customerSpace);
         SourceTable accountTable = new SourceTable(accountTableName, customerSpace);
         List<String> baseSources = new ArrayList<String>();

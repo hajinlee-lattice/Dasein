@@ -14,7 +14,9 @@ import com.querydsl.core.types.dsl.StringPath;
 public class AttrRepoUtils {
 
     public static ColumnMetadata getAttribute(AttributeRepository attrRepo, AttributeLookup attributeLookup) {
-        return attrRepo.getColumnMetadata(attributeLookup);
+        ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
+        cm.setColumnId(attributeLookup.getAttribute());
+        return cm;
     }
 
     public static EntityPath<String> getEntityPath(String tableName) {

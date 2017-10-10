@@ -173,7 +173,6 @@ public class QueryProcessor {
     private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups) {
         List<Expression<?>> expressions = new ArrayList<>();
         for (Lookup lookup : lookups) {
-
             LookupResolver resolver = factory.getLookupResolver(lookup.getClass());
             Expression<?> expression = resolver.resolveForSelect(lookup, true);
             expressions.add(expression);
