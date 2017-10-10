@@ -15,6 +15,9 @@ public class AttrRepoUtils {
 
     public static ColumnMetadata getAttribute(AttributeRepository attrRepo, AttributeLookup attributeLookup) {
         ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
+        if (cm == null) {
+            throw new QueryEvaluationException("Cannot find attribute " + attributeLookup + " in the repository.");
+        }
         cm.setColumnId(attributeLookup.getAttribute());
         return cm;
     }
