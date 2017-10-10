@@ -300,6 +300,8 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
                         Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
                         Assert.assertNotNull(entry.getLaunchState());
                         Assert.assertNotNull(entry.getLaunchTime());
+                        Assert.assertNotNull(entry.getPlayName());
+                        Assert.assertNotNull(entry.getPlayDisplayName());
                         Assert.assertNotNull(entry.getSelectedBuckets());
                         Stats stats = entry.getStats();
                         Assert.assertNotNull(stats);

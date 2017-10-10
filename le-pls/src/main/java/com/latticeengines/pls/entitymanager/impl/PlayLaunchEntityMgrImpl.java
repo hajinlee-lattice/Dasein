@@ -1,9 +1,12 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -13,6 +16,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.PlayLaunchDao;
@@ -91,9 +95,11 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<PlayLaunch> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
+    public List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, Long endTimestamp) {
-        return playLaunchDao.findByPlayStatesAndPagination(playId, states, startTimestamp, offset, max, endTimestamp);
+        List<PlayLaunch> playLaunches = playLaunchDao.findByPlayStatesAndPagination(playId, states, startTimestamp,
+                offset, max, endTimestamp);
+        return convertToSummaries(playLaunches);
     }
 
     @Override
@@ -118,5 +124,41 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     private String generateLaunchId() {
         return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
+    }
+
+    private List<LaunchSummary> convertToSummaries(List<PlayLaunch> playLaunches) {
+        if (CollectionUtils.isEmpty(playLaunches)) {
+            return new ArrayList<>();
+        } else {
+            return playLaunches.stream() //
+                    .map(launch -> convertToSummary(launch)) //
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private LaunchSummary convertToSummary(PlayLaunch launch) {
+        LaunchSummary summary = new LaunchSummary();
+
+        Stats stats = new Stats();
+        stats.setContactsWithinRecommendations(getCount(launch.getContactsLaunched()));
+        stats.setErrors(getCount(launch.getAccountsErrored()));
+        stats.setRecommendationsLaunched(getCount(launch.getAccountsLaunched()));
+        stats.setSuppressed(getCount(launch.getAccountsSuppressed()));
+
+        summary.setStats(stats);
+        summary.setLaunchId(launch.getLaunchId());
+        summary.setLaunchState(launch.getLaunchState());
+        summary.setLaunchTime(launch.getCreated());
+        summary.setSelectedBuckets(launch.getBucketsToLaunch());
+        if (launch.getPlay() != null) {
+            summary.setPlayName(launch.getPlay().getName());
+            summary.setPlayDisplayName(launch.getPlay().getDisplayName());
+        }
+
+        return summary;
+    }
+
+    private long getCount(Long count) {
+        return count == null ? 0L : count;
     }
 }

@@ -1,11 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -76,12 +73,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
             Long offset, Long max, Long endTimestamp) {
         PlayLaunchDashboard dashboard = new PlayLaunchDashboard();
-        List<PlayLaunch> playLaunches = playLaunchEntityMgr.findDashboardEntries(playId, launchStates, startTimestamp,
-                offset, max, endTimestamp);
         Stats totalCounts = playLaunchEntityMgr.findDashboardCumulativeStats(playId, launchStates, startTimestamp,
                 endTimestamp);
 
-        List<LaunchSummary> launchSummaries = convertToSummaries(playLaunches);
+        List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
+                startTimestamp, offset, max, endTimestamp);
 
         dashboard.setLaunchSummaries(launchSummaries);
         dashboard.setCumulativeStats(totalCounts);
@@ -92,37 +88,5 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     public Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp,
             Long endTimestamp) {
         return playLaunchEntityMgr.findDashboardEntriesCount(playId, launchStates, startTimestamp, endTimestamp);
-    }
-
-    private List<LaunchSummary> convertToSummaries(List<PlayLaunch> playLaunches) {
-        if (CollectionUtils.isEmpty(playLaunches)) {
-            return new ArrayList<>();
-        } else {
-            return playLaunches.stream() //
-                    .map(launch -> convertToSummary(launch)) //
-                    .collect(Collectors.toList());
-        }
-    }
-
-    private LaunchSummary convertToSummary(PlayLaunch launch) {
-        LaunchSummary summary = new LaunchSummary();
-
-        Stats stats = new Stats();
-        stats.setContactsWithinRecommendations(getCount(launch.getContactsLaunched()));
-        stats.setErrors(getCount(launch.getAccountsErrored()));
-        stats.setRecommendationsLaunched(getCount(launch.getAccountsLaunched()));
-        stats.setSuppressed(getCount(launch.getAccountsSuppressed()));
-
-        summary.setStats(stats);
-        summary.setLaunchId(launch.getLaunchId());
-        summary.setLaunchState(launch.getLaunchState());
-        summary.setLaunchTime(launch.getCreated());
-        summary.setSelectedBuckets(launch.getBucketsToLaunch());
-
-        return summary;
-    }
-
-    private long getCount(Long count) {
-        return count == null ? 0L : count;
     }
 }

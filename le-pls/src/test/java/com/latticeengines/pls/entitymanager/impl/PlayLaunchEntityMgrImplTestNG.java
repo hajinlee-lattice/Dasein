@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
@@ -332,7 +333,7 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, Long endTimestamp, long expectedCount) {
-        List<PlayLaunch> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
+        List<LaunchSummary> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
                 offset, max, endTimestamp);
         Assert.assertNotNull(dashboardEntries);
         Assert.assertEquals(dashboardEntries.size(), expectedCount);
@@ -344,8 +345,13 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         if (dashboardEntries.size() > 0) {
             dashboardEntries.stream() //
                     .forEach(entry -> {
-                        Assert.assertNotNull(entry.getId());
-                        Assert.assertTrue(launchIds.contains(entry.getId()));
+                        Assert.assertNotNull(entry.getLaunchId());
+                        Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
+                        Assert.assertNotNull(entry.getLaunchState());
+                        Assert.assertNotNull(entry.getLaunchTime());
+                        Assert.assertNotNull(entry.getPlayDisplayName());
+                        Assert.assertNotNull(entry.getPlayName());
+                        Assert.assertNotNull(entry.getSelectedBuckets());
                     });
         }
     }
