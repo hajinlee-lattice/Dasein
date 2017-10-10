@@ -49,7 +49,9 @@ public class FinishProfile extends BaseWorkflowStep<CalculateStatsStepConfigurat
         Table activeBatchStore = dataCollectionProxy.getTable(customerSpace, role, activeVersion);
         if (activeBatchStore != null) {
             Table clone = metadataProxy.cloneTable(customerSpace, activeBatchStore.getName());
-            dataCollectionProxy.upsertTable(customerSpace, clone.getName(), role, inactiveVersion);
+            String newName = activeBatchStore.getName() + "_Clone";
+            metadataProxy.updateTable(customerSpace, newName, clone);
+            dataCollectionProxy.upsertTable(customerSpace, newName, role, inactiveVersion);
             log.info("Clone and upsert " + role + " from version " + activeVersion + " to " + inactiveVersion);
         }
     }
