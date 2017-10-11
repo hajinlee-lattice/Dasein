@@ -46,12 +46,13 @@ public class StartProfile extends BaseWorkflowStep<CalculateStatsStepConfigurati
         }
 
         Table transactionTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
-                                                              TableRoleInCollection.AggregatedTransaction);
+                TableRoleInCollection.AggregatedTransaction);
         Table productTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
-                                                          TableRoleInCollection.ConsolidatedProduct);
+                TableRoleInCollection.ConsolidatedProduct);
         if (productTable == null) {
             log.info("Skip sort product since product table does not exist");
-            SortProductStepConfiguration sortProductStepConfiguration = getConfigurationFromJobParameters(SortProductStepConfiguration.class);
+            SortProductStepConfiguration sortProductStepConfiguration = getConfigurationFromJobParameters(
+                    SortProductStepConfiguration.class);
             sortProductStepConfiguration.setSkipStep(true);
             putObjectInContext(SortProductStepConfiguration.class.getName(), sortProductStepConfiguration);
         }

@@ -9,6 +9,7 @@ public enum ComparisonType {
     GREATER_OR_EQUAL, //
     LESS_THAN, //
     LESS_OR_EQUAL, //
+    @Deprecated
     IN_RANGE, //
     IN_COLLECTION, //
     CONTAINS, //
