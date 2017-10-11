@@ -108,6 +108,10 @@ public class Bucket implements Serializable {
         Bucket bucket = new Bucket();
         if (StringUtils.isNotBlank(value)) {
             bucket.setLabel(value);
+            bucket.setComparisonType(ComparisonType.EQUAL);
+            bucket.setValues(Collections.singletonList(value));
+        } else {
+            bucket.setComparisonType(ComparisonType.IS_NULL);
         }
         return bucket;
     }
