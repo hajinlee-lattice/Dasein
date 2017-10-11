@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortProductStepConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +49,12 @@ public class StartProfile extends BaseWorkflowStep<CalculateStatsStepConfigurati
                                                               TableRoleInCollection.AggregatedTransaction);
         Table productTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
                                                           TableRoleInCollection.ConsolidatedProduct);
+        if (productTable == null) {
+            log.info("Skip sort product since product table does not exist");
+            SortProductStepConfiguration sortProductStepConfiguration = getConfigurationFromJobParameters(SortProductStepConfiguration.class);
+            sortProductStepConfiguration.setSkipStep(true);
+            putObjectInContext(SortProductStepConfiguration.class.getName(), sortProductStepConfiguration);
+        }
         if ((transactionTable == null) || (productTable == null)) {
             log.info("Skip profile purchase history since either product or transaction table does not exist");
             CalculatePurchaseHistoryConfiguration calculatePurchaseHistoryConfig = getConfigurationFromJobParameters(
