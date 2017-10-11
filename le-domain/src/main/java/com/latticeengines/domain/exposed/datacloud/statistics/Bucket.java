@@ -74,7 +74,12 @@ public class Bucket implements Serializable {
         if (min != null && max != null) {
             vals = Arrays.asList(min, max);
             if (minInclusive && maxInclusive) {
-                comparator = ComparisonType.GTE_AND_LTE;
+                if (min == max) {
+                    comparator = ComparisonType.EQUAL;
+                    vals = Collections.singletonList(min);
+                } else {
+                    comparator = ComparisonType.GTE_AND_LTE;
+                }
             } else if (minInclusive) {
                 comparator = ComparisonType.GTE_AND_LT;
             } else if (maxInclusive) {
