@@ -38,6 +38,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.Sort;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SorterParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
@@ -136,7 +137,8 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     @Override
-    protected void postDataFlowProcessing(String workflowDir, SorterParameters paramters, SorterConfig configuration) {
+    protected void postDataFlowProcessing(TransformStep step, String workflowDir, SorterParameters paramters,
+            SorterConfig configuration) {
         if (paramters.getPartitions() == 1) {
             if (Boolean.TRUE.equals(configuration.getCompressResult())) {
                 keepOnlyBiggestAvro(workflowDir);

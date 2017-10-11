@@ -70,7 +70,8 @@ public class SourceCopier extends AbstractDataflowTransformer<CopierConfig, Copi
     }
 
     @Override
-    protected void postDataFlowProcessing(String workflowDir, CopierParameters paramters, CopierConfig configuration) {
+    protected void postDataFlowProcessing(TransformStep step, String workflowDir, CopierParameters paramters,
+            CopierConfig configuration) {
         if (configuration.getSortKeys() != null && !configuration.getSortKeys().isEmpty()) {
             String wd = new Path(workflowDir).toString();
             String avroGlob = wd + (wd.endsWith("/") ? "*.avro" : "/*.avro");
