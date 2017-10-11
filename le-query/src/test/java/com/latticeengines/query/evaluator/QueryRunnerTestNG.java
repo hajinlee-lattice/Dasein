@@ -92,15 +92,16 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 13);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTransactionSelect() throws ParseException {
         TransactionRestriction txRestriction = new TransactionRestriction();
-        txRestriction.setProductId("1");
+        txRestriction.setProductId("0802DD00110356F3289420FE46850008");
         Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
-        Restriction countryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
-                .eq("LEICESTER").build();
-        Restriction idRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(1802).build();
-        Restriction cityAndTx = Restriction.builder().and(countryRestriction, restriction).build();
+        Restriction cityRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
+                .eq("Richland").build();
+        Restriction idRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .eq("0012400001DO2QKAA1").build();
+        Restriction cityAndTx = Restriction.builder().and(cityRestriction, restriction).build();
         Restriction idOrCityAndTx = Restriction.builder().or(idRestriction, cityAndTx).build();
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
@@ -123,20 +124,20 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 108045);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTransactionSelectWithTimeFilter() throws ParseException {
         TransactionRestriction txRestriction = new TransactionRestriction();
-        txRestriction.setProductId("1");
+        txRestriction.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction.setTimeFilter(
                 new TimeFilter(ComparisonType.BEFORE, Period.Quarter, Arrays.asList(new Object[] { 1 })));
-        txRestriction.setSpentFilter(
-                new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH, ComparisonType.GREATER_THAN, Collections.singletonList(9)));
+        txRestriction.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
+                ComparisonType.GREATER_THAN, Collections.singletonList(200)));
         Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
-        Assert.assertEquals(results.size(), 1);
+        Assert.assertEquals(results.size(), 15);
     }
 
     @Test(groups = "functional")
