@@ -202,7 +202,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(getConfiguration().getHdfsPodId());
         jobConfiguration.setMatchInput(getConfiguration().getMatchInput());
-        jobConfiguration.setName("PropDataMatchBlock");
+        jobConfiguration.setName("DataCloudMatchBlock");
         jobConfiguration.setCustomerSpace(getConfiguration().getCustomerSpace());
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
         jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());

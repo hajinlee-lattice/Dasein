@@ -47,21 +47,6 @@ public class ContactResource extends BaseFrontEndEntityResource {
     }
 
     @Override
-    @Deprecated
-    @RequestMapping(value = "/count/restriction", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Retrieve the number of rows for the specified restriction")
-    public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
-        try {
-            return super.getCountForRestriction(restriction);
-        } catch (LedpException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_36002, e);
-        }
-    }
-
-    @Override
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")

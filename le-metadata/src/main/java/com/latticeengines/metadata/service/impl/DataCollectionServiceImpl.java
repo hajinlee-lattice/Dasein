@@ -1,9 +1,8 @@
 package com.latticeengines.metadata.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerMetadata;
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerStats;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLConsolidate;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLProfile;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,20 +204,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     private void notifyCacheWatchers(String customerSpace) {
         new Thread(() -> {
-            NodeWatcher.updateWatchedData(CustomerStats.name(), customerSpace);
-            for (TableRoleInCollection role : Arrays.asList( //
-                    TableRoleInCollection.BucketedAccount, //
-                    TableRoleInCollection.SortedContact, //
-                    TableRoleInCollection.AggregatedTransaction, //
-                    TableRoleInCollection.SortedProduct)) {
-                NodeWatcher.updateWatchedData(CustomerMetadata.name(),
-                        String.format("%s|%s", customerSpace, role.name()));
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
+            NodeWatcher.updateWatchedData(CDLProfile.name(), customerSpace);
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                log.warn("Thread sleep interrupted", e);
             }
+            NodeWatcher.updateWatchedData(CDLConsolidate.name(), customerSpace);
         }).run();
     }
 

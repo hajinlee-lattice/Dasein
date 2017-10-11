@@ -7,7 +7,6 @@ public enum CamilleWatcher {
     AMApiUpdate,    // refresh all cached proxies
 
     // CDL
-    CustomerStats,   // update data lake stats for a customer
-    CustomerMetadata // update table metadata in data collection
-
+    CDLConsolidate, // a new data collection consolidate just finished
+    CDLProfile,     // a new data collection profile just finished
 }

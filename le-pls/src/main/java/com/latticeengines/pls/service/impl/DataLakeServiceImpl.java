@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerMetadata;
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerStats;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLProfile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,7 +95,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private List<ColumnMetadata> getAllAttributes() {
-        String customerSpace = MultiTenantContext.getTenant().getId();
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         List<ColumnMetadata> cms = new ArrayList<>();
         for (BusinessEntity entity : BusinessEntity.SEGMENT_ENTITIES) {
             cms.addAll(getAttributesInEntity(customerSpace, entity));
@@ -175,24 +174,24 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (statsCache == null) {
             statsCache = WatcherCache.builder() //
                     .name("DataLakeStatsCache") //
-                    .watch(CustomerStats) //
+                    .watch(CDLProfile) //
                     .maximum(100) //
                     .load(o -> {
                         String customerSpace = (String) o;
                         return getStatistics(customerSpace);
                     }).build();
-            statsCache.setRefreshKeyResolver(s -> {
+            statsCache.setRefreshKeyResolver((updateSignal, existingKeys) -> {
                 try {
-                    String customerSpace = CustomerSpace.parse(s).toString();
-                    if (customerSpace.equals(s)) {
+                    String customerSpace = CustomerSpace.parse(updateSignal).toString();
+                    if (customerSpace.equals(updateSignal)) {
                         log.info("Attempt to refresh the stats cache of tenant " + customerSpace);
-                        return Collections.singletonList(s);
+                        return Collections.singletonList(updateSignal);
                     } else {
                         throw new IllegalArgumentException(
-                                "Parsed customer space " + customerSpace + " is different from the watched data " + s);
+                                "Parsed customer space " + customerSpace + " is different from the watched data " + updateSignal);
                     }
                 } catch (Exception e) {
-                    log.warn("Cannot parse watched data " + s + " into a customer space.", e);
+                    log.warn("Cannot parse watched data " + updateSignal + " into a customer space.", e);
                     return Collections.emptyList();
                 }
             });
@@ -237,7 +236,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (cmCache == null) {
             cmCache = WatcherCache.builder() //
                     .name("DataLakeColumnMetadataCache") //
-                    .watch(CustomerMetadata) //
+                    .watch(CDLProfile) //
                     .maximum(100) //
                     .load(o -> {
                         String str = (String) o;
@@ -246,22 +245,19 @@ public class DataLakeServiceImpl implements DataLakeService {
                         String customerSpace = tokens[0];
                         return getAttributesInTableRole(customerSpace, role);
                     }).build();
-            cmCache.setRefreshKeyResolver(s -> {
-                try {
-                    String[] tokens = s.split("\\|");
+            cmCache.setRefreshKeyResolver((updateSignal, existingKeys) -> {
+                String customerSpace = CustomerSpace.parse(updateSignal).toString();
+                List<String> keysToUpdate = new ArrayList<>();
+                existingKeys.forEach(key -> {
+                    String[] tokens = key.split("\\|");
                     TableRoleInCollection role = TableRoleInCollection.valueOf(tokens[1]);
-                    String customerSpace = CustomerSpace.parse(tokens[0]).toString();
-                    if (customerSpace.equals(tokens[0])) {
-                        log.info("Attempt to refresh the table metadata cache of " + role + " in tenant " + customerSpace);
-                        return Collections.singletonList(s);
-                    } else {
-                        throw new IllegalArgumentException("Parsed customer space " + customerSpace
-                                + " is different from the watched data " + tokens[0]);
+                    String csInKey = CustomerSpace.parse(tokens[0]).toString();
+                    if (customerSpace.equals(csInKey)) {
+                        log.info("Attempt to refresh the table metadata cache of " + role + " in tenant " + csInKey);
+                        keysToUpdate.add(key);
                     }
-                } catch (Exception e) {
-                    log.warn("Cannot parse watched data " + s + " into a valid cache key.", e);
-                    return Collections.emptyList();
-                }
+                });
+                return keysToUpdate;
             });
         }
     }

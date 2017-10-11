@@ -1,19 +1,14 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -25,90 +20,32 @@ public abstract class BaseFrontEndEntityResource {
 
     private final SegmentProxy segmentProxy;
 
-    private final LoadingCache<String, Long> countCache;
-
-    private final LoadingCache<String, DataPage> dataCache;
-
-    private final LoadingCache<String, Map<String, Long>> ratingCache;
-
     BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
         this.entityProxy = entityProxy;
         this.segmentProxy = segmentProxy;
-        countCache = Caffeine.newBuilder() //
-                .maximumSize(1000) //
-                .expireAfterWrite(10, TimeUnit.MINUTES) //
-                .refreshAfterWrite(1, TimeUnit.MINUTES) //
-                .build(this::getCountFromObjectApi);
-        dataCache = Caffeine.newBuilder() //
-                .maximumSize(100) //
-                .expireAfterWrite(10, TimeUnit.MINUTES) //
-                .refreshAfterWrite(1, TimeUnit.MINUTES) //
-                .build(this::getDataFromObjectApi);
-        ratingCache = Caffeine.newBuilder() //
-                .maximumSize(1000) //
-                .expireAfterWrite(10, TimeUnit.MINUTES) //
-                .refreshAfterWrite(1, TimeUnit.MINUTES) //
-                .build(this::getRatingCountFromObjectApi);
     }
 
     public long getCount(FrontEndQuery frontEndQuery) {
         appendSegmentRestriction(frontEndQuery);
         optimizeRestrictions(frontEndQuery);
-        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
-        return countCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
-    }
-
-    private long getCountFromObjectApi(String serializedKey) {
-        String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
-        String serializedQuery = serializedKey.substring(tenantId.length() + 1);
-        FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         frontEndQuery.setMainEntity(getMainEntity());
+        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getCount(tenantId, frontEndQuery);
-    }
-
-    public long getCountForRestriction(FrontEndRestriction restriction) {
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        BusinessEntity mainEntity = getMainEntity();
-        if (restriction != null) {
-            if (BusinessEntity.Account == mainEntity) {
-                frontEndQuery.setAccountRestriction(restriction);
-            } else if (BusinessEntity.Contact == mainEntity){
-                frontEndQuery.setContactRestriction(restriction);
-            } else {
-                throw new RuntimeException("Entity " + mainEntity + " is not supported yet.");
-            }
-        }
-        optimizeRestrictions(frontEndQuery);
-        return getCount(frontEndQuery);
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery) {
         appendSegmentRestriction(frontEndQuery);
         optimizeRestrictions(frontEndQuery);
+        frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
-        return dataCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
+        return entityProxy.getData(tenantId, frontEndQuery);
     }
 
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
         appendSegmentRestriction(frontEndQuery);
         optimizeRestrictions(frontEndQuery);
+        frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
-        return ratingCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
-    }
-
-    private DataPage getDataFromObjectApi(String serializedKey) {
-        String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
-        String serializedQuery = serializedKey.substring(tenantId.length() + 1);
-        FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        frontEndQuery.setMainEntity(getMainEntity());
-        return entityProxy.getData(tenantId, frontEndQuery);
-    }
-
-    private Map<String, Long> getRatingCountFromObjectApi(String serializedKey) {
-        String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
-        String serializedQuery = serializedKey.substring(tenantId.length() + 1);
-        FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        frontEndQuery.setMainEntity(getMainEntity());
         return entityProxy.getRatingCount(tenantId, frontEndQuery);
     }
 

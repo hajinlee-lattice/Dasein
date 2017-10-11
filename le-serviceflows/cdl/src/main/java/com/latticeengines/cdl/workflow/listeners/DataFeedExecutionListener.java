@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.listeners;
 
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLConsolidate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -7,6 +9,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -42,6 +45,7 @@ public class DataFeedExecutionListener extends LEJobListener {
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
+            NodeWatcher.updateWatchedData(CDLConsolidate.name(), customerSpace);
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
             DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);

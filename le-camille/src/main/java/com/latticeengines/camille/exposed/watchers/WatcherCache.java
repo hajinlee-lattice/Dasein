@@ -3,12 +3,15 @@ package com.latticeengines.camille.exposed.watchers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -30,7 +33,8 @@ public class WatcherCache<K, V> {
     private final String watcherName;
     private final Object[] initKeys;
     private final Callable<Object[]> initKeysCallable;
-    private Function<String, Collection<K>> refreshKeyResolver;
+    private BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver;
+    private BiFunction<String, Set<K>, Collection<K>> evictKeyResolver;
     private final int capacity;
     private Cache<K, V> cache;
 
@@ -41,17 +45,20 @@ public class WatcherCache<K, V> {
         this.initKeys = initKeys;
         this.capacity = capacity;
         this.initKeysCallable = null;
-        this.refreshKeyResolver = s -> cache.asMap().keySet();
+        this.refreshKeyResolver = (s, k) -> cache.asMap().keySet();
+        this.evictKeyResolver = (s, k) -> Collections.emptyList();
     }
 
-    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, Callable<Object[]> initKeysCallable) {
+    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity,
+            Callable<Object[]> initKeysCallable) {
         this.load = load;
         this.cacheName = cacheName;
         this.watcherName = watcherName;
         this.initKeys = null;
         this.initKeysCallable = initKeysCallable;
         this.capacity = capacity;
-        this.refreshKeyResolver = s -> cache.asMap().keySet();
+        this.refreshKeyResolver = (s, k) -> cache.asMap().keySet();
+        this.evictKeyResolver = (s, k) -> Collections.emptyList();
     }
 
     public static <K, V> Builder<K, V> builder() {
@@ -97,8 +104,7 @@ public class WatcherCache<K, V> {
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);
             }
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
-            log.info(
-                    String.format("Finished initializing the WatcherCache %s after %.3f secs.", cacheName, duration));
+            log.info(String.format("Finished initializing the WatcherCache %s after %.3f secs.", cacheName, duration));
         }
     }
 
@@ -118,10 +124,18 @@ public class WatcherCache<K, V> {
         if (cache != null) {
             long startTime = System.currentTimeMillis();
             log.info("Start refreshing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
-            Collection<K> keys = new ArrayList<>(refreshKeyResolver.apply(watchedData));
-            keys.retainAll(cache.asMap().keySet());
-            log.info("Going to refresh " + keys.size() + " keys.");
-            keys.forEach(this::loadKey);
+            Collection<K> keysToEvict = new ArrayList<>(evictKeyResolver.apply(watchedData, cache.asMap().keySet()));
+            if (!keysToEvict.isEmpty()) {
+                log.info("Going to evict " + keysToEvict.size() + " keys.");
+                keysToEvict.forEach(cache::invalidate);
+            }
+            Collection<K> keysToRefresh = new ArrayList<>(refreshKeyResolver.apply(watchedData, cache.asMap().keySet()));
+            keysToRefresh.retainAll(cache.asMap().keySet());
+            if (!keysToRefresh.isEmpty()) {
+                log.info("Going to refresh " + keysToRefresh.size() + " keys.");
+                cache.invalidateAll(keysToRefresh);
+                keysToRefresh.forEach(this::loadKey);
+            }
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
             log.info(String.format("Finished refreshing the WatcherCache %s after %.3f secs.", cacheName, duration));
         }
@@ -133,7 +147,7 @@ public class WatcherCache<K, V> {
                 // avoid request spike on cached resource
                 Thread.sleep(random.nextInt(3000));
             } catch (InterruptedException e) {
-                // ignore
+                log.warn("Thread sleep interrupted.", e);
             }
             V val = load.apply(key);
             if (val == null) {
@@ -147,8 +161,12 @@ public class WatcherCache<K, V> {
         }
     }
 
-    public void setRefreshKeyResolver(Function<String, Collection<K>> refreshKeyResolver) {
+    public void setRefreshKeyResolver(BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver) {
         this.refreshKeyResolver = refreshKeyResolver;
+    }
+
+    public void setEvictKeyResolver(BiFunction<String, Set<K>, Collection<K>> evictKeyResolver) {
+        this.evictKeyResolver = evictKeyResolver;
     }
 
     public static class Builder<K, V> {
