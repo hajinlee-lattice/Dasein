@@ -225,10 +225,12 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             query.setMaxResults(max.intValue());
         }
 
-        query.setBigInteger("startTimestamp", new BigInteger(startTimestamp.toString()));
+        query.setBigInteger("startTimestamp", //
+                new BigInteger(toCompatibleUnixTimestamp(startTimestamp).toString()));
 
         if (endTimestamp != null) {
-            query.setBigInteger("endTimestamp", new BigInteger(endTimestamp.toString()));
+            query.setBigInteger("endTimestamp", //
+                    new BigInteger(toCompatibleUnixTimestamp(endTimestamp).toString()));
         }
 
         if (playId != null) {
@@ -245,15 +247,12 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query;
     }
 
-    void updateQueryWithLastUpdatedTimestamp(Date lastModificationDate, Query query) {
-        if (lastModificationDate == null) {
-            lastModificationDate = new Date(0L);
+    private Long toCompatibleUnixTimestamp(Long timestamp) {
+        if (timestamp == null || timestamp < 0) {
+            timestamp = 0L;
         }
-        query.setBigInteger("lastUpdatedTimestamp",
-                new BigInteger((dateToUnixTimestamp(lastModificationDate).toString())));
-    }
-
-    Long dateToUnixTimestamp(Date lastModificationDate) {
-        return new Long(lastModificationDate.getTime() / 1000);
+        // hibernate UNIX_TIMESTAMP converts date in seconds therefore
+        // converting query timestamp to seconds
+        return new Long(timestamp / 1000);
     }
 }
