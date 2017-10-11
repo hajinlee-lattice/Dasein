@@ -1501,6 +1501,18 @@
                 <version>${mockito.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.netflix.curator</groupId>
+                <artifactId>curator-test</artifactId>
+                <version>${curator.test.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <!-- used by all projects have metric unit tests -->
             <!-- to be moved to individual projects -->
             <dependency>

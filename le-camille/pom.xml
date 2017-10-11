@@ -47,12 +47,6 @@
             <groupId>com.netflix.curator</groupId>
             <artifactId>curator-test</artifactId>
             <version>${curator.test.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>
