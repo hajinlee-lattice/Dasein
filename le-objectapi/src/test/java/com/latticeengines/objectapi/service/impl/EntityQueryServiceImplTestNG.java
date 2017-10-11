@@ -41,6 +41,9 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
+    private static final String ATTR_ACCOUNT_NAME = "name";
+    private static final String ATTR_CONTACT_TITLE = "Title";
+
     @Autowired
     private EntityQueryService entityQueryService;
 
@@ -57,48 +60,50 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     public void testAccountCount() {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("a").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(2510L));
+        Assert.assertEquals(count, new Long(105163L));
     }
 
     @Test(groups = "functional")
     public void testAccountContactCount() {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction1 = new FrontEndRestriction();
-        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("a").build();
+        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
+                .build();
         frontEndRestriction1.setRestriction(restriction1);
         frontEndQuery.setAccountRestriction(frontEndRestriction1);
 
         FrontEndRestriction frontEndRestriction2 = new FrontEndRestriction();
-        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Contact, "Title").gte("VP").build();
+        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).gte("VP")
+                .build();
         frontEndRestriction2.setRestriction(restriction2);
         frontEndQuery.setContactRestriction(frontEndRestriction2);
 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(25L));
+        Assert.assertEquals(count, new Long(43L));
 
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(42L));
+        Assert.assertEquals(count, new Long(44L));
     }
 
     @Test(groups = "functional")
     public void testContactDataWithAccountIds() {
         // mimic a segment get from metadata api
         MetadataSegment segment = new MetadataSegment();
-        Restriction accountRestrictionInternal = Restriction.builder().let(BusinessEntity.Account, "CompanyName")
-                .gte("a").build();
+        Restriction accountRestrictionInternal = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
+                .gte("A").build();
         segment.setAccountRestriction(accountRestrictionInternal);
-        Restriction contactRestrictionInternal = Restriction.builder().let(BusinessEntity.Contact, "Title").gte("VP")
-                .build();
+        Restriction contactRestrictionInternal = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE)
+                .gte("VP").build();
         segment.setContactRestriction(contactRestrictionInternal);
 
         // front end query from segment restrictions
@@ -131,7 +136,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name())));
         contactQuery.setPageFilter(new PageFilter(0, 100));
         dataPage = entityQueryService.getData(contactQuery);
-        Assert.assertEquals(dataPage.getData().size(), 19);
+        Assert.assertEquals(dataPage.getData().size(), 10);
         for (Map<String, Object> contact : dataPage.getData()) {
             Object accountId = contact.get(InterfaceName.AccountId.name());
             Assert.assertTrue(accountIds.contains(accountId));
@@ -140,9 +145,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         emptyContactQuery.setMainEntity(BusinessEntity.Contact);
         emptyContactQuery.setContactRestriction(frontEndRestriction);
         dataPage = entityQueryService.getData(emptyContactQuery);
-        Assert.assertEquals(dataPage.getData().size(), 19);
+        Assert.assertEquals(dataPage.getData().size(), 10);
         for (Map<String, Object> contact : dataPage.getData()) {
-            Assert.assertTrue(contact.containsKey(InterfaceName.CompanyName.toString()));
+            Assert.assertTrue(contact.containsKey(InterfaceName.Email.toString()));
         }
     }
 
@@ -152,18 +157,19 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("D").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setSort(new FrontEndSort(
-                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, "CompanyName")), false));
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
 
         DataPage dataPage = entityQueryService.getData(frontEndQuery);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
+        Assert.assertFalse(data.isEmpty());
         data.forEach(row -> {
             Assert.assertTrue(row.containsKey("Score"));
             String score = (String) row.get("Score");
@@ -177,6 +183,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         dataPage = entityQueryService.getData(frontEndQuery);
         Assert.assertNotNull(dataPage);
         data = dataPage.getData();
+        Assert.assertFalse(data.isEmpty());
         data.forEach(row -> {
             Assert.assertTrue(row.containsKey(model.getId()));
             String score = (String) row.get(model.getId());
@@ -195,6 +202,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         dataPage = entityQueryService.getData(frontEndQuery);
         Assert.assertNotNull(dataPage);
         data = dataPage.getData();
+        Assert.assertFalse(data.isEmpty());
         data.forEach(row -> {
             Assert.assertTrue(row.containsKey(model.getId()));
             String score = (String) row.get(model.getId());
@@ -208,22 +216,22 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("A").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setSort(new FrontEndSort(
-                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, "CompanyName")), false));
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
 
         Map<String, Long> ratingCounts = entityQueryService.getRatingCount(frontEndQuery);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RuleBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 50287L);
+                Assert.assertEquals((long) count, 1675L);
             } else if (RuleBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 13932L);
+                Assert.assertEquals((long) count, 361L);
             }
         });
     }
@@ -241,14 +249,14 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         Map<String, Restriction> ruleA = new HashMap<>();
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("B", "G").build());
+                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("B", "G").build());
         ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Contact, "Title").in("A", "N").build());
+                Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).in("A", "N").build());
         rule.getBucketToRuleMap().put(RuleBucketName.A.getName(), ruleA);
 
         Map<String, Restriction> ruleC = new HashMap<>();
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("H", "N").build());
+                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("H", "N").build());
         rule.getBucketToRuleMap().put(RuleBucketName.C.getName(), ruleC);
 
         rule.setDefaultBucketName(RuleBucketName.A.getName());

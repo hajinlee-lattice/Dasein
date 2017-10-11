@@ -41,16 +41,16 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static String accountTableName;
     protected static String contactTableName;
     protected static final String BUCKETED_NOMINAL_ATTR = "TechIndicator_AdobeCreativeSuite";
-    protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr220";
-    protected static final long BUCKETED_YES_IN_CUSTOEMR = 39;
-    protected static final long BUCKETED_NO_IN_CUSTOEMR = 29;
-    protected static final long TOTAL_RECORDS = 506574;
+    protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr354";
+    protected static final long BUCKETED_YES_IN_CUSTOEMR = 10189;
+    protected static final long BUCKETED_NO_IN_CUSTOEMR = 15884;
+    protected static final long TOTAL_RECORDS = 105344;
     protected static final long BUCKETED_NULL_IN_CUSTOEMR = TOTAL_RECORDS - BUCKETED_YES_IN_CUSTOEMR
             - BUCKETED_NO_IN_CUSTOEMR;
 
-    protected static final String ATTR_ACCOUNT_NAME = InterfaceName.CompanyName.name();
+    protected static final String ATTR_ACCOUNT_NAME = "name";
     protected static final String ATTR_ACCOUNT_WEBSITE = InterfaceName.Website.name();
-    protected static final String ATTR_ACCOUNT_CITY = InterfaceName.City.name();
+    protected static final String ATTR_ACCOUNT_CITY = "LDC_City";
 
     protected static final String ATTR_CONTACT_TITLE = InterfaceName.Title.name();
     protected static final String ATTR_CONTACT_COUNTRY = InterfaceName.Country.name();
@@ -66,11 +66,10 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     }
 
     protected Query generateAccountWithSelectedContactQuery(String subSelectAlias) {
-
         AttributeLookup accountIdAttrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_ID);
         Restriction contactRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_EMAIL)
-                .eq("avelayudham@worldbank.org.kb").build();
-        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(1802)
+                .eq("paul.hopkins@accellent.com").build();
+        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq("0012400001DNVOPAA5")
                 .build();
 
         Query innerQuery = Query.builder().from(BusinessEntity.Contact).where(contactRestriction)
