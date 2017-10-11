@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class RestrictionUtils {
@@ -79,28 +80,13 @@ public class RestrictionUtils {
             restriction = new ConcreteRestriction(false, attr, IS_NOT_NULL, null);
             break;
         case EQUAL:
-            validateSingleValue(values);
-            restriction = convertValueComparison(attr, comparisonType, values.get(0));
-            break;
         case NOT_EQUAL:
-            validateSingleValue(values);
-            restriction = convertValueComparison(attr, comparisonType, values.get(0));
-            break;
         case GREATER_THAN:
-            validateSingleValue(values);
-            restriction = convertValueComparison(attr, comparisonType, values.get(0));
-            break;
         case GREATER_OR_EQUAL:
-            validateSingleValue(values);
-            restriction = convertValueComparison(attr, comparisonType, values.get(0));
-            break;
         case LESS_THAN:
-            validateSingleValue(values);
-            restriction = convertValueComparison(attr, comparisonType, values.get(0));
-            break;
         case LESS_OR_EQUAL:
             validateSingleValue(values);
-            restriction = convertValueComparison(attr, comparisonType, values.get(0));
+            restriction = convertUnitaryValueComparison(attr, comparisonType, values.get(0));
             break;
         case IN_RANGE:
         case GTE_AND_LTE:
@@ -108,9 +94,56 @@ public class RestrictionUtils {
         case GTE_AND_LT:
         case GT_AND_LT:
             validateInRangeValues(values);
-            Object min = values.get(0);
-            Object max = values.get(1);
-            switch (comparisonType) {
+            restriction = convertBinaryValueComparison(attr, comparisonType, values.get(0), values.get(1));
+            break;
+        case IN_COLLECTION:
+            restriction = Restriction.builder().let(attr).inCollection(values).build();
+            break;
+        case CONTAINS:
+            restriction = Restriction.builder().let(attr).contains(values.get(0)).build();
+            break;
+        case NOT_CONTAINS:
+            restriction = Restriction.builder().let(attr).notcontains(values.get(0)).build();
+            break;
+        case STARTS_WITH:
+            restriction = Restriction.builder().let(attr).not().startsWith(values.get(0)).build();
+            break;
+        default:
+            throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
+        }
+        return restriction;
+    }
+
+    private static Restriction convertUnitaryValueComparison(Lookup attr, ComparisonType comparisonType, Object value) {
+        Restriction restriction = null;
+        switch (comparisonType) {
+        case EQUAL:
+            restriction = Restriction.builder().let(attr).eq(value).build();
+            break;
+        case NOT_EQUAL:
+            restriction = Restriction.builder().let(attr).neq(value).build();
+            break;
+        case GREATER_THAN:
+            restriction = Restriction.builder().let(attr).gt(value).build();
+            break;
+        case GREATER_OR_EQUAL:
+            restriction = Restriction.builder().let(attr).gte(value).build();
+            break;
+        case LESS_THAN:
+            restriction = Restriction.builder().let(attr).lt(value).build();
+            break;
+        case LESS_OR_EQUAL:
+            restriction = Restriction.builder().let(attr).lte(value).build();
+            break;
+        default:
+            throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
+        }
+        return restriction;
+    }
+
+    private static Restriction convertBinaryValueComparison(Lookup attr, ComparisonType comparisonType, Object min, Object max) {
+        Restriction restriction = null;
+        switch (comparisonType) {
             case GTE_AND_LTE:
                 restriction = Restriction.builder()
                         .and( //
@@ -142,52 +175,11 @@ public class RestrictionUtils {
             default:
                 restriction = Restriction.builder().let(attr).in(min, max).build();
                 break;
-            }
-            break;
-        case IN_COLLECTION:
-            restriction = Restriction.builder().let(attr).inCollection(values).build();
-            break;
-        case CONTAINS:
-            restriction = Restriction.builder().let(attr).contains(values.get(0)).build();
-            break;
-        case NOT_CONTAINS:
-            restriction = Restriction.builder().let(attr).notcontains(values.get(0)).build();
-            break;
-        case STARTS_WITH:
-            restriction = Restriction.builder().let(attr).not().startsWith(values.get(0)).build();
-            break;
-        default:
-            throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
         }
         return restriction;
     }
 
-    private static Restriction convertValueComparison(Lookup attr, ComparisonType comparisonType, Object value) {
-        Restriction restriction = null;
-        switch (comparisonType) {
-        case EQUAL:
-            restriction = Restriction.builder().let(attr).eq(value).build();
-            break;
-        case NOT_EQUAL:
-            restriction = Restriction.builder().let(attr).neq(value).build();
-            break;
-        case GREATER_THAN:
-            restriction = Restriction.builder().let(attr).gt(value).build();
-            break;
-        case GREATER_OR_EQUAL:
-            restriction = Restriction.builder().let(attr).gte(value).build();
-            break;
-        case LESS_THAN:
-            restriction = Restriction.builder().let(attr).lt(value).build();
-            break;
-        case LESS_OR_EQUAL:
-            restriction = Restriction.builder().let(attr).lte(value).build();
-            break;
-        default:
-            throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
-        }
-        return restriction;
-    }
+
 
     private static void validateSingleValue(List<Object> values) {
         if (values == null || values.size() != 1) {
