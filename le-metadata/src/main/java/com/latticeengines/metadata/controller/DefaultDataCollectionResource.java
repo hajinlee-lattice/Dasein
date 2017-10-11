@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.controller;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -131,4 +133,15 @@ public class DefaultDataCollectionResource {
         dataCollectionService.addStats(customerSpace, null, statisticsContainer);
         return SimpleBooleanResponse.successResponse();
     }
+
+    @RequestMapping(value = "/attributegroups", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get mocked metadat of attribute group for company profile and talking point")
+    public List<String> getAttributeGroupsForCompanyProfileAndTalkingPoints(@PathVariable String customerSpace) {
+        List<String> result = Arrays.asList(new String[] { InterfaceName.CompanyName.toString(),
+                InterfaceName.City.toString(), InterfaceName.Country.toString(), InterfaceName.Industry.toString(),
+                InterfaceName.Website.toString(), InterfaceName.YearStarted.toString() });
+        return result;
+    }
+
 }
