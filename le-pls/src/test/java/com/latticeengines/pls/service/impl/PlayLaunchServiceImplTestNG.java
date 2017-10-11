@@ -8,8 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -21,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -52,6 +55,8 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant1;
 
+    private Set<RuleBucketName> bucketsToLaunch2;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
 
@@ -79,10 +84,15 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         playLaunch1.setLaunchState(LaunchState.Launching);
         playLaunch1.setPlay(play);
 
+        bucketsToLaunch2 = new TreeSet<>();
+        bucketsToLaunch2.add(RuleBucketName.A_MINUS);
+        bucketsToLaunch2.add(RuleBucketName.B);
+
         playLaunch2 = new PlayLaunch();
         playLaunch2.setTenant(tenant1);
         playLaunch2.setLaunchState(LaunchState.Launching);
         playLaunch2.setPlay(play);
+        playLaunch2.setBucketsToLaunch(bucketsToLaunch2);
     }
 
     private void cleanupPlayLunches() {
@@ -154,6 +164,8 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         setupSecurityContext(tenant1);
 
         playLaunch1 = playLaunchService.findByLaunchId(playLaunch1.getLaunchId());
+        assertBucketsToLaunch(playLaunch1, new TreeSet<>(Arrays.asList(RuleBucketName.values())));
+
         playLaunch1.setLaunchState(LaunchState.Launched);
         playLaunch1.setAccountsErrored(1L);
         playLaunch1.setAccountsLaunched(5L);
@@ -161,6 +173,8 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         playLaunch1.setContactsLaunched(7L);
 
         playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId());
+        assertBucketsToLaunch(playLaunch2, bucketsToLaunch2);
+
         playLaunch2.setLaunchState(LaunchState.Launched);
         playLaunch2.setAccountsErrored(2L);
         playLaunch2.setAccountsLaunched(10L);
@@ -176,6 +190,17 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         playLaunchMap.put(playLaunch2.getId(), playLaunch2);
 
         Thread.sleep(2000);
+    }
+
+    private void assertBucketsToLaunch(PlayLaunch launch, Set<RuleBucketName> expectedBucketsToLaunch) {
+        Set<RuleBucketName> actualBucketsToLaunch = launch.getBucketsToLaunch();
+        Assert.assertNotNull(actualBucketsToLaunch);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(actualBucketsToLaunch));
+        Assert.assertEquals(actualBucketsToLaunch.size(), expectedBucketsToLaunch.size());
+
+        for (RuleBucketName expectedBucket : expectedBucketsToLaunch) {
+            Assert.assertTrue(actualBucketsToLaunch.contains(expectedBucket));
+        }
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateLaunch" })
