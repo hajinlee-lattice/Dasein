@@ -137,6 +137,10 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("UpdateExpressions")
     private String[] updateExpressions; // for strategy UPDATE
 
+    @JsonProperty("SyncSchemaProp")
+    private boolean syncSchemaProp; // If true, target schema will retain all
+                                    // the properties from base schema
+
     public enum StandardizationStrategy {
         ADD_ID, //
         DOMAIN, //
@@ -496,5 +500,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     public void setUpdateExpressions(String[] updateExpressions) {
         this.updateExpressions = updateExpressions;
     }
+
+    public boolean isSyncSchemaProp() {
+        return syncSchemaProp;
+    }
+
+    public void setSyncSchemaProp(boolean syncSchemaProp) {
+        this.syncSchemaProp = syncSchemaProp;
+    }
+
 
 }

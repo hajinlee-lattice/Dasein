@@ -1,13 +1,19 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DomainValidation;
@@ -17,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowP
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(SourceStandardizationFlow.TRANSFORMER_NAME)
 public class StandardizationTransformer
@@ -396,7 +403,7 @@ public class StandardizationTransformer
                 }
                 for (String discardField : config.getDiscardFields()) {
                     if (StringUtils.isEmpty(discardField)) {
-                        error = "EMpty string or null is not allowed in DiscardFields";
+                        error = "Empty string or null is not allowed in DiscardFields";
                         log.error(error);
                         RequestContext.logError(error);
                         return false;
@@ -482,6 +489,37 @@ public class StandardizationTransformer
                 return false;
             }
         }
+        return true;
+    }
+
+    @Override
+    protected Schema getTargetSchema(Table result, StandardizationFlowParameter parameters,
+            StandardizationTransformerConfig config, List<Schema> baseSchemas) {
+        if (config.isSyncSchemaProp() && CollectionUtils.isNotEmpty(baseSchemas) && baseSchemas.get(0) != null) {
+            String extractPath = result.getExtracts().get(0).getPath();
+            String glob;
+            if (extractPath.endsWith(".avro")) {
+                glob = extractPath;
+            } else if (extractPath.endsWith(File.pathSeparator)) {
+                glob = extractPath + "*.avro";
+            } else {
+                glob = extractPath + File.separator + "*.avro";
+            }
+            Schema parsed = AvroUtils.getSchemaFromGlob(yarnConfiguration, glob);
+            Schema base = baseSchemas.get(0);
+            for (Map.Entry<String, JsonNode> entry : base.getJsonProps().entrySet()) {
+                if (parsed.getProp(entry.getKey()) == null) {
+                    parsed.addProp(entry.getKey(), entry.getValue());
+                }
+            }
+            return parsed;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    protected boolean needBaseAvsc() {
         return true;
     }
 
