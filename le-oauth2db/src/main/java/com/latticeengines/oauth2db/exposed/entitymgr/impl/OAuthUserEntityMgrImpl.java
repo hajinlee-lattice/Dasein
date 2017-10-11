@@ -76,6 +76,11 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     }
 
     @Override
+    public String findAppIdByAccessToken(String token) {
+        return userDao.getAppIdByAccessToken(token);
+    }
+
+    @Override
     public Date getPasswordExpiration(String userId) {
         if (passwordExpirationDays <= 0) {
             log.info(String.format("oauth2.password_expiration_days <= 0.  Disabling expiration for user with id=%s",

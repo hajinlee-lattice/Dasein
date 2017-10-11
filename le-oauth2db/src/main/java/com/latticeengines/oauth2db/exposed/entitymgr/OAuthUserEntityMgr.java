@@ -19,4 +19,6 @@ public interface OAuthUserEntityMgr {
     String findTenantNameByAccessToken(String accessToken);
 
     Date getPasswordExpiration(String userId);
+
+    String findAppIdByAccessToken(String token);
 }

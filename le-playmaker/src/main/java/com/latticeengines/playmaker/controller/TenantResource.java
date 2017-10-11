@@ -68,4 +68,11 @@ public class TenantResource {
     public String getOauthTokenToTenant(HttpServletRequest request) {
         return OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
     }
+
+    @RequestMapping(value = "/oauthtoappid", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get tenant info from OAuth token")
+    public String getAppIdFromOauthToken(HttpServletRequest request) {
+        return OAuth2Utils.getAppId(request, oAuthUserEntityMgr);
+    }
 }

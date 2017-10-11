@@ -16,6 +16,8 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
     private String tenantName = null;
     private RestTemplate restTemplate = null;
     protected OAuth2RestTemplate adminRestTemplate = null;
+    private String clientId = "playmaker";
+    private String appId = "some.app.id";
 
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
@@ -47,7 +49,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
         System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
         tenantName = newTenant.getTenantName();
         adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
-                newTenant.getTenantPassword(), "playmaker");
+                newTenant.getTenantPassword(), clientId, appId);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
@@ -71,6 +73,14 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
     }
 
     @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant")
+    public void testGetAppIdFromToken() {
+        String url = apiHostPort + "/playmaker/tenants/oauthtoappid";
+        String appIdViaToken = adminRestTemplate.getForObject(url, String.class);
+        Assert.assertNotNull(appIdViaToken);
+        Assert.assertEquals(appIdViaToken, appId);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testGetAppIdFromToken")
     public void deleteTenantWithTenantName() {
         String url = apiHostPort + "/playmaker/tenants/" + tenant.getTenantName();
         adminRestTemplate.delete(url);

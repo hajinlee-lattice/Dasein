@@ -14,4 +14,5 @@ public interface OAuthUserDao {
 
     OAuthUser getByAccessToken(String token);
 
+    String getAppIdByAccessToken(String token);
 }

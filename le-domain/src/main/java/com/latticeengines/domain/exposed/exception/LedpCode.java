@@ -378,6 +378,8 @@ public enum LedpCode {
     LEDP_23002("Access token does not have token key!"), //
     LEDP_23003("Failed to get tenant!"), //
     LEDP_23004("Failed to get tenant from DB!"), //
+    LEDP_23005("Failed to find Authentication for the given access token"), //
+    LEDP_23006("Failed to find app_id for the given access token"), //
 
     // le-upgrade
     LEDP_24000("Yarn operation exception: {0}"), //

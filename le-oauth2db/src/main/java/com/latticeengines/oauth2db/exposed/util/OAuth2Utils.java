@@ -97,6 +97,23 @@ public class OAuth2Utils {
         }
     }
 
+    public static String getAppId(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+        try {
+            String token = OAuth2Utils.extractHeaderToken(request);
+            if (token == null) {
+                throw new LedpException(LedpCode.LEDP_23001);
+            }
+            String app_id = oAuthUserEntityMgr.findAppIdByAccessToken(token);
+            if (app_id == null || app_id.isEmpty()) {
+                throw new LedpException(LedpCode.LEDP_23006);
+            }
+            return app_id;
+        } catch (Exception ex) {
+            log.error("Unable to find app_id");
+            throw new LedpException(LedpCode.LEDP_23006, ex);
+        }
+    }
+
     public static CustomerSpace getCustomerSpace(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
         return CustomerSpace.parse(getTenantName(request, oAuthUserEntityMgr));
     }
