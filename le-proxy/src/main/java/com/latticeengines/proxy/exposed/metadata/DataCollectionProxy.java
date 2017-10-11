@@ -12,9 +12,11 @@ import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -82,6 +84,15 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         return get("getTable", url, Table.class);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List<MetadataSegment> getSegments(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/segments",
+                shortenCustomerSpace(customerSpace));
+
+        List raw = get("getSegments", url, List.class);
+        return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
     public void resetTable(String customerSpace, TableRoleInCollection tableRole) {
