@@ -386,7 +386,8 @@ angular.module('lp.ratingsengine')
             url: '/pls/ratingengines/coverage',
             data: {
                 segmentIds: segmentIds
-            }
+            },
+            cache: true
         }).then(function(response) {
             deferred.resolve(response.data);
         });
@@ -400,7 +401,8 @@ angular.module('lp.ratingsengine')
         $http({
             method: 'POST',
             url: '/pls/ratingengines/coverage',
-            data: CoverageRequest
+            data: CoverageRequest,
+            cache: true
         }).then(function(response) {
             deferred.resolve(response.data);
         });

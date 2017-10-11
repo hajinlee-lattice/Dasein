@@ -283,7 +283,7 @@ angular.module('common.datacloud.query.builder', [
                 var segment = { 
                     'free_form_text_search': "",
                     'page_filter': {
-                        'num_rows': 20,
+                        'num_rows': 10,
                         'row_offset': 0
                     }
                 };

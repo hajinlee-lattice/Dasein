@@ -10,9 +10,10 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         segments: Segments,
         stateParams: $stateParams,
         currentPage: 1,
-        pageSize: 15,
+        pageSize: 10,
         block_user: true,
-        loadingSupplementaryData: true
+        loadingSupplementaryData: true,
+        showPagination: true
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -23,7 +24,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
 
     $scope.$watch('vm.currentPage', function(newValue, oldValue) {
         if(vm.currentPage != oldValue) {
-        	vm.filteredSegments = vm.segments.slice((15 * (vm.currentPage - 1)), (15 * vm.currentPage));
+        	vm.filteredSegments = vm.segments.slice((10 * (vm.currentPage - 1)), (10 * vm.currentPage));
         	
         	console.log(vm.filteredSegments);
 
@@ -36,8 +37,12 @@ angular.module('lp.ratingsengine.wizard.segment', [])
 
     vm.init = function() {
 
-    	vm.filteredSegments = vm.segments.slice(0, 15);
+    	vm.filteredSegments = vm.segments.slice(0, 10);
     	vm.getCounts(vm.filteredSegments);
+
+        if(vm.filteredSegments.length < 10){
+            vm.showPagination = false;
+        }
 
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){

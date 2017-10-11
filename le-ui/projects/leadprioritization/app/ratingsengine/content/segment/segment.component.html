@@ -64,7 +64,8 @@
                 </ul>
                 <pd-pagination-controls
                     current="vm.currentPage"
-                    max="filteredList.length / vm.pageSize">
+                    max="filteredList.length / vm.pageSize"
+                    ng-if="vm.showPagination">
                 </pd-pagination-controls>
 
             </div><!-- End .content-body -->

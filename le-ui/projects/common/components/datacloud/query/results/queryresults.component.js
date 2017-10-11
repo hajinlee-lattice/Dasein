@@ -24,7 +24,7 @@ angular.module('common.datacloud.query.results', [
         accountRestriction: QueryStore.getAccountRestriction(),
         contactRestriction: QueryStore.getContactRestriction(),
         current: 1,
-        pagesize: 15,
+        pagesize: 10,
         showAccountPagination: false,
         showContactPagination: false,
         search: '',
@@ -72,7 +72,8 @@ angular.module('common.datacloud.query.results', [
                 });
             } else {
                 QueryStore.setContacts(dataQuery).then(function(response) {
-                    vm.contact = response.data;
+                    console.log(response.data);
+                    vm.contacts = response.data;
                     vm.loading = false;
                 });
             }
@@ -119,7 +120,7 @@ angular.module('common.datacloud.query.results', [
                 vm.counts.accounts.value = data;
                 vm.counts.accounts.loading = false;
 
-                if(vm.counts.accounts.value > 15){
+                if(vm.counts.accounts.value > 10){
                     vm.showAccountPagination = true;
                     vm.showContactPagination = false;
                 }
@@ -130,7 +131,7 @@ angular.module('common.datacloud.query.results', [
                 vm.counts.contacts.value = data;
                 vm.counts.contacts.loading = false;
 
-                if(vm.counts.contacts.value > 15){
+                if(vm.counts.contacts.value > 10){
                     vm.showAccountPagination = false;
                     vm.showContactPagination = true;
                 }
@@ -139,10 +140,10 @@ angular.module('common.datacloud.query.results', [
 
 
 
-        if((vm.page === 'Accounts' || vm.page === 'Available Targets') && vm.counts.accounts.value > 15){
+        if((vm.page === 'Accounts' || vm.page === 'Available Targets') && vm.counts.accounts.value > 10){
             vm.showAccountPagination = true;
             vm.showContactPagination = false;
-        } else if (vm.page === 'Contacts' && vm.counts.contacts.value > 15){
+        } else if (vm.page === 'Contacts' && vm.counts.contacts.value > 10){
             vm.showAccountPagination = false;
             vm.showContactPagination = true;
         }

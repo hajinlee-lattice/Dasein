@@ -432,7 +432,7 @@ angular
                             'contact_restriction': contactRestriction,
                             'preexisting_segment_name': segmentName,
                             'page_filter': {
-                                'num_rows': 15,
+                                'num_rows': 10,
                                 'row_offset': 0
                             }
                         };
@@ -447,7 +447,7 @@ angular
                                 'contact_restriction': segment.contact_restriction,
                                 'preexisting_segment_name': segmentName,
                                 'page_filter': {
-                                    'num_rows': 15,
+                                    'num_rows': 10,
                                     'row_offset': 0
                                 }
                             };
@@ -498,7 +498,7 @@ angular
                                     'contact_restriction': contactRestriction,
                                     'preexisting_segment_name': segmentName,
                                     'page_filter': {
-                                        'num_rows': 15,
+                                        'num_rows': 10,
                                         'row_offset': 0
                                     }
                                 };
@@ -513,7 +513,7 @@ angular
                                         'contact_restriction': segment.contact_restriction,
                                         'preexisting_segment_name': segmentName,
                                         'page_filter': {
-                                            'num_rows': 15,
+                                            'num_rows': 10,
                                             'row_offset': 0
                                         }
                                     };

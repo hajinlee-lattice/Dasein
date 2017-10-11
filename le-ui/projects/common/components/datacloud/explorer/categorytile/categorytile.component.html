@@ -66,6 +66,7 @@
                             'ignore-ngclick': vm.section !== 'segment.analysis'
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
+
                     <div class="column label" title="{{attribute.DisplayName}}">
                         <input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" />
                         

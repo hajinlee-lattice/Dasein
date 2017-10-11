@@ -23,6 +23,9 @@ angular.module('common.datacloud.analysistabs', [
     });
 
     if ($state.current.name === 'home.segment.accounts') {
+
+        console.log($stateParams);
+
         $rootScope.$broadcast('header-back', { 
             path: '^home.segment.accounts',
             displayName: vm.segment,

@@ -361,7 +361,7 @@ angular.module('common.datacloud.query.service',[
                     'account_restriction': accountRestriction,
                     'contact_restriction': contactRestriction,
                     'page_filter': {
-                        'num_rows': 20,
+                        'num_rows': 10,
                         'row_offset': 0
                     }
                 };

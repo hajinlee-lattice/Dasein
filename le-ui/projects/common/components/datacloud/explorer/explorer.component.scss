@@ -1548,6 +1548,25 @@
             background-color: #aac43b;
         }
     }
+    .category-contact-attributes, .category-my-attributes {
+        &.color {
+            color: #457EBA;
+        }
+        &.border {
+            border-color: #457EBA;
+        }
+        &.border-top {
+            border-top-color: #457EBA;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(69,126,186);
+            border-color: #457EBA;
+        }
+        &.background-color {
+            background-color: #457EBA;
+        }
+    }
     .disabled-grayout {
         .color {
             color: gray;
