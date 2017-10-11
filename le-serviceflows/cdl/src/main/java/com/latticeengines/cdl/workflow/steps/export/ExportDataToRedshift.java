@@ -178,6 +178,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                     // create for active version
                     targetVersion = inactiveVersion.complement();
                 } else {
+                    log.info("Mering to the the existing table " + oldTable.getName());
                     goodName = oldTable.getName();
                 }
             }

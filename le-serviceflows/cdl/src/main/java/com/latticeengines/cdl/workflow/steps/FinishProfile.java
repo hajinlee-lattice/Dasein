@@ -65,6 +65,10 @@ public class FinishProfile extends BaseWorkflowStep<CalculateStatsStepConfigurat
                 log.info(role + " table exists in version " + activeVersion + " but not in version " + inactiveVersion
                         + ", registering it in " + inactiveVersion + " as well.");
                 dataCollectionProxy.upsertTable(customerSpace, activeTxn.getName(), role, inactiveVersion);
+            } else if (!activeTxn.getName().equals(inactiveTxn.getName())) {
+                throw new IllegalStateException("Both versions have different " + role + " table: "
+                        + activeTxn.getName() + " for " + activeTxn + " while " + inactiveTxn.getName() + " for "
+                        + inactiveTxn + ". Please check and unify the correct latest " + role + " table.");
             } else {
                 log.info(role + " does not exists in either version. Skip copying.");
             }
