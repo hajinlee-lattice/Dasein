@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class SSLUtils {
 
     private static final Logger log = LoggerFactory.getLogger(SSLUtils.class);
-    private static ThreadLocal<Boolean> sslOff = new ThreadLocal<>();
+    private static ThreadLocal<Boolean> verifySSLHostName = new ThreadLocal<>();
 
     public static final SSLConnectionSocketFactory SSL_BLIND_SOCKET_FACTORY = newSslBlindSocketFactory();
     private static final HostnameVerifier DEFAULT_HOST_NAME_VERIFIER = HttpsURLConnection.getDefaultHostnameVerifier();
@@ -30,12 +30,12 @@ public class SSLUtils {
     }
 
     private static void switchSSLNameVerification(boolean on) {
-        if (sslOff.get() == null || !sslOff.get().equals(on)) {
+        if (verifySSLHostName.get() == null || !verifySSLHostName.get().equals(on)) {
             String action = on ? "on" : "off";
             try {
                 HostnameVerifier verifier = on ? DEFAULT_HOST_NAME_VERIFIER : BLIND_HOST_NAME_VERIFIER;
                 HttpsURLConnection.setDefaultHostnameVerifier(verifier);
-                sslOff.set(on);
+                verifySSLHostName.set(on);
                 log.info("Turned " + action + " ssl for current thread: " + Thread.currentThread().getName());
             } catch (Exception e) {
                 log.warn("Failed to turn " + action + " ssl for thread" + Thread.currentThread().getName());
