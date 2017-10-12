@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -15,6 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -28,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
@@ -93,11 +97,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Value("${datacloud.dnb.dispatcher.frequency.sec:30}")
     private int dispatcherFrequency;
 
-    @Value("${datacloud.dnb.fetcher.frequency.sec:20}")
-    private int fetcherFrequency;
-
     @Value("${datacloud.dnb.status.frequency:120}")
     private int statusFrequency;
+
+    @Value("${datacloud.dnb.batch.fetcher.num:4}")
+    private int batchFetchers;
 
     @Value("${datacloud.dnb.bulk.redirect.realtime.threshold:100}")
     private int bulkToRealtimeThreshold;
@@ -135,8 +139,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     private final List<DnBBatchMatchContext> unsubmittedBatches = Collections.synchronizedList(new ArrayList<>());
     @SuppressWarnings("unchecked")
     private final List<DnBBatchMatchContext> submittedBatches = Collections.synchronizedList(new ArrayList<>());
-    @SuppressWarnings("unchecked")
-    private final List<DnBBatchMatchContext> finishedBatches = Collections.synchronizedList(new ArrayList<>());
+    private final Queue<DnBBatchMatchContext> finishedBatches = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean batchFetchersInitiated = new AtomicBoolean(false);
 
     @Autowired
     @Qualifier("dnbBatchScheduler")
@@ -145,10 +149,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Autowired
     @Qualifier("dnbBatchScheduler")
     private ThreadPoolTaskScheduler dnbTimerStatus;
-
-    @Autowired
-    @Qualifier("dnbBatchScheduler")
-    private ThreadPoolTaskScheduler dnbTimerFetcher;
 
     @PostConstruct
     public void postConstruct() {
@@ -172,14 +172,24 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
         }, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(statusFrequency)),
                 TimeUnit.SECONDS.toMillis(statusFrequency));
+    }
 
-        dnbTimerFetcher.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                dnbBatchFetchResult();
+    private void initExecutors() {
+        synchronized (batchFetchersInitiated) {
+            if (batchFetchersInitiated.get()) {
+                // do nothing if fetcher executors are already started
+                return;
             }
-        }, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(fetcherFrequency)),
-                TimeUnit.SECONDS.toMillis(fetcherFrequency));
+
+            log.info("Initialize DnB batch fetcher executors.");
+            ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("dnb-batch-fetcher", batchFetchers);
+
+            for (int i = 0; i < batchFetchers; i++) {
+                executor.submit(new BatchFetcher());
+            }
+
+            batchFetchersInitiated.set(true);
+        }
     }
 
     @PreDestroy
@@ -398,6 +408,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     }
 
     private void dnbBatchCheckStatus() {
+        if (!batchFetchersInitiated.get()) {
+            initExecutors();
+        }
         try {
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
@@ -420,7 +433,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     DnBBatchMatchContext submittedBatch = iter.next();
                     switch (submittedBatch.getDnbCode()) {
                     case OK:
-                        finishedBatches.add(submittedBatch);
+                        finishedBatches.offer(submittedBatch);
+                        synchronized (finishedBatches) {
+                            finishedBatches.notify();
+                        }
                         iter.remove();
                         break;
                     case SUBMITTED:
@@ -468,49 +484,49 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         }
     }
 
-    private void dnbBatchFetchResult() {
-        try {
-            // Failed batch requests to process
-            List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
-            // Success batch requests to process
-            List<DnBBatchMatchContext> successBatches = new ArrayList<>();
-            if (finishedBatches.isEmpty()) {
-                return;
-            }
-            synchronized (finishedBatches) {
-                Iterator<DnBBatchMatchContext> iter = finishedBatches.iterator();
-                while (iter.hasNext()) {
-                    DnBBatchMatchContext finishedBatch = iter.next();
-                    try {
-                        finishedBatch = dnbBulkLookupFetcher.getResult(finishedBatch);
-                    } catch (Exception ex) {
-                        log.error(String.format(
-                                "Fail to poll match result for request %s from DnB bulk matchc service: %s",
-                                finishedBatch.getServiceBatchId(), ex.getMessage()));
-                        finishedBatch.setDnbCode(DnBReturnCode.UNKNOWN);
+    private class BatchFetcher implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                DnBBatchMatchContext finishedBatch = null;
+                synchronized (finishedBatches) {
+                    while (finishedBatches.isEmpty()) {
+                        try {
+                            finishedBatches.wait();
+                        } catch (InterruptedException e) {
+                            log.error(String.format("Encounter InterruptedException in DnB batch fetcher: %s",
+                                    e.getMessage()));
+                        }
                     }
-                    switch (finishedBatch.getDnbCode()) {
-                    case OK:
-                        successBatches.add(finishedBatch);
-                        iter.remove();
-                        break;
-                    default:
-                        failedBatches.add(finishedBatch);
-                        iter.remove();
-                        break;
-                    }
+                    finishedBatch = finishedBatches.poll();
+                }
+                if (finishedBatch != null) {
+                    dnbBatchFetchResult(finishedBatch);
                 }
             }
-            // Process failed batch requests
-            for (DnBBatchMatchContext batchContext : failedBatches) {
-                processBulkMatchResult(batchContext, false, true);
+        }
+    }
+
+    private void dnbBatchFetchResult(DnBBatchMatchContext batch) {
+        try {
+            try {
+                batch = dnbBulkLookupFetcher.getResult(batch);
+            } catch (Exception ex) {
+                log.error(String.format("Fail to poll match result for request %s from DnB bulk matchc service: %s",
+                        batch.getServiceBatchId(), ex.getMessage()));
+                batch.setDnbCode(DnBReturnCode.UNKNOWN);
             }
-            // Process success batch requests
-            for (DnBBatchMatchContext batchContext : successBatches) {
-                processBulkMatchResult(batchContext, true, true);
+            switch (batch.getDnbCode()) {
+            case OK:
+                processBulkMatchResult(batch, true, true);
+                break;
+            default:
+                processBulkMatchResult(batch, false, true);
+                break;
             }
         } catch (Exception ex) {
             log.error("Exception in fetching dnb batch request result", ex);
+            processBulkMatchResult(batch, false, true);
         }
     }
 
