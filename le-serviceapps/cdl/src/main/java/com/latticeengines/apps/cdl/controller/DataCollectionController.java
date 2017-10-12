@@ -41,7 +41,7 @@ public class DataCollectionController {
         } else {
             status = collectionMgrSvc.resetEntity(customerSpaceString, entity);
         }
-        if (status = true) {
+        if (status) {
             return ResponseDocument.successResponse("Success");
         } else {
             return ResponseDocument.failedResponse(new RuntimeException("Failed to reset"));
