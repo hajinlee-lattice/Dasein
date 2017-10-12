@@ -88,7 +88,7 @@ public class TestPlayCreationHelper {
         if (tenant == null) {
             System.out.println("Creating new tenant: " + tenantIdentifier);
             tenantCleanupAllowed = true;
-            tenant = deploymentTestBed.bootstrapForProduct(tenantIdentifier, LatticeProduct.LPA3);
+            tenant = deploymentTestBed.bootstrapForProduct(tenantIdentifier, LatticeProduct.CG);
         } else {
             deploymentTestBed.loginAD();
             deploymentTestBed.getTestTenants().add(tenant);
@@ -137,20 +137,17 @@ public class TestPlayCreationHelper {
                 createBucketRestriction(1, ComparisonType.EQUAL, //
                         BusinessEntity.Account, "PREMIUM_MARKETING_PRESCREEN");
         Restriction b3 = //
-                createBucketRestriction("CALIFORNIA", ComparisonType.EQUAL, //
-                        BusinessEntity.Account, "LDC_State");
-        Restriction b4 = //
                 createBucketRestriction(2, ComparisonType.LESS_THAN, //
                         BusinessEntity.Account, "CloudTechnologies_ContactCenterManagement");
-        Restriction b5 = //
+        Restriction b4 = //
                 createBucketRestriction(4, ComparisonType.LESS_THAN, //
                         BusinessEntity.Account, "BusinessTechnologiesSsl");
-        Restriction b6 = //
+        Restriction b5 = //
                 createBucketRestriction(3, ComparisonType.LESS_THAN, //
                         BusinessEntity.Account, "BusinessTechnologiesAnalytics");
 
         Restriction innerLogical1 = LogicalRestriction.builder()//
-                .and(Arrays.asList(b1, b2, b3, b4, b5, b6)).build();
+                .and(Arrays.asList(b1, b2, b3, b4, b5)).build();
         Restriction innerLogical2 = LogicalRestriction.builder()//
                 .or(new ArrayList<>()).build();
 

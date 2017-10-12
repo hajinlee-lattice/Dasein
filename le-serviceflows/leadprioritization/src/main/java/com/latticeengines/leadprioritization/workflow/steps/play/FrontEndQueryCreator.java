@@ -168,7 +168,6 @@ public class FrontEndQueryCreator {
                         InterfaceName.LDC_Name.name()));
 
         contactLookupFields = new HashMap<>();
-        contactLookupFields.put(BusinessEntity.Account, Arrays.asList(InterfaceName.AccountId.name()));
         contactLookupFields.put(BusinessEntity.Contact,
                 Arrays.asList(InterfaceName.AccountId.name(), //
                         InterfaceName.ContactId.name(), //

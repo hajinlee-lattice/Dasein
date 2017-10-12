@@ -6,7 +6,9 @@ import static org.mockito.Mockito.doNothing;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
@@ -153,6 +155,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
+        AtomicInteger contactCounts = new AtomicInteger();
 
         recommendations.stream().forEach(rec -> {
             Assert.assertNotNull(rec.getAccountId());
@@ -167,7 +170,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
             Assert.assertEquals(rec.getPlayId(), play.getName());
             Assert.assertEquals(rec.getLaunchId(), playLaunch.getId());
+            if (CollectionUtils.isNotEmpty(rec.getExpandedContacts())) {
+                contactCounts.addAndGet(rec.getExpandedContacts().size());
+            }
         });
+
+        // TODO - enable following check once PLS-5320 is fixed
+        // Assert.assertTrue(contactCounts.get() > 0);
     }
 
     private PlayLaunchInitStepConfiguration createConf(CustomerSpace customerSpace, String playName,
