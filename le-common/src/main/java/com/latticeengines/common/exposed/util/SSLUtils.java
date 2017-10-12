@@ -45,7 +45,8 @@ public class SSLUtils {
 
     private static SSLConnectionSocketFactory newSslBlindSocketFactory() {
         try {
-            return new SSLConnectionSocketFactory((SSLSocketFactory) SSLSocketFactory.getDefault(), BLIND_HOST_NAME_VERIFIER);
+            SSLSocketFactory sf = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            return new SSLConnectionSocketFactory(sf, BLIND_HOST_NAME_VERIFIER);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create a trust-everything connection manager ", e);
         }
