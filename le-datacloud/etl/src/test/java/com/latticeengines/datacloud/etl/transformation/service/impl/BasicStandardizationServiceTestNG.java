@@ -97,8 +97,10 @@ public class BasicStandardizationServiceTestNG
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] updateFields = { "CHIEF_EXECUTIVE_OFFICER_NAME" };
         String[] updateExpressions = { "ID == 2 ? \"CEO2Fixed\" : CHIEF_EXECUTIVE_OFFICER_NAME" };
+        String[][] updateInputFields = { { "ID", "CHIEF_EXECUTIVE_OFFICER_NAME" } };
         conf.setUpdateFields(updateFields);
         conf.setUpdateExpressions(updateExpressions);
+        conf.setUpdateInputFields(updateInputFields);
         conf.setSyncSchemaProp(true);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.UPDATE };
         conf.setSequence(sequence);

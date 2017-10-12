@@ -134,7 +134,8 @@ public class SourceStandardizationFlow
                 source = checksum(source, parameters.getChecksumExcludeFields(), parameters.getChecksumField());
                 break;
             case UPDATE:
-                source = update(source, parameters.getUpdateFields(), parameters.getUpdateExpressions());
+                source = update(source, parameters.getUpdateFields(), parameters.getUpdateExpressions(),
+                        parameters.getUpdateInputFields());
                 break;
             default:
                 throw new UnsupportedOperationException(
@@ -145,13 +146,14 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    private Node update(Node source, String[] updateFields, String[] updateExpressions) {
+    private Node update(Node source, String[] updateFields, String[] updateExpressions, String[][] updateInputFields) {
         for (int i = 0; i < updateFields.length; i++) {
             FieldMetadata fm = new FieldMetadata("_UPDATE_NEW_" + updateFields[i],
                     source.getSchema(updateFields[i]).getJavaType());
-            source = source.apply(updateExpressions[i], new FieldList(source.getFieldNames()), fm)
+            source = source.apply(updateExpressions[i], new FieldList(updateInputFields[i]), fm)
                     .discard(new FieldList(updateFields[i]))
                     .rename(new FieldList("_UPDATE_NEW_" + updateFields[i]), new FieldList(updateFields[i]));
+            source = source.retain(new FieldList(source.getFieldNames()));
         }
         return source;
     }

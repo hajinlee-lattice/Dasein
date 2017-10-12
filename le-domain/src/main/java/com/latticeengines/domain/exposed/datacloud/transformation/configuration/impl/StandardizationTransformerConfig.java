@@ -132,7 +132,12 @@ public class StandardizationTransformerConfig extends TransformerConfig {
                                   // checksum
 
     @JsonProperty("UpdateFields")
-    private String[] updateFields; // for strategy UPDATE
+    private String[] updateFields; // for strategy UPDATE, target fields to
+                                   // update
+
+    @JsonProperty("UpdateInputFields")
+    private String[][] updateInputFields; // for strategy UPDATE, fields used to
+                                          // update target fields
 
     @JsonProperty("UpdateExpressions")
     private String[] updateExpressions; // for strategy UPDATE
@@ -499,6 +504,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setUpdateExpressions(String[] updateExpressions) {
         this.updateExpressions = updateExpressions;
+    }
+
+    public String[][] getUpdateInputFields() {
+        return updateInputFields;
+    }
+
+    public void setUpdateInputFields(String[][] updateInputFields) {
+        this.updateInputFields = updateInputFields;
     }
 
     public boolean isSyncSchemaProp() {

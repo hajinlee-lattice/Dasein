@@ -460,25 +460,37 @@ public class StandardizationTransformer
                 break;
             case UPDATE:
                 if (config.getUpdateFields() == null || config.getUpdateFields().length == 0
-                        || config.getUpdateExpressions() == null || config.getUpdateExpressions().length == 0) {
-                    error = "UpdateFields and UpdateExpressions cannot be empty";
+                        || config.getUpdateExpressions() == null || config.getUpdateExpressions().length == 0
+                        || config.getUpdateInputFields() == null || config.getUpdateInputFields().length == 0) {
+                    error = "UpdateFields, UpdateInputFields and UpdateExpressions cannot be empty";
                     log.error(error);
                     RequestContext.logError(error);
                     return false;
                 }
-                if (config.getUpdateFields().length != config.getUpdateExpressions().length) {
-                    error = "UpdateFields and UpdateExpressions are not in same size";
+                if (config.getUpdateFields().length != config.getUpdateExpressions().length
+                        || config.getUpdateExpressions().length != config.getUpdateInputFields().length) {
+                    error = "UpdateFields, UpdateInputFields and UpdateExpressions are not in same size";
                     log.error(error);
                     RequestContext.logError(error);
                     return false;
                 }
                 for (int i = 0; i < config.getUpdateFields().length; i++) {
                     if (StringUtils.isBlank(config.getUpdateFields()[i])
-                            || StringUtils.isBlank(config.getUpdateExpressions()[i])) {
-                        error = "UpdateFields and UpdateExpressions cannot be empty strings";
+                            || StringUtils.isBlank(config.getUpdateExpressions()[i])
+                            || config.getUpdateInputFields()[i] == null
+                            || config.getUpdateInputFields()[i].length == 0) {
+                        error = "UpdateFields, UpdateInputFields and UpdateExpressions cannot be empty or empty strings";
                         log.error(error);
                         RequestContext.logError(error);
                         return false;
+                    }
+                    for (String updateInputField : config.getUpdateInputFields()[i]) {
+                        if (StringUtils.isBlank(updateInputField)) {
+                            error = "UpdateInputFields cannot be empty strings";
+                            log.error(error);
+                            RequestContext.logError(error);
+                            return false;
+                        }
                     }
                 }
                 break;
@@ -577,6 +589,7 @@ public class StandardizationTransformer
         parameters.setChecksumField(config.getChecksumField());
         parameters.setUpdateFields(config.getUpdateFields());
         parameters.setUpdateExpressions(config.getUpdateExpressions());
+        parameters.setUpdateInputFields(config.getUpdateInputFields());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 
