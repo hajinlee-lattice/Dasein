@@ -175,8 +175,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             }
         });
 
-        // TODO - enable following check once PLS-5320 is fixed
-        // Assert.assertTrue(contactCounts.get() > 0);
+        Assert.assertTrue(contactCounts.get() > 0);
     }
 
     private PlayLaunchInitStepConfiguration createConf(CustomerSpace customerSpace, String playName,
