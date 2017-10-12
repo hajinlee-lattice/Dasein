@@ -1,10 +1,8 @@
 package com.latticeengines.pls.dao.impl;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -201,11 +199,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             Long max, Long endTimestamp, Session session, Class<PlayLaunch> entityClz, String queryStr) {
         queryStr += String.format(
                 " FROM %s "//
-                        + " WHERE UNIX_TIMESTAMP(created) >= :startTimestamp ", //
+                        + " WHERE created >= :startTimestamp ", //
                 entityClz.getSimpleName());
 
         if (endTimestamp != null) {
-            queryStr += " AND UNIX_TIMESTAMP(created) <= :endTimestamp  ";
+            queryStr += " AND created <= :endTimestamp  ";
         }
 
         if (playId != null) {
@@ -226,12 +224,12 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             query.setMaxResults(max.intValue());
         }
 
-        query.setBigInteger("startTimestamp", //
-                toCompatibleUnixTimestamp(startTimestamp));
+        query.setTimestamp("startTimestamp", //
+                toTimestamp(startTimestamp));
 
         if (endTimestamp != null) {
-            query.setBigInteger("endTimestamp", //
-                    toCompatibleUnixTimestamp(endTimestamp));
+            query.setTimestamp("endTimestamp", //
+                    toTimestamp(endTimestamp));
         }
 
         if (playId != null) {
@@ -248,17 +246,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query;
     }
 
-    private BigInteger toCompatibleUnixTimestamp(Long timestamp) {
+    private Date toTimestamp(Long timestamp) {
         if (timestamp == null || timestamp < 0) {
             timestamp = 0L;
         }
 
-        long timestampViaDateConversion = //
-                TimeUnit.SECONDS.convert( //
-                        new Date(timestamp).getTime(), TimeUnit.MILLISECONDS);
-
-        // hibernate UNIX_TIMESTAMP converts date in seconds therefore
-        // converting query timestamp to seconds
-        return new BigInteger(new Long(timestampViaDateConversion).toString());
+        return new Date(timestamp);
     }
 }
