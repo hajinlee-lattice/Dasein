@@ -1,9 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -259,10 +259,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     public Set<RuleBucketName> getBucketsToLaunch() {
         if (StringUtils.isNotBlank(this.bucketsToLaunch)) {
             List<?> attrListIntermediate = JsonUtils.deserialize(this.bucketsToLaunch, List.class);
-            return new HashSet<>(JsonUtils.convertList(attrListIntermediate, RuleBucketName.class));
+            return new TreeSet<>(JsonUtils.convertList(attrListIntermediate, RuleBucketName.class));
         }
 
-        return new HashSet<>();
+        return new TreeSet<>();
     }
 
     public void setBucketsToLaunch(Set<RuleBucketName> bucketsToLaunch) {

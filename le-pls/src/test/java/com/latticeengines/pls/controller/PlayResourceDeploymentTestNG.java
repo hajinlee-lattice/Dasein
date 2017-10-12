@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,8 +35,6 @@ import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -288,8 +287,17 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playLaunch.getCreated());
         Assert.assertNotNull(playLaunch.getApplicationId());
         Assert.assertNotNull(playLaunch.getLaunchState());
-        Assert.assertNotNull(playLaunch.getBucketsToLaunch());
+        assertBucketsToLaunch(playLaunch.getBucketsToLaunch());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
+    }
+
+    private void assertBucketsToLaunch(Set<RuleBucketName> bucketsToLaunch) {
+        Assert.assertNotNull(playLaunch.getBucketsToLaunch());
+        Set<RuleBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RuleBucketName.values()));
+        Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
+        for (RuleBucketName bucket : bucketsToLaunch) {
+            Assert.assertTrue(defaultBucketsToLaunch.contains(bucket));
+        }
     }
 
     private Play createDefaultPlay() {
@@ -338,10 +346,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         return playLaunch;
     }
 
-    @SuppressWarnings("unchecked")
     private PlayLaunch createDefaultPlayLaunch() {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(new TreeSet<>(Arrays.asList(RuleBucketName.values())));
+        playLaunch.setBucketsToLaunch(null);
         return playLaunch;
     }
 

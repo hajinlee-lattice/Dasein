@@ -55,6 +55,7 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant1;
 
+    private Set<RuleBucketName> bucketsToLaunch1;
     private Set<RuleBucketName> bucketsToLaunch2;
 
     @BeforeClass(groups = "functional")
@@ -79,10 +80,13 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.findByName(NAME);
 
+        bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RuleBucketName.values()));
+
         playLaunch1 = new PlayLaunch();
         playLaunch1.setTenant(tenant1);
         playLaunch1.setLaunchState(LaunchState.Launching);
         playLaunch1.setPlay(play);
+        playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
 
         bucketsToLaunch2 = new TreeSet<>();
         bucketsToLaunch2.add(RuleBucketName.A_MINUS);
@@ -164,7 +168,7 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         setupSecurityContext(tenant1);
 
         playLaunch1 = playLaunchService.findByLaunchId(playLaunch1.getLaunchId());
-        assertBucketsToLaunch(playLaunch1, new TreeSet<>(Arrays.asList(RuleBucketName.values())));
+        assertBucketsToLaunch(playLaunch1, bucketsToLaunch1);
 
         playLaunch1.setLaunchState(LaunchState.Launched);
         playLaunch1.setAccountsErrored(1L);

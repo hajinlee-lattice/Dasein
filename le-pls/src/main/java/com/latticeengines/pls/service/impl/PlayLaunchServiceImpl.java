@@ -2,10 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,11 +14,8 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.pls.entitymanager.PlayLaunchEntityMgr;
 import com.latticeengines.pls.service.PlayLaunchService;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
@@ -30,13 +24,6 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public void create(PlayLaunch entity) {
-        if (CollectionUtils.isEmpty(entity.getBucketsToLaunch())) {
-            // if no buckets are specified then we default it to all buckets
-            @SuppressWarnings("unchecked")
-            Set<RuleBucketName> defaultBucketsToLaunch = //
-                    new TreeSet<>(Arrays.asList(RuleBucketName.values()));
-            entity.setBucketsToLaunch(defaultBucketsToLaunch);
-        }
         playLaunchEntityMgr.create(entity);
     }
 

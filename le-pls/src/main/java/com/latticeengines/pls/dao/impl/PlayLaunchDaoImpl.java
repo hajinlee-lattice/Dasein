@@ -226,11 +226,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
 
         query.setBigInteger("startTimestamp", //
-                new BigInteger(toCompatibleUnixTimestamp(startTimestamp).toString()));
+                toCompatibleUnixTimestamp(startTimestamp));
 
         if (endTimestamp != null) {
             query.setBigInteger("endTimestamp", //
-                    new BigInteger(toCompatibleUnixTimestamp(endTimestamp).toString()));
+                    toCompatibleUnixTimestamp(endTimestamp));
         }
 
         if (playId != null) {
@@ -247,12 +247,12 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query;
     }
 
-    private Long toCompatibleUnixTimestamp(Long timestamp) {
+    private BigInteger toCompatibleUnixTimestamp(Long timestamp) {
         if (timestamp == null || timestamp < 0) {
             timestamp = 0L;
         }
         // hibernate UNIX_TIMESTAMP converts date in seconds therefore
         // converting query timestamp to seconds
-        return new Long(timestamp / 1000);
+        return new BigInteger(new Long(timestamp / 1000).toString());
     }
 }

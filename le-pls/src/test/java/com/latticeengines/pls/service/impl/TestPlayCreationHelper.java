@@ -1,7 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,13 +15,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingRule;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -99,9 +112,9 @@ public class TestPlayCreationHelper {
         playResourceDeploymentTestNG.setMainTestTenant(tenant);
         playResourceDeploymentTestNG.setup();
 
-        Restriction accountRestriction = JsonUtils.deserialize(accountRestrictionJson, Restriction.class);
-        Restriction contactRestriction = JsonUtils.deserialize(contactRestrictionJson, Restriction.class);
-        RatingRule ratingRule = JsonUtils.deserialize(ratingRuleJson, RatingRule.class);
+        Restriction accountRestriction = createAccountRestriction();
+        Restriction contactRestriction = createContactRestriction();
+        RatingRule ratingRule = createRatingRule();
 
         segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
         playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
@@ -114,6 +127,52 @@ public class TestPlayCreationHelper {
 
         Assert.assertNotNull(play);
         Assert.assertNotNull(playLaunch);
+    }
+
+    private Restriction createAccountRestriction() {
+        Restriction b1 = //
+                createBucketRestriction(6, ComparisonType.EQUAL, //
+                        BusinessEntity.Account, "COMPOSITE_RISK_SCORE");
+        Restriction b2 = //
+                createBucketRestriction(1, ComparisonType.EQUAL, //
+                        BusinessEntity.Account, "PREMIUM_MARKETING_PRESCREEN");
+        Restriction b3 = //
+                createBucketRestriction("CALIFORNIA", ComparisonType.EQUAL, //
+                        BusinessEntity.Account, "LDC_State");
+        Restriction b4 = //
+                createBucketRestriction(2, ComparisonType.LESS_THAN, //
+                        BusinessEntity.Account, "CloudTechnologies_ContactCenterManagement");
+        Restriction b5 = //
+                createBucketRestriction(4, ComparisonType.LESS_THAN, //
+                        BusinessEntity.Account, "BusinessTechnologiesSsl");
+        Restriction b6 = //
+                createBucketRestriction(3, ComparisonType.LESS_THAN, //
+                        BusinessEntity.Account, "BusinessTechnologiesAnalytics");
+
+        Restriction innerLogical1 = LogicalRestriction.builder()//
+                .and(Arrays.asList(b1, b2, b3, b4, b5, b6)).build();
+        Restriction innerLogical2 = LogicalRestriction.builder()//
+                .or(new ArrayList<>()).build();
+
+        return LogicalRestriction.builder() //
+                .and(Arrays.asList(innerLogical1, innerLogical2)).build();
+    }
+
+    private Restriction createBucketRestriction(Object val, ComparisonType comparisonType, BusinessEntity entityType,
+            String attrName) {
+        Bucket bucket = null;
+
+        if (comparisonType == ComparisonType.EQUAL) {
+            bucket = Bucket.valueBkt(comparisonType, Arrays.asList(val));
+        } else if (comparisonType == ComparisonType.LESS_THAN) {
+            bucket = Bucket.rangeBkt(null, val);
+        }
+        return new BucketRestriction(new AttributeLookup(entityType, attrName), bucket);
+    }
+
+    private Restriction createContactRestriction() {
+        return LogicalRestriction.builder()//
+                .or(new ArrayList<>()).build();
     }
 
     public Tenant getTenant() {
@@ -195,189 +254,53 @@ public class TestPlayCreationHelper {
         }
     }
 
-    String accountRestrictionJson = //
-            "{ " //
-                    + "      \"logicalRestriction\": { " //
-                    + "        \"operator\": \"AND\", " //
-                    + "        \"restrictions\": [ " //
-                    + "          { " //
-                    + "            \"logicalRestriction\": { " //
-                    + "              \"operator\": \"AND\", " //
-                    + "              \"restrictions\": [ " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"6\", " //
-                    + "                      \"Cnt\": 4884, " //
-                    + "                      \"Id\": 4 " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.COMPOSITE_RISK_SCORE\" " //
-                    + "                  } " //
-                    + "                }, " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"1\", " //
-                    + "                      \"Cnt\": 7521, " //
-                    + "                      \"Id\": 1 " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.PREMIUM_MARKETING_PRESCREEN\" " //
-                    + "                  } " //
-                    + "                }, " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"CALIFORNIA\", " //
-                    + "                      \"Cnt\": 5463, " //
-                    + "                      \"Id\": 562 " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.LDC_State\" " //
-                    + "                  } " //
-                    + "                }, " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"< 2\", " //
-                    + "                      \"Cnt\": 5583, " //
-                    + "                      \"Id\": 1, " //
-                    + "                      \"Rng\": [ " //
-                    + "                        null, " //
-                    + "                        2 " //
-                    + "                      ] " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.CloudTechnologies_ContactCenterManagement\" " //
-                    + "                  } " //
-                    + "                }, " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"< 4\", " //
-                    + "                      \"Cnt\": 35291, " //
-                    + "                      \"Id\": 1, " //
-                    + "                      \"Rng\": [ " //
-                    + "                        null, " //
-                    + "                        4 " //
-                    + "                      ] " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.BusinessTechnologiesSsl\" " //
-                    + "                  } " //
-                    + "                }, " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"< 3\", " //
-                    + "                      \"Cnt\": 23987, " //
-                    + "                      \"Id\": 1, " //
-                    + "                      \"Rng\": [ " //
-                    + "                        null, " //
-                    + "                        3 " //
-                    + "                      ] " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.BusinessTechnologiesAnalytics\" " //
-                    + "                  } " //
-                    + "                } " //
-                    + "              ] " //
-                    + "            } " //
-                    + "          }, " //
-                    + "          { " //
-                    + "            \"logicalRestriction\": { " //
-                    + "              \"operator\": \"OR\", " //
-                    + "              \"restrictions\": [] " //
-                    + "            } " //
-                    + "          } " //
-                    + "        ] " //
-                    + "      } " //
-                    + "    } " //
-                    + "} ";
+    private RatingRule createRatingRule() {
+        RatingRule ratingRule = new RatingRule();
+        TreeMap<String, Map<String, Restriction>> bucketToRuleMap = populateBucketToRuleMap();
+        ratingRule.setBucketToRuleMap(bucketToRuleMap);
+        ratingRule.setDefaultBucketName(RuleBucketName.C.name());
+        return ratingRule;
+    }
 
-    String contactRestrictionJson = //
-            "{ " //
-                    + "      \"logicalRestriction\": {}} ";
+    private TreeMap<String, Map<String, Restriction>> populateBucketToRuleMap() {
+        TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
+        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.A_MINUS, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+                ComparisonType.LESS_THAN, BusinessEntity.Account, "LDC_Name", "A", "G");
+        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.C, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+                ComparisonType.LESS_THAN, BusinessEntity.Account, "LDC_Name", "h", "n");
+        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.D, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+                ComparisonType.LESS_THAN, BusinessEntity.Account, "LDC_Name", "A", "O");
+        populateBucketInfo(bucketToRuleMap, false, RuleBucketName.D, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
+                null, null, null, null);
+        populateBucketInfo(bucketToRuleMap, false, RuleBucketName.F, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
+                null, null, null, null);
+        populateBucketInfo(bucketToRuleMap, false, RuleBucketName.F, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
+                null, null, null, null);
 
-    String ratingRuleJson = //
-            " { " //
-                    + "   \"bucketToRuleMap\": { " //
-                    + "     \"A-\": { " //
-                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
-                    + "         \"concreteRestriction\": { " //
-                    + "           \"negate\": false, " //
-                    + "           \"lhs\": { " //
-                    + "             \"attribute\": { " //
-                    + "               \"entity\": \"Account\", " //
-                    + "               \"attribute\": \"LDC_Name\" " //
-                    + "             } " //
-                    + "           }, " //
-                    + "           \"relation\": \"IN_RANGE\", " //
-                    + "           \"rhs\": { " //
-                    + "             \"range\": { " //
-                    + "               \"min\": \"A\", " //
-                    + "               \"max\": \"G\" " //
-                    + "             } " //
-                    + "           } " //
-                    + "         } " //
-                    + "       } " //
-                    + "     }, " //
-                    + "     \"C\": { " //
-                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
-                    + "         \"concreteRestriction\": { " //
-                    + "           \"negate\": false, " //
-                    + "           \"lhs\": { " //
-                    + "             \"attribute\": { " //
-                    + "               \"entity\": \"Account\", " //
-                    + "               \"attribute\": \"LDC_Name\" " //
-                    + "             } " //
-                    + "           }, " //
-                    + "           \"relation\": \"IN_RANGE\", " //
-                    + "           \"rhs\": { " //
-                    + "             \"range\": { " //
-                    + "               \"min\": \"h\", " //
-                    + "               \"max\": \"n\" " //
-                    + "             } " //
-                    + "           } " //
-                    + "         } " //
-                    + "       } " //
-                    + "     }, " //
-                    + "     \"D\": { " //
-                    + "       \"" + FrontEndQueryConstants.CONTACT_RESTRICTION + "\": { " //
-                    + "         \"logicalRestriction\": { " //
-                    + "           \"operator\": \"AND\", " //
-                    + "           \"restrictions\": [] " //
-                    + "         } " //
-                    + "       }, " //
-                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
-                    + "         \"concreteRestriction\": { " //
-                    + "           \"negate\": false, " //
-                    + "           \"lhs\": { " //
-                    + "             \"attribute\": { " //
-                    + "               \"entity\": \"Account\", " //
-                    + "               \"attribute\": \"LDC_Name\" " //
-                    + "             } " //
-                    + "           }, " //
-                    + "           \"relation\": \"IN_RANGE\", " //
-                    + "           \"rhs\": { " //
-                    + "             \"range\": { " //
-                    + "               \"min\": \"A\", " //
-                    + "               \"max\": \"O\" " //
-                    + "             } " //
-                    + "           } " //
-                    + "         } " //
-                    + "       } " //
-                    + "     }, " //
-                    + "     \"F\": { " //
-                    + "       \"" + FrontEndQueryConstants.CONTACT_RESTRICTION + "\": { " //
-                    + "         \"logicalRestriction\": { " //
-                    + "           \"operator\": \"AND\", " //
-                    + "           \"restrictions\": [] " //
-                    + "         } " //
-                    + "       }, " //
-                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
-                    + "         \"logicalRestriction\": { " //
-                    + "           \"operator\": \"AND\", " //
-                    + "           \"restrictions\": [] " //
-                    + "         } " //
-                    + "       } " //
-                    + "     } " //
-                    + "   }, " //
-                    + "   \"defaultBucketName\": \"C\" " //
-                    + " } ";
+        return bucketToRuleMap;
+    }
+
+    private void populateBucketInfo(TreeMap<String, Map<String, Restriction>> bucketToRuleMap,
+            boolean createConcreteRestriction, RuleBucketName bucketName, String key, ComparisonType comparisonType,
+            BusinessEntity entity, String attrName, Object min, Object max) {
+        Map<String, Restriction> bucketInfo = bucketToRuleMap.get(bucketName.name());
+        if (bucketInfo == null) {
+            bucketInfo = new HashMap<>();
+            bucketToRuleMap.put(bucketName.name(), bucketInfo);
+        }
+
+        Restriction info = null;
+
+        if (createConcreteRestriction) {
+            Lookup lhs = new AttributeLookup(entity, attrName);
+            Lookup rhs = new RangeLookup(min, max);
+            info = new ConcreteRestriction(false, lhs, comparisonType, rhs);
+        } else {
+            info = LogicalRestriction.builder() //
+                    .and(new ArrayList<>()).build();
+        }
+
+        bucketInfo.put(key, info);
+    }
+
 }

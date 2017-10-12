@@ -1,10 +1,14 @@
 package com.latticeengines.pls.controller;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
@@ -171,8 +176,19 @@ public class PlayResource {
     }
 
     private void validatePlayLaunchBeforeLaunch(PlayLaunch playLaunch, Play play) {
-        if (playLaunch.getBucketsToLaunch() == null) {
-            throw new LedpException(LedpCode.LEDP_18156, new String[] { play.getName() });
+        if (CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
+            // TODO - enable it once UI has added support for launc/relaunch
+            // workflow (PLS-4997)
+            // throw new LedpException(LedpCode.LEDP_18156, new String[] {
+            // play.getName() });
+
+            // ----------------
+
+            // TODO - remove it when (PLS-4997) if done
+            // if no buckets are specified then we default it to all buckets
+            Set<RuleBucketName> defaultBucketsToLaunch = //
+                    new TreeSet<>(Arrays.asList(RuleBucketName.values()));
+            playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
         }
     }
 
