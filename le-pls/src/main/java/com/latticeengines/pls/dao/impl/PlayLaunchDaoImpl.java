@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -251,8 +252,13 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         if (timestamp == null || timestamp < 0) {
             timestamp = 0L;
         }
+
+        long timestampViaDateConversion = //
+                TimeUnit.SECONDS.convert( //
+                        new Date(timestamp).getTime(), TimeUnit.MILLISECONDS);
+
         // hibernate UNIX_TIMESTAMP converts date in seconds therefore
         // converting query timestamp to seconds
-        return new BigInteger(new Long(timestamp / 1000).toString());
+        return new BigInteger(new Long(timestampViaDateConversion).toString());
     }
 }

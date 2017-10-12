@@ -224,6 +224,23 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         checkCountForDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
                 System.currentTimeMillis(), 0L, 0L);
 
+        checkCountForDashboard(null, goodStates, badStates, playLaunch1.getCreated().getTime() - 1000L,
+                playLaunch2.getCreated().getTime() - 1000L, 1L, 2L);
+
+        checkCountForDashboard(null, goodStates, badStates, playLaunch1.getCreated().getTime() + 1000L,
+                playLaunch2.getCreated().getTime() + 1000L, 1L, 1L);
+
+        checkCountForDashboard(null, goodStates, badStates, playLaunch1.getCreated().getTime() - 1000L,
+                playLaunch2.getCreated().getTime() + 1000L, 2L, 2L);
+
+        checkCountForDashboard(null, goodStates, badStates, playLaunch1.getCreated().getTime(),
+                playLaunch2.getCreated().getTime(), 2L, 2L);
+
+        checkCountForDashboard(null, goodStates, badStates, 0L, playLaunch1.getCreated().getTime() - 1000L, 0L, 2L);
+
+        checkCountForDashboard(null, goodStates, badStates, playLaunch2.getCreated().getTime() + 1000L,
+                System.currentTimeMillis(), 0L, 0L);
+
         checkCountForDashboard(null, goodStates, badStates, 0L, 1L, 0L, 2L);
     }
 
