@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
@@ -64,10 +65,9 @@ public class PythonScriptModelService extends ModelServiceBase {
             // 1. attributes that is part of the standard schema repository
             // 2. attributes that come from customer data or does not have tag
             // information but both have approved usage of modeling and above
-            if (schema.getAttribute(attribute.getName()) != null //
-                    || (tags == null || tags.isEmpty() || tags.get(0).equals(Tag.INTERNAL.toString()))
+            if (attribute.getName().equals(InterfaceName.Id.name()) || ((tags == null || tags.isEmpty() || tags.get(0).equals(Tag.INTERNAL.toString()))
                             && !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty()
-                                    || attribute.getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString()))) {
+                                    || attribute.getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString())))) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
                 if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
                         && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
