@@ -71,7 +71,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         if (BusinessEntity.Contact == entity) {
             List<Lookup> lookups = query.getLookups();
             if (lookups != null && lookups.stream().anyMatch(this::isContactCompanyNameLookup)) {
-                List<Lookup> filtered = lookups.stream().filter(this::isContactCompanyNameLookup)
+                List<Lookup> filtered = lookups.stream().filter(this::notContactCompanyNameLookup)
                         .collect(Collectors.toList());
                 filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.toString()));
                 filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.toString()));
@@ -79,6 +79,10 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             }
         }
         return query;
+    }
+
+    private boolean notContactCompanyNameLookup(Lookup lookup) {
+        return !isContactCompanyNameLookup(lookup);
     }
 
     private boolean isContactCompanyNameLookup(Lookup lookup) {
