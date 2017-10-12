@@ -16,7 +16,6 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Listeners;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -45,7 +44,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     protected String deployedHostPort;
 
     protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
-        SSLUtils.turnOffSSL();
         testBed.bootstrapForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         testBed.switchToSuperAdmin();

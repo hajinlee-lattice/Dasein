@@ -73,7 +73,7 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
 
     protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product)
             throws NoSuchAlgorithmException, KeyManagementException, IOException {
-        SSLUtils.turnOffSSL();
+        SSLUtils.turnOffSSLNameVerification();
         testBed.bootstrapForProduct(product);
         mainTestTenant = testBed.getMainTestTenant();
         mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());

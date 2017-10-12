@@ -99,4 +99,22 @@ public class HttpClientUtils {
         return interceptors;
     }
 
+    /**
+     * This is command line tool to check https connection
+     */
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Usage: "+ SSLUtils.class.getName()+" <url>");
+            System.exit(1);
+        }
+        try {
+            RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+            String content = restTemplate.getForObject(args[0], String.class);
+            System.out.println(content.substring(0, Math.min(content.length(), 1000)));
+            System.out.println("Successfully connected");
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
 }
