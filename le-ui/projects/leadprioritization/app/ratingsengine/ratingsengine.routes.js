@@ -147,10 +147,10 @@ angular
                 },
                 WizardProgressItems: function(RatingsEngineStore) {
                     return [
-                        { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveRatingEngine },
-                        { label: 'Attributes', state: 'segment.attributes' },
-                        { label: 'Rules', state: 'segment.attributes.rules', nextFn: RatingsEngineStore.nextSaveRules },
-                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextFn: RatingsEngineStore.nextSaveSummary }
+                        { label: 'Segment', state: 'segment', nextLabel: 'Next, Choose Attributes', nextFn: RatingsEngineStore.nextSaveRatingEngine },
+                        { label: 'Attributes', state: 'segment.attributes', nextLabel: 'Next, Set Rules'},
+                        { label: 'Rules', state: 'segment.attributes.rules', nextLabel: 'Next, Summary', nextFn: RatingsEngineStore.nextSaveRules },
+                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextLabel: 'Publish', nextFn: RatingsEngineStore.nextSaveSummary }
                     ];
                 }
             },
@@ -187,7 +187,7 @@ angular
                                 backState: 'home.ratingsengine', 
                                 nextState: 'home.ratingsengine.dashboard'
                             };
-                        }
+                        },
                     },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
@@ -367,7 +367,7 @@ angular
         .state('home.ratingsengine.wizard.segment.attributes.rules_dashboard', {
             url: '/rules_dashboard',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-model',
                 pageTitle: 'Rating Engine - Rules'
             },
             resolve: {

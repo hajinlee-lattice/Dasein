@@ -1,6 +1,6 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressItems,
+    $state, $stateParams, $scope, $timeout, $rootScope, ResourceUtility, WizardProgressItems,
     WizardProgressContext, WizardControlsOptions, WizardValidationStore, ImportWizardService, ImportWizardStore
 ) {
     var vm = this;
@@ -11,7 +11,8 @@ angular.module('common.wizard.controls', [])
         state: $state.current.name,
         prev: WizardControlsOptions.backState,
         next: 'home.' + WizardProgressContext + '.wizard',
-        valid: false
+        valid: false,
+        toState: $state.current
     });
 
     vm.init = function() {
@@ -22,6 +23,7 @@ angular.module('common.wizard.controls', [])
         vm.items.forEach(function(item) {
             vm.itemMap[vm.rootState + item.state] = item;
         });
+        vm.item = vm.itemMap[vm.toState.name];
     }
 
     vm.click = function(isPrev) {
@@ -48,6 +50,7 @@ angular.module('common.wizard.controls', [])
                 vm.go(WizardControlsOptions.nextState, isPrev, params);
             }
         }
+
     }
 
     vm.go = function(state, isPrev, params) {
@@ -60,10 +63,15 @@ angular.module('common.wizard.controls', [])
         }
     }
 
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) { 
+        vm.toState = toState;
+        vm.item = vm.itemMap[vm.toState.name];
+    })
+
     vm.setButtons = function() {
         var current = $state.current.name,
             item, state, split, last, prev, next, nsplit, psplit;
-
+        
         for (var i=0; i<vm.items.length; i++) {
             item = vm.items[i];
             state = item.state;

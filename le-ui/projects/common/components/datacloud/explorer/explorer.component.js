@@ -1703,6 +1703,7 @@ angular.module('common.datacloud.explorer', [
     };
 
     vm.selectRatingsEngineAttribute = function(enrichment) {
+        vm.statusMessage(vm.label.saving_alert, {wait: 0});
         var rule = getRatingsEngineRule(RatingsEngineModels);
         DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.ColumnId]).then(function(response) {
             enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
@@ -1712,6 +1713,7 @@ angular.module('common.datacloud.explorer', [
             if(!SelectedForRatingsEngine.length) {
                 vm.metadata.toggle.show.selected_ratingsengine_attributes = false;
             }
+            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
         });
     }
 

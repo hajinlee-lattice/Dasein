@@ -13,7 +13,7 @@ angular
             angular.extend(vm, {
                 orders: {
                     attributeLookupMode: [ '-Value', 'DisplayName'],
-                    attribute: ['-HighlightHighlighted', '-IsRatingsEngineAttribute', 'DisplayName'],
+                    attribute: ['-HighlightHighlighted', 'DisplayName'],
                     subcategory: 'toString()',
                     category: 'toString()'
                 },
