@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMAttrEnrichConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
@@ -63,11 +62,9 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
 
     private static final long RAND_SEED = 0L;
     private static final String ENRICH_PROFILE = "EnrichProfile";
-    private static final String SEGMENT_PROFILE = "SegmentProfile";
     private static final String MATCH_SEGMENT_PROFILE = "MatchSegmentProfile";
 
     private GeneralSource source = new GeneralSource(MATCH_SEGMENT_PROFILE);
-    private GeneralSource segProfile = new GeneralSource(SEGMENT_PROFILE);
     private GeneralSource enrichProfile = new GeneralSource(ENRICH_PROFILE);
 
     @Autowired
@@ -90,13 +87,12 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
     @Test(groups = "deployment")
     public void testTransformation() {
         prepareAM();
-        prepareCustomer();
         prepareMatch();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
-        confirmIntermediateSource(segProfile, null);
         confirmIntermediateSource(enrichProfile, null);
+        confirmIntermediateSource(source, null);
         confirmResultFile(progress);
         cleanupProgressTables();
     }
@@ -123,88 +119,45 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
         configuration.setVersion(targetVersion);
 
         TransformationStepConfig step0 = new TransformationStepConfig();
-        SourceTable sourceTable = new SourceTable(customerTable.getSourceName(),
-                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         List<String> baseSources = new ArrayList<>();
-        baseSources.add(customerTable.getSourceName());
         baseSources.add(am.getSourceName());
         step0.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(customerTable.getSourceName(), sourceTable);
-        step0.setBaseTables(baseTables);
-        step0.setTransformer(DataCloudConstants.TRANSFORMER_AM_ENRICHER);
-        step0.setConfiguration(getCustomerUniverseConfig());
-        step0.setTargetSource("Enriched");
+        step0.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step0.setTargetSource(enrichProfile.getSourceName());
+        String confParamStr0 = getEnrichProfileConfig();
+        step0.setConfiguration(confParamStr0);
 
         TransformationStepConfig step1 = new TransformationStepConfig();
-        List<Integer> inputSteps = new ArrayList<>();
-        inputSteps.addAll(Collections.singletonList(0));
-        step1.setInputSteps(inputSteps);
-        step1.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-        step1.setTargetSource(segProfile.getSourceName());
-        String confParamStr1 = getSegmentProfileConfig();
-        step1.setConfiguration(confParamStr1);
+        SourceTable sourceTable1 = new SourceTable(matchTable.getSourceName(),
+                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
+        List<String> baseSources1 = Collections.singletonList(matchTable.getSourceName());
+        step1.setBaseSources(baseSources1);
+        Map<String, SourceTable> baseTables1 = new HashMap<>();
+        baseTables1.put(matchTable.getSourceName(), sourceTable1);
+        step1.setBaseTables(baseTables1);
+        step1.setTransformer(TRANSFORMER_MATCH);
+        step1.setConfiguration(getMatchConfig());
 
         TransformationStepConfig step2 = new TransformationStepConfig();
-        baseSources = new ArrayList<>();
-        baseSources.add(am.getSourceName());
-        step2.setBaseSources(baseSources);
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.addAll(Collections.singletonList(1));
+        step2.setInputSteps(inputSteps);
         step2.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-        step2.setTargetSource(enrichProfile.getSourceName());
-        String confParamStr2 = getEnrichProfileConfig();
-        step2.setConfiguration(confParamStr2);
-
-        TransformationStepConfig step3 = new TransformationStepConfig();
-        SourceTable sourceTable3 = new SourceTable(matchTable.getSourceName(),
-                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
-        List<String> baseSources3 = Collections.singletonList(matchTable.getSourceName());
-        step3.setBaseSources(baseSources3);
-        Map<String, SourceTable> baseTables3 = new HashMap<>();
-        baseTables3.put(matchTable.getSourceName(), sourceTable3);
-        step3.setBaseTables(baseTables3);
-        step3.setTransformer(TRANSFORMER_MATCH);
-        step3.setConfiguration(getMatchConfig());
-
-        TransformationStepConfig step4 = new TransformationStepConfig();
-        inputSteps = new ArrayList<>();
-        inputSteps.addAll(Collections.singletonList(3));
-        step4.setInputSteps(inputSteps);
-        step4.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-        step4.setTargetSource(source.getSourceName());
-        String confParamStr4 = getMatchSegmentProfileConfig();
-        step4.setConfiguration(setDataFlowEngine(confParamStr4, "TEZ"));
+        step2.setTargetSource(source.getSourceName());
+        String confParamStr2 = getMatchSegmentProfileConfig();
+        step2.setConfiguration(setDataFlowEngine(confParamStr2, "TEZ"));
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step0);
         steps.add(step1);
         steps.add(step2);
-        steps.add(step3);
-        steps.add(step4);
 
         // -----------
         configuration.setSteps(steps);
         configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
         configuration.setKeepTemp(true);
         return configuration;
-    }
-
-    private String getCustomerUniverseConfig() {
-        AMAttrEnrichConfig conf = new AMAttrEnrichConfig();
-        conf.setAmLatticeId("LatticeID");
-        conf.setInputLatticeId("LatticeAccountId");
-        return JsonUtils.serialize(conf);
-    }
-
-    private String getSegmentProfileConfig() {
-        ProfileConfig conf = new ProfileConfig();
-        conf.setNumBucketEqualSized(false);
-        conf.setBucketNum(4);
-        conf.setMinBucketSize(2);
-        conf.setRandSeed(RAND_SEED);
-        conf.setMaxCat(10);
-        conf.setDataCloudVersion(DATA_CLOUD_VERSION);
-        return JsonUtils.serialize(conf);
     }
 
     private String getEnrichProfileConfig() {
@@ -256,35 +209,6 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
         return keyMap;
-    }
-
-    private Object[][] customerData = new Object[][] { //
-            { 1L, 0, null, 10F, null, true, 2.01 }, //
-            { 2L, null, 10L, null, 100D, false, 2.01 }, //
-            { 3L, 10, null, 100F, 100D, null, 2.01 }, //
-            { 4L, null, 100L, 100F, 1000D, true, 1.01 }, //
-            { 5L, 100, 100L, 1000F, 1000D, false, 1.02 }, //
-            { 6L, 100, 1000L, 1000F, 10000D, null, 1.02 }, //
-            { 7L, 1000, 1000L, 10000F, 10000D, true, 1.02 }, //
-            { 8L, 1000, 10000L, 10000F, null, false, null }, //
-            { 9L, 10000, 10000L, null, 0D, null, null }, //
-            { 10L, 10000, null, 0F, 100D, true, null }, //
-            { 11L, null, 0L, 100F, 10D, false, null }, //
-            { 12L, 0, 100L, 10F, 0D, null, null }, //
-            { 13L, 100, 10L, 0F, null, true, null }, //
-            { 14L, 10, 0L, null, 10D, false, null }, //
-    };
-
-    private void prepareCustomer() {
-        List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of("LatticeAccountId", Long.class)); // ID Retained
-        schema.add(Pair.of("Customer1", Integer.class)); // Interval
-        schema.add(Pair.of("Customer2", Long.class)); // Interval
-        schema.add(Pair.of("Customer3", Float.class)); // Interval
-        schema.add(Pair.of("Customer4", Double.class)); // Interval
-        schema.add(Pair.of("Customer5", Boolean.class)); // Boolean
-        schema.add(Pair.of("Customer6", Double.class)); // Interval (use distinct value as interval boundary)
-        uploadAndRegisterTableSource(schema, customerData, customerTable.getSourceName());
     }
 
     private Object[][] amData = new Object[][] { //
@@ -387,24 +311,136 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
         uploadAndRegisterTableSource(schema, matchData, matchTable.getSourceName());
     }
 
-    private Map<String, BucketAlgorithm> getExpectedBuckAlgoForFlatAttrs() {
+    @Override
+    protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
+        log.info(String.format("Start to verify intermediate source %s", source));
+        try {
+            switch (source) {
+            case ENRICH_PROFILE:
+                verifyEnrichProfileResult(records);
+                break;
+            case MATCH_SEGMENT_PROFILE:
+                verifyMatchSegmentProfileResult(records);
+                break;
+            default:
+                throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Exception in verifyIntermediateResult", ex);
+        }
+    }
+
+    private Map<String, BucketAlgorithm> getExpectedBuckAlgoForSegment() {
+        Map<String, BucketAlgorithm> map = new HashMap<>();
+        IntervalBucket intBucket = new IntervalBucket();
+        Number[] intValues = { 0, 1, 2 };
+        intBucket.setBoundaries(Arrays.asList(intValues));
+        map.put("BusinessTechnologiesSeoMeta", intBucket);
+        CategoricalBucket catBucket = new CategoricalBucket();
+        String[] catValues = { "684", "710", "425", "636", "716" };
+        catBucket.setCategories(Arrays.asList(catValues));
+        map.put("GLOBAL_ULTIMATE_DnB_COUNTY_CODE", catBucket);
+        map.put("LAST_UPDATE_DATE", null);
+        return map;
+    }
+
+    private void verifyMatchSegmentProfileResult(Iterator<GenericRecord> records)
+            throws JsonProcessingException, IOException {
+        Map<String, BucketAlgorithm> flatAttrsToCheck = getExpectedBuckAlgoForSegment();
+        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
+                DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER,
+                DATA_CLOUD_VERSION_MATCH);
+        Map<String, String> decAttrToEnc = new HashMap<>();
+        for (SourceAttribute srcAttr : srcAttrs) {
+            JsonNode arg = om.readTree(srcAttr.getArguments());
+            if (arg.get(SourceProfiler.IS_PROFILE).asBoolean() && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
+                if (!arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
+                    decAttrToEnc.put(srcAttr.getAttribute(), null);
+                    continue;
+                }
+                String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
+                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
+                Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
+                decAttrToEnc.put(srcAttr.getAttribute(), bitDecodeStrategy.getEncodedColumn());
+            }
+        }
+
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            Object attr = record.get("AttrName");
+            Assert.assertNotNull(attr);
+            if (attr instanceof Utf8) {
+                attr = attr.toString();
+            }
+            Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
+            if (bktAlgo != null && bktAlgo instanceof Utf8) {
+                bktAlgo = bktAlgo.toString();
+            }
+
+            if (decAttrToEnc.containsKey((String) attr)) { // Decoded attrs
+                switch (decAttrToEnc.get((String) attr)) {
+                case "HGData_SupplierTechIndicators":
+                case "HGData_SegmentTechIndicators":
+                case "BuiltWith_TechIndicators":
+                    Assert.assertNotNull(bktAlgo);
+                    BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
+                    Assert.assertNotNull(boolAlgo);
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                    break;
+                case "BmbrSurge_Intent":
+                    Assert.assertNotNull(bktAlgo);
+                    CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
+                    Assert.assertNotNull(catAlgo);
+                    Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
+                    Assert.assertEquals(String.join(",", catAlgo.generateLabels()), "null,Normal,Moderate,High");
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                    break;
+                case "BmbrSurge_CompositeScore":
+                    if (bktAlgo == null) {
+                        continue;
+                    }
+                    IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
+                    Assert.assertNotNull(intAlgo);
+                    break;
+                case "BmbrSurge_BucketCode":
+                    Assert.assertNotNull(bktAlgo);
+                    catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
+                    Assert.assertNotNull(catAlgo);
+                    Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
+                    Assert.assertEquals(String.join(",", catAlgo.generateLabels()), "null,A,B,C");
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                    break;
+                default: // deprecated decoded attrs
+                    break;
+                }
+            } else { // Flat attributes
+                log.info(record.toString());
+                if (!flatAttrsToCheck.containsKey((String) attr)) {
+                    continue;
+                }
+                if (flatAttrsToCheck.get((String) attr) == null) { // Retained
+                                                                   // attributes
+                    Assert.assertNull(bktAlgo);
+                } else {
+                    JsonUtils.serialize(
+                            JsonUtils.deserialize((String) bktAlgo, flatAttrsToCheck.get((String) attr).getClass()));
+                }
+            }
+        }
+    }
+
+    private Map<String, BucketAlgorithm> getExpectedBuckAlgoForEnrich() {
         Map<String, BucketAlgorithm> map = new HashMap<>();
         map.put("LatticeAccountId", null);
         map.put("LDC_Name", null);
         map.put("LDC_Domain", null);
         IntervalBucket intBuck = new IntervalBucket();
-        map.put("Customer1", intBuck);
-        intBuck = new IntervalBucket();
-        map.put("Customer2", intBuck);
-        intBuck = new IntervalBucket();
-        map.put("Customer3", intBuck);
-        intBuck = new IntervalBucket();
-        map.put("Customer4", intBuck);
-        BooleanBucket boolBuck = new BooleanBucket();
-        map.put("Customer5", boolBuck);
-        intBuck = new IntervalBucket();
-        map.put("Customer6", intBuck);
-        intBuck = new IntervalBucket();
         map.put("AlexaAUPageViews", intBuck);
         intBuck = new IntervalBucket();
         map.put("AlexaAURank", intBuck);
@@ -416,129 +452,16 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
         map.put("AlexaLanguage", null);
         map.put("AlexaLinksIn", null);
         map.put("AlexaCARank", null);
-        boolBuck = new BooleanBucket();
+        BooleanBucket boolBuck = new BooleanBucket();
         map.put("AlexaCAUsers", boolBuck);
         boolBuck = new BooleanBucket();
         map.put("AlexaGBPageViews", boolBuck);
         return map;
     }
 
-    @Override
-    protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
-        try {
-            switch (source) {
-            case SEGMENT_PROFILE:
-                log.info(String.format("Start to verify intermediate source %s", source));
-                verifySegmentProfileResult(records);
-                break;
-            case ENRICH_PROFILE:
-                verifyEnrichProfileResult(records);
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Exception in verifyIntermediateResult", ex);
-        }
-    }
-
-    private void verifySegmentProfileResult(Iterator<GenericRecord> records)
-            throws JsonProcessingException, IOException {
-        Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
-        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
-                DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER, DATA_CLOUD_VERSION);
-        String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent" };
-        Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
-        Map<String, Integer> expected = new HashMap<>(); // encAttr -> decAttr
-                                                         // count
-        for (SourceAttribute srcAttr : srcAttrs) {
-            JsonNode arg = om.readTree(srcAttr.getArguments());
-            if (arg.get(SourceProfiler.IS_PROFILE).asBoolean() && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
-                String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
-                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
-                Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
-                if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
-                    continue;
-                }
-                if (!expected.containsKey(bitDecodeStrategy.getEncodedColumn())) {
-                    expected.put(bitDecodeStrategy.getEncodedColumn(), 1);
-                } else {
-                    expected.put(bitDecodeStrategy.getEncodedColumn(),
-                            expected.get(bitDecodeStrategy.getEncodedColumn()) + 1);
-                }
-            }
-        }
-        while (records.hasNext()) {
-            GenericRecord record = records.next();
-            // log.info(record.toString());
-            Object attr = record.get("AttrName");
-            Assert.assertNotNull(attr);
-            if (attr instanceof Utf8) {
-                attr = attr.toString();
-            }
-            Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
-            if (bktAlgo != null && bktAlgo instanceof Utf8) {
-                bktAlgo = bktAlgo.toString();
-            }
-            Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
-            if (decStr != null) { // Attributes need to decode
-                if (decStr instanceof Utf8) {
-                    decStr = decStr.toString();
-                }
-                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
-                Assert.assertTrue(expected.containsKey(bitDecodeStrategy.getEncodedColumn()));
-                expected.put(bitDecodeStrategy.getEncodedColumn(),
-                        expected.get(bitDecodeStrategy.getEncodedColumn()) - 1);
-                if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
-                    expected.remove(bitDecodeStrategy.getEncodedColumn());
-                }
-                switch (bitDecodeStrategy.getEncodedColumn()) {
-                case "HGData_SupplierTechIndicators":
-                case "BuiltWith_TechIndicators":
-                    Assert.assertNotNull(bktAlgo);
-                    BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
-                    Assert.assertNotNull(boolAlgo);
-                    break;
-                case "BmbrSurge_Intent":
-                    Assert.assertNotNull(bktAlgo);
-                    CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
-                    Assert.assertNotNull(catAlgo);
-                    Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
-                    Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
-                            "null,Very Low,Low,Medium,High,Very High");
-                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
-                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
-                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
-                    break;
-                case "BmbrSurge_CompositeScore":
-                    if (bktAlgo == null) {
-                        continue;
-                    }
-                    IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
-                    Assert.assertNotNull(intAlgo);
-                    // log.info((String) attr + ": " + JsonUtils.serialize(intAlgo));
-                    break;
-                default:
-                    throw new RuntimeException(
-                            String.format("Unrecognized encoded attribute %s", bitDecodeStrategy.getEncodedColumn()));
-                }
-            } else { // Flat attributes
-                log.info(record.toString());
-                Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
-                if (flatAttrsBuckAlgo.get((String) attr) == null) { // Retained attributes
-                    Assert.assertNull(bktAlgo);
-                } else {
-                    JsonUtils.serialize(
-                            JsonUtils.deserialize((String) bktAlgo, flatAttrsBuckAlgo.get((String) attr).getClass()));
-                }
-            }
-        }
-        Assert.assertEquals(0, expected.size());
-    }
-
     private void verifyEnrichProfileResult(Iterator<GenericRecord> records)
             throws JsonProcessingException, IOException {
-        Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
+        Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForEnrich();
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
                 DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER, DATA_CLOUD_VERSION);
         String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
@@ -619,8 +542,7 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
             } else { // FLat attributes
                 log.info(record.toString());
                 Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
-                if (flatAttrsBuckAlgo.get((String) attr) == null) { // Retained
-                                                                    // attributes
+                if (flatAttrsBuckAlgo.get((String) attr) == null) { // Retained attributes
                     Assert.assertNull(bktAlgo);
                 } else {
                     JsonUtils.serialize(
