@@ -239,7 +239,6 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         String lockName = entityName;
         try {
             LockManager.registerCrossDivisionLock(lockName);
-            LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
             if (createNew && CamilleEnvironment.getCamille().exists(path)) {
                 try {
                     CamilleEnvironment.getCamille().delete(path);
@@ -257,8 +256,6 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         } catch (Exception ex) {
             log.error("Failed to create znode, path " + path, ex);
             throw new RuntimeException("Failed to create znode, path " + path);
-        } finally {
-            LockManager.releaseWriteLock(lockName);
         }
 
         return result;
