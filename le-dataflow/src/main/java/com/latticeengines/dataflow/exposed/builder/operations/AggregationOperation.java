@@ -3,7 +3,6 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.pipe.assembly.MaxBy;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
@@ -11,6 +10,8 @@ import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.AverageBy;
 import cascading.pipe.assembly.CountBy;
+import cascading.pipe.assembly.MaxBy;
+import cascading.pipe.assembly.MinBy;
 import cascading.tuple.Fields;
 
 public class AggregationOperation extends Operation {
@@ -39,6 +40,12 @@ public class AggregationOperation extends Operation {
                         new Fields(aggregation.getAggregatedFieldName()), //
                         new Fields(aggregation.getTargetFieldName()));
                 targetFieldClass = Long.class;
+        case MIN_STR:
+            aggregationPipe = new MinBy(aggregationPipe, //
+                    Fields.NONE, //
+                    new Fields(aggregation.getAggregatedFieldName()), //
+                    new Fields(aggregation.getTargetFieldName()));
+            targetFieldClass = String.class;
         default:
             break;
         }

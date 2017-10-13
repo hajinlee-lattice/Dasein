@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.period.PeriodStrategy;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
@@ -38,6 +39,7 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
         public Builder microServiceHostPort(String microServiceHostPort) {
             startExecutionConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
+            consolidateDataConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -70,6 +72,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder transactionIdField(String idField) {
             consolidateDataConfigurationBuilder.transactionIdField(idField);
+            return this;
+        }
+
+        public Builder periodStrategy(PeriodStrategy periodStrategy) {
+            consolidateDataConfigurationBuilder.periodStrategy(periodStrategy);
             return this;
         }
 

@@ -3,12 +3,14 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.period.PeriodStrategy;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateAccountDataStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateContactDataStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateProductDataStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateTransactionDataStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 
 public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -21,6 +23,7 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
         public ConsolidateContactDataStepConfiguration consolidateContactDataConfiguration = new ConsolidateContactDataStepConfiguration();
         public ConsolidateProductDataStepConfiguration consolidateProductDataConfiguration = new ConsolidateProductDataStepConfiguration();
         public ConsolidateTransactionDataStepConfiguration consolidateTransactionDataConfiguration = new ConsolidateTransactionDataStepConfiguration();
+        public AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("consolidateDataWorkflow", customerSpace,
@@ -29,6 +32,7 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
             consolidateContactDataConfiguration.setCustomerSpace(customerSpace);
             consolidateProductDataConfiguration.setCustomerSpace(customerSpace);
             consolidateTransactionDataConfiguration.setCustomerSpace(customerSpace);
+            awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -37,6 +41,12 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
             consolidateContactDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             consolidateProductDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             consolidateTransactionDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
+        public Builder microServiceHostPort(String microServiceHostPort) {
+            awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -57,6 +67,11 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
 
         public Builder transactionIdField(String idField) {
             consolidateTransactionDataConfiguration.setIdField(idField);
+            return this;
+        }
+
+        public Builder periodStrategy(PeriodStrategy periodStrategy) {
+            consolidateTransactionDataConfiguration.setPeriodStrategy(periodStrategy);
             return this;
         }
 
@@ -90,6 +105,7 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
             configuration.add(consolidateContactDataConfiguration);
             configuration.add(consolidateProductDataConfiguration);
             configuration.add(consolidateTransactionDataConfiguration);
+            configuration.add(awsPythonDataConfiguration);
             return configuration;
         }
     }

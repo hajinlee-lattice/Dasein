@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.common.exposed.period.PeriodStrategy;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
@@ -130,13 +131,13 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
                         .build()) //
                 .accountIdField(InterfaceName.Id.name()) //
-                .bucketAccount(
-                        dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile) != null) //
+                .bucketAccount(dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile) != null) //
                 .contactIdField(InterfaceName.Id.name()) //
                 .productIdField(InterfaceName.Id.name()) //
                 .bucketContact(dataCollectionProxy.getTable(customerSpace, //
                         TableRoleInCollection.ContactProfile) != null) //
                 .transactionIdField(InterfaceName.Id.name()) //
+                .periodStrategy(PeriodStrategy.CalendarQuarter) //
                 .bucketTransaction(true) //
                 .bucketProduct(true) //
                 .workflowContainerMem(workflowMemMb) //

@@ -38,12 +38,12 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         if (config.isCreateTimestampColumn()) {
             createTimestampColumns(config, sources);
         }
+        if (CollectionUtils.isNotEmpty(config.getCompositeKeys())) {
+            groupByKey = buildNewIdColumn(config, sources);
+        }
         dedupeSource(config, sources, groupByKey);
         if (sources.size() <= 1) {
             return sources.get(0);
-        }
-        if (CollectionUtils.isNotEmpty(config.getCompositeKeys())) {
-            groupByKey = buildNewIdColumn(config, sources);
         }
 
         Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();

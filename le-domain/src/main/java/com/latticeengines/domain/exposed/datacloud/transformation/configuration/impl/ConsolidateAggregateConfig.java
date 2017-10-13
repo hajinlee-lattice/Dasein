@@ -2,28 +2,31 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 
 import java.util.List;
 
+import com.latticeengines.common.exposed.period.PeriodStrategy;
+
 public class ConsolidateAggregateConfig extends TransformerConfig {
 
-    private String sumField;
-    private String countField;
+    private List<String> sumFields;
+    private List<String> countFields;
     private List<String> goupByFields;
     private String trxDateField;
+    private PeriodStrategy periodStrategy;
 
-    public String getSumField() {
+    public List<String> getSumFields() {
 
-        return this.sumField;
+        return this.sumFields;
     }
 
-    public void setSumField(String sumField) {
-        this.sumField = sumField;
+    public void setSumFields(List<String> sumFields) {
+        this.sumFields = sumFields;
     }
 
-    public String getCountField() {
-        return this.countField;
+    public List<String> getCountFields() {
+        return this.countFields;
     }
 
-    public void setCountField(String countField) {
-        this.countField = countField;
+    public void setCountField(List<String> countFields) {
+        this.countFields = countFields;
     }
 
     public List<String> getGoupByFields() {
@@ -40,5 +43,13 @@ public class ConsolidateAggregateConfig extends TransformerConfig {
 
     public String getTrxDateField() {
         return trxDateField;
+    }
+
+    public void setPeriodStrategy(PeriodStrategy periodStrategy) {
+        this.periodStrategy = periodStrategy;
+    }
+
+    public PeriodStrategy getPeriodStrategy() {
+        return periodStrategy;
     }
 }

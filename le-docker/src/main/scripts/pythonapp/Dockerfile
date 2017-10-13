@@ -9,4 +9,4 @@ RUN tar -xvzf leframework.tar.gz
 
 ENV PYTHON_PATH /opt/conda/bin:/:/leframework:$PYTHON_PATH
 
-#ENTRYPOINT ["/start.sh"]
+ENTRYPOINT ["/start.sh"]

@@ -13,8 +13,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +20,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -29,7 +28,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 @Component("transactionTableBuilder")
 public class TransactionTableBuilder {
 
-    private static final String TRANSACTION_DATE = "TransactionDate";
+    private static final String TRANSACTION_DATE = InterfaceName.TransactionDate.name();
     private static String regex = "^" + BusinessEntity.Transaction.name()
             + "_(?:[0-9]{2})?[0-9]{2}-[0-3]?[0-9]-[0-3]?[0-9]$";
     protected static Pattern pattern = Pattern.compile(regex);

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.AwsApsGeneratorStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateDataWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -25,7 +26,9 @@ public class ConsolidateDataWorkflow extends AbstractWorkflow<ConsolidateDataWor
     @Autowired
     private ConsolidateTransactionWrapper consolidateTransactionWrapper;
 
-    
+    @Autowired
+    private AwsApsGeneratorStep apsGenerator;
+
     @Bean
     public Job consolidateDataWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -38,6 +41,7 @@ public class ConsolidateDataWorkflow extends AbstractWorkflow<ConsolidateDataWor
                 .next(consolidateContactWrapper) //
                 .next(consolidateProductWrapper) //
                 .next(consolidateTransactionWrapper) //
+                .next(apsGenerator) //
                 .build();
     }
 }

@@ -14,10 +14,10 @@ import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.period.PeriodStrategy;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformationDeploymentTestNGBase {
 
@@ -73,7 +74,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         prepareCleanPod("PipelineConsolidateDeploymentTestNG");
     }
 
-    @AfterMethod(groups = "deployment")
+    // @AfterMethod(groups = "deployment")
     public void afterMethod() {
 
         cleanupProgressTables();
@@ -92,7 +93,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     public void testTableToTable() {
         targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
 
-        uploadAndRegisterTableSource(accountTableName, accountTableName, null, null);
+        // uploadAndRegisterTableSource(accountTableName, accountTableName,
+        // null, null);
         uploadAndRegisterTableSource(tableName1, tableName1, null, null);
         uploadAndRegisterTableSource(tableName2, tableName2, null, null);
         uploadAndRegisterTableSource(tableName3, tableName3, null, null);
@@ -103,7 +105,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         finish(progress);
 
         verifyMergedTable();
-        verifyHistoryTable();
+        // verifyHistoryTable();
         confirmResultFile(progress);
 
     }
@@ -141,7 +143,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
             List<TransformationStepConfig> subSteps1 = createSteps(tableName1, tableName2, 0, mergedTableName1,
                     aggregatedTableName1, historyTableName1);
-            List<TransformationStepConfig> subSteps2 = createSteps(tableName2, tableName3, 3, mergedTableName2,
+            List<TransformationStepConfig> subSteps2 = createSteps(tableName2, tableName3, 2, mergedTableName2,
                     aggregatedTableName2, historyTableName2);
 
             /* Final */
@@ -190,28 +192,29 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         step2.setConfiguration(getPartitionConfig());
 
         /* Step 3: calculate purchase history */
-        TransformationStepConfig step3 = new TransformationStepConfig();
-        step3.setInputSteps(Collections.singletonList(stepInput + 1));
-        baseSources = Arrays.asList(accountTableName);
-        step3.setBaseSources(baseSources);
-        SourceTable accountTable = new SourceTable(accountTableName, customerSpace);
-        baseTables = new HashMap<>();
-        baseTables.put(accountTableName, accountTable);
-        step3.setBaseTables(baseTables);
-        step3.setTransformer(DataCloudConstants.TRANSFORMER_TRANSACTION_AGGREGATOR);
+        // TransformationStepConfig step3 = new TransformationStepConfig();
+        // step3.setInputSteps(Collections.singletonList(stepInput + 1));
+        // baseSources = Arrays.asList(accountTableName);
+        // step3.setBaseSources(baseSources);
+        // SourceTable accountTable = new SourceTable(accountTableName,
+        // customerSpace);
+        // baseTables = new HashMap<>();
+        // baseTables.put(accountTableName, accountTable);
+        // step3.setBaseTables(baseTables);
+        // step3.setTransformer(DataCloudConstants.TRANSFORMER_TRANSACTION_AGGREGATOR);
+        //
+        // targetTable = new TargetTable();
+        // targetTable.setCustomerSpace(customerSpace);
+        // targetTable.setNamePrefix(historyTableName);
+        // step3.setTargetTable(targetTable);
+        // step3.setConfiguration(getHistoryConfig());
 
-        targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(historyTableName);
-        step3.setTargetTable(targetTable);
-        step3.setConfiguration(getHistoryConfig());
-
-        return Arrays.asList(step1, step2, step3);
+        return Arrays.asList(step1, step2);
     }
 
     private String getPartitionConfig() {
         ConsolidatePartitionConfig config = new ConsolidatePartitionConfig();
-        config.setNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
+        config.setNamePrefix(BusinessEntity.Transaction.name());
         config.setAggrNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
         config.setTimeField("TransactionTime");
         config.setTrxDateField("TransactionDate");
@@ -222,12 +225,11 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private String getAggregateConfig() {
         ConsolidateAggregateConfig config = new ConsolidateAggregateConfig();
-        config.setCountField("Quantity");
-        config.setSumField("Amount");
+        config.setSumFields(Arrays.asList("Amount", "Quantity"));
         config.setTrxDateField("TransactionDate");
         config.setGoupByFields(
                 Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType", "TransactionDate"));
-
+        config.setPeriodStrategy(PeriodStrategy.CalendarQuarter);
         return JsonUtils.serialize(config);
     }
 
@@ -268,7 +270,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         conf.setPeriods(periods);
         conf.setMetrics(metrics);
         return JsonUtils.serialize(conf);
-   }
+    }
 
     private void cleanupRegisteredTable(String tableName) {
         metadataProxy.deleteTable(customerSpace.toString(), tableName);
@@ -306,8 +308,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Integer rowCount = 0;
         Map<String, GenericRecord> recordMap = new HashMap<>();
         for (GenericRecord record : records) {
-            String id = String
-                    .valueOf(record.get(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name()));
+            String id = String.valueOf(record.get(InterfaceName.TransactionId.name()));
             recordMap.put(id, record);
             rowCount++;
         }
@@ -397,14 +398,14 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Assert.assertEquals(diskRecord.get("TransactionDate").toString(), "2017-08-17");
         Assert.assertEquals(diskRecord.get("ProductId").toString(), "1");
         Assert.assertEquals(diskRecord.get("TotalAmount").toString(), "30.0");
-        Assert.assertEquals(diskRecord.get("TotalQuantity").toString(), "3");
+        Assert.assertEquals(diskRecord.get("TotalQuantity").toString(), "3.0");
 
         Assert.assertEquals(keyboardRecord.get("AccountId").toString(), "3");
         Assert.assertEquals(keyboardRecord.get("TransactionType").toString(), "PurchaseHistory");
         Assert.assertEquals(keyboardRecord.get("TransactionDate").toString(), "2017-08-17");
         Assert.assertEquals(keyboardRecord.get("ProductId").toString(), "3");
         Assert.assertEquals(keyboardRecord.get("TotalAmount").toString(), "10.0");
-        Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1");
+        Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1.0");
     }
 
     @Test(groups = "deployment", enabled = false)
@@ -423,7 +424,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     private void uploadAccountTable() {
-        Object[][] data = {{ "1" }, { "2" }, { "3" }, { "4" }, { "5" }};
+        Object[][] data = { { "1" }, { "2" }, { "3" }, { "4" }, { "5" } };
 
         uploadDataToHdfs(data, accountFieldNames, accountClz,
                 "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + accountTableName + ".avro", accountTableName);

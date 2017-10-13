@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 @Component("consolidateTransactionData")
 public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateTransactionDataStepConfiguration> {
 
-    private static final String AGGREGATE_TABLE_KEY = "Aggregate";
+    protected static final String AGGREGATE_TABLE_KEY = "Aggregate";
     private static final String MASTER_TABLE_KEY = "Master";
     private static final String DELTA_TABLE_KEY = "Delta";
 
@@ -101,12 +101,12 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
     private String getAggregateConfig() {
         ConsolidateAggregateConfig config = new ConsolidateAggregateConfig();
-        config.setCountField(InterfaceName.Quantity.name());
-        config.setSumField(InterfaceName.Amount.name());
+        config.setSumFields(Arrays.asList("Amount", "Quantity"));
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setGoupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionDate.name()));
+        config.setPeriodStrategy(configuration.getPeriodStrategy());
         return appendEngineConf(config, lightEngineConfig());
     }
 
@@ -114,7 +114,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
-        config.setMasterIdField(InterfaceName.TransactionId.name());
+        setupConfig(config);
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(Collections.singleton(CREATION_DATE));
         config.setCompositeKeys(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
@@ -133,10 +133,12 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         aggregateTable = metadataProxy.getTable(customerSpace.toString(), aggrTableName);
 
         putObjectInContext(AGGREGATE_TABLE_KEY, aggregateTable);
-        Table masterTable = transactionTableBuilder.setupMasterTable(BusinessEntity.Transaction.name(), pipelineVersion, aggregateTable);
+        Table masterTable = transactionTableBuilder.setupMasterTable(BusinessEntity.Transaction.name(), pipelineVersion,
+                aggregateTable);
         putObjectInContext(MASTER_TABLE_KEY, masterTable);
         if (isBucketing()) {
-            Table deltaTable = transactionTableBuilder.setupDeltaTable(servingStoreTablePrefix, pipelineVersion, aggregateTable);
+            Table deltaTable = transactionTableBuilder.setupDeltaTable(servingStoreTablePrefix, pipelineVersion,
+                    aggregateTable);
             putObjectInContext(DELTA_TABLE_KEY, deltaTable);
         }
         super.onPostTransformationCompleted();

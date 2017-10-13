@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddNewColumnFuction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddCompositeColumnFuction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -65,7 +65,7 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
             if (fieldNames.contains(COMPOSITE_KEY)) {
                 continue;
             }
-            source = source.apply(new ConsolidateAddNewColumnFuction(keys, COMPOSITE_KEY), new FieldList(keys),
+            source = source.apply(new ConsolidateAddCompositeColumnFuction(keys, COMPOSITE_KEY), new FieldList(keys),
                     new FieldMetadata(COMPOSITE_KEY, String.class));
             sources.set(i, source);
         }

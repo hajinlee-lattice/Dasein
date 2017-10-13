@@ -3,8 +3,8 @@ package com.latticeengines.workflow.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -16,9 +16,9 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBat
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
-public abstract class BaseAwsBatchStep<T extends AWSBatchConfiguration> extends AbstractStep<T> implements
-        ApplicationContextAware {
-    private static Log log = LogFactory.getLog(BaseAwsBatchStep.class);
+public abstract class BaseAwsBatchStep<T extends AWSBatchConfiguration> extends AbstractStep<T>
+        implements ApplicationContextAware {
+    private static Logger log = LoggerFactory.getLogger(BaseAwsBatchStep.class);
 
     protected ApplicationContext applicationContext;
 

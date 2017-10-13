@@ -13,11 +13,11 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "serial" })
-public class ConsolidateAddNewColumnFuction extends BaseOperation implements Function {
+public class ConsolidateAddCompositeColumnFuction extends BaseOperation implements Function {
     private Map<String, Integer> namePositionMap;
     private List<String> fieldNames;
 
-    public ConsolidateAddNewColumnFuction(List<String> fieldNames, String targetField) {
+    public ConsolidateAddCompositeColumnFuction(List<String> fieldNames, String targetField) {
         super(new Fields(targetField));
         this.namePositionMap = getPositionMap(fieldNames);
         this.fieldNames = fieldNames;

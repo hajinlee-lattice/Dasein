@@ -57,7 +57,7 @@ class ApsDataLoader(object):
         logger.info("Start to uploadFromLocal data.")
         outputFiles = glob.glob("%s/*.avro" % localDir)
         for outputFile in outputFiles:
-            logger.info("Uploaded file from local=%s to remote=%s" % (outputFile, self.outputPath))
+            logger.info("Uploading file from local=%s to remote=%s" % (outputFile, self.outputPath))
             filePath, fileName = os.path.split(outputFile)
             self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
             logger.info("Uploaded file from local=%s to remote=%s" % (outputFile, self.outputPath))

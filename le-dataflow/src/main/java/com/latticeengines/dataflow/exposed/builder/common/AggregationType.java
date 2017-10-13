@@ -11,7 +11,8 @@ public enum AggregationType {
     COUNT(new FieldMetadata(Schema.Type.LONG, Long.class, null, null)), //
     AVG(new FieldMetadata(Schema.Type.DOUBLE, Double.class, null, null)), //
     FIRST, //
-    LAST;
+    LAST, //
+    MIN_STR;
 
     private FieldMetadata fieldMetadata;
 
