@@ -743,11 +743,11 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
-        table.addAttribute(attr(InterfaceName.CRMId.name()) //
+        table.addAttribute(attr(InterfaceName.SalesforceAccountID.name()) //
                 .allowedDisplayNames(
-                        Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
+                        Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "SALESFORCEACCOUNTID")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.CRMId) //
+                .interfaceName(InterfaceName.SalesforceAccountID) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -934,10 +934,10 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        table.addAttribute(attr(InterfaceName.CRMId.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
+        table.addAttribute(attr(InterfaceName.SalesforceAccountID.name()) //
+                .allowedDisplayNames(Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "SALESFORCEACCOUNTID")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.CRMId) //
+                .interfaceName(InterfaceName.SalesforceAccountID) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //

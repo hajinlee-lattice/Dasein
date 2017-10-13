@@ -87,6 +87,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.AccountId));
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.Website));
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.CompanyName));
+        Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.SalesforceAccountID));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testResolveMetadata", expectedExceptions = RuntimeException.class)
