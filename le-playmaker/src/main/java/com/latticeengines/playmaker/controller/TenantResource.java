@@ -18,6 +18,7 @@ import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Deprecated
 @Api(value = "Playmaker tenant api", description = "REST resource for managing playmaker tenants")
 @RestController
 @RequestMapping(value = "/playmaker/tenants")
