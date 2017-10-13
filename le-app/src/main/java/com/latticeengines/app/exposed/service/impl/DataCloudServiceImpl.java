@@ -39,7 +39,7 @@ public class DataCloudServiceImpl implements DataCloudService {
         CustomerReport customerReport = new CustomerReport();
         customerReport.setId(UUID.randomUUID().toString());
 
-        customerReport.setType(CustomerReportType.LOOkUP);
+        customerReport.setType(CustomerReportType.LOOKUP);
         customerReport.setCreatedTime(new Date());
         customerReport.setComment(reportRequest.getComment());
         customerReport.setReportedByTenant(MultiTenantContext.getCustomerSpace().getTenantId());

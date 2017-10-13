@@ -18,7 +18,7 @@ public class CustomerReportUnitTestNG {
         CustomerReport report = new CustomerReport();
         String id = UUID.randomUUID().toString();
         report.setId(id);
-        report.setType(CustomerReportType.LOOkUP);
+        report.setType(CustomerReportType.LOOKUP);
         report.setComment("this is test!");
         report.setCreatedTime(new Date());
         report.setReportedByUser("penglong.liu@lattice-engines.com");
@@ -37,7 +37,7 @@ public class CustomerReportUnitTestNG {
         CustomerReport equalReport = JsonUtils.deserialize(json, CustomerReport.class);
 
         Assert.assertEquals(id, equalReport.getId());
-        Assert.assertEquals(CustomerReportType.LOOkUP, equalReport.getType());
+        Assert.assertEquals(CustomerReportType.LOOKUP, equalReport.getType());
         Assert.assertTrue(equalReport.getReproduceDetail() instanceof IncorrectLookupReproduceDetail);
 
         IncorrectMatchedAttributeReproduceDetail matchDetail = new IncorrectMatchedAttributeReproduceDetail();

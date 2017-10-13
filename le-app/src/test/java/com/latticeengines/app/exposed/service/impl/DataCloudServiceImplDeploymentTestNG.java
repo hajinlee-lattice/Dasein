@@ -43,7 +43,7 @@ public class DataCloudServiceImplDeploymentTestNG extends AppTestNGBase {
         setupTestEnvironmentWithOneTenant();
         mainTestTenant = globalAuthFunctionalTestBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
-        createCustomerReport(CustomerReportType.LOOkUP);
+        createCustomerReport(CustomerReportType.LOOKUP);
         createCustomerReport(CustomerReportType.MATCHEDATTRIBUTE);
     }
 
@@ -81,7 +81,7 @@ public class DataCloudServiceImplDeploymentTestNG extends AppTestNGBase {
         matchedRequest.setMatchedKeys(matchedKeys);
         matchedRequest.setMatchedValue(matchedValue);
         matchedRequest.setMatchLog(matchLog);
-        if (type == CustomerReportType.LOOkUP) {
+        if (type == CustomerReportType.LOOKUP) {
             lookupCustomerReport = dataCloudService.reportIncorrectLookup(lookupRequest);
         } else {
             matchedCustomerReport = dataCloudService.reportIncorrectMatchedAttr(matchedRequest);
