@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
@@ -65,7 +66,10 @@ public class RecommendationCreator {
             recommendationService.create(recommendation);
 
             // insert recommendation in dante
-            danteLeadProxy.create(recommendation, playLaunchContext.getCustomerSpace().toString());
+            danteLeadProxy.create(
+                    new DanteLeadDTO(recommendation, playLaunchContext.getPlay(), //
+                            playLaunchContext.getPlayLaunch()), //
+                    playLaunchContext.getCustomerSpace().toString());
 
             // update corresponding counters
             playLaunchContext.getCounter().getContactLaunched().addAndGet(

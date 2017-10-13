@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -153,7 +154,7 @@ public class PlayLaunchInitStepMockedDeploymentTestNG extends AbstractTestNGSpri
     private void mockDanteLeadProxy() {
         doNothing() //
                 .when(danteLeadProxy) //
-                .create(any(Recommendation.class), anyString());
+                .create(any(DanteLeadDTO.class), anyString());
     }
 
     private void mockRecommendationService() {

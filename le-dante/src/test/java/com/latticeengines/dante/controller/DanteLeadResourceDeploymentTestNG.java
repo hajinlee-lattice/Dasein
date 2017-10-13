@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.dante.entitymgr.DanteLeadEntityMgr;
 import com.latticeengines.dante.testFramework.DanteTestNGBase;
 import com.latticeengines.domain.exposed.dante.DanteLead;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
@@ -40,7 +41,7 @@ public class DanteLeadResourceDeploymentTestNG extends DanteTestNGBase {
     @Test(groups = "deployment")
     public void TestCreateRecommendation() {
         Recommendation testRec = getTestRecommendation();
-        danteLeadProxy.create(testRec, mainTestCustomerSpace.toString());
+        danteLeadProxy.create(new DanteLeadDTO(testRec, testPlay, testPlayLaunch), mainTestCustomerSpace.toString());
 
         DanteLead fromDante = danteLeadEntityMgr.findByField("externalID", testRec.getId());
         Assert.assertNotNull(fromDante);

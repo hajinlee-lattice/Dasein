@@ -2,7 +2,7 @@ package com.latticeengines.proxy.exposed.dante;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.network.exposed.dante.DanteLeadInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -13,8 +13,8 @@ public class DanteLeadProxy extends MicroserviceRestApiProxy implements DanteLea
         super("/dante/leads");
     }
 
-    public void create(Recommendation recommendation, String customerSpace) {
+    public void create(DanteLeadDTO danteLeadDTO, String customerSpace) {
         String url = constructUrl("?customerSpace=" + customerSpace);
-        post("create", url, recommendation, Object.class);
+        post("create", url, danteLeadDTO, Object.class);
     }
 }

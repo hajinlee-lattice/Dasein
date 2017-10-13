@@ -1,7 +1,7 @@
 package com.latticeengines.dante.service;
 
-import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 
 public interface DanteLeadService {
-    void create(Recommendation recommendation, String customerSpace);
+    void create(DanteLeadDTO danteLeadDTO, String customerSpace);
 }

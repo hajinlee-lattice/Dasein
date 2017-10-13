@@ -39,7 +39,7 @@ public class DanteLead implements Serializable, HasDanteAuditingFields {
     private String accountExternalID;
 
     @Column(name = "Recommendation_ID")
-    private int recommendaitonID;
+    private int recommendationID;
 
     @Column(name = "Value", columnDefinition = "VARCHAR(max)")
     private String value;
@@ -89,12 +89,12 @@ public class DanteLead implements Serializable, HasDanteAuditingFields {
         this.accountExternalID = accountExternalID;
     }
 
-    public int getRecommendaitonID() {
-        return recommendaitonID;
+    public int getRecommendationID() {
+        return recommendationID;
     }
 
-    public void setRecommendaitonID(int recommendaitonID) {
-        this.recommendaitonID = recommendaitonID;
+    public void setRecommendationID(int recommendationID) {
+        this.recommendationID = recommendationID;
     }
 
     public String getValue() {

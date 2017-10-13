@@ -15,11 +15,10 @@ import com.latticeengines.dante.entitymgr.DanteLeadEntityMgr;
 import com.latticeengines.dante.service.DanteLeadService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteLead;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.domain.exposed.dante.DanteLeadNotionObject;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.playmakercore.Recommendation;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component("danteLeadService")
@@ -44,42 +43,38 @@ public class DanteLeadServiceImpl implements DanteLeadService {
     }
 
     @Override
-    public void create(Recommendation recommendation, String customerSpace) {
-        if (recommendation == null) {
+    public void create(DanteLeadDTO danteLeadDTO, String customerSpace) {
+        if (danteLeadDTO.getRecommendation() == null) {
             throw new LedpException(LedpCode.LEDP_38021, new String[] { customerSpace });
         }
-        Play play;
-        try {
-            play = internalResourceRestApiProxy.findPlayByName(CustomerSpace.parse(customerSpace),
-                    recommendation.getPlayId());
-            if (play == null) {
-                throw new LedpException(LedpCode.LEDP_38012, new String[] { recommendation.getPlayId() });
-            }
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38013, e);
+
+        if (danteLeadDTO.getPlayLaunch() == null) {
+            throw new LedpException(LedpCode.LEDP_38022, new String[] { customerSpace });
         }
 
         try {
-            danteLeadEntityMgr.create(convertForDante(recommendation, customerSpace, play));
+            danteLeadEntityMgr.create(convertForDante(danteLeadDTO, customerSpace));
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38020, e, new String[] { recommendation.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_38020, e, new String[] { danteLeadDTO.getRecommendation().getId(),
+                    danteLeadDTO.getPlay().getName(), customerSpace });
         }
     }
 
-    private DanteLead convertForDante(Recommendation recommendation, String customerSpace, Play play) {
+    private DanteLead convertForDante(DanteLeadDTO danteLeadDTO, String customerSpace) {
         DanteLead lead = new DanteLead();
         Date now = new Date();
-        lead.setAccountExternalID(recommendation.getLeAccountExternalID());
+        lead.setAccountExternalID(danteLeadDTO.getRecommendation().getLeAccountExternalID());
         lead.setCreationDate(now);
         lead.setCustomerID(CustomerSpace.parse(customerSpace).getTenantId());
-        lead.setExternalID(recommendation.getId());
+        lead.setExternalID(danteLeadDTO.getRecommendation().getId());
         lead.setLastModificationDate(now);
         lead.setSalesforceID(null);
-        lead.setAccountExternalID(recommendation.getSfdcAccountID());
+        lead.setAccountExternalID(danteLeadDTO.getRecommendation().getSfdcAccountID());
         /// TODO: Remove this once both BIS & DanteUI support String IDs
-        lead.setRecommendaitonID(recommendation.getPid().intValue());
+        lead.setRecommendationID(danteLeadDTO.getRecommendation().getPid().intValue());
         /// TODO: END
-        lead.setValue(JsonUtils.serialize(new DanteLeadNotionObject(recommendation, play)));
+        lead.setValue(JsonUtils.serialize(new DanteLeadNotionObject(danteLeadDTO.getRecommendation(),
+                danteLeadDTO.getPlay(), danteLeadDTO.getPlayLaunch())));
         return lead;
     }
 }

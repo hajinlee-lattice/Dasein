@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dante.service.DanteLeadService;
-import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.network.exposed.dante.DanteLeadInterface;
 
 import io.swagger.annotations.Api;
@@ -26,8 +26,7 @@ public class DanteLeadResource implements DanteLeadInterface {
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Get Dante accounts")
-    public void create(@RequestBody Recommendation recommendation,
-            @RequestParam("customerSpace") String customerSpace) {
-        danteLeadService.create(recommendation, customerSpace);
+    public void create(@RequestBody DanteLeadDTO danteLeadDTO, @RequestParam("customerSpace") String customerSpace) {
+        danteLeadService.create(danteLeadDTO, customerSpace);
     }
 }

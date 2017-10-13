@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 public class DanteLeadNotionObject {
 
@@ -105,14 +106,14 @@ public class DanteLeadNotionObject {
     public DanteLeadNotionObject() {
     }
 
-    public DanteLeadNotionObject(Recommendation recommendation, Play play) {
+    public DanteLeadNotionObject(Recommendation recommendation, Play play, PlayLaunch playLaunch) {
         baseExternalId = recommendation.getId();
         notionName = danteLeadNotionName;
         displayName = play.getDisplayName();
         analyticAttributes = null;
         expectedValue = null;
         externalProbability = null;
-        lastLaunched = play.getLaunchHistory().getMostRecentLaunch().getCreated();
+        lastLaunched = playLaunch.getCreated();
         lastModified = recommendation.getLastUpdatedTimestamp();
         leadId = baseExternalId;
         lift = null;

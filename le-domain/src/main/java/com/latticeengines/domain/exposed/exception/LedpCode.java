@@ -625,8 +625,9 @@ public enum LedpCode {
     LEDP_38017("Unable to delete Talkingpoints {0} due to an internal error"), //
     LEDP_38018("Talking point not associated with any Play"), //
     LEDP_38019("Failed to revert Talkingpoints for the play {0}, CustomerSpace {1}"), //
-    LEDP_38020("Unable to create lead in Dante for the recommendation {0}, CustomerSpace {1}"), //
-    LEDP_38021("Empty or null recommendation, Failed to create lead in dante for CustomerSpace {0}");
+    LEDP_38020("Unable to create lead in Dante for the recommendation {0}, play {1} ,CustomerSpace {2}"), //
+    LEDP_38021("Empty or null recommendation, Failed to create lead in dante for CustomerSpace {0}"), //
+    LEDP_38022("Empty or null play, Failed to create lead in dante for CustomerSpace {0}");
 
     private String message;
 
