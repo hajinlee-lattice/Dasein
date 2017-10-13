@@ -146,11 +146,17 @@ div.advanced-query-builder {
             .query-section-item-label {
                 background-color: rgba(150,150,150,.1);
                 border-right: 1px solid #ccc;
-                width: 2em;
+                min-width: 1.75em;
+                max-width: 1.75em;
                 padding-top: .9em;
                 text-align: center;
                 z-index: 1;
                 
+                strong {
+                    display: inline-block;
+                    color: rgb(51, 51, 51);
+                }
+
                 &,
                 & * {
                     cursor: move;
@@ -183,10 +189,18 @@ div.advanced-query-builder {
                         position: relative;
                         top: 0;
                         bottom: 0;
-                        margin: 0 -2px;
+                        margin: 0 -1px 0 -3px;
                         height: 100%;
                         border-top: none;
                         border-bottom: none;
+                                
+                        &.blue-button {
+                            border: none;
+                        }
+
+                        &.gray-button {
+                            border: none;
+                        }
                     }
                 }
 
@@ -202,19 +216,37 @@ div.advanced-query-builder {
                 .query-section-item-category {
                     padding-bottom: .2em;
                     font-size: .85em;
+                    
+                    strong {
+                        padding-right: 1em;
+                    }
                 }
 
                 .query-section-item-displayname {
                     clear: both;
                     
                     .query-section-item-name {
-
+                        margin-right: .25em;
                     }
 
                     .query-section-item-operation {
                         position: relative;
                         display: inline-block;
-                        margin: -4px .5em 0;
+                        margin: 0px .5em 0 0;
+                        
+                        .button-group {
+                            overflow: hidden;
+                            margin-top: 0px;
+                            
+                            button {
+                                padding: 0;
+                                height: 1.65em;
+                            }
+                        }
+
+                        span {
+                            margin: 0px .25em 0;
+                        }
                         
                         * {
                             cursor: default;
@@ -223,6 +255,7 @@ div.advanced-query-builder {
                         select {
                             height: 1.65em;
                             margin-right: 1em;
+                            max-width: 25em;
                         }
 
                         span.operation-and {
@@ -253,7 +286,7 @@ div.advanced-query-builder {
 
             .query-section-item-records {
                 border-right: none;
-                width: 12em;
+                width: 9.5em;
                 padding-top: .3em;
                 padding-left: 1em;
                 line-height: 1.4em;
@@ -311,9 +344,9 @@ div.advanced-query-builder {
                     display: none;
                 }
 
-                .query-section-item-label {
-                    display: none;
-                }
+                // .query-section-item-label strong {
+                //     visibility: hidden;
+                // }
                 
                 .query-section-item-unused {
                     display: block;

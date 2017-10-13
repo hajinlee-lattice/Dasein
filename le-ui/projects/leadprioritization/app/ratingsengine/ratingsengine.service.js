@@ -27,6 +27,85 @@ angular.module('lp.ratingsengine')
         this.type = null;
         this.coverage = {};
         this.savedSegment = "";
+
+        this.wizardProgressItems = {
+            "all": [
+                { 
+                    label: 'Segment', 
+                    state: 'segment', 
+                    nextLabel: 'Next, Choose Attributes', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    } 
+                },{ 
+                    label: 'Attributes', 
+                    state: 'segment.attributes', 
+                    nextLabel: 'Next, Set Rules'
+                },{ 
+                    label: 'Rules', 
+                    state: 'segment.attributes.rules', 
+                    nextLabel: 'Next, Summary', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveRules(nextState);
+                    } 
+                },{ 
+                    label: 'Summary', 
+                    state: 'segment.attributes.rules.summary', 
+                    nextLabel: 'Publish', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveSummary(nextState);
+                    }
+                }
+            ],
+            "segment": [
+                { 
+                    label: 'Segment', 
+                    state: 'segment', 
+                    nextLabel: 'Back To Dashboard', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    } 
+                }
+            ],
+            "attributes": [
+                { 
+                    label: 'Attributes', 
+                    state: 'segment.attributes', 
+                    nextLabel: 'Next, Set Rules'
+                },{ 
+                    label: 'Rules', 
+                    state: 'segment.attributes.rules', 
+                    nextLabel: 'Back To Dashboard', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveRules(nextState);
+                    }
+                }
+            ],
+            "rules": [
+                { 
+                    label: 'Attributes', 
+                    state: 'segment.attributes', 
+                    nextLabel: 'Next, Set Rules'
+                },{ 
+                    label: 'Rules', 
+                    state: 'segment.attributes.rules', 
+                    nextLabel: 'Back To Dashboard', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveRules(nextState);
+                    }
+                }
+            ],
+            "summary": [
+                { 
+                    label: 'Summary', 
+                    state: 'segment.attributes.rules.summary', 
+                    nextLabel: 'Back To Dashboard', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveSummary(nextState);
+                    }
+                }
+            ]
+        };
     }
 
     this.init();
@@ -41,6 +120,10 @@ angular.module('lp.ratingsengine')
 
     this.setValidation = function(type, value) {
         this.validation[type] = value;
+    }
+
+    this.getWizardProgressItems = function(step) {
+        return this.wizardProgressItems[(step || 'all')];
     }
 
     this.setSettings = function(obj) {
@@ -117,7 +200,7 @@ angular.module('lp.ratingsengine')
 
     this.hasRules = function(rating) {
         try {
-            if(Object.keys(rating.ratingModels[0].rule.ratingRule.bucketToRuleMap).length) {
+            if (Object.keys(rating.ratingModels[0].rule.ratingRule.bucketToRuleMap).length) {
                 return true;
             } else {
                 return false;
@@ -254,7 +337,6 @@ angular.module('lp.ratingsengine')
                 };
 
             object[type + '_restriction'] = SegmentStore.sanitizeSegmentRestriction([ bucket ])[0];
-            console.log('CoverageMap', object, type + '_restriction', label, SegmentStore.sanitizeSegmentRestriction([ bucket ]));
 
             return object;
         });

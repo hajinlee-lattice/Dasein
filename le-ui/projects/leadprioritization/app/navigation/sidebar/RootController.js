@@ -5,10 +5,12 @@ angular
         'mainApp.core.services.FeatureFlagService'
     ])
     .controller('SidebarRootController', function(
-        $scope, $rootScope, $state, FeatureFlagService, ResourceUtility, JobsStore, ModelRatingsService
+        $scope, $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, 
+        JobsStore, ModelRatingsService
     ) {
         $scope.$state = $state;
         $scope.ResourceUtility = ResourceUtility;
+        $scope.stateParams = $stateParams;
 
         $scope.handleSidebarToggle = function ($event) {
             var target = angular.element($event.target),

@@ -865,8 +865,8 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
   position: relative;
   display: inline-block;
   vertical-align: top;
-  width: 56px;
-  height: 20px;
+  width: 57px;
+  height: 21px;
   padding: 3px;
   background-color: white;
   border-radius: 18px;
@@ -901,7 +901,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 .switch-label:before, .switch-label:after {
   position: absolute;
   top: 50%;
-  margin-top: -.5em;
+  margin-top: -.35em;
   line-height: 1;
   -webkit-transition: inherit;
   -moz-transition: inherit;
@@ -937,7 +937,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
   top: 4px;
   left: 4px;
   width: 18px;
-  height: 18px;
+  height: 19px;
   background: white;
   border-radius: 10px;
   box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);

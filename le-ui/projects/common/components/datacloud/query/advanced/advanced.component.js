@@ -328,6 +328,7 @@ angular.module('common.datacloud.query.builder', [
             segmentId = CurrentRatingEngine.segment.name,
             map = {};
 
+// console.log('getRuleRecordCounts', restrictions);
         restrictions.forEach(function(bucket, index) {
             bucket.bucketRestriction.bkt.Cnt = -1;
 

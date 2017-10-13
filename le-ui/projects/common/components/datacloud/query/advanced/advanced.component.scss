@@ -145,10 +145,10 @@ div.advanced-query-builder {
     }
 
     .button-group {
-        margin: 0 0.75em 0 0.25em;
+        margin: 0 0.5em 0 0em;
 
         button {
-            border-radius: 3px;
+            border-radius: 0px;
             border-color: rgb(169, 169, 169);
         }
 
@@ -197,7 +197,7 @@ div.advanced-query-builder {
 
             &:last-child i {
                 margin-left: 0.1em;
-                margin-right: 0.25em;
+                margin-right: 0.35em;
             }
         }
     }

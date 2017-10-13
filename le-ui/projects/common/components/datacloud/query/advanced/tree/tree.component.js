@@ -27,7 +27,31 @@ angular
                 unused: false,
                 uniqueId: $scope.tree.$$hashKey,
                 editMode: 'Custom',
-                mouseDownTimer: false
+                mouseDownTimer: false,
+                cmp_operations: {
+                    'IS_NULL': 'Is Empty',
+                    'IS_NOT_NULL': 'Is Present',
+                    'EQUAL': 'Equal',
+                    'NOT_EQUAL': 'Not Equal',
+                    'GREATER_THAN': 'Greater Than',
+                    'GREATER_OR_EQUAL': 'Greater or Equal',
+                    'LESS_THAN': 'Less Than',
+                    'LESS_OR_EQUAL': 'Less or Equal',
+                    'IN_COLLECTION': 'In Collection',
+                    'CONTAINS': 'Contains',
+                    'NOT_CONTAINS': 'Not Contains',
+                    'STARTS_WITH': 'Starts With',
+                    'GTE_AND_LTE': 'Greater Or Equal and Less Or Equal',
+                    'GTE_AND_LT': 'Greater Or Equal and Less Than',
+                    'GT_AND_LTE': "Greater Than and Less Or Equal",
+                    'GT_AND_LT': "Greater Than and Less Than"
+                },
+                two_inputs: [
+                    'GTE_AND_LTE',
+                    'GTE_AND_LT',
+                    'GT_AND_LTE',
+                    'GT_AND_LT'
+                ]
             });
 
             vm.init = function (type, value) {
@@ -50,12 +74,11 @@ angular
                         vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
                         vm.type = vm.item.cube.Bkts.Type;
                         vm.label = vm.item.topbkt.Lbl;
-                        vm.range = vm.item.topbkt.Rng;
+                        vm.range = vm.item.topbkt.Vals;
                         
-                        vm.setOperation(vm.item, vm.type, vm.label, vm.range);
+                        //vm.setOperation(vm.item, vm.type, vm.label, vm.range);
 
                         if (typeof vm.tree.bucketRestriction.bkt.Id != "number") {
-                            //vm.tree.bucketRestriction.bkt.Id = vm.tree.labelGlyph;
                             vm.unused = true;
                         }
                     }
@@ -63,28 +86,28 @@ angular
             }
 
             vm.setOperation = function(item, type, label, range) {
-                if (type == 'Numerical') {
-                    if (range) {
-                        if (range[0] != null && range[1] != null && range[0] === range[1]) {
-                            vm.operation = 'is';
-                        } else if (range[0] != null && range[1] != null) {
-                            vm.operation = 'between';
-                        } else if (range[0] == null) {
-                            vm.operation = 'less';
-                        } else if (range[1] == null) {
-                            vm.operation = 'greater_equal';
-                        } else {
-                            vm.operation = 'empty';
-                        }
-                    } else {
-                        vm.operation = 'empty';
-                    }
-                }
+                // if (type == 'Numerical') {
+                //     if (range) {
+                //         if (range[0] != null && range[1] != null && range[0] === range[1]) {
+                //             vm.operation = 'is';
+                //         } else if (range[0] != null && range[1] != null) {
+                //             vm.operation = 'between';
+                //         } else if (range[0] == null) {
+                //             vm.operation = 'less';
+                //         } else if (range[1] == null) {
+                //             vm.operation = 'greater_equal';
+                //         } else {
+                //             vm.operation = 'empty';
+                //         }
+                //     } else {
+                //         vm.operation = 'empty';
+                //     }
+                // }
             }
 
             vm.checkSelected = function(bucket) {
-                console.log(bucket);
-                if (bucket.Rng && bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]) {
+                // console.log(bucket);
+                if (bucket.Vals && bucket.Vals[0] == vm.range[0] && bucket.Vals[1] == vm.range[1]) {
                     //console.log('selected', (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]), bucket.Rng[0], vm.range[0], bucket.Rng[1], vm.range[1], bucket, vm.range);
                     vm.presetOperation = bucket.Lbl;
                 }
@@ -97,45 +120,64 @@ angular
                 var restriction = vm.tree.bucketRestriction.bkt;
                 var bkt = angular.copy(bucket);
 
-                restriction.Cnt = bkt.Cnt;
+                restriction.Cmp = bkt.Cmp;
                 restriction.Id = bkt.Id;
+                restriction.Cnt = bkt.Cnt;
                 restriction.Lbl = bkt.Lbl;
-                restriction.Rng[0] = bkt.Rng[0];
-                restriction.Rng[1] = bkt.Rng[1];
 
-                vm.setOperation(null, 'Numerical', null, bkt.Rng) 
-                //console.log(label, bucket, buckets, restriction);
+                if (bkt.Vals[0]) {
+                    if (restriction.Vals[0]) {
+                        restriction.Vals[0] = bkt.Vals[0];
+                    } else {
+                        restriction.Vals = [ bkt.Vals[0] ];
+                    }
+                } else if (restriction.Vals[0]) {
+                    restriction.Vals.length = 0;
+                }
+
+
+                if (bkt.Vals[1]) {
+                    if (restriction.Vals[1]) {
+                        restriction.Vals[1] = bkt.Vals[1];
+                    } else {
+                        restriction.Vals.push(bkt.Vals[1])
+                    }
+                } else if (restriction.Vals[1]) {
+                    restriction.Vals.splice(1,1);
+                }
+
+                //vm.setOperation(null, 'Numerical', null, bkt.Rng) 
             }
 
             vm.changeOperation = function() {
-                if (!vm.item.topbkt.Rng) {
-                    vm.item.topbkt.Rng = [null, null];
-                }
+                // if (!vm.item.topbkt.Rng) {
+                //     vm.item.topbkt.Rng = [null, null];
+                // }
 
-                switch (vm.operation) {
-                    case 'is':
-                        vm.item.topbkt.Rng = [ vm.item.topbkt.Rng[0], vm.item.topbkt.Rng[0] ];
-                        vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0];
-                        break;
-                    case 'between': 
-                        vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0] + ' - ' + vm.item.topbkt.Rng[1];
-                        break;
-                    case 'less': 
-                        vm.item.topbkt.Rng[0] = null;
-                        vm.item.topbkt.Lbl = '< ' + vm.item.topbkt.Rng[1];
-                        break;
-                    case 'greater_equal': 
-                        vm.item.topbkt.Rng[1] = null;
-                        vm.item.topbkt.Lbl = '>= ' + vm.item.topbkt.Rng[0];
-                        break;
-                    case 'empty': 
-                        vm.item.topbkt.Rng = null;
-                        vm.item.topbkt.Lbl = null;
-                        break;
-                }
+                // switch (vm.operation) {
+                //     case 'is':
+                //         vm.item.topbkt.Rng = [ vm.item.topbkt.Rng[0], vm.item.topbkt.Rng[0] ];
+                //         vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0];
+                //         break;
+                //     case 'between': 
+                //         vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0] + ' - ' + vm.item.topbkt.Rng[1];
+                //         break;
+                //     case 'less': 
+                //         vm.item.topbkt.Rng[0] = null;
+                //         vm.item.topbkt.Lbl = '< ' + vm.item.topbkt.Rng[1];
+                //         break;
+                //     case 'greater_equal': 
+                //         vm.item.topbkt.Rng[1] = null;
+                //         vm.item.topbkt.Lbl = '>= ' + vm.item.topbkt.Rng[0];
+                //         break;
+                //     case 'empty': 
+                //         vm.item.topbkt.Rng = null;
+                //         vm.item.topbkt.Lbl = null;
+                //         break;
+                // }
 
-                vm.updateBucketCount();
-                vm.range = vm.item.topbkt.Rng;
+                // vm.updateBucketCount();
+                // vm.range = vm.item.topbkt.Rng;
             }
 
             vm.getOperationLabel = function(operation) {
@@ -149,13 +191,29 @@ angular
                     "less_equal": "is less than",
                     "greater": "is greater than",
                     "greater_equal": "is greater than",
-                    "between": "is between"
+                    "between": "is between",
+                    'IS_NULL': 'is empty',
+                    'IS_NOT_NULL': 'is present',
+                    'EQUAL': 'equal',
+                    'NOT_EQUAL': 'not equal',
+                    'GREATER_THAN': 'greater than',
+                    'GREATER_OR_EQUAL': 'greater or equal',
+                    'LESS_THAN': 'less than',
+                    'LESS_OR_EQUAL': 'less or equal',
+                    'IN_COLLECTION': 'in collection',
+                    'CONTAINS': 'contains',
+                    'NOT_CONTAINS': 'not contains',
+                    'STARTS_WITH': 'starts with',
+                    'GTE_AND_LTE': 'greater or equal and less or equal',
+                    'GTE_AND_LT': 'greater or equal and less than',
+                    'GT_AND_LTE': "greater than and less or equal",
+                    'GT_AND_LT': "greater than and less than"
                 };
 
                 switch (vm.type) {
-                    case 'Boolean': return map[vm.item.topbkt.Lbl];
-                    case 'Numerical': return map[vm.operation];
-                    case 'Enum': return 'has a value of';
+                    case 'Boolean': return map[vm.item.topbkt.Vals[0]];
+                    case 'Numerical': return map[vm.item.topbkt.Cmp];
+                    case 'Enum': return 'is';
                     default: 
                         //console.log('unknown type', vm.type, vm.label, vm.operation, vm.item);
                         return 'has a value of';
@@ -183,12 +241,12 @@ angular
                 if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum')) {
                     if (vm.unused) {
                         vm.unused = false;
-
+console.log(vm.label, vm.type, vm.item.DisplayName, vm.item);
                         vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
                         vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
 
                         vm.label = vm.item.topbkt.Lbl;
-                        vm.range = vm.item.topbkt.Rng;
+                        vm.range = vm.item.topbkt.Vals;
 
                         vm.setOperation(vm.item, vm.type, vm.label, vm.range);
                     }
@@ -199,6 +257,7 @@ angular
             }
 
             vm.updateBucketCount = function() {
+                console.log('updateBucketCount', vm.item.DisplayName, vm.item, vm);
                 if (vm.root.mode == 'rules') {
                     vm.root.getRuleRecordCounts([ vm.tree ]);
                 } else {
@@ -224,6 +283,7 @@ angular
                 vm.mouseDownTimer = $timeout(function() {
                     vm.root.draggedItem = vm;
                     vm.mouseDownTimer = false;
+                    vm.unused = true;
                 }, 333);
             }
 
@@ -238,6 +298,7 @@ angular
                     if (dropped) {
                         this.root.saveState();
                         vm.root.dropMoveItem(dragged, dropped);
+                        vm.unused = false;
                     }
                 }
 

@@ -101,7 +101,6 @@ angular
             resolve: {
                 Rating: function($q, $stateParams, RatingsEngineStore) {
                     var deferred = $q.defer();
-
                     var rating_id = $stateParams.rating_id || RatingsEngineStore.getRatingId();
 
                     RatingsEngineStore.getRatingDashboard(rating_id).then(function(data) {
@@ -137,7 +136,10 @@ angular
             }
         })
         .state('home.ratingsengine.wizard', {
-            url: '/wizard/:rating_id',
+            url: '/wizard/:rating_id/:wizard_steps',
+            params: {
+                wizard_steps: 'all'
+            },
             resolve: {
                 WizardValidationStore: function(RatingsEngineStore) {
                     return RatingsEngineStore;
@@ -145,13 +147,11 @@ angular
                 WizardProgressContext: function() {
                     return 'ratingsengine';
                 },
-                WizardProgressItems: function(RatingsEngineStore) {
-                    return [
-                        { label: 'Segment', state: 'segment', nextLabel: 'Next, Choose Attributes', nextFn: RatingsEngineStore.nextSaveRatingEngine },
-                        { label: 'Attributes', state: 'segment.attributes', nextLabel: 'Next, Set Rules'},
-                        { label: 'Rules', state: 'segment.attributes.rules', nextLabel: 'Next, Summary', nextFn: RatingsEngineStore.nextSaveRules },
-                        { label: 'Summary', state: 'segment.attributes.rules.summary', nextLabel: 'Publish', nextFn: RatingsEngineStore.nextSaveSummary }
-                    ];
+                WizardProgressItems: function($stateParams, RatingsEngineStore) {
+                    var rating_id = $stateParams.rating_id || '';
+                    var wizard_steps = $stateParams.wizard_steps;
+
+                    return RatingsEngineStore.getWizardProgressItems(wizard_steps || 'all', rating_id);
                 }
             },
             views: {
@@ -187,7 +187,7 @@ angular
                                 backState: 'home.ratingsengine', 
                                 nextState: 'home.ratingsengine.dashboard'
                             };
-                        },
+                        }
                     },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
@@ -227,7 +227,7 @@ angular
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
                 }
-            },
+            }
         })
         .state('home.ratingsengine.wizard.segment.attributes', {
             url: '/attributes',
@@ -328,7 +328,7 @@ angular
                 //     controllerAs: 'vm',
                 //     templateUrl: 'app/ratingsengine/content/attributes/attributes.component.html'
                 // }
-            },
+            }
         })
         .state('home.ratingsengine.wizard.segment.attributes.rules', {
             url: '/rules',
@@ -364,40 +364,39 @@ angular
                 }
             }
         })
-        .state('home.ratingsengine.wizard.segment.attributes.rules_dashboard', {
-            url: '/rules_dashboard',
-            params: {
-                pageIcon: 'ico-model',
-                pageTitle: 'Rating Engine - Rules'
-            },
-            resolve: {
-                Cube: function($q, DataCloudStore){
-                    var deferred = $q.defer();
-
-                    DataCloudStore.getCube().then(function(result) {
-                        deferred.resolve(result.data.Stats);
-                    });
-                    
-                    return deferred.promise;
-                },
-                RatingEngineModel: function(DataCloudStore, RatingsEngineModels) {
-                    var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
-
-                    if (selectedAttributes) {
-                        RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
-                    }
-
-                    return RatingsEngineModels;
-                }
-            },
-            views: {
-                '@main': {
-                    controller: 'AdvancedQueryCtrl',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
-                }
-            }
-        })
+        // .state('home.ratingsengine.wizard.segment.attributes.rules_dashboard', {
+        //     url: '/rules_dashboard',
+        //     params: {
+        //         pageIcon: 'ico-playbook',
+        //         pageTitle: 'Rating Engine - Rules'
+        //     },
+        //     resolve: {
+        //         Cube: function($q, DataCloudStore){
+        //             var deferred = $q.defer();
+        //             DataCloudStore.getCube().then(function(result) {
+        //                 deferred.resolve(result.data.Stats);
+        //             });
+        //             return deferred.promise;
+        //         },
+        //         RatingEngineModel: function(DataCloudStore, RatingsEngineModels) {
+        //             var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
+        //             if (selectedAttributes) {
+        //                 RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
+        //             }
+        //             return RatingsEngineModels;
+        //         }
+        //     },
+        //     views: {
+        //         'main@': {
+        //             template: '<section class="container"><div class="row columns twelve box-outline wizard-content"><div class="section-body with-padding row" ui-view="dashboard_rules"></div></div></section>'
+        //         },
+        //         'wizard_content@home.ratingsengine.wizard': {
+        //             controller: 'AdvancedQueryCtrl',
+        //             controllerAs: 'vm',
+        //             templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
+        //         }
+        //     }
+        // })
         .state('home.ratingsengine.wizard.segment.attributes.rules.summary', {
             url: '/summary',
             params: {
@@ -421,6 +420,6 @@ angular
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/summary/summary.component.html'
                 }
-            },
+            }
         });
 });

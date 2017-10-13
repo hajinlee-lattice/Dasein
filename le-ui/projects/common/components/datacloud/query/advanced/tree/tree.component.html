@@ -77,33 +77,32 @@
             ng-class="{ 
                 'cursor-pointer': vm.type != 'Enum'
             }">
-        <span class="query-section-item-category">{{vm.item.Category}}{{vm.item.Subcategory != 'Other' ? ' - ' + vm.item.Subcategory : ''}}</span>
+        <span class="query-section-item-category">
+            <strong ng-if="vm.editing">{{vm.item.DisplayName}}</strong>
+            <span>{{vm.item.Category}}{{vm.item.Subcategory != 'Other' ? ' - ' + vm.item.Subcategory : ''}}</span>
+        </span>
         
         <span class="query-section-item-displayname">
-            <span class="query-section-item-name"><strong>{{vm.item.DisplayName}}</strong></span>
+            <span class="query-section-item-name" ng-if="!vm.editing"><strong>{{vm.item.DisplayName}}</strong></span>
             
             <span class="item-edit-bucket-data" ng-if="vm.editing && !vm.unused">
 
                 <span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
-                    <select ng-model="vm.item.topbkt.Lbl" ng-change="vm.updateBucketCount()">
+                    <select ng-model="vm.item.topbkt.Vals[0]" ng-change="vm.updateBucketCount()">
                         <option value="Yes">is</option>
                         <option value="No">is not</option>
                         <option value="">is empty</option>
                     </select>
 
-                    <span class="query-section-item-value" ng-if="vm.item.topbkt.Lbl != ''">
+                    <span class="query-section-item-value" ng-if="vm.item.topbkt.Vals[0] != ''">
                         <strong>Yes</strong>
                     </span>
                 </span>
 
                 <span ng-if="vm.type == 'Enum'" class="query-section-item-operation">
-                    <select ng-model="vm.item.topbkt.Lbl" ng-change="vm.updateBucketCount()">
+                    <select ng-model="vm.item.topbkt.Vals[0]" ng-change="vm.updateBucketCount()">
                             <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
                     </select>
-
-                    <span class="query-section-item-value" ng-if="vm.item.topbkt.Lbl != ''">
-                        <strong>Yes</strong>
-                    </span>
                 </span>
 
                 <span ng-if="vm.type == 'Numerical'" class="query-section-item-operation">
@@ -123,22 +122,18 @@
                     </div>
 
                     <span ng-if="vm.editMode == 'Custom'">
-                        <select ng-model="vm.operation" ng-change="vm.changeOperation()">
-                            <option value="is">is</option>
-                            <option value="between">is between</option>
-                            <option value="less">is less than</option>
-                            <option value="greater_equal">is greater than</option>
-                            <option value="empty">is empty</option>
+                        <select ng-model="vm.item.topbkt.Cmp" 
+                                ng-change="vm.changeOperation()"
+                                ng-options="k as v for (k, v) in vm.cmp_operations">
                         </select>
 
-                        <input  ng-if="vm.operation != 'less' && vm.operation != 'empty'" 
-                                ng-model="vm.range[0]" 
+                        <input  ng-model="vm.range[0]" 
                                 ng-keyup="vm.changeOperation()"
                                 ng-value="vm.range[0]"></input>
 
-                        <span ng-if="vm.operation == 'between'" class="operation-and">-</span>
+                        <span ng-if="vm.two_inputs.indexOf(vm.item.topbkt.Cmp) >= 0" class="operation-and">-</span>
                         
-                        <input  ng-if="vm.operation != 'is' && vm.operation != 'empty' && vm.operation != '' && vm.operation != 'greater_equal'" 
+                        <input  ng-if="vm.two_inputs.indexOf(vm.item.topbkt.Cmp) >= 0" 
                                 ng-model="vm.range[1]" 
                                 ng-keyup="vm.changeOperation()"
                                 ng-value="vm.range[1]"></input>
@@ -154,20 +149,20 @@
 
             <span class="item-bucket-data" ng-if="!vm.editing && !vm.unused">
                 <span class="query-section-item-operation">
-                    <span class="query-section-item-operation">{{vm.getOperationLabel()}}</span>
+                    <span class="query-section-item-operation"><span>{{vm.getOperationLabel()}}</span></span>
 
-                    <span class="query-section-item-value" ng-if="vm.type == 'Boolean' && vm.item.topbkt.Lbl != ''">
+                    <span class="query-section-item-value" ng-if="vm.type == 'Boolean' && vm.item.topbkt.Vals[0] != ''">
                         <strong>Yes</strong>
                     </span>
 
                     <span class="query-section-item-value" ng-if="vm.type == 'Numerical'">
-                        <strong ng-if="vm.range[0] != null && vm.operation != 'empty'">{{vm.range[0]}}</strong>
-                        <span ng-if="(vm.range[0] != null && vm.range[1] != null) && vm.operation == 'between'" class="operation-and">-</span>
-                        <strong ng-if="vm.range[1] != null && vm.operation != 'empty' && vm.operation != 'is'">{{vm.range[1]}}</strong>
+                        <strong>{{vm.range[0]}}</strong>
+                        <span ng-if="vm.two_inputs.indexOf(vm.item.topbkt.Cmp) >= 0" class="operation-and">-</span>
+                        <strong ng-if="vm.two_inputs.indexOf(vm.item.topbkt.Cmp) >= 0">{{vm.range[1]}}</strong>
                     </span>
 
                     <span class="query-section-item-value" ng-if="vm.type == 'Enum'">
-                        <strong>{{vm.item.topbkt.Lbl}}</strong>
+                        <strong ng-repeat="value in vm.item.topbkt.Vals">{{ value }}</strong>
                     </span>
                 </span>
             </span>
@@ -176,13 +171,13 @@
         <span class="item-edit-controls" ng-if="vm.editing && !vm.unused">
             <button class="button blue-button set-button" 
                     ng-click="vm.setBucket($event)">SET</button>
-            <button class="button white-button unset-button" 
+            <button class="button gray-button unset-button" 
                     ng-if="vm.root.mode == 'rules'"
                     ng-click="vm.setBucket($event, true)">UNSET</button>
         </span>
     </div>
 
-    <div class="query-section-item-records" ng-if="!vm.unused">
+    <div class="query-section-item-records" ng-if="!vm.unused && !vm.editing">
         <span class="query-section-item-records-label">RECORDS</span>
         
         <span ng-if="vm.tree.bucketRestriction.bkt.Cnt >= 0" class="query-section-item-records-number">
