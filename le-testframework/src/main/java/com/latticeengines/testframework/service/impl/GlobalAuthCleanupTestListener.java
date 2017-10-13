@@ -64,7 +64,7 @@ public class GlobalAuthCleanupTestListener implements ITestListener {
                 log.info("Cleanup PLS and HDFS.");
                 testBed.cleanupPlsHdfs();
                 log.info("Cleanup Redshift.");
-                testBed.cleanupPlsHdfs();
+                testBed.cleanupRedshift();
             }
         } else {
             log.warn("Did not find any GlobalAuthTestBed instance in test context.");
