@@ -148,6 +148,13 @@ public class RedshiftServiceImpl implements RedshiftService {
     }
 
     @Override
+    public void cloneTable(String srcTable, String tgtTable) {
+        log.info("Clone table " + srcTable + " to " + tgtTable);
+        redshiftJdbcTemplate.execute(String.format("CREATE TABLE %s (LIKE %s)", tgtTable, srcTable));
+        redshiftJdbcTemplate.execute(String.format("INSERT INTO %s (SELECT * FROM %s)", tgtTable, srcTable));
+    }
+
+    @Override
     public List<String> getTables(String prefix) {
         String sql = "SELECT DISTINCT tablename FROM pg_table_def WHERE schemaname = 'public'";
         if (StringUtils.isNotBlank(prefix)) {

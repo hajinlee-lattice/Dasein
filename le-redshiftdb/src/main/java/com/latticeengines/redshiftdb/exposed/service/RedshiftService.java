@@ -13,6 +13,8 @@ public interface RedshiftService {
 
     void dropTable(String tableName);
 
+    void cloneTable(String srcTable, String tgtTable);
+
     void createStagingTable(String stageTableName, String targetTableName);
 
     void updateExistingRowsFromStagingTable(String stageTableName, String targetTableName, String... joinFields);
