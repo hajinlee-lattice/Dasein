@@ -18,6 +18,7 @@ import org.apache.http.message.BasicHeader;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 public class HttpClientUtils {
@@ -108,10 +109,31 @@ public class HttpClientUtils {
             System.exit(1);
         }
         try {
-            RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+            RestTemplate restTemplate = new RestTemplate();
+            SSLUtils.turnOffSSLNameVerification();
             String content = restTemplate.getForObject(args[0], String.class);
             System.out.println(content.substring(0, Math.min(content.length(), 1000)));
             System.out.println("Successfully connected");
+
+            SSLUtils.turnOnSSLNameVerification();
+            try {
+                content = restTemplate.getForObject(args[0], String.class);
+            } catch (ResourceAccessException e) {
+                System.out.println("Got ResourceAccessException as expected.");
+            }
+
+            SSLUtils.turnOffSSLNameVerification();
+            content = restTemplate.getForObject(args[0], String.class);
+            System.out.println(content.substring(0, Math.min(content.length(), 1000)));
+            System.out.println("Successfully connected");
+
+
+            restTemplate = HttpClientUtils.newRestTemplate();
+            SSLUtils.turnOffSSLNameVerification();
+            content = restTemplate.getForObject(args[0], String.class);
+            System.out.println(content.substring(0, Math.min(content.length(), 1000)));
+            System.out.println("Successfully connected");
+
         } catch (Exception exception) {
             exception.printStackTrace();
         }

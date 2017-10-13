@@ -17,19 +17,13 @@ public class ThreadPoolUtils {
     }
 
     public static ForkJoinPool getForkJoinThreadPool(String name, int size) {
-
         // custom workerThreadFactory for ensuring specified thread name prefix
         ForkJoinWorkerThreadFactory workerThreadFactory = //
-                new ForkJoinWorkerThreadFactory() {
-                    @Override
-                    public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-
-                        ForkJoinWorkerThread thread = //
-                                ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-                        thread.setName(String.format("%s-%d", name, thread.getPoolIndex()));
-
-                        return thread;
-                    }
+                pool -> {
+                    ForkJoinWorkerThread thread = //
+                            ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+                    thread.setName(String.format("%s-%d", name, thread.getPoolIndex()));
+                    return thread;
                 };
         return new ForkJoinPool(size, workerThreadFactory, null, false);
     }

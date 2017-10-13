@@ -164,16 +164,25 @@ public class OAuth2Utils {
             synchronized (OAuth2Utils.class) {
                 try {
                     SecurityContextHolder.clearContext();
-                    SSLUtils.turnOffSSLNameVerification();
-                    return oAuth2RestTemplate.getAccessToken();
+                    return getAccessTokenInternal(oAuth2RestTemplate);
                 } finally {
                     SecurityContextHolder.setContext(securityContext);
                 }
             }
         } else {
-            SSLUtils.turnOffSSLNameVerification();
-            return oAuth2RestTemplate.getAccessToken();
+            return getAccessTokenInternal(oAuth2RestTemplate);
         }
+    }
+
+    private static OAuth2AccessToken getAccessTokenInternal(OAuth2RestTemplate oAuth2RestTemplate) {
+        OAuth2AccessToken token;
+        SSLUtils.turnOffSSLNameVerification();
+        try {
+            token = oAuth2RestTemplate.getAccessToken();
+        } finally {
+            SSLUtils.turnOnSSLNameVerification();
+        }
+        return token;
     }
 
     public static String generatePassword() {
