@@ -140,6 +140,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         LaunchSummary summary = new LaunchSummary();
 
         Stats stats = new Stats();
+        stats.setSelectedTargets(getCount(launch.getAccountsSelected()));
         stats.setContactsWithinRecommendations(getCount(launch.getContactsLaunched()));
         stats.setErrors(getCount(launch.getAccountsErrored()));
         stats.setRecommendationsLaunched(getCount(launch.getAccountsLaunched()));

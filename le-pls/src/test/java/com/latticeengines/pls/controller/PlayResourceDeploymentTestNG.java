@@ -180,8 +180,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        internalResourceRestApiProxy.updatePlayLaunch(CustomerSpace.parse(tenant.getId()), name,
+        internalResourceRestApiProxy.updatePlayLaunch(CustomerSpace.parse(tenant.getId()), name, //
                 playLaunch.getLaunchId(), LaunchState.Launched);
+        internalResourceRestApiProxy.updatePlayLaunchProgress(CustomerSpace.parse(tenant.getId()), //
+                name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L, 0L, 2L);
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Canceled + "&launchStates="
@@ -212,6 +214,16 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId(), PlayLaunch.class);
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
+        assertLaunchStats(retrievedLaunch.getAccountsSelected(), 10L);
+        assertLaunchStats(retrievedLaunch.getAccountsLaunched(), 8L);
+        assertLaunchStats(retrievedLaunch.getContactsLaunched(), 25L);
+        assertLaunchStats(retrievedLaunch.getAccountsErrored(), 0L);
+        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), 2L);
+    }
+
+    private void assertLaunchStats(Long count, long expectedVal) {
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count.longValue(), expectedVal);
     }
 
     @SuppressWarnings("unchecked")

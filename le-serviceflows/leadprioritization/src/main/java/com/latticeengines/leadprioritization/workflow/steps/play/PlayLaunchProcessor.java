@@ -217,12 +217,12 @@ public class PlayLaunchProcessor {
 
     private void updateLaunchProgress(PlayLaunchContext playLaunchContext) {
         try {
-            Tenant tenant = playLaunchContext.getTenant();
             PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
-            internalResourceRestApiProxy.updatePlayLaunchProgress(tenant.getId(), //
+            internalResourceRestApiProxy.updatePlayLaunchProgress(playLaunchContext.getCustomerSpace(), //
                     playLaunch.getPlay().getName(), playLaunch.getLaunchId(), playLaunch.getLaunchCompletionPercent(),
-                    playLaunch.getAccountsLaunched(), playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
+                    playLaunch.getAccountsSelected(), playLaunch.getAccountsLaunched(),
+                    playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
                     playLaunch.getAccountsSuppressed());
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);

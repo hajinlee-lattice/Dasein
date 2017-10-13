@@ -1327,6 +1327,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @RequestParam("launchCompletionPercent") double launchCompletionPercent, //
+            @RequestParam("accountsSelected") long accountsSelected, //
             @RequestParam("accountsLaunched") long accountsLaunched, //
             @RequestParam("contactsLaunched") long contactsLaunched, //
             @RequestParam("accountsErrored") long accountsErrored, //
@@ -1335,6 +1336,7 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        playLaunch.setAccountsSelected(accountsSelected);
         playLaunch.setAccountsLaunched(accountsLaunched);
         playLaunch.setAccountsErrored(accountsErrored);
         playLaunch.setContactsLaunched(contactsLaunched);

@@ -102,6 +102,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "LAUNCH_COMPLETION_PERCENT")
     private double launchCompletionPercent;
 
+    @JsonProperty("accountsSelected")
+    @Column(name = "ACCOUNTS_SELECTED")
+    private Long accountsSelected;
+
     @JsonProperty("contactsLaunched")
     @Column(name = "CONTACTS_LAUNCHED")
     private Long contactsLaunched;
@@ -222,6 +226,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setLaunchCompletionPercent(double launchCompletionPercent) {
         this.launchCompletionPercent = launchCompletionPercent;
+    }
+
+    public Long getAccountsSelected() {
+        return accountsSelected;
+    }
+
+    public void setAccountsSelected(Long accountsSelected) {
+        this.accountsSelected = accountsSelected;
     }
 
     public Long getAccountsLaunched() {

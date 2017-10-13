@@ -165,12 +165,14 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             Long endTimestamp) {
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
+        String totalAccountsSelected = "totalAccountsSelected";
         String totalAccountsLaunched = "totalAccountsLaunched";
         String totalAccountsSuppressed = "totalAccountsSuppressed";
         String totalAccountsErrored = "totalAccountsErrored";
         String totalContactsLaunched = "totalContactsLaunched";
 
         String queryStr = "SELECT new map " + "( " //
+                + " SUM(COALESCE(accountsSelected)) AS " + totalAccountsSelected + ", " //
                 + " SUM(COALESCE(accountsLaunched)) AS " + totalAccountsLaunched + ", " //
                 + " SUM(COALESCE(accountsSuppressed)) AS " + totalAccountsSuppressed + ", " //
                 + " SUM(COALESCE(accountsErrored)) AS " + totalAccountsErrored + ", " //
@@ -182,6 +184,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         List<Map<String, Object>> queryResult = query.list();
         Stats totalCounts = new Stats();
         Map<String, Object> res = queryResult.get(0);
+        totalCounts.setSelectedTargets(getVal(res, totalAccountsSelected));
         totalCounts.setRecommendationsLaunched(getVal(res, totalAccountsLaunched));
         totalCounts.setSuppressed(getVal(res, totalAccountsSuppressed));
         totalCounts.setErrors(getVal(res, totalAccountsErrored));
