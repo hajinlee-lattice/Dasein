@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
+import com.querydsl.core.QueryException;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.Configuration;
@@ -70,6 +71,47 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         long count = factory().query().from(outerTable)
                 .where(factory().from(innerTable).where(innerColumn.eq(outerColumn)).exists()).fetchCount();
         assertEquals(count, 100000);
+    }
+
+    @Test(groups = "functional")
+    @SuppressWarnings("unchecked")
+    public void testIntersect() throws SQLException {
+        StringPath outerTable = Expressions.stringPath("bernard_txn_poc");
+        StringPath innerTable = Expressions.stringPath("bernard_txn_poc");
+        StringPath outerColumn1 = Expressions.stringPath(outerTable, "account_id");
+        StringPath outerColumn2 = Expressions.stringPath(outerTable, "period_id");
+        StringPath innerColumn1 = Expressions.stringPath(innerTable, "account_id");
+        StringPath innerColumn2 = Expressions.stringPath(innerTable, "period_id");
+        SQLQuery withQuery1 = factory().query().from(outerTable).select(outerColumn1, outerColumn2).where(outerColumn1.eq("6"));
+        SQLQuery withQuery2 = factory().query().from(innerTable).select(innerColumn1, innerColumn2).where(innerColumn1.eq("2"));
+        SQLQuery withQuery3 = factory().query().from(innerTable)
+                .select(innerColumn1, innerColumn2).where(innerColumn2.eq("2").and(innerColumn1.eq("6")));
+        StringPath withTable1 = Expressions.stringPath("T1");
+        StringPath withTable2 = Expressions.stringPath("T2");
+        StringPath withTable3 = Expressions.stringPath("T3");
+        StringPath withTable4 = Expressions.stringPath("T4");
+        StringPath col1 = Expressions.stringPath("account_id");
+        StringPath col2 = Expressions.stringPath("period_id");
+        SQLQuery unionQuery1 = factory().query().select(SQLExpressions.all).from(withTable1);
+        SQLQuery unionQuery2 = factory().query().select(SQLExpressions.all).from(withTable2);
+        SQLQuery unionQuery3 = factory().query().select(SQLExpressions.all).from(withTable3);
+        SQLQuery withQuery4 = factory().query().select(SQLExpressions.all)
+                .from(SQLExpressions.intersect(SQLExpressions.union(unionQuery1, unionQuery2), unionQuery3));
+        SQLQuery testQuery = factory().query()
+                .with(withTable1, col1, col2).as(withQuery1)
+                .with(withTable2, col1, col2).as(withQuery2)
+                .with(withTable3, col1, col2).as(withQuery3)
+                .with(withTable4, col1, col2).as(withQuery4)
+                .orderBy(col2.asc())
+                .from(withTable4)
+                .select(SQLExpressions.all);
+        System.out.println("sql = " + testQuery);
+        //Assert.assertEquals(1, testQuery.fetchCount());
+        ResultSet results = testQuery.getResults();
+        while (results.next()) {
+            Assert.assertEquals(6, results.getLong("account_id"));
+            Assert.assertEquals(2, results.getLong("period_id"));
+        }
     }
 
     private SQLQueryFactory factory() {
