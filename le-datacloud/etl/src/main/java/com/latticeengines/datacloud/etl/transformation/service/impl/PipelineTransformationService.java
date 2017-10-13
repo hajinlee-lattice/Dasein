@@ -19,12 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
@@ -33,6 +29,7 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
+import com.latticeengines.datacloud.core.util.SlackUtils;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
@@ -70,7 +67,6 @@ public class PipelineTransformationService extends AbstractTransformationService
     private static final String SLACK_BOT = "PipelineTransformer";
     private static final String SLACK_COLOR_GOOD = "good";
     private static final String SLACK_COLOR_DANGER = "danger";
-    private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
     private PipelineSource pipelineSource;
@@ -88,15 +84,13 @@ public class PipelineTransformationService extends AbstractTransformationService
     private MetadataProxy metadataProxy;
 
     @Value("${datacloud.slack.webhook.url}")
-    private String slackWebhookUrl;
+    private String slackWebHookUrl;
 
     @Value("${common.le.environment}")
     private String leEnv;
 
     @Value("${common.le.stack}")
     private String leStack;
-
-    private RestTemplate slackRestTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
 
     private final String PIPELINE = "Pipeline_";
     private final String VERSION = "_version_";
@@ -799,36 +793,9 @@ public class PipelineTransformationService extends AbstractTransformationService
     }
 
     private void sendSlack(String title, String text, String color, PipelineTransformationConfiguration transConf) {
-        if (StringUtils.isNotEmpty(slackWebhookUrl) && transConf.isEnableSlack()) {
-            try {
-                String payload = slackPayload(title, text, color);
-                slackRestTemplate.postForObject(slackWebhookUrl, payload, String.class);
-            } catch (Exception e) {
-                log.error("Failed to send slack message.", e);
-            }
+        if (StringUtils.isNotEmpty(slackWebHookUrl) && transConf.isEnableSlack()) {
+            SlackUtils.sendSlack(slackWebHookUrl, title, text, color, SLACK_BOT, "[" + leEnv + "-" + leStack + "]");
         }
-    }
-
-    private String slackPayload(String title, String text, String color) {
-        ObjectNode objectNode = OM.createObjectNode();
-        objectNode.put("username", SLACK_BOT);
-        ArrayNode attachments = OM.createArrayNode();
-        ObjectNode attachment = OM.createObjectNode();
-        String pretext = "[" + leEnv + "-" + leStack + "]";
-        if (SLACK_COLOR_DANGER.equals(color)) {
-            pretext = "<!channel> " + pretext;
-        }
-        attachment.put("pretext", pretext);
-        if (StringUtils.isNotEmpty(color)) {
-            attachment.put("color", color);
-        }
-        if (StringUtils.isNotEmpty(title)) {
-            attachment.put("title", title);
-        }
-        attachment.put("text", text);
-        attachments.add(attachment);
-        objectNode.put("attachments", attachments);
-        return JsonUtils.serialize(objectNode);
     }
 
     @Override
