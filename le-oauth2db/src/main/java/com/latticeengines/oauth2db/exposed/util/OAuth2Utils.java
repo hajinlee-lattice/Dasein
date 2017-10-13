@@ -159,24 +159,20 @@ public class OAuth2Utils {
     }
 
     public static OAuth2AccessToken getAccessToken(OAuth2RestTemplate oAuth2RestTemplate) {
-        try {
-            SecurityContext securityContext = SecurityContextHolder.getContext();
-            if (securityContext.getAuthentication() instanceof AnonymousAuthenticationToken) {
-                synchronized (OAuth2Utils.class) {
-                    try {
-                        SecurityContextHolder.clearContext();
-                        SSLUtils.turnOffSSLNameVerification();
-                        return oAuth2RestTemplate.getAccessToken();
-                    } finally {
-                        SecurityContextHolder.setContext(securityContext);
-                    }
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        if (securityContext.getAuthentication() instanceof AnonymousAuthenticationToken) {
+            synchronized (OAuth2Utils.class) {
+                try {
+                    SecurityContextHolder.clearContext();
+                    SSLUtils.turnOffSSLNameVerification();
+                    return oAuth2RestTemplate.getAccessToken();
+                } finally {
+                    SecurityContextHolder.setContext(securityContext);
                 }
-            } else {
-                SSLUtils.turnOffSSLNameVerification();
-                return oAuth2RestTemplate.getAccessToken();
             }
-        } finally {
-            SSLUtils.turnOnSSLNameVerification();
+        } else {
+            SSLUtils.turnOffSSLNameVerification();
+            return oAuth2RestTemplate.getAccessToken();
         }
     }
 
