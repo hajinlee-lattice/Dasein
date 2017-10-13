@@ -152,7 +152,8 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         fms.add(new FieldMetadata(CAT_ATTR, String.class));
         fms.add(new FieldMetadata(CAT_VALUE, String.class));
         CategoricalProfileGroupingBuffer groupBuf = new CategoricalProfileGroupingBuffer(
-                new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats(), catAttrs);
+                new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats(),
+                config.getMaxCatLength(), catAttrs);
         cat = cat.groupByAndBuffer(new FieldList(DUMMY_GROUP), groupBuf, fms);
         fms = getFinalMetadata();
         CategoricalProfileBuffer buf = new CategoricalProfileBuffer(

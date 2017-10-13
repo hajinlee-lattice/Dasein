@@ -31,6 +31,9 @@ public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("MaxCats")
     private int maxCats;
 
+    @JsonProperty("MaxCatLen")
+    private int maxCatLength = 1024;
+
     @JsonProperty("CatAttrsNotEnc")
     private String[] catAttrsNotEnc; // Dimensional attributes for stats should
                                      // not be encoded
@@ -105,6 +108,14 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public void setMaxCats(int maxCats) {
         this.maxCats = maxCats;
+    }
+
+    public int getMaxCatLength() {
+        return maxCatLength;
+    }
+
+    public void setMaxCatLength(int maxCatLength) {
+        this.maxCatLength = maxCatLength;
     }
 
     public String[] getCatAttrsNotEnc() {

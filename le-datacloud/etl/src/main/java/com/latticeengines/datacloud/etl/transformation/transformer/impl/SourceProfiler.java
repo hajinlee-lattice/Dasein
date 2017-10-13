@@ -131,6 +131,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setRandSeed(config.getRandSeed());
         paras.setEncAttrPrefix(config.getEncAttrPrefix());
         paras.setMaxCats(config.getMaxCat());
+        paras.setMaxCatLength(config.getMaxCatLength());
         paras.setCatAttrsNotEnc(config.getCatAttrsNotEnc());
         if (CollectionUtils.isNotEmpty(idAttrs)) {
             paras.setIdAttr(idAttrs.get(0));

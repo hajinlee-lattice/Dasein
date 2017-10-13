@@ -26,15 +26,17 @@ public class CategoricalProfileGroupingBuffer extends BaseOperation implements B
     private int catValueLoc;
     private String nonCatFlag;
     private int maxCat;
+    private int maxCatLen;
     private List<String> catAttrs;
 
     private Map<String, Integer> namePositionMap;
 
     public CategoricalProfileGroupingBuffer(Fields fieldDeclaration, String catAttrField, String catValueField,
-            String nonCatFlag, int maxCat, List<String> catAttrs) {
+            String nonCatFlag, int maxCat, int maxCatLen, List<String> catAttrs) {
         super(fieldDeclaration);
         this.nonCatFlag = nonCatFlag;
         this.maxCat = maxCat;
+        this.maxCatLen = maxCatLen;
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.catAttrLoc = this.namePositionMap.get(catAttrField);
         this.catValueLoc = this.namePositionMap.get(catValueField);
@@ -65,6 +67,11 @@ public class CategoricalProfileGroupingBuffer extends BaseOperation implements B
                 continue;
             }
             val = StringUtils.trim(val);
+            if (val.length() > maxCatLen) {
+                knownVals.clear();
+                knownVals.add(nonCatFlag);
+                continue;
+            }
             knownVals.add(val);
             if (knownVals.size() > maxCat) {
                 knownVals.clear();

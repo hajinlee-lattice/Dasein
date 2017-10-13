@@ -35,6 +35,11 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
     @JsonProperty("MaxCat")
     private int maxCat = 2048; // Maximum allowed category number
 
+    @JsonProperty("MaxCatLen")
+    private int maxCatLength = 1024; // Maximum allowed category attribute
+                                     // length. If exceeded, this attribute is
+                                     // not segmentable
+
     @JsonProperty("CatAttrsNotEnc")
     private String[] catAttrsNotEnc; // Dimensional attributes for stats should
                                      // not be encoded
@@ -98,6 +103,14 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
 
     public void setMaxCat(int maxCat) {
         this.maxCat = maxCat;
+    }
+
+    public int getMaxCatLength() {
+        return maxCatLength;
+    }
+
+    public void setMaxCatLength(int maxCatLength) {
+        this.maxCatLength = maxCatLength;
     }
 
     public String[] getCatAttrsNotEnc() {
