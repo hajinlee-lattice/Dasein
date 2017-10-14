@@ -23,15 +23,6 @@ public class SSLUtils {
 
     public static final SSLConnectionSocketFactory SSL_BLIND_SOCKET_FACTORY = newSslBlindSocketFactory();
     private static final HostnameVerifier DEFAULT_HOST_NAME_VERIFIER = HttpsURLConnection.getDefaultHostnameVerifier();
-    private static final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{new X509TrustManager() {
-        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-        }
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-        }
-    }};
 
     public static void turnOffSSLNameVerification() {
         switchSSLNameVerification(false);
@@ -47,6 +38,15 @@ public class SSLUtils {
             try {
                 HostnameVerifier verifier = on ? DEFAULT_HOST_NAME_VERIFIER : (hostname, session) -> true;
                 final SSLContext sc = SSLContext.getInstance("SSL");
+                final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
+                }};
                 sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
                 HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
                 HttpsURLConnection.setDefaultHostnameVerifier(verifier);
@@ -61,6 +61,15 @@ public class SSLUtils {
     private static SSLConnectionSocketFactory newSslBlindSocketFactory() {
         try {
             final SSLContext sc = SSLContext.getInstance("SSL");
+            final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                }
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                }
+            }};
             sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
             return new SSLConnectionSocketFactory(sc.getSocketFactory(), (hostname, session) -> true);
         } catch (Exception e) {
