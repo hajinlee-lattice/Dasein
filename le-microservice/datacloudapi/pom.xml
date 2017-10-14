@@ -10,15 +10,15 @@
 
     <properties>
         <component-name>datacloudapi-microservice</component-name>
-        <le.microservice.version>4.0.1-SNAPSHOT</le.microservice.version>
-        <le.propdata.version>4.0.1-SNAPSHOT</le.propdata.version>
-        <le.aws.version>4.0.1-SNAPSHOT</le.aws.version>
+        <le.microservice.version>4.1.0-SNAPSHOT</le.microservice.version>
+        <le.propdata.version>4.1.0-SNAPSHOT</le.propdata.version>
+        <le.aws.version>4.1.0-SNAPSHOT</le.aws.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-web</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.1.0-SNAPSHOT</version>
         <relativePath>../web-pom.xml</relativePath>
     </parent>
 

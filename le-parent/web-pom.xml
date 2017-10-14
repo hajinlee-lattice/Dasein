@@ -6,13 +6,13 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-web-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
     <description>Parent of all lattice engine web projects.</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.1.0-SNAPSHOT</version>
         <relativePath>pom.xml</relativePath>
     </parent>
 
