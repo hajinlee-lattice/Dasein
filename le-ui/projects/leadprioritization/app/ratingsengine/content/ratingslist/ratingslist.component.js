@@ -74,6 +74,10 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
     }
     vm.init();
 
+    vm.hasRules = function(rating) {
+        return RatingsEngineStore.hasRules(rating);
+    }
+
     vm.customMenuClick = function ($event, rating) {
 
         if ($event != null) {
@@ -131,9 +135,13 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
         tileState.editRating = !tileState.editRating;
     };
 
-    vm.editStatusClick = function($event, rating){
-        
+    vm.editStatusClick = function($event, rating, disable){
         $event.stopPropagation();
+        
+        if(disable) {
+            return false;
+        }
+
         vm.saveInProgress = true;
 
         if(rating.status === 'ACTIVE'){

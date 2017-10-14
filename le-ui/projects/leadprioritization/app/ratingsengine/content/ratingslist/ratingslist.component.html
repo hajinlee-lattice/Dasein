@@ -45,7 +45,7 @@
                                 <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.tileStates[rating.id].showCustomMenu }"></span>
                             </button>
                             <ul class="model-menu" ng-show="vm.tileStates[rating.id].showCustomMenu">
-                                <li data-ng-click="vm.editStatusClick($event, rating)">
+                                <li data-ng-click="vm.editStatusClick($event, rating, !vm.hasRules(rating))" ng-disabled="!vm.hasRules(rating)">
                                     <a href="javascript:void(0)">
                                         <span ng-if="rating.status === 'INACTIVE'">Activate</span>
                                         <span ng-if="rating.status === 'ACTIVE'">Deactivate</span>
