@@ -51,7 +51,7 @@ angular.module('lp.ratingsengine')
                 },{ 
                     label: 'Summary', 
                     state: 'segment.attributes.rules.summary', 
-                    nextLabel: 'Publish', 
+                    nextLabel: 'Save', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveSummary(nextState);
                     }

@@ -100,6 +100,9 @@ angular
                 }],
                 RatingsEngineModels: [function() {
                     return null;
+                }],
+                RatingsEngineStore: [function() {
+                    return null;
                 }]
             }
         };
@@ -266,25 +269,25 @@ angular
                 LoadingText: 'Loading DataCloud Attributes',
                 section: 'insights'
             },
+            resolve: {
+                LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
+                    var deferred = $q.defer();
+                    
+                    LookupService.submit(ApiHost).then(function(data) {
+                        var current = new Date().getTime();
+                        var old = LookupStore.get('timestamp');
+
+                        LookupStore.add('elapsedTime', current - old);
+                        LookupStore.add('response', data);
+
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "main@": {
-                    resolve: {
-                        LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
-                            var deferred = $q.defer();
-                            
-                            LookupService.submit(ApiHost).then(function(data) {
-                                var current = new Date().getTime();
-                                var old = LookupStore.get('timestamp');
-
-                                LookupStore.add('elapsedTime', current - old);
-                                LookupStore.add('response', data);
-
-                                deferred.resolve(data);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
