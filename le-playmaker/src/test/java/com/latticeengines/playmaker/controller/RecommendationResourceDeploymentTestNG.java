@@ -3,6 +3,7 @@ package com.latticeengines.playmaker.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -23,6 +24,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
         super.beforeClass();
+        SSLUtils.turnOffSSLNameVerification();
         newTenant = playMakerEntityMgr.create(tenant);
         restTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
                 newTenant.getTenantPassword(), "playmaker");
@@ -31,6 +33,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
     @AfterClass(groups = "deployment")
     public void afterClass() {
         playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
+        SSLUtils.turnOnSSLNameVerification();
     }
 
     @Test(groups = "deployment")
