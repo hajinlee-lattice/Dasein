@@ -65,7 +65,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "3";
+    private static final String S3_CHECKPOINTS_VERSION = "4";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 300;
@@ -108,9 +108,6 @@ public class CheckpointService {
 
     @Value("${camille.zk.pod.id}")
     private String podId;
-
-    @Value("${aws.s3.bucket}")
-    private String s3Bucket;
 
     private ObjectMapper om = new ObjectMapper();
 
