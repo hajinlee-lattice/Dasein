@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
+import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
@@ -27,7 +29,20 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
 
     @Test(groups = "deployment", enabled = true)
     public void testRetrieveModelArtifacts() throws Exception {
+        long sizeOfPmmlFile = FileUtils.sizeOf(new File(Thread.currentThread().getContextClassLoader()
+                .getResource(LOCAL_MODEL_PATH + ModelJsonTypeHandler.PMML_FILENAME).getPath()));
+        log.info(String.format("Size of the pmml file is %d", sizeOfPmmlFile));
+        long memBeforeScoreArtifactCreation = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        log.info(String.format("Before generating the score artifact, the free memory is %d",
+                memBeforeScoreArtifactCreation));
         ScoringArtifacts artifacts = modelRetriever.getModelArtifacts(customerSpace, MODEL_ID);
+        long memAfterScoreArtifactCreation = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        log.info(String.format("After generating the score artifact, the free memory is %d",
+                memAfterScoreArtifactCreation));
+        log.info(String.format("Memory change due to score artifact is %d",
+                (memAfterScoreArtifactCreation - memBeforeScoreArtifactCreation)));
+        double factor = (double) (memAfterScoreArtifactCreation - memBeforeScoreArtifactCreation) / (sizeOfPmmlFile);
+        log.info(String.format("factor is %f", factor));
         testArtifacts(artifacts);
         // Fetch the artifacts second time directly from the cache
         ScoringArtifacts cachedArtifacts = modelRetriever.getModelArtifacts(customerSpace, MODEL_ID);
