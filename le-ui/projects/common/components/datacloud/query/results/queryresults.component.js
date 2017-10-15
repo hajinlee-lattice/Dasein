@@ -120,7 +120,7 @@ angular.module('common.datacloud.query.results', [
                 vm.counts.accounts.value = data;
                 vm.counts.accounts.loading = false;
 
-                if(vm.counts.accounts.value > 10){
+                if(vm.counts.accounts.value < 10){
                     vm.showAccountPagination = true;
                     vm.showContactPagination = false;
                 }
@@ -131,7 +131,7 @@ angular.module('common.datacloud.query.results', [
                 vm.counts.contacts.value = data;
                 vm.counts.contacts.loading = false;
 
-                if(vm.counts.contacts.value > 10){
+                if(vm.counts.contacts.value < 10){
                     vm.showAccountPagination = false;
                     vm.showContactPagination = true;
                 }
@@ -155,10 +155,12 @@ angular.module('common.datacloud.query.results', [
         excludeAccounts = !excludeAccounts;
 
         if(excludeAccounts){
-            vm.excludeNonSalesForce = false;
-        } else {
             vm.excludeNonSalesForce = true;
+        } else {
+            vm.excludeNonSalesForce = false;
         }
+
+        console.log(vm.excludeNonSalesForce);
 
         updatePage();
         

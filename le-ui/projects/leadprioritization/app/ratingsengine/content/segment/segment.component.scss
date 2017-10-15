@@ -23,6 +23,12 @@ section.ratingsengine {
                     }
                 }
             }
+            &.no-data {
+                text-align: center;
+                color: #858585;
+                font-size: 20px;
+                padding: 10px 60px;
+            }
         }
     }
 }

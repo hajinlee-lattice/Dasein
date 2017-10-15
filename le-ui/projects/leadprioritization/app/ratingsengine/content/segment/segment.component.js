@@ -13,7 +13,8 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         pageSize: 10,
         block_user: true,
         loadingSupplementaryData: true,
-        showPagination: true
+        showPagination: true,
+        hasSegments: true
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -40,15 +41,23 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     	vm.filteredSegments = vm.segments.slice(0, 10);
     	vm.getCounts(vm.filteredSegments);
 
+        if(vm.segments.length === 0){
+            vm.hasSegments = false;
+            vm.isValid = false;
+        }
+
         if(vm.filteredSegments.length < 10){
             vm.showPagination = false;
         }
 
+
+        RatingsEngineStore.setValidation('segment', false);
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
                 vm.stored.segment_selection = rating.segment.name;
                 vm.setSegment(rating.segment);
                 vm.block_user = false;
+                RatingsEngineStore.setValidation('segment', true);
 
                 // if(vm.stored.segment_selection){
                 //     console.log("has stored");
@@ -102,6 +111,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
 
     vm.setSegment = function(segment) {
         console.log("set segment", segment);
+        RatingsEngineStore.setValidation('segment', true);
     	RatingsEngineStore.setSegment(segment);
     }
 

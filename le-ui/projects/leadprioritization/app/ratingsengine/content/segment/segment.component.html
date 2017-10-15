@@ -17,7 +17,12 @@
                 -->
                 </h2>
             </div>
-            <div class="content-body">
+
+            <div class="content-body no-data" ng-if="!vm.hasSegments">
+                There are currently no Segments to select. <br/>Please <a ui-sref="home.segment.explorer.attributes({segment:'Create'})">create at least one Segment</a> in order to create your Rating Engine.
+            </div>
+
+            <div class="content-body" ng-if="vm.hasSegments">
 
                 <div class="filters">
                     <div class="ng-search">
@@ -28,6 +33,8 @@
                         </a>
                     </div>
                 </div>
+
+
                 <ul class="list">
                     <li class="item header segment">
                         <ul>
@@ -62,6 +69,8 @@
                         </ul>
                     </li>
                 </ul>
+
+
                 <pd-pagination-controls
                     current="vm.currentPage"
                     max="filteredList.length / vm.pageSize"

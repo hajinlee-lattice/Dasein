@@ -309,13 +309,7 @@ angular
                     return deferred.promise;
 
                 }],
-                ContactsCount: [function(){
-                    return null;
-                }],
                 Accounts: [function(){
-                    return null;
-                }],
-                AccountsCount: [function(){
                     return null;
                 }],
                 CountWithoutSalesForce: [function(){
@@ -505,20 +499,20 @@ angular
                     return deferred.promise;
 
                 }],
-                AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+                // AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
-                    var deferred = $q.defer(),
-                        savedRating = PlaybookWizardStore.getSavedRating(),
-                        engineId = savedRating.id,
-                        engineIdObject = [{id: engineId}];
+                //     var deferred = $q.defer(),
+                //         savedRating = PlaybookWizardStore.getSavedRating(),
+                //         engineId = savedRating.id,
+                //         engineIdObject = [{id: engineId}];
                             
-                    PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                        deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
-                    });
+                //     PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
+                //         deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
+                //     });
 
-                    return deferred.promise;
+                //     return deferred.promise;
 
-                }],
+                // }],
                 CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
                     var deferred = $q.defer(),
@@ -540,9 +534,9 @@ angular
                 Contacts: [function(){
                     return null;
                 }],
-                ContactsCount: [function(){
-                    return null;
-                }],
+                // ContactsCount: [function(){
+                //     return null;
+                // }],
             },
             views: {
                 "wizard_content@home.playbook.wizard": {
