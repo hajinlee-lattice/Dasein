@@ -124,11 +124,18 @@
                             ng-if="vm.tileStates[play.name].launching">
                             <i class="fa fa-spinner fa-pulse fw"></i> 
                             Launching...</button>
-                        <span 
-                            class="launch-success pull-right" 
-                            ng-if="play.launchHistory.playLaunch && !vm.tileStates[play.name].launching">
-                            Launched {{play.launchHistory.playLaunch.updated | date}}
-                            <i class="fa fa-check" aria-hidden="true"></i>
+                        <span ng-if="play.launchHistory.playLaunch && !vm.tileStates[play.name].launching">
+                            <span 
+                                class="launch-success pull-left">
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                                Launched {{play.launchHistory.playLaunch.updated | date}}
+                            </span>
+                            <button 
+                                type="button"
+                                class="button blue-button pull-right"
+                                ng-click="vm.launchPlay($event, play)">
+                                Re-Launch
+                            </button>
                         </span>
 
                     </div><!-- End .tile-footer -->
