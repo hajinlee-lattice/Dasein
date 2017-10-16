@@ -46,7 +46,9 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
 
-        if(vm.segment != "Create"){
+        console.log(vm.segment);
+
+        if(vm.segment === null || vm.segment != "Create"){
             $rootScope.$broadcast('header-back', { 
                 path: '^home.segment.accounts',
                 displayName: vm.segment.display_name,

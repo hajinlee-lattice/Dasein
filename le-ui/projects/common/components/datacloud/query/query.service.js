@@ -211,8 +211,6 @@ angular.module('common.datacloud.query.service',[
 
         this.setAccountRestriction(this.accountRestriction);
 
-        console.log(this.accountRestriction);
-
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
             self.setResourceTypeCount('accounts', false, data);
