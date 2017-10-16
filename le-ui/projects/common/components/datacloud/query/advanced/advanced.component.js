@@ -306,7 +306,7 @@ angular.module('common.datacloud.query.builder', [
 
         segment[vm.treeMode + '_restriction'] = {
             "restriction": {
-                "bucketRestriction": bucketRestriction
+                "bucketRestriction": angular.copy(bucketRestriction)
             }
         };
 
@@ -328,14 +328,14 @@ angular.module('common.datacloud.query.builder', [
             segmentId = CurrentRatingEngine.segment.name,
             map = {};
 
-// console.log('getRuleRecordCounts', restrictions);
         restrictions.forEach(function(bucket, index) {
             bucket.bucketRestriction.bkt.Cnt = -1;
 
             map[bucket.bucketRestriction.attr + '_' + index] = bucket;
         })
 
-        RatingsEngineStore.getBucketRuleCounts(restrictions, segmentId).then(function(result) {
+// console.log('getRuleRecordCounts', restrictions);
+        RatingsEngineStore.getBucketRuleCounts(angular.copy(restrictions), segmentId).then(function(result) {
             var buckets = result.segmentIdAndSingleRulesCoverageMap;
             
             Object.keys(buckets).forEach(function(key) {

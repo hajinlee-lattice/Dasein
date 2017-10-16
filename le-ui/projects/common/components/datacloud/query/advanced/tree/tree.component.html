@@ -88,7 +88,7 @@
             <span class="item-edit-bucket-data" ng-if="vm.editing && !vm.unused">
 
                 <span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
-                    <select ng-model="vm.item.topbkt.Vals[0]" ng-change="vm.updateBucketCount()">
+                    <select ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" ng-change="vm.updateBucketCount()">
                         <option value="Yes">is</option>
                         <option value="No">is not</option>
                         <option value="">is empty</option>
@@ -122,21 +122,21 @@
                     </div>
 
                     <span ng-if="vm.editMode == 'Custom'">
-                        <select ng-model="vm.item.topbkt.Cmp" 
+                        <select ng-model="vm.tree.bucketRestriction.bkt.Cmp" 
                                 ng-change="vm.changeOperation()"
                                 ng-options="k as v for (k, v) in vm.cmp_operations">
                         </select>
 
-                        <input  ng-model="vm.range[0]" 
+                        <input  ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" 
                                 ng-keyup="vm.changeOperation()"
-                                ng-value="vm.range[0]"></input>
+                                ng-value="vm.tree.bucketRestriction.bkt.Vals[0]"></input>
 
-                        <span ng-if="vm.two_inputs.indexOf(vm.item.topbkt.Cmp) >= 0" class="operation-and">-</span>
+                        <span ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0" class="operation-and">-</span>
                         
-                        <input  ng-if="vm.two_inputs.indexOf(vm.item.topbkt.Cmp) >= 0" 
-                                ng-model="vm.range[1]" 
+                        <input  ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0" 
+                                ng-model="vm.tree.bucketRestriction.bkt.Vals[1]" 
                                 ng-keyup="vm.changeOperation()"
-                                ng-value="vm.range[1]"></input>
+                                ng-value="vm.tree.bucketRestriction.bkt.Vals[1]"></input>
                     </span>
                     
                     <span ng-if="vm.editMode == 'Preset'">

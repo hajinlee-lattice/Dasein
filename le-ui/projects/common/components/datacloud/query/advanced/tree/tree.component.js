@@ -241,14 +241,14 @@ angular
                 if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum')) {
                     if (vm.unused) {
                         vm.unused = false;
-console.log(vm.label, vm.type, vm.item.DisplayName, vm.item);
+//console.log(vm.label, vm.type, vm.item.DisplayName, vm.item);
                         vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
                         vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
 
                         vm.label = vm.item.topbkt.Lbl;
                         vm.range = vm.item.topbkt.Vals;
 
-                        vm.setOperation(vm.item, vm.type, vm.label, vm.range);
+                        //vm.setOperation(vm.item, vm.type, vm.label, vm.range);
                     }
 
                     vm.root.saveState(true);
@@ -257,7 +257,7 @@ console.log(vm.label, vm.type, vm.item.DisplayName, vm.item);
             }
 
             vm.updateBucketCount = function() {
-                console.log('updateBucketCount', vm.item.DisplayName, vm.item, vm);
+                //console.log('updateBucketCount', vm.item.DisplayName, vm.item, vm);
                 if (vm.root.mode == 'rules') {
                     vm.root.getRuleRecordCounts([ vm.tree ]);
                 } else {
