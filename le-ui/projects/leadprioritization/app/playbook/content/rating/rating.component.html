@@ -42,13 +42,13 @@
                         <li class="segment">
                             <input 
                                 type="radio" 
-                                id="rating{{$index}}" 
-                                name="rating{{$index}}" 
+                                id="{{rating.id}}" 
+                                name="{{rating.id}}" 
                                 ng-value="rating.id"
                                 ng-change="vm.checkValid(rating_form)"
                                 ng-click="vm.saveRating(rating)"
                                 ng-model="vm.stored.rating_selection" />
-                            <label for="rating{{$index}}">{{rating.segmentDisplayName}}</label>
+                            <label for="{{rating.id}}">{{rating.segmentDisplayName}}</label>
                         </li>
                         <li class="ratingengine">
                             <label for="rating{{$index}}">{{rating.displayName}}</label>

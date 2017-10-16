@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.rating', [])
 .controller('PlaybookWizardRating', function(
-    $state, $stateParams, $scope, ResourceUtility, Ratings, PlaybookWizardStore
+    $state, $stateParams, $scope, $filter, ResourceUtility, Ratings, PlaybookWizardStore
 ) {
     var vm = this;
 
@@ -20,7 +20,9 @@ angular.module('lp.playbook.wizard.rating', [])
     });
 
     if($stateParams.rating_id) {
+        var rating = $filter('filter')(Ratings, {id: $stateParams.rating_id})[0];
         vm.stored.rating_selection = $stateParams.rating_id;
+        PlaybookWizardStore.setRating(rating);
     }
 
     vm.init = function() {
