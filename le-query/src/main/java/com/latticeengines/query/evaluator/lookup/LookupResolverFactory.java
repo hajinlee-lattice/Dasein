@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
+import com.latticeengines.domain.exposed.query.WindowFunctionLookup;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.evaluator.restriction.RestrictionResolverFactory;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
@@ -84,6 +85,10 @@ public final class LookupResolverFactory {
         }
         if (lookupType.isAssignableFrom(FunctionLookup.class)) {
             resolvers.put(lookupType.getSimpleName(), new FunctionResolver(attrRepo, this));
+            return;
+        }
+        if (lookupType.isAssignableFrom(WindowFunctionLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new WindowFunctionResolver(attrRepo, this));
             return;
         }
         throw new QueryEvaluationException("Do not support lookup of type " + lookupType + " yet.");

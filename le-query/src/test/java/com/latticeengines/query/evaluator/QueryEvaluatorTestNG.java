@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
+import com.latticeengines.domain.exposed.query.WindowFunctionLookup;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.sql.SQLQuery;
@@ -415,6 +417,33 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
         sqlContains(sqlQuery, String.format("where %s.%s = ?)", CONTACT, ATTR_CONTACT_EMAIL));
 
+    }
+
+    @Test(groups = "functional")
+    public void testWindowFunction() {
+        String accountTotalAmount = "AccountTotalAmount";
+        String caseAmount = "CaseAmount";
+        AttributeLookup amount = new AttributeLookup(BusinessEntity.Transaction, ATTR_TOTAL_AMOUNT);
+        AttributeLookup accountId = new AttributeLookup(BusinessEntity.Transaction, ATTR_ACCOUNT_ID);
+        TreeMap<String, Restriction> caseMap = new TreeMap<>();
+        Restriction amountCaseRestriction = Restriction.builder().let(amount).gt(1000).build();
+        caseMap.put("1", amountCaseRestriction);
+        CaseLookup caseAmountLookup = new CaseLookup(caseMap, "0", caseAmount);
+
+        WindowFunctionLookup sumLookup = WindowFunctionLookup.sum(amount, accountId, accountTotalAmount);
+        Restriction accountRestriction = Restriction.builder().let(accountId).eq("0012400001DNJYKAA5").build();
+        Query query = Query.builder().select(accountId, sumLookup, caseAmountLookup).from(BusinessEntity.Transaction)
+                .where(accountRestriction).build();
+
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery,
+                String.format("select %s.%s as %s, sum(%s.%s) over (partition by %s.%s) as %s,", TRANSACTION,
+                        ATTR_ACCOUNT_ID, ATTR_ACCOUNT_ID, TRANSACTION, ATTR_TOTAL_AMOUNT, TRANSACTION, ATTR_ACCOUNT_ID,
+                        accountTotalAmount));
+        sqlContains(sqlQuery, String.format("(case when %s.%s > ? then ? else ? end) as %s", TRANSACTION,
+                ATTR_TOTAL_AMOUNT, caseAmount));
+        sqlContains(sqlQuery, String.format("from %s as %s", transactionTableName, TRANSACTION));
+        sqlContains(sqlQuery, String.format("where %s.%s = ?", TRANSACTION, ATTR_ACCOUNT_ID));
     }
 
     @Test(groups = "functional")

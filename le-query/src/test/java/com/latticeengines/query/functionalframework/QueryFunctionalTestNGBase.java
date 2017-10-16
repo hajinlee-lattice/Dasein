@@ -40,6 +40,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static AttributeRepository attrRepo;
     protected static String accountTableName;
     protected static String contactTableName;
+    protected static String transactionTableName;
     protected static final String BUCKETED_NOMINAL_ATTR = "TechIndicator_AdobeCreativeSuite";
     protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr354";
     protected static final long BUCKETED_YES_IN_CUSTOEMR = 10189;
@@ -58,6 +59,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static final String ATTR_ACCOUNT_ID = InterfaceName.AccountId.name();
     protected static final String ATTR_CONTACT_ID = InterfaceName.ContactId.name();
     protected static final String ATTR_CONTACT_EMAIL = InterfaceName.Email.name();
+    protected static final String ATTR_TOTAL_AMOUNT = InterfaceName.TotalAmount.name();
     protected static final String TRS_TRANSACTION_DATE = InterfaceName.TransactionDate.name();
 
     @BeforeClass(groups = "functional")
@@ -95,6 +97,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
                     synchronized (QueryFunctionalTestNGBase.class) {
                         accountTableName = attrRepo.getTableName(TableRoleInCollection.BucketedAccount);
                         contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+                        transactionTableName = attrRepo.getTableName(TableRoleInCollection.AggregatedTransaction);
                     }
                 }
             }
