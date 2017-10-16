@@ -97,7 +97,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.init = function() {
 
-        if(vm.segment){
+        if(vm.segment != "Create"){
             SegmentStore.getSegmentByName(vm.segment).then(function(result) {
                 vm.displayName = result.display_name;
 
