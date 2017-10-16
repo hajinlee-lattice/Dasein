@@ -64,12 +64,6 @@
                             'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]
                           }"
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))">
-
-
-                <p>{{enrichment|json}}{{stat|json}}</p>
-
-                <!--'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean')-->
-                
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
                         <input  type="checkbox"
