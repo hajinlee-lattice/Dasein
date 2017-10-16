@@ -9,8 +9,8 @@ angular.module('common.datacloud.explorer', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
-    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, Enrichments,
-    ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
+    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, $rootScope, 
+    Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
     RatingsEngineModels, RatingsEngineStore
@@ -89,12 +89,25 @@ angular.module('common.datacloud.explorer', [
         categorySize: 7,
         addBucketTreeRoot: null,
         feedbackModal: DataCloudStore.getFeedbackModal(),
-        stateParams: $stateParams
+        stateParams: $stateParams,
+        segment: $stateParams.segment
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.init = function() {
+
+        SegmentStore.getSegmentByName(vm.segment).then(function(result) {
+            vm.displayName = result.display_name;
+
+            $rootScope.$broadcast('header-back', { 
+                path: '^home.segment.accounts',
+                displayName: vm.displayName,
+                sref: 'home.segments'
+            });
+        });
+
+
         if (vm.section == 'insights' && !vm.show_lattice_insights) {
             vm.statusMessage(vm.label.insufficientUserRights, { wait: 0, special: 'nohtml' });
             return false;

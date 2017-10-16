@@ -2,7 +2,8 @@ angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function(
-    $q, $scope, $state, $stateParams, $filter, BrowserStorageUtility, QueryStore, QueryService, 
+    $q, $scope, $state, $stateParams, $filter, $rootScope,
+    BrowserStorageUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts, /*AccountsCount, ContactsCount,*/ 
     CountWithoutSalesForce, Contacts, PlaybookWizardStore
 ) {
@@ -44,6 +45,13 @@ angular.module('common.datacloud.query.results', [
     });
 
     vm.init = function() {
+
+        $rootScope.$broadcast('header-back', { 
+            path: '^home.segment.accounts',
+            displayName: vm.segment.display_name,
+            sref: 'home.segments'
+        });
+
         vm.accountsCount = vm.counts.accounts.value;
         vm.contactsCount = vm.counts.contacts.value;
     }
