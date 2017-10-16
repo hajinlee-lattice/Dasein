@@ -9,10 +9,6 @@
 
     <properties>
         <component-name>dataflow</component-name>
-        <le.common.version>4.1.0-SNAPSHOT</le.common.version>
-        <le.domain.version>4.1.0-SNAPSHOT</le.domain.version>
-        <le.scheduler.version>4.1.0-SNAPSHOT</le.scheduler.version>
-        <le.transform.version>4.1.0-SNAPSHOT</le.transform.version>
     </properties>
 
     <parent>
@@ -66,7 +62,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -279,6 +275,11 @@
         </dependency>
         <dependency>
             <groupId>cascading</groupId>
+            <artifactId>cascading-jdbc-redshift</artifactId>
+            <version>${cascading.redshift.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cascading</groupId>
             <artifactId>cascading-platform</artifactId>
             <version>${cascading.version}</version>
             <scope>test</scope>
@@ -351,7 +352,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -363,7 +364,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
@@ -375,7 +376,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scheduler</artifactId>
-            <version>${le.scheduler.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -386,12 +387,12 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-transform</artifactId>
-            <version>${le.transform.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-flink</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.flink</groupId>
@@ -406,11 +407,6 @@
                     <artifactId>metrics-jvm</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${tez.guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.clapper</groupId>
@@ -433,9 +429,9 @@
             <version>${scala.version}</version>
         </dependency>
         <dependency>
-            <groupId>cascading</groupId>
-            <artifactId>cascading-jdbc-redshift</artifactId>
-            <version>${cascading.redshift.version}</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${tez.guava.version}</version>
         </dependency>
     </dependencies>
 

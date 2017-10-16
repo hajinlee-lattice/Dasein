@@ -15,59 +15,7 @@
 
 	<properties>
 		<component-name>datadb</component-name>
-		<le.common.version>4.1.0-SNAPSHOT</le.common.version>
-		<le.db.version>4.1.0-SNAPSHOT</le.db.version>
-		<le.proxy.version>4.1.0-SNAPSHOT</le.proxy.version>
-		<le.remote.version>4.1.0-SNAPSHOT</le.remote.version>
-		<le.testfwk.version>4.1.0-SNAPSHOT</le.testfwk.version>
 	</properties>
-
-	<profiles>
-		<profile>
-			<id>functional</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>${maven.surefire.version}</version>
-						<executions>
-							<execution>
-								<id>unit-test</id>
-								<configuration>
-									<skip>true</skip>
-								</configuration>
-							</execution>
-							<execution>
-								<id>default-test</id>
-								<configuration>
-									<skip>true</skip>
-								</configuration>
-							</execution>
-							<execution>
-								<id>functional-test</id>
-								<goals>
-									<goal>test</goal>
-								</goals>
-								<phase>integration-test</phase>
-								<configuration>
-									<argLine>-XX:MaxPermSize=256m
-										${argLine}
-									</argLine>
-									<skip>false</skip>
-									<includes>
-										<include>${functional.classes.include}</include>
-										<exclude>${functional.classes.exclude}</exclude>
-									</includes>
-									<groups>${functional.groups}</groups>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 	<build>
 		<plugins>
@@ -100,7 +48,7 @@
 		<dependency>
 			<groupId>com.latticeengines</groupId>
 			<artifactId>le-common</artifactId>
-			<version>${le.common.version}</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.mortbay.jetty</groupId>
@@ -115,24 +63,12 @@
 		<dependency>
 			<groupId>com.latticeengines</groupId>
 			<artifactId>le-db</artifactId>
-			<version>${le.db.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.latticeengines</groupId>
-			<artifactId>le-proxy</artifactId>
-			<version>${le.proxy.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.latticeengines</groupId>
-			<artifactId>le-remote</artifactId>
-			<version>${le.remote.version}</version>
-			<scope>test</scope>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.latticeengines</groupId>
 			<artifactId>le-testframework</artifactId>
-			<version>${le.testfwk.version}</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
