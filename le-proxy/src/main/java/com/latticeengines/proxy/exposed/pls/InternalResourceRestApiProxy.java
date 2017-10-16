@@ -503,19 +503,27 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public void updatePlayLaunchProgress(CustomerSpace customerSpace, //
             String playName, //
             String launchId, //
-            double launchCompletionPercent, //
-            long accountsSelected, //
-            long accountsLaunched, //
-            long contactsLaunched, //
-            long accountsErrored, //
-            long accountsSuppressed) {
+            Double launchCompletionPercent, //
+            Long accountsSelected, //
+            Long accountsLaunched, //
+            Long contactsLaunched, //
+            Long accountsErrored, //
+            Long accountsSuppressed) {
         String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId, customerSpace.toString());
-        url += "?launchCompletionPercent=" + launchCompletionPercent;
-        url += "&accountsSelected=" + accountsSelected;
-        url += "&accountsLaunched=" + accountsLaunched;
-        url += "&contactsLaunched=" + contactsLaunched;
-        url += "&accountsErrored=" + accountsErrored;
-        url += "&accountsSuppressed=" + accountsSuppressed;
+        url += "?";
+        if (launchCompletionPercent != null)
+            url += "launchCompletionPercent=" + launchCompletionPercent;
+        if (accountsSelected != null)
+            url += "&accountsSelected=" + accountsSelected;
+        if (accountsLaunched != null)
+            url += "&accountsLaunched=" + accountsLaunched;
+        if (contactsLaunched != null)
+            url += "&contactsLaunched=" + contactsLaunched;
+        if (accountsErrored != null)
+            url += "&accountsErrored=" + accountsErrored;
+        if (accountsSuppressed != null)
+            url += "&accountsSuppressed=" + accountsSuppressed;
+
         restTemplate.patchForObject(url, null, String.class);
     }
 

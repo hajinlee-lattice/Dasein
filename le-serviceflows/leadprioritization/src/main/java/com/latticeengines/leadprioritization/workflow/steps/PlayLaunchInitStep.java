@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
@@ -55,10 +57,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info(String.format("For playLaunchId: %s", playLaunchId));
 
             playLaunchProcessor.executeLaunchActivity(tenant, config);
-
             successUpdates(customerSpace, playName, playLaunchId);
         } catch (Exception ex) {
             failureUpdates(customerSpace, playName, playLaunchId, ex);
+            throw new LedpException(LedpCode.LEDP_18157, ex);
         }
     }
 

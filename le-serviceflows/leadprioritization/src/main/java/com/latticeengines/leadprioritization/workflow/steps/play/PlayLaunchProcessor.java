@@ -72,6 +72,7 @@ public class PlayLaunchProcessor {
 
         long segmentAccountsCount = accountFetcher.getCount(playLaunchContext);
         log.info(String.format("Total records in segment: %d", segmentAccountsCount));
+        playLaunchContext.getPlayLaunch().setAccountsSelected(segmentAccountsCount);
 
         // do initial handling of SFDC id based suppression
         handleSFDCIdBasedSuppression(playLaunchContext, segmentAccountsCount);
@@ -89,6 +90,12 @@ public class PlayLaunchProcessor {
                 processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, segmentAccountsCount,
                         processedSegmentAccountsCount, pageNo);
             }
+        }
+
+        if (playLaunchContext.getPlayLaunch().getAccountsErrored() != null
+                && playLaunchContext.getPlayLaunch().getAccountsErrored() > 0) {
+            throw new RuntimeException(String.format("Encountered %d errors while processing accounts for play launch",
+                    playLaunchContext.getPlayLaunch().getAccountsErrored()));
         }
     }
 
