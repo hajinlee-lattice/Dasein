@@ -97,15 +97,18 @@ angular.module('common.datacloud.explorer', [
 
     vm.init = function() {
 
-        SegmentStore.getSegmentByName(vm.segment).then(function(result) {
-            vm.displayName = result.display_name;
+        if(vm.segment){
+            SegmentStore.getSegmentByName(vm.segment).then(function(result) {
+                vm.displayName = result.display_name;
 
-            $rootScope.$broadcast('header-back', { 
-                path: '^home.segment.accounts',
-                displayName: vm.displayName,
-                sref: 'home.segments'
-            });
-        });
+                $rootScope.$broadcast('header-back', { 
+                    path: '^home.segment.accounts',
+                    displayName: vm.displayName,
+                    sref: 'home.segments'
+                });
+            });    
+        }
+        
 
 
         if (vm.section == 'insights' && !vm.show_lattice_insights) {

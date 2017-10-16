@@ -46,11 +46,13 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
 
-        $rootScope.$broadcast('header-back', { 
-            path: '^home.segment.accounts',
-            displayName: vm.segment.display_name,
-            sref: 'home.segments'
-        });
+        if(vm.segment != "Create"){
+            $rootScope.$broadcast('header-back', { 
+                path: '^home.segment.accounts',
+                displayName: vm.segment.display_name,
+                sref: 'home.segments'
+            });
+        }
 
         vm.accountsCount = vm.counts.accounts.value;
         vm.contactsCount = vm.counts.contacts.value;
