@@ -44,9 +44,16 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { null, "Microsoft", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
 
             // name standardization
-            { null, "Johnson & Johnson", null, null, null, null,  null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
-            { null, "Johnson and Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
-            { null, "Johnson Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            { null, "Johnson & Johnson", null, "NJ", null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey",
+                    "USA", ">10,000", ">10B" },
+            { null, "Johnson and Johnson", null, "NJ", null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey",
+                    "USA", ">10,000", ">10B" },
+            { null, "Johnson Johnson", null, "NJ", null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey",
+                    "USA", ">10,000", ">10B" },
+
+            //{ null, "Johnson & Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            //{ null, "Johnson and Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            //{ null, "Johnson Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
 
             { null, "Microsoft Corporation", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { null, "Microsoft Corp.", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
