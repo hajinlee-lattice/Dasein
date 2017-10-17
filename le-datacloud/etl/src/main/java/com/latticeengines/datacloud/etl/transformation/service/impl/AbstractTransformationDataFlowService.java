@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.flink.FlinkConstants;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class AbstractTransformationDataFlowService {
@@ -42,21 +41,6 @@ public abstract class AbstractTransformationDataFlowService {
 
     @Value("${datacloud.etl.cascading.tez.task.mem.vcores}")
     private int taskVcores;
-
-    @Value("${datacloud.etl.cascading.flink.mode}")
-    private String flinkMode;
-
-    @Value("${datacloud.etl.cascading.flink.containers}")
-    private int flinkContainers;
-
-    @Value("${datacloud.etl.cascading.flink.jm.mem.gb}")
-    private int flinkJmMem;
-
-    @Value("${datacloud.etl.cascading.flink.tm.mem.gb}")
-    private int flinkTmMem;
-
-    @Value("${datacloud.etl.cascading.flink.tm.slots}")
-    private int flinkTmSlots;
 
     @Autowired
     protected DataTransformationService dataTransformationService;
@@ -97,7 +81,6 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
-        ctx.setProperty(DataFlowProperty.FLINKMODE, flinkMode);
         ctx.setProperty(DataFlowProperty.APPCTX, appCtx);
 
         // partitions
@@ -112,15 +95,13 @@ public abstract class AbstractTransformationDataFlowService {
 
         // job properties
         Properties jobProps = getJobProperties();
-        org.apache.flink.configuration.Configuration flinkConf = getFlinkConf();
         if (parameters instanceof TransformationFlowParameters) {
             TransformationFlowParameters tfParameters = (TransformationFlowParameters) parameters;
             if (tfParameters.getEngineConfiguration() != null) {
-                overwriteJobProperties(jobProps, flinkConf, tfParameters.getEngineConfiguration().getJobProperties());
+                overwriteJobProperties(jobProps, tfParameters.getEngineConfiguration().getJobProperties());
             }
         }
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, jobProps);
-        ctx.setProperty(DataFlowProperty.FLINKCONF, flinkConf);
 
         return ctx;
     }
@@ -158,21 +139,10 @@ public abstract class AbstractTransformationDataFlowService {
         return jobProperties;
     }
 
-    private org.apache.flink.configuration.Configuration getFlinkConf() {
-        org.apache.flink.configuration.Configuration flinkConf = new org.apache.flink.configuration.Configuration();
-        flinkConf.setString(FlinkConstants.JM_HEAP_CONF, String.valueOf(flinkJmMem * 1024));
-        flinkConf.setString(FlinkConstants.TM_HEAP_CONF, String.valueOf(flinkTmMem * 1024));
-        flinkConf.setString(FlinkConstants.TM_SLOTS, String.valueOf(flinkTmSlots));
-        flinkConf.setString(FlinkConstants.NUM_CONTAINERS, String.valueOf(flinkContainers));
-        return flinkConf;
-    }
-
-    private void overwriteJobProperties(Properties jobProps, org.apache.flink.configuration.Configuration flinkConf,
-            Map<String, String> properties) {
+    private void overwriteJobProperties(Properties jobProps, Map<String, String> properties) {
         if (properties != null) {
             for (Map.Entry<String, String> entry : properties.entrySet()) {
                 jobProps.put(entry.getKey(), entry.getValue());
-                flinkConf.setString(entry.getKey(), entry.getValue());
             }
         }
     }

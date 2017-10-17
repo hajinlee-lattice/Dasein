@@ -39,6 +39,7 @@ public class OAuth2Utils {
     private static final Logger log = LoggerFactory.getLogger(OAuth2Utils.class);
     private static final String APP_ID = "app_id";
 
+    @SuppressWarnings("unchecked")
     public static String extractHeaderToken(HttpServletRequest request) {
         Enumeration<String> headers = request.getHeaders("Authorization");
         while (headers.hasMoreElements()) { // typically there is only one (most

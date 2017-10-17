@@ -1,11 +1,11 @@
 package com.latticeengines.domain.exposed.query;
 
-import org.junit.Assert;
+import java.util.Arrays;
+
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-
-import java.util.Arrays;
 
 public class RestrictionBuilderUnitTestNG {
 

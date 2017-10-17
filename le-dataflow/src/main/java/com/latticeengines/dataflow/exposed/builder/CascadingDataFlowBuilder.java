@@ -18,12 +18,9 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.client.program.ContextEnvironment;
-import org.apache.flink.yarn.AbstractYarnClusterDescriptor;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -37,7 +34,6 @@ import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.exposed.builder.engine.FlinkExecutionEngine;
 import com.latticeengines.dataflow.exposed.builder.operations.DebugOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.Operation;
@@ -59,7 +55,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.flink.FlinkYarnCluster;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -966,7 +961,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
         Properties properties = new Properties();
-        Map<String, String> extraJarsForFlink = new HashMap<>();
 
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
         log.info("Using hadoop fs.defaultFS = " + config.get(FileSystem.FS_DEFAULT_NAME_KEY));
@@ -979,13 +973,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             for (String file : files) {
                 String jarId = file.substring(file.lastIndexOf("/"));
                 if (jarId.contains("le-dataflow-")) {
-                    jarId = "flink.jar";
                     appJarPath = file;
                 } else {
                     log.info("Adding " + file + " to flowdef classpath.");
                     flowDef.addToClassPath(file);
                 }
-                extraJarsForFlink.put(jarId, file);
             }
         } catch (Exception e) {
             log.warn("Exception retrieving library jars for this flow.");
@@ -1006,64 +998,41 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             properties.putAll(jobProperties);
         }
 
-        if (engine instanceof FlinkExecutionEngine) {
-            String flinkMode = dataFlowCtx.getProperty(DataFlowProperty.FLINKMODE, String.class, "local");
-            log.info("Flink mode: " + flinkMode);
-            if ("yarn".endsWith(flinkMode)) {
-                String queue = dataFlowCtx.getProperty(DataFlowProperty.QUEUE, String.class);
-                String name = "Flink Session ["
-                        + dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class, "Cascading DataFlow") + "]";
-                YarnConfiguration yarnConf = (YarnConfiguration) config;
-                org.apache.flink.configuration.Configuration flinkConf = dataFlowCtx
-                        .getProperty(DataFlowProperty.FLINKCONF, org.apache.flink.configuration.Configuration.class);
-                AbstractYarnClusterDescriptor yarnDescriptor = FlinkYarnCluster.createDescriptor(yarnConf, flinkConf,
-                        name, queue);
-                yarnDescriptor.setExtraJars(extraJarsForFlink);
-                FlinkYarnCluster.launch(yarnDescriptor);
-                ContextEnvironment flinkEnv = FlinkYarnCluster.getExecutionEnvironment();
-                dataFlowCtx.setProperty(DataFlowProperty.FLINKENV, flinkEnv);
-            }
+        AppProps.setApplicationJarClass(properties, getClass());
+        if (StringUtils.isNotBlank(appJarPath)) {
+            log.info("Set application jar path to " + appJarPath);
+            AppProps.setApplicationJarPath(properties, appJarPath);
         }
+        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
+        Flow<?> flow = flowConnector.connect(flowDef);
+        flow.writeDOT("dot/wcr.dot");
+        flow.addListener(dataFlowListener);
+        flow.addStepListener(dataFlowStepListener);
+        flow.complete();
 
+        // CascadeConnector connector = new CascadeConnector();
+        // Cascade cascade = connector.connect(flow);
+        // cascade.complete();
+
+        List steps = flow.getFlowSteps();
+        Long tuplesWritten = null;
         try {
-            AppProps.setApplicationJarClass(properties, getClass());
-            if (StringUtils.isNotBlank(appJarPath)) {
-                log.info("Set application jar path to " + appJarPath);
-                AppProps.setApplicationJarPath(properties, appJarPath);
+            if (steps != null && !steps.isEmpty()) {
+                FlowStep lastStep = (FlowStep) steps.get(steps.size() - 1);
+                tuplesWritten = lastStep.getFlowStepStats().getCounterValue(StepCounters.Tuples_Written);
+                log.info("Wrote " + tuplesWritten + " in last step.");
             }
-            FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
-            Flow<?> flow = flowConnector.connect(flowDef);
-            flow.writeDOT("dot/wcr.dot");
-            flow.addListener(dataFlowListener);
-            flow.addStepListener(dataFlowStepListener);
-            flow.complete();
-
-            // CascadeConnector connector = new CascadeConnector();
-            // Cascade cascade = connector.connect(flow);
-            // cascade.complete();
-
-            List steps = flow.getFlowSteps();
-            Long tuplesWritten = null;
-            try {
-                if (steps != null && !steps.isEmpty()) {
-                    FlowStep lastStep = (FlowStep) steps.get(steps.size() - 1);
-                    tuplesWritten = lastStep.getFlowStepStats().getCounterValue(StepCounters.Tuples_Written);
-                    log.info("Wrote " + tuplesWritten + " in last step.");
-                }
-            } catch (Exception e) {
-                log.error("Failed to read final count", e);
-            }
-            Table resultTable = getTableMetadata(
-                    dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
-                    targetPath, //
-                    pipesAndOutputSchemas.get(lastOperator).getValue());
-            if (tuplesWritten != null && tuplesWritten > 0) {
-                resultTable.setCount(tuplesWritten);
-            }
-            return resultTable;
-        } finally {
-            FlinkYarnCluster.shutdown();
+        } catch (Exception e) {
+            log.error("Failed to read final count", e);
         }
+        Table resultTable = getTableMetadata(
+                dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
+                targetPath, //
+                pipesAndOutputSchemas.get(lastOperator).getValue());
+        if (tuplesWritten != null && tuplesWritten > 0) {
+            resultTable.setCount(tuplesWritten);
+        }
+        return resultTable;
     }
 
     protected FlowDef constructFlowDef() {

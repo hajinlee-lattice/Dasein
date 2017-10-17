@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -19,7 +19,6 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
-import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -27,10 +26,10 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowJob;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.flink.FlinkConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConfiguration> {
@@ -63,21 +62,6 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
     @Value("${dataflowapi.engine}")
     private String engine;
-
-    @Value("${dataflowapi.flink.mode}")
-    private String flinkMode;
-
-    @Value("${dataflowapi.flink.yarn.containers}")
-    private Integer flinkYarnContainers;
-
-    @Value("${dataflowapi.flink.yarn.slots}")
-    private Integer flinkYarnSlots;
-
-    @Value("${dataflowapi.flink.yarn.tm.mem.mb}")
-    private Integer flinkYarnTmMem;
-
-    @Value("${dataflowapi.flink.yarn.jm.mem.mb}")
-    private Integer flinkYarnJmMem;
 
     public DataFlowProcessor() {
         super();
@@ -189,7 +173,6 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         } else {
             ctx.setProperty(DataFlowProperty.ENGINE, engine);
         }
-        ctx.setProperty(DataFlowProperty.FLINKMODE, flinkMode);
         ctx.setProperty(DataFlowProperty.APPCTX, appContext);
         ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
         Integer partitions = dataFlowConfig.getPartitions();
@@ -198,22 +181,6 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         }
         if (dataFlowConfig.getJobProperties() != null) {
             ctx.setProperty(DataFlowProperty.JOBPROPERTIES, dataFlowConfig.getJobProperties());
-        }
-
-        if ("yarn".equals(flinkMode)) {
-            org.apache.flink.configuration.Configuration flinkConf = new org.apache.flink.configuration.Configuration();
-            flinkConf.setString(FlinkConstants.JM_HEAP_CONF, String.valueOf(flinkYarnJmMem));
-            flinkConf.setString(FlinkConstants.TM_HEAP_CONF, String.valueOf(flinkYarnTmMem));
-            flinkConf.setString(FlinkConstants.NUM_CONTAINERS, String.valueOf(flinkYarnContainers));
-            flinkConf.setString(FlinkConstants.TM_SLOTS, String.valueOf(flinkYarnSlots));
-            if (dataFlowConfig.getJobProperties() != null) {
-                for (Map.Entry<Object, Object> entry : dataFlowConfig.getJobProperties().entrySet()) {
-                    if (entry.getKey() instanceof String && entry.getValue() != null) {
-                        flinkConf.setString((String) entry.getKey(), String.valueOf(entry.getValue()));
-                    }
-                }
-            }
-            ctx.setProperty(DataFlowProperty.FLINKCONF, flinkConf);
         }
 
         return ctx;
