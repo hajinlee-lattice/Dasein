@@ -56,7 +56,9 @@
                                     <a href="javascript:void(0)">Rename</a>
                                     <i class="fa fa-edit"></i>
                                 </li>
-                                <li data-ng-click="vm.showDeleteRatingModalClick($event, rating)">
+                                <li 
+                                    data-ng-click="vm.showDeleteRatingModalClick($event, rating)"
+                                    ng-if="rating.status === 'ACTIVE'">
                                     <a href="javascript:void(0)">Delete</a>
                                     <i class="fa fa-trash"></i>
                                 </li>

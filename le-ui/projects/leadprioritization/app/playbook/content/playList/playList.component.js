@@ -100,8 +100,9 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
 
             vm.tileStates[play.name] = {
                 showCustomMenu: false,
-                editSegment: false,
-                launching: false
+                editPlay: false,
+                launching: false,
+                saveEnabled: false
             };
 
             if(play.launchHistory.mostRecentLaunch != null && play.launchHistory.mostRecentLaunch.launchState === 'Launching'){
@@ -163,6 +164,15 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
         var tileState = vm.tileStates[play.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editPlay = !tileState.editPlay;
+    };
+
+    vm.nameChanged = function(play){
+        var tileState = vm.tileStates[play.name];
+        if(play.displayName.length > 0) {
+            tileState.saveEnabled = true;
+        } else {
+            tileState.saveEnabled = false;
+        }
     };
 
     vm.cancelEditPlayClicked = function($event, play) {

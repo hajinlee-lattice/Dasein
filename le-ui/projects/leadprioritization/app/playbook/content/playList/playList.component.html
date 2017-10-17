@@ -66,8 +66,8 @@
                             <li>Created by <span class="blue-text">{{play.createdBy}}</span> on <span class="blue-text">{{play.created | date}}</span></li>
                             <li>
                                 Segment: 
-                                <span ng-if="play.segment != null" class="blue-text">{{play.segment}}</span>
-                                <span ng-if="play.segment == null" class="gray-text">Segment not selected</span>
+                                <span ng-if="play.ratingEngine.segment != null" class="blue-text">{{play.ratingEngine.segment.display_name}}</span>
+                                <span ng-if="play.ratingEngine.segment == null" class="gray-text">Segment not selected</span>
                             </li>
                             <li>
                                 Last Data Refresh: 
@@ -153,9 +153,10 @@
                                 id="display_name"
                                 name="display_name"
                                 data-ng-model="play.displayName"
+                                ng-change="vm.nameChanged(play)"
+                                ng-model-options="{ debounce: 200 }"
                                 class="form-control" />
                             </label>
-
                         </div>
                         <div class="actions">
 
@@ -168,7 +169,7 @@
                             <button
                                 type="button"
                                 class="button orange-button pull-right"
-                                ng-disabled="editPlayForm.$pristine"
+                                ng-disabled="vm.tileStates[play.name].saveEnabled === false"
                                 ng-click="vm.savePlayClicked($event, play)"
                                 ng-if="!vm.saveInProgress">
                                 Save</button>

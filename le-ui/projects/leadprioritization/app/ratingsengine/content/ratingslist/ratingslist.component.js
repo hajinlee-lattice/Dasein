@@ -40,6 +40,8 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
 
     vm.init = function($q, $filter) {
         
+        // console.log(vm.ratings);
+
         var checkLaunchState,
             arrayofIds = [];
 
