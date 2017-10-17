@@ -42,10 +42,11 @@ NPM AND GRUNT COMMANDS
         'npm run dev' - Compile SASS, Start HTTPD, Use QA Stack A API, Run SASS Sentry in background for css dev
         'npm run devb' - Compile SASS, Start HTTPD, Use QA Stack B API, Run SASS Sentry in background for css dev
         'npm run local' - Compile SASS, Start HTTPD, Use localhost for API, Run SASS Sentry in background for css dev
-        'grunt dev' - Start HTTPD, Use QA Stack A
-        'grunt devb' - Start HTTPD, Use QA Stack B
+        'grunt newdev' - Start HTTPD, Use QA Stack A
+        'grunt newdevb' - Start HTTPD, Use QA Stack B
         'grunt qa' - Start HTTPD, Use QA Stack A API, Use DIST routes and minified files
         'grunt prod' - Start HTTPD, Use Prod Stack A API, Use DIST routes and minified files
+        'grunt proddev' - Start HTTPD, Use Prod Stack A API, Use dev unminified files
          
     Other helpful LE-UI commands
 

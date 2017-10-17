@@ -12,6 +12,7 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
         query: '',
         loadingRatingChart: true,
         buckets: {},
+        ceil: window.Math.ceil,
         header: {
             sort: {
                 label: 'Sort By',

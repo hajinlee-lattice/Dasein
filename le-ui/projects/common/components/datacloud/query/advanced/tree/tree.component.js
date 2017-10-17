@@ -73,8 +73,8 @@ angular
 
                         vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
                         vm.type = vm.item.cube.Bkts.Type;
-                        vm.label = vm.item.topbkt.Lbl;
-                        vm.range = vm.item.topbkt.Vals;
+                        vm.label = vm.tree.bucketRestriction.bkt.Lbl;
+                        vm.range = vm.tree.bucketRestriction.bkt.Vals;
                         
                         //vm.setOperation(vm.item, vm.type, vm.label, vm.range);
 
@@ -150,47 +150,43 @@ angular
             }
 
             vm.changeOperation = function() {
-                // if (!vm.item.topbkt.Rng) {
-                //     vm.item.topbkt.Rng = [null, null];
+                // if (!vm.tree.bucketRestriction.bkt.Rng) {
+                //     vm.tree.bucketRestriction.bkt.Rng = [null, null];
                 // }
 
                 // switch (vm.operation) {
                 //     case 'is':
-                //         vm.item.topbkt.Rng = [ vm.item.topbkt.Rng[0], vm.item.topbkt.Rng[0] ];
-                //         vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0];
+                //         vm.tree.bucketRestriction.bkt.Rng = [ vm.tree.bucketRestriction.bkt.Rng[0], vm.tree.bucketRestriction.bkt.Rng[0] ];
+                //         vm.tree.bucketRestriction.bkt.Lbl = vm.tree.bucketRestriction.bkt.Rng[0];
                 //         break;
                 //     case 'between': 
-                //         vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0] + ' - ' + vm.item.topbkt.Rng[1];
+                //         vm.tree.bucketRestriction.bkt.Lbl = vm.tree.bucketRestriction.bkt.Rng[0] + ' - ' + vm.tree.bucketRestriction.bkt.Rng[1];
                 //         break;
                 //     case 'less': 
-                //         vm.item.topbkt.Rng[0] = null;
-                //         vm.item.topbkt.Lbl = '< ' + vm.item.topbkt.Rng[1];
+                //         vm.tree.bucketRestriction.bkt.Rng[0] = null;
+                //         vm.tree.bucketRestriction.bkt.Lbl = '< ' + vm.tree.bucketRestriction.bkt.Rng[1];
                 //         break;
                 //     case 'greater_equal': 
-                //         vm.item.topbkt.Rng[1] = null;
-                //         vm.item.topbkt.Lbl = '>= ' + vm.item.topbkt.Rng[0];
+                //         vm.tree.bucketRestriction.bkt.Rng[1] = null;
+                //         vm.tree.bucketRestriction.bkt.Lbl = '>= ' + vm.tree.bucketRestriction.bkt.Rng[0];
                 //         break;
                 //     case 'empty': 
-                //         vm.item.topbkt.Rng = null;
-                //         vm.item.topbkt.Lbl = null;
+                //         vm.tree.bucketRestriction.bkt.Rng = null;
+                //         vm.tree.bucketRestriction.bkt.Lbl = null;
                 //         break;
                 // }
 
                 // vm.updateBucketCount();
-                // vm.range = vm.item.topbkt.Rng;
+                // vm.range = vm.tree.bucketRestriction.bkt.Rng;
             }
 
-            vm.getOperationLabel = function(operation) {
+            vm.getOperationLabel = function() {
                 var map = {
                     "Yes": "is",
                     "No": "is not",
                     "": "is empty",
                     "is": "is",
                     "empty": "is empty",
-                    "less": "is less than",
-                    "less_equal": "is less than",
-                    "greater": "is greater than",
-                    "greater_equal": "is greater than",
                     "between": "is between",
                     'IS_NULL': 'is empty',
                     'IS_NOT_NULL': 'is present',
@@ -200,19 +196,19 @@ angular
                     'GREATER_OR_EQUAL': 'greater or equal',
                     'LESS_THAN': 'less than',
                     'LESS_OR_EQUAL': 'less or equal',
-                    'IN_COLLECTION': 'in collection',
-                    'CONTAINS': 'contains',
-                    'NOT_CONTAINS': 'not contains',
-                    'STARTS_WITH': 'starts with',
                     'GTE_AND_LTE': 'greater or equal and less or equal',
                     'GTE_AND_LT': 'greater or equal and less than',
                     'GT_AND_LTE': "greater than and less or equal",
-                    'GT_AND_LT': "greater than and less than"
+                    'GT_AND_LT': "greater than and less than",
+                    'IN_COLLECTION': 'in collection',
+                    'CONTAINS': 'contains',
+                    'NOT_CONTAINS': 'not contains',
+                    'STARTS_WITH': 'starts with'
                 };
 
                 switch (vm.type) {
-                    case 'Boolean': return map[vm.item.topbkt.Vals[0]];
-                    case 'Numerical': return map[vm.item.topbkt.Cmp];
+                    case 'Boolean': return map[vm.tree.bucketRestriction.bkt.Vals[0]];
+                    case 'Numerical': return map[vm.tree.bucketRestriction.bkt.Cmp];
                     case 'Enum': return 'is';
                     default: 
                         //console.log('unknown type', vm.type, vm.label, vm.operation, vm.item);
@@ -245,8 +241,8 @@ angular
                         vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
                         vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
 
-                        vm.label = vm.item.topbkt.Lbl;
-                        vm.range = vm.item.topbkt.Vals;
+                        vm.label = vm.tree.bucketRestriction.bkt.Lbl;
+                        vm.range = vm.tree.bucketRestriction.bkt.Vals;
 
                         //vm.setOperation(vm.item, vm.type, vm.label, vm.range);
                     }

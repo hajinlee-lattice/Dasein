@@ -13,14 +13,6 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}</span>
             </a>
         </li>
-        <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.wizard.segment'}" ng-disabled="menuDisabled || dashboardDisabled">
-            <a ui-sref="home.ratingsengine.wizard.segment({rating_id: stateParams.rating_id, wizard_steps: 'segment'})">
-                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_SEGMENTS')}}">
-                    <span class="ico ico-datatable ico-light-gray"></span>
-                </span>
-                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_SEGMENTS')}}</span>
-            </a>
-        </li>
         <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.wizard.segment.attributes'}" ng-disabled="menuDisabled || dashboardDisabled">
             <a ui-sref="home.ratingsengine.wizard.segment.attributes({rating_id: stateParams.rating_id, wizard_steps: 'attributes'})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_ATTRIBUTES')}}">
@@ -35,14 +27,6 @@
                     <span class="ico ico-performance ico-light-gray"></span>
                 </span>
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}</span>
-            </a>
-        </li>
-        <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.wizard.segment.attributes.rules.summary'}" ng-disabled="menuDisabled || dashboardDisabled">
-            <a ui-sref="home.ratingsengine.wizard.segment.attributes.rules.summary({rating_id: stateParams.rating_id, wizard_steps: 'summary'})">
-                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_SUMMARY')}}">
-                    <span class="ico ico-notes"></span>
-                </span>
-                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_SUMMARY')}}</span>
             </a>
         </li>
     </ul>

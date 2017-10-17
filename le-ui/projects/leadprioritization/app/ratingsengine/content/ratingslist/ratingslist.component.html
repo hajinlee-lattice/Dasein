@@ -98,7 +98,7 @@
 
                                     <div 
                                         class="rating-bar"
-                                        ng-attr-style="{{'height: '+ ((bucket.count / rating.tallestBarHeight) * 100) + '%' }}">
+                                        ng-attr-style="{{'height: '+ vm.ceil(((bucket.count / rating.tallestBarHeight) * 100) / 2) + 'px' }}">
                                     </div>
 
                                     <div class="meta">{{bucket.bucket}}</div>
