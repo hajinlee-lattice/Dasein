@@ -30,6 +30,7 @@ public class TimeFilter {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.EVER;
         filter.period = Period.Day;
+        filter.values = Collections.singletonList(-1);
         return filter;
     }
 

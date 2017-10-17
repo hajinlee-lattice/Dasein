@@ -110,6 +110,84 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(results.size(), 2);
     }
 
+    @Test(groups = "functional", enabled = true)
+    public void testTransactionSelectEver() throws ParseException {
+        TransactionRestriction txRestrictionSpentSum = new TransactionRestriction();
+        txRestrictionSpentSum.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
+        txRestrictionSpentSum.setTimeFilter(TimeFilter.ever());
+        txRestrictionSpentSum.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM,
+                ComparisonType.GREATER_THAN, Collections.singletonList(3000)));
+        Restriction restrictionSpentSum = new TransactionRestrictionTranslator(txRestrictionSpentSum)
+                .convert(BusinessEntity.Account);
+        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .eq("0012400001DNJYKAA5").build();
+        Restriction accountAndTxSpentSum = Restriction.builder().and(accountIdRestriction, restrictionSpentSum).build();
+        Query querySpentSum = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(accountAndTxSpentSum).build();
+        List<Map<String, Object>> spentSumResults = queryEvaluatorService.getData(attrRepo, querySpentSum).getData();
+        Assert.assertEquals(spentSumResults.size(), 1);
+
+        TransactionRestriction txRestrictionSpentEach = new TransactionRestriction();
+        txRestrictionSpentEach.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
+        txRestrictionSpentEach.setTimeFilter(TimeFilter.ever());
+        txRestrictionSpentEach.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
+                ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(200)));
+        Restriction restrictionSpentEach = new TransactionRestrictionTranslator(txRestrictionSpentEach)
+                .convert(BusinessEntity.Account);
+        Restriction accountAndTxSpentEach = Restriction.builder().and(accountIdRestriction, restrictionSpentEach)
+                .build();
+        Query querySpentEach = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(accountAndTxSpentEach).build();
+        List<Map<String, Object>> spentEachResults = queryEvaluatorService.getData(attrRepo, querySpentEach).getData();
+        Assert.assertEquals(spentEachResults.size(), 0);
+
+        TransactionRestriction txRestrictionSpentOnce = new TransactionRestriction();
+        txRestrictionSpentOnce.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
+        txRestrictionSpentOnce.setTimeFilter(TimeFilter.ever());
+        txRestrictionSpentOnce.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT,
+                AggregationType.AT_LEAST_ONCE, ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(2900)));
+        Restriction restrictionSpentOnce = new TransactionRestrictionTranslator(txRestrictionSpentOnce)
+                .convert(BusinessEntity.Account);
+        Restriction accountAndTxSpentOnce = Restriction.builder().and(accountIdRestriction, restrictionSpentOnce)
+                .build();
+        Query querySpentOnce = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(accountAndTxSpentOnce).build();
+        List<Map<String, Object>> spentOnceResults = queryEvaluatorService.getData(attrRepo, querySpentOnce).getData();
+        Assert.assertEquals(spentOnceResults.size(), 1);
+
+        TransactionRestriction txRestrictionUnitSum = new TransactionRestriction();
+        txRestrictionUnitSum.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
+        txRestrictionUnitSum.setTimeFilter(TimeFilter.ever());
+        txRestrictionUnitSum.setUnitFilter(new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM,
+                ComparisonType.GREATER_THAN, Collections.singletonList(20)));
+        Restriction restrictionUnitSum = new TransactionRestrictionTranslator(txRestrictionUnitSum)
+                .convert(BusinessEntity.Account);
+        Restriction accountAndTxUnitSum = Restriction.builder().and(accountIdRestriction, restrictionUnitSum).build();
+        Query queryUnitSum = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(accountAndTxUnitSum).build();
+        List<Map<String, Object>> unitSumResults = queryEvaluatorService.getData(attrRepo, queryUnitSum).getData();
+        Assert.assertEquals(unitSumResults.size(), 0);
+
+        TransactionRestriction txRestrictionUnitAvg = new TransactionRestriction();
+        txRestrictionUnitAvg.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
+        txRestrictionUnitAvg.setTimeFilter(TimeFilter.ever());
+        txRestrictionUnitAvg.setUnitFilter(new AggregationFilter(AggregationSelector.UNIT, AggregationType.AVG,
+                ComparisonType.EQUAL, Collections.singletonList(2)));
+        Restriction restrictionUnitAvg = new TransactionRestrictionTranslator(txRestrictionUnitAvg)
+                .convert(BusinessEntity.Account);
+        Restriction accountAndTxUnitAvg = Restriction.builder().and(accountIdRestriction, restrictionUnitAvg).build();
+        Query queryUnitAvg = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(accountAndTxUnitAvg).build();
+        List<Map<String, Object>> unitAvgResults = queryEvaluatorService.getData(attrRepo, queryUnitAvg).getData();
+        Assert.assertEquals(unitAvgResults.size(), 1);
+
+    }
+
     @Test(groups = "functional")
     public void testTimeFilter() {
         // TODO: this test result might change as times goes
