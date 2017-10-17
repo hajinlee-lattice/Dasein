@@ -117,7 +117,10 @@ class LearningExecutor(Executor):
         pipeline.learnParameters(params["training"], params["test"], configMetadata)
         training = pipeline.predict(params["training"], configMetadata, False)
         test = pipeline.predict(params["test"], configMetadata, True)
-
+        
+        pipelineMediate = pipeline.getMediator()
+        params['pipelineMediator'] = pipelineMediate
+        
         return (training, test, metadata)
 
     @overrides(Executor)

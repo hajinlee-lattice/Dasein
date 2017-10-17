@@ -2,7 +2,7 @@ import os
 import fastavro as avro
 from abc import ABCMeta, abstractmethod
 import shutil
-
+import json
 
 class Executor(object):
     '''
@@ -61,6 +61,7 @@ class Executor(object):
         hdfs.mkdir(modelHdfsDir)
         if not os.path.exists(modelLocalDir + "diagnostics.json"):
             hdfs.copyToLocal(params["schema"]["diagnostics_path"] + "diagnostics.json", modelLocalDir + "diagnostics.json")
+            self.mergeDiagnostics(modelLocalDir + "diagnostics.json", params)
             if os.path.exists(metadataFile):
                 shutil.copy2(metadataFile, modelLocalDir + "metadata.avsc")
         (_, _, filenames) = os.walk(modelLocalDir).next()
@@ -92,6 +93,21 @@ class Executor(object):
         for filename in filter(lambda e: self.accept(e), filenames):
             hdfs.copyFromLocal(dataRulesLocalDir + filename, "%s%s" % (dataRulesHdfsDir, filename))
 
+    def mergeDiagnostics(self, diagnostics, params):
+        if 'pipelineMediator' not in params:
+            return
+        pipelineMediator = params['pipelineMediator']
+        if pipelineMediator == None or ('REMOVEDCOLUMNS' not in pipelineMediator and 'ADDEDCOLUMNS' not in pipelineMediator):
+            return
+        with open(diagnostics, "r") as fp:
+            diagnosticsJson = json.load(fp)
+            if 'REMOVEDCOLUMNS' in pipelineMediator:
+                diagnosticsJson['Summary']['RemovedColumnsInPipeline'] = pipelineMediator["REMOVEDCOLUMNS"]
+            if 'ADDEDCOLUMNS' in pipelineMediator:
+                diagnosticsJson['Summary']['AddedColumnsInPipeline'] = pipelineMediator["ADDEDCOLUMNS"]
+        with open(diagnostics, "wb") as fp:
+                json.dump(diagnosticsJson, fp)
+                
     @abstractmethod
     def getModelDirPath(self, schema): pass
 

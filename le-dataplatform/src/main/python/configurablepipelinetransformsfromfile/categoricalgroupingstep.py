@@ -109,7 +109,7 @@ class CategoricalGroupingStep(PipelineStep):
                 if any([pd.isnull(x) for x in xList]):
                     xList = ['LE-missing' if pd.isnull(x) else x for x in xList]
 
-                featValMapping = self.__getGroupMapping(xList, eventList, popCount, popRate, self.thresholdError, self.thresholdSigSize, self.thresholdBinSize)
+                featValMapping = self.__getGroupMapping(featureName, xList, eventList, popCount, popRate, self.thresholdError, self.thresholdSigSize, self.thresholdBinSize)
 
                 if len(featValMapping) > 0 :
                     newFeatName = ''.join([featureName, 'Grouped'])
@@ -282,7 +282,7 @@ class CategoricalGroupingStep(PipelineStep):
 
         return (featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver)
 
-    def __getGroupMapping(self, xList, eventList, popCount, popRate, thresholdError=3, thresholdSigSize=0.01, threshBinSize=0.05):
+    def __getGroupMapping(self, featureName, xList, eventList, popCount, popRate, thresholdError=3, thresholdSigSize=0.01, threshBinSize=0.05):
 
         featValMapping = {}
 
@@ -329,6 +329,6 @@ class CategoricalGroupingStep(PipelineStep):
                     featValMapping = {}
 
                 if len(featValMapping) == 0:
-                    logger.info('feature values in left_over are too significant; original column is to be deleted and not grouped')
+                    logger.info('feature values in left_over are too significant; original column is to be deleted and not grouped, featureName={%s}' % featureName)
 
         return featValMapping
