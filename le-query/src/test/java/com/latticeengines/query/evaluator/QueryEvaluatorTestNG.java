@@ -8,7 +8,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -87,11 +86,12 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         AttributeLookup accountIdLookup = new AttributeLookup(BusinessEntity.Contact, ATTR_ACCOUNT_ID);
         Query query = Query.builder() //
-                .select(accountIdLookup, AggregateLookup.count().as(countAttrAlias)) //
+                .select(accountIdLookup, AggregateLookup.count()) //
                 .from(BusinessEntity.Contact) //
                 .groupBy(accountIdLookup) //
                 .build();
-        SubQuery subQuery = new SubQuery(query, subQueryAlias);
+        SubQuery subQuery = new SubQuery(query, subQueryAlias).withProjection(ATTR_ACCOUNT_ID)
+                .withProjection(countAttrAlias);
         SubQueryAttrLookup countLookup = new SubQueryAttrLookup(subQuery, countAttrAlias);
         Restriction subQueryRestriction = Restriction.builder().let(subQuery, countAttrAlias).gte(10).build();
         Restriction joinedRestriction = Restriction.builder().and(accountRestriction, subQueryRestriction).build();
@@ -99,8 +99,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME).select(countLookup)
                 .where(joinedRestriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, joinQuery);
-        sqlContains(sqlQuery, String.format("with %s as (select %s.%s, count(?) as %s", subQueryAlias, CONTACT,
-                ATTR_ACCOUNT_ID, countAttrAlias));
+        sqlContains(sqlQuery, String.format("with %s (%s, %s) as (select %s.%s, count(?)", subQueryAlias,
+                ATTR_ACCOUNT_ID, countAttrAlias, CONTACT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
         sqlContains(sqlQuery, String.format("group by %s.%s)", CONTACT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("select %s.%s, %s.%s, %s.%s", ACCOUNT, ATTR_ACCOUNT_ID, ACCOUNT,

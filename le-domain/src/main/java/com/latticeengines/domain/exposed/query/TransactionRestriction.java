@@ -9,9 +9,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class TransactionRestriction extends Restriction {
-    public final static String PERIOD_AMOUNT = "PeriodAmount";
-    public final static String PERIOD_QUANTITY = "PeriodQuantity";
-    public final static String PERIOD_MAX = "PeriodMax";
 
     @JsonProperty("productName")
     private String productName;

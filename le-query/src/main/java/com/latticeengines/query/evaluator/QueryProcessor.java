@@ -87,7 +87,14 @@ public class QueryProcessor {
         SQLQuery<?> sqlQuery = queryFactory.getQuery(repository);
         for (SubQuery sq : query.getCommonTableQueryList()) {
             StringPath aliasTable = AttrRepoUtils.getTablePath(sq.getAlias());
-            sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, false));
+            StringPath[] projectedColumns = sq.getProjections().stream().map(QueryUtils::getAttributePath)
+                    .toArray(StringPath[]::new);
+            if (projectedColumns.length != 0) {
+                sqlQuery = sqlQuery.with(aliasTable, projectedColumns)
+                        .as(processSubueryExpression(repository, sq, false));
+            } else {
+                sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, false));
+            }
         }
         if (subQuery != null) {
             Expression<?> subQueryExpression = processSubueryExpression(repository, subQuery, true);
