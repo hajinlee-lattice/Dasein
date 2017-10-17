@@ -29,14 +29,19 @@ public class ProfileParameters extends TransformationFlowParameters {
                                   // real use case
 
     @JsonProperty("MaxCats")
-    private int maxCats;
+    private int maxCats = 2048; // Maximum allowed category number
 
     @JsonProperty("MaxCatLen")
-    private int maxCatLength = 1024;
+    private int maxCatLength = 1024; // Maximum allowed category attribute
+                                     // length. If exceeded, this attribute is
+                                     // not segmentable
 
     @JsonProperty("CatAttrsNotEnc")
     private String[] catAttrsNotEnc; // Dimensional attributes for stats should
                                      // not be encoded
+
+    @JsonProperty("MaxDiscrete")
+    private int maxDiscrete = 5; // Maximum allowed discrete bucket number
 
     @JsonProperty("IDAttr")
     private String idAttr;
@@ -144,6 +149,14 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public void setCatAttrs(List<Attribute> catAttrs) {
         this.catAttrs = catAttrs;
+    }
+
+    public int getMaxDiscrete() {
+        return maxDiscrete;
+    }
+
+    public void setMaxDiscrete(int maxDiscrete) {
+        this.maxDiscrete = maxDiscrete;
     }
 
     public void setNumericAttrs(List<Attribute> numericAttrs) {

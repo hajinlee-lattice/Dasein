@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
@@ -174,6 +175,9 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         if (algo instanceof IntervalBucket) {
             return bucketInterval(value, (IntervalBucket) algo);
         }
+        if (algo instanceof DiscreteBucket) {
+            return bucketDiscrete(value, (DiscreteBucket) algo);
+        }
         return 0;
     }
 
@@ -235,6 +239,27 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
             }
         }
         return interval;
+    }
+
+    private static int bucketDiscrete(Object value, DiscreteBucket bucket) {
+        if (value == null) {
+            return 0;
+        }
+        try {
+            int idx = 1;
+            for (Number disVal : bucket.getValues()) {
+                if ((value instanceof Integer && value.equals(disVal.intValue()))
+                        || (value instanceof Long && value.equals(disVal.longValue()))) {
+                    return idx;
+                }
+                idx++;
+            }
+            log.error("Fail to find value " + value.toString() + " in discrete bucket");
+            return 0;
+        } catch (Exception ex) {
+            log.error("Fail to compare value " + value.toString() + " with discrete values in bucket", ex);
+            return 0;
+        }
     }
 
 }

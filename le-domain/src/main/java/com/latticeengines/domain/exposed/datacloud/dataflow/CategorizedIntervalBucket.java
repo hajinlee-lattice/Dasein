@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CategorizedIntervalBucket extends IntervalBucket {
+    private static final long serialVersionUID = 7888809618514182701L;
 
     @Override
     @JsonIgnore

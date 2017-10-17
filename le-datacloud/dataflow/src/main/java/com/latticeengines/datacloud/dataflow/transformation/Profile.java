@@ -15,10 +15,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AddRandomIntFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CategoricalProfileBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CategoricalProfileGroupingBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DiscreteProfileBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DiscreteProfileGroupingBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.NumericProfileBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.NumericProfileSampleBuffer;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -40,7 +43,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
 
     private static final String DUMMY_GROUP = "_Dummy_Group_";
     private static final int SAMPLE_SIZE = 100000;
-    private static final String NONCAT_FLAG = "__LATTICE_NONCAT_FLAG_F167B732-D33b-40D0-8288-87605A82650C__";
+    private static final String NONSEG_FLAG = "__LATTICE_NONCAT_FLAG_F167B732-D33b-40D0-8288-87605A82650C__";
     private static final String CAT_ATTR = "CatAttr";
     private static final String CAT_VALUE = "CatValue";
 
@@ -67,14 +70,22 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         src = src.apply(new AddRandomIntFunction(DUMMY_GROUP, 1, SAMPLE_SIZE, config.getRandSeed()),
                 new FieldList(src.getFieldNames()), new FieldMetadata(DUMMY_GROUP, Integer.class));
 
+        // Discrete profiling
+        Node disProfile = profileDisAttrs(src, numAttrs, numAttrsToDecode, decStrs);
+
         // Numeric profiling
         Node numProfile = profileNumAttrs(src, numAttrs, numAttrsToDecode, decStrs);
 
         // Categorical profiling
         Node catProfile = profileCatAttrs(src, catAttrs);
 
-        return numProfile.merge(catProfile);
+        // Exclude discrete attrs from numeric attrs
+        numProfile = cleanNumProfile(numProfile, disProfile);
 
+        List<Node> mergeList = new ArrayList<>();
+        mergeList.add(catProfile);
+        mergeList.add(disProfile);
+        return numProfile.merge(mergeList);
     }
     
     private Node retainAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode, List<String> catAttrs) {
@@ -107,6 +118,33 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         for (ProfileParameters.Attribute attr : config.getCatAttrs()) {
             catAttrs.add(attr.getAttr());
         }
+    }
+
+    private Node profileDisAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
+            Map<String, String> decStrs) {
+        List<String> retainAttrs = new ArrayList<>();
+        retainAttrs.addAll(numAttrs);
+        retainAttrs.addAll(numAttrsToDecode.keySet());
+        retainAttrs.add(DUMMY_GROUP);
+        Node dis = src.renamePipe("_DIS_PROFILE_").retain(new FieldList(retainAttrs));
+        List<FieldMetadata> fms = new ArrayList<>();
+        fms.add(new FieldMetadata(KVDepivotStrategy.KEY_ATTR, String.class));
+        fms.add(new FieldMetadata(KVDepivotStrategy.valueAttr(Integer.class), Integer.class));
+        fms.add(new FieldMetadata(KVDepivotStrategy.valueAttr(Long.class), Long.class));
+        DiscreteProfileGroupingBuffer groupBuf = new DiscreteProfileGroupingBuffer(
+                new Fields(KVDepivotStrategy.KEY_ATTR, KVDepivotStrategy.valueAttr(Integer.class),
+                        KVDepivotStrategy.valueAttr(Long.class)),
+                numAttrs, numAttrsToDecode, config.getCodeBookMap(), config.getMaxDiscrete());
+        dis = dis.groupByAndBuffer(new FieldList(DUMMY_GROUP), groupBuf, fms);
+        fms = getFinalMetadata();
+        DiscreteProfileBuffer buf = new DiscreteProfileBuffer(new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME,
+                DataCloudConstants.PROFILE_ATTR_SRCATTR, DataCloudConstants.PROFILE_ATTR_DECSTRAT,
+                DataCloudConstants.PROFILE_ATTR_ENCATTR, DataCloudConstants.PROFILE_ATTR_LOWESTBIT,
+                DataCloudConstants.PROFILE_ATTR_NUMBITS, DataCloudConstants.PROFILE_ATTR_BKTALGO),
+                config.getMaxDiscrete(), decStrs);
+        dis = dis.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), new FieldList(dis.getFieldNames()), buf,
+                fms);
+        return dis;
     }
 
     private Node profileNumAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
@@ -152,7 +190,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         fms.add(new FieldMetadata(CAT_ATTR, String.class));
         fms.add(new FieldMetadata(CAT_VALUE, String.class));
         CategoricalProfileGroupingBuffer groupBuf = new CategoricalProfileGroupingBuffer(
-                new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats(),
+                new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONSEG_FLAG, config.getMaxCats(),
                 config.getMaxCatLength(), catAttrs);
         cat = cat.groupByAndBuffer(new FieldList(DUMMY_GROUP), groupBuf, fms);
         fms = getFinalMetadata();
@@ -161,9 +199,23 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
                         DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
                         DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
                         DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats());
+                CAT_ATTR, CAT_VALUE, NONSEG_FLAG, config.getMaxCats());
         cat = cat.groupByAndBuffer(new FieldList(CAT_ATTR), new FieldList(cat.getFieldNames()), buf, fms);
         return cat;
+    }
+
+    private Node cleanNumProfile(Node numProfile, Node disProfile) {
+        List<String> renamedDisSchema = new ArrayList<>();
+        disProfile.getFieldNames().forEach(name -> renamedDisSchema.add("DIS_" + name));
+        disProfile = disProfile.rename(new FieldList(disProfile.getFieldNames()), new FieldList(renamedDisSchema));
+        List<String> retainNumSchema = numProfile.getFieldNames();
+        numProfile = numProfile
+                .join(new FieldList(DataCloudConstants.PROFILE_ATTR_ATTRNAME), disProfile,
+                        new FieldList("DIS_" + DataCloudConstants.PROFILE_ATTR_ATTRNAME), JoinType.LEFT)
+                .filter("DIS_" + DataCloudConstants.PROFILE_ATTR_ATTRNAME + " == null",
+                        new FieldList("DIS_" + DataCloudConstants.PROFILE_ATTR_ATTRNAME))
+                .retain(new FieldList(retainNumSchema));
+        return numProfile;
     }
 
     private Map<String, Class<?>> getNumAttrClsMap(List<FieldMetadata> schema,

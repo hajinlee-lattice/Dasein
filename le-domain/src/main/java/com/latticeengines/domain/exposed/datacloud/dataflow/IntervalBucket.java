@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IntervalBucket extends BucketAlgorithm {
+    private static final long serialVersionUID = 5591535115795170400L;
 
     @Override
     @JsonIgnore

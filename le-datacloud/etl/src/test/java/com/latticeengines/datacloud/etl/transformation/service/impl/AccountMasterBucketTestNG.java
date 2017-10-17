@@ -129,7 +129,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         List<String> baseSources = Collections.singletonList(accountMaster.getSourceName());
         step.setBaseSources(baseSources);
         step.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-        step.setConfiguration(JsonUtils.serialize(constructProfileConfig()));
+        step.setConfiguration(setDataFlowEngine(JsonUtils.serialize(constructProfileConfig()), "TEZ"));
         return step;
     }
 

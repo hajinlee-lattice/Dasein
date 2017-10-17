@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategorizedIntervalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters.Attribute;
@@ -133,6 +134,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setMaxCats(config.getMaxCat());
         paras.setMaxCatLength(config.getMaxCatLength());
         paras.setCatAttrsNotEnc(config.getCatAttrsNotEnc());
+        paras.setMaxDiscrete(config.getMaxDiscrete());
         if (CollectionUtils.isNotEmpty(idAttrs)) {
             paras.setIdAttr(idAttrs.get(0));
         }
@@ -468,25 +470,64 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 ? new HashSet<>(Arrays.asList(paras.getCatAttrsNotEnc())) : new HashSet<>();
         for (GenericRecord record : records) {
             String attrName = record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString();
-            if (numericAttrMap.containsKey(attrName)) {
+            boolean validBucketAlgo = false;
+            try {
                 IntervalBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
                         : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
                                 IntervalBucket.class);
+                if (!numericAttrMap.containsKey(attrName)) {
+                    throw new RuntimeException(
+                            String.format("Fail to find attribute %s with IntervalBucket %s in numeric attribute list",
+                                    attrName, record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString()));
+                }
                 numericAttrMap.get(attrName).setAlgo(algo);
                 // boundary+2: 1 for catNum = boundNum + 1; 1 for null
                 Integer numBits = algo == null ? null
                         : Math.max((int) Math.ceil(Math.log((algo.getBoundaries().size() + 2)) / Math.log(2)), 1);
                 numericAttrMap.get(attrName).setEncodeBitUnit(numBits);
-            } else if (catAttrMap.containsKey(attrName)) {
-                CategoricalBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
-                        : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
-                                CategoricalBucket.class);
-                catAttrMap.get(attrName).setAlgo(algo);
-                Integer numBits = algo == null ? null
-                        : Math.max((int) Math.ceil(Math.log((algo.getCategories().size() + 1)) / Math.log(2)), 1);
-                catAttrMap.get(attrName).setEncodeBitUnit(numBits);
-            } else {
-                throw new RuntimeException("Unknown attribute: " + attrName);
+                validBucketAlgo = true;
+            } catch (Exception e) {
+            }
+            if (!validBucketAlgo) {
+                try {
+                    DiscreteBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
+                            : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
+                                    DiscreteBucket.class);
+                    if (!numericAttrMap.containsKey(attrName)) {
+                        throw new RuntimeException(String.format(
+                                "Fail to find attribute %s with DiscreteBucket %s in numeric attribute list", attrName,
+                                record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString()));
+                    }
+                    numericAttrMap.get(attrName).setAlgo(algo);
+                    Integer numBits = algo == null ? null
+                            : Math.max((int) Math.ceil(Math.log((algo.getValues().size() + 1)) / Math.log(2)), 1);
+                    numericAttrMap.get(attrName).setEncodeBitUnit(numBits);
+                    validBucketAlgo = true;
+                } catch (Exception e) {
+                }
+            }
+            if (!validBucketAlgo) {
+                try {
+                    CategoricalBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
+                            : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
+                                    CategoricalBucket.class);
+                    if (!catAttrMap.containsKey(attrName)) {
+                        throw new RuntimeException(String.format(
+                                "Fail to find attribute %s with CategoricalBucket %s in categorical attribute list",
+                                attrName, record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString()));
+                    }
+                    catAttrMap.get(attrName).setAlgo(algo);
+                    Integer numBits = algo == null ? null
+                            : Math.max((int) Math.ceil(Math.log((algo.getCategories().size() + 1)) / Math.log(2)), 1);
+                    catAttrMap.get(attrName).setEncodeBitUnit(numBits);
+                    validBucketAlgo = true;
+                } catch (Exception e) {
+
+                }
+            }
+            if (!validBucketAlgo) {
+                throw new RuntimeException(String.format("Unknown bucket algorithm for attribute %s: %s", attrName,
+                        record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString()));
             }
         }
         Iterator<Attribute> iter = numericAttrs.iterator();

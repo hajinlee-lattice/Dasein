@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BooleanBucket extends BucketAlgorithm {
+    private static final long serialVersionUID = -6093490491153221140L;
 
     public static final String DEFAULT_TRUE = "Yes";
     public static final String DEFAULT_FALSE = "No";

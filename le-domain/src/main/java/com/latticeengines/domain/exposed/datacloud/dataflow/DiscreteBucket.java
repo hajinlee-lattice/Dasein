@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,44 +11,32 @@ import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CategoricalBucket extends BucketAlgorithm {
-    private static final long serialVersionUID = 974998427768883957L;
+public class DiscreteBucket extends BucketAlgorithm {
+    private static final long serialVersionUID = -4196020293536783489L;
 
     @Override
     @JsonIgnore
     public String getAlgorithm() {
-        return CATEGORICAL;
+        return DISCRETE;
     }
 
-    @JsonProperty("cats")
-    private List<String> categories;
+    @JsonProperty("values")
+    private List<Number> values;
 
-    // optional
-    @JsonProperty("map")
-    private Map<String, List<String>> mapping;
-
-    public List<String> getCategories() {
-        return categories;
+    public List<Number> getValues() {
+        return values;
     }
 
-    public void setCategories(List<String> categories) {
-        this.categories = categories;
+    public void setValues(List<Number> values) {
+        this.values = values;
     }
 
-    public Map<String, List<String>> getMapping() {
-        return mapping;
-    }
-
-    public void setMapping(Map<String, List<String>> mapping) {
-        this.mapping = mapping;
-    }
-
-    @Override
     @JsonIgnore
-    public List<String> generateLabelsInternal () {
+    @Override
+    public List<String> generateLabelsInternal() {
         List<String> labels = new ArrayList<>();
         labels.add(null);
-        labels.addAll(categories);
+        values.forEach(v -> labels.add(String.valueOf(v)));
         return labels;
     }
 
@@ -58,4 +45,5 @@ public class CategoricalBucket extends BucketAlgorithm {
     public BucketType getBucketType() {
         return BucketType.Enum;
     }
+
 }

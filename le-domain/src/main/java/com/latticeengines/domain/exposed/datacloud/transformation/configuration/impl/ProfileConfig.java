@@ -44,6 +44,9 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
     private String[] catAttrsNotEnc; // Dimensional attributes for stats should
                                      // not be encoded
 
+    @JsonProperty("MaxDiscrete")
+    private int maxDiscrete = 5; // Maximum allowed discrete bucket number
+
     @Override
     public String getStage() {
         if (StringUtils.isBlank(super.getStage())) {
@@ -119,6 +122,14 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
 
     public void setCatAttrsNotEnc(String[] catAttrsNotEnc) {
         this.catAttrsNotEnc = catAttrsNotEnc;
+    }
+
+    public int getMaxDiscrete() {
+        return maxDiscrete;
+    }
+
+    public void setMaxDiscrete(int maxDiscrete) {
+        this.maxDiscrete = maxDiscrete;
     }
 
     public String getDataCloudVersion() {

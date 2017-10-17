@@ -97,7 +97,8 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
                     bucket, //
                     hqduns, //
                     calcStats, //
-                    report, extractTopCube);
+                    report, //
+                    extractTopCube);
             // -----------
             steps.get(steps.size() - 1).setTargetSource(getTargetSourceName());
             configuration.setSteps(steps);
@@ -158,7 +159,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(3));
         step.setTransformer(AMStatsReport.TRANSFORMER_NAME);
-        step.setConfiguration("{}");
+        step.setConfiguration(setDataFlowEngine("{}", "TEZ"));
         step.setTargetSource("AccountMasterReport");
         return step;
     }

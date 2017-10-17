@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -139,6 +140,8 @@ public class StatsCubeUtils {
             updateIntervalBucket(bucket, (IntervalBucket) algorithm, bktId);
         } else if (algorithm instanceof CategoricalBucket) {
             updateCategoricalBucket(bucket, (CategoricalBucket) algorithm, bktId);
+        } else if (algorithm instanceof DiscreteBucket) {
+            updateDiscreteBucket(bucket, (DiscreteBucket) algorithm, bktId);
         } else {
             throw new UnsupportedOperationException(
                     "Do not know how to parse algorithm of type " + algorithm.getClass());
@@ -185,6 +188,14 @@ public class StatsCubeUtils {
     }
 
     private static void updateCategoricalBucket(Bucket bucket, CategoricalBucket algo, int bktId) {
+        List<String> labels = algo.generateLabels();
+        String bucketLabel = labels.get(bktId);
+        bucket.setLabel(bucketLabel);
+        bucket.setValues(Collections.singletonList(bucketLabel));
+        bucket.setComparisonType(ComparisonType.EQUAL);
+    }
+
+    private static void updateDiscreteBucket(Bucket bucket, DiscreteBucket algo, int bktId) {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
