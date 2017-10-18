@@ -63,13 +63,16 @@ public class DanteLeadServiceImpl implements DanteLeadService {
     private DanteLead convertForDante(DanteLeadDTO danteLeadDTO, String customerSpace) {
         DanteLead lead = new DanteLead();
         Date now = new Date();
-        lead.setAccountExternalID(danteLeadDTO.getRecommendation().getLeAccountExternalID());
+        if (org.apache.commons.lang.StringUtils.isBlank(danteLeadDTO.getRecommendation().getSfdcAccountID())) {
+            lead.setAccountExternalID(danteLeadDTO.getRecommendation().getLeAccountExternalID());
+        } else {
+            lead.setAccountExternalID(danteLeadDTO.getRecommendation().getSfdcAccountID());
+        }
         lead.setCreationDate(now);
         lead.setCustomerID(CustomerSpace.parse(customerSpace).getTenantId());
         lead.setExternalID(danteLeadDTO.getRecommendation().getId());
         lead.setLastModificationDate(now);
         lead.setSalesforceID(null);
-        lead.setAccountExternalID(danteLeadDTO.getRecommendation().getSfdcAccountID());
         /// TODO: Remove this once both BIS & DanteUI support String IDs
         lead.setRecommendationID(danteLeadDTO.getRecommendation().getPid().intValue());
         /// TODO: END
