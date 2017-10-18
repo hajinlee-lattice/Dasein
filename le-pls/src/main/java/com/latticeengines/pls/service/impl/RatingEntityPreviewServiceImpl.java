@@ -42,7 +42,6 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
             InterfaceName.CompanyName.name(), //
             InterfaceName.Domain.name(), //
             InterfaceName.Website.name(), //
-            InterfaceName.SalesforceAccountID.name(), //
             InterfaceName.LastModifiedDate.name(), //
             InterfaceName.LDC_Name.name());
 

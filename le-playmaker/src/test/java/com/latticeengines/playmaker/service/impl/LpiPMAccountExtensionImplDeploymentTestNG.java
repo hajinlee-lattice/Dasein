@@ -58,6 +58,8 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
             "ID", //
             "LEAccountExternalID", //
             "LastModificationDate", //
+            "SalesforceAccountID", //
+            "SfdcAccountID", //
             "RowNum");
 
     @BeforeClass(groups = "deployment")
@@ -97,6 +99,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                         log.info(String.format("Expected fields: %s , Result fields: %s", //
                                 JsonUtils.serialize(accountFields), //
                                 JsonUtils.serialize(row.keySet())));
+                        log.info("Account Ext Data: " + JsonUtils.serialize(row));
                     }
 
                     Assert.assertEquals(row.keySet().size(), accountFields.size());
