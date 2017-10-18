@@ -17,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
-import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -169,14 +168,7 @@ public class TestPlayCreationHelper {
         return playLaunch;
     }
 
-    @SuppressWarnings("unchecked")
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {
-        Field propMapField = PropertyUtils.class.getDeclaredField("propertiesMap");
-        propMapField.setAccessible(true);
-        Map<String, String> propertiesMap = (Map<String, String>) propMapField.get(null);
-
-        propertiesMap.put("common.microservice.url", //
-                "http://localhost:8080");
 
         EntityProxy entityProxy = new EntityProxy();
 
