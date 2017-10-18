@@ -22,7 +22,7 @@ public class ConsolidateAddDateColumnFuction extends BaseOperation implements Fu
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String trxTime = arguments.getString(trxTimeColumn);
+        String trxTime = arguments.getString(trxTimeColumn).toString();
         String result = DateTimeUtils.toDateOnlyFromMillis(trxTime);
         functionCall.getOutputCollector().add(new Tuple(result));
     }
