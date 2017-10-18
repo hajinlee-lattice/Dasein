@@ -745,7 +745,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.SalesforceAccountID.name()) //
                 .allowedDisplayNames(
-                        Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "SALESFORCEACCOUNTID")) //
+                        Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.SalesforceAccountID) //
                 .logicalType(LogicalDataType.Id) //
@@ -934,8 +934,8 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        table.addAttribute(attr(InterfaceName.SalesforceAccountID.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "SALESFORCEACCOUNTID")) //
+        table.addAttribute(attr(InterfaceName.SalesforceContactID.name()) //
+                .allowedDisplayNames(Sets.newHashSet("CRM_ID")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.SalesforceAccountID) //
                 .logicalType(LogicalDataType.Id) //

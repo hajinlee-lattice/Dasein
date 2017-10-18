@@ -66,6 +66,7 @@ public enum InterfaceName {
     External_ID, // TODO: temporarily used for contact Id before we have real
                  // contact data
     SalesforceAccountID, // salesforce account ID
+    SalesforceContactID, // salesforce contact ID
 
     // Data Cloud
     LatticeAccountId, // Id in AccountMaster
