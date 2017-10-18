@@ -12,6 +12,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -25,7 +26,9 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
+@Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
@@ -79,7 +82,6 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
-        testPlayCreationHelper.cleanupTenant();
     }
 
     @Test(groups = "deployment")

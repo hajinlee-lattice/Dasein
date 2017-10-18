@@ -13,6 +13,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -22,7 +23,9 @@ import com.latticeengines.playmakercore.service.EntityQueryGenerator;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
+@Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
         "classpath:test-playmaker-context.xml" })
@@ -44,7 +47,11 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
 
     List<String> accountFields = Arrays.asList( //
             "LatticeAccountId", //
-            "LastModifiedDate", //
+            // TODO - anoop - enable it once CDL team ensures that
+            // LastModifiedDate
+            // column is present in all tenant data
+            //
+            // "LastModifiedDate", //
             "AccountId", //
             "Website", //
             "LDC_Name", //

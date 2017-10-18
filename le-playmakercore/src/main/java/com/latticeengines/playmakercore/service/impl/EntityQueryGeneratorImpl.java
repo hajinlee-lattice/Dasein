@@ -30,10 +30,15 @@ public class EntityQueryGeneratorImpl implements EntityQueryGenerator {
         if (dataRequest == null) {
             dataRequest = new DataRequest();
         }
-        long lastModifiedTime = start;
-        Restriction lastModifiedRestriction = Restriction.builder()
-                .let(BusinessEntity.Account, InterfaceName.LastModifiedDate.name()).gte(lastModifiedTime).build();
-        restrictions.add(lastModifiedRestriction);
+
+        // TODO - anoop - enable it once CDL team ensures that LastModifiedDate
+        // column is present in all tenant data
+        //
+        // long lastModifiedTime = start;
+        // Restriction lastModifiedRestriction = Restriction.builder()
+        // .let(BusinessEntity.Account,
+        // InterfaceName.LastModifiedDate.name()).gte(lastModifiedTime).build();
+        // restrictions.add(lastModifiedRestriction);
 
         if (CollectionUtils.isNotEmpty(dataRequest.getAccountIds())) {
             RestrictionBuilder accoundIdRestrictionBuilder = Restriction.builder();
@@ -48,9 +53,12 @@ public class EntityQueryGeneratorImpl implements EntityQueryGenerator {
         FrontEndQuery query = new FrontEndQuery();
         Set<String> attrSet = new HashSet<>();
         attrSet.add(InterfaceName.AccountId.name());
-        attrSet.add(InterfaceName.LatticeAccountId.name());
         attrSet.add(InterfaceName.SalesforceAccountID.name());
-        attrSet.add(InterfaceName.LastModifiedDate.name());
+
+        // TODO - anoop - enable it once CDL team ensures that LastModifiedDate
+        // column is present in all tenant data
+        //
+        // attrSet.add(InterfaceName.LastModifiedDate.name());
         if (CollectionUtils.isNotEmpty(dataRequest.getAttributes())) {
             attrSet.addAll(dataRequest.getAttributes());
         }
@@ -59,6 +67,11 @@ public class EntityQueryGeneratorImpl implements EntityQueryGenerator {
 
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         List<AttributeLookup> sortFields = new ArrayList<>();
+        // TODO - anoop - enable it once CDL team ensures that LastModifiedDate
+        // column is present in all tenant data
+        //
+        // sortFields.add(new AttributeLookup(BusinessEntity.Account,
+        // InterfaceName.LastModifiedDate.name()));
         sortFields.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
         FrontEndSort sort = new FrontEndSort(sortFields, false);
         query.setSort(sort);

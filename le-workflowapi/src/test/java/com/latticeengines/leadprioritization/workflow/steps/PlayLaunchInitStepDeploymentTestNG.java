@@ -22,6 +22,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -39,7 +40,9 @@ import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
+@Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
         "classpath:test-playlaunch-properties-context.xml" })
@@ -91,7 +94,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         String playId = play.getName();
         String playLaunchId = playLaunch.getId();
-        long pageSize = 2L;
+        long pageSize = 20L;
 
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
 
@@ -117,7 +120,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     public void teardown() throws Exception {
 
         testPlayCreationHelper.cleanupArtifacts();
-        testPlayCreationHelper.cleanupTenant();
 
         List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
         Assert.assertNotNull(recommendations);

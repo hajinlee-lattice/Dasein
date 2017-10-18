@@ -8,10 +8,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -94,23 +98,40 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         ratingCache.setRefreshKeyResolver((updateSignal, existingKeys) -> Collections.emptyList());
     }
 
-    public long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
-        return countCache
+    public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        Long count = countCache
                 .get(String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+
+        if (count == null) {
+            throw new LedpException(LedpCode.LEDP_18158);
+        }
+
+        return count;
     }
 
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
-        return dataCache
+        DataPage dataPage = dataCache
                 .get(String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+
+        if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
+            throw new LedpException(LedpCode.LEDP_18158);
+        }
+
+        return dataPage;
     }
 
-    @SuppressWarnings({ "rawtypes" })
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
-        return ratingCache
+        Map<String, Long> ratingCountInfo = ratingCache
                 .get(String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+
+        if (MapUtils.isEmpty(ratingCountInfo)) {
+            throw new LedpException(LedpCode.LEDP_18158);
+        }
+
+        return ratingCountInfo;
     }
 
-    private long getCountFromObjectApi(String serializedKey) {
+    private Long getCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);

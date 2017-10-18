@@ -394,6 +394,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             Map<String, Long> countInfo = entityProxy.getRatingCount( //
                     tenent.getId(), //
                     accountFrontEndQuery);
+
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
             Long accountCount = accountCountOption.orElse(0L);
@@ -460,6 +461,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             Map<String, Long> countInfo = entityProxy.getRatingCount( //
                     tenent.getId(), //
                     accountFrontEndQuery);
+
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
             Long accountCount = accountCountOption.orElse(0L);
@@ -514,16 +516,11 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     private Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
-        Long contactCount = 0L;
-        try {
-            log.info("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
-            contactCount = entityProxy.getCount( //
-                    tenent.getId(), //
-                    contactFrontEndQuery);
-        } catch (Exception ex) {
-            log.info("Ignoring exception in getting contact count" + ex);
-        }
-        return contactCount;
+
+        log.info("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
+        return entityProxy.getCount( //
+                tenent.getId(), //
+                contactFrontEndQuery);
     }
 
     private FrontEndQuery createEntityFronEndQuery(BusinessEntity entityType, boolean isRestrictNotNullSalesforceId,

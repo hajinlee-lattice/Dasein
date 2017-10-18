@@ -80,14 +80,12 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             for (Map<String, Object> accExtRec : data) {
                 if (accExtRec.containsKey(InterfaceName.AccountId.name())) {
                     accExtRec.put(PlaymakerConstants.ID, accExtRec.get(InterfaceName.AccountId.name()));
+                    accExtRec.put(PlaymakerConstants.LEAccountExternalID,
+                            accExtRec.get(InterfaceName.AccountId.name()));
                 }
                 if (accExtRec.containsKey(InterfaceName.SalesforceAccountID.name())) {
                     accExtRec.put(PlaymakerConstants.SfdcAccountID,
                             accExtRec.get(InterfaceName.SalesforceAccountID.name()));
-                }
-                if (accExtRec.containsKey(InterfaceName.LatticeAccountId.name())) {
-                    accExtRec.put(PlaymakerConstants.LEAccountExternalID,
-                            accExtRec.get(InterfaceName.LatticeAccountId.name()));
                 }
 
                 accExtRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,

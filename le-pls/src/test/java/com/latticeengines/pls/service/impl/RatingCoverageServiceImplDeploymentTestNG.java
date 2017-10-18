@@ -14,6 +14,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -33,7 +34,9 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
+@Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
@@ -87,7 +90,6 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
-        testPlayCreationHelper.cleanupTenant();
     }
 
     @Test(groups = "deployment")

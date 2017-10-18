@@ -69,7 +69,13 @@ public class FrontEndQueryCreator {
         accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
         contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
 
-        setSortField(BusinessEntity.Account, InterfaceName.LastModifiedDate.name(), false, accountFrontEndQuery);
+        // TODO - anoop - enable it once CDL team ensures that LastModifiedDate
+        // column is present in all tenant data
+        //
+        // setSortField(BusinessEntity.Account,
+        // InterfaceName.LastModifiedDate.name(), false, accountFrontEndQuery);
+        setSortField(BusinessEntity.Account, InterfaceName.AccountId.name(), false, accountFrontEndQuery);
+
         setSortField(BusinessEntity.Contact, InterfaceName.ContactId.name(), false, contactFrontEndQuery);
     }
 

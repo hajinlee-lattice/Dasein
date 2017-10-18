@@ -66,6 +66,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     @Override
     public void populateData(String tenantId) {
         final String shortTenantId = CustomerSpace.parse(tenantId).getTenantId();
+        DataCollection vl = dataCollectionProxy.getDefaultDataCollection(shortTenantId);
         ExecutorService executors = Executors.newCachedThreadPool();
         Set<Future> futures = new HashSet<>();
         futures.add(executors.submit(() -> {
