@@ -709,7 +709,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED DATE")) //
+                .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED DATE", "CREATION DATE")) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Date) //
@@ -718,7 +718,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
+                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED", "UPDATE DATE")) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
