@@ -53,7 +53,8 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
 
             vm.tileStates[ratingId] = {
                 showCustomMenu: false,
-                editRating: false
+                editRating: false,
+                saveEnabled: false
             };
             arrayofIds.push(ratingId);
 
@@ -126,6 +127,15 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
         var tileState = vm.tileStates[rating.id];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editRating = !tileState.editRating;
+    };
+
+    vm.nameChanged = function(rating){
+        var tileState = vm.tileStates[rating.id];
+        if(rating.displayName.length > 0) {
+            tileState.saveEnabled = true;
+        } else {
+            tileState.saveEnabled = false;
+        }
     };
 
     vm.cancelEditRatingClicked = function($event, rating) {

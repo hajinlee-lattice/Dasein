@@ -1,17 +1,19 @@
 <div class="container query-results">
 
-    <h3 ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">Targets</h3>
+    <h3 ng-if=" vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">Targets</h3>
 
     <div 
         class="exclude-filter"
         ng-if="
             vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
         <label>
+
+            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
+
             <input 
                 type="checkbox" 
                 class=""
-                ng-model="!excludeAccounts"
-                ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)"
+                ng-model="excludeAccounts"
                 ng-change="vm.excludeNonSalesForceCheckbox(excludeAccounts)" />
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.accountsWithoutSfId | number }}</span>)
         </label>
@@ -115,6 +117,7 @@
             </tr>
         </tbody>
     </table>
+
     <table class="list-table" ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
@@ -154,6 +157,7 @@
             </tr>
         </tbody>
     </table>
+
     <table class="list-table" ng-if="vm.page === 'Contacts'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>

@@ -160,8 +160,12 @@
                                 id="display_name"
                                 name="display_name"
                                 data-ng-model="rating.displayName"
+                                ng-change="vm.nameChanged(rating)"
+                                maxlength="50"
+                                ng-trim="false"
                                 class="form-control" />
                             </label>
+                            <span>{{50 - rating.displayName.length}} characters remaining</span>
 
                         </div>
                         <div class="actions">
@@ -175,7 +179,7 @@
                             <button
                                 type="button"
                                 class="button orange-button pull-right"
-                                ng-disabled="editRatingForm.$pristine"
+                                ng-disabled="vm.tileStates[rating.id].saveEnabled === false"
                                 ng-click="vm.saveRatingClicked($event, rating)"
                                 ng-if="!vm.saveInProgress">
                                 Save</button>

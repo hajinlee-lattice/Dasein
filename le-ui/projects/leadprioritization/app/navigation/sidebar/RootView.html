@@ -26,7 +26,7 @@
             </a>
         </li>
         <li ng-if="showAnalysisPage" role="presentation" 
-            ng-class="{active: isStateName(['home.segment.explorer.attributes','home.segment.accounts','home.segment.contacts']) && (!state.params.segment || state.params.segment == 'Create')}">
+            ng-class="{active: isStateName(['home.segment.explorer.attributes','home.segment.accounts','home.segment.contacts', 'home.segment.explorer.builder']) && (!state.params.segment || state.params.segment == 'Create')}">
             <a 
                 ui-sref="home.segment.explorer.attributes({segment:'Create'})"
                 ui-sref-opts="{reload: true}"

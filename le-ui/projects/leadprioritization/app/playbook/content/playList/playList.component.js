@@ -94,7 +94,7 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
     vm.init = function($q) {
 
 
-        console.log(vm.plays);
+        // console.log(vm.plays);
 
         angular.forEach(vm.plays, function(play) {
 

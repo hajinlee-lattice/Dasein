@@ -47,7 +47,7 @@
                             </button>
                             <ul class="model-menu" ng-show="vm.tileStates[play.name].showCustomMenu">
                                 <li data-ng-click="vm.editPlayClick($event, play)">
-                                    <a href="javascript:void(0)">Edit</a>
+                                    <a href="javascript:void(0)">Rename</a>
                                     <i class="fa fa-edit"></i>
                                 </li>
                                 <li data-ng-click="vm.showDeletePlayModalClick($event, play)">
@@ -154,9 +154,11 @@
                                 name="display_name"
                                 data-ng-model="play.displayName"
                                 ng-change="vm.nameChanged(play)"
-                                ng-model-options="{ debounce: 200 }"
+                                maxlength="50"
+                                ng-trim="false"
                                 class="form-control" />
                             </label>
+                            <span>{{50 - play.displayName.length}} characters remaining</span>
                         </div>
                         <div class="actions">
 

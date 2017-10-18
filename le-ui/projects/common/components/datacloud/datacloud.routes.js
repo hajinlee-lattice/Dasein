@@ -464,8 +464,45 @@ angular
                 Contacts: [function(){
                     return null;
                 }],
-                CountWithoutSalesForce: [function(){
-                    return null;
+                CountWithoutSalesForce: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
+                    var deferred = $q.defer(),
+                        segmentName = $stateParams.segment,
+                        accountRestriction = QueryStore.getAccountRestriction(),
+                        contactRestriction = QueryStore.getContactRestriction();
+
+                    if(segmentName === "Create"){
+                        query = { 
+                            'free_form_text_search': '',
+                            'account_restriction': accountRestriction,
+                            'contact_restriction': contactRestriction,
+                            'preexisting_segment_name': segmentName,
+                            'restrict_without_sfdcid': true,
+                            'page_filter': {
+                                'num_rows': 10,
+                                'row_offset': 0
+                            }
+                        };
+
+                        deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+                    } else {
+                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                            var segment = result;
+                            query = { 
+                                'free_form_text_search': '',
+                                'account_restriction': segment.account_restriction,
+                                'contact_restriction': segment.contact_restriction,
+                                'preexisting_segment_name': segmentName,
+                                'restrict_without_sfdcid': true,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
+                            };
+                            deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+                        });
+                    };
+
+                    return deferred.promise;
                 }],
                 Config: [function(){
                     return null;

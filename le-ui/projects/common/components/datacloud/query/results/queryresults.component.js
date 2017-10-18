@@ -46,7 +46,8 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
 
-        console.log(vm.segment);
+        console.log(Config);
+        console.log(vm.accountsWithoutSfId);
 
         if(vm.segment != null){
 
