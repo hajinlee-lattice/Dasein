@@ -102,18 +102,21 @@ class Executor(object):
         pipelineMediator = params['pipelineMediator']
         if pipelineMediator == None or ('REMOVEDCOLUMNS' not in pipelineMediator and 'ADDEDCOLUMNS' not in pipelineMediator):
             return
+
         with open(diagnostics, "r") as fp:
             fp_content = fp.read()
-            if len(fp_content) > 0:
-                diagnosticsJson = json.load(fp_content)
-                if 'REMOVEDCOLUMNS' in pipelineMediator:
-                    diagnosticsJson['Summary']['RemovedColumnsInPipeline'] = pipelineMediator["REMOVEDCOLUMNS"]
-                if 'ADDEDCOLUMNS' in pipelineMediator:
-                    diagnosticsJson['Summary']['AddedColumnsInPipeline'] = pipelineMediator["ADDEDCOLUMNS"]
-                with open(diagnostics, "wb") as fout:
-                        json.dump(diagnosticsJson, fout)
-            else:
-                logger.info("There is not diagnostics file to merge.")
+
+        if len(fp_content) > 0:
+            diagnosticsJson = json.load(fp_content)
+            if 'REMOVEDCOLUMNS' in pipelineMediator:
+                diagnosticsJson['Summary']['RemovedColumnsInPipeline'] = pipelineMediator["REMOVEDCOLUMNS"]
+            if 'ADDEDCOLUMNS' in pipelineMediator:
+                diagnosticsJson['Summary']['AddedColumnsInPipeline'] = pipelineMediator["ADDEDCOLUMNS"]
+            with open(diagnostics, "wb") as fout:
+                json.dump(diagnosticsJson, fout)
+        else:
+            logger.info("There is not diagnostics file to merge.")
+
 
     @abstractmethod
     def getModelDirPath(self, schema): pass
