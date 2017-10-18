@@ -96,6 +96,9 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     private MetadataSegment translateForFrontend(MetadataSegment segment) {
+        if (segment == null) {
+            return null;
+        }
         try {
             Restriction accountRestriction = segment.getAccountRestriction();
             if (accountRestriction != null) {

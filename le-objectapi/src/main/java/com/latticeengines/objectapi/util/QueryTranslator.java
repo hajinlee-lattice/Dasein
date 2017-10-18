@@ -82,19 +82,7 @@ public class QueryTranslator {
             if (decorator.addSelects()) {
                 queryBuilder.select(decorator.getAttributeLookups());
                 if (frontEndQuery.getRatingModels() != null) {
-                    frontEndQuery.getRatingModels().forEach(model -> {
-                        if (model instanceof RuleBasedModel) {
-                            String alias = model.getId();
-                            if (frontEndQuery.getRatingModels().size() == 1) {
-                                alias = "Score";
-                            }
-                            Lookup ruleLookup = translateRatingRule(frontEndQuery.getMainEntity(),
-                                    ((RuleBasedModel) model).getRatingRule(), alias, false);
-                            queryBuilder.select(ruleLookup);
-                        } else {
-                            log.warn("Cannot not handle rating model of type " + model.getClass().getSimpleName());
-                        }
-                    });
+                    appendRuleLookups(frontEndQuery, queryBuilder);
                 }
             }
             queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
@@ -102,6 +90,22 @@ public class QueryTranslator {
         }
 
         return queryBuilder.build();
+    }
+
+    private static void appendRuleLookups(FrontEndQuery frontEndQuery, QueryBuilder queryBuilder) {
+        frontEndQuery.getRatingModels().forEach(model -> {
+            if (model instanceof RuleBasedModel) {
+                String alias = model.getId();
+                if (frontEndQuery.getRatingModels().size() == 1) {
+                    alias = "Score";
+                }
+                Lookup ruleLookup = translateRatingRule(frontEndQuery.getMainEntity(),
+                        ((RuleBasedModel) model).getRatingRule(), alias, false);
+                queryBuilder.select(ruleLookup);
+            } else {
+                log.warn("Cannot not handle rating model of type " + model.getClass().getSimpleName());
+            }
+        });
     }
 
     private static FrontEndRestriction getEntityFrontEndRestriction(BusinessEntity entity,
