@@ -275,6 +275,7 @@
             <artifactId>quartz</artifactId>
             <version>${quartz.version}</version>
         </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>com.latticeengines</groupId>

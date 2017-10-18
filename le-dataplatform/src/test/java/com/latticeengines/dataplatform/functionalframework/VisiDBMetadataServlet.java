@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpStatus;
+import org.apache.http.HttpStatus;
 
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -55,7 +55,7 @@ public class VisiDBMetadataServlet extends HttpServlet {
         metadata.setMetadata(metadataCols);
         System.out.println(metadata.toString());
         resp.getWriter().write(metadata.toString());
-        resp.setStatus(HttpStatus.ORDINAL_200_OK);
+        resp.setStatus(HttpStatus.SC_OK);
     }
     
     private String getDisplayDiscretizationStrategy() {

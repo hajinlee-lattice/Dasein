@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.http.HttpStatus;
+import org.apache.http.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -55,6 +55,6 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         String json = JsonUtils.serialize(columns);
         resp.getWriter().write(json);
 
-        resp.setStatus(HttpStatus.OK_200);
+        resp.setStatus(HttpStatus.SC_OK);
     }
 }

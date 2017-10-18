@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.http.HttpStatus;
+import org.apache.http.HttpStatus;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 
@@ -21,7 +21,7 @@ public class SourceCredentialValidationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.getWriter().write(SimpleBooleanResponse.successResponse().toString());
-        resp.setStatus(HttpStatus.OK_200);
+        resp.setStatus(HttpStatus.SC_OK);
     }
 
 }

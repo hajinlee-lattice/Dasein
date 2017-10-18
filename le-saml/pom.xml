@@ -78,48 +78,6 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty-util</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jsp-2.1</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jsp-api-2.1</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>servlet-api-2.1</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>servlet-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.servlet.jsp</groupId>
-                    <artifactId>jsp-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>tomcat</groupId>
-                    <artifactId>jasper-compiler</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>tomcat</groupId>
-                    <artifactId>jasper-runtime</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.python</groupId>
-                    <artifactId>jython-standalone</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -179,17 +137,6 @@
             <groupId>org.springframework.security.extensions</groupId>
             <artifactId>spring-security-saml2-core</artifactId>
             <version>${spring.saml.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.fasterxml.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.fasterxml.version}</version>
         </dependency>
     </dependencies>
 </project>

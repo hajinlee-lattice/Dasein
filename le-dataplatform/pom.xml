@@ -286,6 +286,24 @@
             <version>${commons.exec.version}</version>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.connector.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>${commons.dbcp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-api</artifactId>
+            <version>${newrelic.version}</version>
+        </dependency>
+
+        <!-- LE Dependencies -->
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
@@ -350,17 +368,6 @@
             <version>${le.remote.version}</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.connector.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>${commons.dbcp.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-sqoop</artifactId>
             <version>${le.sqoop.version}</version>
@@ -383,11 +390,6 @@
                     <artifactId>sqoop</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.newrelic.agent.java</groupId>
-            <artifactId>newrelic-api</artifactId>
-            <version>${newrelic.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

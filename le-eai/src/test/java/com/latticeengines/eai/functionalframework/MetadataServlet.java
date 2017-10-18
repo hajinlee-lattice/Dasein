@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.http.HttpStatus;
+import org.apache.http.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -36,19 +36,19 @@ public class MetadataServlet extends HttpServlet {
         String pathInfo = req.getPathInfo();
         if (pathInfo.endsWith("importtables")) {
             resp.getWriter().write(JsonUtils.serialize(new ArrayList<>(map.keySet())));
-            resp.setStatus(HttpStatus.OK_200);
+            resp.setStatus(HttpStatus.SC_OK);
         } else {
             String[] pathParts = pathInfo.split("/");
             String tableName = pathParts[2];
             Table table = map.get(tableName);
             resp.getWriter().write(table.toString());
-            resp.setStatus(HttpStatus.OK_200);
+            resp.setStatus(HttpStatus.SC_OK);
         }
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
         resp.setContentType("application/json");
-        resp.setStatus(HttpStatus.OK_200);
+        resp.setStatus(HttpStatus.SC_OK);
     }
 }

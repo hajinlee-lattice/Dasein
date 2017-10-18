@@ -65,8 +65,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     @Value("${eai.salesforce.production.loginurl}")
     private String productionLoginUrl;
 
-    private List<String> tableNameList = Arrays
-            .<String> asList(new String[] { "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole" });
+    private List<String> tableNameList = Arrays.asList( //
+            "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole");
 
     private String customer = "SFDC-Eai-Customer";
 
@@ -119,7 +119,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         tenantService.discardTenant(tenant);
     }
 
-    @Test(groups = { "deployment" }, enabled = true)
+    @Test(groups = "deployment")
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         targetPath += "/" + importConfig.getSourceConfigurations().get(0).getSourceType().getName();

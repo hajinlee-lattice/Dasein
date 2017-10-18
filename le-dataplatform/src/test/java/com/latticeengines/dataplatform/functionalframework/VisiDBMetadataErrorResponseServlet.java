@@ -7,7 +7,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpStatus;
+import org.apache.http.HttpStatus;
+
 
 public class VisiDBMetadataErrorResponseServlet extends HttpServlet {
 
@@ -21,7 +22,7 @@ public class VisiDBMetadataErrorResponseServlet extends HttpServlet {
             throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.getWriter().write("\"ErrorMessage\":Some DL error");
-        resp.setStatus(HttpStatus.ORDINAL_200_OK);
+        resp.setStatus(HttpStatus.SC_OK);
     }
 
 }

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.mortbay.jetty.HttpStatus;
+import org.apache.http.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -41,7 +41,7 @@ public class PublicationWorkflowServlet extends HttpServlet {
         ApplicationId appId = ConverterUtils.toApplicationId(appIdStr);
         AppSubmission appSubmission = new AppSubmission(Collections.singletonList(appId));
         resp.getWriter().write(JsonUtils.serialize(appSubmission));
-        resp.setStatus(HttpStatus.ORDINAL_200_OK);
+        resp.setStatus(HttpStatus.SC_OK);
     }
 
     public interface PayloadVerifier {

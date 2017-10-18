@@ -2,34 +2,30 @@ package com.latticeengines.testframework.exposed.rest;
 
 import javax.servlet.http.HttpServlet;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 
 public class StandaloneHttpServer {
 
     private static final Logger log = LoggerFactory.getLogger(StandaloneHttpServer.class);
     private Server server;
-    private Context root;
+    private ServletContextHandler root;
 
     private int port;
-    public static final Integer SERVER_PORT = 8082;
+    private static final Integer SERVER_PORT = 8082;
 
     public void init() throws Exception {
-        if (server == null) {
-            this.port = SERVER_PORT;
-            server = new Server(SERVER_PORT);
-            root = new Context(server, "/", Context.SESSIONS);
-        }
+        init(SERVER_PORT);
     }
 
     public void init(int port) throws Exception {
         if (server == null) {
             this.port = port;
             server = new Server(port);
-            root = new Context(server, "/", Context.SESSIONS);
+            root = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
         }
     }
 

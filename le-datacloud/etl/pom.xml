@@ -48,6 +48,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>${quartz.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-datacloud-core</artifactId>
             <version>${project.version}</version>
@@ -83,11 +88,6 @@
             <artifactId>le-sqoop</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>${quartz.version}</version>
         </dependency>
     </dependencies>
 
