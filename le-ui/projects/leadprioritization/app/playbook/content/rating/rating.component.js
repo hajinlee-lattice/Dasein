@@ -23,6 +23,11 @@ angular.module('lp.playbook.wizard.rating', [])
         var rating = $filter('filter')(Ratings, {id: $stateParams.rating_id})[0];
         vm.stored.rating_selection = $stateParams.rating_id;
         PlaybookWizardStore.setRating(rating);
+        PlaybookWizardStore.setSettings({
+            ratingEngine: {
+                id: $stateParams.rating_id
+            }
+        });
     }
 
     vm.init = function() {
@@ -97,7 +102,7 @@ angular.module('lp.playbook.wizard.rating', [])
         if(vm.stored.rating_selection) {
             PlaybookWizardStore.setSettings({
                 ratingEngine: {
-                    id :vm.stored.rating_selection
+                    id: vm.stored.rating_selection
                 }
             });
         }

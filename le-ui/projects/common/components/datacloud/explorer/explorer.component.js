@@ -1236,6 +1236,16 @@ angular.module('common.datacloud.explorer', [
         return ar;
     }
 
+    vm.getHighestStat = function(stats) {
+        var highest = 0;
+        stats.forEach(function(stat) {
+            if(stat.Cnt > highest) {
+                highest = stat.Cnt;
+            }
+        })
+        return highest;
+    }
+
     vm.makeSegmentsRangeKey = function(enrichment, range, label){
         var fieldName = enrichment.Attribute || enrichment.ColumnId,
             values = ObjectValues(range),

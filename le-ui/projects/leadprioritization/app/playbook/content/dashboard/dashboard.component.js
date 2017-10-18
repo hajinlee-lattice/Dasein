@@ -2,7 +2,7 @@ angular.module('lp.playbook.dashboard', [
     'mainApp.appCommon.utilities.TimestampIntervalUtility'
 ])
 .controller('PlaybookDashboard', function(
-    $q, $scope, $stateParams, $state, $interval,
+    $q, $scope, $stateParams, $state, $interval, $rootScope,
     PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore
 ) {
 
@@ -170,6 +170,11 @@ angular.module('lp.playbook.dashboard', [
             PlaybookWizardStore.savePlay(savePlay).then(function(play){
                 vm.play = play;
                 vm.editable = true;
+                $rootScope.$broadcast('header-back', { 
+                    path: '^home.playbook.dashboard',
+                    displayName: play.displayName,
+                    sref: 'home.playbook'
+                });
             });
         }
     }

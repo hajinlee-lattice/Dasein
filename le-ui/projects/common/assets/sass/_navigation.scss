@@ -515,6 +515,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
         & > li {
             @include flex-item(0 1 auto);
             position: relative;
+            white-space: nowrap;
             &:nth-last-child(2) {
                 @include flex-item(1 1 auto);
             }
@@ -617,7 +618,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
         }
     }
     .profile-nav {
-        max-width: 250px;
+        width: 250px;
         z-index: 30;
         & > a {
             padding: 16px 20px 16px 20px;
@@ -717,6 +718,22 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
         content: "";
         clear: both;
     }
+    // @media (max-width: 700px) { 
+    //     .page-icon-container {
+    //         display: none;
+    //     }
+    //     .profile-nav {
+    //         width: 70px;
+    //         div, span {
+    //             display: none;
+    //         }
+    //         .dropdown > ul {
+    //             width: 200px;
+    //             right: auto;
+    //             left: calc(-200px - -70px);
+    //         }
+    //     }
+    // }
 }
 .profile-nav.dropdown>a.open {
     background-image: url("/assets/images/ico-user-profile.svg");

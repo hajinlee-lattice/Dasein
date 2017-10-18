@@ -107,7 +107,7 @@ angular.module('lp.ratingsengine.dashboard', [])
             vm.editable = false; // block rapid edits
             saveRating = {
                 id: vm.rating.summary.id,
-                displayName: newRating.displayName
+                displayName: newRating.displayName  
             }
             RatingsEngineService.saveRating(saveRating).then(function(data){
                 vm.rating.summary = data;

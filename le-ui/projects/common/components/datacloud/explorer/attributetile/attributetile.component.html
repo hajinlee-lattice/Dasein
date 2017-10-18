@@ -63,7 +63,8 @@
                             'select-range': vm.section == 'segment.analysis', 
                             'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]
                           }"
-                ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))">
+                ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))"
+                ng-init="highest = vm.getHighestStat(vm.cube.data.Stats[enrichment.ColumnId].Bkts.List)">
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
                         <input  type="checkbox"
@@ -75,7 +76,7 @@
                         {{stat.Lbl}}
                     </li>
                     <li class="bar_">
-                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.data.Stats[enrichment.ColumnId].Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.data.Stats[enrichment.ColumnId].Cnt, '%', 0)}}">
+                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, highest, '%', 0)}" title="{{vm.percentage(stat.Cnt, highest, '%', 0)}}">
                             <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                         </div>
                     </li>
