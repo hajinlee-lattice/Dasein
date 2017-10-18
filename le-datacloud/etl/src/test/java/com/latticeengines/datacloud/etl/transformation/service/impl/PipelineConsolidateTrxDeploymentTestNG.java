@@ -227,6 +227,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         ConsolidateAggregateConfig config = new ConsolidateAggregateConfig();
         config.setSumFields(Arrays.asList("Amount", "Quantity"));
         config.setTrxDateField("TransactionDate");
+        config.setTrxTimeField("TransactionTime");
         config.setGoupByFields(
                 Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType", "TransactionDate"));
         config.setPeriodStrategy(PeriodStrategy.CalendarQuarter);

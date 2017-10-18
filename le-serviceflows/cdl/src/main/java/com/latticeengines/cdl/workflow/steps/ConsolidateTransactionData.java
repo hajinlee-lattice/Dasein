@@ -103,6 +103,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         ConsolidateAggregateConfig config = new ConsolidateAggregateConfig();
         config.setSumFields(Arrays.asList("Amount", "Quantity"));
         config.setTrxDateField(InterfaceName.TransactionDate.name());
+        config.setTrxTimeField(InterfaceName.TransactionTime.name());
         config.setGoupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionDate.name()));

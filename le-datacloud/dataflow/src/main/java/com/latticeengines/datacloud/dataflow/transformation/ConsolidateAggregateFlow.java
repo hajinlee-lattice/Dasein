@@ -11,6 +11,7 @@ import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddCompositeColumnFuction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddDateColumnFuction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddPeriodColumnFuction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateAggregateConfig;
@@ -29,6 +30,14 @@ public class ConsolidateAggregateFlow extends ConsolidateBaseFlow<ConsolidateAgg
         ConsolidateAggregateConfig config = getTransformerConfig(parameters);
 
         Node result = null;
+        for (String sourceName : parameters.getBaseTables()) {
+            Node source = addSource(sourceName);
+            if (result == null) {
+                result = source;
+            } else {
+                result = result.merge(source);
+            }
+        }
         List<Aggregation> aggregations = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(config.getSumFields())) {
             for (String field : config.getSumFields()) {
@@ -40,18 +49,9 @@ public class ConsolidateAggregateFlow extends ConsolidateBaseFlow<ConsolidateAgg
                 aggregations.add(new Aggregation(field, "Total" + field, AggregationType.COUNT));
             }
         }
-
-        for (String sourceName : parameters.getBaseTables()) {
-            Node source = addSource(sourceName);
-            String date = sourceName;
-            source = source.addColumnWithFixedValue(config.getTrxDateField(), date, String.class);
-            source = source.groupBy(new FieldList(config.getGoupByFields()), aggregations);
-            if (result == null) {
-                result = source;
-            } else {
-                result = result.merge(source);
-            }
-        }
+        result = result.apply(new ConsolidateAddDateColumnFuction(config.getTrxTimeField(), config.getTrxDateField()),
+                new FieldList(config.getTrxTimeField()), new FieldMetadata(config.getTrxDateField(), String.class));
+        result = result.groupBy(new FieldList(config.getGoupByFields()), aggregations);
         result = addPeriodIdColumn(config, result);
         result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGoupByFields(), COMPOSITE_KEY),
                 new FieldList(config.getGoupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));

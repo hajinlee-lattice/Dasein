@@ -10,6 +10,7 @@ public class ConsolidateAggregateConfig extends TransformerConfig {
     private List<String> countFields;
     private List<String> goupByFields;
     private String trxDateField;
+    private String trxTimeField;
     private PeriodStrategy periodStrategy;
 
     public List<String> getSumFields() {
@@ -51,5 +52,13 @@ public class ConsolidateAggregateConfig extends TransformerConfig {
 
     public PeriodStrategy getPeriodStrategy() {
         return periodStrategy;
+    }
+
+    public String getTrxTimeField() {
+        return this.trxTimeField;
+    }
+
+    public void setTrxTimeField(String trxTimeField) {
+        this.trxTimeField = trxTimeField;
     }
 }
