@@ -225,7 +225,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private String getAggregateConfig() {
         ConsolidateAggregateConfig config = new ConsolidateAggregateConfig();
-        config.setSumFields(Arrays.asList("Amount", "Quantity"));
+        config.setSumFields(Arrays.asList("Amount"));
+        config.setSumLongFields(Arrays.asList("Quantity"));
         config.setTrxDateField("TransactionDate");
         config.setTrxTimeField("TransactionTime");
         config.setGoupByFields(
@@ -399,14 +400,14 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Assert.assertEquals(diskRecord.get("TransactionDate").toString(), "2017-08-17");
         Assert.assertEquals(diskRecord.get("ProductId").toString(), "1");
         Assert.assertEquals(diskRecord.get("TotalAmount").toString(), "30.0");
-        Assert.assertEquals(diskRecord.get("TotalQuantity").toString(), "3.0");
+        Assert.assertEquals(diskRecord.get("TotalQuantity").toString(), "3");
 
         Assert.assertEquals(keyboardRecord.get("AccountId").toString(), "3");
         Assert.assertEquals(keyboardRecord.get("TransactionType").toString(), "PurchaseHistory");
         Assert.assertEquals(keyboardRecord.get("TransactionDate").toString(), "2017-08-17");
         Assert.assertEquals(keyboardRecord.get("ProductId").toString(), "3");
         Assert.assertEquals(keyboardRecord.get("TotalAmount").toString(), "10.0");
-        Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1.0");
+        Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1");
     }
 
     @Test(groups = "deployment", enabled = false)

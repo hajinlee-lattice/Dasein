@@ -118,6 +118,8 @@ public class DataFlowUtils {
             return new Count(convertToFields(aggregatedFieldName));
         case SUM:
             return new Sum(convertToFields(aggregatedFieldName));
+        case SUM_LONG:
+            return new Sum(convertToFields(aggregatedFieldName), Long.class);
         case AVG:
             return new Average(convertToFields(aggregatedFieldName));
         case FIRST:

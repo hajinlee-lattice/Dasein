@@ -38,10 +38,25 @@ public class ConsolidateAggregateFlow extends ConsolidateBaseFlow<ConsolidateAgg
                 result = result.merge(source);
             }
         }
+        result = result.apply(new ConsolidateAddDateColumnFuction(config.getTrxTimeField(), config.getTrxDateField()),
+                new FieldList(config.getTrxTimeField()), new FieldMetadata(config.getTrxDateField(), String.class));
+        result = aggregate(config, result);
+        result = addPeriodIdColumn(config, result);
+        result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGoupByFields(), COMPOSITE_KEY),
+                new FieldList(config.getGoupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));
+        return result;
+    }
+
+    private Node aggregate(ConsolidateAggregateConfig config, Node result) {
         List<Aggregation> aggregations = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(config.getSumFields())) {
             for (String field : config.getSumFields()) {
                 aggregations.add(new Aggregation(field, "Total" + field, AggregationType.SUM));
+            }
+        }
+        if (CollectionUtils.isNotEmpty(config.getSumLongFields())) {
+            for (String field : config.getSumLongFields()) {
+                aggregations.add(new Aggregation(field, "Total" + field, AggregationType.SUM_LONG));
             }
         }
         if (CollectionUtils.isNotEmpty(config.getCountFields())) {
@@ -49,12 +64,7 @@ public class ConsolidateAggregateFlow extends ConsolidateBaseFlow<ConsolidateAgg
                 aggregations.add(new Aggregation(field, "Total" + field, AggregationType.COUNT));
             }
         }
-        result = result.apply(new ConsolidateAddDateColumnFuction(config.getTrxTimeField(), config.getTrxDateField()),
-                new FieldList(config.getTrxTimeField()), new FieldMetadata(config.getTrxDateField(), String.class));
         result = result.groupBy(new FieldList(config.getGoupByFields()), aggregations);
-        result = addPeriodIdColumn(config, result);
-        result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGoupByFields(), COMPOSITE_KEY),
-                new FieldList(config.getGoupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));
         return result;
     }
 

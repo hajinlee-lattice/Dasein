@@ -8,6 +8,7 @@ public enum AggregationType {
     MAX, //
     MIN, //
     SUM(new FieldMetadata(Schema.Type.DOUBLE, Double.class, null, null)), //
+    SUM_LONG(new FieldMetadata(Schema.Type.LONG, Long.class, null, null)), //
     COUNT(new FieldMetadata(Schema.Type.LONG, Long.class, null, null)), //
     AVG(new FieldMetadata(Schema.Type.DOUBLE, Double.class, null, null)), //
     FIRST, //

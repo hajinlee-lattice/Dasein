@@ -7,6 +7,7 @@ import com.latticeengines.common.exposed.period.PeriodStrategy;
 public class ConsolidateAggregateConfig extends TransformerConfig {
 
     private List<String> sumFields;
+    private List<String> sumLongFields;
     private List<String> countFields;
     private List<String> goupByFields;
     private String trxDateField;
@@ -20,6 +21,14 @@ public class ConsolidateAggregateConfig extends TransformerConfig {
 
     public void setSumFields(List<String> sumFields) {
         this.sumFields = sumFields;
+    }
+
+    public List<String> getSumLongFields() {
+        return sumLongFields;
+    }
+
+    public void setSumLongFields(List<String> sumLongFields) {
+        this.sumLongFields = sumLongFields;
     }
 
     public List<String> getCountFields() {
