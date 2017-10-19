@@ -12,6 +12,8 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,6 +90,18 @@ public class ModelingHdfsUtils {
         return paths.get(0);
     }
 
+    public static String getStandardDataCompositionWithRegex(Configuration conf, String sourceDataDir,
+            final String eventTableName) throws IOException {
+        List<String> paths = HdfsUtils.getFilesForDir(conf, sourceDataDir, String.format("^%s.*Metadata$",
+                eventTableName));
+
+        if (paths.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_00002);
+        }
+
+        return String.format("%s/datacomposition.json", paths.get(0));
+    }
+
     public static void copyModelingDataDirectory(String sourceCustomerRoot, String targetCustomerRoot,
             String eventTableName, String cpEventTableName, Configuration yarnConfiguration) throws IOException {
         String sourceDataRoot = sourceCustomerRoot + "/data/" + eventTableName;
@@ -101,8 +115,11 @@ public class ModelingHdfsUtils {
         String sourceStandardDataCompositionPath = null;
         try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory - get " +
                 "standard data composition")) {
-            sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
+            sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataCompositionWithRegex(yarnConfiguration,
                     sourceCustomerRoot + "/data/", eventTableName);
+
+            Logger log  = LoggerFactory.getLogger(ModelingHdfsUtils.class);
+            log.info("sourceStandardDataCompositionPath is: " + sourceStandardDataCompositionPath);
         }
 
         String targetStandardDataCompositionPath = sourceStandardDataCompositionPath
