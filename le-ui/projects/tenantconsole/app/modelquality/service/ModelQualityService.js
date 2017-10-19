@@ -183,7 +183,8 @@ angular.module("app.modelquality.service.ModelQualityService", [
 
         $http({
             method: 'GET',
-            url: '/modelquality'+ url
+            url: '/modelquality'+ url,
+            headers: { 'MagicAuthentication': 'Security through obscurity!' }
         }).success(function(data){
             result.resultObj = data;
             defer.resolve(result);
@@ -209,6 +210,7 @@ angular.module("app.modelquality.service.ModelQualityService", [
         $http({
             method: 'POST',
             url: '/modelquality' + url,
+            headers: { 'MagicAuthentication': 'Security through obscurity!' },
             data: data,
             params: params,
             transformResponse: [function (data, headers, status) {
@@ -250,6 +252,7 @@ angular.module("app.modelquality.service.ModelQualityService", [
         $http({
             method: 'PUT',
             url: '/modelquality' + url,
+            headers: { 'MagicAuthentication': 'Security through obscurity!' },
             data: data,
             params: params
         }).success(function(data){
