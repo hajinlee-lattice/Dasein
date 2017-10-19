@@ -38,8 +38,9 @@ angular.module('common.wizard.controls', [])
             vm.go(vm.prev, isPrev);
         } else if (!isPrev && !vm.next) {
             // FIXME:  there should be no ImportWizard specific code in this generic component
-            //ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-            
+        	if (vm.prev == 'home.import.wizard.accounts.one.two.three.four') {
+                ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+        	}
             if (WizardControlsOptions.nextState) {
                 var params = WizardControlsOptions.nextStateParams
                     ? typeof WizardControlsOptions.nextStateParams == 'function'
