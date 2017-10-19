@@ -78,6 +78,7 @@ public class SessionServiceImpl implements SessionService {
         if (session != null) {
             interpretGARights(session);
         } else {
+            LOGGER.error(String.format("Failed to attach ticket %s against GA", ticket.getData()));
             throw new RuntimeException("Failed to attach ticket against GA.");
         }
         // refresh cache upon attach, because the session object changed
