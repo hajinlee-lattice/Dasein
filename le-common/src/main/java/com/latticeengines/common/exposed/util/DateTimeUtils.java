@@ -17,11 +17,9 @@ public class DateTimeUtils {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
     public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
-    public static final SimpleDateFormat dateOnlyFormat = new SimpleDateFormat(DATE_ONLY_FORMAT_STRING);
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-        dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
     static {
@@ -57,6 +55,8 @@ public class DateTimeUtils {
     }
 
     public static String toDateOnlyFromMillis(String time) {
+        SimpleDateFormat dateOnlyFormat = new SimpleDateFormat(DATE_ONLY_FORMAT_STRING);
+        dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(UTC));
         Long timeLong = Long.valueOf(time);
         String result = dateOnlyFormat.format(new Date(timeLong));
         return result;
