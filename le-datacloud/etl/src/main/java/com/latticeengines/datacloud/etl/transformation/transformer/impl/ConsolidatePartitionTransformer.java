@@ -205,7 +205,7 @@ public class ConsolidatePartitionTransformer
                 dateRecordMap.put(date, new ArrayList<>());
             }
             dateRecordMap.get(date).add(record);
-            if (dateRecordMap.get(date).size() >= 20) {
+            if (dateRecordMap.get(date).size() >= 100) {
                 writeDataBuffer(schema, date, dateFileMap, dateRecordMap);
             }
         }
