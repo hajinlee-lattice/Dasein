@@ -107,7 +107,7 @@ class Executor(object):
             fp_content = fp.read()
 
         if len(fp_content) > 0:
-            diagnosticsJson = json.load(fp_content)
+            diagnosticsJson = json.loads(fp_content)
             if 'REMOVEDCOLUMNS' in pipelineMediator:
                 diagnosticsJson['Summary']['RemovedColumnsInPipeline'] = pipelineMediator["REMOVEDCOLUMNS"]
             if 'ADDEDCOLUMNS' in pipelineMediator:
