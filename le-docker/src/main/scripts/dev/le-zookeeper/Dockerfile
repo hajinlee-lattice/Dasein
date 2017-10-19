@@ -25,7 +25,7 @@ RUN touch /usr/zookeeper/conf/zoo.cfg && \
 
 VOLUME ["/usr/zookeeper/data"]
 
-RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
+RUN echo invalidate cache 1508369778 > /dev/null
 
 ADD start.sh /start.sh
 

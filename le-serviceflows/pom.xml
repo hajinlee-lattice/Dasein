@@ -309,12 +309,6 @@
             <artifactId>spring-aspects</artifactId>
             <version>${spring.version}</version>
             <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.aspectj</groupId>
-                    <artifactId>aspectjweaver</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -368,19 +362,6 @@
             <artifactId>le-testframework</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.tez</groupId>
-            <artifactId>tez-runtime-library</artifactId>
-            <version>${tez.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-auth</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
