@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -48,7 +47,7 @@ public class FrontEndQueryCreator {
         initLookupFieldsConfiguration();
     }
 
-    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) throws JsonProcessingException {
+    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) {
         Play play = playLaunchContext.getPlay();
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();

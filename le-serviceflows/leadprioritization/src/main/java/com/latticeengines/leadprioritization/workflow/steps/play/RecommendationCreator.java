@@ -46,7 +46,6 @@ public class RecommendationCreator {
                             } catch (Throwable th) {
                                 log.error(th.getMessage(), th);
                                 playLaunchContext.getCounter().getAccountErrored().addAndGet(1);
-                                throw th;
                             }
                         });
     }

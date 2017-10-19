@@ -269,6 +269,9 @@ public enum LedpCode {
     LEDP_18156("PlayLaunch for Play {0} cannot be started since it does not have buckets specified."), //
     LEDP_18157("PlayLaunch workflow failed."), //
     LEDP_18158("Error in evaluating restriction."), //
+    LEDP_18159("Could not generate minimum required recommendations. " //
+            + "Recommendations were generated for {0} accounts and for " //
+            + "{1} accounts errors were encountered"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

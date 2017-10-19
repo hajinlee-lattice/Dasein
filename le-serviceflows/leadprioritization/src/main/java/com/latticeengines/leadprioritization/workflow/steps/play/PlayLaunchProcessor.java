@@ -15,9 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -62,8 +63,7 @@ public class PlayLaunchProcessor {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
-    public void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config)
-            throws JsonProcessingException {
+    public void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) {
         // initialize play launch context
         PlayLaunchContext playLaunchContext = initPlayLaunchContext(tenant, config);
 
@@ -92,10 +92,14 @@ public class PlayLaunchProcessor {
             }
         }
 
-        if (playLaunchContext.getPlayLaunch().getAccountsErrored() != null
-                && playLaunchContext.getPlayLaunch().getAccountsErrored() > 0) {
-            throw new RuntimeException(String.format("Encountered %d errors while processing accounts for play launch",
-                    playLaunchContext.getPlayLaunch().getAccountsErrored()));
+        // as per PM requirement, we need to fail play launch if 0
+        // recommendations were created. In future this may be enhanced for
+        // %based failure rate to decide if play launch failed or not
+        if (playLaunchContext.getPlayLaunch().getAccountsLaunched() == null
+                || playLaunchContext.getPlayLaunch().getAccountsLaunched().longValue() == 0L) {
+            throw new LedpException(LedpCode.LEDP_18159,
+                    new Object[] { playLaunchContext.getPlayLaunch().getAccountsLaunched(),
+                            playLaunchContext.getPlayLaunch().getAccountsErrored() });
         }
     }
 
