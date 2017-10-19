@@ -44,7 +44,7 @@
                         </ul>
                     </li>
                     <li 
-                        ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
+                        ng-repeat="segment in (vm.filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
                         ng-disabled="vm.block_user"
                         class="item segment">
                         <ul>
@@ -73,7 +73,7 @@
 
                 <pd-pagination-controls
                     current="vm.currentPage"
-                    max="filteredList.length / vm.pageSize"
+                    max="vm.filteredList.length / vm.pageSize"
                     ng-if="vm.showPagination">
                 </pd-pagination-controls>
 

@@ -313,7 +313,7 @@ angular
 
                         deferred.resolve(model);
                     });
-
+                    
                     return deferred.promise;
                 }
             },

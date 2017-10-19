@@ -20,14 +20,16 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     $scope.$watch('vm.search', function(newValue, oldValue) {
         if(vm.search || oldValue) {
             vm.currentPage = 1;
+            if(vm.filteredList) {
+                vm.loadingSupplementaryData = true;
+                vm.getCounts(vm.filteredList);
+            }
         }
     });
 
     $scope.$watch('vm.currentPage', function(newValue, oldValue) {
         if(vm.currentPage != oldValue) {
         	vm.filteredSegments = vm.segments.slice((10 * (vm.currentPage - 1)), (10 * vm.currentPage));
-        	
-        	console.log(vm.filteredSegments);
 
         	if(!vm.filteredSegments[0].numAccounts) {
 	        	vm.loadingSupplementaryData = true;
@@ -102,15 +104,16 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         });
         RatingsEngineStore.getSegmentsCounts(segmentIds).then(function(response){
             angular.forEach(filteredSegments, function(segment) {
-            	segment.numAccounts = response.segmentIdCoverageMap[segment.name].accountCount;
-            	segment.numContacts = response.segmentIdCoverageMap[segment.name].contactCount;
+                if(response.segmentIdCoverageMap && response.segmentIdCoverageMap[segment.name]) {
+            	   segment.numAccounts = (response.segmentIdCoverageMap[segment.name].accountCount ? response.segmentIdCoverageMap[segment.name].accountCount : 0);
+            	   segment.numContacts = (response.segmentIdCoverageMap[segment.name].contactCount ? response.segmentIdCoverageMap[segment.name].contactCount : 0);
+                }
             });
             vm.loadingSupplementaryData = false;
         });
     }
 
     vm.setSegment = function(segment) {
-        console.log("set segment", segment);
         RatingsEngineStore.setValidation('segment', true);
     	RatingsEngineStore.setSegment(segment);
     }
