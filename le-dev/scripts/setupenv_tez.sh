@@ -8,7 +8,8 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     TEZ_VERSION=0.9.0
 
     if [ ! -f "$ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz" ]; then
-        wget --trust-server-names "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=tez/${TEZ_VERSION}/apache-tez-${TEZ_VERSION}-bin.tar.gz" -O $ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz
+        wget --trust-server-names "https://s3.amazonaws.com/latticeengines-dev/artifacts/tez/${TEZ_VERSION}/tez-${TEZ_VERSION}.tar.gz" \
+            -O $ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz
     fi
     hdfs dfsadmin -safemode leave
     hdfs dfs -mkdir -p /apps/tez || true

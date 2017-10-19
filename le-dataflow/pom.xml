@@ -133,6 +133,12 @@
             <artifactId>tez-mapreduce</artifactId>
             <version>${tez.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tez</groupId>
+            <artifactId>tez-api</artifactId>
+            <version>${tez.version}</version>
+            <classifier>ledp</classifier>
+        </dependency>
 
         <!-- Flink Dependencies -->
         <dependency>
@@ -149,11 +155,6 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
 

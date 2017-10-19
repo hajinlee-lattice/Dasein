@@ -14,7 +14,8 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo mkdir -p ${HADOOP_HOME}
     sudo chown -R ${USER} ${HADOOP_HOME}
     if [ ! -f "${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz" ]; then
-        wget https://s3.amazonaws.com/latticeengines-dev/hadoop-${HDP_VERSION}.tar.gz -O ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz
+        wget "https://s3.amazonaws.com/latticeengines-dev/artifacts/hadoop/common/hadoop-${HDP_VERSION}/hadoop-${HDP_VERSION}.tar.gz" \
+            -O ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz
     fi
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION} || true
     mkdir -p ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}

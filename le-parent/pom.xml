@@ -1536,6 +1536,36 @@
                 <version>${jackson.codehaus.version}</version>
             </dependency>
 
+            <!-- TEZ Dependencies -->
+            <dependency>
+                <groupId>org.apache.tez</groupId>
+                <artifactId>tez-dag</artifactId>
+                <version>${tez.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.tez</groupId>
+                        <artifactId>tez-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tez</groupId>
+                <artifactId>tez-mapreduce</artifactId>
+                <version>${tez.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.tez</groupId>
+                        <artifactId>tez-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tez</groupId>
+                <artifactId>tez-api</artifactId>
+                <version>${tez.version}</version>
+                <classifier>ledp</classifier>
+            </dependency>
+
             <!-- Web Applications -->
             <dependency>
                 <groupId>io.springfox</groupId>
