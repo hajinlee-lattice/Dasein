@@ -72,6 +72,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
             @Override
             public void onSuccess(Boolean result) {
                 try {
+                    log.debug(String.format("On Success for job %s", jobName));
                     jobActives.put(jobKey, false);
                     JobHistory jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName,
                             jobId);
@@ -98,6 +99,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
             @Override
             public void onFailure(Throwable t) {
                 try {
+                    log.debug(String.format("On Failure for job %s", jobName));
                     jobActives.put(jobKey, false);
                     JobHistory jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName,
                             jobId);

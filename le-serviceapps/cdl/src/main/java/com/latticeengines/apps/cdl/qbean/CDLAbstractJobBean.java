@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
-import com.latticeengines.apps.cdl.service.impl.CDLJobCallable;
+import com.latticeengines.apps.cdl.service.impl.CDLQuartzJobCallable;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
@@ -18,10 +18,11 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        CDLJobCallable.Builder builder = new CDLJobCallable.Builder();
+        CDLQuartzJobCallable.Builder builder = new CDLQuartzJobCallable.Builder();
         builder.cdlJobType(cdlJobType)
-                .cdlJobService(cdlJobService);
-        return new CDLJobCallable(builder);
+                .cdlJobService(cdlJobService)
+                .jobArguments(jobArguments);
+        return new CDLQuartzJobCallable(builder);
     }
 
     protected void setCDLJobType(CDLJobType cdlJobType) {

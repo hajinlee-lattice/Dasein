@@ -14,4 +14,6 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.controller.*" />
     </context:component-scan>
 
+    <bean id="cdlMultiTenancyAspect" class="com.latticeengines.apps.cdl.entitymanager.impl.CDLMultiTenantEntityMgrAspect"/>
+
 </beans>

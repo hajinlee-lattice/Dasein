@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.service.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
@@ -81,6 +83,22 @@ public class DataFeedServiceImpl implements DataFeedService {
         dataCollectionService.getOrCreateDefaultCollection(customerSpace);
         DataFeed dataFeed = datafeedEntityMgr.findDefaultFeed();
         return findDataFeedByName(customerSpace, dataFeed.getName());
+    }
+
+    @Override
+    public DataFeed getDefaultDataFeed(String customerSpace) {
+        return datafeedEntityMgr.findDefaultFeedReadOnly();
+    }
+
+    @Override
+    public void updateDataFeedDrainingStatus(String customerSpace, String drainingStatusStr) {
+        DataFeed dataFeed = getDefaultDataFeed(customerSpace);
+        if (dataFeed != null) {
+            dataFeed = findDataFeedByName(customerSpace, dataFeed.getName());
+            DrainingStatus drainingStatus = DrainingStatus.valueOf(drainingStatusStr);
+            dataFeed.setDrainingStatus(drainingStatus);
+            datafeedEntityMgr.update(dataFeed);
+        }
     }
 
     @Override
@@ -183,6 +201,11 @@ public class DataFeedServiceImpl implements DataFeedService {
             datafeedEntityMgr.update(datafeed);
         }
         return datafeed;
+    }
+
+    @Override
+    public List<DataFeed> getAllDataFeeds() {
+        return datafeedEntityMgr.getAllDataFeeds();
     }
 
     @Override

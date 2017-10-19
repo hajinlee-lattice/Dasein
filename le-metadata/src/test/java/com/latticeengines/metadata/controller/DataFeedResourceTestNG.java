@@ -52,6 +52,8 @@ public class DataFeedResourceTestNG extends DataCollectionFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCrud() {
+        DataFeed testDefault = dataFeedProxy.getDefaultDataFeed(customerSpace1);
+        Assert.assertNotNull(testDefault);
         DataFeed retrievedDataFeed = dataFeedProxy.getDataFeed(customerSpace1);
         Assert.assertNotNull(retrievedDataFeed);
         Assert.assertTrue(retrievedDataFeed.getStatus() == Status.Initing);

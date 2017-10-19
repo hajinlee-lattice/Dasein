@@ -4,6 +4,6 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 
 public interface CDLJobService {
 
-    void submitJob(CDLJobType cdlJobType);
+    boolean submitJob(CDLJobType cdlJobType, String jobArguments);
 
 }

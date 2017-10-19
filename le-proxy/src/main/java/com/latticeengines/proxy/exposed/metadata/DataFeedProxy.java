@@ -26,6 +26,17 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return get("get data feed", url, DataFeed.class);
     }
 
+    public DataFeed getDefaultDataFeed(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/default", shortenCustomerSpace(customerSpace));
+        return get("get default data feed", url, DataFeed.class);
+    }
+
+    public List<DataFeed> getAllDataFeeds() {
+        String url = constructUrl("/datafeed/internal/list");
+        List<?> list = get("get all data feeds", url, List.class);
+        return JsonUtils.convertList(list, DataFeed.class);
+    }
+
     public DataFeedExecution startExecution(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startexecution",
                 shortenCustomerSpace(customerSpace));
@@ -50,6 +61,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/execution/workflow/{workflowId}",
                 shortenCustomerSpace(customerSpace), workflowId);
         return post("updateExecutionWorkflowId", url, null, DataFeedExecution.class);
+    }
+
+    public void updateDataFeedDrainingStatus(String customerSpace, String drainingStatus) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/drainingstatus/{drainingStatus}",
+                shortenCustomerSpace(customerSpace), drainingStatus);
+        put("updateDataFeedDrainingStatus", url, null);
     }
 
     public void updateDataFeedStatus(String customerSpace, String status) {

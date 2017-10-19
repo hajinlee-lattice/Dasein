@@ -62,6 +62,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("tenant")
     private Tenant tenant;
 
     @JsonIgnore
@@ -119,6 +120,15 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("last_profiled")
     private Date lastProfiled;
 
+    @Column(name = "DRAINING_STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("draining_status")
+    private DrainingStatus drainingStatus = DrainingStatus.NONE;
+
+    @Column(name = "AUTO_SCHEDULING", nullable = false)
+    @JsonProperty("auto_scheduling")
+    private boolean autoScheduling = false;
+
     @Transient
     @JsonIgnore
     private Map<String, Map<String, Map<String, DataFeedTask>>> taskMap = new HashMap<>();
@@ -145,7 +155,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.tenantId = tenantId;
     }
 
-    @JsonIgnore
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
 
@@ -154,7 +163,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         }
     }
 
-    @JsonIgnore
     public Tenant getTenant() {
         return tenant;
     }
@@ -284,6 +292,22 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setLastProfiled(Date lastProfiled) {
         this.lastProfiled = lastProfiled;
+    }
+
+    public DrainingStatus getDrainingStatus() {
+        return drainingStatus;
+    }
+
+    public void setDrainingStatus(DrainingStatus drainingStatus) {
+        this.drainingStatus = drainingStatus;
+    }
+
+    public boolean isAutoScheduling() {
+        return autoScheduling;
+    }
+
+    public void setAutoScheduling(boolean autoScheduling) {
+        this.autoScheduling = autoScheduling;
     }
 
     public enum Status {

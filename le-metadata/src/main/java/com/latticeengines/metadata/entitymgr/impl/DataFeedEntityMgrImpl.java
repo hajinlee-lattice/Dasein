@@ -215,6 +215,23 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataFeed findDefaultFeedReadOnly() {
+        DataCollection collection = null;
+        try {
+            collection = dataCollectionEntityMgr.getDefaultCollectionReadOnly();
+        } catch (RuntimeException e) {
+            collection = null;
+        }
+        if (collection == null) {
+            return null;
+        } else {
+            DataFeed dataFeed = datafeedDao.findDefaultFeed(collection.getName());
+            return findByNameInflated(dataFeed.getName());
+        }
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public DataFeedProfile startProfile(String datafeedName) {
         DataFeed datafeed = findByNameInflated(datafeedName);
@@ -231,6 +248,28 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeed.setStatus(Status.Profiling);
         update(datafeed);
         return profile;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<DataFeed> getAllDataFeeds() {
+        List<DataFeed> dataFeeds = datafeedDao.findAll();
+        for (DataFeed datafeed : dataFeeds) {
+            HibernateUtils.inflateDetails(datafeed.getTasks());
+            for (DataFeedTask datafeedTask : datafeed.getTasks()) {
+                TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
+                TableEntityMgr.inflateTable(datafeedTask.getImportData());
+            }
+            DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
+            if (execution != null) {
+                datafeed.setActiveExecution(execution);
+            }
+            DataFeedProfile profile = datafeedProfileEntityMgr.findByProfileId(datafeed.getActiveProfileId());
+            if (profile != null) {
+                datafeed.setActiveProfile(profile);
+            }
+        }
+        return dataFeeds;
     }
 
 }

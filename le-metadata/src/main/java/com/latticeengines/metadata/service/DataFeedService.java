@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
@@ -16,6 +18,10 @@ public interface DataFeedService {
 
     DataFeed getOrCreateDataFeed(String customerSpace);
 
+    DataFeed getDefaultDataFeed(String customerSpace);
+
+    void updateDataFeedDrainingStatus(String customerSpace, String drainingStatusStr);
+
     void updateDataFeed(String customerSpace, String datafeedName, String status);
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
@@ -31,5 +37,7 @@ public interface DataFeedService {
     void resetImport(String customerSpace, String datafeedName);
 
     DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr);
+
+    List<DataFeed> getAllDataFeeds();
 
 }

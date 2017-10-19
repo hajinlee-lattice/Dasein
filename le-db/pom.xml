@@ -48,6 +48,7 @@
                                 <argument>com.latticeengines.domain.exposed.modelreview</argument>
                                 <argument>com.latticeengines.domain.exposed.pls</argument>
                                 <argument>com.latticeengines.domain.exposed.security</argument>
+                                <argument>com.latticeengines.domain.exposed.serviceapps.cdl</argument>
                                 <argument>com.latticeengines.domain.exposed.ulysses</argument>
                                 <argument>com.latticeengines.domain.exposed.workflow</argument>
 

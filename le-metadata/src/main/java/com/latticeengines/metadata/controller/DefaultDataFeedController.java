@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,22 @@ public class DefaultDataFeedController {
     public DataFeed findDataFeedByName(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.getOrCreateDataFeed(customerSpace);
+    }
+
+    @RequestMapping(value = "/default", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "find data feed by name")
+    public DataFeed getDefaultDataFeed(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return datafeedService.getDefaultDataFeed(customerSpace);
+    }
+
+    @RequestMapping(value = "/drainingstatus/{drainingStatus}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "update data feed status by name")
+    public void updateDataFeedDrainingStatus(@PathVariable String customerSpace, @PathVariable String drainingStatus) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        datafeedService.updateDataFeedDrainingStatus(customerSpace, drainingStatus);
     }
 
     @RequestMapping(value = "/startexecution", method = RequestMethod.POST, headers = "Accept=application/json")

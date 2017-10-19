@@ -7,12 +7,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
-@Component("cdlConsolidateJob")
-public class CDLConsolidateJobBean extends CDLAbstractJobBean implements QuartzJobBean {
-
+@Component("cdlOrchestrationJob")
+public class CDLOrchestrationJobBean extends CDLAbstractJobBean implements QuartzJobBean {
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        super.setCDLJobType(CDLJobType.CONSOLIDATE);
+        super.setCDLJobType(CDLJobType.ORCHESTRATION);
         return super.getCallable(jobArguments);
     }
 }

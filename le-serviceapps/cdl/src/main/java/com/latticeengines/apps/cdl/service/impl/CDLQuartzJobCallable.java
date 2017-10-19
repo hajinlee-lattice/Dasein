@@ -8,28 +8,31 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 
-public class CDLJobCallable implements Callable<Boolean> {
+public class CDLQuartzJobCallable implements Callable<Boolean> {
 
-    private static final Logger log = LoggerFactory.getLogger(CDLJobCallable.class);
+    private static final Logger log = LoggerFactory.getLogger(CDLQuartzJobCallable.class);
 
     private CDLJobType cdlJobType;
     private CDLJobService cdlJobService;
+    private String jobArguments;
 
-    public CDLJobCallable(Builder builder) {
+    public CDLQuartzJobCallable(Builder builder) {
         this.cdlJobType = builder.cdlJobType;
         this.cdlJobService = builder.cdlJobService;
+        this.jobArguments = builder.jobArguments;
     }
 
     @Override
     public Boolean call() throws Exception {
-        log.info(String.format("Calling with jobtype: %s", cdlJobType.name()));
-        return null;
+        log.debug(String.format("Calling with job type: %s", cdlJobType.name()));
+        return cdlJobService.submitJob(cdlJobType, jobArguments);
     }
 
     public static class Builder {
 
         private CDLJobType cdlJobType;
         private CDLJobService cdlJobService;
+        private String jobArguments;
 
         public Builder() {
 
@@ -42,6 +45,11 @@ public class CDLJobCallable implements Callable<Boolean> {
 
         public Builder cdlJobService(CDLJobService cdlJobService) {
             this.cdlJobService = cdlJobService;
+            return this;
+        }
+
+        public Builder jobArguments(String jobArguments) {
+            this.jobArguments = jobArguments;
             return this;
         }
     }
