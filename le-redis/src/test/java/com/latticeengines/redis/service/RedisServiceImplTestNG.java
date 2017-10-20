@@ -1,5 +1,7 @@
 package com.latticeengines.redis.service;
 
+import java.util.Set;
+
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -17,6 +19,8 @@ public class RedisServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = { "functional" })
     private void test() {
-        System.out.println(redisson.getAtomicLong("a"));
+        Set<Object> set = redisson.getMap("EntityCache").keySet("*LocalTest*");
+        set.clear();
+        System.out.println(set.size());
     }
 }
