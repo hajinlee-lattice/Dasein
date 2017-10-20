@@ -447,9 +447,8 @@ public class HdfsUtils {
     }
 
     public static InputStream getInputStream(Configuration configuration, String hdfsPath) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
-            return fs.open(new Path(hdfsPath));
-        }
+        FileSystem fs = FileSystem.newInstance(configuration);
+        return fs.open(new Path(hdfsPath));
     }
 
     public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)
