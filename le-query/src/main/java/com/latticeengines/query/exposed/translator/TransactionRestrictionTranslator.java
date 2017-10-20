@@ -34,6 +34,7 @@ public class TransactionRestrictionTranslator {
     public final static String PERIOD_AMOUNT = "PeriodAmount";
     public final static String PERIOD_QUANTITY = "PeriodQuantity";
     public final static String PERIOD_MAX = "PeriodMax";
+    public final static String PERIOD_OFFSET = "PeriodOffset";
 
     public TransactionRestrictionTranslator(TransactionRestriction txnRestriction) {
         this.txnRestriction = txnRestriction;
@@ -42,13 +43,13 @@ public class TransactionRestrictionTranslator {
     private FunctionLookup<Integer, Object, String> createPeriodLookup() {
         AttributeLookup transactionDate = new AttributeLookup(BusinessEntity.Transaction,
                 InterfaceName.TransactionDate.name());
-        AttributeLookup periodId = AttributeLookup.fromString(InterfaceName.PeriodId.name());
+        AttributeLookup periodOffset = AttributeLookup.fromString(PERIOD_OFFSET);
 
         Period p = txnRestriction.getTimeFilter().getPeriod();
         String source = ExpressionTemplateUtils.strAttrToDate(transactionDate.toString());
         String target = ExpressionTemplateUtils.getCurrentDate();
         FunctionLookup<Integer, Object, String> period = new FunctionLookup<Integer, Object, String>(Integer.class,
-                periodId).as(InterfaceName.PeriodId.name());
+                periodOffset).as(PERIOD_OFFSET);
         period.setFunction(args -> ExpressionTemplateUtils.getDateDiffTemplate(p, source, target));
         return period;
     }
@@ -70,7 +71,7 @@ public class TransactionRestrictionTranslator {
         SubQuery innerSubQuery = new SubQuery(innerQuery, generateAlias(BusinessEntity.Transaction));
 
         SubQueryAttrLookup subQueryAccountId = new SubQueryAttrLookup(innerSubQuery, InterfaceName.AccountId.name());
-        SubQueryAttrLookup subQueryPeriodId = new SubQueryAttrLookup(innerSubQuery, InterfaceName.PeriodId.name());
+        SubQueryAttrLookup subQueryPeriodOffset = new SubQueryAttrLookup(innerSubQuery, PERIOD_OFFSET);
         SubQueryAttrLookup subQueryPeriodAmount = new SubQueryAttrLookup(innerSubQuery,
                 InterfaceName.TotalAmount.name());
         SubQueryAttrLookup subQueryPeriodQuantity = new SubQueryAttrLookup(innerSubQuery,
@@ -79,19 +80,19 @@ public class TransactionRestrictionTranslator {
         AggregateLookup periodAmount = AggregateLookup.sum(subQueryPeriodAmount).as(PERIOD_AMOUNT);
         AggregateLookup periodQuantity = AggregateLookup.sum(subQueryPeriodQuantity).as(PERIOD_QUANTITY);
 
-        Restriction timeRestriction = filterByTime(subQueryPeriodId);
+        Restriction timeRestriction = filterByTime(subQueryPeriodOffset);
         Query middleQuery = Query.builder().from(innerSubQuery)
-                .select(subQueryAccountId, subQueryPeriodId, periodAmount, periodQuantity).where(timeRestriction)
-                .groupBy(groupByAccountAndPeriod(subQueryAccountId, subQueryPeriodId))
+                .select(subQueryAccountId, subQueryPeriodOffset, periodAmount, periodQuantity).where(timeRestriction)
+                .groupBy(groupByAccountAndPeriod(subQueryAccountId, subQueryPeriodOffset))
                 .having(filterByPeriodAmountQuantity(periodAmount, periodQuantity)).build();
 
         SubQuery middleSubQuery = new SubQuery(middleQuery, generateAlias(BusinessEntity.Transaction));
 
         subQueryAccountId = new SubQueryAttrLookup(middleSubQuery, InterfaceName.AccountId.name());
-        subQueryPeriodId = new SubQueryAttrLookup(middleSubQuery, InterfaceName.PeriodId.name());
+        subQueryPeriodOffset = new SubQueryAttrLookup(middleSubQuery, PERIOD_OFFSET);
         SubQueryAttrLookup periodTotalAmountLookup = new SubQueryAttrLookup(middleSubQuery, PERIOD_AMOUNT);
         SubQueryAttrLookup periodTotalQuantityLookup = new SubQueryAttrLookup(middleSubQuery, PERIOD_QUANTITY);
-        AggregateLookup periodMax = AggregateLookup.max(subQueryPeriodId).as(PERIOD_MAX);
+        AggregateLookup periodMax = AggregateLookup.max(subQueryPeriodOffset).as(PERIOD_MAX);
 
         Query outerQuery = Query.builder().from(middleSubQuery).select(subQueryAccountId, periodMax)
                 .groupBy(subQueryAccountId) //
@@ -203,21 +204,21 @@ public class TransactionRestrictionTranslator {
                 .eq(txnRestriction.getProductId()).build();
     }
 
-    private Restriction filterByTime(Lookup periodId) {
+    private Restriction filterByTime(Lookup periodOffset) {
         Restriction restriction = null;
         switch (txnRestriction.getTimeFilter().getRelation()) {
         case EVER:
-            restriction = Restriction.builder().let(periodId).isNotNull().build();
+            restriction = Restriction.builder().let(periodOffset).isNotNull().build();
             break;
         case IN_CURRENT_PERIOD:
-            restriction = Restriction.builder().let(periodId).eq(0).build();
+            restriction = Restriction.builder().let(periodOffset).eq(0).build();
             break;
         case BEFORE:
-            restriction = Restriction.builder().let(periodId).gt(txnRestriction.getTimeFilter().getValues().get(0))
+            restriction = Restriction.builder().let(periodOffset).gt(txnRestriction.getTimeFilter().getValues().get(0))
                     .build();
             break;
         case AFTER:
-            restriction = Restriction.builder().let(periodId).lt(txnRestriction.getTimeFilter().getValues().get(0))
+            restriction = Restriction.builder().let(periodOffset).lt(txnRestriction.getTimeFilter().getValues().get(0))
                     .build();
             break;
         default:
