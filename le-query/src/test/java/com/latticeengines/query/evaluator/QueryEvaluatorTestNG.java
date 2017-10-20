@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
+import com.latticeengines.domain.exposed.query.SelectAllLookup;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
@@ -503,16 +504,6 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, "as Score");
         sqlContains(sqlQuery, "group by Score");
 
-    }
-
-    private void sqlContains(SQLQuery<?> query, String content) {
-        Assert.assertTrue(query.toString().toLowerCase().contains(content.toLowerCase()), //
-                String.format("Cannot find pattern [%s] in query: %s", content, query));
-    }
-
-    private void sqlNotContain(SQLQuery<?> query, String content) {
-        Assert.assertFalse(query.toString().toLowerCase().contains(content.toLowerCase()), //
-                String.format("Should not find pattern [%s] in query: %s", content, query));
     }
 
 }

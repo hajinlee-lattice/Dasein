@@ -46,6 +46,10 @@ public class QueryProcessor {
     @Autowired
     private QueryFactory queryFactory;
 
+    public QueryFactory getQueryFactory() {
+        return queryFactory;
+    }
+
     public SQLQuery<?> process(AttributeRepository repository, Query query) {
         query.analyze();
 

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -20,9 +21,11 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
+import com.querydsl.sql.SQLQuery;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-query-context.xml" })
@@ -36,6 +39,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Autowired
     private TestArtifactService testArtifactService;
+
+    @Autowired
+    protected QueryProcessor queryProcessor;
 
     protected static AttributeRepository attrRepo;
     protected static String accountTableName;
@@ -103,6 +109,16 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
             }
         }
         return attrRepo;
+    }
+
+    protected void sqlContains(SQLQuery<?> query, String content) {
+        Assert.assertTrue(query.toString().toLowerCase().contains(content.toLowerCase()), //
+                String.format("Cannot find pattern [%s] in query: %s", content, query));
+    }
+
+    protected void sqlNotContain(SQLQuery<?> query, String content) {
+        Assert.assertFalse(query.toString().toLowerCase().contains(content.toLowerCase()), //
+                String.format("Should not find pattern [%s] in query: %s", content, query));
     }
 
 }

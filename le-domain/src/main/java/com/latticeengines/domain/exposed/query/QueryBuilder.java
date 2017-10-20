@@ -15,6 +15,7 @@ public class QueryBuilder {
     private GroupBy groupBy;
     private BusinessEntity mainEntity;
     private List<SubQuery> subQueryList = new ArrayList<>();
+    private UnionLookup unionLookup;
     private SubQuery subQuery;
     private Restriction restriction;
     private Sort sort;
@@ -99,6 +100,11 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder from(UnionLookup unionLookup) {
+        this.unionLookup = unionLookup;
+        return this;
+    }
+
     public QueryBuilder with(SubQuery... subQueryArray) {
         Collections.addAll(this.subQueryList, subQueryArray);
         return this;
@@ -126,6 +132,7 @@ public class QueryBuilder {
         query.setMainEntity(mainEntity);
         query.setSubQuery(subQuery);
         query.setCommonTableQueryList(subQueryList);
+        query.setUnionLookup(unionLookup);
         query.setGroupBy(groupBy);
         return query;
     }

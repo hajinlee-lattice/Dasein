@@ -7,10 +7,15 @@ import com.latticeengines.domain.exposed.query.SubQuery;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.Union;
 
 public interface LookupResolver<T extends Lookup> {
-    default SQLQuery<?> resolveForWith(SubQuery subQuery, SQLQuery<?> sqlQuery) {
-        throw new UnsupportedOperationException("Resolve for with is not supported yet");
+    default Union<?> resolveForUnion(T lookup) {
+        throw new UnsupportedOperationException("Resolve for union is not supported yet");
+    }
+
+    default SQLQuery<?> resolveForFrom(T lookup) {
+        throw new UnsupportedOperationException("Resolve for from is not supported yet");
     }
 
     default ComparableExpression<String> resolveForSubselect(T lookup) {

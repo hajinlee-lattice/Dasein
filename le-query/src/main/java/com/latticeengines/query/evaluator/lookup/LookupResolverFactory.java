@@ -14,7 +14,9 @@ import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.FunctionLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
+import com.latticeengines.domain.exposed.query.SelectAllLookup;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
+import com.latticeengines.domain.exposed.query.UnionLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.domain.exposed.query.WindowFunctionLookup;
 import com.latticeengines.query.evaluator.QueryProcessor;
@@ -91,6 +93,16 @@ public final class LookupResolverFactory {
             resolvers.put(lookupType.getSimpleName(), new WindowFunctionResolver(attrRepo, this));
             return;
         }
+        if (lookupType.isAssignableFrom(SelectAllLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(),
+                    new SelectAllResolver(attrRepo, queryProcessor.getQueryFactory()));
+            return;
+        }
+        if (lookupType.isAssignableFrom(UnionLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new UnionResolver(attrRepo, this));
+            return;
+        }
+
         throw new QueryEvaluationException("Do not support lookup of type " + lookupType + " yet.");
     }
 
