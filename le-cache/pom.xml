@@ -28,11 +28,6 @@
             <artifactId>le-domain</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-aws</artifactId>
-            <version>${project.version}</version>
-        </dependency>
        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-redis</artifactId>

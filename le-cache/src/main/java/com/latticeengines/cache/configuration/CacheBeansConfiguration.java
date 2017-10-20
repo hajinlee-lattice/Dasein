@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.cache.CacheNames;
 @Configuration
 @ComponentScan
 @EnableCaching
-public class BeansConfiguration {
+public class CacheBeansConfiguration {
 
     @Bean("redisCache")
     public CacheManager cacheManager(RedissonClient redisson) {
