@@ -82,6 +82,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
     public static final String MODEL_JSON_SUFFIX = "_model.json";
     public static final String MODEL_JSON = "model.json";
+    public static final String MODEL_PMML = "rfpmml.xml";
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
     public static final String SCORED_TXT = "_scored.txt";
@@ -413,23 +414,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private String getScoredTxt(String hdfsScoreArtifactBaseDir) {
         String content = null;
 
-        List<String> scoredTxtHdfsPath = null;
-        try {
-            scoredTxtHdfsPath = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactBaseDir,
-                    new HdfsFilenameFilter() {
-                        @Override
-                        public boolean accept(String filename) {
-                            if (filename.endsWith(SCORED_TXT)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }
-                    });
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            throw new LedpException(LedpCode.LEDP_31018, new String[] { hdfsScoreArtifactBaseDir });
-        }
+        List<String> scoredTxtHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir,
+                SCORED_TXT);
 
         if (scoredTxtHdfsPath.size() == 1) {
             try {
@@ -447,25 +433,31 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return content;
     }
 
+    private List<String> getListOfFilesBasedOnBaseDirectoryAndFilter(String baseDirectory, String filterStr) {
+        List<String> hdfsPaths = null;
+        try {
+            hdfsPaths = HdfsUtils.getFilesForDir(yarnConfiguration, baseDirectory, new HdfsFilenameFilter() {
+                @Override
+                public boolean accept(String filename) {
+                    if (filename.endsWith(filterStr)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new LedpException(LedpCode.LEDP_31018, new String[] { baseDirectory });
+        }
+        return hdfsPaths;
+    }
+
     private String getModelRecordExportCsv(String hdfsScoreArtifactBaseDir) {
         String content = "";
 
-        List<String> dataExportHdfsPath = null;
-        try {
-            dataExportHdfsPath = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactBaseDir,
-                    new HdfsFilenameFilter() {
-                        @Override
-                        public boolean accept(String filename) {
-                            if (filename.endsWith(DATA_EXPORT_CSV)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }
-                    });
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+        List<String> dataExportHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir,
+                DATA_EXPORT_CSV);
 
         if (dataExportHdfsPath.size() == 1) {
             try {
@@ -524,23 +516,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private File extractModelArtifacts(String hdfsScoreArtifactBaseDir, //
             CustomerSpace customerSpace, //
             String modelId) {
-        List<String> modelJsonHdfsPath = null;
-        try {
-            modelJsonHdfsPath = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactBaseDir,
-                    new HdfsFilenameFilter() {
-                        @Override
-                        public boolean accept(String filename) {
-                            if (filename.endsWith(MODEL_JSON)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }
-                    });
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            throw new LedpException(LedpCode.LEDP_31001, new String[] { hdfsScoreArtifactBaseDir });
-        }
+        List<String> modelJsonHdfsPath = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir,
+                MODEL_JSON);
 
         String localModelJsonCacheDir = String.format(localModelJsonCacheDirProperty, localModelJsonCacheDirIdentifier,
                 customerSpace.toString(), modelId);
@@ -612,7 +589,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         }
     }
 
-    private SimpleEntry<CustomerSpace, String> createModelKey(CustomerSpace customerSpace, String modelId) {
+    protected SimpleEntry<CustomerSpace, String> createModelKey(CustomerSpace customerSpace, String modelId) {
         return new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId);
     }
 
@@ -696,6 +673,25 @@ public class ModelRetrieverImpl implements ModelRetriever {
         List<ModelDetail> models = new ArrayList<>();
         convertModelSummaryToModelDetail(models, modelSummaries, customerSpace);
         return models;
+    }
+
+    @Override
+    public long getSizeOfPMMLFile(CustomerSpace customerSpace, ModelSummary modelSummary) {
+        Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
+                customerSpace, modelSummary);
+        String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
+        List<String> pmmlFilePaths = getListOfFilesBasedOnBaseDirectoryAndFilter(hdfsScoreArtifactBaseDir, MODEL_PMML);
+
+        long length = 0;
+        for (String path : pmmlFilePaths) {
+            try {
+                length += HdfsUtils.getFileSize(yarnConfiguration, path);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+                throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
+            }
+        }
+        return length;
     }
 
     private void convertModelSummaryToModelDetail(List<ModelDetail> models, //

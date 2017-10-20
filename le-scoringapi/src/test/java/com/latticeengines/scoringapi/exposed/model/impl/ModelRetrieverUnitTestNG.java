@@ -1,7 +1,8 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,9 +25,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterators;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -39,9 +41,35 @@ public class ModelRetrieverUnitTestNG {
 
     private static final String TARGETDIR = "/tmp/modelretrieverunittest/modelfiles";
 
-    private CustomerSpace space;
+    private CustomerSpace space1 = CustomerSpace.parse("space1");
 
-    private String modelId;
+    private String modelId1 = "modelId1";
+
+    private CustomerSpace space2 = CustomerSpace.parse("space2");
+
+    private String modelId2 = "modelId2";
+
+    private String modelId3 = "modelId3";
+
+    private String modelId4 = "modelId4";
+
+    private long mockPmmlSize = 4l;
+
+    private long scoreArtifactCacheMaxWeight = 600;
+
+    private int scoreArtifactCachePMMLFileRatio = 60;
+
+    private int scoreArtifactCacheExpirationTime = 1;
+
+    private int scoreArtifactCacheConcurrencyLevel = 1;
+
+    private int scoreArtifactCacheRefreshTime = 1;
+
+    private double maxCacheThreshold = 0.5;
+
+    private long defaultPmmlFileSize = 2l;
+
+    private long largePmmlFileSize = 5l;
 
     @Mock
     private ModelSummary oldModelSummary;
@@ -64,30 +92,40 @@ public class ModelRetrieverUnitTestNG {
         new File(TARGETDIR).mkdir();
 
         MockitoAnnotations.initMocks(this);
-        space = CustomerSpace.parse("space");
-        modelId = "modelId";
+        mockModelSummaries();
+        mockModelRetriever();
+    }
+
+    private void mockModelSummaries() {
         doReturn(ModelSummaryStatus.INACTIVE).when(newModelSummary).getStatus();
         doReturn(System.currentTimeMillis()).when(newModelSummary).getLastUpdateTime();
-        doReturn(modelId).when(newModelSummary).getId();
-        doReturn(new Tenant(space.getTenantId())).when(newModelSummary).getTenant();
-        doReturn(newModelSummary).when(modelRetriever).getModelSummary(any(CustomerSpace.class), any(String.class));
+        doReturn(modelId1).when(newModelSummary).getId();
+        doReturn(new Tenant(space1.getTenantId())).when(newModelSummary).getTenant();
         doReturn(ModelSummaryStatus.ACTIVE).when(oldModelSummary).getStatus();
+    }
+
+    @SuppressWarnings("deprecation")
+    private void mockModelRetriever() {
         scoringArtifact = new ScoringArtifacts(oldModelSummary, null, null, null, null, null, null, null, null, null);
         doReturn(scoringArtifact).when(modelRetriever).retrieveModelArtifactsFromHdfs(any(CustomerSpace.class),
                 any(String.class));
         bucketMetadataList = Collections.emptyList();
+        doReturn(newModelSummary).when(modelRetriever).getModelSummary(any(CustomerSpace.class), any(String.class));
         doReturn(Collections.singletonList(newModelSummary)).when(modelRetriever)
                 .getModelSummariesModifiedWithinTimeFrame(Matchers.anyLong());
         doReturn(bucketMetadataList).when(modelRetriever).getBucketMetadata(any(CustomerSpace.class),
                 any(String.class));
-        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheMaxSize(50);
-        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheExpirationTime(1);
-        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheRefreshTime(1);
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        modelRetriever.getScoreArtifactCache().setTaskScheduler(taskScheduler);
-        taskScheduler.setThreadNamePrefix("poolScheduler");
-        taskScheduler.setPoolSize(1);
-        taskScheduler.initialize();
+        doReturn(mockPmmlSize).when(modelRetriever).getSizeOfPMMLFile(any(CustomerSpace.class),
+                any(ModelSummary.class));
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheMaxWeight(scoreArtifactCacheMaxWeight);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCachePMMLFileRatio(scoreArtifactCachePMMLFileRatio);
+        modelRetriever.getScoreArtifactCache()
+                .setScoreArtifactCacheConcurrencyLevel(scoreArtifactCacheConcurrencyLevel);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheExpirationTime(scoreArtifactCacheExpirationTime);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheRefreshTime(scoreArtifactCacheRefreshTime);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheMaxCacheThreshold(maxCacheThreshold);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheDefaultPmmlFileSize(defaultPmmlFileSize);
+        modelRetriever.getScoreArtifactCache().setTaskScheduler(createThreadPool());
 
         modelRetriever.getModelDetailsCache().setModelDetailsAndFieldsCacheMaxSize(50);
         modelRetriever.getModelDetailsCache().setModelDetailsAndFieldsCacheExpirationTime(1);
@@ -99,34 +137,77 @@ public class ModelRetrieverUnitTestNG {
         modelRetriever.getScoreArtifactCache().scheduleRefreshJob();
     }
 
+    private ThreadPoolTaskScheduler createThreadPool() {
+        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+        taskScheduler.setThreadNamePrefix("poolScheduler");
+        taskScheduler.setPoolSize(1);
+        taskScheduler.initialize();
+        return taskScheduler;
+    }
+
     @Test(groups = "unit")
     public void testCacheRefresh() throws InterruptedException {
         LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts> cache = modelRetriever
                 .getScoreArtifactCache().getCache();
         Assert.assertNotNull(cache);
-        Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 0);
+        Assert.assertEquals(cache.asMap().size(), 0);
         Thread.sleep(1200);
         // The first time when scoring cache tries to refresh, no change is
         // since there is no entry in the cache.
         cache = modelRetriever.getScoreArtifactCache().getCache();
         Assert.assertNotNull(cache);
-        Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 0);
+        Assert.assertEquals(cache.asMap().size(), 0);
 
-        AbstractMap.SimpleEntry<CustomerSpace, String> entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(space,
-                modelId);
+        AbstractMap.SimpleEntry<CustomerSpace, String> entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(
+                space1, modelId1);
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
         Assert.assertNotNull(scoringArtifacts);
-        Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 1);
+        Assert.assertEquals(cache.asMap().size(), 1);
         Assert.assertEquals(scoringArtifacts.getModelSummary().getStatus(), ModelSummaryStatus.ACTIVE);
         Thread.sleep(1200);
         // The second time when scoring cache tries to refresh, an entry already
         // exists
-        Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 1);
         scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
         Assert.assertNotNull(scoringArtifacts);
         Assert.assertEquals(scoringArtifacts.getModelSummary().getStatus(), ModelSummaryStatus.INACTIVE);
         Assert.assertNotNull(scoringArtifacts.getBucketMetadataList());
         Assert.assertEquals(scoringArtifacts.getBucketMetadataList().size(), 0);
+
+        entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(space2, modelId2);
+        scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
+        Assert.assertNotNull(scoringArtifacts);
+        Assert.assertEquals(scoringArtifacts.getModelSummary().getStatus(), ModelSummaryStatus.INACTIVE);
+        Assert.assertEquals(cache.asMap().size(), 2);
+
+        // Test the removal of the first entry in the cache
+        entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(space2, modelId3);
+        scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
+        Assert.assertNotNull(scoringArtifacts);
+        Assert.assertEquals(cache.asMap().size(), 2);
+        System.out.println("map key set is " + cache.asMap().keySet());
+        Assert.assertFalse(cache.asMap().keySet().toString().contains(modelId1));
+
+        // Test case where exception happens during fetching the pmml file size
+        doThrow(new LedpException(LedpCode.LEDP_31000, new String[] { "modelPath" })).when(modelRetriever)
+                .getSizeOfPMMLFile(any(CustomerSpace.class), any(ModelSummary.class));
+        entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(space2, modelId4);
+        scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
+        Assert.assertNotNull(scoringArtifacts);
+        Assert.assertEquals(cache.asMap().size(), 3);
+        System.out.println("map key set is " + cache.asMap().keySet());
+        Assert.assertFalse(cache.asMap().keySet().toString().contains(modelId1));
+
+        // Test case where pmml file size is too large
+        doReturn(largePmmlFileSize).when(modelRetriever).getSizeOfPMMLFile(any(CustomerSpace.class),
+                any(ModelSummary.class));
+        entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(space2, modelId1);
+        try {
+            scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
+            Assert.fail("Should have thrown exception as the file size exceeds the threshold");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof LedpException);
+            Assert.assertTrue(((LedpException) e).getCode().equals(LedpCode.LEDP_31026));
+        }
     }
 
     @Test(groups = "unit")

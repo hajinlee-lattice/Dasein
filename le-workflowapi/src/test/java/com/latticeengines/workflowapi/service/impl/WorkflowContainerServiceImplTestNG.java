@@ -1,6 +1,6 @@
 package com.latticeengines.workflowapi.service.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -9,6 +9,8 @@ import java.util.Date;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -29,6 +31,8 @@ import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalT
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 
 public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowContainerServiceImplTestNG.class);
 
     @Autowired
     private WorkflowContainerService workflowContainerService;
@@ -109,7 +113,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void submitAwsWorkFlow() {
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
         workflowConfig.setWorkflowName("dummyWorkflow");
@@ -125,6 +129,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
 
         String jobId = workflowContainerService.submitAwsWorkFlow(workflowConfig);
         Assert.assertNotNull(jobId);
+        log.info("job id is " + jobId);
     }
 
 }

@@ -18,7 +18,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
+import com.google.common.primitives.Ints;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
@@ -27,14 +33,26 @@ import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 public class ScoreArtifactCache {
     private static final Logger log = LoggerFactory.getLogger(ScoreArtifactCache.class);
 
-    @Value("${scoringapi.scoreartifact.cache.maxsize}")
-    private int scoreArtifactCacheMaxSize;
+    @Value("${scoringapi.scoreartifact.cache.max.weight}")
+    private long scoreArtifactCacheMaxWeight;
+
+    @Value("${scoringapi.scoreartifact.cache.ratio}")
+    private int scoreArtifactCachePMMLFileRatio;
 
     @Value("${scoringapi.scoreartifact.cache.expiration.time}")
     private int scoreArtifactCacheExpirationTime;
 
+    @Value("${scoringapi.scoreartifact.cache.concurrency.level}")
+    private int scoreArtifactCacheConcurrencyLevel;
+
     @Value("${scoringapi.scoreartifact.cache.refresh.time:120}")
     private int scoreArtifactCacheRefreshTime;
+
+    @Value("${scoringapi.scoreartifact.cache.default.size}")
+    private long defaultPmmlFileSize;
+
+    @Value("${scoringapi.scoreartifact.cache.max.threshold}")
+    private double maxCacheThreshold;
 
     @Resource(name = "commonTaskScheduler")
     private ThreadPoolTaskScheduler taskScheduler;
@@ -44,16 +62,42 @@ public class ScoreArtifactCache {
     private LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts> scoreArtifactCache;
 
     void instantiateCache(ModelRetrieverImpl modelRetriever) {
-        log.info("Instantiating score artifact cache with max size " + scoreArtifactCacheMaxSize);
-        scoreArtifactCache = CacheBuilder.newBuilder().maximumSize(scoreArtifactCacheMaxSize) //
+        log.info(String.format("Instantiating score artifact cache with maxWeight=%d, and ratio=%d",
+                scoreArtifactCacheMaxWeight, scoreArtifactCachePMMLFileRatio));
+        scoreArtifactCache = CacheBuilder.newBuilder() //
+                .recordStats() //
+                .maximumWeight(scoreArtifactCacheMaxWeight) //
+                .concurrencyLevel(scoreArtifactCacheConcurrencyLevel) //
                 .expireAfterAccess(scoreArtifactCacheExpirationTime, TimeUnit.DAYS) //
+                .weigher(new Weigher<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
+                    @Override
+                    public int weigh(AbstractMap.SimpleEntry<CustomerSpace, String> key, ScoringArtifacts value) {
+                        return getWeightBasedOnPmmlFile(key, value);
+                    }
+                }) //
+                .removalListener(
+                        new RemovalListener<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
+                            @Override
+                            public void onRemoval(
+                                    RemovalNotification<SimpleEntry<CustomerSpace, String>, ScoringArtifacts> removal) {
+                                if (removal.wasEvicted()) {
+                                    if (log.isInfoEnabled()) {
+                                        log.info(String.format(
+                                                "Removal of model artifacts for tenant=%s and model=%s. "//
+                                                        + "due to cause=%s. Current cacheSize=%d",
+                                                removal.getKey().getKey(), removal.getKey().getValue(),
+                                                removal.getCause().name(), scoreArtifactCache.asMap().size()));
+                                    }
+                                }
+                            }
+                        }) //
                 .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
                         if (log.isInfoEnabled()) {
                             log.info(String.format(
-                                    "Load model artifacts for tenant %s and model %s. "//
-                                            + "Current cache size = %d",
+                                    "Load model artifacts for tenant=%s and model=%s. "//
+                                            + "Current cacheSize=%d",
                                     key.getKey(), key.getValue(), scoreArtifactCache.asMap().size()));
                         }
                         long beforeLoad = System.currentTimeMillis();
@@ -86,8 +130,8 @@ public class ScoreArtifactCache {
     }
 
     private void refreshCache() {
-        log.info(String.format("Begin to refresh cache, the size of the cache is %d",
-                scoreArtifactCache.asMap().size()));
+        log.info(String.format("Begin to refresh cache, the size of the cache=%d, with stats=%s",
+                scoreArtifactCache.asMap().size(), scoreArtifactCache.stats().toString()));
         List<ModelSummary> modelSummaryListNeedsToRefresh = modelRetriever
                 .getModelSummariesModifiedWithinTimeFrame(TimeUnit.SECONDS.toMillis(scoreArtifactCacheRefreshTime));
         if (CollectionUtils.isNotEmpty(modelSummaryListNeedsToRefresh)) {
@@ -96,20 +140,43 @@ public class ScoreArtifactCache {
                 CustomerSpace cs = CustomerSpace.parse(modelsummay.getTenant().getId());
                 String modelId = modelsummay.getId();
                 List<BucketMetadata> bucketMetadataList = modelRetriever.getBucketMetadata(cs, modelId);
-                ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifactsIfPresent(cs, modelId);
+
                 // lazy refresh by only updating the cache entry if present
-                if (scoringArtifacts != null) {
+                if (scoreArtifactCache.asMap().containsKey(modelRetriever.createModelKey(cs, modelId))) {
+                    ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(cs, modelId);
                     scoringArtifacts.setBucketMetadataList(bucketMetadataList);
                     scoringArtifacts.setModelSummary(modelsummay);
                     scoreArtifactCache.put(new AbstractMap.SimpleEntry<>(cs, modelId), scoringArtifacts);
                     log.info(
-                            String.format("Refresh cache for model %s in tenant %s finishes.", modelId, cs.toString()));
-                    log.info(String.format("After loading, the size of the cache is %d",
-                            scoreArtifactCache.asMap().size()));
+                            String.format("Refresh cache for model=%s in tenant=%s finishes.", modelId, cs.toString()));
+                    log.info(String.format("After loading, the cacheSize= %d", scoreArtifactCache.asMap().size()));
                 }
             });
         }
         log.info("Refresh cache ends");
+        scoreArtifactCache.cleanUp();
+    }
+
+    @VisibleForTesting
+    int getWeightBasedOnPmmlFile(AbstractMap.SimpleEntry<CustomerSpace, String> key, ScoringArtifacts value) {
+        long pmmlFileSize = defaultPmmlFileSize;
+        try {
+            pmmlFileSize = modelRetriever.getSizeOfPMMLFile(key.getKey(), value.getModelSummary());
+        } catch (Exception e) {
+            log.warn(String.format("Error getting the pmml file size for modelId=%s. Setting it to default value=%d",
+                    key.getValue(), defaultPmmlFileSize));
+        }
+        long weight = pmmlFileSize * scoreArtifactCachePMMLFileRatio;
+        log.info(String.format("model=%s, weight=%d.", key.getValue(), weight));
+        throttleLargePmmlFileBasedOnWeight(weight, key.getValue());
+        return Ints.checkedCast(weight);
+    }
+
+    private void throttleLargePmmlFileBasedOnWeight(long weight, String modelId) {
+        if (weight >= maxCacheThreshold * scoreArtifactCacheMaxWeight) {
+            log.error(String.format("The pmml file is too big to be loaded into the cache with modelId=%s", modelId));
+            throw new LedpException(LedpCode.LEDP_31026, new String[] { modelId });
+        }
     }
 
     @VisibleForTesting
@@ -118,8 +185,8 @@ public class ScoreArtifactCache {
     }
 
     @VisibleForTesting
-    void setScoreArtifactCacheMaxSize(int scoreArtifactCacheMaxSize) {
-        this.scoreArtifactCacheMaxSize = scoreArtifactCacheMaxSize;
+    void setScoreArtifactCacheMaxWeight(long scoreArtifactCacheMaxWeight) {
+        this.scoreArtifactCacheMaxWeight = scoreArtifactCacheMaxWeight;
     }
 
     @VisibleForTesting
@@ -128,7 +195,27 @@ public class ScoreArtifactCache {
     }
 
     @VisibleForTesting
+    void setScoreArtifactCachePMMLFileRatio(int scoreArtifactCachePMMLFileRatio) {
+        this.scoreArtifactCachePMMLFileRatio = scoreArtifactCachePMMLFileRatio;
+    }
+
+    @VisibleForTesting
     void setScoreArtifactCacheRefreshTime(int scoreArtifactCacheRefreshTime) {
         this.scoreArtifactCacheRefreshTime = scoreArtifactCacheRefreshTime;
+    }
+
+    @VisibleForTesting
+    void setScoreArtifactCacheConcurrencyLevel(int concurrencyLevel) {
+        this.scoreArtifactCacheConcurrencyLevel = concurrencyLevel;
+    }
+
+    @VisibleForTesting
+    void setScoreArtifactCacheMaxCacheThreshold(double maxCacheThreshold) {
+        this.maxCacheThreshold = maxCacheThreshold;
+    }
+
+    @VisibleForTesting
+    void setScoreArtifactCacheDefaultPmmlFileSize(long defaultPmmlFileSize) {
+        this.defaultPmmlFileSize = defaultPmmlFileSize;
     }
 }

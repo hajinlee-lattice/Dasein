@@ -36,6 +36,8 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
         log.info(String.format("Before generating the score artifact, the free memory is %d",
                 memBeforeScoreArtifactCreation));
         ScoringArtifacts artifacts = modelRetriever.getModelArtifacts(customerSpace, MODEL_ID);
+        Assert.assertEquals(sizeOfPmmlFile,
+                modelRetriever.getSizeOfPMMLFile(customerSpace, artifacts.getModelSummary()));
         long memAfterScoreArtifactCreation = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         log.info(String.format("After generating the score artifact, the free memory is %d",
                 memAfterScoreArtifactCreation));

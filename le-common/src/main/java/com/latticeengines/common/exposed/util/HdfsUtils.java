@@ -42,7 +42,6 @@ import org.springframework.util.StreamUtils;
 
 public class HdfsUtils {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(HdfsUtils.class);
     private static final int EOF = -1;
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
@@ -105,8 +104,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
-            throws IOException {
+    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
@@ -354,8 +353,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final List<String> getFilesForDirRecursiveWithFilterOnDir(Configuration configuration,
-            String hdfsDir, HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
+    public static final List<String> getFilesForDirRecursiveWithFilterOnDir(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
@@ -363,8 +362,8 @@ public class HdfsUtils {
                 if (status.isDirectory()) {
                     if (folderFilter.accept(status)) {
                         filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
-                        filePaths.addAll(getFilesForDirRecursiveWithFilterOnDir(configuration, status.getPath()
-                                .toString(), filter, folderFilter));
+                        filePaths.addAll(getFilesForDirRecursiveWithFilterOnDir(configuration,
+                                status.getPath().toString(), filter, folderFilter));
                     }
                 }
             }
@@ -448,8 +447,9 @@ public class HdfsUtils {
     }
 
     public static InputStream getInputStream(Configuration configuration, String hdfsPath) throws IOException {
-        FileSystem fs = FileSystem.newInstance(configuration);
-        return fs.open(new Path(hdfsPath));
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            return fs.open(new Path(hdfsPath));
+        }
     }
 
     public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)
@@ -642,8 +642,8 @@ public class HdfsUtils {
             }
             return false;
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not check if key %s exists using provider %s", keyName,
-                    provider), e);
+            throw new RuntimeException(
+                    String.format("Could not check if key %s exists using provider %s", keyName, provider), e);
         }
     }
 
@@ -673,9 +673,10 @@ public class HdfsUtils {
             InputStream inputStream, String hdfsPath, long totalRows) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
-                return copyLarge(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream,
-                        totalRows);
+                return copyLarge(
+                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                                ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                        outputStream, totalRows);
             }
         }
     }
