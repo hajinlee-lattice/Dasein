@@ -9,6 +9,7 @@ import pandas as pd
 from pipelinefwk import PipelineStep
 from pipelinefwk import create_column
 from pipelinefwk import get_logger
+import random
 
 
 logger = get_logger("categoricalgroupingstep")
@@ -100,8 +101,9 @@ class CategoricalGroupingStep(PipelineStep):
                     logger.info('feature not found in dataFrame = {}'.format(str(featureName)))
                     continue
                 xList = dataFrame[featureName].tolist()
-                if len(set(xList)) < self.maxNumberUniqueValues:
-                    logger.info('feature {0} has {1} distinct values'.format(str(featureName), str(len(set(xList)))))
+                xSetLen = len(set(xList))
+                if xSetLen < self.maxNumberUniqueValues:
+                    logger.info('feature {0} has {1} distinct values'.format(str(featureName), str(xSetLen)))
                     continue
 
                 self.columnsToRemove.add(featureName)
@@ -109,14 +111,17 @@ class CategoricalGroupingStep(PipelineStep):
                 if any([pd.isnull(x) for x in xList]):
                     xList = ['LE-missing' if pd.isnull(x) else x for x in xList]
 
-                featValMapping = self.__getGroupMapping(featureName, xList, eventList, popCount, popRate, self.thresholdError, self.thresholdSigSize, self.thresholdBinSize)
+                featValMapping = self.__getGroupMapping(xList, eventList, popCount, popRate, self.thresholdError, self.thresholdSigSize, self.thresholdBinSize)
 
                 if len(featValMapping) > 0 :
                     newFeatName = ''.join([featureName, 'Grouped'])
                     self.groupedFeatures.append(newFeatName)
                     self.outputColumnsInput.update({newFeatName: featureName})
 
-                    xListNew = [featValMapping[x] for x in xList]
+                    xListNew = [featValMapping[x] if x in featValMapping else None for x in xList]
+                    
+                    xListNew = self.__replaceValue(xListNew, set(featValMapping.values()))
+
 
                     # code below that can be deleted in the future 
                     dd = self.__conversionRateEncoding(xListNew, eventList)
@@ -149,9 +154,12 @@ class CategoricalGroupingStep(PipelineStep):
                     origColValue = ['LE-missing' if pd.isnull(x) else x for x in origColValue]
 
                 valmap = self.dsCategVarGroupingInfo[origFeatName]
-                dsColVal = [valmap[x] if x in valmap else 1.0 for x in origColValue]
+                
+                dsColVal = [valmap[x] if x in valmap else None for x in origColValue]
 
-                featureValueDict.update({newFeatName : dsColVal})
+                dsColValNew = self.__replaceValue(dsColVal, set(valmap.values()))
+            
+                featureValueDict.update({newFeatName : dsColValNew})
 
         featureValueDict = {k: featureValueDict[k] for k in featureValueDict if k in self.groupedFeatures}
         if len(featureValueDict) > 0:
@@ -282,7 +290,7 @@ class CategoricalGroupingStep(PipelineStep):
 
         return (featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver)
 
-    def __getGroupMapping(self, featureName, xList, eventList, popCount, popRate, thresholdError=3, thresholdSigSize=0.01, threshBinSize=0.05):
+    def __getGroupMapping(self, xList, eventList, popCount, popRate, thresholdError=3, thresholdSigSize=0.01, threshBinSize=0.05):
 
         featValMapping = {}
 
@@ -302,33 +310,36 @@ class CategoricalGroupingStep(PipelineStep):
             featValMapping.update({k: 'Close To Mean' for k in featureValClosetomean.keys()})
 
         if len(featureValLeftOver) > 0:
-
-            values = featureValLeftOver.values()
-            countLO = sum([x[0] for x in values])
-            eventLO = sum([x[0] * x[1] for x in values])
-
-            sigLO = self.__getSig((countLO, float(eventLO) / countLO), (popCount, popRate))
-
-            logger.info('features in left_over aggregated: cnt={0}, event={1}, lift={2}, sig = {3}'.format(countLO, eventLO, eventLO / (countLO * popRate), sigLO))
-
-            if sigLO <= thresholdError * 0.05 * sqrt(popCount * popRate):
-                featValMapping.update({k: 'LeftOver' for k in featureValLeftOver.keys()})
-            else:
-                if len(featureValClosetomean) > 0:
-                    values = featureValClosetomean.values()
-                    countLOCM = countLO + sum([x[0] for x in values])
-                    eventLOCM = eventLO + sum([x[0] * x[1] for x in values])
-                    sigLOCM = self.__getSig((countLOCM, float(eventLOCM) / (countLOCM)), (popCount, popRate))
-                    logger.info('features in left_over and close_to_mean when aggregated: cnt={0}, event={1}, lift={2}, sig = {3}'.format(countLOCM, eventLOCM, eventLOCM / (countLOCM * popRate), sigLOCM))
-
-                    if sigLOCM <= thresholdError * 0.025 * sqrt(popCount * popRate):
-                        featValMapping.update({k: 'Close To Mean' for k in featureValLeftOver.keys()})
-                    else:
-                        featValMapping = {}
-                else:
-                    featValMapping = {}
-
-                if len(featValMapping) == 0:
-                    logger.info('feature values in left_over are too significant; original column is to be deleted and not grouped, featureName={%s}' % featureName)
+            logger.info('feature values in left_over will be smeared with the other values')
 
         return featValMapping
+
+    def __randomChoice(self, seq,numberReturned,seed=3):
+        random.seed(seed)
+        return [random.choice(seq) for i in xrange(numberReturned)]
+
+    def __replaceValue(self, values, stayValSet):
+
+        replaceBooleanIndicator = [x not in stayValSet for x in values]
+
+        if sum(replaceBooleanIndicator) == 0:
+            return values
+        
+        ixReplace=[i for i,x in enumerate(replaceBooleanIndicator) if x] #assume x=True or False
+        
+        ixStay=[i for i in range(len(values)) if i not in  set(ixReplace)]
+
+        stayValues=[values[i] for i in ixStay]
+
+        replacedValues=self.__randomChoice(stayValues,len(ixReplace))
+        
+        #these dictionaries  map
+        iDictReplace={j:i for i,j in enumerate(ixReplace)}
+        iDictStay={j:i for i,j in enumerate(ixStay)}
+
+        def getVal(i):
+            if replaceBooleanIndicator[i]:
+                return replacedValues[iDictReplace[i]]
+            else:
+                return stayValues[iDictStay[i]]
+        return [getVal(i) for i in xrange(len(values))]
