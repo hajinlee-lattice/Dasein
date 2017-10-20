@@ -9,7 +9,9 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -29,6 +31,9 @@ public class DataFeedExecutionListener extends LEJobListener {
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -45,6 +50,7 @@ public class DataFeedExecutionListener extends LEJobListener {
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
+            cacheService.dropKeysByPattern(CacheNames.EntityCache.name(), String.format("*%s*", customerSpace));
             NodeWatcher.updateWatchedData(CDLConsolidate.name(), customerSpace);
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");

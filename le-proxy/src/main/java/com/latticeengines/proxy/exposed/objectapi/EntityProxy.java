@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
@@ -21,6 +23,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("entityProxy")
+@CacheConfig(cacheNames = "EntityCache")
 public class EntityProxy extends MicroserviceRestApiProxy {
 
     private final WatcherCache<String, Long> countCache;
@@ -98,21 +101,23 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         ratingCache.setRefreshKeyResolver((updateSignal, existingKeys) -> Collections.emptyList());
     }
 
+    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
-        Long count = countCache
-                .get(String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
-
+        Long count = getCountFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
         if (count == null) {
             throw new LedpException(LedpCode.LEDP_18158);
         }
-
         return count;
     }
 
+    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|data\", #customerSpace, #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
-        DataPage dataPage = dataCache
-                .get(String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
-
+        // DataPage dataPage = dataCache
+        // .get(String.format("%s|%s", shortenCustomerSpace(customerSpace),
+        // JsonUtils.serialize(frontEndQuery)));
+        DataPage dataPage = getDataFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
         if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
             throw new LedpException(LedpCode.LEDP_18158);
         }

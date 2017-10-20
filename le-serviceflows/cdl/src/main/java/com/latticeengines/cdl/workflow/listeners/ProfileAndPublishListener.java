@@ -1,16 +1,22 @@
 package com.latticeengines.cdl.workflow.listeners;
 
+import java.lang.reflect.Method;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.ProxyUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -29,6 +35,9 @@ public class ProfileAndPublishListener extends LEJobListener {
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private CacheService cacheService;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -51,9 +60,22 @@ public class ProfileAndPublishListener extends LEJobListener {
             DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
             log.info("Switch data collection to version " + inactiveVersion);
             dataCollectionProxy.switchVersion(customerSpace, inactiveVersion);
+            cacheService.dropKeysByPattern(CacheNames.EntityCache.name(), String.format("*%s*", customerSpace));
         } else {
             log.warn("Workflow ended in an unknown state.");
         }
     }
 
+    @Component("evictEntityKeyGenerator")
+    class EvictEntityKeyGenerator implements KeyGenerator {
+
+        @Override
+        public Object generate(Object target, Method method, Object... params) {
+            JobExecution jobExecution = (JobExecution) params[0];
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+            String customerSpace = job.getTenant().getId();
+            return ProxyUtils.shortenCustomerSpace(customerSpace) + "|.*";
+        }
+
+    }
 }

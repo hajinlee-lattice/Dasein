@@ -318,7 +318,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-redis</artifactId>
+            <artifactId>le-cache</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

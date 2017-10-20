@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-serviceflows</artifactId>
@@ -29,16 +29,16 @@
 
     <build>
         <plugins>
-            <!-- Override parent pom to exclude svn revision number.  
-                 For some reason it's failing for certain developers. -->
+            <!-- Override parent pom to exclude svn revision number. For 
+                some reason it's failing for certain developers. -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
                 <configuration>
-                   <skip>true</skip>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
-       </plugins>
+        </plugins>
     </build>
 
     <dependencies>
@@ -88,6 +88,13 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-cache</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

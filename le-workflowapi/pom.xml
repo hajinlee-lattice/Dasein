@@ -245,6 +245,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-cache</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.batch</groupId>
              <artifactId>spring-batch-test</artifactId>
             <version>${spring.batch.version}</version>

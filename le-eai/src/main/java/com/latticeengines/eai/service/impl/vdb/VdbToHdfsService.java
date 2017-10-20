@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
-import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
@@ -37,9 +36,6 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private EaiMetadataService eaiMetadataService;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -150,7 +146,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
 
     @SuppressWarnings("unchecked")
     private void finalizeJobDetail(VdbConnectorConfiguration config, HashMap<String, Table> tableMetaData,
-                                   ImportContext importContext) {
+            ImportContext importContext) {
         Map<String, Boolean> multipleExtractMap = importContext.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class);
         Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
         Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
@@ -162,7 +158,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
             Table table = tableMetaData.get(entry.getValue().getCollectionIdentifier());
             if (multipleExtractMap.get(table.getName())) {
                 List<String> recordList = new ArrayList<>();
-                for(Long record : multipleRecords.get(table.getName())) {
+                for (Long record : multipleRecords.get(table.getName())) {
                     recordList.add(record.toString());
                 }
                 updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
