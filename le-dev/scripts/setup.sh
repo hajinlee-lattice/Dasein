@@ -62,12 +62,12 @@ wait
 UNAME=`uname`
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
-    sed -i '' "/INFO fs.TrashPolicyDefault/d" /tmp/errors.txt
+    sed -i '' "/INFO /d" /tmp/errors.txt
     sed -i '' "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
     sed -i '' "/\/app\/swlib/d" /tmp/errors.txt
 else
     echo "You are on ${UNAME}"
-    sed -i "/INFO fs.TrashPolicyDefault/d" /tmp/errors.txt
+    sed -i "/INFO /d" /tmp/errors.txt
     sed -i "/WARN util.NativeCodeLoader/d" /tmp/errors.txt
     sed -i "/\/app\/swlib/d" /tmp/errors.txt
 fi
