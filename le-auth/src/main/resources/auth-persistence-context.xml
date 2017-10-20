@@ -8,12 +8,13 @@
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
     <bean id="dataSourceGlobalAuth" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-        <property name="driverClass" value="${auth.globalauth.datasource.driver:com.microsoft.sqlserver.jdbc.SQLServerDriver}" />
+        <property name="driverClass" value="${auth.globalauth.datasource.driver}" />
         <property name="jdbcUrl" value="${auth.globalauth.datasource.url}" />
         <property name="user" value="${auth.globalauth.datasource.user}" />
         <property name="password" value="${auth.globalauth.datasource.password.encrypted}" />
-        <property name="acquireIncrement" value="4"/>
-        <property name="maxPoolSize" value="32"/>
+        <property name="acquireIncrement" value="2"/>
+        <property name="minPoolSize" value="2"/>
+        <property name="maxPoolSize" value="8"/>
         <property name="checkoutTimeout" value="10000"/>
         <property name="idleConnectionTestPeriod" value="10"/>
         <property name="maxIdleTime" value="30"/>
