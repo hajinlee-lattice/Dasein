@@ -58,10 +58,10 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath = null;
 
-        if (jobId == null || workflowJobService.find(jobId) == null) {
+        Job job = workflowJobService.find(jobId, false);
+        if (jobId == null || job == null) {
             throw new LedpException(LedpCode.LEDP_18125, new String[] { modelId });
         } else {
-            Job job = workflowJobService.find(jobId);
             pivotAvroDirPath = job.getOutputs().get(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH);
         }
 
@@ -69,15 +69,12 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         if (pivotAvroDirPath == null) {
             throw new LedpException(LedpCode.LEDP_18125, new String[] { modelId });
         }
-        HdfsUtils.HdfsFileFilter hdfsFileFilter = new HdfsUtils.HdfsFileFilter() {
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-                String name = file.getPath().getName();
-                return name.matches(".*.avro");
+        HdfsUtils.HdfsFileFilter hdfsFileFilter = (FileStatus file) -> {
+            if (file == null) {
+                return false;
             }
+            String name = file.getPath().getName();
+            return name.matches(".*.avro");
         };
         List<String> filePaths = HdfsUtils.getFilesForDir(yarnConfiguration, pivotAvroDirPath, hdfsFileFilter);
         String pivotAvroFilePath = filePaths.get(0);
@@ -93,8 +90,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             GenericRecord pivotedRecord = pivotedRecords.get(currentRecord);
             log.info(String.format("current record index: %s, i is: %s, and generic record is: %s", currentRecord,
                     currentScore, pivotedRecord.toString()));
-            if (pivotedRecord != null
-                    && Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue() == currentScore) {
+            if (Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue() == currentScore) {
                 bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
                         Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
@@ -148,8 +144,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
             if (!creationTimesToBucketMetadatas.containsKey(bucketMetadata.getCreationTimestamp())) {
-                creationTimesToBucketMetadatas.put(bucketMetadata.getCreationTimestamp(),
-                        new ArrayList<BucketMetadata>());
+                creationTimesToBucketMetadatas.put(bucketMetadata.getCreationTimestamp(), new ArrayList<>());
             }
             creationTimesToBucketMetadatas.get(bucketMetadata.getCreationTimestamp()).add(bucketMetadata);
         }
@@ -187,9 +182,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             throw new LedpException(LedpCode.LEDP_18126, new String[] { modelId });
         }
 
-        List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
-                .getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
-        return bucketMetadatas;
+        return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
     }
 
 }

@@ -35,6 +35,8 @@ public interface WorkflowService {
 
     Job getJob(WorkflowExecutionId workflowId);
 
+    Job getJobNoCache(WorkflowExecutionId workflowId);
+
     WorkflowJob getJob(long workflowId);
 
     List<Job> getJobs(List<WorkflowExecutionId> workflowIds);

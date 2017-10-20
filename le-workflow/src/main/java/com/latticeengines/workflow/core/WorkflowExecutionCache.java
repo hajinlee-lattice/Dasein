@@ -1,19 +1,23 @@
 package com.latticeengines.workflow.core;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Date;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -52,7 +53,14 @@ public class WorkflowExecutionCache {
     @Value("${workflow.jobs.numthreads}")
     private String numJobThreads;
 
-    private Cache<Long, Job> cache;
+    @Value("${workflow.jobs.maxDynamicCacheSize:300}")
+    private String maxDynamicCacheSize;
+
+    @Value("${workflow.jobs.expireTime:60}")
+    private String expireTime;
+
+    private Cache<Long, Job> dynamicCache;
+    private Cache<Long, Job> staticCache;
     private ExecutorService executorService;
 
     @Autowired
@@ -72,7 +80,23 @@ public class WorkflowExecutionCache {
 
     @PostConstruct
     public void init() {
-        cache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE).build();
+        dynamicCache = Caffeine.newBuilder()
+                .maximumSize(Long.parseLong(maxDynamicCacheSize))
+                .expireAfterWrite(Long.parseLong(expireTime), TimeUnit.SECONDS)
+                .removalListener((Long key, Job value, RemovalCause cause) -> {
+                    log.info(String.format("Job %d is removed from dynamic cache. Cause: %s.",
+                            key, cause));
+                })
+                .build();
+
+        staticCache = Caffeine.newBuilder()
+                .maximumSize(MAX_CACHE_SIZE - Long.parseLong(maxDynamicCacheSize))
+                .removalListener((Long key, Job value, RemovalCause cause) -> {
+                    log.info(String.format("Job %d is removed from static cache. Cause: %s.",
+                            key, cause));
+                })
+                .build();
+
         executorService = Executors.newFixedThreadPool(Integer.parseInt(numJobThreads));
     }
 
@@ -81,15 +105,111 @@ public class WorkflowExecutionCache {
 
         List<WorkflowExecutionId> missingJobIds = new ArrayList<>();
         for (WorkflowExecutionId workflowId : workflowIds) {
-            if (cache.getIfPresent(workflowId.getId()) == null) {
-                missingJobIds.add(workflowId);
+            Job job = getIfPresent(workflowId);
+            if (job != null) {
+                jobs.add(job);
             } else {
-                jobs.add(cache.getIfPresent(workflowId.getId()));
+                missingJobIds.add(workflowId);
             }
         }
 
         jobs.addAll(loadMissingJobs(missingJobIds));
         return clearJobDetails(jobs);
+    }
+
+    public Job getJob(WorkflowExecutionId workflowId) {
+        Job job = getIfPresent(workflowId);
+        if (job != null) {
+            return job;
+        }
+
+        job = queryJob(workflowId.getId());
+        if (job != null) {
+            if (job.getJobStatus().isTerminated()) {
+                staticCache.put(workflowId.getId(), job);
+            } else {
+                dynamicCache.put(workflowId.getId(), job);
+            }
+        }
+
+        return job;
+    }
+
+    private Job queryJob(Long jobId) {
+        log.info(String.format("Job with id: %s is not in the cache, reloading.", jobId));
+        try {
+            JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(jobId);
+            if (jobExecution == null) {
+                return null;
+            }
+
+            JobInstance jobInstance = jobExecution.getJobInstance();
+            WorkflowExecutionId workflowId = new WorkflowExecutionId(jobId);
+            WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
+
+            Job job = new Job();
+            job.setId(jobId);
+            if (FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
+                job.setJobStatus(JobStatus.FAILED);
+            } else {
+                JobStatus status = getJobStatusFromBatchStatus(workflowStatus.getStatus());
+                if (status.isTerminated()) {
+                    job.setJobStatus(status);
+                } else {
+                    WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
+                }
+            }
+
+            job.setStartTimestamp(workflowStatus.getStartTime());
+            job.setJobType(jobInstance.getJobName());
+            job.setSteps(getJobSteps(jobExecution));
+
+            if (workflowJob.getStartTimeInMillis() != null) {
+                job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
+            }
+            job.setReports(getReports(workflowJob));
+            job.setOutputs(getOutputs(workflowJob));
+            job.setInputs(workflowJob.getInputContext());
+            job.setApplicationId(workflowJob.getApplicationId());
+            job.setUser(workflowJob.getUserId());
+            ErrorDetails errorDetails = workflowJob.getErrorDetails();
+            if (errorDetails != null) {
+                job.setErrorCode(errorDetails.getErrorCode());
+                job.setErrorMsg(errorDetails.getErrorMsg());
+            }
+            job.setEndTimestamp(workflowStatus.getEndTime());
+
+            return job;
+        } catch (Exception e) {
+            log.error(String.format("Getting job status for workflow: %d failed", jobId), e);
+            throw e;
+        }
+    }
+
+    private List<Job> loadMissingJobs(List<WorkflowExecutionId> workflowIds) throws Exception {
+        List<Job> missingJobs = new ArrayList<>();
+        Set<Callable<Job>> callables = new HashSet<>();
+
+        for (final WorkflowExecutionId workflowId : workflowIds) {
+            callables.add(() -> {
+                try {
+                    return getJob(workflowId);
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+        }
+
+        List<Future<Job>> futures = executorService.invokeAll(callables);
+        for (Future<Job> future : futures) {
+            Job job = future.get();
+            if (job != null) {
+                missingJobs.add(job);
+            }
+        }
+
+        return missingJobs;
     }
 
     private List<Job> clearJobDetails(List<Job> jobs) {
@@ -111,94 +231,7 @@ public class WorkflowExecutionCache {
         return nonDetailedJobs;
     }
 
-    public Job getJob(WorkflowExecutionId workflowId) {
-        if (cache.getIfPresent(workflowId.getId()) != null) {
-            return cache.getIfPresent(workflowId.getId());
-        }
-
-        log.info(String.format("Job with id: %s is not in the cache, reloading.", workflowId.getId()));
-
-        try {
-            JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
-            if (jobExecution == null) {
-                return null;
-            }
-            JobInstance jobInstance = jobExecution.getJobInstance();
-            WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
-            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
-
-            Job job = new Job();
-            job.setId(workflowId.getId());
-            if (FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
-                job.setJobStatus(JobStatus.FAILED);
-            } else {
-                JobStatus status = getJobStatusFromBatchStatus(workflowStatus.getStatus());
-                if (status.isTerminated()) {
-                    job.setJobStatus(status);
-                } else {
-                    WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
-                }
-            }
-            job.setStartTimestamp(workflowStatus.getStartTime());
-            job.setJobType(jobInstance.getJobName());
-            job.setSteps(getJobSteps(jobExecution));
-
-            if (workflowJob != null) {
-                if (workflowJob.getStartTimeInMillis() != null) {
-                    job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
-                }
-                job.setReports(getReports(workflowJob));
-                job.setOutputs(getOutputs(workflowJob));
-                job.setInputs(workflowJob.getInputContext());
-                job.setApplicationId(workflowJob.getApplicationId());
-                job.setUser(workflowJob.getUserId());
-                ErrorDetails errorDetails = workflowJob.getErrorDetails();
-                if (errorDetails != null) {
-                    job.setErrorCode(errorDetails.getErrorCode());
-                    job.setErrorMsg(errorDetails.getErrorMsg());
-                }
-            }
-
-            if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
-                job.setEndTimestamp(workflowStatus.getEndTime());
-                cache.put(job.getId(), job);
-            }
-            return job;
-        } catch (Exception e) {
-            log.error(String.format("Getting job status for workflow: %d failed", workflowId.getId()), e);
-            throw e;
-        }
-    }
-
-    private List<Job> loadMissingJobs(List<WorkflowExecutionId> workflowIds) throws Exception {
-        List<Job> missingJobs = new ArrayList<>();
-        Set<Callable<Job>> callables = new HashSet<>();
-
-        for (final WorkflowExecutionId workflowId : workflowIds) {
-            callables.add(new Callable<Job>() {
-                @Override
-                public Job call() throws Exception {
-                    try {
-                        return getJob(workflowId);
-                    } catch (Exception e) {
-                        return null;
-                    }
-                }
-            });
-        }
-
-        List<Future<Job>> futures = executorService.invokeAll(callables);
-        for (Future<Job> future : futures) {
-            Job job = future.get();
-            if (job != null) {
-                missingJobs.add(job);
-            }
-        }
-
-        return missingJobs;
-    }
-
-    public List<JobStep> getJobSteps(JobExecution jobExecution) {
+    private List<JobStep> getJobSteps(JobExecution jobExecution) {
         List<JobStep> steps = new ArrayList<>();
 
         for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
@@ -241,27 +274,36 @@ public class WorkflowExecutionCache {
     private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {
         JobStatus jobStatus = JobStatus.PENDING;
         switch (batchStatus) {
-        case UNKNOWN:
-            jobStatus = JobStatus.PENDING;
-            break;
-        case STARTED:
-        case STARTING:
-            jobStatus = JobStatus.RUNNING;
-            break;
-        case COMPLETED:
-            jobStatus = JobStatus.COMPLETED;
-            break;
-        case STOPPING:
-        case STOPPED:
-            jobStatus = JobStatus.CANCELLED;
-            break;
-        case ABANDONED:
-        case FAILED:
-            jobStatus = JobStatus.FAILED;
-            break;
+            case UNKNOWN:
+                jobStatus = JobStatus.PENDING;
+                break;
+            case STARTED:
+            case STARTING:
+                jobStatus = JobStatus.RUNNING;
+                break;
+            case COMPLETED:
+                jobStatus = JobStatus.COMPLETED;
+                break;
+            case STOPPING:
+            case STOPPED:
+                jobStatus = JobStatus.CANCELLED;
+                break;
+            case ABANDONED:
+            case FAILED:
+                jobStatus = JobStatus.FAILED;
+                break;
         }
 
         return jobStatus;
+    }
+
+    private Job getIfPresent(WorkflowExecutionId workflowId) {
+        Job job = staticCache.getIfPresent(workflowId.getId());
+        if (job != null) {
+            return job;
+        }
+
+        return dynamicCache.getIfPresent(workflowId.getId());
     }
 
     @VisibleForTesting
@@ -272,5 +314,25 @@ public class WorkflowExecutionCache {
     @VisibleForTesting
     void setLEJobExecutionRetriever(LEJobExecutionRetriever leJobExecutionRetriever) {
         this.leJobExecutionRetriever = leJobExecutionRetriever;
+    }
+
+    @VisibleForTesting
+    void setJobProxy(JobProxy proxy) {
+        this.jobProxy = proxy;
+    }
+
+    @VisibleForTesting
+    long staticCacheSize() {
+        return staticCache.estimatedSize();
+    }
+
+    @VisibleForTesting
+    long dynamicCacheSize() {
+        return dynamicCache.estimatedSize();
+    }
+
+    @VisibleForTesting
+    void cleanUp() {
+        dynamicCache.cleanUp();
     }
 }
