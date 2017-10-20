@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:redisson="http://redisson.org/schema/redisson"
+    xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://redisson.org/schema/redisson
+       http://redisson.org/schema/redisson/redisson.xsd">
+
+    <context:component-scan base-package="com.latticeengines.redis"/>
+    
+<!--     <redisson:client>
+        <redisson:replicated-servers>
+            <redisson:node-address value="redis://qa-001.wqkmsp.0001.use1.cache.amazonaws.com:6379" />
+            <redisson:node-address value="redis://qa-002.wqkmsp.0001.use1.cache.amazonaws.com:6379" />
+            <redisson:node-address value="redis://qa-003.wqkmsp.0001.use1.cache.amazonaws.com:6379" />
+        </redisson:replicated-servers>
+    </redisson:client> -->
+
+
+</beans>
