@@ -44,7 +44,7 @@ public class SftpToHdfsEaiServiceTestNG extends EaiMiniClusterFunctionalTestNGBa
         assertNotNull(appId);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        Assert.assertTrue(routeServiceTestNG.waitForFileToBeDownloaded(), "Could not find the file to be downloaded");
+        Assert.assertTrue(routeServiceTestNG.waitForFileToBeDownloaded(miniclusterConfiguration), "Could not find the file to be downloaded");
     }
 
 }

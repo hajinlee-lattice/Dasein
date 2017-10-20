@@ -5,6 +5,7 @@ import java.io.InputStream;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -56,7 +57,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
         CamelContext camelContext = new DefaultCamelContext();
         camelContext.addRoutes(route);
         camelContext.start();
-        boolean downloaded = waitForFileToBeDownloaded();
+        boolean downloaded = waitForFileToBeDownloaded(yarnConfiguration);
         camelContext.stop();
 
         Assert.assertTrue(downloaded, "Did not find the file to be downloaded in hdfs.");
@@ -99,7 +100,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
         }
     }
 
-    public boolean waitForFileToBeDownloaded() {
+    public boolean waitForFileToBeDownloaded(Configuration yarnConfiguration) {
         Long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < 10000) {
             try {

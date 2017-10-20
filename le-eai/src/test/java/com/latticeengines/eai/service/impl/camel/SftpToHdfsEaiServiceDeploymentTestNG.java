@@ -42,7 +42,7 @@ public class SftpToHdfsEaiServiceDeploymentTestNG extends EaiFunctionalTestNGBas
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        Assert.assertTrue(routeServiceTestNG.waitForFileToBeDownloaded(), "Could not find the file to be downloaded");
+        Assert.assertTrue(routeServiceTestNG.waitForFileToBeDownloaded(yarnConfiguration), "Could not find the file to be downloaded");
     }
 
 }
