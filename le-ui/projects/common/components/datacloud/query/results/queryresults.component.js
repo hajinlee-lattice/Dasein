@@ -45,10 +45,6 @@ angular.module('common.datacloud.query.results', [
     });
 
     vm.init = function() {
-
-        console.log(Config);
-        console.log(vm.accountsWithoutSfId);
-
         if(vm.segment != null){
 
             console.log("this");
@@ -73,11 +69,17 @@ angular.module('common.datacloud.query.results', [
                 "account_restriction": vm.accountRestriction,
                 "contact_restriction": vm.contactRestriction,
                 "preexisting_segment_name": $stateParams.segment,
+                "restrict_with_sfdcid": vm.excludeNonSalesForce,
                 "page_filter": {
                     "num_rows": vm.pagesize,
                     "row_offset": offset
                 },
-                "restrict_with_sfdcid": vm.excludeNonSalesForce
+                "sort": {
+                    "attributes": [{
+                        "attribute": vm.sortType,
+                        "entity": "Account"
+                    }]
+                }
             };
 
             if (vm.page === 'Accounts'){
@@ -97,6 +99,8 @@ angular.module('common.datacloud.query.results', [
 
         } else {
 
+            console.log("!!!!!!!!!!! controller updatePage()");
+
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
 
                 var engineId = data.ratingEngine.id,
@@ -106,7 +110,9 @@ angular.module('common.datacloud.query.results', [
                         entityType: 'Account',
                         bucketFieldName: 'ScoreBucket',
                         maximum: 15,
-                        offset: offset
+                        offset: offset,
+                        sortBy: 'LDC_Name',
+                        descending: false
                     };
 
                 PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ 
@@ -128,14 +134,13 @@ angular.module('common.datacloud.query.results', [
             vm.loading = false;
         }
 
-
-        if(vm.page === 'Accounts' || vm.page === 'Available Targets'){
+        if(vm.page === 'Accounts' || vm.page === 'Available Targets' || vm.page === 'Playbook'){
             QueryStore.GetCountByQuery('accounts').then(function(data){ 
-                
+            
                 vm.counts.accounts.value = data;
                 vm.counts.accounts.loading = false;
 
-                if(vm.counts.accounts.value < 10){
+                if(data < 10){
                     vm.showAccountPagination = true;
                     vm.showContactPagination = false;
                 }
