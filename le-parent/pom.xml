@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:Xlint="http://www.w3.org/2001/XMLSchema"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xmlns:Xlint="http://www.w3.org/2001/XMLSchema"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
@@ -19,8 +19,8 @@
 
     <properties>
         <branchPath>trunk</branchPath>
-        <svnrepourl/>
-        <nexusrepourl/>
+        <svnrepourl />
+        <nexusrepourl />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <compiler.version>1.8</compiler.version>
@@ -35,7 +35,8 @@
         <maven.dependency.version>3.0.1</maven.dependency.version>
         <maven.assembly.version>3.0.0</maven.assembly.version>
         <maven.install.version>2.5.2</maven.install.version>
-        <maven.eclipse.version>2.9</maven.eclipse.version> <!-- Users are advised to use m2e, the Eclipse Maven Integration instead of this plugin -->
+        <maven.eclipse.version>2.9</maven.eclipse.version> <!-- Users are advised to use m2e, the Eclipse Maven Integration instead 
+            of this plugin -->
         <maven.antrun.version>1.8</maven.antrun.version>
         <maven.exec.version>1.6.0</maven.exec.version>
         <maven.shaded.version>2.3</maven.shaded.version>
@@ -60,7 +61,8 @@
         <cascading.version>3.2.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version>
-        <!-- if until 2018 or cascading 3.3, they still do not release new version, we should move away from cascading-flink -->
+        <!-- if until 2018 or cascading 3.3, they still do not release new 
+            version, we should move away from cascading-flink -->
         <cascading.flink.version>0.3.0</cascading.flink.version>
         <scala.version>2.11.8</scala.version>
         <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
@@ -113,6 +115,7 @@
         <jcabi.version>1.1</jcabi.version>
         <sourceforge.csvjdbc.version>1.0.28</sourceforge.csvjdbc.version>
         <jedis.version>2.8.0</jedis.version>
+        <redisson.version>3.5.4</redisson.version>
         <okio.version>1.13.0</okio.version>
         <caffeine.version>2.5.3</caffeine.version>
         <zip4j.version>1.3.2</zip4j.version>
@@ -166,6 +169,7 @@
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize> <!-- for java 8 compatibility, where this variable is empty -->
         <surefire.reuse.forks>true</surefire.reuse.forks>
+        <netty.version>4.1.15.Final</netty.version>
     </properties>
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
@@ -221,7 +225,8 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
-                                <!-- Strip any signatures to avoid security errors running the shaded JAR. -->
+                                <!-- Strip any signatures to avoid security 
+                                    errors running the shaded JAR. -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -251,7 +256,7 @@
                                     <artifact>*:spring-yarn-core</artifact>
                                     <excludes>
                                         <exclude>org/springframework/yarn/am/AppmasterRmTemplate*</exclude>
-                                        <!-- exclude>org/springframework/yarn/rpc/YarnRpcAccessor*</exclude-->
+                                        <!-- exclude>org/springframework/yarn/rpc/YarnRpcAccessor*</exclude -->
                                     </excludes>
                                 </filter>
                             </filters>
@@ -265,19 +270,19 @@
                                 <configuration>
                                     <transformers>
                                         <transformer
-                                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                            implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                             <resource>META-INF/spring.handlers</resource>
                                         </transformer>
                                         <transformer
-                                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                            implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                             <resource>META-INF/spring.schemas</resource>
                                         </transformer>
                                         <transformer
-                                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                            implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                             <resource>reference.conf</resource>
                                         </transformer>
                                         <transformer
-                                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                     </transformers>
                                 </configuration>
                             </execution>
@@ -308,8 +313,8 @@
                             </artifactSet>
 
                             <filters>
-                                <!-- Strip any signatures to avoid security errors running the shaded
-                                    JAR. -->
+                                <!-- Strip any signatures to avoid security 
+                                    errors running the shaded JAR. -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -321,7 +326,7 @@
                             </filters>
                             <transformers>
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>reference.conf</resource>
                                 </transformer>
                             </transformers>
@@ -347,7 +352,8 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <version>${maven.dependency.version}</version>
                         <executions>
-                            <!-- Copy the ant tasks jar. Needed for ts.jacoco.report-ant . -->
+                            <!-- Copy the ant tasks jar. Needed for ts.jacoco.report-ant 
+                                . -->
                             <execution>
                                 <id>copy-jacoco-agent</id>
                                 <goals>
@@ -432,7 +438,8 @@
                                 </goals>
                                 <configuration>
                                     <fileSets>
-                                        <fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
+                                        <fileSet
+                                            implementation="org.apache.maven.shared.model.fileset.FileSet">
                                             <directory>${basedir}/jacoco</directory>
                                             <includes>
                                                 <include>*.exec</include>
@@ -878,32 +885,44 @@
                                 <configuration>
                                     <target>
                                         <!-- Execute an ant task within maven -->
-                                        <echo message="Generating jacoco reports..."/>
-                                        <taskdef name="report" classname="org.jacoco.ant.ReportTask">
+                                        <echo
+                                            message="Generating jacoco reports..." />
+                                        <taskdef name="report"
+                                            classname="org.jacoco.ant.ReportTask">
                                             <classpath
-                                                    path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar"/>
+                                                path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
                                         </taskdef>
-                                        <mkdir dir="${jacoco.coverage.dir}/site/jacoco"/>
+                                        <mkdir
+                                            dir="${jacoco.coverage.dir}/site/jacoco" />
                                         <report>
                                             <executiondata>
-                                                <fileset dir="${jacoco.coverage.dir}/jacoco">
-                                                    <include name="*.exec"/>
+                                                <fileset
+                                                    dir="${jacoco.coverage.dir}/jacoco">
+                                                    <include
+                                                        name="*.exec" />
                                                 </fileset>
                                             </executiondata>
-                                            <structure name="Jacoco Multi-Run Coverage Project">
-                                                <group name="jacoco-multi-run-coverage">
+                                            <structure
+                                                name="Jacoco Multi-Run Coverage Project">
+                                                <group
+                                                    name="jacoco-multi-run-coverage">
                                                     <classfiles>
                                                         <fileset
-                                                                dir="${project.build.directory}/classes"/>
+                                                            dir="${project.build.directory}/classes" />
                                                     </classfiles>
-                                                    <sourcefiles encoding="UTF-8">
-                                                        <fileset dir="${project.build.sourceDirectory}"/>
+                                                    <sourcefiles
+                                                        encoding="UTF-8">
+                                                        <fileset
+                                                            dir="${project.build.sourceDirectory}" />
                                                     </sourcefiles>
                                                 </group>
                                             </structure>
-                                            <html destdir="${jacoco.coverage.dir}/site/jacoco"/>
-                                            <xml destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml"/>
-                                            <csv destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv"/>
+                                            <html
+                                                destdir="${jacoco.coverage.dir}/site/jacoco" />
+                                            <xml
+                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
+                                            <csv
+                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
                                         </report>
                                     </target>
                                 </configuration>
@@ -953,7 +972,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven.jar.version}</version><!--$NO-MVN-MAN-VER$-->
+                <version>${maven.jar.version}</version><!--$NO-MVN-MAN-VER$ -->
                 <configuration>
                     <archive>
                         <manifestEntries>
@@ -976,14 +995,15 @@
                         <target>${compiler.version}</target>
                         <executable>${JAVA_HOME}/bin/javac</executable>
                         <compilerArguments>
-                            <Werror/>
-                            <Xlint:all/>
-                            <Xlint:-deprecation/>
+                            <Werror />
+                            <Xlint:all />
+                            <Xlint:-deprecation />
                         </compilerArguments>
                     </configuration>
                 </plugin>
                 <!-- -->
-                <!-- jar plugin to produce 3 jars: impl (default), interface, tests -->
+                <!-- jar plugin to produce 3 jars: impl (default), interface, 
+                    tests -->
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven.jar.version}</version>
@@ -1086,7 +1106,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute/>
+                                        <execute />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -1655,6 +1675,12 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

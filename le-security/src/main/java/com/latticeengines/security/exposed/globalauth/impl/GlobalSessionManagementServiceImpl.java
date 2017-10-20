@@ -7,28 +7,33 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
-import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
-import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
-import com.latticeengines.domain.exposed.security.Session;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSessionEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 
 @Component("globalSessionManagementService")
-public class GlobalSessionManagementServiceImpl
-        extends GlobalAuthenticationServiceBaseImpl
+@CacheConfig(cacheNames = "SessionCache")
+public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl
         implements GlobalSessionManagementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionManagementServiceImpl.class);
@@ -51,6 +56,7 @@ public class GlobalSessionManagementServiceImpl
     private GlobalAuthUserTenantRightEntityMgr gaUserTenantRightEntityMgr;
 
     @Override
+    @Cacheable(key = "#ticket.data")
     public synchronized Session retrieve(Ticket ticket) {
         if (ticket == null) {
             throw new NullPointerException("Ticket cannot be null.");
@@ -62,8 +68,7 @@ public class GlobalSessionManagementServiceImpl
             throw new NullPointerException("Ticket.getUniqueness() cannot be null.");
         }
         try {
-            LOGGER.info(String.format("Retrieving session from ticket %s against Global Auth.",
-                    ticket.toString()));
+            LOGGER.info(String.format("Retrieving session from ticket %s against Global Auth.", ticket.toString()));
             Session s = retrieveSession(ticket);
             s.setTicket(ticket);
             return s;
@@ -121,6 +126,7 @@ public class GlobalSessionManagementServiceImpl
     }
 
     @Override
+    @CachePut(key = "#ticket.data")
     public synchronized Session attach(Ticket ticket) {
         if (ticket == null) {
             throw new NullPointerException("Ticket cannot be null.");
@@ -134,14 +140,16 @@ public class GlobalSessionManagementServiceImpl
         if (ticket.getTenants().size() == 0) {
             throw new RuntimeException("There must be at least one tenant in the ticket.");
         }
+        Session s = null;
         try {
             LOGGER.info(String.format("Attaching ticket %s against Global Auth.", ticket.toString()));
-            Session s = attachSession(ticket, ticket.getTenants().get(0));
+            s = attachSession(ticket, ticket.getTenants().get(0));
             s.setTicket(ticket);
             return s;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { ticket.toString() });
         }
+
     }
 
     private Session attachSession(Ticket ticket, Tenant tenant) throws Exception {
@@ -182,8 +190,7 @@ public class GlobalSessionManagementServiceImpl
 
         if (sessionData != null) {
             if (sessionData.getTenantId() == tenantData.getPid()) {
-                return new SessionBuilder().build(userData, sessionData, tenantData,
-                        userTenantRightData);
+                return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
             } else {
                 gaSessionEntityMgr.delete(sessionData);
             }
@@ -197,8 +204,32 @@ public class GlobalSessionManagementServiceImpl
         return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
     }
 
+    private static void interpretGARights(Session session) {
+        List<String> GARights = session.getRights();
+        try {
+            AccessLevel level = AccessLevel.findAccessLevel(GARights);
+            session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+            session.setAccessLevel(level.name());
+        } catch (NullPointerException e) {
+            if (!GARights.isEmpty()) {
+                AccessLevel level = isInternalEmail(session.getEmailAddress()) ? AccessLevel.INTERNAL_USER
+                        : AccessLevel.EXTERNAL_USER;
+                session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+                session.setAccessLevel(level.name());
+            }
+            LOGGER.warn(String.format("Failed to interpret GA rights: %s for user %s in tenant %s. Use %s instead",
+                    GARights.toString(), session.getEmailAddress(), session.getTenant().getId(),
+                    session.getAccessLevel()));
+        }
+    }
+
+    private static boolean isInternalEmail(String email) {
+        return email.toLowerCase().endsWith("lattice-engines.com");
+    }
+
     static class SessionBuilder {
 
+        @SuppressWarnings("unused")
         public Session build(GlobalAuthUser userData, GlobalAuthSession sessionData, GlobalAuthTenant tenantData,
                 List<GlobalAuthUserTenantRight> userTenantRightData) {
 
@@ -219,6 +250,11 @@ public class GlobalSessionManagementServiceImpl
             session.setRights(rights);
             session.setTitle(userData.getTitle());
             session.setTenant(new TenantBuilder().build(tenantData));
+
+            if (session == null) {
+                throw new RuntimeException("Failed to attach ticket against GA.");
+            }
+            interpretGARights(session);
 
             return session;
         }

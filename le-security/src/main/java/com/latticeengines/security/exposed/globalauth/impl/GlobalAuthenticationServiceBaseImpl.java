@@ -18,7 +18,7 @@ public abstract class GlobalAuthenticationServiceBaseImpl {
 
     @Value("${security.globalauth.url}")
     protected String globalAuthUrl;
-    
+
     void addMagicHeaderAndSystemProperty(Object servicePort) {
         if (!(servicePort instanceof BindingProvider)) {
             throw new RuntimeException("Service is not of type BindingProvider.");

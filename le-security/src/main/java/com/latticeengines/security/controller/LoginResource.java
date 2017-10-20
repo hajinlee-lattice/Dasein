@@ -77,9 +77,7 @@ public class LoginResource {
         LoginDocument doc = new LoginDocument();
 
         try {
-            Ticket ticket = globalAuthenticationService.authenticateUser(
-                    creds.getUsername().toLowerCase(),
-                    creds.getPassword());
+            Ticket ticket = sessionService.authenticate(creds);
 
             doc.setRandomness(ticket.getRandomness());
             doc.setUniqueness(ticket.getUniqueness());
@@ -178,10 +176,10 @@ public class LoginResource {
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
-                                                   HttpServletRequest request) {
+            HttpServletRequest request) {
         User user = new User();
         user.setUsername(userService.getURLSafeUsername(username).toLowerCase());
-        if(userService.updateCredentials(user, data)) {
+        if (userService.updateCredentials(user, data)) {
             return SimpleBooleanResponse.successResponse();
         } else {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList("Could not change password."));

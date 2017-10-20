@@ -11,8 +11,13 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -22,15 +27,13 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
 @Component("globalAuthenticationService")
-public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
-        GlobalAuthenticationService {
+@CacheConfig(cacheNames = "SessionCache")
+public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationServiceBaseImpl
+        implements GlobalAuthenticationService {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthenticationServiceImpl.class);
 
@@ -149,6 +152,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @CacheEvict(key = "#ticket.data")
     public synchronized boolean discard(Ticket ticket) {
         try {
             log.info("Discarding ticket " + ticket + " against Global Auth.");

@@ -5,6 +5,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
+
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:security-api-context.xml"/>
@@ -22,6 +23,7 @@
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:workflow-context.xml"/>
     <import resource="classpath:app-context.xml"/>
+    <import resource="classpath:redis-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.pls">
         <!-- Need to exclude instantiating the swagger config except for bringing up the API

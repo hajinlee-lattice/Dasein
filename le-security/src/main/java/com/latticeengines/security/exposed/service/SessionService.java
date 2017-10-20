@@ -13,7 +13,7 @@ public interface SessionService {
 
     void logout(Ticket ticket);
 
-    //TODO: really deprecated?
+    // TODO: really deprecated?
     @Deprecated
-    void clearCacheIfNecessary(String tenantId, String token);
+    boolean clearCacheIfNecessary(String tenantId, String token);
 }

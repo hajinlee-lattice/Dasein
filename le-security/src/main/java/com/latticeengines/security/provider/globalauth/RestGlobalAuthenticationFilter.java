@@ -25,8 +25,6 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationTokenF
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
 
-        String methodName = String.format("RestGlobalAuthenticationFilter.attemptAuthentication [%s]",
-                request.getRequestURI());
         String ticket = request.getHeader(Constants.AUTHORIZATION);
         detectSessionCacheDirtiness(request);
         if (ticket == null) {
