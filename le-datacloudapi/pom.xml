@@ -29,12 +29,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.latticeengines</groupId>
-                    <artifactId>le-common</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -103,10 +97,6 @@
                     <groupId>io.confluent</groupId>
                     <artifactId>kafka-connect-hdfs</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -114,17 +104,6 @@
             <artifactId>le-testframework</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro</artifactId>
-            <version>${avro.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro-mapred</artifactId>
-            <version>${avro.version}</version>
-            <classifier>hadoop2</classifier>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>

@@ -5,11 +5,13 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericRecord;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -121,6 +123,22 @@ public class AvroUtilsUnitTestNG {
         return new Object[][] { { "aps.avsc" }, //
                 { "leaccount.avsc" }, //
                 { "leaccountextensions.avsc" } };
+    }
+
+    @Test(groups = "unit")
+    public void testReadSchema() throws Exception {
+        InputStream is = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("com/latticeengines/common/exposed/util/avroUtilsData/compressed.avro");
+        Schema schema = AvroUtils.readSchemaFromInputStream(is);
+        System.out.println(schema.toString(true));
+        Assert.assertNotNull(schema);
+
+        is = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("com/latticeengines/common/exposed/util/avroUtilsData/compressed.avro");
+        List<GenericRecord> records = AvroUtils.readFromInputStream(is);
+        records.forEach(record -> {
+            System.out.println(record.toString());
+        });
     }
 
 }

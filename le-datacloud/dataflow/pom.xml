@@ -38,10 +38,6 @@
                     <groupId>com.thoughtworks.xstream</groupId>
                     <artifactId>xstream</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>com.latticeengines</groupId>
-                    <artifactId>le-common</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -50,17 +46,6 @@
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro</artifactId>
-            <version>${avro.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro-mapred</artifactId>
-            <version>${avro.version}</version>
-            <classifier>hadoop2</classifier>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

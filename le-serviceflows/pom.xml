@@ -99,6 +99,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- adding scope to provided is to avoid packaging them into shaded jar -->
         <!-- all runtime dependencies from le-parent are provided or test -->
         <dependency>
             <groupId>commons-codec</groupId>
