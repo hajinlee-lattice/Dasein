@@ -106,12 +106,14 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
             ComboPooledDataSource cpds = new ComboPooledDataSource();
             cpds.setDriverClass(tenant.getJdbcDriver());
             if (StringUtils.isBlank(tenant.getJdbcUserName())) {
-                cpds.setUser(dataSouceUser);
+                log.warn(String.format("User name of tenant %s is blank", tenant.getTenantName()));
+                throw new LedpException(LedpCode.LEDP_22003, new String[] { tenant.getTenantName() });
             } else {
                 cpds.setUser(tenant.getJdbcUserName());
             }
             if (StringUtils.isBlank(tenant.getJdbcPassword())) {
-                cpds.setPassword(dataSoucePassword);
+                log.warn(String.format("User password of tenant %s is blank", tenant.getTenantName()));
+                throw new LedpException(LedpCode.LEDP_22004, new String[] { tenant.getTenantName() });
             } else {
                 cpds.setPassword(tenant.getJdbcPassword());
             }
@@ -128,6 +130,8 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
             TemplateInfo templateInfo = new TemplateInfo(template, hash, cpds);
             return templateInfo;
 
+        } catch (LedpException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_22000, ex, new String[] { tenant.getTenantName() });
         }

@@ -376,6 +376,8 @@ public enum LedpCode {
     LEDP_22000("Can not create data source for tenant {0}"), //
     LEDP_22001("Can not find DB connection info for tenant {0}"), //
     LEDP_22002("Tenant exists, but there's no such oauth user, tenant name={0}"), //
+    LEDP_22003("Tenant exists, but username is blank, tenant name={0}"),
+    LEDP_22004("Tenant exists, but user password is blank, tenant name={0}"),
     LEDP_22007("Failed to get recommendations after retry."), //
 
     // le-oauth2db
