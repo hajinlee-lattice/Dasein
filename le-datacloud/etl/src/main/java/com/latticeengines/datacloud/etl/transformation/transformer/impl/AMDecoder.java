@@ -102,6 +102,11 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
             throw new RuntimeException(String.format("Failed to extract data cloud version from schema. Schema is %s",
                     JsonUtils.serialize(schema)));
         }
+
+        if (dataCloudVersion.contains(MapAttributeTransformer.MINI_PREFIX)) {
+            dataCloudVersion = dataCloudVersion.substring(MapAttributeTransformer.MINI_PREFIX.length());
+        }
+
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes("AccountMasterDecoded",
                 "DECODE", TRANSFORMER_NAME, dataCloudVersion);
         Map<String, SourceAttribute> sourceAttributeMap = new HashMap<>();

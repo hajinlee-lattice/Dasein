@@ -75,7 +75,7 @@ public class AMDecoderTestNG extends TransformationServiceImplTestNGBase<Pipelin
                     null, null, null, null, null, null, "No", "No", "No", "No", "No", "No"}
     };
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testTransformation() {
         prepareData();
         TransformationProgress progress = createNewProgress();
