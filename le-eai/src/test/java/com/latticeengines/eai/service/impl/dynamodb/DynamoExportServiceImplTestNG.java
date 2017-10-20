@@ -60,9 +60,6 @@ public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestN
     private DynamoService dynamoService;
 
     @Autowired
-    private EaiYarnService eaiYarnService;
-
-    @Autowired
     @Qualifier("dynamoExportService")
     private ExportService exportService;
 

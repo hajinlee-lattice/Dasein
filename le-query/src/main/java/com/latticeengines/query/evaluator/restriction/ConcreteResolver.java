@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -43,6 +44,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 restriction.setRelation(ComparisonType.EQUAL);
                 rhs = new ValueLookup(0);
             } else {
+                // TODO: handle collection lookup
                 ValueLookup valueLookup = (ValueLookup) rhs;
                 AttributeStats stats = findAttributeStats(attrLookup);
                 Buckets bkts = stats.getBuckets();
@@ -182,9 +184,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             Bucket bkt = buckets.getBucketList().stream() //
                     .filter(b -> b.getLabel().equals(bktLbl)) //
                     .findFirst() //
-                    .orElseThrow(() -> {
-                        return new QueryEvaluationException("Cannot find label [" + bktLbl + "] in statistics.");
-                    });
+                    .orElseThrow(() -> new QueryEvaluationException("Cannot find label [" + bktLbl + "] in statistics."));
             value = bkt.getIdAsInt();
         }
         return new ValueLookup(value);

@@ -107,8 +107,6 @@ public class StatsCubeUtils {
             }
         }
         bktCounts.forEach((bktId, bktCnt) -> updateBucket(bucketList.get(bktId - 1), algorithm, bktId, bktCnt));
-        // remove buckets with 0 count
-        bucketList.removeIf(bucket -> bucket.getCount() == 0L);
         if (bucketList.isEmpty()) {
             return null;
         } else {
@@ -376,7 +374,10 @@ public class StatsCubeUtils {
         if (attributeStats.getBuckets() != null && attributeStats.getBuckets().getBucketList() != null) {
             Buckets buckets = attributeStats.getBuckets();
             List<Bucket> top5Bkts = buckets.getBucketList().stream() //
-                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())).limit(5).collect(Collectors.toList());
+                    .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0) //
+                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())) //
+                    .limit(5) //
+                    .collect(Collectors.toList());
             if (attributeStats.getBuckets().getBucketList().size() > top5Bkts.size()) {
                 buckets.setHasMore(true);
             }
@@ -417,7 +418,9 @@ public class StatsCubeUtils {
         TopAttribute topAttribute = new TopAttribute(entry.getKey(), stats.getNonNullCount());
         if (includeTopBkt && stats.getBuckets() != null) {
             Bucket topBkt = stats.getBuckets().getBucketList().stream() //
-                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())).findFirst().orElse(null);
+                    .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0) //
+                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())) //
+                    .findFirst().orElse(null);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
             }

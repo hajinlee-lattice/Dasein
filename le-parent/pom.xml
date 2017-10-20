@@ -49,6 +49,7 @@
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
         <hadoop.version>2.7.1.2.3.6.0-3796</hadoop.version>
+        <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <spring.data.version>2.4.0.RELEASE-hdp23</spring.data.version> <!-- need ledp3 classifier -->
         <tez.version>0.9.0</tez.version>
@@ -119,6 +120,8 @@
         <okio.version>1.13.0</okio.version>
         <caffeine.version>2.5.3</caffeine.version>
         <zip4j.version>1.3.2</zip4j.version>
+        <netty.all.version>4.1.15.Final</netty.all.version>
+        <netty.version>3.10.5.Final</netty.version>
         <!-- Confluent -->
         <kafka.version>0.11.0.0-cp1</kafka.version>
         <kafka.scala.version>2.11</kafka.scala.version>
@@ -169,7 +172,6 @@
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize> <!-- for java 8 compatibility, where this variable is empty -->
         <surefire.reuse.forks>true</surefire.reuse.forks>
-        <netty.version>4.1.15.Final</netty.version>
     </properties>
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
@@ -243,6 +245,13 @@
                                         <exclude>licenses/*</exclude>
                                         <exclude>license.*</exclude>
                                         <exclude>META-INF/license/*</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>log4j.properties</exclude>
+                                        <exclude>**/log4j.properties</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
@@ -1166,6 +1175,11 @@
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.fasterxml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.fasterxml.version}</version>
             </dependency>
@@ -1223,6 +1237,16 @@
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz-jobs</artifactId>
                 <version>${quartz.version}</version>
+            </dependency>
+            <dependency> <!-- used by hadoop libs -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.all.version}</version>
             </dependency>
 
             <!-- Apache Commons -->
@@ -1555,6 +1579,16 @@
                 <artifactId>jackson-xc</artifactId>
                 <version>${jackson.codehaus.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty</artifactId>
+                <version>${mortbay.jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+                <version>${mortbay.jetty.version}</version>
+            </dependency>
 
             <!-- TEZ Dependencies -->
             <dependency>
@@ -1675,12 +1709,6 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
