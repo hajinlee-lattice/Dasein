@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -24,7 +23,9 @@ import com.latticeengines.workflow.core.BaseAwsPythonBatchStep;
 @Component("awsApsGeneratorStep")
 public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchConfiguration> {
 
-    @Value("${consolidate.aps.generate.enabled:false}")
+    private static final String APS = "AnalyticPurchaseState";
+
+    @Value("${cdl.aps.generate.enabled:false}")
     private boolean apsEnabled;
 
     @Autowired
@@ -33,7 +34,6 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     @Autowired
     private Configuration yarnConfiguration;
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AwsApsGeneratorStep.class);
 
     @Override
@@ -70,6 +70,37 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
 
     }
 
+    @Override
+    protected void afterComplete(AWSPythonBatchConfiguration config) {
+        try {
+            String hdfsPath = PathBuilder
+                    .buildDataTablePath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), "").append(APS)
+                    .toString();
+            String newHdfsPath = PathBuilder
+                    .buildDataTablePath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), "")
+                    .append(APS + "_New").toString();
+            String bakHdfsPath = PathBuilder
+                    .buildDataTablePath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), "")
+                    .append(APS + "_Bak").toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, newHdfsPath)) {
+                if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+                    if (HdfsUtils.fileExists(yarnConfiguration, bakHdfsPath)) {
+                        HdfsUtils.rmdir(yarnConfiguration, bakHdfsPath);
+                    }
+                    HdfsUtils.rename(yarnConfiguration, hdfsPath, bakHdfsPath);
+                    HdfsUtils.rename(yarnConfiguration, newHdfsPath, hdfsPath);
+                } else {
+                    HdfsUtils.rename(yarnConfiguration, newHdfsPath, hdfsPath);
+                }
+            } else {
+                throw new RuntimeException("There's no new APS file created!");
+            }
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     private List<String> getInputPaths(Table transactionTable) {
         List<String> inputPaths = new ArrayList<>();
         for (Extract extract : transactionTable.getExtracts()) {
@@ -84,14 +115,14 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
 
     private String getOutputPath(AWSPythonBatchConfiguration config) {
         try {
-            String hdfsPath = PathBuilder
+            String newHdfsPath = PathBuilder
                     .buildDataTablePath(CamilleEnvironment.getPodId(), config.getCustomerSpace(), "")
-                    .append("AnalyticPurchaseState").toString();
-            if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
-                HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+                    .append(APS + "_New").toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, newHdfsPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, newHdfsPath);
             }
-            return hdfsPath;
+            HdfsUtils.mkdir(yarnConfiguration, newHdfsPath);
+            return newHdfsPath;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

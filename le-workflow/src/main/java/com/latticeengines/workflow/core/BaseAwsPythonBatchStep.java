@@ -44,25 +44,30 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
             config = getConfiguration();
             setupConfig(config);
             if (CollectionUtils.isEmpty(config.getInputPaths())) {
-                log.error("There's no input paths generated!");
+                log.info("There's no input paths generated for Aps!");
                 return;
             }
             log.info("Inside BaseAwsPythonBatchStep execute(), runInAws=" + config.isRunInAws());
+            boolean result = false;
             if (config.isRunInAws()) {
-                executeInAws();
+                result = executeInAws();
             } else {
-                executeInline();
+                result = executeInline();
+            }
+            if (result) {
+                afterComplete(config);
             }
         } catch (Exception ex) {
             log.error("Failed to run Python App!", ex);
         }
     }
 
-    private void executeInAws() {
+    private boolean executeInAws() {
         JobRequest jobRequest = createJobRequest();
         String jobId = batchService.submitJob(jobRequest);
         boolean result = batchService.waitForCompletion(jobId, 1000 * 60 * 300L);
         log.info("Job name=" + jobName + " Job id=" + jobId + " is successful=" + result);
+        return result;
     }
 
     private JobRequest createJobRequest() {
@@ -80,8 +85,9 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         envs.put(WorkflowProperty.STEPFLOWCONFIG, config.toString());
         envs.put("CONDA_ENV", getAcondaEnv());
         envs.put("PYTHON_APP", getPythonScript());
-        // envs.put("SHDP_HD_FSWEB", webHdfs);
-        envs.put("SHDP_HD_FSWEB", "http://webhdfs.lattice.local:14000/webhdfs/v1");
+         envs.put("SHDP_HD_FSWEB", webHdfs);
+        // envs.put("SHDP_HD_FSWEB",
+        // "http://webhdfs.lattice.local:14000/webhdfs/v1");
 
         jobRequest.setEnvs(envs);
         return jobRequest;
@@ -91,10 +97,14 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
 
     protected abstract String getPythonScript();
 
-    protected void executeInline() {
+    protected boolean executeInline() {
+        return true;
     }
 
     protected void setupConfig(AWSPythonBatchConfiguration config) {
+    }
+
+    protected void afterComplete(AWSPythonBatchConfiguration config) {
     }
 
 }

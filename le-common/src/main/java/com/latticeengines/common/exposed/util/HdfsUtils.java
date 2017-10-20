@@ -522,6 +522,12 @@ public class HdfsUtils {
         }
     }
 
+    public static boolean rename(Configuration configuration, String src, String dst) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            return fs.rename(new Path(src), new Path(dst));
+        }
+    }
+
     public static void moveGlobToDir(Configuration configuration, String sourceGlob, String targetDir)
             throws IOException {
         if (!isDirectory(configuration, targetDir)) {
