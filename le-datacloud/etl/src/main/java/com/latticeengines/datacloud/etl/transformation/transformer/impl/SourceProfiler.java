@@ -25,9 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -83,8 +83,6 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     @Autowired
     private DataCloudVersionService dataCloudVersionService;
-
-    private static ObjectMapper om = new ObjectMapper();
 
     private static final Set<Schema.Type> NUM_TYPES = new HashSet<>(Arrays
             .asList(new Schema.Type[] { Schema.Type.INT, Schema.Type.LONG, Schema.Type.FLOAT, Schema.Type.DOUBLE }));
@@ -192,7 +190,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     private void classifyAttrs(Source baseSrc, String baseVer, ProfileConfig config, ProfileParameters paras) {
         String dataCloudVersion = findDCVersionToProfile(config);
-        Map<String, SourceAttribute> amAttrsConfig = findAMAttrsConfig(config, dataCloudVersion);    // attr name -> srcAttr
+        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(config, dataCloudVersion);
         Schema schema = findSchema(baseSrc, baseVer);
 
         log.info("Classifying attributes...");
@@ -216,16 +214,14 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     readyForNext = AttrClassifier.isAttrNoBucket(field, amAttrsConfig, paras);
                 }
                 if (!readyForNext) {
-                    readyForNext = AttrClassifier.isPreknownAttr(field, encAttrsMap, decAttrsMap, config, paras);
+                    readyForNext = AttrClassifier.isPreknownAttr(field, encAttrsMap, decAttrsMap, encAttrs, config,
+                            paras);
                 }
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isNumericAttr(field, config, paras);
                 }
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isBooleanAttr(field, amAttrsConfig, paras);
-                }
-                if (!readyForNext) {
-                    readyForNext = AttrClassifier.isAttrToIgnore(field, encAttrs);
                 }
                 if (!readyForNext) {
                     readyForNext = AttrClassifier.isCategoricalAttr(field, config, paras);
@@ -258,14 +254,15 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return dataCloudVersion;
     }
 
-    private Map<String, SourceAttribute> findAMAttrsConfig(ProfileConfig config, String dataCloudVersion) {
+    private Map<String, ProfileArgument> findAMAttrsConfig(ProfileConfig config, String dataCloudVersion) {
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
                 config.getTransformer(), dataCloudVersion);
         if (CollectionUtils.isEmpty(srcAttrs)) {
             throw new RuntimeException("Fail to find configuration for profiling in SourceAttribute table");
         }
-        Map<String, SourceAttribute> amAttrsConfig = new HashMap<>();    // attr name -> srcAttr
-        srcAttrs.forEach(attr -> amAttrsConfig.put(attr.getAttribute(), attr));
+        Map<String, ProfileArgument> amAttrsConfig = new HashMap<>();
+        srcAttrs.forEach(attr -> amAttrsConfig.put(attr.getAttribute(),
+                JsonUtils.deserialize(attr.getArguments(), ProfileArgument.class)));
         return amAttrsConfig;
     }
 
@@ -280,7 +277,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     /**
      * @param amAttrsConfig:
-     *            attr name -> srcAttr
+     *            attr name -> profile argument
      * @param encAttrsMap:
      *            encoded attr -> [decoded attrs] (Enabled in profiling)
      * @param encAttrs:
@@ -292,48 +289,40 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
      * @throws JsonProcessingException
      * @throws IOException
      */
-    private void parseEncodedAttrsConfig(Map<String, SourceAttribute> amAttrsConfig,
+    private void parseEncodedAttrsConfig(Map<String, ProfileArgument> amAttrsConfig,
             Map<String, List<ProfileParameters.Attribute>> encAttrsMap, Set<String> encAttrs,
             Map<String, ProfileParameters.Attribute> decAttrsMap, Map<String, String> decodeStrs)
             throws JsonProcessingException, IOException {
-        for (SourceAttribute amAttr : amAttrsConfig.values()) {
-            JsonNode arg = om.readTree(amAttr.getArguments());
-            validateSrcAttrArg(amAttr.getAttribute(), arg);
-            if (!AttrClassifier.isEncodedAttr(arg)) {
+        for (Map.Entry<String, ProfileArgument> amAttrConfig : amAttrsConfig.entrySet()) {
+            if (!AttrClassifier.isEncodedAttr(amAttrConfig.getValue())) {
                 continue;
             }
-            String decodeStrategyStr = arg.get(DECODE_STRATEGY).toString();
-            BitDecodeStrategy decodeStrategy = JsonUtils.deserialize(decodeStrategyStr, BitDecodeStrategy.class);
+            BitDecodeStrategy decodeStrategy = amAttrConfig.getValue().getDecodeStrategy();
+            String decodeStrategyStr = JsonUtils.serialize(decodeStrategy);
             String encAttr = decodeStrategy.getEncodedColumn();
             encAttrs.add(encAttr);
-            if (!AttrClassifier.isProfileEnabled(arg)) {
+            if (!AttrClassifier.isProfileEnabled(amAttrConfig.getValue())) {
                 continue;
             }
             if (!encAttrsMap.containsKey(encAttr)) {
                 encAttrsMap.put(encAttr, new ArrayList<>());
             }
-            Integer numBits = arg.has(NUM_BITS) ? arg.get(NUM_BITS).asInt() : null;
-            validateEncodedSrcAttrArg(amAttr.getAttribute(), arg);
-            BucketAlgorithm bktAlgo = parseBucketAlgo(arg.get(BKT_ALGO).asText(), decodeStrategy.getValueDict());
-            numBits = numBits != null ? numBits : decideBitNumFromBucketAlgo(bktAlgo);
-            ProfileParameters.Attribute attr = new ProfileParameters.Attribute(amAttr.getAttribute(), numBits,
+            validateEncodedSrcAttrArg(amAttrConfig.getKey(), amAttrConfig.getValue());
+            BucketAlgorithm bktAlgo = parseBucketAlgo(amAttrConfig.getValue().getBktAlgo(),
+                    decodeStrategy.getValueDict());
+            Integer numBits = amAttrConfig.getValue().getNumBits() != null ? amAttrConfig.getValue().getNumBits()
+                    : decideBitNumFromBucketAlgo(bktAlgo);
+            ProfileParameters.Attribute attr = new ProfileParameters.Attribute(amAttrConfig.getKey(), numBits,
                     decodeStrategyStr, bktAlgo);
             encAttrsMap.get(encAttr).add(attr);
             decAttrsMap.put(attr.getAttr(), attr);
-            decodeStrs.put(amAttr.getAttribute(), decodeStrategyStr);
+            decodeStrs.put(amAttrConfig.getKey(), decodeStrategyStr);
         }
     }
 
-    private void validateSrcAttrArg(String attr, JsonNode arg) {
-        if (!arg.hasNonNull(IS_PROFILE)) {
-            throw new RuntimeException(
-                    String.format("Please provide IsProfile flag for attribute %s", attr));
-        }
-    }
-
-    private void validateEncodedSrcAttrArg(String attr, JsonNode arg) {
-        if (!arg.hasNonNull(BKT_ALGO)) {
-            throw new RuntimeException(String.format("Please provide BktAlgo for attribute %s", attr));
+    private void validateEncodedSrcAttrArg(String attrName, ProfileArgument arg) {
+        if (arg.getBktAlgo() == null) {
+            throw new RuntimeException(String.format("Please provide BktAlgo for attribute %s", attrName));
         }
     }
 
@@ -487,12 +476,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         data[3] = null;
         data[4] = null;
         data[5] = null;
-        try {
-            data[6] = attr.getAlgo() == null ? null : om.writeValueAsString(attr.getAlgo());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(
-                    String.format("Fail to format %s object to json", attr.getAlgo().getClass().getSimpleName()), e);
-        }
+        data[6] = attr.getAlgo() == null ? null : JsonUtils.serialize(attr.getAlgo());
         return data;
     }
 
@@ -504,12 +488,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         data[3] = encodedAttr;
         data[4] = lowestBit;
         data[5] = attr.getEncodeBitUnit();
-        try {
-            data[6] = attr.getAlgo() == null ? null : om.writeValueAsString(attr.getAlgo());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(
-                    String.format("Fail to format %s object to json", attr.getAlgo().getClass().getSimpleName()), e);
-        }
+        data[6] = attr.getAlgo() == null ? null : JsonUtils.serialize(attr.getAlgo());
         return data;
     }
 
@@ -560,21 +539,57 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return encAttrPrefix + String.valueOf(encodedSeq);
     }
     
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class ProfileArgument {
+        @JsonProperty("IsProfile")
+        private Boolean isProfile = false;
+
+        @JsonProperty("DecodeStrategy")
+        private BitDecodeStrategy decodeStrategy;
+
+        @JsonProperty("BktAlgo")
+        private String bktAlgo;
+
+        @JsonProperty("NoBucket")
+        private Boolean noBucket = false;
+
+        @JsonProperty("NumBits")
+        private Integer numBits;
+
+        public Boolean isProfile() {
+            return isProfile;
+        }
+
+        public BitDecodeStrategy getDecodeStrategy() {
+            return decodeStrategy;
+        }
+
+        public String getBktAlgo() {
+            return bktAlgo;
+        }
+
+        public Boolean isNoBucket() {
+            return noBucket;
+        }
+
+        public Integer getNumBits() {
+            return numBits;
+        }
+    }
 
 
     private static class AttrClassifier {
-        private static ObjectMapper om = new ObjectMapper();
 
-        private static boolean isEncodedAttr(JsonNode srcAttrArg) {
-            if (srcAttrArg.get(DECODE_STRATEGY) == null) {
+        private static boolean isEncodedAttr(ProfileArgument arg) {
+            if (arg.decodeStrategy == null) {
                 return false;
             } else {
                 return true;
             }
         }
 
-        private static boolean isProfileEnabled(JsonNode srcAttrArg) {
-            return srcAttrArg.get(IS_PROFILE).asBoolean();
+        private static boolean isProfileEnabled(ProfileArgument arg) {
+            return arg.isProfile;
         }
 
         private static boolean isIdAttr(Field field, ProfileParameters paras) {
@@ -591,32 +606,24 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
         }
 
-        private static boolean isAttrToDiscard(Field field, Map<String, SourceAttribute> amAttrConfig)
-                throws JsonProcessingException, IOException {
+        private static boolean isAttrToDiscard(Field field, Map<String, ProfileArgument> amAttrConfig) {
             if (!amAttrConfig.containsKey(field.name())) {
                 return false;
             }
-            JsonNode arg = om.readTree(amAttrConfig.get(field.name()).getArguments());
-            if (!arg.get(IS_PROFILE).asBoolean()) {
+            if (Boolean.FALSE.equals(amAttrConfig.get(field.name()).isProfile)) {
                 log.info(String.format("Discarded attr: %s", field.name()));
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
 
-        private static boolean isAttrNoBucket(Field field, Map<String, SourceAttribute> amAttrConfig,
+        private static boolean isAttrNoBucket(Field field, Map<String, ProfileArgument> amAttrConfig,
                 ProfileParameters paras)
                 throws JsonProcessingException, IOException {
             if (!amAttrConfig.containsKey(field.name())) {
                 return false;
             }
-            JsonNode arg = om.readTree(amAttrConfig.get(field.name()).getArguments());
-            boolean noBucket = false;
-            if (arg.hasNonNull(NO_BUCKET)) {
-                noBucket = arg.get(NO_BUCKET).asBoolean();
-            }
-            if (!noBucket) {
+            if (Boolean.FALSE.equals(amAttrConfig.get(field.name()).isNoBucket())) {
                 return false;
             }
             log.info(String.format("Retained attr: %s (unencode)", field.name()));
@@ -625,7 +632,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isPreknownAttr(Field field, Map<String, List<ProfileParameters.Attribute>> encAttrsMap,
-                Map<String, ProfileParameters.Attribute> decAttrsMap, ProfileConfig config, ProfileParameters paras) {
+                Map<String, ProfileParameters.Attribute> decAttrsMap, Set<String> encAttrs, ProfileConfig config,
+                ProfileParameters paras) {
             // Preknown attributes which are encoded (usually for Enrichment use
             // case, since profiled source is AM)
             if (encAttrsMap.containsKey(field.name())) {
@@ -640,6 +648,12 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (decAttrsMap.containsKey(field.name())) {
                 classifyPreknownAttr(decAttrsMap.get(field.name()), config.getStage(), paras.getNumericAttrs(),
                         paras.getCatAttrs(), paras.getAmAttrsToEnc(), paras.getAttrsToRetain());
+                return true;
+            }
+            if (encAttrs.contains(field.name())) {
+                log.info(String.format(
+                        "Ignore encoded attr: %s (No decoded attrs of it are enabled in profiling)",
+                        field.name()));
                 return true;
             }
             return false;
@@ -666,7 +680,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             return false;
         }
 
-        private static boolean isBooleanAttr(Field field, Map<String, SourceAttribute> amAttrConfig,
+        private static boolean isBooleanAttr(Field field, Map<String, ProfileArgument> amAttrConfig,
                 ProfileParameters paras) {
             Schema.Type type = field.schema().getTypes().get(0).getType();
             if (BOOL_TYPES.contains(type)
@@ -703,17 +717,6 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 return true;
             }
             return false;
-        }
-
-        private static boolean isAttrToIgnore(Field field, Set<String> encAttrs) {
-            if (encAttrs.contains(field.name())) {
-                log.info(String.format(
-                        "Existing encoded attr: %s (To profile on decoded attrs and ignore original value)",
-                        field.name()));
-                return true;
-            } else {
-                return false;
-            }
         }
 
         private static boolean isAttrToRetain(Field field, ProfileParameters paras) {
