@@ -19,6 +19,7 @@
         <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
         <admin.docker.context>src/main/scripts/tomcat/le-admin</admin.docker.context>
         <pls.docker.context>src/main/scripts/tomcat/le-pls</pls.docker.context>
+        <workflowapp.docker.context>src/main/scripts/workflowapp</workflowapp.docker.context>
         <pythonapp.docker.context>src/main/scripts/pythonapp</pythonapp.docker.context>
     </properties>
 
@@ -51,6 +52,15 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/devcluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/devcluster/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/qacluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/qacluster/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/prodcluster/latticeengines.properties"
                                       overwrite="true" />
 
                                 <!-- special wars -->
@@ -122,6 +132,13 @@
                                 <copy file="${project.basedir}/../le-microservice/lp/target/le-lp-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/lp.war"
                                       overwrite="true" />
+
+                                <!-- workflow app -->
+                                <copy file="${project.basedir}/../le-workflowapi/target/le-workflowapi-${project.version}-shaded.jar"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/workflowapp.jar"
+                                      overwrite="true" />
+
+                                <!-- python app -->
                                 <copy file="${project.basedir}/../le-dataplatform/target/leframework.tar.gz" 
                                       tofile="${project.basedir}/${pythonapp.docker.context}/leframework.tar.gz"
                                       overwrite="true" />
@@ -130,7 +147,7 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsgenerator.py" 
                                       tofile="${project.basedir}/${pythonapp.docker.context}/apsgenerator.py" 
-                                      overwrite="true" />
+                                      overwrite="true"/>
                             </tasks>
                         </configuration>
                     </execution>
@@ -139,8 +156,21 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>${maven.exec.version}</version>
                 <executions>
+                    <execution>
+                        <id>touch-workflow-app-jar</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>touch</executable>
+                            <workingDirectory>${project.basedir}/../le-workflowapi/target/</workingDirectory>
+                            <arguments>
+                                <argument>le-workflowapi-${project.version}-shaded.jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>build-docker-images</id>
                         <phase>package</phase>
