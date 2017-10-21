@@ -137,7 +137,7 @@ angular.module('lp.ratingsengine')
     }
 
     this.setSegment = function(segment) {
-        console.log("set segment service", segment);
+        //console.log("set segment service", segment);
         this.savedSegment = segment;
     }
 

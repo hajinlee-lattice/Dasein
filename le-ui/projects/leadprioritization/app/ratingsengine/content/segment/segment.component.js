@@ -14,35 +14,29 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         block_user: true,
         loadingSupplementaryData: true,
         showPagination: true,
-        hasSegments: true
+        hasSegments: true,
+        sortBy: 'Selected',
+        segmentsKeyMap: {}
     });
+
+    var makeSegmentsKeyMap = function(segments) {
+        var segmentsKeyMap = {};
+        segments.forEach(function(segment, index) {
+            segmentsKeyMap[segment.name] = index;
+        });
+        return segmentsKeyMap;
+    }
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
         if(vm.search || oldValue) {
             vm.currentPage = 1;
-            if(vm.filteredList) {
-                vm.loadingSupplementaryData = true;
-                vm.getCounts(vm.filteredList);
-            }
-        }
-    });
-
-    $scope.$watch('vm.currentPage', function(newValue, oldValue) {
-        if(vm.currentPage != oldValue) {
-        	vm.filteredSegments = vm.segments.slice((10 * (vm.currentPage - 1)), (10 * vm.currentPage));
-
-        	if(!vm.filteredSegments[0].numAccounts) {
-	        	vm.loadingSupplementaryData = true;
-	        	vm.getCounts(vm.filteredSegments);
-	        }
         }
     });
 
     vm.init = function() {
-
     	vm.filteredSegments = vm.segments.slice(0, 10);
-    	vm.getCounts(vm.filteredSegments);
-
+        vm.segmentsKeyMap = makeSegmentsKeyMap(vm.segments);
+    	vm.getCounts(vm.segments);
         if(vm.segments.length === 0){
             vm.hasSegments = false;
             vm.isValid = false;
@@ -52,7 +46,6 @@ angular.module('lp.ratingsengine.wizard.segment', [])
             vm.showPagination = false;
         }
 
-
         RatingsEngineStore.setValidation('segment', false);
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
@@ -61,56 +54,71 @@ angular.module('lp.ratingsengine.wizard.segment', [])
                 vm.block_user = false;
                 RatingsEngineStore.setValidation('segment', true);
 
-                // if(vm.stored.segment_selection){
-                //     console.log("has stored");
-                //     vm.initSegments = vm.segments;
-                // } else {
-                //     console.log("not stored");
-                //     vm.initSegments = vm.segments;
-                // }
-
-
-                // There's probably a better way to do this with orderBy and a filter
-                // but this gets the selected segment and move it to the first position in the array
-                var move = function (array, fromIndex, toIndex) {
-                    array.splice(toIndex, 0, array.splice(fromIndex, 1)[0] );
-                    return array;
-                }
                 makeItemFirst = function (name){
                     for (var i = 0; i < vm.segments.length; i++){
                         if (vm.segments[i].name == name){
-                            vm.segments = move(vm.segments, i, 0);
+                            vm.segments[i].Selected = true;
                         }
                     }
                 }
                 makeItemFirst(vm.stored.segment_selection);
-
-
-
             });
         } else {
             vm.block_user = false;
         }
-
     }
 
-    vm.getCounts = function(filteredSegments) {
+    vm.endsWith = function(item, string) {
+        var reg = new RegExp(string + '$'),
+            item = item || '',
+            match = item.match(reg);
+        if(match) {
+            return true;
+        }
+        return false;
+    }
 
-    	segmentIds = [];
+    function chunk (arr, len) {
+        var chunks = [],
+        i = 0,
+        n = arr.length;
 
-    	angular.forEach(filteredSegments, function(segment) {
+        while (i < n) {
+            chunks.push(arr.slice(i, i += len));
+        }
+
+        return chunks;
+    }
+
+    vm.getCounts = function(segments) {
+    	var segmentIds = [],
+            _segments = {};
+
+    	angular.forEach(segments, function(segment) {
             var segmentId = segment.name;
             segmentIds.push(segmentId);
         });
-        RatingsEngineStore.getSegmentsCounts(segmentIds).then(function(response){
-            angular.forEach(filteredSegments, function(segment) {
-                if(response.segmentIdCoverageMap && response.segmentIdCoverageMap[segment.name]) {
-            	   segment.numAccounts = (response.segmentIdCoverageMap[segment.name].accountCount ? response.segmentIdCoverageMap[segment.name].accountCount : 0);
-            	   segment.numContacts = (response.segmentIdCoverageMap[segment.name].contactCount ? response.segmentIdCoverageMap[segment.name].contactCount : 0);
+
+        var chunk_size = Math.round(segmentIds.length / 6),
+            segmentChunks = chunk(segmentIds, chunk_size) || [];
+
+        angular.forEach(segmentChunks, function(ids, index) {
+            RatingsEngineStore.getSegmentsCounts(ids).then(function(response){
+                ids.forEach(function(id) {
+                    if(vm.segmentsKeyMap && vm.segmentsKeyMap[id] && response.segmentIdCoverageMap && response.segmentIdCoverageMap[id]) {
+                        vm.segments[vm.segmentsKeyMap[id]].numAccounts = (response.segmentIdCoverageMap[id].accountCount ? response.segmentIdCoverageMap[id].accountCount : 0);
+                        vm.segments[vm.segmentsKeyMap[id]].numContacts = (response.segmentIdCoverageMap[id].contactCount ? response.segmentIdCoverageMap[id].contactCount : 0);
+                    } else {
+                        vm.segments[vm.segmentsKeyMap[id]].numAccounts = 0;
+                        vm.segments[vm.segmentsKeyMap[id]].numContacts = 0;
+                    }
+                });
+                var done = (index+1 === segmentChunks.length);
+                if(done) {
+                    vm.loadingSupplementaryData = false;
                 }
-            });
-            vm.loadingSupplementaryData = false;
-        });
+            })
+        })
     }
 
     vm.setSegment = function(segment) {

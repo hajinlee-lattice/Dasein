@@ -34,17 +34,28 @@
                     </div>
                 </div>
 
-
                 <ul class="list">
                     <li class="item header segment">
                         <ul>
                             <li class="name">Segment</li>
-                            <li class="accounts">Accounts</li>
-                            <li class="contacts">Contacts</li>
+                            <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numAccounts'" ng-disabled="vm.loadingSupplementaryData">
+                                <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                                Accounts
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'numAccounts')" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'numAccounts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                            </li>
+                            <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numContacts'" ng-disabled="vm.loadingSupplementaryData">
+                                Contacts 
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'numContacts')"" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'numContacts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                            </li>
                         </ul>
                     </li>
                     <li 
-                        ng-repeat="segment in (vm.filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
+                        ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) 
+                                    | orderBy: vm.sortBy
+                                    | startFrom: (vm.currentPage - 1) * vm.pageSize 
+                                    | limitTo: vm.pageSize"
                         ng-disabled="vm.block_user"
                         class="item segment">
                         <ul>
@@ -56,15 +67,11 @@
                                         ng-model="vm.stored.segment_selection" 
                                         ng-click="vm.setSegment(segment)" />
                                 <label for="{{segment.name}}">{{segment.display_name}}</label></li>
-                            <!--  <li class="accounts">{{ vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number }}</li>
-                            <li class="contacts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li> -->
                             <li class="accounts">
-                                <span ng-if="!vm.loadingSupplementaryData">{{segment.numAccounts|number}}</span>
-                                <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                                <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>
                             </li>
                             <li class="contacts">
-                                <span ng-if="!vm.loadingSupplementaryData">{{segment.numContacts|number}}</span>
-                                <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                                <span ng-if="segment.numContacts">{{segment.numContacts|number}}</span>
                             </li>
                         </ul>
                     </li>
@@ -73,7 +80,7 @@
 
                 <pd-pagination-controls
                     current="vm.currentPage"
-                    max="vm.filteredList.length / vm.pageSize"
+                    max="filteredList.length / vm.pageSize"
                     ng-if="vm.showPagination">
                 </pd-pagination-controls>
 

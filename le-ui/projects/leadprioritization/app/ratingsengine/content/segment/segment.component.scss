@@ -10,16 +10,28 @@ section.ratingsengine {
                 .item {
                     ul {
                         & > li {
+                            min-width: 100px;
                             &.accounts,
                             &.contacts {
                                 @include flex-item(0 1 auto);
                                 text-align: right;
+                            }
+                            &[disabled] {
+                                pointer-events: none;
+                                opacity: .5;
                             }
                         }
                     }
                     &[disabled] {
                         pointer-events: none;
                         opacity: .5;
+                    }
+                    &.header {
+                        ul {
+                            & > li {
+                                user-select: none;
+                            }
+                        }
                     }
                 }
             }

@@ -17,6 +17,7 @@
         <ul class="attributes noselect-children">
             <li class="header" ng-show="subcategoryAttributes.length > 0">
                 <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(subcategoryAttributes) }}</div>
+                <div class="column data" ng-if="vm.section == 'segment.analysis'">Value</div>
                 <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
             </li>
 
@@ -43,7 +44,7 @@
 
                 </div>
 
-                <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode">
+                <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode || vm.section == 'segment.analysis'">
                     <div class="attribute-feedback-container">
                         <attribute-feedback-button 
                             button-type="'infodot'" 
@@ -53,14 +54,15 @@
                             category-class="vm.categoryClass(vm.category)"
                             ng-if="vm.lookupMode && vm.hasCompanyInfo" />
 
-                        {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
+                        <strong ng-if="attribute.Value">{{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}</strong>
+                        <strong ng-if="!attribute.Value && attribute.TopBkt.Lbl">{{attribute.TopBkt.Lbl}}</strong>
 
                     </div>
                 </div>
 
                 <div class="column data records" ng-if="!vm.lookupMode">
-                    <strong ng-if="vm.section != 'section.analysis'">{{ attribute.Count | number }}</strong>
-                    <strong ng-if="vm.section == 'section.analysis'">{{ attribute.TopBkt.Cnt | number }}</strong>
+                    <strong ng-if="vm.section != 'segment.analysis'">{{ attribute.Count | number }}</strong>
+                    <strong ng-if="vm.section == 'segment.analysis'">{{ attribute.TopBkt.Cnt | number }}</strong>
                 </div>
 
             </li>
