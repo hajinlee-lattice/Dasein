@@ -113,9 +113,6 @@ public class EntityProxy extends MicroserviceRestApiProxy {
 
     @Cacheable(key = "T(java.lang.String).format(\"%s|%s|data\", #customerSpace, #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
-        // DataPage dataPage = dataCache
-        // .get(String.format("%s|%s", shortenCustomerSpace(customerSpace),
-        // JsonUtils.serialize(frontEndQuery)));
         DataPage dataPage = getDataFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
         if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
@@ -125,9 +122,10 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return dataPage;
     }
 
+    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace, #frontEndQuery)", sync = true)
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
-        Map<String, Long> ratingCountInfo = ratingCache
-                .get(String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+        Map<String, Long> ratingCountInfo = getRatingCountFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
 
         if (MapUtils.isEmpty(ratingCountInfo)) {
             throw new LedpException(LedpCode.LEDP_18158);
