@@ -53,8 +53,15 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public void deleteKeysByPattern(String mapName, String pattern) {
-        getKeys(mapName, pattern).clear();
+    public Long deleteKeysByPattern(String mapName, String pattern) {
+        Set<Object> keys = getKeys(mapName, pattern);
+        return deleteKeys(mapName, keys.toArray());
+    }
+
+    @Override
+    public Future<Long> deleteKeysByPatternAsync(String mapName, String pattern) {
+        Set<Object> keys = getKeys(mapName, pattern);
+        return deleteKeysAsync(mapName, keys.toArray());
     }
 
     @Override

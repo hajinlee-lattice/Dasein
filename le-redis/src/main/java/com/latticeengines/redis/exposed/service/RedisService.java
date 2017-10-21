@@ -20,7 +20,9 @@ public interface RedisService {
 
     Future<Long> deleteKeysAsync(String mapName, Object... keys);
 
-    void deleteKeysByPattern(String cacheName, String pattern);
+    Long deleteKeysByPattern(String cacheName, String pattern);
+
+    Future<Long> deleteKeysByPatternAsync(String mapName, String pattern);
 
     Object getValue(String mapName, Object key);
 
