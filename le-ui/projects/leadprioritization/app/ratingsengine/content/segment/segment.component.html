@@ -37,7 +37,11 @@
                 <ul class="list">
                     <li class="item header segment">
                         <ul>
-                            <li class="name">Segment</li>
+                            <li class="name" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'display_name'">
+                                Segment
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'display_name')"" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                            </li>
                             <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numAccounts'" ng-disabled="vm.loadingSupplementaryData">
                                 <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
                                 Accounts
