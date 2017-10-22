@@ -133,9 +133,11 @@ angular.module('common.datacloud.query.builder', [
             var bucket = vm.rating_rule.bucketToRuleMap[vm.bucket],
                 fromBucket = bucket[vm.treeMode + '_restriction'],
                 restrictions = fromBucket.logicalRestriction.restrictions,
+                allBuckets = vm.recursiveGetBucketRestrictions(restrictions),
                 ids = [];
 
-            restrictions.forEach(function(value, index) {
+
+            allBuckets.forEach(function(value, index) {
                 ids.push(value.bucketRestriction.attr);
             })
 
@@ -214,10 +216,10 @@ angular.module('common.datacloud.query.builder', [
             });
         }
 
-        var filtered = [];
+        var filtered = [], restrictions = [];
 
         buckets.forEach(function(bucket, index) {
-            var restrictions = bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions;
+            restrictions = vm.recursiveGetBucketRestrictions(bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions);
             
             filtered = filtered.concat(restrictions.filter(function(value, index) {
                 return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
@@ -354,31 +356,30 @@ angular.module('common.datacloud.query.builder', [
             BucketMap = RatingEngineCopy.rule.ratingRule.bucketToRuleMap,
             restrictions = [];
 
-        var recursive = function(tree, restrictions) {
-            if (!restrictions) {
-                var restrictions = [];
-            }
-
-            tree.forEach(function(branch) {
-                if (branch && branch.bucketRestriction && branch.bucketRestriction && branch.bucketRestriction.bkt.Id) {
-                    restrictions.push(branch);
-                }
-
-                if (branch && branch.logicalRestriction) {
-                    recursive(branch.logicalRestriction.restrictions, restrictions);
-                }
-            });
-        };
-
         vm.bucketLabels.forEach(function(bucketName, index) {
             var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
 
-            recursive(logical.restrictions, restrictions);
+            vm.recursiveGetBucketRestrictions(logical.restrictions, restrictions);
         });
 
         return restrictions;
     }
 
+    vm.recursiveGetBucketRestrictions = function(tree, restrictions) {
+        restrictions = restrictions || [];
+
+        tree.forEach(function(branch) {
+            if (branch && branch.bucketRestriction && branch.bucketRestriction && branch.bucketRestriction.bkt.Id) {
+                restrictions.push(branch);
+            }
+
+            if (branch && branch.logicalRestriction) {
+                vm.recursiveGetBucketRestrictions(branch.logicalRestriction.restrictions, restrictions);
+            }
+        });
+
+        return restrictions;
+    };
 
     vm.saveSegment = function() {
         var segment = QueryStore.getSegment(),
@@ -460,6 +461,11 @@ angular.module('common.datacloud.query.builder', [
         vm.tree = vm.getTree();
 
         vm.setCurrentSavedTree();
+    }
+
+    vm.mouseOut = function() {
+        vm.draggedItem = null;
+        vm.droppedItem = null;
     }
 
     vm.init();

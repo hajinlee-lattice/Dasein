@@ -28,24 +28,34 @@ angular
                 uniqueId: $scope.tree.$$hashKey,
                 editMode: 'Custom',
                 mouseDownTimer: false,
-                cmp_operations: {
-                    'IS_NULL': 'Is Empty',
-                    'IS_NOT_NULL': 'Is Present',
+                numerical_operations: {
+                    'IS_NULL': 'Empty',
+                    'IS_NOT_NULL': 'Not Empty',
                     'EQUAL': 'Equal',
                     'NOT_EQUAL': 'Not Equal',
                     'GREATER_THAN': 'Greater Than',
                     'GREATER_OR_EQUAL': 'Greater or Equal',
                     'LESS_THAN': 'Less Than',
-                    'LESS_OR_EQUAL': 'Less or Equal',
-                    'IN_COLLECTION': 'In Collection',
-                    'CONTAINS': 'Contains',
-                    'NOT_CONTAINS': 'Not Contains',
-                    'STARTS_WITH': 'Starts With',
-                    'GTE_AND_LTE': 'Greater Or Equal and Less Or Equal',
-                    'GTE_AND_LT': 'Greater Or Equal and Less Than',
-                    'GT_AND_LTE': "Greater Than and Less Or Equal",
-                    'GT_AND_LT': "Greater Than and Less Than"
+                    'LESS_OR_EQUAL': 'Lesser or Equal',
+                    'GTE_AND_LTE': '>= and <=',
+                    'GTE_AND_LT': '>= and <',
+                    'GT_AND_LTE': "> and <=",
+                    'GT_AND_LT': "> and <"
                 },
+                enum_operations: {
+                    //'IS_NULL': 'Is Empty',
+                    //'IS_NOT_NULL': 'Is Present',
+                    'EQUAL': 'Is Equal To',
+                    'NOT_EQUAL': 'Does Not Equal',
+                    //'IN_COLLECTION': 'Is In Collection',
+                    //'CONTAINS': 'String Contains',
+                    //'NOT_CONTAINS': "Does Not Contains",
+                    //'STARTS_WITH': 'String Starts With'
+                },
+                no_inputs: [
+                    'IS_NULL',
+                    'IS_NOT_NULL'
+                ],
                 two_inputs: [
                     'GTE_AND_LTE',
                     'GTE_AND_LT',
@@ -181,6 +191,10 @@ angular
             }
 
             vm.getOperationLabel = function() {
+                if (!vm.tree.bucketRestriction.bkt) {
+                    return;
+                }
+
                 var map = {
                     "Yes": "is",
                     "No": "is not",
@@ -190,16 +204,16 @@ angular
                     "between": "is between",
                     'IS_NULL': 'is empty',
                     'IS_NOT_NULL': 'is present',
-                    'EQUAL': 'equal',
-                    'NOT_EQUAL': 'not equal',
-                    'GREATER_THAN': 'greater than',
-                    'GREATER_OR_EQUAL': 'greater or equal',
-                    'LESS_THAN': 'less than',
-                    'LESS_OR_EQUAL': 'less or equal',
-                    'GTE_AND_LTE': 'greater or equal and less or equal',
-                    'GTE_AND_LT': 'greater or equal and less than',
-                    'GT_AND_LTE': "greater than and less or equal",
-                    'GT_AND_LT': "greater than and less than",
+                    'EQUAL': 'is equal to',
+                    'NOT_EQUAL': 'is not equal to',
+                    'GREATER_THAN': 'is greater than',
+                    'GREATER_OR_EQUAL': 'is greater than or equal to',
+                    'LESS_THAN': 'is less than',
+                    'LESS_OR_EQUAL': 'is less than or equal to',
+                    'GTE_AND_LTE': 'is greater or equal and lesser or equal',
+                    'GTE_AND_LT': 'is greater or equal and less than',
+                    'GT_AND_LTE': "is greater than and lesser or equal",
+                    'GT_AND_LT': "is greater than and less than",
                     'IN_COLLECTION': 'in collection',
                     'CONTAINS': 'contains',
                     'NOT_CONTAINS': 'not contains',
@@ -209,10 +223,8 @@ angular
                 switch (vm.type) {
                     case 'Boolean': return map[vm.tree.bucketRestriction.bkt.Vals[0]];
                     case 'Numerical': return map[vm.tree.bucketRestriction.bkt.Cmp];
-                    case 'Enum': return 'is';
-                    default: 
-                        //console.log('unknown type', vm.type, vm.label, vm.operation, vm.item);
-                        return 'has a value of';
+                    case 'Enum': return map[vm.tree.bucketRestriction.bkt.Cmp];
+                    default: return 'has a value of';
                 }
             }
 
@@ -234,10 +246,15 @@ angular
             }
             
             vm.editBucket = function() {
+                if (vm.root.draggedItem == vm) {
+                    return;
+                }
+
                 if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum')) {
                     if (vm.unused) {
                         vm.unused = false;
-//console.log(vm.label, vm.type, vm.item.DisplayName, vm.item);
+
+                        //console.log(vm.label, vm.type, vm.item.DisplayName, vm.item);
                         vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
                         vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
 
@@ -280,7 +297,7 @@ angular
                     vm.root.draggedItem = vm;
                     vm.mouseDownTimer = false;
                     vm.unused = true;
-                }, 333);
+                }, 150);
             }
 
             vm.mouseUp = function() {
@@ -294,12 +311,14 @@ angular
                     if (dropped) {
                         this.root.saveState();
                         vm.root.dropMoveItem(dragged, dropped);
-                        vm.unused = false;
+                        //vm.unused = false;
                     }
                 }
 
-                vm.root.draggedItem = null;
-                vm.root.droppedItem = null;
+                $timeout(function() {
+                    vm.root.draggedItem = null;
+                    vm.root.droppedItem = null;
+                }, 100)
 
                 $timeout.cancel(vm.mouseDownTimer);
                 vm.mouseDownTimer = false;

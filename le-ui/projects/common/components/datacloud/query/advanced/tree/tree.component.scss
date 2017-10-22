@@ -218,15 +218,37 @@ div.advanced-query-builder {
                     font-size: .85em;
                     
                     strong {
+                        max-width: 15em;
+                        display: inline-block;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        vertical-align: middle;
                         padding-right: 1em;
                     }
                 }
 
                 .query-section-item-displayname {
+                    display: inline-block;
+                    position: relative;
+                    width: 100%; 
                     clear: both;
+
+                    .item-bucket-data {
+                        display: inline-block;
+                        max-width: 45%;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
                     
                     .query-section-item-name {
+                        display: inline-block;
+                        max-width: 50%;
                         margin-right: .25em;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
                     }
 
                     .query-section-item-operation {

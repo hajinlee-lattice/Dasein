@@ -78,12 +78,12 @@
                 'cursor-pointer': vm.type != 'Enum'
             }">
         <span class="query-section-item-category">
-            <strong ng-if="vm.editing">{{vm.item.DisplayName}}</strong>
+            <strong ng-if="vm.editing" title="{{vm.item.DisplayName}}">{{vm.item.DisplayName}}</strong>
             <span>{{vm.item.Category}}{{vm.item.Subcategory != 'Other' ? ' - ' + vm.item.Subcategory : ''}}</span>
         </span>
         
         <span class="query-section-item-displayname">
-            <span class="query-section-item-name" ng-if="!vm.editing"><strong>{{vm.item.DisplayName}}</strong></span>
+            <span class="query-section-item-name" ng-if="!vm.editing" title="{{vm.item.DisplayName}}"><strong>{{vm.item.DisplayName}}</strong></span>
             
             <span class="item-edit-bucket-data" ng-if="vm.editing && !vm.unused">
 
@@ -100,6 +100,11 @@
                 </span>
 
                 <span ng-if="vm.type == 'Enum'" class="query-section-item-operation">
+                    <select ng-model="vm.tree.bucketRestriction.bkt.Cmp" 
+                            ng-change="vm.changeOperation()"
+                            ng-options="k as v for (k, v) in vm.enum_operations">
+                    </select>
+
                     <select ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" ng-change="vm.updateBucketCount()">
                             <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
                     </select>
@@ -124,10 +129,11 @@
                     <span ng-if="vm.editMode == 'Custom'">
                         <select ng-model="vm.tree.bucketRestriction.bkt.Cmp" 
                                 ng-change="vm.changeOperation()"
-                                ng-options="k as v for (k, v) in vm.cmp_operations">
+                                ng-options="k as v for (k, v) in vm.numerical_operations">
                         </select>
 
                         <input  ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" 
+                                ng-if="vm.no_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) < 0"
                                 ng-keyup="vm.changeOperation()"
                                 ng-value="vm.tree.bucketRestriction.bkt.Vals[0]"></input>
 
@@ -155,7 +161,7 @@
                         <strong>Yes</strong>
                     </span>
 
-                    <span class="query-section-item-value" ng-if="vm.type == 'Numerical'">
+                    <span class="query-section-item-value" ng-if="vm.type == 'Numerical' && vm.no_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) < 0">
                         <strong>{{vm.tree.bucketRestriction.bkt.Vals[0]}}</strong>
                         <span ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0" class="operation-and">-</span>
                         <strong ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0">{{vm.tree.bucketRestriction.bkt.Vals[1]}}</strong>

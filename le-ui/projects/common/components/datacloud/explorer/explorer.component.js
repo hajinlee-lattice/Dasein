@@ -1542,15 +1542,15 @@ angular.module('common.datacloud.explorer', [
 
         if(entity === 'Account') {
             if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-                QueryStore.addAccountRestriction({columnName: attributeRangeKey, resourceType: entity, bkt: stat});
+                QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
             } else {
-                QueryStore.removeAccountRestriction({columnName: attributeRangeKey, resourceType: entity, bkt: stat});
+                QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
             }
         } else {
             if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-                QueryStore.addContactRestriction({columnName: attributeRangeKey, resourceType: entity, bkt: stat});
+                QueryStore.addContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
             } else {
-                QueryStore.removeContactRestriction({columnName: attributeRangeKey, resourceType: entity, bkt: stat});
+                QueryStore.removeContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
             }
         }
 

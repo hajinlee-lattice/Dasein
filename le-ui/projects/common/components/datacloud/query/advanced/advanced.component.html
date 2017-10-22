@@ -101,7 +101,8 @@
             </span>
         </div>
 
-        <ul class="query-section query-tree-root">
+        <ul class="query-section query-tree-root"
+            ng-mouseleave="vm.mouseOut()">
             <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
                     ng-repeat="tree in vm.tree">
                 <query-tree-directive 
