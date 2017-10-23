@@ -80,7 +80,12 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
 
             switch (restriction.getRelation()) {
             case EQUAL:
-                booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                if (rhs instanceof SubQueryAttrLookup) {
+                    ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                    booleanExpression = lhsPath.eq(subselect);
+                } else {
+                    booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                }
                 break;
             case GREATER_OR_EQUAL:
                 booleanExpression = lhsPath.goe(rhsPaths.get(0));

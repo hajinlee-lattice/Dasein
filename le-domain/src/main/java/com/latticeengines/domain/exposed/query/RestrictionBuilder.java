@@ -264,8 +264,8 @@ public class RestrictionBuilder {
         return this;
     }
 
-    public RestrictionBuilder before(Period period, Object value) {
-        operator = ComparisonType.BEFORE;
+    public RestrictionBuilder prior(Period period, Object value) {
+        operator = ComparisonType.PRIOR;
         restriction = new TimeRestriction(new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
                 Arrays.asList(new Object[] { value })));
         complete = true;

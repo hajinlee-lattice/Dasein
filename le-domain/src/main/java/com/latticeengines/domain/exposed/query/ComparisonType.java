@@ -21,8 +21,9 @@ public enum ComparisonType {
     GT_AND_LT, //
     EVER, //
     IN_CURRENT_PERIOD, //
-    BEFORE, //
-    AFTER;
+    BETWEEN, //
+    PRIOR, //
+    WITHIN;
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH;

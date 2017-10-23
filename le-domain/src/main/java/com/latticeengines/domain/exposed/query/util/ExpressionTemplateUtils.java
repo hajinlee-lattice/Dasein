@@ -24,4 +24,9 @@ public class ExpressionTemplateUtils {
         return String.format("DATEDIFF('%s', %s, %s)", p.name(), getDateOnPeriodTemplate(p, source),
                 getDateOnPeriodTemplate(p, target));
     }
+
+    public static String getMaxDateDiffTemplate(Period p, String source, String target) {
+        return String.format("MAX(DATEDIFF('%s', %s, %s))", p.name(), getDateOnPeriodTemplate(p, source),
+                getDateOnPeriodTemplate(p, target));
+    }
 }

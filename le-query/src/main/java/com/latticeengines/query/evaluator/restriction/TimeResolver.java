@@ -47,11 +47,11 @@ public class TimeResolver extends BaseRestrictionResolver<TimeRestriction> imple
         case IN_CURRENT_PERIOD:
             booleanExpression = lhsPath.goe(rhsPaths.get(0));
             break;
-        case BEFORE:
-            booleanExpression = lhsPath.lt(rhsPaths.get(0));
+        case PRIOR:
+            booleanExpression = lhsPath.loe(rhsPaths.get(0));
             break;
-        case AFTER:
-            booleanExpression = lhsPath.gt(rhsPaths.get(0));
+        case WITHIN:
+            booleanExpression = lhsPath.goe(rhsPaths.get(0));
             break;
         default:
             throw new LedpException(LedpCode.LEDP_37006, new String[] { filter.getRelation().toString() });

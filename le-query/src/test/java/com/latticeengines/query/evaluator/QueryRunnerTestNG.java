@@ -1,6 +1,9 @@
 package com.latticeengines.query.evaluator;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -190,10 +193,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testTimeFilter() {
-        // TODO: this test result might change as times goes
+        // This query actually returns all accounts so it doesn't change over time
         Restriction restriction = Restriction.builder() //
                 .let(BusinessEntity.Transaction, TRS_TRANSACTION_DATE)//
-                .before(Period.Quarter, 0) //
+                .prior(Period.Quarter, 1) //
                 .build();
         Query query = Query.builder() //
                 .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
@@ -202,12 +205,19 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 108045);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testTransactionSelectWithTimeFilter() throws ParseException {
+        // adjust period offset based on current date
+        LocalDate periodStart = LocalDate.of(2017, Month.APRIL, 1);
+        LocalDate currentDate = LocalDate.now();
+        long diffInMonths = ChronoUnit.MONTHS.between(periodStart, currentDate);
+        long periodOffset = diffInMonths / 3;
+
+        // each period prior to quarter of 2017/4/1
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction.setTimeFilter(
-                new TimeFilter(ComparisonType.BEFORE, Period.Quarter, Arrays.asList(new Object[] { 1 })));
+                new TimeFilter(ComparisonType.PRIOR, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
         Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
@@ -215,7 +225,50 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
-        Assert.assertEquals(results.size(), 15);
+        Assert.assertEquals(results.size(), 2);
+
+        // at_least_once after quarter of 2017/4/1
+        TransactionRestriction txRestriction1 = new TransactionRestriction();
+        txRestriction1.setProductId("0720FE59CDE6B915173E381A517876B7");
+        txRestriction1.setTimeFilter(
+                new TimeFilter(ComparisonType.WITHIN, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
+        txRestriction1.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_THAN, Collections.singletonList(200)));
+        Restriction restriction1 = new TransactionRestrictionTranslator(txRestriction1).convert(BusinessEntity.Account);
+        Query query1 = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(restriction1).build();
+        List<Map<String, Object>> results1 = queryEvaluatorService.getData(attrRepo, query1).getData();
+        Assert.assertEquals(results1.size(), 70);
+
+        // between [0, quarter of 2017/4/1], should get the same result as above
+        TransactionRestriction txRestriction2 = new TransactionRestriction();
+        txRestriction2.setProductId("0720FE59CDE6B915173E381A517876B7");
+        txRestriction2.setTimeFilter(new TimeFilter(ComparisonType.BETWEEN, Period.Quarter,
+                Arrays.asList(new Object[] { 0, periodOffset })));
+        txRestriction2.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_THAN, Collections.singletonList(200)));
+        Restriction restriction2 = new TransactionRestrictionTranslator(txRestriction2).convert(BusinessEntity.Account);
+        Query query2 = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(restriction2).build();
+        List<Map<String, Object>> results2 = queryEvaluatorService.getData(attrRepo, query2).getData();
+        Assert.assertEquals(results2.size(), 70);
+
+        // no qualified account in current period
+        TransactionRestriction txRestriction3 = new TransactionRestriction();
+        txRestriction3.setProductId("0720FE59CDE6B915173E381A517876B7");
+        txRestriction3.setTimeFilter(
+                new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, Period.Quarter, Arrays.asList(new Object[] { 0 })));
+        txRestriction3.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_THAN, Collections.singletonList(200)));
+        Restriction restriction3 = new TransactionRestrictionTranslator(txRestriction3).convert(BusinessEntity.Account);
+        Query query3 = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
+                .where(restriction3).build();
+        List<Map<String, Object>> results3 = queryEvaluatorService.getData(attrRepo, query3).getData();
+        Assert.assertEquals(results3.size(), 0);
+
     }
 
     @Test(groups = "functional")

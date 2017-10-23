@@ -4,8 +4,7 @@ import static com.latticeengines.domain.exposed.query.AggregationType.AT_LEAST_O
 import static com.latticeengines.domain.exposed.query.AggregationType.EACH;
 
 import java.math.BigDecimal;
-
-import org.apache.commons.lang.RandomStringUtils;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
@@ -22,25 +21,27 @@ import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.domain.exposed.query.util.ExpressionTemplateUtils;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 
 public class TransactionRestrictionTranslator {
-
+    private AtomicInteger aliasCounter = new AtomicInteger(0);
     private TransactionRestriction txnRestriction;
 
     public final static String PERIOD_AMOUNT = "PeriodAmount";
     public final static String PERIOD_QUANTITY = "PeriodQuantity";
-    public final static String PERIOD_MAX = "PeriodMax";
     public final static String PERIOD_OFFSET = "PeriodOffset";
+    public final static String MAX_PERIOD_OFFSET = "MaxPeriodOffset";
+    public final static String PERIOD_COUNT = "PeriodCount";
 
     public TransactionRestrictionTranslator(TransactionRestriction txnRestriction) {
         this.txnRestriction = txnRestriction;
     }
 
-    private FunctionLookup<Integer, Object, String> createPeriodLookup() {
+    private FunctionLookup<Integer, Object, String> createPeriodOffsetLookup() {
         AttributeLookup transactionDate = new AttributeLookup(BusinessEntity.Transaction,
                 InterfaceName.TransactionDate.name());
         AttributeLookup periodOffset = AttributeLookup.fromString(PERIOD_OFFSET);
@@ -54,6 +55,21 @@ public class TransactionRestrictionTranslator {
         return period;
     }
 
+    private FunctionLookup<Integer, Object, String> createMaxPeriodOffsetLookup() {
+        AttributeLookup transactionDate = new AttributeLookup(BusinessEntity.Transaction,
+                InterfaceName.TransactionDate.name());
+        AttributeLookup periodOffset = AttributeLookup.fromString(PERIOD_OFFSET);
+
+        Period p = txnRestriction.getTimeFilter().getPeriod();
+        String source = ExpressionTemplateUtils.strAttrToDate(transactionDate.toString());
+        String target = ExpressionTemplateUtils.getCurrentDate();
+        FunctionLookup<Integer, Object, String> period = new FunctionLookup<Integer, Object, String>(Integer.class,
+                periodOffset).as(MAX_PERIOD_OFFSET);
+        period.setFunction(args -> ExpressionTemplateUtils.getMaxDateDiffTemplate(p, source, target));
+
+        return period;
+    }
+
     public Restriction convert(BusinessEntity entity) {
         Restriction productRestriction = filterByProduct();
         if (txnRestriction.getTimeFilter() == null) {
@@ -64,7 +80,7 @@ public class TransactionRestrictionTranslator {
         AttributeLookup quantityLookup = new AttributeLookup(BusinessEntity.Transaction,
                 InterfaceName.TotalQuantity.name());
         AttributeLookup accountId = new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name());
-        FunctionLookup<Integer, Object, String> period = createPeriodLookup();
+        FunctionLookup<Integer, Object, String> period = createPeriodOffsetLookup();
 
         Query innerQuery = Query.builder().from(BusinessEntity.Transaction)
                 .select(accountId, period, amountLookup, quantityLookup).where(productRestriction).build();
@@ -89,15 +105,12 @@ public class TransactionRestrictionTranslator {
         SubQuery middleSubQuery = new SubQuery(middleQuery, generateAlias(BusinessEntity.Transaction));
 
         subQueryAccountId = new SubQueryAttrLookup(middleSubQuery, InterfaceName.AccountId.name());
-        subQueryPeriodOffset = new SubQueryAttrLookup(middleSubQuery, PERIOD_OFFSET);
         SubQueryAttrLookup periodTotalAmountLookup = new SubQueryAttrLookup(middleSubQuery, PERIOD_AMOUNT);
         SubQueryAttrLookup periodTotalQuantityLookup = new SubQueryAttrLookup(middleSubQuery, PERIOD_QUANTITY);
-        AggregateLookup periodMax = AggregateLookup.max(subQueryPeriodOffset).as(PERIOD_MAX);
 
-        Query outerQuery = Query.builder().from(middleSubQuery).select(subQueryAccountId, periodMax)
+        Query outerQuery = Query.builder().from(middleSubQuery).select(subQueryAccountId)
                 .groupBy(subQueryAccountId) //
-                .having(filterByAggregatedPeriodAmountQuantity(periodTotalAmountLookup, periodTotalQuantityLookup,
-                        periodMax))
+                .having(filterByAggregatedPeriodAmountQuantity(periodTotalAmountLookup, periodTotalQuantityLookup))
                 .build();
 
         SubQuery txSubQuery = new SubQuery(outerQuery, generateAlias(BusinessEntity.Transaction));
@@ -138,8 +151,7 @@ public class TransactionRestrictionTranslator {
         return restriction;
     }
 
-    private Restriction filterByAggregatedPeriodAmountQuantity(Lookup periodAmountLookup, Lookup periodQuantityLookup,
-            Lookup periodMax) {
+    private Restriction filterByAggregatedPeriodAmountQuantity(Lookup periodAmountLookup, Lookup periodQuantityLookup) {
         AggregationFilter spentFilter = txnRestriction.getSpentFilter();
         AggregationFilter unitFilter = txnRestriction.getUnitFilter();
         Restriction restriction;
@@ -151,18 +163,18 @@ public class TransactionRestrictionTranslator {
             Restriction quantityRestriction = Restriction.builder().let(aggrQuantity).gt(0).build();
             restriction = Restriction.builder().or(amountRestriction, quantityRestriction).build();
         } else if (spentFilter != null && unitFilter == null) {
-            restriction = getAggregatedRestriction(periodAmountLookup, spentFilter, periodMax);
+            restriction = getAggregatedRestriction(periodAmountLookup, spentFilter);
         } else if (spentFilter == null && unitFilter != null) {
-            restriction = getAggregatedRestriction(periodQuantityLookup, unitFilter, periodMax);
+            restriction = getAggregatedRestriction(periodQuantityLookup, unitFilter);
         } else {
-            Restriction amountRestriction = getAggregatedRestriction(periodAmountLookup, spentFilter, periodMax);
-            Restriction quantityRestriction = getAggregatedRestriction(periodQuantityLookup, unitFilter, periodMax);
+            Restriction amountRestriction = getAggregatedRestriction(periodAmountLookup, spentFilter);
+            Restriction quantityRestriction = getAggregatedRestriction(periodQuantityLookup, unitFilter);
             restriction = Restriction.builder().and(amountRestriction, quantityRestriction).build();
         }
         return restriction;
     }
 
-    private Restriction getAggregatedRestriction(Lookup mixin, AggregationFilter filter, Lookup periodMax) {
+    private Restriction getAggregatedRestriction(Lookup mixin, AggregationFilter filter) {
         Restriction restriction = null;
         switch (filter.getAggregationType()) {
         case AVG:
@@ -177,7 +189,7 @@ public class TransactionRestrictionTranslator {
             restriction = Restriction.builder().let(AggregateLookup.count()).gt(0).build();
             break;
         case EACH:
-            restriction = Restriction.builder().let(AggregateLookup.count()).eq(createPeriodRangeLookup(periodMax))
+            restriction = Restriction.builder().let(AggregateLookup.count()).eq(createPeriodCountLookup())
                     .build();
             break;
         default:
@@ -186,17 +198,56 @@ public class TransactionRestrictionTranslator {
         return restriction;
     }
 
-    private FunctionLookup<Integer, Expression<BigDecimal>, Expression<BigDecimal>> createPeriodRangeLookup(
-            Lookup periodMax) {
-        FunctionLookup<Integer, Expression<BigDecimal>, Expression<BigDecimal>> periodRange = new FunctionLookup<Integer, Expression<BigDecimal>, Expression<BigDecimal>>(
-                Integer.class, periodMax).as("PeriodRange");
-        periodRange.setFunction(exp -> Expressions.asNumber(exp)
-                .add(new BigDecimal(txnRestriction.getTimeFilter().getValues().get(0).toString()).negate()));
-        return periodRange;
+    private Lookup createPeriodCountLookup() {
+        Lookup lookup;
+        switch (txnRestriction.getTimeFilter().getRelation()) {
+        case EVER:
+            FunctionLookup<Integer, Object, String> everMax = createMaxPeriodOffsetLookup();
+            FunctionLookup<Integer, Expression<BigDecimal>, Expression<BigDecimal>> everCount = new FunctionLookup<>(
+                    Integer.class, everMax);
+            everCount.setFunction(maxOffset -> Expressions.asNumber(maxOffset).add(1));
+            everCount.setAlias(PERIOD_COUNT);
+            Query everCountQuery = Query.builder().from(BusinessEntity.Transaction).select(everCount).build();
+            SubQuery everCountSubQuery = new SubQuery(everCountQuery, generateAlias(BusinessEntity.Transaction));
+            lookup = new SubQueryAttrLookup(everCountSubQuery, PERIOD_COUNT);
+            break;
+        case IN_CURRENT_PERIOD:
+            lookup = new ValueLookup(1);
+            break;
+        case EQUAL:
+            Integer offset = Integer.valueOf(txnRestriction.getTimeFilter().getValues().get(0).toString());
+            lookup = new ValueLookup(offset);
+            break;
+        case WITHIN:
+            Integer withinMax = Integer.valueOf(txnRestriction.getTimeFilter().getValues().get(0).toString());
+            lookup = new ValueLookup(withinMax + 1);
+            break;
+        case PRIOR:
+            Integer prior = Integer.valueOf(txnRestriction.getTimeFilter().getValues().get(0).toString());
+            FunctionLookup<Integer, Object, String> offsetMax = createMaxPeriodOffsetLookup();
+            FunctionLookup<Integer, Expression<BigDecimal>, Expression<BigDecimal>> priorCount = new FunctionLookup<>(
+                    Integer.class, offsetMax);
+            priorCount.setFunction(maxOffset -> Expressions.asNumber(maxOffset).subtract(prior).add(1));
+            priorCount.setAlias(PERIOD_COUNT);
+            Query priorCountQuery = Query.builder().from(BusinessEntity.Transaction).select(priorCount).build();
+            SubQuery priorCountSubQuery = new SubQuery(priorCountQuery, generateAlias(BusinessEntity.Transaction));
+            lookup = new SubQueryAttrLookup(priorCountSubQuery, PERIOD_COUNT);
+            break;
+        case BETWEEN:
+            Integer betweenMin = Integer.valueOf(txnRestriction.getTimeFilter().getValues().get(0).toString());
+            Integer betweenMax = Integer.valueOf(txnRestriction.getTimeFilter().getValues().get(1).toString());
+            lookup = new ValueLookup(betweenMax - betweenMin + 1);
+            break;
+        default:
+            throw new UnsupportedOperationException(
+                    "comparator " + txnRestriction.getTimeFilter().getRelation() + " is not supported yet");
+        }
+
+        return lookup;
     }
 
     private String generateAlias(BusinessEntity entity) {
-        return entity.name() + RandomStringUtils.randomAlphanumeric(8);
+        return entity.name() + aliasCounter.incrementAndGet();
     }
 
     private Restriction filterByProduct() {
@@ -210,16 +261,27 @@ public class TransactionRestrictionTranslator {
         case EVER:
             restriction = Restriction.builder().let(periodOffset).isNotNull().build();
             break;
+        case EQUAL:
+            restriction = Restriction.builder().let(periodOffset).eq(txnRestriction.getTimeFilter().getValues().get(0))
+                    .build();
+            break;
         case IN_CURRENT_PERIOD:
             restriction = Restriction.builder().let(periodOffset).eq(0).build();
             break;
-        case BEFORE:
-            restriction = Restriction.builder().let(periodOffset).gt(txnRestriction.getTimeFilter().getValues().get(0))
+        case WITHIN:
+            restriction = Restriction.builder().let(periodOffset).lte(txnRestriction.getTimeFilter().getValues().get(0))
                     .build();
             break;
-        case AFTER:
-            restriction = Restriction.builder().let(periodOffset).lt(txnRestriction.getTimeFilter().getValues().get(0))
+        case PRIOR:
+            restriction = Restriction.builder().let(periodOffset).gte(txnRestriction.getTimeFilter().getValues().get(0))
                     .build();
+            break;
+        case BETWEEN:
+            Object minOffset = txnRestriction.getTimeFilter().getValues().get(0);
+            Object maxOffset = txnRestriction.getTimeFilter().getValues().get(1);
+            Restriction minRestriction = Restriction.builder().let(periodOffset).gte(minOffset).build();
+            Restriction maxRestriction = Restriction.builder().let(periodOffset).lte(maxOffset).build();
+            restriction = Restriction.builder().and(minRestriction, maxRestriction).build();
             break;
         default:
             throw new UnsupportedOperationException(
