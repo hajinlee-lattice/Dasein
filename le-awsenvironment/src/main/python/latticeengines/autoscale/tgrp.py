@@ -4,7 +4,7 @@ import logging
 import time
 from botocore.exceptions import ClientError
 
-from ..elb.targetgroup import find_tgrp_arn, targets_are_healthy
+from ..elb.targetgroup import find_tgrp_arn, targets_are_healthy, get_targets
 
 AS_CLIENT = None
 LOG = logging.getLogger(__name__)
@@ -89,7 +89,7 @@ def verify_internal(asgroup, tgrp):
         LOG.info('Going to check instance health in target group once per 30 second for 15 minutes.')
         all_healthy = False
         t0 = time.time()
-
+        instances = []
         while (not all_healthy) and (time.time() - t0 < 15 * 60):
             # scan instances inside loop in case they change during verification
             response = as_client.describe_auto_scaling_groups(AutoScalingGroupNames=[group_name])
@@ -103,6 +103,21 @@ def verify_internal(asgroup, tgrp):
 
         if not all_healthy:
             raise Exception('Not all instances become healthy with in 15 minutes.')
+
+        LOG.info('Wait for all other instances draining out within 10 minutes')
+        t0 = time.time()
+        exist_instances = []
+        while time.time() - t0 < 10 * 60:
+            exist_instances = get_targets(tgrp_arn)
+            if len(exist_instances) > len(instances):
+                LOG.warn('%d instances [ %s ] in the auto scaling group %s, while %d [ %s ] registered in the target group %s'
+                         % ( len(instances), ','.join(instances), group_name, len(exist_instances), ','.join(exist_instances), tgrp ))
+                time.sleep(30)
+            else:
+                break
+
+        if len(exist_instances) > len(instances):
+            raise Exception('Not all extra instances drained out with in 10 minutes.')
 
     except ClientError as e:
         LOG.error("Error: %s" % e)

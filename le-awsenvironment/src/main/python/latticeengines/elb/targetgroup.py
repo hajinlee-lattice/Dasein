@@ -66,6 +66,11 @@ def targets_are_healthy(tgrp_arn, instance_ids):
         all_healthy = all_healthy and (state == 'healthy')
     return all_healthy
 
+def get_targets(tgrp_arn):
+    client = get_client()
+    response = client.describe_target_health(TargetGroupArn=tgrp_arn)
+    return [desc['Target']['Id'] for desc in response["TargetHealthDescriptions"]]
+
 def get_client():
     global ELB_CLIENT
     if ELB_CLIENT is None:
@@ -90,5 +95,6 @@ if __name__ == '__main__':
 
     init_logging()
     tgrp_arn = 'arn:aws:elasticloadbalancing:us-east-1:028036828464:targetgroup/app-lpi/139acd55ecbd292e'
-    instances = [ 'i-05233af0d126e5efd', 'i-0ad3def5bc2977092' ]
-    targets_are_healthy(tgrp_arn, instances)
+    #instances = [ 'i-05233af0d126e5efd', 'i-0ad3def5bc2977092' ]
+    #targets_are_healthy(tgrp_arn, instances)
+    print get_targets(tgrp_arn)
