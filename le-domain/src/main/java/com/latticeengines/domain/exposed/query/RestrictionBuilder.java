@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 
 public class RestrictionBuilder {
@@ -78,7 +77,7 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder not(ConcreteRestriction restriction) {
         negate = true;
-        this.restriction = JsonUtils.deserialize(JsonUtils.serialize(restriction), ConcreteRestriction.class);
+        this.restriction = restriction;
         ((ConcreteRestriction) this.restriction).setNegate(true);
         complete = true;
         return this;
