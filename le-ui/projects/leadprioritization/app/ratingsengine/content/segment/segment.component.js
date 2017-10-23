@@ -78,16 +78,28 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         return false;
     }
 
-    function chunk (arr, len) {
-        var chunks = [],
-        i = 0,
-        n = arr.length;
+    function chunk (arr, n) {
+        if (n < 2)
+            return [arr];
 
-        while (i < n) {
-            chunks.push(arr.slice(i, i += len));
+        var len = arr.length,
+            out = [],
+            i = 0,
+            size;
+
+        if (len % n === 0) {
+            size = Math.floor(len / n);
+            while (i < len) {
+                out.push(arr.slice(i, i += size));
+            }
+        } else {
+            while (i < len) {
+                size = Math.ceil((len - i) / n--);
+                out.push(arr.slice(i, i += size));
+            }
         }
 
-        return chunks;
+        return out;
     }
 
     vm.getCounts = function(segments) {
@@ -99,8 +111,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
             segmentIds.push(segmentId);
         });
 
-        var chunk_size = Math.round(segmentIds.length / 6),
-            segmentChunks = chunk(segmentIds, chunk_size) || [];
+        var segmentChunks = chunk(segmentIds, 5) || [];
 
         angular.forEach(segmentChunks, function(ids, index) {
             RatingsEngineStore.getSegmentsCounts(ids).then(function(response){
