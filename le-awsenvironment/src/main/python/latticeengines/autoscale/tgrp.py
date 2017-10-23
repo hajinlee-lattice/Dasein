@@ -4,6 +4,7 @@ import logging
 import time
 from botocore.exceptions import ClientError
 
+from ..common.log import init_logging
 from ..elb.targetgroup import find_tgrp_arn, targets_are_healthy, get_targets
 
 AS_CLIENT = None
