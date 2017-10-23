@@ -22,6 +22,11 @@ def deregister_ec2_from_targetgroup(stackname, tgrp):
         print "registering ec2 %s to target group %s" % (ec2_id, tgrp)
         deregister(tgrp, ec2_id)
 
+def verify_ec2_in_targetgroup(stackname, tgrp):
+    ids = find_ec2_ids(stackname)
+    for ec2_id in ids:
+        print "verifying ec2 %s in target group %s" % (ec2_id, tgrp)
+
 def find_ec2_ids(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
     ips = []

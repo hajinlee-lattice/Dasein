@@ -1,7 +1,10 @@
 import argparse
 import boto3
+import logging
 
 DUMMY_TGRP="arn:aws:iam::028036828464:target-group/dummy"
+ELB_CLIENT=None
+LOG = logging.getLogger(__name__)
 
 def main():
     args = parse_args()
@@ -13,7 +16,7 @@ def register_cli(args):
 def register(tgrp, instance, port=443):
     group_arn = find_tgrp_arn(tgrp)
 
-    client = boto3.client('elbv2')
+    client = get_client()
     client.register_targets(
         TargetGroupArn=group_arn,
         Targets=[
@@ -27,7 +30,7 @@ def register(tgrp, instance, port=443):
 def deregister(tgrp, instance, port=443):
     group_arn = find_tgrp_arn(tgrp)
 
-    client = boto3.client('elbv2')
+    client = get_client()
     client.deregister_targets(
         TargetGroupArn=group_arn,
         Targets=[
@@ -39,14 +42,35 @@ def deregister(tgrp, instance, port=443):
     )
 
 def find_tgrp_arn(name):
-    client = boto3.client('elbv2')
+    client = get_client()
     response = client.describe_target_groups()
     for tgrp in response['TargetGroups']:
         if tgrp['TargetGroupName'] == name:
             tgrp_arn = tgrp['TargetGroupArn']
-            print "Found target group " + tgrp_arn
+            LOG.info("Found target group " + tgrp_arn)
             return tgrp_arn
     raise Exception("Cannot find target group named "+ name)
+
+def targets_are_healthy(tgrp_arn, instance_ids):
+    client = get_client()
+    response = client.describe_target_health(
+        TargetGroupArn=tgrp_arn,
+        Targets= [
+            {'Id': iid} for iid in instance_ids
+        ])
+    all_healthy = True
+    for desc in response["TargetHealthDescriptions"]:
+        iid = desc['Target']['Id']
+        state = desc['TargetHealth']['State']
+        LOG.info('The state of instance %s is %s' % (iid, state))
+        all_healthy = all_healthy and (state == 'healthy')
+    return all_healthy
+
+def get_client():
+    global ELB_CLIENT
+    if ELB_CLIENT is None:
+        ELB_CLIENT = boto3.client('elbv2')
+    return ELB_CLIENT
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Docker image management')
@@ -62,4 +86,9 @@ def parse_args():
     return args
 
 if __name__ == '__main__':
-    main()
+    from ..common.log import init_logging
+
+    init_logging()
+    tgrp_arn = 'arn:aws:elasticloadbalancing:us-east-1:028036828464:targetgroup/app-lpi/139acd55ecbd292e'
+    instances = [ 'i-05233af0d126e5efd', 'i-0ad3def5bc2977092' ]
+    targets_are_healthy(tgrp_arn, instances)
