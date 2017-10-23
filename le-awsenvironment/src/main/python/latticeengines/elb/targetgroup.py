@@ -91,10 +91,11 @@ def parse_args():
     return args
 
 if __name__ == '__main__':
-    from ..common.log import init_logging
-
-    init_logging()
-    tgrp_arn = 'arn:aws:elasticloadbalancing:us-east-1:028036828464:targetgroup/app-lpi/139acd55ecbd292e'
-    #instances = [ 'i-05233af0d126e5efd', 'i-0ad3def5bc2977092' ]
-    #targets_are_healthy(tgrp_arn, instances)
-    print get_targets(tgrp_arn)
+    # from ..common.log import init_logging
+    #
+    # init_logging()
+    # tgrp_arn = 'arn:aws:elasticloadbalancing:us-east-1:028036828464:targetgroup/app-lpi/139acd55ecbd292e'
+    # #instances = [ 'i-05233af0d126e5efd', 'i-0ad3def5bc2977092' ]
+    # #targets_are_healthy(tgrp_arn, instances)
+    # print get_targets(tgrp_arn)
+    main()

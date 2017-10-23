@@ -168,6 +168,7 @@ def parse_args():
     return args
 
 if __name__ == '__main__':
-    from ..common.log import init_logging
-    init_logging()
-    verify_internal('lpi-lpi-a', 'app-lpi')
+    # from ..common.log import init_logging
+    # init_logging()
+    # verify_internal('lpi-lpi-a', 'app-lpi')
+    main()
