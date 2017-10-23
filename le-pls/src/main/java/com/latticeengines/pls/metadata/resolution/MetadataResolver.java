@@ -149,7 +149,7 @@ public class MetadataResolver {
                         }
                     }, null);
                     if (attribute != null) {
-                        attribute.setApprovedUsage(ApprovedUsage.NONE, ApprovedUsage.IGNORED);
+                        attributes.remove(attribute);
                     }
                 }
             }

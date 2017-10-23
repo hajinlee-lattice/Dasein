@@ -232,10 +232,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 path = matches.get(0);
                 allSchemas[i] = AvroUtils.getSchema(config, new Path(path));
                 for (Field field : allSchemas[i].getFields()) {
-                    Attribute attr = sourceTable.getAttribute(field.name());
-                    if (attr != null && attr.getApprovedUsage() != null && attr.getApprovedUsage().contains(ApprovedUsage.IGNORED.getName())) {
-                        continue;
-                    }
                     allColumns.put(field.name(), field);
                 }
                 i++;
