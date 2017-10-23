@@ -12,7 +12,6 @@ public enum InterfaceName {
     ContactId, //
     CategoryId, //
     SubcategoryId, //
-    CRMId, //
     ProductId, //
     TransactionId, //
     PeriodId, //

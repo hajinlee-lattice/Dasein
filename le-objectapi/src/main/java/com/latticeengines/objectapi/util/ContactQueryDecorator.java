@@ -11,7 +11,7 @@ public class ContactQueryDecorator extends QueryDecorator {
     private final static AttributeLookup[] attributeLookups = {
             new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.toString()),
             new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.toString()),
-            new AttributeLookup(BusinessEntity.Contact, InterfaceName.CRMId.toString()),
+            new AttributeLookup(BusinessEntity.Contact, InterfaceName.SalesforceContactID.toString()),
             new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.toString()),
             new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.toString()),
     };
