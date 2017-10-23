@@ -17,17 +17,22 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -67,6 +72,72 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(105163L));
+    }
+
+    @Test(groups = "functional")
+    public void testAccountWithTxn() {
+        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+
+        // Ever Purchased
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
+        long totalCount = countTxnBkt(txn);
+        Assert.assertEquals(totalCount, 832L);
+
+        // Ever, Amount > 0, Quantity > 0
+        AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN, Collections.singletonList(0));
+        txn = new Bucket.Transaction(prodId, TimeFilter.ever(), greaterThan0, greaterThan0, false);
+        long count = countTxnBkt(txn);
+        Assert.assertEquals(count, totalCount);
+
+        // Check add up
+        AggregationFilter filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1000));
+        AggregationFilter filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1000, 3000));
+        AggregationFilter filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(3000));
+        Bucket.Transaction txn1 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter1, null, false);
+        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter2, null, false);
+        Bucket.Transaction txn3 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter3, null, false);
+        long count1 = countTxnBkt(txn1);
+        long count2 = countTxnBkt(txn2);
+        long count3 = countTxnBkt(txn3);
+        Assert.assertEquals(count1 + count2 + count3, totalCount);
+
+        filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1));
+        filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1, 10));
+        filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(10));
+        txn1 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter1, null, false);
+        txn2 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter2, null, false);
+        txn3 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter3, null, false);
+        count1 = countTxnBkt(txn1);
+        count2 = countTxnBkt(txn2);
+        count3 = countTxnBkt(txn3);
+        Assert.assertEquals(count1 + count2 + count3, totalCount);
+
+//        // Last Quarter Amount
+//        TimeFilter lastQuarter = new TimeFilter(ComparisonType.EQUAL, TimeFilter.Period.Quarter, Collections.singletonList(1));
+//        AggregationFilter spentFilter = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(15, 700));
+//        txn = new Bucket.Transaction(prodId, lastQuarter, spentFilter, null, false);
+//        count = countTxnBkt(txn);
+//        Assert.assertEquals(count, new Long(115L));
+//
+//        // Last Quarter Quantity
+//        AggregationFilter unitFilter = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(2));
+//        txn = new Bucket.Transaction(prodId, lastQuarter, null, unitFilter, false);
+//        count = countTxnBkt(txn);
+//        Assert.assertEquals(count, new Long(105017L));
+    }
+
+    private long countTxnBkt(Bucket.Transaction txn) {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Bucket bucket = Bucket.txnBkt(txn);
+        Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        Long count = entityQueryService.getCount(frontEndQuery);
+        Assert.assertNotNull(count);
+        return count;
     }
 
     @Test(groups = "functional")
