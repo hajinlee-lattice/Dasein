@@ -90,7 +90,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @JsonProperty("status")
     @Column(name = "STATUS", nullable = false)
     @Enumerated(EnumType.STRING)
-    private RatingEngineStatus status = RatingEngineStatus.INACTIVE;
+    private RatingEngineStatus status;
 
     @JsonProperty("segment")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)

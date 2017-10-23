@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -160,6 +161,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
             ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
             ratingEngine.addRatingModel(ruleBasedModel);
+            ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
             ratingEngineDao.create(ratingEngine);
             break;
         case AI_BASED:
