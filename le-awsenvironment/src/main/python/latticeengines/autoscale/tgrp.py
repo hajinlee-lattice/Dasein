@@ -1,5 +1,6 @@
 import argparse
 import boto3
+import json
 import logging
 import time
 from botocore.exceptions import ClientError
@@ -48,7 +49,7 @@ def register_internal(asgroup, tgrp):
             AutoScalingGroupName=group_name,
             TargetGroupARNs=tgrp_arns
         )
-        LOG.info('Registered ' + response)
+        LOG.info('Registered ' + json.dumps(response))
     except ClientError as e:
         LOG.error("Error: %s" % e)
         raise e
@@ -66,7 +67,7 @@ def deregister_internal(asgroup, tgrp):
                     AutoScalingGroupName=group_name,
                     TargetGroupARNs=[ tgrp_arn ]
                 )
-            LOG.info('Deregistered ' + response)
+            LOG.info('Deregistered ' + json.dumps(response))
     except ClientError as e:
         LOG.error("Error: %s" % e)
         raise e
