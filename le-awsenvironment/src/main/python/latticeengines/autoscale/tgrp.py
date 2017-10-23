@@ -121,6 +121,8 @@ def verify_internal(asgroup, tgrp):
         if len(exist_instances) > len(instances):
             raise Exception('Not all extra instances drained out with in 10 minutes.')
 
+        LOG.info('Auto scaling group %s in target group %s is healthy.' % (group_name, tgrp))
+
     except ClientError as e:
         LOG.error("Error: %s" % e)
         raise e
@@ -161,7 +163,7 @@ def parse_args():
     subparser.add_argument('-t', dest='tgrp', type=str, required=True, help='target group name')
     subparser.set_defaults(func=deregister)
 
-    subparser = commands.add_parser("verify", description="Verify an autoscaling group is registered to a target group")
+    subparser = commands.add_parser("verify", description="Verify a single autoscaling group is registered to a target group")
     subparser.add_argument('-a', dest='asgroup', type=str, required=True, help='autoscaling group name (prefix)')
     subparser.add_argument('-t', dest='tgrp', type=str, required=True, help='target group name')
     subparser.set_defaults(func=verify)
