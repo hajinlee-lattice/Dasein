@@ -139,7 +139,7 @@
         <c3p0.version>0.9.5.2</c3p0.version>
         <influxdb.version>2.7</influxdb.version>
         <hive.version>1.1.0</hive.version>
-        <sqljdbc4.version>4.0</sqljdbc4.version>
+        <sqljdbc.version>6.2.2.jre8</sqljdbc.version>
         <mysql.connector.version>5.1.30</mysql.connector.version>
         <!-- commons -->
         <commons.io.version>2.5</commons.io.version>
@@ -1195,8 +1195,8 @@
             </dependency>
             <dependency>
                 <groupId>com.microsoft.sqlserver</groupId>
-                <artifactId>sqljdbc4</artifactId>
-                <version>${sqljdbc4.version}</version>
+                <artifactId>mssql-jdbc</artifactId>
+                <version>${sqljdbc.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -1811,7 +1811,7 @@
 
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
+            <artifactId>mssql-jdbc</artifactId>
         </dependency>
 
         <dependency>
