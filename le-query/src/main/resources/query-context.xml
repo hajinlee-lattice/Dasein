@@ -18,8 +18,8 @@
         <property name="driverClass" value="com.amazon.redshift.jdbc42.Driver"/>
         <property name="jdbcUrl"
                   value="${redshift.jdbc.url}/${redshift.app.database}?user=${redshift.segment.user}&amp;password=${redshift.password.encrypted}&amp;tcpKeepAlive=true"/>
-        <property name="acquireIncrement" value="4"/>
-        <property name="maxPoolSize" value="32"/>
+        <property name="acquireIncrement" value="2"/>
+        <property name="maxPoolSize" value="8"/>
         <property name="checkoutTimeout" value="10000"/>
         <property name="idleConnectionTestPeriod" value="10"/>
         <property name="maxIdleTime" value="30"/>
