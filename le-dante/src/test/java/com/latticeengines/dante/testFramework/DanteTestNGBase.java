@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -93,6 +94,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         String id = RatingEngine.generateIdStr();
         ratingEngine.setId(id);
         ratingEngine.setTenant(mainTestTenant);
+        ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
         ratingEngine.setDisplayName(
                 String.format(RatingEngine.DEFAULT_NAME_PATTERN, RatingEngine.DATE_FORMAT.format(new Date())));
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
