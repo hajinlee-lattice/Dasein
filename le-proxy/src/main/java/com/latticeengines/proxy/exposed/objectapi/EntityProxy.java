@@ -19,7 +19,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("entityProxy")
@@ -101,8 +103,28 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         ratingCache.setRefreshKeyResolver((updateSignal, existingKeys) -> Collections.emptyList());
     }
 
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        optimizeRestrictions(frontEndQuery);
+        frontEndQuery.setPageFilter(null);
+        frontEndQuery.setSort(null);
+        return getCountFromCache(customerSpace, frontEndQuery);
+    }
+
+    public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
+        optimizeRestrictions(frontEndQuery);
+        return getDataFromCache(customerSpace, frontEndQuery);
+    }
+
+    public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        optimizeRestrictions(frontEndQuery);
+        frontEndQuery.setPageFilter(null);
+        frontEndQuery.setSort(null);
+        return getRatingCountFromCache(customerSpace, frontEndQuery);
+    }
+
+    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
+    private Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+        optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
         Long count = getCountFromObjectApi(
@@ -114,7 +136,8 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     }
 
     @Cacheable(key = "T(java.lang.String).format(\"%s|%s|data\", #customerSpace, #frontEndQuery)", sync = true)
-    public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
+    private DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+        optimizeRestrictions(frontEndQuery);
         DataPage dataPage = getDataFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
         if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
@@ -125,7 +148,8 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     }
 
     @Cacheable(key = "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace, #frontEndQuery)", sync = true)
-    public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
+    private Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+        optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
         Map<String, Long> ratingCountInfo = getRatingCountFromObjectApi(
@@ -164,6 +188,21 @@ public class EntityProxy extends MicroserviceRestApiProxy {
             return null;
         } else {
             return JsonUtils.convertMap(map, String.class, Long.class);
+        }
+    }
+
+    private void optimizeRestrictions(FrontEndQuery frontEndQuery) {
+        if (frontEndQuery.getAccountRestriction() != null) {
+            Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
+            if (restriction != null) {
+                frontEndQuery.getAccountRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+            }
+        }
+        if (frontEndQuery.getContactRestriction() != null) {
+            Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
+            if (restriction != null) {
+                frontEndQuery.getContactRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+            }
         }
     }
 }

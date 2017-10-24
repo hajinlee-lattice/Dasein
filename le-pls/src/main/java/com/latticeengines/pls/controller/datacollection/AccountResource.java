@@ -62,6 +62,7 @@ public class AccountResource extends BaseFrontEndEntityResource {
         }
     }
 
+    @Deprecated
     @Override
     @RequestMapping(value = "/ratingcount", method = RequestMethod.POST)
     @ResponseBody

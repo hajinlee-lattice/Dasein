@@ -28,7 +28,6 @@ public abstract class BaseFrontEndEntityResource {
 
     public long getCount(FrontEndQuery frontEndQuery) {
         appendSegmentRestriction(frontEndQuery);
-        optimizeRestrictions(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getCount(tenantId, frontEndQuery);
@@ -36,15 +35,14 @@ public abstract class BaseFrontEndEntityResource {
 
     public DataPage getData(FrontEndQuery frontEndQuery) {
         appendSegmentRestriction(frontEndQuery);
-        optimizeRestrictions(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getData(tenantId, frontEndQuery);
     }
 
+    @Deprecated
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
         appendSegmentRestriction(frontEndQuery);
-        optimizeRestrictions(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getRatingCount(tenantId, frontEndQuery);
@@ -93,21 +91,6 @@ public abstract class BaseFrontEndEntityResource {
             return Pair.of(segment.getAccountRestriction(), segment.getContactRestriction());
         } else {
             return Pair.of(null, null);
-        }
-    }
-
-    private void optimizeRestrictions(FrontEndQuery frontEndQuery) {
-        if (frontEndQuery.getAccountRestriction() != null) {
-            Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
-            if (restriction != null) {
-                frontEndQuery.getAccountRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
-            }
-        }
-        if (frontEndQuery.getContactRestriction() != null) {
-            Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
-            if (restriction != null) {
-                frontEndQuery.getContactRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
-            }
         }
     }
 

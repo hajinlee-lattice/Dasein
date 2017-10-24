@@ -100,7 +100,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
             case MAX:
                 return numberPath.max().as(lookup.getAlias());
             case MIN:
-                return numberExpression.min().as(lookup.getAlias());
+                return numberPath.min().as(lookup.getAlias());
             default:
                 throw new UnsupportedOperationException("Aggregator " + lookup.getAggregator() + " is not supported");
             }
@@ -113,7 +113,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
             case MAX:
                 return numberPath.max();
             case MIN:
-                return numberExpression.min();
+                return numberPath.min();
             default:
                 throw new UnsupportedOperationException("Aggregator " + lookup.getAggregator() + " is not supported");
             }
