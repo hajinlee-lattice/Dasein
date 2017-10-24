@@ -161,7 +161,9 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
             ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
             ratingEngine.addRatingModel(ruleBasedModel);
-            ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
+            if (ratingEngine.getStatus() == null) {
+                ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
+            }
             ratingEngineDao.create(ratingEngine);
             break;
         case AI_BASED:
