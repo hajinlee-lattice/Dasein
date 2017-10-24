@@ -53,14 +53,12 @@ angular.module('lp.ratingsengine.wizard.summary', [])
     		vm.rating.status = 'INACTIVE';
     	}
 
-    	// $stateParams.opts = {
-    	// 	rating_id: $stateParams.rating_id,
-    	// 	displayName: vm.rating.displayName,
-    	// 	note: vm.rating.note,
-    	// 	status: vm.rating.status
-    	// }
-
-    	console.log(vm.rating);
+    	$stateParams.opts = {
+    		rating_id: $stateParams.rating_id,
+    		displayName: vm.rating.displayName,
+    		note: vm.rating.note,
+    		status: vm.rating.status
+    	}
 
     }
 

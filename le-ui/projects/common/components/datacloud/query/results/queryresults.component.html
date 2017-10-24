@@ -19,11 +19,6 @@
         </label>
     </div>
 
-    <div class="success-message" ng-if="vm.saved === true">
-        <h3>Your segment was saved successfully!</h3>
-        <i class="fa fa-times fa-inverse" data-ng-click="vm.hideMessage()"></i>
-    </div>
-
     <ul class="filters">
         <li class="query">
             <div class="ng-search" ng-if="vm.section !== 'dashboard.targets' && vm.section !== 'wizard.targets'">
@@ -53,8 +48,14 @@
                 <!-- <button ng-if="!vm.inModel" class="button white-button" ui-sref="home.import.entry">Import Data</button> -->
                 <button class="button icon-button white-button" ui-sref="{{ vm.refineQuery() }}" ng-disabled="vm.saving">Refine Query</button>
 
-                <button class="save button blue-button" ng-if="vm.saveSegmentEnabled" ng-click="vm.saveSegment()">Save Segment</button>
-                <button class="save button blue-button" ng-if="!vm.saveSegmentEnabled" disabled>Save Segment</button>
+                <button 
+                    class="save button blue-button" 
+                    ng-if="vm.saveSegmentEnabled" 
+                    ng-click="vm.saveSegment()">Save Segment</button>
+                <button 
+                    class="save button blue-button" 
+                    ng-if="!vm.saveSegmentEnabled" 
+                    disabled>Save Segment</button>
 
             </div>
         </li>
@@ -193,9 +194,6 @@
     <div ng-if="vm.accounts.length === 0 || vm.contacts.length === 0">
         <p>No {{vm.page}} Found<p>
     </div>
-
-
-    {{vm.counts.accounts.value | number}}
 
     <ul class="filters pull-right" ng-if="vm.showAccountPagination">
         <li>

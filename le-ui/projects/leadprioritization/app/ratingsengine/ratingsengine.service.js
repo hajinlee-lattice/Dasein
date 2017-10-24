@@ -256,7 +256,8 @@ angular.module('lp.ratingsengine')
             segment: rating.segment || RatingsEngineStore.getSegment(),
             displayName: rating.displayName,
             status: rating.status,
-            id: rating.id
+            id: rating.id,
+            note: rating.note
         };
 
         RatingsEngineService.saveRating(opts).then(function(data){
