@@ -29,7 +29,6 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
-import com.latticeengines.datacloud.core.util.SlackUtils;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
@@ -53,6 +52,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.monitor.SlackSettings;
+import com.latticeengines.monitor.exposed.service.SlackService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 /**
@@ -65,8 +66,6 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     private static final Logger log = LoggerFactory.getLogger(PipelineTransformationService.class);
     private static final String SLACK_BOT = "PipelineTransformer";
-    private static final String SLACK_COLOR_GOOD = "good";
-    private static final String SLACK_COLOR_DANGER = "danger";
 
     @Autowired
     private PipelineSource pipelineSource;
@@ -82,6 +81,9 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private SlackService slackService;
 
     @Value("${datacloud.slack.webhook.url}")
     private String slackWebHookUrl;
@@ -397,7 +399,8 @@ public class PipelineTransformationService extends AbstractTransformationService
 
         for (int i = 0; i < steps.length; i++) {
             String slackMessage = String.format("Started step %d at %s", i, new Date().toString());
-            sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, "", transConf);
+            sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
+                    SlackSettings.Color.NORMAL, transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
             Long startTime = System.currentTimeMillis();
@@ -416,14 +419,15 @@ public class PipelineTransformationService extends AbstractTransformationService
                     slackMessage = String.format("Failed at step %d after %s :sob:", i,
                             DurationFormatUtils.formatDurationHMS(stepDuration));
                     sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
-                            SLACK_COLOR_DANGER, transConf);
+                            SlackSettings.Color.DANGER, transConf);
                     updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
                     return false;
                 }
                 // success message
                 slackMessage = String.format("Step %d finished after %s :smile:", i,
                         DurationFormatUtils.formatDurationHMS(stepDuration));
-                sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
+                sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
+                        SlackSettings.Color.GOOD,
                         transConf);
 
                 if (i == steps.length - 1) {
@@ -431,7 +435,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                             steps.length,
                             DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - pipelineStarTime));
                     sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
-                            SLACK_COLOR_GOOD, transConf);
+                            SlackSettings.Color.GOOD, transConf);
                 }
 
                 if (reportEnabled) {
@@ -792,9 +796,12 @@ public class PipelineTransformationService extends AbstractTransformationService
         return JsonUtils.deserialize(confStr, getConfigurationClass());
     }
 
-    private void sendSlack(String title, String text, String color, PipelineTransformationConfiguration transConf) {
+    private void sendSlack(String title, String text, SlackSettings.Color color,
+            PipelineTransformationConfiguration transConf) {
         if (StringUtils.isNotEmpty(slackWebHookUrl) && transConf.isEnableSlack()) {
-            SlackUtils.sendSlack(slackWebHookUrl, title, text, color, SLACK_BOT, "[" + leEnv + "-" + leStack + "]");
+            slackService.sendSlack(
+                    new SlackSettings(slackWebHookUrl, title, "[" + leEnv + "-" + leStack + "]", text, SLACK_BOT,
+                            color));
         }
     }
 
