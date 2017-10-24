@@ -207,9 +207,6 @@ angular
             },
             resolve: {
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-                    console.log("!!!!!!!!!!! route resolve");
-
                     var deferred = $q.defer();
 
                     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
@@ -233,62 +230,6 @@ angular
                     return deferred.promise;
 
                 }],
-                // AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-                //     var deferred = $q.defer();
-
-                //     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
-                //         var engineId = data.ratingEngine.id,
-                //             engineIdObject = [{id: engineId}];
-                //         PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                //             deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
-                //         });
-                //     });
-
-                //     return deferred.promise;
-
-                // }],
-                // CountWithoutSalesForce: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
-                //     var deferred = $q.defer(),
-                //         segmentName = $stateParams.segment,
-                //         accountRestriction = QueryStore.getAccountRestriction(),
-                //         contactRestriction = QueryStore.getContactRestriction();
-
-                //     if(segmentName === "Create"){
-                //         query = { 
-                //             'free_form_text_search': '',
-                //             'account_restriction': accountRestriction,
-                //             'contact_restriction': contactRestriction,
-                //             'preexisting_segment_name': segmentName,
-                //             'restrict_without_sfdcid': true,
-                //             'page_filter': {
-                //                 'num_rows': 10,
-                //                 'row_offset': 0
-                //             }
-                //         };
-
-                //         deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
-                //     } else {
-
-                //         SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                //             var segment = result;
-                //             query = { 
-                //                 'free_form_text_search': '',
-                //                 'account_restriction': segment.account_restriction,
-                //                 'contact_restriction': segment.contact_restriction,
-                //                 'preexisting_segment_name': segmentName,
-                //                 'restrict_without_sfdcid': true,
-                //                 'page_filter': {
-                //                     'num_rows': 10,
-                //                     'row_offset': 0
-                //                 }
-                //             };
-                //             deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
-                //         });
-                //     };
-
-                //     return deferred.promise;
-                // }],
                 CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
                     var deferred = $q.defer();
@@ -552,20 +493,6 @@ angular
                     return deferred.promise;
 
                 }],
-                // AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-                //     var deferred = $q.defer(),
-                //         savedRating = PlaybookWizardStore.getSavedRating(),
-                //         engineId = savedRating.id,
-                //         engineIdObject = [{id: engineId}];
-                            
-                //     PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                //         deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
-                //     });
-
-                //     return deferred.promise;
-
-                // }],
                 CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
                     var deferred = $q.defer(),
@@ -586,10 +513,7 @@ angular
                 }],
                 Contacts: [function(){
                     return null;
-                }],
-                // ContactsCount: [function(){
-                //     return null;
-                // }],
+                }]
             },
             views: {
                 "wizard_content@home.playbook.wizard": {
@@ -599,150 +523,6 @@ angular
                 }
             }
         })
-        // .state('home.playbook.wizard.rating.targets', {
-        //     url: '/targets',
-        //     resolve: {
-        //         Config: [function() {
-        //             return { 
-        //                     header: {
-        //                         class: 'playbook-targets',
-        //                         label: 'Targets'
-        //                     }
-        //                 }
-        //         }]
-        //     },
-        //     redirectTo: 'home.playbook.wizard.rating.targets.accounts',
-        //     views: {
-        //         "wizard_content@home.playbook.wizard": {
-        //             controller: 'TargetTabsController',
-        //             controllerAs: 'vm',
-        //             templateUrl: '/components/datacloud/query/results/targettabs.component.html'
-        //         }
-        //     }
-        // })
-        // .state('home.playbook.wizard.rating.targets.accounts', {
-        //     url: '/accounts',
-        //     params: {
-        //         section: 'wizard.targets',
-        //         currentTargetTab: 'accounts'
-        //     },
-        //     resolve: {
-        //         Accounts: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-        //             var deferred = $q.defer(),
-        //                 savedRating = PlaybookWizardStore.getSavedRating(),
-        //                 engineId = savedRating.id,
-        //                 query = { 
-        //                     free_form_text_search: '',
-        //                     restrictNotNullSalesforceId: false,
-        //                     entityType: 'Account',
-        //                     bucketFieldName: 'ScoreBucket',
-        //                     maximum: 15,
-        //                     offset: 0
-        //                 };
-
-        //             deferred.resolve(PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ return data.data; }));
-
-        //             return deferred.promise;
-
-        //         }],
-        //         AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-        //             var deferred = $q.defer(),
-        //                 savedRating = PlaybookWizardStore.getSavedRating(),
-        //                 engineId = savedRating.id,
-        //                 engineIdObject = [{id: engineId}];
-                            
-        //             PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-        //                 deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
-        //             });
-
-        //             return deferred.promise;
-
-        //         }],
-        //         CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-        //             var deferred = $q.defer(),
-        //                 savedRating = PlaybookWizardStore.getSavedRating(),
-        //                 engineId = savedRating.id,
-        //                 engineIdObject = [{id: engineId}];
-
-        //             PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
-        //                 deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
-        //             });
-
-        //             return deferred.promise;
-                    
-        //         }],
-        //         Contacts: [function(){
-        //             return null;
-        //         }],
-        //         ContactsCount: [function(){
-        //             return null;
-        //         }],
-        //         Config: [function(){
-        //             return null;
-        //         }],
-        //     },
-        //     views: {
-        //         "wizard_content@home.playbook.wizard": {
-        //             controller: 'QueryResultsCtrl',
-        //             controllerAs: 'vm',
-        //             templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-        //         }
-        //     }
-        // })
-        // .state('home.playbook.wizard.rating.targets.contacts', {
-        //     url: '/contacts',
-        //     params: {
-        //         section: 'wizard.targets',
-        //         currentTargetTab: 'contacts'
-        //     },
-        //     resolve: {
-        //         Contacts: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-        //             var deferred = $q.defer(),
-        //                 savedRating = PlaybookWizardStore.getSavedRating(),
-        //                 engineId = savedRating.id,
-        //                 engineIdObject = [{id: engineId}],
-        //                 query = { 
-        //                     free_form_text_search: '',
-        //                     restrictNotNullSalesforceId: false,
-        //                     entityType: 'Account',
-        //                     bucketFieldName: 'ScoreBucket',
-        //                     maximum: 15,
-        //                     offset: 0
-        //                 };
-                    
-        //             deferred.resolve(PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ return data.data; }));
-
-        //             return deferred.promise;
-
-        //         }],
-        //         ContactsCount: [function(){
-        //             return null;
-        //         }],
-        //         Accounts: [function(){
-        //             return null;
-        //         }],
-        //         AccountsCount: [function(){
-        //             return null;
-        //         }],
-        //         CountWithoutSalesForce: [function(){
-        //             return null;
-        //         }],
-        //         Config: [function(){
-        //             return null;
-        //         }],
-        //     },
-        //     views: {
-        //         "wizard_content@home.playbook.wizard": {
-        //             controller: 'QueryResultsCtrl',
-        //             controllerAs: 'vm',
-        //             templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-        //         }
-        //     }
-        // })
         .state('home.playbook.wizard.rating.targets.insights', {
             url: '/insights',
             params: {

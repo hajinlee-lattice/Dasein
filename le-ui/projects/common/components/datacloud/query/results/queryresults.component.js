@@ -98,9 +98,6 @@ angular.module('common.datacloud.query.results', [
             vm.setCurrentRestrictionForSaveButton();
 
         } else {
-
-            console.log("!!!!!!!!!!! controller updatePage()");
-
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
 
                 var engineId = data.ratingEngine.id,
@@ -139,8 +136,7 @@ angular.module('common.datacloud.query.results', [
             
                 vm.counts.accounts.value = data;
                 vm.counts.accounts.loading = false;
-
-                if(data < 10){
+                if(data > 10){
                     vm.showAccountPagination = true;
                     vm.showContactPagination = false;
                 }

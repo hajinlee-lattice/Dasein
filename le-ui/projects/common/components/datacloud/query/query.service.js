@@ -353,9 +353,6 @@ angular.module('common.datacloud.query.service',[
                 accountRestriction = this.getAccountRestriction(),
                 contactRestriction = this.getContactRestriction();
 
-
-            //console.log(query);
-
             if(query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
