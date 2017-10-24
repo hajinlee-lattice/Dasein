@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface MetadataInterface {
 
@@ -38,4 +39,5 @@ public interface MetadataInterface {
 
     void validateArtifact(String customerSpace, ArtifactType artifactType, String filePath);
 
+    Boolean provisionImportTables(Tenant tenant);
 }

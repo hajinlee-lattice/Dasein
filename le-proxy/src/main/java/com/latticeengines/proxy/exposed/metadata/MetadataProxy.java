@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
 import com.latticeengines.network.exposed.metadata.ModuleInterface;
@@ -202,4 +203,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         return get("getArtifactByPath", url, Artifact.class);
     }
 
+    @Override
+    public Boolean provisionImportTables(Tenant tenant) {
+        String url = constructUrl("/admin/provision");
+        return post("provisionImportTables", url, tenant, Boolean.class);
+    }
 }
