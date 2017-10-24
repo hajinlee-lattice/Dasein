@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller.datacollection;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -50,30 +51,48 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
-        Restriction segmentRestriction = null;
         if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())) {
-            segmentRestriction = getSegmentRestriction(frontEndQuery.getPreexistingSegmentName());
-        }
-        Restriction frontEndRestriction = null;
-        if (frontEndQuery.getAccountRestriction() != null) {
-            frontEndRestriction = frontEndQuery.getAccountRestriction().getRestriction();
-        }
-        if (segmentRestriction != null && frontEndRestriction != null) {
-            Restriction totalRestriction = Restriction.builder().and(frontEndRestriction, segmentRestriction).build();
-            frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
-        } else if (segmentRestriction != null) {
-            frontEndQuery.getAccountRestriction().setRestriction(segmentRestriction);
+            // Segment Restrictions
+            Pair<Restriction, Restriction> segmentRestrictions = getSegmentRestrictions(
+                    frontEndQuery.getPreexistingSegmentName());
+            Restriction segmentAccountRestriction = segmentRestrictions.getLeft();
+            Restriction segmentContactRestriction = segmentRestrictions.getRight();
+
+            // Account
+            if (segmentAccountRestriction != null) {
+                Restriction frontEndAccountRestriction = frontEndQuery.getAccountRestriction() != null
+                        ? frontEndQuery.getAccountRestriction().getRestriction() : null;
+                if (frontEndAccountRestriction != null) {
+                    Restriction totalRestriction = Restriction.builder()
+                            .and(frontEndAccountRestriction, segmentAccountRestriction).build();
+                    frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
+                } else {
+                    frontEndQuery.getAccountRestriction().setRestriction(segmentAccountRestriction);
+                }
+            }
+
+            // Contact
+            if (segmentContactRestriction != null) {
+                Restriction frontEndContactRestriction = frontEndQuery.getContactRestriction() != null
+                        ? frontEndQuery.getContactRestriction().getRestriction() : null;
+                if (frontEndContactRestriction != null) {
+                    Restriction totalRestriction = Restriction.builder()
+                            .and(frontEndContactRestriction, segmentContactRestriction).build();
+                    frontEndQuery.getContactRestriction().setRestriction(totalRestriction);
+                } else {
+                    frontEndQuery.getContactRestriction().setRestriction(segmentContactRestriction);
+                }
+            }
         }
     }
 
-    // TODO Bernard JiunJiun - handle contactRestriction
-    private Restriction getSegmentRestriction(String segmentName) {
+    private Pair<Restriction, Restriction> getSegmentRestrictions(String segmentName) {
         MetadataSegment segment = segmentProxy
                 .getMetadataSegmentByName(MultiTenantContext.getCustomerSpace().toString(), segmentName);
         if (segment != null) {
-            return segment.getAccountRestriction();
+            return Pair.of(segment.getAccountRestriction(), segment.getContactRestriction());
         } else {
-            return null;
+            return Pair.of(null, null);
         }
     }
 
