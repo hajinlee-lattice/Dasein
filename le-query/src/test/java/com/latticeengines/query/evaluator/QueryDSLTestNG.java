@@ -86,6 +86,8 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         SQLQuery withQuery2 = factory().query().from(innerTable).select(innerColumn1, innerColumn2).where(innerColumn1.eq("2"));
         SQLQuery withQuery3 = factory().query().from(innerTable)
                 .select(innerColumn1, innerColumn2).where(innerColumn2.eq("2").and(innerColumn1.eq("6")));
+        SQLQuery withQuery5 = factory().query().from(innerTable).select(innerColumn1, innerColumn2)
+                .where(innerColumn1.eq("3"));
         StringPath withTable1 = Expressions.stringPath("T1");
         StringPath withTable2 = Expressions.stringPath("T2");
         StringPath withTable3 = Expressions.stringPath("T3");
@@ -96,7 +98,9 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         SQLQuery unionQuery2 = factory().query().select(SQLExpressions.all).from(withTable2);
         SQLQuery unionQuery3 = factory().query().select(SQLExpressions.all).from(withTable3);
         SQLQuery withQuery4 = factory().query().select(SQLExpressions.all)
-                .from(SQLExpressions.intersect(SQLExpressions.union(unionQuery1, unionQuery2), unionQuery3));
+                .from(SQLExpressions.intersect(
+                        SQLExpressions.except(SQLExpressions.union(unionQuery1, unionQuery2), withQuery5),
+                        unionQuery3));
         SQLQuery testQuery = factory().query()
                 .with(withTable1, col1, col2).as(withQuery1)
                 .with(withTable2, col1, col2).as(withQuery2)
