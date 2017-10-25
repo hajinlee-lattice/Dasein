@@ -236,6 +236,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     value = (objInResult == null ? value : objInResult);
                 }
 
+                try {
+                    value = MatchOutputStandardizer.cleanNewlineCharacters(value);
+                } catch (Exception exc) {
+                    log.error("Failed to clean up new line characters. Exception: " + exc);
+                }
+
                 output.add(value);
                 columnMatchCount[i] += (value == null ? 0 : 1);
                 internalRecord.getColumnMatched().add(value != null);

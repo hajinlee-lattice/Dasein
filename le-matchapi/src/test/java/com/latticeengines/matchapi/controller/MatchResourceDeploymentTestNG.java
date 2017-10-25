@@ -12,6 +12,8 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -103,7 +105,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     private JobService jobService;
 
     // Test against DerivedColumnsCache
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
@@ -116,7 +118,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testAccountMasterRTSMatch() {
         testAccountMasterRTSMatch(true, "a@fb.com", true, false, null);
         testAccountMasterRTSMatch(true, "a@salesforce.com", false, true, "null");
@@ -125,7 +127,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     }
 
     private void testAccountMasterRTSMatch(boolean resolveKeyMap, String domain, boolean isEmail,
-            boolean setUnionSelection, String duns) {
+                                           boolean setUnionSelection, String duns) {
         MatchInput input = prepareSimpleMatchInput(resolveKeyMap, domain, isEmail, setUnionSelection, duns);
         String latestVersion = dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
         input.setDataCloudVersion(latestVersion);
@@ -141,7 +143,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions", enabled = true)
+    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions")
     public void testRealtimeBulkMatch(String version) throws IOException {
         int size = 200;
         List<MatchInput> inputList = prepareBulkMatchInput(size, version, true);
@@ -178,7 +180,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions", enabled = true)
+    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions")
     public void testRealtimeMatchWithMultipleRecords(String version) throws IOException {
         int size = 200;
         MatchInput matchInput = prepareMatchInputWithMultipleRecords(size, version);
@@ -245,7 +247,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     }
 
     private MatchInput prepareSimpleMatchInput(boolean resolveKeyMap, String domain, boolean isEmail,
-            boolean setUnionSelection, String duns) {
+                                               boolean setUnionSelection, String duns) {
         Object[][] data = new Object[][] { { 0, domain, duns } };
         List<List<Object>> mockData = new ArrayList<>();
         for (Object[] row : data) {
@@ -273,7 +275,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         return input;
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
@@ -286,7 +288,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
+    @Test(groups = "deployment", dataProvider = "allDataCloudVersions")
     public void testBulkMatchWithSchema(String version) throws Exception {
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
@@ -321,11 +323,22 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(101));
 
-        Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(100));
+        List<GenericRecord> matchResults = AvroUtils.getDataFromGlob(
+                yarnConfiguration, new Path(finalStatus.getResultLocation() + "/" + "*.avro").toString());
+        for (GenericRecord record : matchResults) {
+            Object value = record.get("HPAEmailSuffix");
+            String valueStr = (value instanceof Utf8) ? value.toString() : (String) value;
+            if (valueStr != null) {
+                Assert.assertFalse(valueStr.contains("\r"));
+                Assert.assertFalse(valueStr.contains("\n"));
+                Assert.assertFalse(valueStr.contains("\r\n"));
+            }
+        }
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testBulkMatchWithoutSchema() throws Exception {
         String version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
 
@@ -350,10 +363,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
         Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
+        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testMultiBlockBulkMatch() throws InterruptedException {
         String version = "1.0.0";
         HdfsPodContext.changeHdfsPodId(podId);
@@ -390,7 +403,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testGetBulkConfig() {
         String currentVersion = dataCloudVersionEntityMgr.currentApprovedVersionAsString();
         MatchInput input = createAvroBulkMatchInput(true, null, currentVersion);
