@@ -121,16 +121,10 @@ public class WorkflowResource implements WorkflowInterface {
 
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get a workflow execution with cache or without cache")
+    @ApiOperation(value = "Get a workflow execution")
     @Override
-    public Job getWorkflowExecution(
-            @PathVariable String workflowId,
-            @RequestParam(value = "cached", defaultValue = "true") boolean isCached) {
-        if (isCached) {
-            return workflowService.getJob(new WorkflowExecutionId(Long.valueOf(workflowId)));
-        } else {
-            return workflowService.getJobNoCache(new WorkflowExecutionId(Long.valueOf(workflowId)));
-        }
+    public Job getWorkflowExecution(@PathVariable String workflowId) {
+        return workflowService.getJob(new WorkflowExecutionId(Long.valueOf(workflowId)));
     }
 
     @RequestMapping(value = "/jobs/{tenantPid}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -138,7 +132,8 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid) {
-        return workflowContainerService.getJobsByTenant(tenantPid);
+        List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid);
+        return jobs;
     }
 
     @RequestMapping(value = "/jobs/{tenantPid}/find", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -146,7 +141,8 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
-        return workflowContainerService.getJobsByTenant(tenantPid, type);
+        List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid, type);
+        return jobs;
     }
 
     @RequestMapping(value = "/job/{workflowId}/stop", method = RequestMethod.POST, headers = "Accept=application/json")

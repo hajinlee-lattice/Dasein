@@ -24,8 +24,6 @@ public interface WorkflowJobService {
 
     Job find(String jobId);
 
-    Job find(String jobId, boolean isCached);
-
     List<Job> findAll();
 
 }

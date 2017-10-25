@@ -57,13 +57,9 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowI
         return get("getWorkflowJobFromApplicationId", url, Job.class);
     }
 
-    public Job getWorkflowExecution(String workflowId) {
-        return getWorkflowExecution(workflowId, true);
-    }
-
     @Override
-    public Job getWorkflowExecution(String workflowId, boolean isCached) {
-        String url = constructUrl("/job/{workflowId}?cached={isCached}", workflowId, isCached);
+    public Job getWorkflowExecution(String workflowId) {
+        String url = constructUrl("/job/{workflowId}", workflowId);
         return get("getWorkflowExecution", url, Job.class);
     }
 

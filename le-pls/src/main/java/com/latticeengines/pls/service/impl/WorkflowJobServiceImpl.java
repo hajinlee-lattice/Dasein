@@ -105,15 +105,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public Job find(String jobId, boolean isCached) {
-        Job job = workflowProxy.getWorkflowExecution(jobId, isCached);
-        updateJobWithModelSummary(job);
-        updateStepDisplayNameAndNumSteps(job);
-        updateJobDisplayNameAndDescription(job);
-        return job;
-    }
-
-    @Override
     public List<Job> findAll() {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
@@ -197,7 +188,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private void updateJobWithModelSummary(Job job) {
         if (job.getInputs() == null) {
-            job.setInputs(new HashMap<>());
+            job.setInputs(new HashMap<String, String>());
         }
         job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
                 getJobSourceFileExists(job.getApplicationId()).toString());
@@ -255,7 +246,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         SourceFile sourceFile = sourceFileEntityMgr.findByApplicationId(applicationId);
-        return (sourceFile != null);
+        if (sourceFile != null) {
+            return true;
+        }
+        return false;
     }
 
 }

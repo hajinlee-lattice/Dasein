@@ -1,19 +1,22 @@
 package com.latticeengines.workflow.service.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import com.latticeengines.domain.exposed.exception.ErrorDetails;
-import com.latticeengines.domain.exposed.workflow.*;
-import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
-import com.latticeengines.workflow.exposed.service.ReportService;
-import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.ReferenceJobFactory;
@@ -36,6 +39,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -78,15 +87,9 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
-    private JobProxy jobProxy;
-
-    @Autowired
-    private ReportService reportService;
-
     @Override
     public List<String> getNames() {
-        return new ArrayList<>(jobRegistry.getJobNames());
+        return new ArrayList<String>(jobRegistry.getJobNames());
     }
 
     @Override
@@ -132,7 +135,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             }
             if (workflowConfiguration.getInternalResourceHostPort() != null) {
                 parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT,
-                        workflowConfiguration.getInternalResourceHostPort());
+                        workflowConfiguration.getInternalResourceHostPort().toString());
             }
             if (workflowConfiguration.getUserId() != null) {
                 parmsBuilder.addString(USER_ID, workflowConfiguration.getUserId());
@@ -145,7 +148,8 @@ public class WorkflowServiceImpl implements WorkflowService {
             }
         }
 
-        return parmsBuilder.toJobParameters();
+        JobParameters parms = parmsBuilder.toJobParameters();
+        return parms;
     }
 
     @Override
@@ -237,24 +241,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
-        log.info("Retrieving job from workflow execution cache.");
         com.latticeengines.domain.exposed.workflow.Job job = workflowExecutionCache.getJob(workflowId);
-
-        if (job == null) {
-            return null;
-        }
-        if (job.getOutputs() != null && job.getApplicationId() != null) {
-            job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
-                    String.format("%s/app/%s", timelineServiceUrl, job.getApplicationId()));
-        }
-        return job;
-    }
-
-    @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJobNoCache(WorkflowExecutionId workflowId) {
-        log.info("Retrieving job from database/yarn.");
-        com.latticeengines.domain.exposed.workflow.Job job = queryJob(workflowId.getId());
-
         if (job == null) {
             return null;
         }
@@ -322,7 +309,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         Collection<String> stepNames = CollectionUtils.collect(jobExecution.getStepExecutions(),
                 TransformerUtils.invokerTransformer("getStepName"));
 
-        return new ArrayList<>(stepNames);
+        return new ArrayList<String>(stepNames);
     }
 
     @Override
@@ -370,123 +357,5 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public WorkflowJob getJob(long workflowId) {
         return workflowJobEntityMgr.findByWorkflowId(workflowId);
-    }
-
-    private com.latticeengines.domain.exposed.workflow.Job queryJob(Long jobId) {
-        log.info(String.format("Job with id: %s is not in the cache, reloading.", jobId));
-        try {
-            JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(jobId);
-            if (jobExecution == null) {
-                return null;
-            }
-
-            JobInstance jobInstance = jobExecution.getJobInstance();
-            WorkflowExecutionId workflowId = new WorkflowExecutionId(jobId);
-            WorkflowStatus workflowStatus = getStatus(workflowId);
-            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
-
-            com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
-            job.setId(jobId);
-            if (FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
-                job.setJobStatus(JobStatus.FAILED);
-            } else {
-                JobStatus status = getJobStatusFromBatchStatus(workflowStatus.getStatus());
-                if (status.isTerminated()) {
-                    job.setJobStatus(status);
-                } else {
-                    WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
-                }
-            }
-
-            job.setStartTimestamp(workflowStatus.getStartTime());
-            job.setJobType(jobInstance.getJobName());
-            job.setSteps(getJobSteps(jobExecution));
-
-            if (workflowJob.getStartTimeInMillis() != null) {
-                job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
-            }
-            job.setReports(getReports(workflowJob));
-            job.setOutputs(getOutputs(workflowJob));
-            job.setInputs(workflowJob.getInputContext());
-            job.setApplicationId(workflowJob.getApplicationId());
-            job.setUser(workflowJob.getUserId());
-            ErrorDetails errorDetails = workflowJob.getErrorDetails();
-            if (errorDetails != null) {
-                job.setErrorCode(errorDetails.getErrorCode());
-                job.setErrorMsg(errorDetails.getErrorMsg());
-            }
-            job.setEndTimestamp(workflowStatus.getEndTime());
-
-            return job;
-        } catch (Exception e) {
-            log.error(String.format("Getting job status for workflow: %d failed", jobId), e);
-            throw e;
-        }
-    }
-
-    private List<JobStep> getJobSteps(JobExecution jobExecution) {
-        List<JobStep> steps = new ArrayList<>();
-
-        for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
-            JobStep jobStep = new JobStep();
-            jobStep.setJobStepType(stepExecution.getStepName());
-            jobStep.setStepStatus(getJobStatusFromBatchStatus(stepExecution.getStatus()));
-            if (stepExecution.getExitStatus() == ExitStatus.NOOP) {
-                jobStep.setStepStatus(JobStatus.SKIPPED);
-            }
-            jobStep.setStartTimestamp(stepExecution.getStartTime());
-            jobStep.setEndTimestamp(stepExecution.getEndTime());
-            steps.add(jobStep);
-        }
-
-        return steps;
-    }
-
-    private List<Report> getReports(WorkflowJob workflowJob) {
-        List<Report> reports = new ArrayList<>();
-        Map<String, String> reportContext = workflowJob.getReportContext();
-        for (String reportPurpose : reportContext.keySet()) {
-            Report report = reportService.getReportByName(reportContext.get(reportPurpose));
-            if (report != null) {
-                reports.add(report);
-            }
-        }
-        return reports;
-    }
-
-    private Map<String, String> getOutputs(WorkflowJob workflowJob) {
-        Map<String, String> outputs = new HashMap<>();
-        Map<String, String> outputContext = workflowJob.getOutputContext();
-
-        for (String key : outputContext.keySet()) {
-            outputs.put(key, outputContext.get(key));
-        }
-        return outputs;
-    }
-
-    private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {
-        JobStatus jobStatus = JobStatus.PENDING;
-        switch (batchStatus) {
-            case UNKNOWN:
-                jobStatus = JobStatus.PENDING;
-                break;
-            case STARTED:
-            case STARTING:
-                jobStatus = JobStatus.RUNNING;
-                break;
-            case COMPLETED:
-                jobStatus = JobStatus.COMPLETED;
-                break;
-            case STOPPING:
-            case STOPPED:
-                jobStatus = JobStatus.CANCELLED;
-                break;
-            case ABANDONED:
-            case FAILED:
-                jobStatus = JobStatus.FAILED;
-                break;
-        }
-
-        return jobStatus;
     }
 }

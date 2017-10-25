@@ -20,7 +20,7 @@ public interface WorkflowInterface {
 
     Job getWorkflowJobFromApplicationId(String applicationId);
 
-    Job getWorkflowExecution(String workflowId, boolean isCached);
+    Job getWorkflowExecution(String workflowId);
 
     List<Job> getWorkflowExecutionsForTenant(long tenantPid);
 
