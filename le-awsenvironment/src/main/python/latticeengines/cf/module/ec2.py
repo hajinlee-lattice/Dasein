@@ -18,6 +18,8 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
     lerepo = config.le_repo()
     bucket = config.cf_bucket()
     chefbucket= config.chef_bucket()
+    cert = "star.lattice.local"
+
     assert isinstance(instance_role_name, Parameter)
 
     md = {
@@ -65,14 +67,28 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "runas=root\n"
                         ]]}
                     },
-                    "/tmp/s-iss.pub":{
+                    "/etc/ledp/s-iss.pub":{
                         "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/ssh_keys/s-iss/pub",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
                         "authentication":"S3AccessCreds"
                     },
-                    "/createSSHAccounts.sh":{
+                    "/etc/ledp/lattice.crt":{
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/" + cert + "/" + cert.crt,
+                        "mode":"000600",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
+                    "/etc/ledp/lattice.key":{
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/" + cert + "/" + cert.key,
+                        "mode":"000600",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
+                    "/etc/ledp/createSSHAccounts.sh":{
                         "source":"http://" + config.s3_endpoint() + "/" + bucket + "/ssh/createAccounts.sh",
                         "mode":"000777",
                         "owner":"root",
@@ -179,7 +195,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "useradd s-iss",
                             "mkdir -p /home/s-iss/.ssh",
                             "chmod 0700 /home/s-iss/.ssh",
-                            "mv /tmp/s-iss.pub .",
+                            "mv /etc/ledp/s-iss.pub .",
                             "cat s-iss.pub > /home/s-iss/.ssh/authorized_keys",
                             "chmod 0600 /home/s-iss/.ssh/authorized_keys",
                             "rm -f s-iss.pub"
@@ -188,7 +204,15 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                     "06_ssh_user" : {
                         "command" : { "Fn::Join": [ "\n", [
                             "#!/bin/bash",
-                            "bash /createSSHAccounts.sh Developers || true"
+                            "bash /etc/ledp/createSSHAccounts.sh Developers || true"
+                        ] ] }
+                    },
+                    "07_concat_tls" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "cd /etc/ledp",
+                            "cat lattice.crt lattice.key > lattice.pem",
+                            "chmod 600 lattice.pem"
                         ] ] }
                     },
                     "10_add_instance_to_cluster" : {

@@ -107,4 +107,11 @@ replace_token dante ${DANTE_HOSTPORTS} true
 
 cat /usr/local/etc/haproxy/haproxy.cfg
 
+if [ -f "/etc/ledp/lattice.pem" ]; then
+    echo 'copying /etc/ledp/lattice.pem to /etc/ssl/private/server.pem'
+    cp -f /etc/ledp/lattice.pem /etc/ssl/private/server.pem
+    chmod 600 /etc/ssl/private/server.pem
+    ls -l /etc/ssl/private/
+fi
+
 /docker-entrypoint.sh haproxy -f /usr/local/etc/haproxy/haproxy.cfg

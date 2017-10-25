@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-test</artifactId>
-            <version>${spring.data.version}</version>
+            <version>${spring.data.hdp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -79,18 +79,18 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-hadoop</artifactId>
-            <version>${spring.data.version}</version>
+            <version>${spring.data.hdp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-core</artifactId>
-            <version>${spring.data.version}</version>
+            <version>${spring.data.hdp.version}</version>
             <classifier>ledp3</classifier>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-batch</artifactId>
-            <version>${spring.data.version}</version>
+            <version>${spring.data.hdp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>

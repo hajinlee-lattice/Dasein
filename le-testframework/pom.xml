@@ -86,7 +86,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-test</artifactId>
-            <version>${spring.data.version}</version>
+            <version>${spring.data.hdp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
