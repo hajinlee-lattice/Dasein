@@ -75,14 +75,14 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "authentication":"S3AccessCreds"
                     },
                     "/etc/ledp/lattice.crt":{
-                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/tls/" + cert + "/" + cert.crt,
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/tls/" + cert + "/" + cert + ".crt",
                         "mode":"000600",
                         "owner":"root",
                         "group":"root",
                         "authentication":"S3AccessCreds"
                     },
                     "/etc/ledp/lattice.key":{
-                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/tls/" + cert + "/" + cert.key,
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/tls/" + cert + "/" + cert + ".crt",
                         "mode":"000600",
                         "owner":"root",
                         "group":"root",
