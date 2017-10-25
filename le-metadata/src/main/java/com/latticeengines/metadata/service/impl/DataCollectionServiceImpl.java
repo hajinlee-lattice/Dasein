@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -43,6 +45,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
         if (StringUtils.isBlank(collectionName)) {
@@ -61,6 +66,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         dataCollectionEntityMgr.update(collection);
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
         notifyCacheWatchers(customerSpace);
+        cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.DataLakeCache,
+                CacheNames.EntityCache);
         return newVersion;
     }
 

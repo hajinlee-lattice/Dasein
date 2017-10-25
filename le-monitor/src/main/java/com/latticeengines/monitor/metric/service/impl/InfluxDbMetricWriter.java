@@ -52,6 +52,9 @@ public class InfluxDbMetricWriter implements MetricWriter {
     private static final String DB_CACHE_KEY = "InfluxDB";
     private static final String METRIC_ADVERTISE_NAME = "METRIC_ADVERTISE_NAME";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
+    
+    @Value("${monitor.influxdb.enabled:false}")
+	private String enableInflux;
 
     @Value("${monitor.influxdb.url:}")
     private String url;
@@ -81,7 +84,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
 
     @PostConstruct
     private void postConstruct() {
-        if (StringUtils.isNotEmpty(url)) {
+        if (StringUtils.isNotEmpty(url) && Boolean.valueOf(enableInflux)) {
             try {
                 buildDbConnectionCache();
                 List<String> dbNames = listDatabases();

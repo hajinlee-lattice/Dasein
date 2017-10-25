@@ -18,6 +18,8 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
@@ -46,6 +48,7 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataLakeService")
+@CacheConfig(cacheNames = "DataLakeCache")
 public class DataLakeServiceImpl implements DataLakeService {
 
     private static final Logger log = LoggerFactory.getLogger(DataLakeServiceImpl.class);
@@ -66,6 +69,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
+    @Cacheable(key = "T(java.lang.String).format(\"%s|count\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public long getAttributesCount() {
         List<ColumnMetadata> cms = getAllAttributes();
         if (cms == null) {
@@ -76,6 +81,9 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
+    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|%s\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)" //
+            + "#offset, #max)")
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
         List<ColumnMetadata> cms = getAllAttributes();
         Stream<ColumnMetadata> stream = cms.stream().sorted(Comparator.comparing(ColumnMetadata::getColumnId));
@@ -104,6 +112,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
+    @Cacheable(key = "T(java.lang.String).format(\"%s|statscub\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public StatsCube getStatsCube() {
         Statistics statistics = getStatistics();
         if (statistics == null) {
@@ -113,6 +123,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
+    @Cacheable(key = "T(java.lang.String).format(\"%s|statscubs\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public Map<BusinessEntity, StatsCube> getStatsCubes() {
         Statistics statistics = getStatistics();
         if (statistics == null) {
@@ -122,6 +134,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
+    @Cacheable(key = "T(java.lang.String).format(\"%s|topntree\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public TopNTree getTopNTree(boolean includeTopBkt) {
         Statistics statistics = getStatistics();
         if (statistics == null) {
@@ -131,14 +145,16 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
+    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|%s\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id), #entity, #attribute")
     public AttributeStats getAttributeStats(BusinessEntity entity, String attribute) {
         Statistics statistics = getStatistics();
         if (statistics == null) {
             return null;
         }
         AttributeLookup lookup = new AttributeLookup(entity, attribute);
-        for (CategoryStatistics catStats: statistics.getCategories().values()) {
-            for (SubcategoryStatistics subCatStats: catStats.getSubcategories().values()) {
+        for (CategoryStatistics catStats : statistics.getCategories().values()) {
+            for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
                 if (subCatStats.getAttributes() != null && subCatStats.getAttributes().containsKey(lookup)) {
                     return subCatStats.getAttrStats(lookup);
                 }
@@ -153,7 +169,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (role == null) {
             return Collections.emptyList();
         }
-        List<ColumnMetadata> cms = cmCache.get(String.format("%s|%s", customerSpace, role.name()));
+        List<ColumnMetadata> cms = getAttributesInTableRole(customerSpace, role);
         cms.forEach(cm -> cm.setEntity(entity));
         return cms;
     }
@@ -166,7 +182,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     private Statistics getStatistics() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         initStatsCache();
-        return statsCache.get(customerSpace);
+        // return statsCache.get(customerSpace);
+        return getStatistics(customerSpace);
     }
 
     @SuppressWarnings("unchecked")
@@ -187,8 +204,8 @@ public class DataLakeServiceImpl implements DataLakeService {
                         log.info("Attempt to refresh the stats cache of tenant " + customerSpace);
                         return Collections.singletonList(updateSignal);
                     } else {
-                        throw new IllegalArgumentException(
-                                "Parsed customer space " + customerSpace + " is different from the watched data " + updateSignal);
+                        throw new IllegalArgumentException("Parsed customer space " + customerSpace
+                                + " is different from the watched data " + updateSignal);
                     }
                 } catch (Exception e) {
                     log.warn("Cannot parse watched data " + updateSignal + " into a customer space.", e);
@@ -261,7 +278,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             });
         }
     }
-    
+
     private List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role) {
         if (role == null) {
             return Collections.emptyList();
@@ -279,12 +296,12 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private Set<String> getAttrsInStats(String customerSpace) {
-        Statistics statistics = statsCache.get(customerSpace);
+        Statistics statistics = getStatistics(customerSpace);
         Set<String> includedAttrs = new HashSet<>();
         statistics.getCategories().forEach((cat, catStats) -> //
-                catStats.getSubcategories().forEach((subCat, subCatStats) -> //
-                        subCatStats.getAttributes().keySet().forEach(attrLookup -> //
-                                includedAttrs.add(attrLookup.getAttribute()))));
+        catStats.getSubcategories().forEach((subCat, subCatStats) -> //
+        subCatStats.getAttributes().keySet().forEach(attrLookup -> //
+        includedAttrs.add(attrLookup.getAttribute()))));
         return includedAttrs;
     }
 

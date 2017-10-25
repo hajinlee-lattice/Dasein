@@ -9,16 +9,6 @@
 
     <properties>
         <component-name>metadata</component-name>
-        <le.common.version>4.1.0-SNAPSHOT</le.common.version>
-        <le.db.version>4.1.0-SNAPSHOT</le.db.version>
-        <le.domain.version>4.1.0-SNAPSHOT</le.domain.version>
-        <le.security.version>4.1.0-SNAPSHOT</le.security.version>
-        <le.camille.version>4.1.0-SNAPSHOT</le.camille.version>
-        <le.baton.version>4.1.0-SNAPSHOT</le.baton.version>
-        <le.network.version>4.1.0-SNAPSHOT</le.network.version>
-        <le.proxy.version>4.1.0-SNAPSHOT</le.proxy.version>
-        <le.testfwk.version>4.1.0-SNAPSHOT</le.testfwk.version>
-        <le.remote.version>4.1.0-SNAPSHOT</le.remote.version>
     </properties>
 
     <parent>
@@ -32,37 +22,37 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -87,49 +77,61 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-network</artifactId>
-            <version>${le.network.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
-            <version>${le.camille.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-remote</artifactId>
-            <version>${le.remote.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
-            <version>${le.baton.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-redshiftdb</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-cache</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-cache</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hive</groupId>

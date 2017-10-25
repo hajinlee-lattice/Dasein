@@ -2,8 +2,6 @@ package com.latticeengines.security.exposed.service.impl;
 
 import java.util.Random;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +32,6 @@ public class SessionServiceImpl implements SessionService {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
-
-    // private GASessionCache sessionCache;
-
-    @PostConstruct
-    private void initializeSessionCache() {
-        // sessionCache =
-        // GASessionCacheHolder.getCache(globalSessionManagementService);
-    }
 
     @Override
     public Ticket authenticate(Credentials credentials) {
@@ -75,9 +65,6 @@ public class SessionServiceImpl implements SessionService {
                 // ignore
             }
         }
-        // refresh cache upon attach, because the session object changed
-        // sessionCache.removeToken(ticket.getData());
-        // sessionCache.put(ticket.getData(), session);
         return session;
     }
 
@@ -89,7 +76,6 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public void logout(Ticket ticket) {
         globalAuthenticationService.discard(ticket);
-        // sessionCache.removeToken(ticket.getData());
     }
 
     @Override

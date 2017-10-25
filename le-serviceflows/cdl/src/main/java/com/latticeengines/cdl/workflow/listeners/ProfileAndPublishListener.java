@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -36,9 +34,6 @@ public class ProfileAndPublishListener extends LEJobListener {
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
-    private CacheService cacheService;
-
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -60,7 +55,6 @@ public class ProfileAndPublishListener extends LEJobListener {
             DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
             log.info("Switch data collection to version " + inactiveVersion);
             dataCollectionProxy.switchVersion(customerSpace, inactiveVersion);
-            cacheService.dropKeysByPattern(CacheNames.EntityCache.name(), String.format("*%s*", customerSpace));
         } else {
             log.warn("Workflow ended in an unknown state.");
         }

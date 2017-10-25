@@ -8,6 +8,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -24,6 +29,8 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataCollectionProxy")
+@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
+@CacheConfig(cacheNames = "MetadataCache")
 public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionProxy.class);
@@ -46,11 +53,13 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("get default dataCollection", url, ResponseDocument.class);
     }
 
+    @Cacheable(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
     public AttributeRepository getAttrRepo(String customerSpace) {
-        if (attrRepoCache == null) {
-            initializeAttrRepoCache();
-        }
-        return attrRepoCache.get(customerSpace);
+        // if (attrRepoCache == null) {
+        // initializeAttrRepoCache();
+        // }
+        // return attrRepoCache.get(customerSpace);
+        return getAttrRepoViaRestCall(customerSpace);
     }
 
     public StatisticsContainer getStats(String customerSpace) {
@@ -96,13 +105,13 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public void resetTable(String customerSpace, TableRoleInCollection tableRole) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/reset?role={tableRole}", //
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/reset?role={tableRole}", //
                 shortenCustomerSpace(customerSpace), tableRole);
         post("resetTable", url, null, Table.class);
     }
 
-    public void upsertTable(String customerSpace, String tableName, TableRoleInCollection role, DataCollection.Version version) {
+    public void upsertTable(String customerSpace, String tableName, TableRoleInCollection role,
+            DataCollection.Version version) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/{tableName}?role={role}";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
@@ -116,22 +125,22 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("upsertTable", url, null, DataCollection.class);
     }
 
+    @CacheEvict(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
     public void upsertStats(String customerSpace, StatisticsContainer container) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
                 shortenCustomerSpace(customerSpace));
-        evictAttrRepoCache(customerSpace);
+        // evictAttrRepoCache(customerSpace);
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
+    @Deprecated
     private void initializeAttrRepoCache() {
-        attrRepoCache = Caffeine.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(5, TimeUnit.MINUTES)
-                .refreshAfterWrite(1, TimeUnit.MINUTES)
-                .build(this::getAttrRepoViaRestCall);
+        attrRepoCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(5, TimeUnit.MINUTES)
+                .refreshAfterWrite(1, TimeUnit.MINUTES).build(this::getAttrRepoViaRestCall);
         log.info("Initialized loading cache attrRepoCache.");
     }
 
+    @Deprecated
     private void evictAttrRepoCache(String customerSpace) {
         if (attrRepoCache != null) {
             attrRepoCache.invalidate(customerSpace);

@@ -50,7 +50,7 @@ public class DataFeedExecutionListener extends LEJobListener {
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
-            cacheService.dropKeysByPattern(CacheNames.EntityCache.name(), String.format("*%s*", customerSpace));
+            cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.EntityCache);
             NodeWatcher.updateWatchedData(CDLConsolidate.name(), customerSpace);
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");

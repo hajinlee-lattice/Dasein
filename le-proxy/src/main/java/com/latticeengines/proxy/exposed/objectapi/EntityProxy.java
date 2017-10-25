@@ -12,6 +12,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("entityProxy")
+@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
 @CacheConfig(cacheNames = "EntityCache")
 public class EntityProxy extends MicroserviceRestApiProxy {
 
