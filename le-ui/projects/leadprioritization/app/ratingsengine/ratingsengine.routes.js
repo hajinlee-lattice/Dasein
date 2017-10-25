@@ -16,6 +16,10 @@ angular
     $stateProvider
         .state('home.ratingsengine', {
             url: '/ratings_engine',
+            redirectTo: 'home.ratingsengine.list.ratings'
+        })
+        .state('home.ratingsengine.list', {
+            url: '/list',
             resolve: {
                 RatingList: function($q, RatingsEngineStore) {
                     var deferred = $q.defer();
@@ -34,24 +38,13 @@ angular
                     templateUrl: 'app/ratingsengine/content/ratingslist/ratingsenginetabs.component.html'
                 }
             },
-            redirectTo: 'home.ratingsengine.ratingslist'
+            redirectTo: 'home.ratingsengine.list.ratings'
         })
-        .state('home.ratingsengine.ratingslist', {
+        .state('home.ratingsengine.list.ratings', {
             url: '/ratings',
             params: {
                 pageIcon: 'ico-model',
                 pageTitle: 'Rating Engines'
-            },
-            resolve: {
-                RatingList: function($q, RatingsEngineStore) {
-                    var deferred = $q.defer();
-
-                    RatingsEngineStore.getRatings().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }   
             },
             views: {
                 "main@": {
@@ -61,7 +54,7 @@ angular
                 }
             }
         })
-        .state('home.ratingsengine.creationhistory', {
+        .state('home.ratingsengine.list.history', {
             url: '/creationhistory',
             params: {
                 pageIcon: 'ico-model',
@@ -323,11 +316,6 @@ angular
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
                 }
-                // 'wizard_content@home.ratingsengine.wizard': {
-                //     controller: 'RatingsEngineAttributes',
-                //     controllerAs: 'vm',
-                //     templateUrl: 'app/ratingsengine/content/attributes/attributes.component.html'
-                // }
             }
         })
         .state('home.ratingsengine.wizard.segment.attributes.rules', {
@@ -364,39 +352,6 @@ angular
                 }
             }
         })
-        // .state('home.ratingsengine.wizard.segment.attributes.rules_dashboard', {
-        //     url: '/rules_dashboard',
-        //     params: {
-        //         pageIcon: 'ico-playbook',
-        //         pageTitle: 'Rating Engine - Rules'
-        //     },
-        //     resolve: {
-        //         Cube: function($q, DataCloudStore){
-        //             var deferred = $q.defer();
-        //             DataCloudStore.getCube().then(function(result) {
-        //                 deferred.resolve(result.data.Stats);
-        //             });
-        //             return deferred.promise;
-        //         },
-        //         RatingEngineModel: function(DataCloudStore, RatingsEngineModels) {
-        //             var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
-        //             if (selectedAttributes) {
-        //                 RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
-        //             }
-        //             return RatingsEngineModels;
-        //         }
-        //     },
-        //     views: {
-        //         'main@': {
-        //             template: '<section class="container"><div class="row columns twelve box-outline wizard-content"><div class="section-body with-padding row" ui-view="dashboard_rules"></div></div></section>'
-        //         },
-        //         'wizard_content@home.ratingsengine.wizard': {
-        //             controller: 'AdvancedQueryCtrl',
-        //             controllerAs: 'vm',
-        //             templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
-        //         }
-        //     }
-        // })
         .state('home.ratingsengine.wizard.segment.attributes.rules.summary', {
             url: '/summary',
             params: {

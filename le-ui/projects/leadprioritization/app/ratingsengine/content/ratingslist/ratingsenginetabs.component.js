@@ -1,25 +1,16 @@
 angular.module('lp.ratingsengine.ratingsenginetabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
-    ])
-.controller('RatingsEngineTabsController', function (
-    $state, $stateParams, $timeout, $scope, $filter,
-    BrowserStorageUtility, ResourceUtility, RatingList
-) {
+])
+.controller('RatingsEngineTabsController', function ($filter, RatingsEngineStore, ResourceUtility) {
     var vm = this;
 
     angular.extend(vm, {
-        stateParams: $stateParams,
-        ratings: RatingList || []
+        ResourceUtility: ResourceUtility,
+        current: RatingsEngineStore.current
     });
 
-    vm.init = function() {
-
-        // console.log(vm.ratings);
-
-        vm.inactiveCount = $filter('filter')(vm.ratings, { status: 'INACTIVE' }).length;
-        vm.activeCount = vm.ratings.length - vm.inactiveCount; 
-
+    vm.count = function(type) {
+        // true makes this $filter match strict strings, instead of contains
+        return $filter('filter')(vm.current.ratings, { status: type }, true).length;
     }
-    vm.init();
-
 });

@@ -12,7 +12,8 @@ angular.module('common.wizard.controls', [])
         prev: WizardControlsOptions.backState,
         next: 'home.' + WizardProgressContext + '.wizard',
         valid: false,
-        toState: $state.current
+        toState: $state.current,
+        nextDisabled: false
     });
 
     vm.init = function() {
@@ -57,6 +58,8 @@ angular.module('common.wizard.controls', [])
     vm.go = function(state, isPrev, params) {
         var current = vm.itemMap[$state.current.name];
 
+        vm.nextDisabled = true;
+
         if (current.nextFn && !isPrev) {
             current.nextFn(state, params);
         } else {
@@ -67,6 +70,7 @@ angular.module('common.wizard.controls', [])
     $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) { 
         vm.toState = toState;
         vm.item = vm.itemMap[vm.toState.name];
+        vm.nextDisabled = false;
     })
 
     vm.setButtons = function() {

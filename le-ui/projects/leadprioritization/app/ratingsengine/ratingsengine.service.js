@@ -1,9 +1,14 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
     $q, $state, $stateParams, RatingsEngineService, DataCloudStore, 
-    BrowserStorageUtility, SegmentStore
+    BrowserStorageUtility, SegmentStore, $timeout
 ){
     var RatingsEngineStore = this;
+    
+    this.current = {
+        ratings: [],
+        bucketCountMap: {}
+    };
 
     this.init = function() {
         this.settings = {};
@@ -22,7 +27,6 @@ angular.module('lp.ratingsengine')
         this.currentRating = {};
         this.rule = null;
         this.rating = null;
-        this.ratings = null;
         this.rating_id
         this.type = null;
         this.coverage = {};
@@ -240,7 +244,6 @@ angular.module('lp.ratingsengine')
     }
 
     this.getCurrentRating = function() {
-        console.log(this.currentRating);
         return this.currentRating;
     }
 
@@ -268,11 +271,31 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
     
-    this.getRatings = function(active) {
+    this.setRatings = function(ratings) {
+        this.current.ratings = ratings;
+
+        var ids = [];
+
+        angular.forEach(ratings, function(rating) {
+            ids.push(rating.id);
+        });
+
+        RatingsEngineStore.getChartDataConcurrently(ids);
+    }
+    
+    this.getRatings = function(active, cacheOnly) {
         var deferred = $q.defer();
 
+        if (this.current.ratings.length > 0) {
+            deferred.resolve(this.current.ratings);
+
+            if (cacheOnly) {
+                return this.current;
+            }
+        }
+
         RatingsEngineService.getRatings(active).then(function(data) {
-            RatingsEngineStore.ratings = data;
+            RatingsEngineStore.setRatings(data);
             deferred.resolve(data);
         });
 
@@ -289,13 +312,48 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     };
 
-    this.getRatingsChartData = function(arrayofIds){
+    this.getChartDataConcurrently = function(all){
+        var deferred = $q.defer();
+        var chunks = [], size = 3;
+
+        while (all.length > 0) {
+            chunks.push(all.splice(0, size));
+        }
+
+        var incrementor = 0;
+        var maxConcurrent = chunks.length;
+        var bucketCountMap = {};
+        var rating = null;
+
+        $timeout(function() {
+            chunks.forEach(function(ids) {
+                RatingsEngineService.getRatingsChartData({
+                    ratingEngineIds: ids
+                }).then(function(response) {
+                    incrementor++;
+
+                    Object.keys(response.ratingEngineIdCoverageMap).reverse().forEach(function(key) {
+                        rating = response.ratingEngineIdCoverageMap[key];
+                        RatingsEngineStore.current.bucketCountMap[key] = rating;
+                    })
+
+                    if (incrementor >= maxConcurrent) {
+                        deferred.resolve(bucketCountMap);
+                    }
+                });
+            });
+        }, 100);
+
+        return deferred.promise;
+    };
+
+    this.getRatingsChartData = function(all){
         var deferred = $q.defer();
         
         RatingsEngineService.getRatingsChartData({
-            ratingEngineIds: arrayofIds
+            ratingEngineIds: all
         }).then(function(response){
-            RatingsEngineStore.setCoverage(response);
+            //RatingsEngineStore.setCoverage(response);
             deferred.resolve(response);
         });
 
@@ -319,7 +377,7 @@ angular.module('lp.ratingsengine')
         };
 
         RatingsEngineService.getRatingsChartData(CoverageMap).then(function(response){
-            RatingsEngineStore.setCoverage(response);
+            //RatingsEngineStore.setCoverage(response);
             deferred.resolve(response);
         });
 
@@ -358,8 +416,8 @@ angular.module('lp.ratingsengine')
         return this.coverage;
     }
 
-    this.setCoverage = function(coverage) {
-        this.coverage = coverage;
+    this.setCoverage = function(bucketCountMap) {
+        this.current.bucketCountMap = bucketCountMap;
     }
 
     // this.getRatingsCounts = function(Ratings, noSalesForceId) {
@@ -427,6 +485,21 @@ angular.module('lp.ratingsengine')
 
     this.setRatingId = function() {
         this.rating_id = $stateParams.rating_id;
+    }
+
+    this.deleteRating = function(ratingId) {
+        var deferred = $q.defer();
+
+        RatingsEngineService.deleteRating(ratingId).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        // immediately remove deleted rating from ratinglist
+        this.setRatings(this.current.ratings.filter(function(rating) { 
+            return rating.id != ratingId;
+        }));
+
+        return deferred.promise;
     }
 })
 .service('RatingsEngineService', function($q, $http, $state) {

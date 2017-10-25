@@ -48,6 +48,7 @@ angular
                 click: function(item) {
                     $scope.label = item.label;
                     $scope.config.filtered = item.filtered;
+                    $scope.config.value = item.action;
                 }
             });
 

@@ -3,7 +3,7 @@
     <div class="row">
         
         <div class="list-header">
-            <div class="pull-left number-of-items" ng-if="vm.ratings">
+            <div class="pull-left number-of-items" ng-if="vm.current.ratings.length > 0">
                 <menu-filter-by config="vm.header.filter"></menu-filter-by>
                 <menu-sort-by config="vm.header.sort"></menu-sort-by>
                 <search-filter query="vm.query"></search-filter>
@@ -24,15 +24,16 @@
             <ul class="tiles">
                 <li
                     ng-repeat="
-                        rating in vm.header.filter.filtered |
-                        filter: vm.query |
+                        rating in vm.current.ratings |
+                        filter: vm.query | 
+                        filter: vm.header.filter.value : true | 
                         orderBy: vm.header.sort.order + vm.header.sort.property |
                         startFrom: (current - 1) * pagesize |
                         limitTo: pagesize"
                     data="rating"
                     ng-click="vm.tileClick($event, rating)"
                     ng-mouseleave="vm.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
-                    ng-if="vm.ratings.length > 0"
+                    ng-if="vm.current.ratings.length > 0"
                     ng-class="{editing: vm.tileStates[rating.id].editRating}">
 
                     <div class="tile-header" ng-if="!vm.tileStates[rating.id].editRating">
@@ -47,7 +48,8 @@
                             <ul class="model-menu" ng-show="vm.tileStates[rating.id].showCustomMenu">
                                 <li data-ng-click="vm.editStatusClick($event, rating, !vm.hasRules(rating))" ng-disabled="!vm.hasRules(rating)">
                                     <a href="javascript:void(0)">
-                                        <span ng-if="rating.status === 'INACTIVE'">Activate</span>
+                                        <span ng-if="rating.status === 'INACTIVE' && vm.hasRules(rating)">Activate</span>
+                                        <span ng-if="rating.status === 'INACTIVE' && !vm.hasRules(rating)" title="Apply bucket rules to Activate ratings">Activate</span>
                                         <span ng-if="rating.status === 'ACTIVE'">Deactivate</span>
                                     </a>
                                     <i class="fa fa-power-off"></i>
@@ -91,23 +93,23 @@
                         <div ng-class="{'inactive': rating.status === 'INACTIVE'}">
                             <h4>Account Ratings</h4>
                             <ul class="barChart ratings"
-                                ng-if="!vm.loadingRatingChart">
+                                ng-if="vm.current.bucketCountMap[rating.id] && vm.current.bucketCountMap[rating.id].bucketCoverageCounts">
                                 <li 
-                                    ng-repeat="bucket in rating.bucketInfo.bucketCoverageCounts"
+                                    ng-repeat="bucket in vm.current.bucketCountMap[rating.id].bucketCoverageCounts"
                                     class="bucket-{{bucket.bucket|lowercase}}">
 
                                     <div class="value">{{bucket.count|number}}</div>
 
                                     <div 
                                         class="rating-bar"
-                                        ng-attr-style="{{'height: '+ vm.ceil(((bucket.count / rating.tallestBarHeight) * 100) / 2) + 'px' }}">
+                                        ng-attr-style="{{'height: '+ vm.ceil(((bucket.count / vm.getTallestBarHeight(bucket, rating)) * 100) / 2) + 'px' }}">
                                     </div>
 
                                     <div class="meta">{{bucket.bucket}}</div>
                                 </li>
                             </ul>
                             <span 
-                                ng-if="vm.loadingRatingChart" 
+                                ng-if="!vm.current.bucketCountMap[rating.id]" 
                                 class="bucket-loading">
                                 <i class="fa fa-spinner fa-spin"></i>
                             </span>
@@ -194,7 +196,7 @@
                     </form>
 
                 </li>
-                <li class="create-tile" ng-if="vm.ratings.length < 12">
+                <li class="create-tile" ng-if="vm.current.ratings.length < 12">
                     <a
                         class="button new-tile-button"
                         ui-sref="home.ratingsengine.wizard">
@@ -208,7 +210,7 @@
     </div><!-- End .row -->
     <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
         <div class="twelve columns">
-            <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
+            <pd-pagination-controls current="current" max="max = (vm.current.ratings | filter: vm.query).length / pagesize">
             </pd-pagination-controls>
         </div>
     </div>

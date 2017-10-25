@@ -1,17 +1,16 @@
 angular.module('lp.ratingsengine.ratingslist', [
     'mainApp.ratingsengine.deleteratingmodal'
 ])
-.controller('RatingsEngineListController', function ($scope, $timeout, $element, $state, 
-$stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRatingModal) {
-
+.controller('RatingsEngineListController', function (
+    $scope, $timeout, $element, $state, $stateParams, $filter, 
+    RatingsEngineStore, RatingsEngineService, DeleteRatingModal
+) {
     var vm = this;
     angular.extend(vm, {
-        ratings: RatingList || [],
+        current: RatingsEngineStore.current,
         filteredItems: [],
         tileStates: {},
         query: '',
-        loadingRatingChart: true,
-        buckets: {},
         ceil: window.Math.ceil,
         header: {
             sort: {
@@ -20,17 +19,16 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
                 order: '-',
                 property: 'created',
                 items: [
-                    { label: 'Last Data Refresh',   icon: 'numeric',    property: 'updated' },
-                    { label: 'Creation Date',   icon: 'numeric',    property: 'created' },
-                    { label: 'Rating Name',      icon: 'alpha',      property: 'displayName' }
+                    { label: 'Last Data Refresh', icon: 'numeric', property: 'updated' },
+                    { label: 'Creation Date', icon: 'numeric', property: 'created' },
+                    { label: 'Rating Name', icon: 'alpha', property: 'displayName' }
                 ]
             },
             filter: {
                 label: 'Filter By',
-                unfiltered: RatingList,
-                filtered: RatingList,
+                value: {},
                 items: [
-                    { label: "All", action: { }, total: vm.totalLength },
+                    { label: "All", action: {}, total: vm.totalLength },
                     { label: "Active", action: { status: 'ACTIVE' }, total: vm.activeCount },
                     { label: "Inactive", action: { status: 'INACTIVE' }, total: vm.inactiveCount },
                 ]
@@ -39,51 +37,35 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
     });
 
     vm.init = function($q, $filter) {
-        
-        console.log(vm.ratings);
-
-        var checkLaunchState,
-            arrayofIds = [];
-
         RatingsEngineStore.clear();
 
-        angular.forEach(vm.ratings, function(rating) {
-            
-            var ratingId = rating.id;
+        vm.header.filter.filtered = vm.current.ratings;
+        vm.header.filter.unfiltered = vm.current.ratings;
 
-            vm.tileStates[ratingId] = {
+        angular.forEach(vm.current.ratings, function(rating) {
+            vm.tileStates[rating.id] = {
                 showCustomMenu: false,
                 editRating: false,
                 saveEnabled: false
             };
-            arrayofIds.push(ratingId);
-
         });
-
-        RatingsEngineStore.getRatingsChartData(arrayofIds).then(function(response){
-
-            vm.loadingRatingChart = false;
-            vm.buckets = response;
-
-            angular.forEach(vm.ratings, function(rating) {
-
-                rating.bucketInfo = vm.buckets.ratingEngineIdCoverageMap[rating.id];
-
-                var bucketArray = (rating && rating.bucketInfo ? rating.bucketInfo.bucketCoverageCounts || [] : []);
-                rating.tallestBarHeight = Math.max.apply(Math,bucketArray.map(function(o){return o.count;}))
-            });
-
-        });  
-
     }
+
     vm.init();
+
+    vm.getTallestBarHeight = function(bucket, rating) {
+        var bucketArray = vm.current.bucketCountMap[rating.id].bucketCoverageCounts;
+
+        return Math.max.apply(Math, bucketArray.map(function(bkt) { 
+            return bkt.count; 
+        }))
+    }
 
     vm.hasRules = function(rating) {
         return RatingsEngineStore.hasRules(rating);
     }
 
     vm.customMenuClick = function ($event, rating) {
-
         if ($event != null) {
             $event.stopPropagation();
         }
@@ -110,16 +92,17 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
 
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
+
         // go to dashboard if there are rules in ratingModels
-        if(RatingsEngineStore.hasRules(rating)) {
-            $state.go('home.ratingsengine.dashboard', {rating_id: rating.id} );
-        } else {
-           $state.go('home.ratingsengine.wizard.segment', {rating_id: rating.id} ); 
-        }
+        var url = RatingsEngineStore.hasRules(rating) 
+            ? 'home.ratingsengine.dashboard'
+            : 'home.ratingsengine.wizard.segment';
+
+        $state.go(url, { rating_id: rating.id }); 
     };
 
     var oldRatingDisplayName = '';
-    vm.editRatingClick = function($event, rating){
+    vm.editRatingClick = function($event, rating) {
         $event.stopPropagation();
 
         oldRatingDisplayName = rating.displayName;
@@ -129,13 +112,10 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
         tileState.editRating = !tileState.editRating;
     };
 
-    vm.nameChanged = function(rating){
+    vm.nameChanged = function(rating) {
         var tileState = vm.tileStates[rating.id];
-        if(rating.displayName.length > 0) {
-            tileState.saveEnabled = true;
-        } else {
-            tileState.saveEnabled = false;
-        }
+        
+        tileState.saveEnabled = !!(rating.displayName.length > 0);
     };
 
     vm.cancelEditRatingClicked = function($event, rating) {
@@ -151,62 +131,50 @@ $stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, Del
     vm.editStatusClick = function($event, rating, disable){
         $event.stopPropagation();
         
-        if(disable) {
+        if (disable) {
             return false;
         }
 
         vm.saveInProgress = true;
 
-        if(rating.status === 'ACTIVE'){
-            var updatedRating = {
-                id: rating.id,
-                status: 'INACTIVE'   
-            }
-        } else {
-            var updatedRating = {
-                id: rating.id,
-                status: 'ACTIVE'   
-            }
-        }
+        var newStatus = (rating.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE');
 
-        updateRating(updatedRating);
+        updateRating({
+            id: rating.id,
+            status: newStatus 
+        });
 
+        rating.status = newStatus;
     };
 
     vm.saveRatingClicked = function($event, rating) {
         $event.stopPropagation();
 
-        vm.saveInProgress = true;
         oldRatingDisplayName = '';
 
-        console.log(rating);
-
+        var tileState = vm.tileStates[rating.id];
         var updatedRating = {
             id: rating.id,
             displayName: rating.displayName
         }
+
+        vm.saveInProgress = true;
+        tileState.editRating = false;
 
         updateRating(updatedRating);
     };
 
 
     vm.showDeleteRatingModalClick = function($event, rating){
-
         $event.preventDefault();
         $event.stopPropagation();
 
         DeleteRatingModal.show(rating);
-
     };
 
     function updateRating(updatedRating) {
-
         RatingsEngineService.saveRating(updatedRating).then(function(result) {
-            vm.saveInProgress = true;
-            $timeout( function(){
-                $state.go('home.ratingsengine.ratingslist', {}, { reload: true} );
-            }, 100 );
+            vm.saveInProgress = false;
         });
-
     }
 });

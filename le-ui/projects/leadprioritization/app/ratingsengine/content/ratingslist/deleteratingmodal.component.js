@@ -1,13 +1,11 @@
 angular.module('mainApp.ratingsengine.deleteratingmodal', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.utilities.NavUtility'
+    'mainApp.appCommon.utilities.StringUtility'
 ])
-.service('DeleteRatingModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, RatingsEngineService) {
+.service('DeleteRatingModal', function ($compile, $templateCache, $rootScope, $http) {
     var self = this;
     this.show = function (rating) {
         $http.get('app/ratingsengine/content/ratingslist/deleteratingmodal.component.html', { cache: $templateCache }).success(function (html) {
-
             var scope = $rootScope.$new();
             scope.ratingId = rating.id;
 
@@ -28,27 +26,25 @@ angular.module('mainApp.ratingsengine.deleteratingmodal', [
         });
     };
 })
-.controller('DeleteRatingController', function ($scope, $rootScope, $timeout, $state, ResourceUtility, NavUtility, RatingsEngineService) {
+.controller('DeleteRatingController', function ($scope, $timeout, ResourceUtility, RatingsEngineStore) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.deleteRatingClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
-
         }
+        
         deleteRating($scope.ratingId);
     };
 
     function deleteRating(ratingId) {
         $("#deleteRatingError").hide();
 
-        RatingsEngineService.deleteRating(ratingId).then(function(result) {
-            
+        RatingsEngineStore.deleteRating(ratingId).then(function(result) {
             $timeout( function(){
                 $("#modalContainer").modal('hide');
-                $state.go('home.ratingsengine.ratingslist', {}, { reload: true } );
+                //$state.go('home.ratingsengine.list.ratings', {}, { reload: true } );
             }, 100 );
-
         });
     }
 

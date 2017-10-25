@@ -13,7 +13,7 @@
             type="button" 
             class="button blue-button"
             ng-click="vm.click()"
-            ng-disabled="!vm.isValid()">
+            ng-disabled="!vm.isValid() || vm.nextDisabled">
             {{vm.item.nextLabel || 'Next'}}
         </button>
     </div>
