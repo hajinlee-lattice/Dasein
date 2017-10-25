@@ -105,9 +105,9 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
         List<String> inputPaths = new ArrayList<>();
         for (Extract extract : transactionTable.getExtracts()) {
             if (!extract.getPath().endsWith("*.avro")) {
-                inputPaths.add(extract.getPath());
-            } else {
                 inputPaths.add(extract.getPath() + "/*.avro");
+            } else {
+                inputPaths.add(extract.getPath());
             }
         }
         return inputPaths;
