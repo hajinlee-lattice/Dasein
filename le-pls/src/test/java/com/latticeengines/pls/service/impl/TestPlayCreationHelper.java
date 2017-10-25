@@ -232,11 +232,11 @@ public class TestPlayCreationHelper {
     private TreeMap<String, Map<String, Restriction>> populateBucketToRuleMap() {
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
         populateBucketInfo(bucketToRuleMap, true, RuleBucketName.A_MINUS, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.LESS_THAN, BusinessEntity.Account, "LDC_Name", "A", "G");
+                ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "A", "G");
         populateBucketInfo(bucketToRuleMap, true, RuleBucketName.C, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.LESS_THAN, BusinessEntity.Account, "LDC_Name", "h", "n");
+                ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "h", "n");
         populateBucketInfo(bucketToRuleMap, true, RuleBucketName.D, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.LESS_THAN, BusinessEntity.Account, "LDC_Name", "A", "O");
+                ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "A", "O");
         populateBucketInfo(bucketToRuleMap, false, RuleBucketName.D, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
                 null, null, null, null);
         populateBucketInfo(bucketToRuleMap, false, RuleBucketName.F, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
