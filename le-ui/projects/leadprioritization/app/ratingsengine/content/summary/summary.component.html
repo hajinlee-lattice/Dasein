@@ -40,8 +40,10 @@
                             class="form-control"
                             ng-change="vm.changeDetails()"
                             ng-model="vm.rating.displayName"
-                            ng-model-options="{ debounce: 300 }"/>
+                            maxlength="50"
+                            ng-trim="false"/>
                     </label>
+                    <span>{{50 - vm.rating.displayName.length}} characters remaining</span>
                 </div>
                  <div class="form-group">
                     <label>Notes

@@ -47,7 +47,13 @@ angular.module('lp.ratingsengine.wizard.summary', [])
 
     vm.changeDetails = function(){
     	
-    	if(vm.ratingStatus === true){
+        if(vm.rating.displayName.length === 0) {
+            RatingsEngineStore.validation.summary = false;
+        } else {
+            RatingsEngineStore.validation.summary = true;
+        };
+
+    	if(vm.ratingStatus === true) {
     		vm.rating.status = 'ACTIVE';
     	} else {
     		vm.rating.status = 'INACTIVE';

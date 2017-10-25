@@ -100,9 +100,9 @@
                             <ul class="playbook-launch-history graph">
                                 <li class="launch-history-graph" ng-repeat="(name, history) in vm.launchGraph.buckets">
                                     <div class="history-label"><strong>{{name}}</strong></div>
-                                    <div class="history-bar" ng-style="{'width': (history.total/vm.launchGraph.total)*100 + '%'}">
-                                        <div class="history-bar-current" ng-if="history.current" ng-style="{'width': (history.current/history.total)*100 + '%'}"></div>
-                                        <div class="history-bar-new" ng-if="history.new" ng-style="{'width': (history.new/history.total)*100 + '%'}"></div>
+                                    <div class="history-bar" ng-attr-style="{'width': (history.total/vm.launchGraph.total)*100 + '%'}">
+                                        <div class="history-bar-current" ng-if="history.current" ng-attr-style="{'width': (history.current/history.total)*100 + '%'}"></div>
+                                        <div class="history-bar-new" ng-if="history.new" ng-attr-style="{'width': (history.new/history.total)*100 + '%'}"></div>
                                     </div>
                                     <div class="history-count" ng-show="history.total"><strong>{{vm.NumberUtility.AbbreviateLargeNumber(history.total)}}</strong></div>
                                 </li>
