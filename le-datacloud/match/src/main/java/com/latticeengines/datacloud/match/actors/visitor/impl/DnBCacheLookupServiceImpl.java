@@ -78,7 +78,6 @@ public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
                                 context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
                                 context.isOutOfBusinessString(), context.isDunsInAMString(),
                                 System.currentTimeMillis() - startTime));
-                        readyToReturn = true;
                     } else {
                         log.info(String.format(
                                 "Reject invalid white cache: Id=%s DUNS=%s OutOfBusiness=%s IsDunsInAM=%s",
@@ -96,12 +95,10 @@ public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
                             context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                             context.getInputNameLocation().getZipcode(),
                             context.getInputNameLocation().getPhoneNumber(), System.currentTimeMillis() - startTime));
-                    readyToReturn = true;
                 }
-
             }
         }
-
+        readyToReturn = true;
         context.setDuration(System.currentTimeMillis() - request.getTimestamp());
         return context;
     }

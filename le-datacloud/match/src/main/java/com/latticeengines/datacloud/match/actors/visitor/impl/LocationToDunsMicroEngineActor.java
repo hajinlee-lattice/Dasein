@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<DnbLookupActor> {
     private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
 
-    private static final String HIT_NO_CACHE = "Did not hit either white or black cache. Went to remote DnB API.";
+    private static final String REMOTE_API = "Went to remote DnB API.";
 
     @PostConstruct
     public void postConstruct() {
@@ -43,11 +43,11 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
         MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
         Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
 
-        if (matchKeyTuple.getDuns() != null && MapUtils.isNotEmpty(dunsOriginMap)
-                && (dunsOriginMap.containsKey(this.getClass().getName())
-                        || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName()))) {
+        if (matchKeyTuple.getDuns() != null
+                || (MapUtils.isNotEmpty(dunsOriginMap) && (dunsOriginMap.containsKey(this.getClass().getName())
+                        || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName())))) {
             // if DunsOriginMap has entry which was already made by this actor
-            // class and current DUNS is not null then reject it
+            // class or current DUNS is not null then reject it
             return false;
         }
 
@@ -65,41 +65,44 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
 
     @Override
     protected void process(Response response) {
-        if (response.getResult() != null) {
-            MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
-            MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
-            DnBMatchContext res = (DnBMatchContext) response.getResult();
-            traveler.debug(HIT_NO_CACHE);
-            String logMessage = String.format(
-                    "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s, IsDunsInAM = %s.",
-                    res.getDuns(), getClass().getSimpleName(),
-                    (res.getConfidenceCode() == null ? null : res.getConfidenceCode().toString()),
-                    (res.getMatchGrade() == null ? null : res.getMatchGrade().getRawCode()),
-                    res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
-                    res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
-                    res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
-                    res.getMatchedNameLocation().getPhoneNumber(), res.isOutOfBusinessString(), res.isDunsInAMString());
-            if (Boolean.TRUE.equals(res.getPatched())) {
-                logMessage += " This cache entry has been manually patched.";
-            }
-            traveler.debug(logMessage);
-            if (res.getDnbCode() != DnBReturnCode.OK) {
-                if (StringUtils.isNotEmpty(res.getDuns())) {
-                    res.setDuns(null);
-                }
-                traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", //
-                        getClass().getSimpleName(), //
-                        (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
-            }
-            matchKeyTuple.setDuns(res.getDuns());
-            Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
-            if (dunsOriginMap == null) {
-                dunsOriginMap = new HashMap<String, String>();
-                ((MatchTraveler) traveler).setDunsOriginMap(dunsOriginMap);
-            }
-            dunsOriginMap.put(this.getClass().getName(), res.getDuns());
-            traveler.getDnBMatchContexts().add(res);
-            response.setResult(null);
+        MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
+        if (response.getResult() == null) {
+            traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", getClass().getSimpleName(),
+                    "Result in response is empty"));
+            return;
         }
+        MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
+        DnBMatchContext res = (DnBMatchContext) response.getResult();
+        traveler.debug(REMOTE_API);
+        String logMessage = String.format(
+                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s, IsDunsInAM = %s.",
+                res.getDuns(), getClass().getSimpleName(),
+                (res.getConfidenceCode() == null ? null : res.getConfidenceCode().toString()),
+                (res.getMatchGrade() == null ? null : res.getMatchGrade().getRawCode()),
+                res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
+                res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
+                res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
+                res.getMatchedNameLocation().getPhoneNumber(), res.isOutOfBusinessString(), res.isDunsInAMString());
+        if (Boolean.TRUE.equals(res.getPatched())) {
+            logMessage += " This cache entry has been manually patched.";
+        }
+        traveler.debug(logMessage);
+        if (res.getDnbCode() != DnBReturnCode.OK) {
+            if (StringUtils.isNotEmpty(res.getDuns())) {
+                res.setDuns(null);
+            }
+            traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", //
+                    getClass().getSimpleName(), //
+                    (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
+        }
+        matchKeyTuple.setDuns(res.getDuns());
+        Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
+        if (dunsOriginMap == null) {
+            dunsOriginMap = new HashMap<String, String>();
+            ((MatchTraveler) traveler).setDunsOriginMap(dunsOriginMap);
+        }
+        dunsOriginMap.put(this.getClass().getName(), res.getDuns());
+        traveler.getDnBMatchContexts().add(res);
+        response.setResult(null);
     }
 }
