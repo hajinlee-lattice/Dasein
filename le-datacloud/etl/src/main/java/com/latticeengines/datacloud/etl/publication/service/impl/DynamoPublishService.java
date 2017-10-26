@@ -1,15 +1,13 @@
 package com.latticeengines.datacloud.etl.publication.service.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,6 +187,9 @@ public class DynamoPublishService extends AbstractPublishService
         properties.put("eai.export.dynamo.repository", "DataCloud");
         properties.put("eai.export.dynamo.record.type", recordType);
         properties.put("numMappers", "16");
+        if (StringUtils.isNotBlank(publishConfig.getAwsRegion())) {
+            properties.put("eai.export.aws.region", publishConfig.getAwsRegion());
+        }
         eaiConfig.setProperties(properties);
 
         return eaiConfig;

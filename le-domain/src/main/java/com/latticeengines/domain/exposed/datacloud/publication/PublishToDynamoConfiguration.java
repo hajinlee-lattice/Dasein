@@ -31,6 +31,9 @@ public class PublishToDynamoConfiguration extends PublicationConfiguration {
     @JsonProperty("LoadingWriteCapacity")
     private long loadingWriteCapacity;
 
+    @JsonProperty("AwsRegion")
+    private String awsRegion;
+
     @Override
     @JsonProperty("ConfigurationType")
     public String getConfigurationType() {
@@ -107,6 +110,14 @@ public class PublishToDynamoConfiguration extends PublicationConfiguration {
 
     public void setLoadingWriteCapacity(long loadingWriteCapacity) {
         this.loadingWriteCapacity = loadingWriteCapacity;
+    }
+
+    public String getAwsRegion() {
+        return awsRegion;
+    }
+
+    public void setAwsRegion(String awsRegion) {
+        this.awsRegion = awsRegion;
     }
 
     public enum Alias {
