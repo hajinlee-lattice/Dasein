@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
@@ -50,14 +52,15 @@ public class BucketExpandFunction extends BaseOperation implements Function {
     }
 
     private static Fields constructDeclaration(List<String> dimAttrs, List<String> dedupAttrs,String attrIdField, String bktIdField) {
-        if (dimAttrs == null || dimAttrs.isEmpty()) {
-            return new Fields(attrIdField, bktIdField);
-        }
         List<String> allFields = new ArrayList<>();
         allFields.add(attrIdField);
         allFields.add(bktIdField);
-        dimAttrs.forEach(dim -> allFields.add(DIM_PREFIX + dim));
-        dedupAttrs.forEach(f -> allFields.add(DEDUP_PREFIX + f));
+        if (CollectionUtils.isNotEmpty(dimAttrs)) {
+            dimAttrs.forEach(dim -> allFields.add(DIM_PREFIX + dim));
+        }
+        if (CollectionUtils.isNotEmpty(dedupAttrs)) {
+            dedupAttrs.forEach(f -> allFields.add(DEDUP_PREFIX + f));
+        }
         return new Fields(allFields.toArray(new String[allFields.size()]));
     }
 

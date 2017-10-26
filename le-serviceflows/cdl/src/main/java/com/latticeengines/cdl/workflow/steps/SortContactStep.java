@@ -165,7 +165,7 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
         step.setTargetTable(targetTable);
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
-        // conf.setDedupFields(Arrays.asList(dedupFields));
+        conf.setDedupFields(Arrays.asList(dedupFields));
         step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
         return step;
     }
