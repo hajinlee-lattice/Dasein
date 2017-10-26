@@ -75,7 +75,7 @@
 
             <button class="query-algorithm-undo button white-button" 
                     ng-click="vm.clickUndo()" 
-                    ng-disabled="vm.history.length == 0">
+                    ng-disabled="vm.history.length == 0 || vm.mode == 'rules'">
                 <i class="fa fa-undo"></i> UNDO
             </button>
         </div>
