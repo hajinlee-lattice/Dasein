@@ -9,6 +9,6 @@
     </context:component-scan>
 
     <import resource="classpath:matchapi-context.xml" />
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

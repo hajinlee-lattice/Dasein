@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <import resource="classpath:modelquality-context.xml" />
-    <import resource="classpath:common-properties-context.xml" />
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:testframework-context.xml"/>
 
 </beans>

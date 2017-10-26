@@ -10,6 +10,6 @@
     <!--<import resource="classpath:test-testframework-testbed-context.xml"/>-->
     <!--<import resource="classpath:remote-context.xml"/>-->
     <import resource="classpath:dantedb-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

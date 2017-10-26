@@ -1,11 +1,14 @@
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
+
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Required minimal context configuration :                        -->
     <!--  + contextPath                                                  -->
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/</Set>
-    <Set name="war"><Property name="jetty.webapps" default="."/>/le-admin-4.1.0-SNAPSHOT.war</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-api-4.1.0-SNAPSHOT.war</Set>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

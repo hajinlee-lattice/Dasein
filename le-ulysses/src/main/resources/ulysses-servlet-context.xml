@@ -8,10 +8,11 @@
 
     <import resource="classpath:ulysses-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+
+    <import resource="classpath:common-webapp-env-context.xml"/>
     <bean class="com.latticeengines.ulysses.swagger.SwaggerConfig" />
 
-    <bean id="propdataHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
+    <bean id="ulyssesHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="ulysses" />
     </bean>
 

@@ -11,7 +11,7 @@
     <context:component-scan base-package="com.latticeengines.security.exposed.dao"/>
 
     <import resource="classpath:objectapi-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:testframework-context.xml"/>
     <import resource="classpath:test-redshiftdb-context.xml"/>
 

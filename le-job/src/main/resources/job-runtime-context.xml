@@ -4,6 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <import resource="classpath:job-context.xml"/>
+    <import resource="classpath:common-datasource-default-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
     <bean class="com.latticeengines.job.swagger.SwaggerConfig" />
 

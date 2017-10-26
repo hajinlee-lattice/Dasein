@@ -7,7 +7,16 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-    <import resource="classpath:db-datasource-default-context.xml" />
+    <bean id="dataSource" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
+        <property name="jndiName" value="java:comp/env/jdbc/PLS_MultiTenant"/>
+        <property name="driverClass" value="${db.datasource.driver}" />
+        <property name="jdbcUrl" value="${db.datasource.url}"/>
+        <property name="user" value="${db.datasource.user}" />
+        <property name="password" value="${db.datasource.password.encrypted}" />
+        <property name="minPoolSize" value="1"/>
+        <property name="maxPoolSize" value="8"/>
+        <property name="acquireIncrement" value="1"/>
+    </bean>
 
     <!-- Hibernate session factory -->
     <bean id="sessionFactory"

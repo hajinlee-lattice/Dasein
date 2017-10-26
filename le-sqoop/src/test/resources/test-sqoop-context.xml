@@ -6,6 +6,6 @@
        <import resource="classpath:sqoop-context.xml"/>
        <import resource="classpath:proxy-context.xml"/>
        <import resource="classpath:test-sqoop-persistence-context.xml"/>
-       <import resource="classpath:common-properties-context.xml" />
+       <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

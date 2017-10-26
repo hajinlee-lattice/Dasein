@@ -6,5 +6,5 @@
 	<import resource="classpath:db-context.xml" />
 	<import resource="classpath:datadb-context.xml" />
 	<import resource="classpath:testframework-context.xml" />
-	<import resource="classpath:common-properties-context.xml" />
+	<import resource="classpath:common-testclient-env-context.xml"/>
 </beans>

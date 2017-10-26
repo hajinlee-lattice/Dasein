@@ -11,7 +11,7 @@
     <mvc:annotation-driven/>
 
     <import resource="classpath:test-propdata-engine-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
     
 

@@ -4,6 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="classpath:redshiftdb-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

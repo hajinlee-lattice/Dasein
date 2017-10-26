@@ -4,6 +4,6 @@
 		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
     <import resource="classpath:workflow-context.xml" />
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

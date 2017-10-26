@@ -5,5 +5,5 @@
 
 	<import resource="classpath:playmakercore-context.xml" />
 	<import resource="classpath:testframework-context.xml" />
-	<import resource="classpath:common-properties-context.xml" />
+	<import resource="classpath:common-testclient-env-context.xml"/>
 </beans>

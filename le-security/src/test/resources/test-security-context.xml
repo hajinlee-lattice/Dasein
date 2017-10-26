@@ -5,6 +5,6 @@
 
     <import resource="classpath:cache-context.xml" />
     <import resource="classpath:security-no-controller-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

@@ -5,7 +5,7 @@
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <import resource="classpath:scoring-context.xml" />
-    <import resource="classpath:common-properties-context.xml" />
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:testframework-context.xml"/>
 

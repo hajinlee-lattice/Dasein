@@ -7,17 +7,15 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-    <bean name="qrtzDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+    <bean id="qrtzDataSource" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
+        <property name="jndiName" value="java:comp/env/jdbc/QuartzDB"/>
         <property name="driverClass" value="${quartzclient.datasource.driver}"/>
         <property name="jdbcUrl" value="${quartzclient.datasource.url}"/>
         <property name="user" value="${quartzclient.datasource.user}" />
         <property name="password" value="${quartzclient.datasource.password.encrypted}" />
-        <property name="acquireIncrement" value="1"/>
         <property name="minPoolSize" value="2"/>
         <property name="maxPoolSize" value="8"/>
-        <property name="checkoutTimeout" value="10000"/>
-        <property name="idleConnectionTestPeriod" value="10"/>
-        <property name="maxIdleTime" value="30"/>
+        <property name="acquireIncrement" value="1"/>
     </bean>
 
     <!-- Hibernate session factory -->

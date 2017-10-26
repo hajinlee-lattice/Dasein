@@ -5,6 +5,6 @@
 
     <context:component-scan base-package="com.latticeengines.sqoop.controller" />
     <import resource="classpath:test-sqoop-context.xml"/>
-    <import resource="classpath:common-properties-context.xml" />
+    <import resource="classpath:common-webapp-env-context.xml"/>
 
 </beans>

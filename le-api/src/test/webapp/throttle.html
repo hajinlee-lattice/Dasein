@@ -1,0 +1,115 @@
+<HTML>
+<HEAD>
+<TITLE>Knob UI</TITLE>
+<img src="/images/logo_lattice.gif" alt="">
+<SCRIPT LANGUAGE="JavaScript">
+	function createRequest() {
+		var result = new XMLHttpRequest();
+		if (window.XMLHttpRequest) {
+			// FireFox, Safari, etc.
+			result = new XMLHttpRequest();
+			//result.withCredentials = true;
+			if (typeof window.overrideMimeType != 'undefined') {
+				result.overrideMimeType('application/json'); // Or anything else
+			}
+		} else if (window.ActiveXObject) {
+			// MSIE
+			result = new ActiveXObject("Microsoft.XMLHTTP");
+		} else {
+			// No known mechanism -- consider aborting the application
+		}
+		return result;
+	}
+</SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+	function submitKnob(form) {
+		var c = confirm("Please confirm!");
+		if (c == false)
+			return;
+		var req = createRequest(); // defined above
+
+		req.open("POST", "http://bodcprodvhdp158.prod.lattice.local:8080/rest/throttle", true);
+		if (!req) {
+			alert('CORS not supported');
+			return;
+		}
+
+		req.onload = function() {
+			var response = req.responseXML;
+			var res = response.getElementsByTagName("immediate")[0].childNodes[0].nodeValue;
+			var iv = form.immediate[0].checked ? form.immediate[0].value
+					: form.immediate[1].value;
+			if (res == iv)
+				document
+						.write("Throttle Configuration has been successfully submitted!");
+			else
+				document.write("Throttle Configuration submission failed!");
+
+		};
+
+		req.onerror = function() {
+			console.log('There was an error!');
+		};
+
+		req.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+		var obj = new Object();
+		obj.enabled = form.enabled[0].checked ? form.enabled[0].value
+				: form.enabled[1].value;
+		obj.immediate = form.immediate[0].checked ? form.immediate[0].value
+				: form.immediate[1].value;
+		var jc = form.jobrank_cutoff;
+		obj.jobrank_cutoff = jc.options[jc.selectedIndex].value;
+
+		var jsonString = JSON.stringify(obj);
+		req.send(jsonString);
+
+		//req.open("GET", "http://localhost:8080/rest/status/subtract/3/2", true);
+		//req.send()
+	}
+</SCRIPT>
+</HEAD>
+<BODY>
+	<P>
+	<FORM NAME="form" ACTION="" METHOD="GET">
+		Please provide the configuration:
+		<table>
+			<tr>
+				<td>Enabled:</td>
+				<td><INPUT TYPE="radio" NAME="enabled" VALUE="true">
+					True</td>
+				<td><INPUT TYPE="radio" NAME="enabled" VALUE="false">
+					False</td>
+			</tr>
+			<BR>
+			<tr>
+				<td>Immediate:</td>
+				<td><INPUT TYPE="radio" NAME="immediate" VALUE="true">
+					True</td>
+				<td><INPUT TYPE="radio" NAME="immediate" VALUE="false">
+					False</td>
+			</tr>
+			<BR>
+			<tr>
+				<td>JobRank CutOff:</td>
+				<!--  INPUT
+				TYPE="range" NAME="jobrank_cutoff" MIN="0" MAX="10" VALUE="5"-->
+				<td><select Name="jobrank_cutoff" autofocus>
+						<script>
+							for (var i = 0; i < 11; i++) {
+								document.write("<option>" + i + "</option>");
+							}
+						</script>
+				</select></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><INPUT TYPE="button" NAME="button" Value="Submit"
+					onClick="submitKnob(this.form)"></td>
+				<td><INPUT TYPE="reset" NAME="reset" Value="Reset"></td>
+			</tr>
+		</table>
+	</FORM>
+	</P>
+</BODY>
+</HTML>

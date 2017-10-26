@@ -8,8 +8,8 @@
       http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:dataplatform-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
-    <import resource="classpath:common-jmx-component-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
+    <!-- <import resource="classpath:common-jmx-component-context.xml"/> -->
     <context:component-scan base-package="com.latticeengines.dataplatform.mbean" />
     <!-- <context:component-scan base-package="com.latticeengines.dataplatform.functionalframework"/> -->
 

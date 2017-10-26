@@ -7,6 +7,6 @@
     <context:component-scan base-package="com.latticeengines.datacloud.core" />
 
     <import resource="classpath:datacloud-core-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

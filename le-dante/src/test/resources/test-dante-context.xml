@@ -11,6 +11,6 @@
     <!--<import resource="classpath:remote-context.xml"/>-->
     <import resource="classpath:dante-context.xml"/>
     <import resource="classpath:metadata-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <!--<import resource="classpath:oauth2db-context.xml"/>-->
 </beans>

@@ -12,7 +12,6 @@
     </context:component-scan>
 
     <import resource="classpath:query-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:objectapi-aspects-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
 </beans>

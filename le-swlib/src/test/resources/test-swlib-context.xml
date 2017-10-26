@@ -6,6 +6,6 @@
 
     <import resource="classpath:swlib-context.xml"/>
     <import resource="classpath:test-swlib-yarn-config-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

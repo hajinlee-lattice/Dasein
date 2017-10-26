@@ -8,6 +8,6 @@
 
     <import resource="classpath:datacloud-etl-collection-context.xml"/>
     <import resource="classpath:datacloud-dataflow-context.xml" />
-    <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:common-testclient-env-context.xml"/>
 
 </beans>

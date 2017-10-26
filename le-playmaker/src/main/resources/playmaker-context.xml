@@ -16,7 +16,6 @@
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:datadb-context.xml"/>
     <import resource="classpath:playmaker-persistence-context.xml" />
-    <import resource="classpath:common-properties-context.xml" />
     <import resource="classpath:playmaker-aspects-context.xml" />
     <import resource="classpath:playmakercore-context.xml" />
     <import resource="classpath:oauth2db-context.xml" />

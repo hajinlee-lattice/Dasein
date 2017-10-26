@@ -7,7 +7,7 @@
     <context:component-scan base-package="com.latticeengines.datacloud.match" />
 
     <import resource="classpath:datacloud-match-context.xml" />
-    <import resource="classpath:common-properties-context.xml" />
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:yarn-context.xml" />
 
 </beans>

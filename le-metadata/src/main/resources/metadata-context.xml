@@ -13,7 +13,6 @@
     <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl"/>
 
     <import resource="classpath:monitor-alerts-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:metadata-aspects-context.xml"/>
     <import resource="classpath:metadata-hive-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>

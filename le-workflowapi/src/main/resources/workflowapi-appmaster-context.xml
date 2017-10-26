@@ -5,7 +5,7 @@
 
     <bean id="itemProcessor" class="com.latticeengines.workflowapi.yarn.runtime.WorkflowProcessor" />
 
-    <import resource="classpath:common-am-properties-context.xml"/>
+    <import resource="classpath:common-am-env-context.xml"/>
     <import resource="classpath:batch-amjob/yarn-batch-appmaster-context.xml" />
     <import resource="classpath:workflow-context.xml" />
 

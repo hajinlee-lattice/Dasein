@@ -162,7 +162,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
 
     @Override
     public void enable() {
-        if (!enabled) {
+        if (!enabled && StringUtils.isNotEmpty(url)) {
             enabled = true;
             forceDisabled = false;
             log.info("InfluxDB metric service is enabled.");

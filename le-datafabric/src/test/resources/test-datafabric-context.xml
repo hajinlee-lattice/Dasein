@@ -6,7 +6,7 @@
 
     <import resource="classpath:aws-context.xml" />
     <import resource="classpath:datafabric-context.xml" />
-    <import resource="classpath:common-properties-context.xml" />
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:test-datafabric-yarn-config-context.xml" />
     <import resource="camille-runtime-context.xml"/>
 
