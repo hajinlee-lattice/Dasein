@@ -159,8 +159,6 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
     vm.editPlayClick = function($event, play){
         $event.stopPropagation();
 
-        oldPlayDisplayName = play.displayName;
-
         var tileState = vm.tileStates[play.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editPlay = !tileState.editPlay;
@@ -178,9 +176,6 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
     vm.cancelEditPlayClicked = function($event, play) {
         $event.stopPropagation();
 
-        play.displayName = oldPlayDisplayName;
-        oldPlayDisplayName = '';
-
         var tileState = vm.tileStates[play.name];
         tileState.editPlay = !tileState.editPlay;
     };
@@ -189,7 +184,6 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
         $event.stopPropagation();
 
         vm.saveInProgress = true;
-        oldPlayDisplayName = '';
 
         var updatedPlay = {
             name: play.name,

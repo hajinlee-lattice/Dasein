@@ -45,8 +45,11 @@ angular.module('common.datacloud.query.results', [
     });
 
     vm.init = function() {
-        if(vm.segment != null){
 
+
+        console.log(vm.accountsWithoutSfId);
+
+        if(vm.segment != null){
             //console.log("this");
             $rootScope.$broadcast('header-back', { 
                 path: '^home.segment.accounts',
@@ -103,10 +106,10 @@ angular.module('common.datacloud.query.results', [
                 var engineId = data.ratingEngine.id,
                     query = { 
                         free_form_text_search: '',
-                        restrictNotNullSalesforceId: false,
+                        restrictNotNullSalesforceId: vm.excludeNonSalesForce,
                         entityType: 'Account',
                         bucketFieldName: 'ScoreBucket',
-                        maximum: 15,
+                        maximum: 10,
                         offset: offset,
                         sortBy: 'LDC_Name',
                         descending: false
@@ -123,7 +126,7 @@ angular.module('common.datacloud.query.results', [
                 var engineId = data.ratingEngine.id,
                     engineIdObject = [{id: engineId}];
                 PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                    vm.counts.accounts.value = data.ratingEngineIdCoverageMap[engineId].accountCount;
+                    vm.accountsWithoutSfId = data.ratingEngineIdCoverageMap[engineId].accountCount;
                 });
             });
 
@@ -284,12 +287,14 @@ angular.module('common.datacloud.query.results', [
                     'name': 'segment' + ts,
                     'display_name': 'segment' + ts,
                     'account_restriction': accountRestriction,
-                    'account_restriction': contactRestriction,
+                    'contact_restriction': contactRestriction,
                     'page_filter': {
                         'row_offset': 0,
                         'num_rows': 10
                     }
                 };
+
+            console.log(segment);
 
             SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                 QueryStore.setupStore(result.data);
@@ -312,6 +317,9 @@ angular.module('common.datacloud.query.results', [
                             'num_rows': 10
                         }
                     };
+
+                console.log(segmentData);
+                console.log(segment);
 
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                     QueryStore.setupStore(result.data);

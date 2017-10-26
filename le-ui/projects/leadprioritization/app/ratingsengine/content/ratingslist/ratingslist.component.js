@@ -101,11 +101,8 @@ angular.module('lp.ratingsengine.ratingslist', [
         $state.go(url, { rating_id: rating.id }); 
     };
 
-    var oldRatingDisplayName = '';
     vm.editRatingClick = function($event, rating) {
         $event.stopPropagation();
-
-        oldRatingDisplayName = rating.displayName;
 
         var tileState = vm.tileStates[rating.id];
         tileState.showCustomMenu = !tileState.showCustomMenu;
@@ -120,9 +117,6 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.cancelEditRatingClicked = function($event, rating) {
         $event.stopPropagation();
-
-        rating.displayName = oldRatingDisplayName;
-        oldRatingDisplayName = '';
 
         var tileState = vm.tileStates[rating.id];
         tileState.editRating = !tileState.editRating;
@@ -149,8 +143,6 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.saveRatingClicked = function($event, rating) {
         $event.stopPropagation();
-
-        oldRatingDisplayName = '';
 
         var tileState = vm.tileStates[rating.id];
         var updatedRating = {

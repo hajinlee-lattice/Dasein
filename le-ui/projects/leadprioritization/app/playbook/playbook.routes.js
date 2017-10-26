@@ -167,6 +167,52 @@ angular
                 section: 'dashboard.targets'
             },
             resolve: {
+                Accounts: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+
+                    console.log("here yo");
+
+                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+
+                        var engineId = data.ratingEngine.id,
+                            query = { 
+                                free_form_text_search: '',
+                                restrictNotNullSalesforceId: false,
+                                entityType: 'Account',
+                                bucketFieldName: 'ScoreBucket',
+                                maximum: 10,
+                                offset: 0,
+                                sortBy: 'LDC_Name',
+                                descending: false
+                            };
+
+                        deferred.resolve(PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ return data.data; }));
+
+                    });
+
+                    return deferred.promise;
+
+                }],
+                CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                        var engineId = data.ratingEngine.id,
+                            engineIdObject = [{id: engineId}];
+
+                        PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
+                            var accountCount = data.ratingEngineIdCoverageMap[engineId].accountCount;
+
+                            console.log(accountCount);
+
+                            deferred.resolve(accountCount);
+                        });
+                    });
+
+                    return deferred.promise;
+                    
+                }],
                 Config: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
                     var deferred = $q.defer();
@@ -206,51 +252,6 @@ angular
                 currentTargetTab: 'accounts'
             },
             resolve: {
-                Accounts: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-                    var deferred = $q.defer();
-
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
-
-                        var engineId = data.ratingEngine.id,
-                            query = { 
-                                free_form_text_search: '',
-                                restrictNotNullSalesforceId: false,
-                                entityType: 'Account',
-                                bucketFieldName: 'ScoreBucket',
-                                maximum: 15,
-                                offset: 0,
-                                sortBy: 'LDC_Name',
-                                descending: false
-                            };
-
-                        deferred.resolve(PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ return data.data; }));
-
-                    });
-
-                    return deferred.promise;
-
-                }],
-                CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
-
-                    var deferred = $q.defer();
-
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
-                        var engineId = data.ratingEngine.id,
-                            engineIdObject = [{id: engineId}];
-
-                        PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
-
-                            console.log(data);
-                            console.log(engineId);
-
-                            var accountCount = data.ratingEngineIdCoverageMap[engineId].accountCount;
-                            deferred.resolve(accountCount);
-                        });
-                    });
-
-                    return deferred.promise;
-                    
-                }],
                 Contacts: [function(){
                     return null;
                 }],

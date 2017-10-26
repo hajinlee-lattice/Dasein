@@ -1,6 +1,8 @@
 <div class="container query-results">
 
-    <h3 ng-if=" vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">Targets</h3>
+    <h2 ng-if=" vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
+        Targets
+    </h2>
 
     <div 
         class="exclude-filter"
@@ -14,7 +16,7 @@
                 type="checkbox" 
                 class=""
                 ng-model="excludeAccounts"
-                ng-change="vm.excludeNonSalesForceCheckbox(excludeAccounts)" />
+                ng-change="vm.excludeNonSalesForceCheckbox(!excludeAccounts)" />
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.accountsWithoutSfId | number }}</span>)
         </label>
     </div>

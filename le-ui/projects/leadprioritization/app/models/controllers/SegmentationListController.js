@@ -34,7 +34,8 @@ angular.module('lp.models.segments', [
         SegmentsList.forEach(function(segment) {
             vm.tileStates[segment.name] = {
                 showCustomMenu: false,
-                editSegment: false
+                editSegment: false,
+                saveEnabled: false
             };
         });
 
@@ -71,32 +72,28 @@ angular.module('lp.models.segments', [
         $event.preventDefault();
         if ($state.current.name == 'home.segments') {
             $state.go('home.segment.accounts', {segment: segment.name}, { reload: true } );
-            //$state.go('home.segment.explorer.attributes', {segment: segment.name}, { reload: true } );
+            // $state.go('home.segment.explorer.attributes', {segment: segment.name}, { reload: true } );
         } else {
             $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );
         };
     };
 
-    var oldSegmentDisplayName = '';
-    var oldSegmentDescription = '';
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
-
-        oldSegmentDescription = segment.description;
-        oldSegmentDisplayName = segment.display_name;
 
         var tileState = vm.tileStates[segment.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editSegment = !tileState.editSegment;
     };
 
+    vm.nameChanged = function(segment) {
+        var tileState = vm.tileStates[segment.name];
+        
+        tileState.saveEnabled = !!(segment.display_name.length > 0);
+    };
+
     vm.cancelEditSegmentClicked = function($event, segment) {
         $event.stopPropagation();
-
-        segment.display_name = oldSegmentDisplayName;
-        segment.description = oldSegmentDescription;
-        oldSegmentDisplayName = '';
-        oldSegmentDescription = '';
 
         var tileState = vm.tileStates[segment.name];
         tileState.editSegment = !tileState.editSegment;
@@ -107,9 +104,6 @@ angular.module('lp.models.segments', [
         $event.stopPropagation();
 
         vm.saveInProgress = true;
-        oldSegmentDisplayName = '';
-        oldSegmentDescription = '';
-
         createOrUpdateSegment(segment);
         
     };

@@ -45,7 +45,7 @@
                             </button>
                             <ul class="model-menu" ng-show="vm.tileStates[segment.name].showCustomMenu">
                                 <li data-ng-click="vm.editSegmentClick($event, segment)">
-                                    <a href="javascript:void(0)">Edit</a>
+                                    <a href="javascript:void(0)">Rename</a>
                                     <i class="fa fa-edit"></i>
                                 </li>
                                 <li data-ng-click="vm.duplicateSegmentClick($event, segment)">
@@ -93,6 +93,7 @@
                                 id="display_name"
                                 name="display_name"
                                 data-ng-model="segment.display_name"
+                                ng-change="vm.nameChanged(segment)"
                                 maxlength="50"
                                 ng-trim="false"
                                 class="form-control" />
@@ -120,7 +121,7 @@
                             <button
                                 type="button"
                                 class="button orange-button pull-right"
-                                ng-disabled="editSegmentForm.$pristine"
+                                ng-disabled="vm.tileStates[segment.name].saveEnabled === false"
                                 ng-click="vm.saveSegmentClicked($event, segment)">
                                 Save</button>
                         </div>
