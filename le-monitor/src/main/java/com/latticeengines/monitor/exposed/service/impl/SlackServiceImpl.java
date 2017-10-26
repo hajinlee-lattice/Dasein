@@ -18,8 +18,8 @@ import com.latticeengines.monitor.exposed.service.SlackService;
 public class SlackServiceImpl implements SlackService {
 
     private static final Logger log = LoggerFactory.getLogger(SlackServiceImpl.class);
-    private static final ObjectMapper OM = new ObjectMapper();
-    private static final RestTemplate slackRestTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
+    private ObjectMapper OM = new ObjectMapper();
+    private RestTemplate slackRestTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
 
     @Override
     public void sendSlack(SlackSettings settings) {
