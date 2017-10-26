@@ -10,15 +10,8 @@
        http://redisson.org/schema/redisson
        http://redisson.org/schema/redisson/redisson.xsd">
 
-    <context:component-scan base-package="com.latticeengines.redis"/>
-    
-<!--     <redisson:client>
-        <redisson:replicated-servers>
-            <redisson:node-address value="redis://qa-001.wqkmsp.0001.use1.cache.amazonaws.com:6379" />
-            <redisson:node-address value="redis://qa-002.wqkmsp.0001.use1.cache.amazonaws.com:6379" />
-            <redisson:node-address value="redis://qa-003.wqkmsp.0001.use1.cache.amazonaws.com:6379" />
-        </redisson:replicated-servers>
-    </redisson:client> -->
+    <context:component-scan base-package="com.latticeengines.redis, com.latticeengines.aws.elasticache"/>
 
+    <import resource="classpath:aws-credentials-context.xml"/>
 
 </beans>
