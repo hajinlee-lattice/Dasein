@@ -15,7 +15,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.workflow.core.BaseAwsPythonBatchStep;
@@ -53,17 +52,18 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
             log.info("There's no need for AggregatedTransaction");
             return;
         }
-        Table transactionTable = dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
-                TableRoleInCollection.AggregatedTransaction);
-        if (transactionTable == null) {
-            log.warn("There's not metadata table for AggregatedTransaction");
-            return;
-        }
+        // Table transactionTable =
+        // dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
+        // TableRoleInCollection.AggregatedTransaction);
+        // if (transactionTable == null) {
+        // log.warn("There's not metadata table for AggregatedTransaction");
+        // return;
+        // }
         /*
          * config.setInputPaths(Arrays.asList("/Pods/Aps/input/*.avro"));
          * config.setOutputPath("/Pods/Aps/output");
          */
-        List<String> inputPaths = getInputPaths(transactionTable);
+        List<String> inputPaths = getInputPaths(aggrTable);
         config.setInputPaths(inputPaths);
         String hdfsPath = getOutputPath(config);
         config.setOutputPath(hdfsPath);
