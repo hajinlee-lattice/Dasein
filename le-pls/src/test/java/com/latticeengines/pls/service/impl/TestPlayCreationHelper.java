@@ -28,10 +28,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
-import com.latticeengines.domain.exposed.query.Lookup;
-import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Session;
@@ -232,11 +229,11 @@ public class TestPlayCreationHelper {
     private TreeMap<String, Map<String, Restriction>> populateBucketToRuleMap() {
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
         populateBucketInfo(bucketToRuleMap, true, RuleBucketName.A_MINUS, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "A", "G");
+                ComparisonType.GTE_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "G");
         populateBucketInfo(bucketToRuleMap, true, RuleBucketName.C, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "h", "n");
         populateBucketInfo(bucketToRuleMap, true, RuleBucketName.D, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "A", "O");
+                ComparisonType.GT_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "O");
         populateBucketInfo(bucketToRuleMap, false, RuleBucketName.D, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
                 null, null, null, null);
         populateBucketInfo(bucketToRuleMap, false, RuleBucketName.F, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
@@ -259,9 +256,10 @@ public class TestPlayCreationHelper {
         Restriction info = null;
 
         if (createConcreteRestriction) {
-            Lookup lhs = new AttributeLookup(entity, attrName);
-            Lookup rhs = new RangeLookup(min, max);
-            info = new ConcreteRestriction(false, lhs, comparisonType, rhs);
+            AttributeLookup lhs = new AttributeLookup(entity, attrName);
+            Bucket rhs = Bucket.rangeBkt(min, max);
+            rhs.setComparisonType(comparisonType);
+            info = new BucketRestriction(lhs, rhs);
         } else {
             info = LogicalRestriction.builder() //
                     .and(new ArrayList<>()).build();
