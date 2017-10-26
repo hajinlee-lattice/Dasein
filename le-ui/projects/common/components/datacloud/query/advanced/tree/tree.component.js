@@ -81,16 +81,19 @@ angular
                             ]
                         );
 
-                        vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
-                        vm.type = vm.item.cube.Bkts.Type;
+                        if (!vm.item || typeof vm.tree.bucketRestriction.bkt.Id != "number") {
+                            vm.unused = true;
+                        }
+
+                        if (vm.item) {
+                            vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
+                            vm.type = vm.item.cube.Bkts.Type;
+                        }
+
                         vm.label = vm.tree.bucketRestriction.bkt.Lbl;
                         vm.range = vm.tree.bucketRestriction.bkt.Vals;
                         
                         //vm.setOperation(vm.item, vm.type, vm.label, vm.range);
-
-                        if (typeof vm.tree.bucketRestriction.bkt.Id != "number") {
-                            vm.unused = true;
-                        }
                     }
                 });
             }
@@ -221,7 +224,7 @@ angular
                 };
 
                 switch (vm.type) {
-                    case 'Boolean': return map[vm.tree.bucketRestriction.bkt.Vals[0]];
+                    case 'Boolean': return map[vm.tree.bucketRestriction.bkt.Vals[0] || ''];
                     case 'Numerical': return map[vm.tree.bucketRestriction.bkt.Cmp];
                     case 'Enum': return map[vm.tree.bucketRestriction.bkt.Cmp];
                     default: return 'has a value of';
@@ -284,6 +287,14 @@ angular
                 }
             }
 
+            vm.changeBooleanValue = function() {
+                if (!vm.tree.bucketRestriction.bkt.Vals[0]) {
+                    vm.tree.bucketRestriction.bkt.Vals[0] = null;
+                }
+
+                vm.updateBucketCount();
+            }
+
             vm.addAttribute = function(tree) {
                 this.root.saveState();
                 QueryStore.setAddBucketTreeRoot(vm.tree);
@@ -296,7 +307,7 @@ angular
                 vm.mouseDownTimer = $timeout(function() {
                     vm.root.draggedItem = vm;
                     vm.mouseDownTimer = false;
-                    vm.unused = true;
+                    //vm.unused = true;
                 }, 150);
             }
 

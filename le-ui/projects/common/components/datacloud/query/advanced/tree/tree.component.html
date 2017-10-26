@@ -88,7 +88,7 @@
             <span class="item-edit-bucket-data" ng-if="vm.editing && !vm.unused">
 
                 <span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
-                    <select ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" ng-change="vm.updateBucketCount()">
+                    <select ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" ng-change="vm.changeBooleanValue()">
                         <option value="Yes">is</option>
                         <option value="No">is not</option>
                         <option value="">is empty</option>
@@ -157,7 +157,7 @@
                 <span class="query-section-item-operation">
                     <span class="query-section-item-operation"><span>{{vm.getOperationLabel()}}</span></span>
 
-                    <span class="query-section-item-value" ng-if="vm.type == 'Boolean' && vm.tree.bucketRestriction.bkt.Vals[0] != ''">
+                    <span class="query-section-item-value" ng-if="vm.type == 'Boolean' && vm.tree.bucketRestriction.bkt.Vals[0] !== null">
                         <strong>Yes</strong>
                     </span>
 
