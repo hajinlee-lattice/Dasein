@@ -81,10 +81,12 @@ angular.module('lp.ratingsengine.wizard.summary', [])
             var segmentId = Object.keys(map.segmentIdModelRulesCoverageMap)[0];
 
             vm.coverage_map = map.segmentIdModelRulesCoverageMap[segmentId];
-
-            vm.coverage_map.bucketCoverageCounts.forEach(function(bkt) {
-                vm.buckets[vm.bucketsMap[bkt.bucket]].count = bkt.count;
-            });
+            
+            if(vm.coverage_map.bucketCoverageCounts) {
+                vm.coverage_map.bucketCoverageCounts.forEach(function(bkt) {
+                    vm.buckets[vm.bucketsMap[bkt.bucket]].count = bkt.count;
+                });
+            }
         }
 
         return map;

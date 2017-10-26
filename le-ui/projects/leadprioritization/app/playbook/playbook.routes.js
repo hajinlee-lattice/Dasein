@@ -170,8 +170,6 @@ angular
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
                     var deferred = $q.defer();
 
-                    console.log("here yo");
-
                     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
 
                         var engineId = data.ratingEngine.id,
@@ -202,7 +200,7 @@ angular
                             engineIdObject = [{id: engineId}];
 
                         PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
-                            var accountCount = data.ratingEngineIdCoverageMap[engineId].accountCount;
+                            var accountCount = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] && data.ratingEngineIdCoverageMap[engineId].accountCount ? data.ratingEngineIdCoverageMap[engineId].accountCount : 0);
 
                             console.log(accountCount);
 

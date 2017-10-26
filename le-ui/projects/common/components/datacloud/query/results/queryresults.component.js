@@ -45,12 +45,7 @@ angular.module('common.datacloud.query.results', [
     });
 
     vm.init = function() {
-
-
-        console.log(vm.accountsWithoutSfId);
-
-        if(vm.segment != null){
-            //console.log("this");
+        if(vm.segment != null && vm.section != 'wizard.targets'){
             $rootScope.$broadcast('header-back', { 
                 path: '^home.segment.accounts',
                 displayName: vm.segment.display_name,
@@ -126,7 +121,7 @@ angular.module('common.datacloud.query.results', [
                 var engineId = data.ratingEngine.id,
                     engineIdObject = [{id: engineId}];
                 PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                    vm.accountsWithoutSfId = data.ratingEngineIdCoverageMap[engineId].accountCount;
+                    vm.accountsWithoutSfId = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] && data.ratingEngineIdCoverageMap[engineId].accountCount ? data.ratingEngineIdCoverageMap[engineId].accountCount : 0);
                 });
             });
 
