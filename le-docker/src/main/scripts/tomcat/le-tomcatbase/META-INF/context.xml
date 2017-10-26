@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context>
     <Resources cachingAllowed="true" cacheMaxSize="1048576" cacheObjectMaxSize="10240" />
-    <ResourceLink name="jdbc/PLS_MultiTenant"
-                  global="jdbc/PLS_MultiTenant"
-                  auth="Container"
-                  type="javax.sql.DataSource" />
 </Context>

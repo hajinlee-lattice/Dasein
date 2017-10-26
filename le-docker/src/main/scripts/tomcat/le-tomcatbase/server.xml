@@ -43,18 +43,6 @@
               description="User database that can be updated and saved"
               factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
               pathname="conf/tomcat-users.xml" />
-
-    <Resource name="jdbc/PLS_MultiTenant"
-              auth="Container"
-              type="javax.sql.DataSource"
-              driverClassName="com.mysql.jdbc.Driver"
-              url="jdbc:mysql://{{AWS_AURORA_ENDPOINT}}/PLS_MultiTenant"
-              username="{{AWS_AURORA_USER}}"
-              password="{{AWS_AURORA_PASSWORD}}"
-
-              maxTotal="8"
-              maxIdle="2"
-              maxWaitMillis="10000" />
   </GlobalNamingResources>
 
   <!-- A "Service" is a collection of one or more "Connectors" that share
