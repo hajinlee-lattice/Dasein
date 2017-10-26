@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class SourceDifferTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(SourceDifferTestNG.class);
 
     private GeneralSource src1 = new GeneralSource("SRC1");
@@ -60,6 +60,11 @@ public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<Pipe
         confirmIntermediateSource(source1, targetVersion);
         confirmIntermediateSource(source, targetVersion);
         cleanupProgressTables();
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
@@ -95,7 +100,7 @@ public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<Pipe
         baseSources.add(src1.getSourceName());
         step0.setBaseSources(baseSources);
         step0.setTransformer(Diff.TRANSFORMER_NAME);
-        step0.setConfiguration(getDifferConfigWithVersionSet());
+        step0.setConfiguration(setDataFlowEngine(getDifferConfigWithVersionSet(), "TEZ"));
         step0.setTargetSource(source0.getSourceName());
 
         // ----------
@@ -104,7 +109,7 @@ public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<Pipe
         baseSources.add(src2.getSourceName());
         step1.setBaseSources(baseSources);
         step1.setTransformer(Diff.TRANSFORMER_NAME);
-        step1.setConfiguration(getDifferConfigNoVersionSet());
+        step1.setConfiguration(setDataFlowEngine(getDifferConfigNoVersionSet(), "TEZ"));
         step1.setTargetSource(source1.getSourceName());
 
         // ----------
@@ -114,7 +119,7 @@ public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<Pipe
         baseSources.add(src3.getSourceName());
         step2.setBaseSources(baseSources);
         step2.setTransformer(Diff.TRANSFORMER_NAME);
-        step2.setConfiguration(getDifferConfigTwoSources());
+        step2.setConfiguration(setDataFlowEngine(getDifferConfigTwoSources(), "TEZ"));
         step2.setTargetSource(source.getSourceName());
 
         // -----------
