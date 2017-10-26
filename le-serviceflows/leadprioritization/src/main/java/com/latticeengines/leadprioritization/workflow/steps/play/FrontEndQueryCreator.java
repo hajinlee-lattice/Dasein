@@ -108,7 +108,9 @@ public class FrontEndQueryCreator {
             FrontEndQuery entityFrontEndQuery) {
         List<AttributeLookup> lookups = new ArrayList<>();
         AttributeLookup attrLookup = new AttributeLookup(entityType,
-                StringUtils.isNotBlank(sortBy) ? sortBy : InterfaceName.LastModifiedDate.name());
+                // StringUtils.isNotBlank(sortBy) ? sortBy :
+                // InterfaceName.LastModifiedDate.name());
+                StringUtils.isNotBlank(sortBy) ? sortBy : InterfaceName.AccountId.name());
         lookups.add(attrLookup);
 
         FrontEndSort sort = new FrontEndSort(lookups, descending);

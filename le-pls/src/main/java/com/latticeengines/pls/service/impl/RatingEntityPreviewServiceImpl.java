@@ -2,8 +2,10 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,7 +44,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
             InterfaceName.CompanyName.name(), //
             InterfaceName.Domain.name(), //
             InterfaceName.Website.name(), //
-            InterfaceName.LastModifiedDate.name(), //
+            // InterfaceName.LastModifiedDate.name(), //
             InterfaceName.LDC_Name.name());
 
     List<String> contactFields = Arrays.asList(InterfaceName.AccountId.name(), //
@@ -79,16 +81,18 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
-        DataPage dataPage = entityProxy.getData( //
+        DataPage cachedDataPage = entityProxy.getData( //
                 tenent.getId(), //
                 entityFrontEndQuery);
 
+        DataPage resultDataPage = cachedDataPage;
+
         if (entityType == BusinessEntity.Account && StringUtils.isNotBlank(bucketFieldName)) {
-            postProcessDataPage(dataPage, model.getId(), bucketFieldName);
+            resultDataPage = handleBucketFieldName(cachedDataPage, model.getId(), bucketFieldName);
         }
 
-        log.info(String.format("Got # %d elements", dataPage.getData().size()));
-        return dataPage;
+        log.info(String.format("Got # %d elements", resultDataPage.getData().size()));
+        return resultDataPage;
 
     }
 
@@ -121,7 +125,9 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
             FrontEndQuery entityFrontEndQuery) {
         List<AttributeLookup> lookups = new ArrayList<>();
         AttributeLookup attrLookup = new AttributeLookup(entityType,
-                StringUtils.isNotBlank(sortBy) ? sortBy : InterfaceName.LastModifiedDate.name());
+                // StringUtils.isNotBlank(sortBy) ? sortBy :
+                // InterfaceName.LastModifiedDate.name());
+                StringUtils.isNotBlank(sortBy) ? sortBy : InterfaceName.AccountId.name());
         lookups.add(attrLookup);
 
         FrontEndSort sort = new FrontEndSort(lookups, descending);
@@ -160,15 +166,33 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         return model;
     }
 
-    private void postProcessDataPage(DataPage dataPage, String modelId, String bucketFieldName) {
-        List<Map<String, Object>> entityList = dataPage.getData();
-        if (CollectionUtils.isNotEmpty(entityList)) {
-            entityList //
-                    .stream().parallel() //
-                    .forEach( //
-                            entity -> //
-                            replaceScoreBucketFieldName(entity, modelId, bucketFieldName));
+    private DataPage handleBucketFieldName(DataPage cachedDataPage, String modelId, String bucketFieldName) {
+        DataPage resultDataPage = new DataPage();
+
+        List<Map<String, Object>> cachedEntityList = cachedDataPage.getData();
+        List<Map<String, Object>> resultEntityList = null;
+
+        if (CollectionUtils.isNotEmpty(cachedEntityList)) {
+            resultEntityList = //
+                    cachedEntityList //
+                            .stream() //
+                            .map( //
+                                    cachedEntity -> {
+                                        // clone cache map entity
+                                        Map<String, Object> resultMapEntity = new HashMap<>();
+                                        resultMapEntity.putAll(cachedEntity);
+                                        // then replace bucket field name
+                                        replaceScoreBucketFieldName(resultMapEntity, modelId, bucketFieldName);
+                                        return resultMapEntity;
+                                    }) //
+                            .collect(Collectors.toList());
+        } else {
+            resultEntityList = new ArrayList<>();
         }
+
+        resultDataPage.setData(resultEntityList);
+
+        return resultDataPage;
     }
 
     private void replaceScoreBucketFieldName(Map<String, Object> entity, String modelId, String bucketFieldName) {

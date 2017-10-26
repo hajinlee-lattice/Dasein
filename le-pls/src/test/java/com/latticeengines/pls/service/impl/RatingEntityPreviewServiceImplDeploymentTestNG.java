@@ -85,6 +85,16 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     }
 
     @Test(groups = "deployment")
+    public void testEntityPreviewFirstTime() {
+        testEntityPreview();
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewFirstTime" })
+    public void testEntityPreviewSecondTime() {
+        // it is imp to run same query twice to be able to test caching effect
+        testEntityPreview();
+    }
+
     public void testEntityPreview() {
         DataPage response = ratingEntityPreviewService.getEntityPreview(ratingEngine, 0L, 5L, BusinessEntity.Account,
                 InterfaceName.AccountId.name(), false, RATING_BUCKET_FIELD, null, false, null, null);
