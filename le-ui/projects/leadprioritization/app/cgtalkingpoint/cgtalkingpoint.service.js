@@ -174,9 +174,10 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     }
 
-    this.getDanteUrl = function() {
-        var deferred = $q.defer();
-        if (this.danteUrl !== null) {
+    this.getDanteUrl = function(opts) {
+        var deferred = $q.defer(),
+            no_cache = opts.no_cache || false;
+        if (this.danteUrl !== null && !no_cache) {
             deferred.resolve(this.danteUrl);
         } else {
         this.getTalkingPointsPreviewResources().then(function(data){
@@ -203,10 +204,10 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return accounts;
     }
 
-    this.getDanteAccounts = function() {
-        var deferred = $q.defer();
-
-        if (this.danteAccounts !== null) {
+    this.getDanteAccounts = function(opts) {
+        var deferred = $q.defer(),
+            no_cache = opts.no_cache || false;
+        if (this.danteAccounts !== null && !no_cache) {
             deferred.resolve(this.danteAccounts);
         } else {
             var self = this;

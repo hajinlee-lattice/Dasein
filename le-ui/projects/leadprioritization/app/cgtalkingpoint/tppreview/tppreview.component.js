@@ -36,10 +36,10 @@ angular.module('lp.cg.talkingpoint.preview', [])
 
         CgTalkingPointStore.generateLeadPreviewObject({playName: $stateParams.play_name}).then(function(leadPreviewObject){
             vm.leadPreviewObject = leadPreviewObject;
-            CgTalkingPointStore.getDanteAccounts().then(function(accounts) {
+            CgTalkingPointStore.getDanteAccounts({no_cache: true}).then(function(accounts) {
                 vm.accounts = accounts;
 
-                return CgTalkingPointStore.getDanteUrl();
+                return CgTalkingPointStore.getDanteUrl({no_cache: true});
             }).then(function(danteUrl) {
                 vm.sceIframeSrc = $sce.trustAsResourceUrl(danteUrl);
             }).then(function() {
