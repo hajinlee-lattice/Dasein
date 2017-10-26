@@ -24,9 +24,9 @@
                                 </div>
                             </div>
                         </p>
-                        <div class="dashboard-section-content-subsection rating_ has-icon">
+                        <div class="dashboard-section-content-subsection rating_ has-icon" ng-if="vm.play.ratingEngine.displayName">
                             <h4>Rating</h4>
-                            <h5>{{vm.play.rating.ratingName}}</h5>
+                            <h5>{{vm.play.ratingEngine.displayName}}</h5>
                         </div>
                         <div class="dashboard-section-content-subsection segment has-icon">
                             <h4>Segment</h4>

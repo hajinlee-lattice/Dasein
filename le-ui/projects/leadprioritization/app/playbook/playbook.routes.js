@@ -504,7 +504,7 @@ angular
                     PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
                         var accountCount = null;
                         if(data && data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] && data.ratingEngineIdCoverageMap[engineId].accountCount) {
-                            accoutCount = data.ratingEngineIdCoverageMap[engineId].accountCount;
+                            accountCount = data.ratingEngineIdCoverageMap[engineId].accountCount;
                         }
                         deferred.resolve(accountCount);
                     });

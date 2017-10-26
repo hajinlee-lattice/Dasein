@@ -2,7 +2,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     'mainApp.ratingsengine.deleteratingmodal'
 ])
 .controller('RatingsEngineListController', function (
-    $scope, $timeout, $element, $state, $stateParams, $filter, 
+    $scope, $timeout, $element, $state, $stateParams, $filter, $interval, 
     RatingsEngineStore, RatingsEngineService, DeleteRatingModal
 ) {
     var vm = this;
@@ -50,6 +50,22 @@ angular.module('lp.ratingsengine.ratingslist', [
             };
         });
     }
+
+    /**
+     * if they decide they want to add sorting by account or contact counts uncomment this and add
+     * { label: 'Accounts', icon: 'numeric', property: 'accountCount' },
+     * { label: 'Contacts', icon: 'numeric', property: 'contactCount' }
+     * to sort object above
+     */
+    // var checkForBuckets = $interval(function() {
+    //     if(vm.current.bucketCountMap && vm.current.ratings) {
+    //         angular.forEach(vm.current.ratings, function(rating, key) {
+    //             rating.accountCount = vm.current.bucketCountMap[rating.id].accountCount || 0;
+    //             rating.contactCount = vm.current.bucketCountMap[rating.id].contactCount || 0;
+    //         })
+    //         $interval.cancel(checkForBuckets);
+    //     }
+    // }, 1000);
 
     vm.init();
 

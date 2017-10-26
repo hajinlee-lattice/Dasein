@@ -116,7 +116,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         angular.forEach(segmentChunks, function(ids, index) {
             RatingsEngineStore.getSegmentsCounts(ids).then(function(response){
                 ids.forEach(function(id) {
-                    if(vm.segmentsKeyMap && vm.segmentsKeyMap[id] && response.segmentIdCoverageMap && response.segmentIdCoverageMap[id]) {
+                    if(vm.segmentsKeyMap && vm.segmentsKeyMap[id] !== 'undefined' && response.segmentIdCoverageMap && response.segmentIdCoverageMap[id]) {
                         vm.segments[vm.segmentsKeyMap[id]].numAccounts = (response.segmentIdCoverageMap[id].accountCount ? response.segmentIdCoverageMap[id].accountCount : 0);
                         vm.segments[vm.segmentsKeyMap[id]].numContacts = (response.segmentIdCoverageMap[id].contactCount ? response.segmentIdCoverageMap[id].contactCount : 0);
                     } else {
