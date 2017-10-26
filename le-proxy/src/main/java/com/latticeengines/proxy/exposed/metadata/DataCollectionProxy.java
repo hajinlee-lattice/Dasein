@@ -53,13 +53,13 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("get default dataCollection", url, ResponseDocument.class);
     }
 
-    @Cacheable(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
+    //@Cacheable(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
     public AttributeRepository getAttrRepo(String customerSpace) {
-        // if (attrRepoCache == null) {
-        // initializeAttrRepoCache();
-        // }
-        // return attrRepoCache.get(customerSpace);
-        return getAttrRepoViaRestCall(customerSpace);
+         if (attrRepoCache == null) {
+         initializeAttrRepoCache();
+         }
+         return attrRepoCache.get(customerSpace);
+        //return getAttrRepoViaRestCall(customerSpace);
     }
 
     public StatisticsContainer getStats(String customerSpace) {
@@ -125,11 +125,11 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("upsertTable", url, null, DataCollection.class);
     }
 
-    @CacheEvict(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
+    //@CacheEvict(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
     public void upsertStats(String customerSpace, StatisticsContainer container) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
                 shortenCustomerSpace(customerSpace));
-        // evictAttrRepoCache(customerSpace);
+         evictAttrRepoCache(customerSpace);
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
