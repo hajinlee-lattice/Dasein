@@ -38,6 +38,6 @@ public class AImodel extends RatingModel {
     }
 
     public static String generateIdStr() {
-        return String.format(AI_MODEL_FORMAT, AI_MODEL_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
+        return UuidUtils.shortenUuid(UUID.randomUUID());
     }
 }
