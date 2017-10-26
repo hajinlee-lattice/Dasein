@@ -29,6 +29,29 @@ if [ -f "/etc/internaladdr.txt" ]; then
     echo "RMI_SERVER=${RMI_SERVER}"
 fi
 
+AWS_AURORA_ENDPOINT=${AWS_AURORA_ENDPOINT:=localhost:3306}
+AWS_AURORA_USER=${AWS_AURORA_USER:=root}
+AWS_USER_PASSWORD=${AWS_USER_PASSWORD:welcome}
+#TODO: remove plain text password
+if [ "${LE_ENVIRONMENT}" = "qacluster" ]; then
+    AWS_AURORA_USER="LPI"
+    AWS_USER_PASSWORD="8@iGe3x-V!"
+elif [ "${LE_ENVIRONMENT}" = "prodcluster" ]; then
+    AWS_AURORA_USER="LPI"
+    AWS_USER_PASSWORD="3e!P@i8v|1"
+else
+
+echo "AWS_AURORA_ENDPOINT=${AWS_AURORA_ENDPOINT}"
+echo "AWS_AURORA_USER=${AWS_AURORA_USER}"
+# to be removed soon after verifying the deployment
+echo "AWS_USER_PASSWORD=${AWS_USER_PASSWORD}"
+
+sed -i "s/{{AWS_AURORA_ENDPOINT}}/${AWS_AURORA_ENDPOINT}/" ${CATALINA_HOME}/conf/server.xml
+sed -i "s/{{AWS_AURORA_USER}}/${AWS_AURORA_USER}/" ${CATALINA_HOME}/conf/server.xml
+sed -i "s/{{AWS_USER_PASSWORD}}/${AWS_USER_PASSWORD}/" ${CATALINA_HOME}/conf/server.xml
+
+cat ${CATALINA_HOME}/conf/server.xml
+
 export JAVA_OPTS="-Duser.timezone=US/Eastern"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
