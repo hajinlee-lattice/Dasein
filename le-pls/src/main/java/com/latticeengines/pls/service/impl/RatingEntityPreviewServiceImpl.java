@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
@@ -114,8 +115,19 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
             boolean restrictNotNullSalesforceId, String freeFormTextSearch) {
         entityFrontEndQuery.setMainEntity(entityType);
 
-        entityFrontEndQuery.setAccountRestriction(ratingEngine.getSegment().getAccountFrontEndRestriction());
-        entityFrontEndQuery.setContactRestriction(ratingEngine.getSegment().getContactFrontEndRestriction());
+        if (ratingEngine.getSegment().getAccountFrontEndRestriction() == null) {
+            entityFrontEndQuery
+                    .setAccountRestriction(new FrontEndRestriction(ratingEngine.getSegment().getAccountRestriction()));
+        } else {
+            entityFrontEndQuery.setAccountRestriction(ratingEngine.getSegment().getAccountFrontEndRestriction());
+        }
+
+        if (ratingEngine.getSegment().getContactFrontEndRestriction() == null) {
+            entityFrontEndQuery
+                    .setContactRestriction(new FrontEndRestriction(ratingEngine.getSegment().getContactRestriction()));
+        } else {
+            entityFrontEndQuery.setContactRestriction(ratingEngine.getSegment().getContactFrontEndRestriction());
+        }
 
         entityFrontEndQuery.setRestrictNotNullSalesforceId(restrictNotNullSalesforceId);
         entityFrontEndQuery.setFreeFormTextSearch(freeFormTextSearch);
