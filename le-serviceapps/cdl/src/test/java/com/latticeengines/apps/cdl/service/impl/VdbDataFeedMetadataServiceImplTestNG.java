@@ -39,13 +39,12 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     @BeforeClass(groups = "functional")
     private void setup() throws IOException {
-        //setup test metadata string;
+        // setup test metadata string;
         testVdbMetadata = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("metadata/vdb/testmetadata.json"),
                 "UTF-8");
-        errorVdbMetadata = IOUtils.toString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream(
-                        "metadata/vdb/testmetadata_error.json"), "UTF-8");
+        errorVdbMetadata = IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("metadata/vdb/testmetadata_error.json"), "UTF-8");
     }
 
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)
@@ -73,8 +72,8 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
                 VdbConnectorConfiguration.class);
         Assert.assertNotNull(vdbConnectorConfiguration);
         Assert.assertNotNull(vdbConnectorConfiguration.getVdbTableConfiguration("FS_Data_For_Dante_Accounts_1000"));
-        ImportVdbTableConfiguration importVdbTableConfiguration = vdbConnectorConfiguration.getVdbTableConfiguration
-                ("FS_Data_For_Dante_Accounts_1000");
+        ImportVdbTableConfiguration importVdbTableConfiguration = vdbConnectorConfiguration
+                .getVdbTableConfiguration("FS_Data_For_Dante_Accounts_1000");
         Assert.assertNotNull(importVdbTableConfiguration);
         Assert.assertEquals(importVdbTableConfiguration.getCollectionIdentifier(), jobIdentifier);
     }
@@ -82,6 +81,8 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     @Test(groups = "functional", dependsOnMethods = "testGetMetadata")
     public void testResolveMetadata() {
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.Account);
+        schemaTable.addAttributes(SchemaRepository.instance().matchingAttributes(BusinessEntity.Account));
+
         resolvedTable = vdbDataFeedMetadataService.resolveMetadata(testTable, schemaTable);
         Assert.assertNotNull(resolvedTable);
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.AccountId));

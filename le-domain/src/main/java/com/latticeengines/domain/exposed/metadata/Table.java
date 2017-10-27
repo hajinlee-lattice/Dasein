@@ -243,15 +243,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (name == null) {
             return null;
         }
-        return Iterables.find(attributes, new Predicate<Attribute>() {
-            @Override
-            public boolean apply(@Nullable Attribute attribute) {
-                if (attribute.getName() == null) {
-                    return false;
-                }
-                return attribute.getName().equals(name);
-            }
-        }, null);
+        return attributes.stream().filter(attr -> name.equals(attr.getName())).findFirst().orElse(null);
     }
 
     @JsonIgnore

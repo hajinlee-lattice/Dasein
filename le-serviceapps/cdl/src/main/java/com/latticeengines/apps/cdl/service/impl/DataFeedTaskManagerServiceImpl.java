@@ -52,7 +52,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private boolean dlTenantMappingEnabled;
 
     @Inject
-    public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter, DataFeedProxy dataFeedProxy, TenantService tenantService, DLTenantMappingService dlTenantMappingService) {
+    public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
+            DataFeedProxy dataFeedProxy, TenantService tenantService, DLTenantMappingService dlTenantMappingService) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
         this.dataFeedProxy = dataFeedProxy;
         this.tenantService = tenantService;
@@ -61,7 +62,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Override
     public String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source,
-                                     String metadata) {
+            String metadata) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
         if (dlTenantMappingEnabled) {
@@ -75,6 +76,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         MultiTenantContext.setTenant(tenant);
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
+        schemaTable.addAttributes(SchemaRepository.instance().matchingAttributes(BusinessEntity.valueOf(entity)));
+
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
@@ -120,15 +123,15 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         }
         String category;
         switch (businessEntity) {
-            case Account:
-                category = Category.ACCOUNT_ATTRIBUTES.name();
-                break;
-            case Contact:
-                category = Category.CONTACT_ATTRIBUTES.name();
-                break;
-            //todo other entity
-            default:
-                category = Category.DEFAULT.getName();
+        case Account:
+            category = Category.ACCOUNT_ATTRIBUTES.name();
+            break;
+        case Contact:
+            category = Category.CONTACT_ATTRIBUTES.name();
+            break;
+        // todo other entity
+        default:
+            category = Category.DEFAULT.getName();
         }
         for (Attribute attr : table.getAttributes()) {
             attr.setCategory(category);
@@ -165,8 +168,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,
-                                    String dataFeedTaskUniqueId) {
-        List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(), entity);
+            String dataFeedTaskUniqueId) {
+        List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(),
+                entity);
         if (dataFeedTasks == null || dataFeedTasks.size() == 0) {
             return;
         } else {
@@ -177,15 +181,15 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 List<String> inconsistentAttrs = compareAttribute(dataFeedTask.getSource(),
                         dataFeedTask.getImportTemplate(), source, metaTable);
                 if (inconsistentAttrs != null && inconsistentAttrs.size() > 0) {
-                    throw new RuntimeException(String.format("The following field data type is not consistent with " +
-                            "the one that already exists: %s", String.join(",", inconsistentAttrs)));
+                    throw new RuntimeException(String.format(
+                            "The following field data type is not consistent with " + "the one that already exists: %s",
+                            String.join(",", inconsistentAttrs)));
                 }
             }
         }
     }
 
-    private List<String> compareAttribute(String baseSource, Table baseTable,
-                                     String targetSource, Table targetTable) {
+    private List<String> compareAttribute(String baseSource, Table baseTable, String targetSource, Table targetTable) {
         List<String> inconsistentAttrs = new ArrayList<>();
         DataFeedMetadataService baseService = DataFeedMetadataService.getService(baseSource);
         DataFeedMetadataService targetService = DataFeedMetadataService.getService(targetSource);

@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
@@ -93,8 +94,9 @@ public class ModelMetadataServiceImplUnitTestNG {
 
         List<Attribute> attributes = Arrays
                 .<Attribute>asList(new Attribute[] { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 });
-        List<Attribute> requiredColumns = pythonScriptModelService.getRequiredColumns(attributes,
-                SchemaInterpretation.SalesforceLead);
+        Table t = new Table();
+        t.setAttributes(attributes);
+        List<Attribute> requiredColumns = pythonScriptModelService.getRequiredColumns(t);
         System.out.println(requiredColumns);
         assertEquals(requiredColumns.size(), 4);
         assertEquals(requiredColumns.get(0), a1);

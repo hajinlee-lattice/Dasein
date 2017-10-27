@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,10 +10,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 
 public class ScoringFileMetadataServiceImplUnitTestNG {
 
@@ -29,9 +28,9 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void testResolveModelAttributeBasedOnFieldMapping() {
         List<Attribute> modelAttributes = generateTestModelAttributes();
-        List<Attribute> schemaAttributes = generateTestSchemaAttributes();
+        // List<Attribute> schemaAttributes = generateTestSchemaAttributes();
         List<FieldMapping> fieldMappingList = generateTestFieldMappingDocument().getFieldMappings();
-        scoringFileMetadataServiceImpl.resolveModelAttributeBasedOnFieldMapping(modelAttributes, schemaAttributes,
+        scoringFileMetadataServiceImpl.resolveModelAttributeBasedOnFieldMapping(modelAttributes,
                 generateTestFieldMappingDocument());
         Assert.assertEquals(modelAttributes.size(), fieldMappingList.size());
         assertUserDefinedAttributeInSchemaIsCorrectlySet(modelAttributes);
@@ -50,23 +49,21 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         Attribute standardAttr1 = new Attribute();
         Attribute standardAttr2 = new Attribute();
         Attribute userDefinedModelAttribute = new Attribute();
+        Attribute userDefinedScoreAttributeMappedSchemaAttribute = new Attribute();
         modelAttributeList.add(standardAttr1);
         modelAttributeList.add(standardAttr2);
         modelAttributeList.add(userDefinedModelAttribute);
+        modelAttributeList.add(userDefinedScoreAttributeMappedSchemaAttribute);
         standardAttr1.setName(standardAttrName1);
         standardAttr1.setDisplayName(standardAttrName1);
         standardAttr2.setName(standardAttrName2);
         standardAttr2.setDisplayName(standardAttrName2);
         userDefinedModelAttribute.setName(userDefinedModelAttributeName);
         userDefinedModelAttribute.setDisplayName(userDefinedModelAttributeName);
+        userDefinedScoreAttributeMappedSchemaAttribute.setName(userDefinedScoreAttributeMappedSchemaColumnName);
+        userDefinedScoreAttributeMappedSchemaAttribute.setDisplayName(userDefinedScoreAttributeCSVHeaderName);
 
         return modelAttributeList;
-    }
-
-    private List<Attribute> generateTestSchemaAttributes() {
-        List<Attribute> schemaFields = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead)
-                .getAttributes();
-        return schemaFields;
     }
 
     private FieldMappingDocument generateTestFieldMappingDocument() {
@@ -103,6 +100,9 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         fieldMappingList.add(mappedToModelRequiredColumnField1);
         fieldMappingList.add(mappedToModelRequiredColumnField2);
         fieldMappingList.add(mappedToSchemaColumnField);
+
+        fieldMappingDocument.setIgnoredFields(
+                Arrays.asList(new String[] { "Website", "DUNS", "City", "State", "PhoneNumber", "PostalCode" }));
 
         return fieldMappingDocument;
     }

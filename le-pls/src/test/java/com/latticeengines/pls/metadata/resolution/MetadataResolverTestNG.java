@@ -9,10 +9,12 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -36,12 +38,12 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
@@ -78,7 +80,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
         Set<String> expectedUnknownColumns = Sets.newHashSet(
                 new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column", "Date" });
-
+        expectedUnknownColumns
+                .addAll(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount).stream()
+                        .flatMap(attr -> attr.getAllowedDisplayNames().stream()).collect(Collectors.toSet()));
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -226,7 +230,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         String path = ClassLoader
                 .getSystemResource("com/latticeengines/pls/service/impl/fileuploadserviceimpl/table.json").getPath();
 
-        Table table = JsonUtils.deserialize(FileUtils.readFileToString(new File(path)), Table.class);
+        Table table = JsonUtils.deserialize(FileUtils.readFileToString(new File(path), Charset.defaultCharset()),
+                Table.class);
         table.getAttributeFromDisplayName("Some Column").setApprovedUsage(ApprovedUsage.NONE.toString());
 
         final Table schema = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead);

@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -26,7 +27,6 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
@@ -80,29 +80,20 @@ public class MetadataResolver {
         result.metadata = metadata;
         calculateBasedOnMetadta();
         // sort the order based on header fields
-        sortAttributesBasedOnSourceFileSequence();
+        sortAttributesBasedOnSourceFileSequence(result.metadata);
     }
 
-    private void sortAttributesBasedOnSourceFileSequence() {
-        log.info("Current metadata attribute list: " + result.metadata.getAttributes());
+    public void sortAttributesBasedOnSourceFileSequence(Table table) {
+        log.info("Current metadata attribute list: " + table.getAttributes());
         Set<String> headerFields = getHeaderFields();
         log.info("Current header list: " + headerFields);
-        List<Attribute> attrs = new ArrayList<>();
-        for (final String header : headerFields) {
-            Attribute attr = Iterables.find(result.metadata.getAttributes(), new Predicate<Attribute>() {
-                @Override
-                public boolean apply(Attribute input) {
-                    if (input.getDisplayName().equals(header)) {
-                        return true;
-                    }
-                    return false;
-                }
-
-            });
-            attrs.add(attr);
-        }
-        result.metadata.setAttributes(attrs);
-        log.info("After sorting header list: " + result.metadata.getAttributes());
+        List<Attribute> attrs = headerFields.stream().map(h -> table.getAttributeFromDisplayName(h))
+                .collect(Collectors.toList());
+        List<Attribute> remaining = table.getAttributes().stream().filter(attr -> !attrs.contains(attr))
+                .collect(Collectors.toList());
+        attrs.addAll(remaining);
+        table.setAttributes(attrs);
+        log.info("After sorting header list: " + table.getAttributes());
     }
 
     public void calculateBasedOnFieldMappingDocument(Table metadata) {

@@ -1,10 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +15,13 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.MetadataUtils;
 
@@ -43,60 +40,46 @@ public class PythonScriptModelService extends ModelServiceBase {
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
         Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
-        List<Attribute> attributes = eventTable.getAttributes();
-        if (attributes == null) {
+        if (eventTable.getAttributes() == null) {
             log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
-        ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
-        List<Attribute> requiredColumns = getRequiredColumns(attributes,
-                SchemaInterpretation.valueOf(summary.getSourceSchemaInterpretation()));
-        return requiredColumns;
+        return getRequiredColumns(eventTable);
     }
 
     @VisibleForTesting
-    List<Attribute> getRequiredColumns(List<Attribute> attributes, SchemaInterpretation schemaInterpretation) {
-        List<Attribute> requiredColumns = new ArrayList<>();
-        Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
-        for (Attribute attribute : attributes) {
-            List<String> tags = attribute.getTags();
-            // required columns consist of two categories:
-            // 1. attributes that is part of the standard schema repository
-            // 2. attributes that come from customer data or does not have tag
-            // information but both have approved usage of modeling and above
-            if (schema.getAttribute(attribute.getName()) != null //
-                    || (tags == null || tags.isEmpty() || tags.get(0).equals(Tag.INTERNAL.toString()))
-                            && !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty()
-                                    || attribute.getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString()))) {
-                LogicalDataType logicalDataType = attribute.getLogicalDataType();
-                if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
-                        && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
-                    requiredColumns.add(attribute);
-                }
-            }
-        }
-        return requiredColumns;
+    List<Attribute> getRequiredColumns(Table eventTable) {
+        List<Attribute> attrs = eventTable.getAttributes().stream()
+                .filter(attr -> attr.isCustomerPredictor() || attr.getInterfaceName() == InterfaceName.Id)
+                .collect(Collectors.toList());
+        Set<String> excludeParentNames = attrs.stream()
+                .filter(attr -> attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString()))
+                .flatMap(attr -> attr.getParentAttributeNames().stream())//
+                .distinct() //
+                .filter(name -> eventTable.getAttribute(name) != null
+                        && eventTable.getAttribute(name).getApprovedUsage().contains(ApprovedUsage.NONE.toString()))
+                .collect(Collectors.toSet());
+        return attrs.stream()
+                .filter(attr -> attr.isInternalPredictor() && !excludeParentNames.contains(attr.getName())
+                        && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
+                        && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType())
+                        && !LogicalDataType.isExcludedFromScoringFileMapping(attr.getLogicalDataType()))
+                .collect(Collectors.toList());
+
     }
 
     @Override
     public Set<String> getLatticeAttributeNames(String modelId) {
-        Set<String> attrNameSet = new HashSet<>();
         Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
-        List<Attribute> attributes = eventTable.getAttributes();
-        if (attributes == null) {
+        if (eventTable.getAttributes() == null) {
             log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
-        for (Attribute attribute : attributes) {
-            List<String> tags = attribute.getTags();
-            if (tags != null && !tags.isEmpty() && !tags.get(0).equals(Tag.INTERNAL.toString())) {
-                LogicalDataType logicalDataType = attribute.getLogicalDataType();
-                if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
-                        && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
-                    attrNameSet.add(attribute.getName());
-                }
-            }
-        }
+        Set<String> attrNameSet = eventTable.getAttributes().stream()
+                .filter(attr -> attr.isInternalPredictor() //
+                        && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
+                        && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType()))
+                .map(Attribute::getName).collect(Collectors.toSet());
         log.info("The column names are : " + attrNameSet);
         return attrNameSet;
     }
