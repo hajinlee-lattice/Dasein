@@ -2,7 +2,6 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,15 +16,16 @@ import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.metadata.dao.DataFeedDao;
+import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
@@ -53,6 +53,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
+
+    @Autowired
+    private DataFeedTaskTableDao datafeedTaskTableDao;
 
     @Override
     public BaseDao<DataFeed> getDao() {
@@ -133,20 +136,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
         List<DataFeedImport> imports = new ArrayList<>();
         List<DataFeedTask> tasks = new ArrayList<>(datafeed.getTasks());
-        Iterator<DataFeedTask> iter = tasks.iterator();
-        while (iter.hasNext()) {
-            DataFeedTask task = iter.next();
-            Table dataTable = datafeedTaskEntityMgr.peekFirstDataTable(task);
-            if (dataTable != null && !dataTable.getExtracts().isEmpty()) {
-                task.setImportData(dataTable);
-                imports.add(DataFeedImportUtils.createImportFromTask(task));
-                datafeedTaskEntityMgr.pollFirstDataTable(task);
-            } else {
-                log.info("ignore task: " + task + " as this task has empty table or empty extract");
-                iter.remove();
-            }
-        }
-        log.info("tasks for consolidates are: " + tasks);
+        tasks.forEach(task -> {
+            imports.addAll(createImports(task));
+            datafeedTaskEntityMgr.clearTableQueuePerTask(task);
+        });
+        log.info("imports for consolidates are: " + imports);
 
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);
@@ -163,8 +157,27 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             datafeedTaskEntityMgr.update(task, new Date());
         });
         log.info(String.format("starting execution: updating data feed to %s", datafeed));
+
         update(datafeed);
         return execution;
+    }
+
+    private List<DataFeedImport> createImports(DataFeedTask task) {
+        List<DataFeedImport> imports = new ArrayList<>();
+
+        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableDao.getDataFeedTaskTables(task);
+        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable).forEach(dataTable -> {
+            dataTable = HibernateUtils.inflateDetails(dataTable);
+            if (dataTable != null) {
+                if (!dataTable.getExtracts().isEmpty()) {
+                    task.setImportData(dataTable);
+                    imports.add(DataFeedImportUtils.createImportFromTask(task));
+                } else {
+                    log.info(String.format("skip table: %s as this table extract is empty", dataTable.getName()));
+                }
+            }
+        });
+        return imports;
     }
 
     @Override
