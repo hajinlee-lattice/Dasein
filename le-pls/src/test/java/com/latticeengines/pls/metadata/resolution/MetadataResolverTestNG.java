@@ -75,8 +75,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     public void getFieldMappingsTest() {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
 
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(
-                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
+        Table table = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount);
+        table.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount));
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(table);
 
         Set<String> expectedUnknownColumns = Sets.newHashSet(
                 new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column", "Date" });
@@ -87,18 +88,20 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
 
-                assertTrue(expectedUnknownColumns.contains(fieldMapping.getUserField()));
+                assertTrue(expectedUnknownColumns.stream().anyMatch(fieldMapping.getUserField()::equalsIgnoreCase));
             }
         }
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument(
-                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
+
+        table = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount);
+        table.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount));
+        resolver.calculateBasedOnFieldMappingDocument(table);
 
         assertTrue(resolver.isMetadataFullyDefined());
-        Table table = resolver.getMetadata();
+        table = resolver.getMetadata();
 
         assertEquals(table.getAttribute(InterfaceName.Id).getDisplayName(), "Account iD");
-        assertEquals(table.getAttribute(InterfaceName.Website).getDisplayName(), "website");
+        assertEquals(table.getAttribute(InterfaceName.Website).getDisplayName(), "Website");
         assertEquals(table.getAttribute(InterfaceName.Event).getDisplayName(), "Event");
         assertEquals(table.getAttribute(InterfaceName.Country).getDisplayName(), "Billing Country");
         assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(), "ACCOUNT Name");
@@ -235,6 +238,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         table.getAttributeFromDisplayName("Some Column").setApprovedUsage(ApprovedUsage.NONE.toString());
 
         final Table schema = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead);
+        schema.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceLead));
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {
@@ -251,6 +255,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 return false;
             }
         });
+
         assertEquals(table.getAttributes().size(), 30);
 
         MetadataResolver resolver = new MetadataResolver(hdfsPath2, yarnConfiguration, null);
