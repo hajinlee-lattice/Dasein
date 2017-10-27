@@ -9,6 +9,7 @@ public final class MatchConstants {
     public static final String CACHE_TABLE = "DerivedColumnsCache";
     public static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     public static final String DISPOSABLE_EMAIL = "DisposableEmail";
+    public static final String PREMATCH_DOMAIN = "PreMatchDomain";
 
     public static final String SOURCE_PREFIX = "Source_";
 

@@ -260,6 +260,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)) {
                     output.set(i, disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain()));
                 }
+                if (MatchConstants.PREMATCH_DOMAIN.equalsIgnoreCase(field)) {
+                    output.set(i, internalRecord.getParsedDomain());
+                }
             }
 
             internalRecord.setOutput(output);

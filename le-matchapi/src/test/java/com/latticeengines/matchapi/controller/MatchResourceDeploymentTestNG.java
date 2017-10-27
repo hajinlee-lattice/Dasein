@@ -105,7 +105,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     private JobService jobService;
 
     // Test against DerivedColumnsCache
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
@@ -118,7 +118,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testAccountMasterRTSMatch() {
         testAccountMasterRTSMatch(true, "a@fb.com", true, false, null);
         testAccountMasterRTSMatch(true, "a@salesforce.com", false, true, "null");
@@ -143,7 +143,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions")
+    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions", enabled = true)
     public void testRealtimeBulkMatch(String version) throws IOException {
         int size = 200;
         List<MatchInput> inputList = prepareBulkMatchInput(size, version, true);
@@ -180,7 +180,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions")
+    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions", enabled = true)
     public void testRealtimeMatchWithMultipleRecords(String version) throws IOException {
         int size = 200;
         MatchInput matchInput = prepareMatchInputWithMultipleRecords(size, version);
@@ -275,7 +275,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         return input;
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
@@ -288,7 +288,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", dataProvider = "allDataCloudVersions")
+    @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
     public void testBulkMatchWithSchema(String version) throws Exception {
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
@@ -338,7 +338,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testBulkMatchWithoutSchema() throws Exception {
         String version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
 
@@ -366,7 +366,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testMultiBlockBulkMatch() throws InterruptedException {
         String version = "1.0.0";
         HdfsPodContext.changeHdfsPodId(podId);
@@ -403,7 +403,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testGetBulkConfig() {
         String currentVersion = dataCloudVersionEntityMgr.currentApprovedVersionAsString();
         MatchInput input = createAvroBulkMatchInput(true, null, currentVersion);
