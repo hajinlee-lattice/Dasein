@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -191,13 +190,14 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         }
 
         Set<String> accIds = new HashSet<>();
-        for (Map<String, Object> row : response.getData()) {
-            Assert.assertNotNull(row.get(RATING_BUCKET_FIELD));
-            Assert.assertNotNull(row.get(InterfaceName.AccountId.name()));
-
-            Assert.assertFalse(accIds.contains(row.get(InterfaceName.AccountId.name()).toString()));
-            accIds.add(row.get(InterfaceName.AccountId.name()).toString());
-        }
+        response.getData() //
+                .stream() //
+                .forEach(row -> {
+                    Assert.assertNotNull(row.get(RATING_BUCKET_FIELD));
+                    Assert.assertNotNull(row.get(InterfaceName.AccountId.name()));
+                    Assert.assertFalse(accIds.contains(row.get(InterfaceName.AccountId.name()).toString()));
+                    accIds.add(row.get(InterfaceName.AccountId.name()).toString());
+                });
         return accIds;
     }
 }
