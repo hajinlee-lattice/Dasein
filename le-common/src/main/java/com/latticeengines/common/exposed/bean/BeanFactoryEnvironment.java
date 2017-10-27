@@ -7,7 +7,7 @@ public final class BeanFactoryEnvironment {
 
     private static Logger log = LoggerFactory.getLogger(BeanFactoryEnvironment.class);
 
-    private static Environment environment;
+    private static Environment environment = null;
 
     public static void setEnvironment(String environmentName) {
         Environment environment1 = Environment.valueOf(environmentName);

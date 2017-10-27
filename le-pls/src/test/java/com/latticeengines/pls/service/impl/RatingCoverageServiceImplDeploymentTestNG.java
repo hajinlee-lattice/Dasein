@@ -18,6 +18,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -28,8 +29,9 @@ import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndSingleRulePair;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineService;
@@ -219,16 +221,12 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment")
     public void testSegmentIdSingleRulesCoverage() {
         RatingsCountRequest request = new RatingsCountRequest();
-        Restriction accountRestriction1 = //
-                ConcreteRestriction.builder() //
-                        .let(BusinessEntity.Account, "LDC_Name") //
-                        .in("A", "G") //
-                        .build();
-        Restriction accountRestriction2 = //
-                ConcreteRestriction.builder() //
-                        .let(BusinessEntity.Account, "LDC_Name") //
-                        .in("B", "Z") //
-                        .build();
+
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Account, "LDC_Name");
+        Bucket bucket1 = Bucket.rangeBkt("A", "G", true, false);
+        Bucket bucket2 = Bucket.rangeBkt("B", "Z", true, false);
+        Restriction accountRestriction1 = new BucketRestriction(attrLookup, bucket1);
+        Restriction accountRestriction2 = new BucketRestriction(attrLookup, bucket2);
 
         SegmentIdAndSingleRulePair r1 = new SegmentIdAndSingleRulePair();
         r1.setSegmentId(ratingEngine.getSegment().getName());

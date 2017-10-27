@@ -16,7 +16,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
-    private static Logger log = LoggerFactory.getLogger(DataSourceBeanFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSourceBeanFactory.class);
 
     // if use jndi
     private String jndiName;

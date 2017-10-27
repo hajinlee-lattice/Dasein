@@ -65,7 +65,6 @@
                   maxTotal="8"
                   maxIdle="1"
                   maxWaitMillis="10000" />
-
     </GlobalNamingResources>
 
     <Service name="MatchAPI">
