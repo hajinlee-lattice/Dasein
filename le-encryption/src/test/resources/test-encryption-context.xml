@@ -4,6 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
+    <import resource="classpath:common-testclient-env-context.xml" />
     <import resource="classpath:encryption-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:testframework-context.xml"/>
