@@ -144,80 +144,6 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
-        // table.addAttribute(attr("Website") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "WEBSITE" })) //
-        // .type(Schema.Type.STRING) //
-        // .required() //
-        // .interfaceName(InterfaceName.Website) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-        // .build());
-        // table.addAttribute(attr("CompanyName") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME",
-        // "ACCOUNT NAME" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.CompanyName) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("City") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY", "BILLING
-        // CITY" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.City) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("State") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "BILLING
-        // STATE", "BILLING PROVINCE" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.State) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("Country") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY",
-        // "BILLING COUNTRY" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.Country) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("PostalCode") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "POSTALCODE",
-        // "BILLING ZIP", "POSTAL CODE" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.PostalCode) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("DUNS") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS
-        // NUMBER" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.DUNS) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("CategoryId") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "CATEGORY_ID" }))
-        // //
-        // .type(Schema.Type.STRING) //
-        // .required() //
-        // .interfaceName(InterfaceName.CategoryId) //
-        // .logicalType(LogicalDataType.Reference) //
-        // .fundamentalType(FundamentalType.ALPHA.name()) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .build());
         table.addAttribute(attr("SubcategoryId") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "SUBCATEGORY_ID" })) //
                 .type(Schema.Type.STRING) //
@@ -387,59 +313,6 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
                 .build());
 
-        // table.addAttribute(attr("CompanyName") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME",
-        // "COMPANY", "ACCOUNT" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.CompanyName) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .build());
-        // table.addAttribute(attr("City") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.City) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("State") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE",
-        // "PROVINCE" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.State) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("Country") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.Country) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("PostalCode") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "POSTALCODE",
-        // "ZIP", "POSTAL CODE" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.PostalCode) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr("DUNS") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS
-        // NUMBER" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.DUNS) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-
         table.addAttribute(attr("CreatedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CREATEDDATE", "CREATED DATE" })) //
                 .type(Schema.Type.LONG) //
@@ -509,15 +382,6 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
-        // table.addAttribute(attr("PhoneNumber") //
-        // .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE
-        // NUMBER" })) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.PhoneNumber) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
         table.addAttribute(attr("AnnualRevenue") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ANNUALREVENUE", "ANNUAL REVENUE" })) //
                 .type(Schema.Type.DOUBLE) //
@@ -562,68 +426,6 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
-        // table.addAttribute(attr(InterfaceName.Website.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("WEBSITE", "URL")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.Website) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(FundamentalType.ALPHA.name()) //
-        // .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-        // .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.CompanyName.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME",
-        // "DISPLAY_NAME", "DISPLAYNAME")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.CompanyName) //
-        // .fundamentalType(FundamentalType.ALPHA.name()) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.City.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING CITY")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.City) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(FundamentalType.ALPHA.name()) //
-        // .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.State.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("STATE", "STATE_PROVINCE",
-        // "STATEPROVINCE", "PROVINCE",
-        // "STATE OR PROVINCE", "BILLING STATE", "BILLING PROVINCE")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.State) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(FundamentalType.ALPHA.name()) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.Country.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("COUNTRY", "BILLING COUNTRY"))
-        // //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.Country) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(FundamentalType.ALPHA.name()) //
-        // .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.PostalCode.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("POSTAL_CODE", "POSTALCODE",
-        // "ZIP", "POSTAL CODE", "BILLING ZIP")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.PostalCode) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(FundamentalType.NUMERIC.name()) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.DUNS.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("DUNS", "DUNS NUMBER")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.DUNS) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(FundamentalType.NUMERIC.name()) //
-        // .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-        // .build());
         table.addAttribute(attr(InterfaceName.Industry.name()) //
                 .allowedDisplayNames(Sets.newHashSet("INDUSTRY")) //
                 .type(Schema.Type.STRING) //
@@ -737,69 +539,6 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        // table.addAttribute(attr(InterfaceName.Email.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL_ADDRESS")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.Email) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_EMAIL) //
-        // .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.City.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("CITY")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.City) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.State.name()) //
-        // .allowedDisplayNames(
-        // Sets.newHashSet("STATE", "STATE_PROVINCE", "PROVINCE", "STATE OR
-        // PROVINCE", "STATEPROVINCE")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.State) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.Country.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("COUNTRY")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.Country) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.PostalCode.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("POSTAL_CODE", "POSTALCODE",
-        // "ZIP", "POSTAL CODE")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.PostalCode) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
-
-        // table.addAttribute(attr(InterfaceName.CompanyName.name()) //
-        // .allowedDisplayNames(
-        // Sets.newHashSet("COMPANY NAME", "COMPANY", "ACCOUNT", "DISPLAY_NAME",
-        // "DISPLAYNAME")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.CompanyName) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .fundamentalType(ModelingMetadata.FT_ALPHA) //
-        // .build());
-        // table.addAttribute(attr(InterfaceName.DUNS.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("DUNS", "DUNS NUMBER")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.DUNS) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
         table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED DATE")) //
                 .type(Schema.Type.LONG) //
@@ -844,14 +583,6 @@ public class SchemaRepository {
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        // table.addAttribute(attr(InterfaceName.PhoneNumber.name()) //
-        // .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE NUMBER")) //
-        // .type(Schema.Type.STRING) //
-        // .interfaceName(InterfaceName.PhoneNumber) //
-        // .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-        // .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-        // .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-        // .build());
         table.addAttribute(attr(InterfaceName.AnnualRevenue.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ANNUALREVENUE", "ANNUAL REVENUE")) //
                 .type(Schema.Type.DOUBLE) //
@@ -1215,16 +946,6 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
-        // Map<MatchKey, List<Attribute>> keyMap = new HashMap<>();
-        // keyMap.put(MatchKey.Domain, Arrays.asList(website, email));
-        // keyMap.put(MatchKey.Name, Collections.singletonList(companyName));
-        // keyMap.put(MatchKey.City, Collections.singletonList(city));
-        // keyMap.put(MatchKey.State, Collections.singletonList(state));
-        // keyMap.put(MatchKey.Country, Collections.singletonList(country));
-        // keyMap.put(MatchKey.Zipcode, Collections.singletonList(postalCode));
-        // keyMap.put(MatchKey.PhoneNumber,
-        // Collections.singletonList(phoneNumber));
-        // keyMap.put(MatchKey.DUNS, Collections.singletonList(duns));
         List<Attribute> attrs = new ArrayList<>();
         if (schema == SchemaInterpretation.Account || schema == SchemaInterpretation.SalesforceAccount) {
             attrs.add(website);

@@ -9,6 +9,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -28,7 +29,6 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void testResolveModelAttributeBasedOnFieldMapping() {
         List<Attribute> modelAttributes = generateTestModelAttributes();
-        // List<Attribute> schemaAttributes = generateTestSchemaAttributes();
         List<FieldMapping> fieldMappingList = generateTestFieldMappingDocument().getFieldMappings();
         scoringFileMetadataServiceImpl.resolveModelAttributeBasedOnFieldMapping(modelAttributes,
                 generateTestFieldMappingDocument());
@@ -101,8 +101,9 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         fieldMappingList.add(mappedToModelRequiredColumnField2);
         fieldMappingList.add(mappedToSchemaColumnField);
 
-        fieldMappingDocument.setIgnoredFields(
-                Arrays.asList(new String[] { "Website", "DUNS", "City", "State", "PhoneNumber", "PostalCode" }));
+        fieldMappingDocument.setIgnoredFields(Arrays.asList(new String[] { InterfaceName.Website.name(),
+                InterfaceName.DUNS.name(), InterfaceName.City.name(), InterfaceName.State.name(),
+                InterfaceName.PhoneNumber.name(), InterfaceName.PostalCode.name() }));
 
         return fieldMappingDocument;
     }
