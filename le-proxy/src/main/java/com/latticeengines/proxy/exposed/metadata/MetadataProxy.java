@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -20,9 +18,8 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
-
-import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 
 
@@ -94,7 +91,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return post("reset", url, null, Boolean.class);
     }
 
-    @CacheEvict(key = "T(java.lang.String).format(\"%s|%s\", #customerSpace, #tableName)")
+    // @CacheEvict(key = "T(java.lang.String).format(\"%s|%s\", #customerSpace,
+    // #tableName)")
     public void updateTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         put("updateTable", url, table);
@@ -118,7 +116,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return Arrays.<String> asList(importTableNames);
     }
 
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%s\", #customerSpace, #tableName)")
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|%s\", #customerSpace,
+    // #tableName)")
     public Table getTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         return get("getTable", url, Table.class);
