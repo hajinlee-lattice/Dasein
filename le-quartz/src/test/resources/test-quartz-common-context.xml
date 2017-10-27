@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+
+
+  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <import resource="classpath:quartz-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
+
+    <bean name="testPredefinedJob" class="com.latticeengines.quartz.service.TestQuartzJobBean"></bean>
+
+    <bean name="testJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="testPredefinedJob" />
+        <property name="cronTrigger" value="${quartz.test.functional.testjob.cron:}" />
+        <property name="destUrl" value="${quartz.test.functional.testjob.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.test.functional.testjob.secondary.url:}" />
+        <property name="queryApi" value="${quartz.test.functional.testjob.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.test.functional.testjob.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;testQuartzJob&quot;}" />
+        <property name="jobTimeout" value="20" />
+    </bean>
+
+    <util:list id="testPredefinedJobs" list-class="java.util.ArrayList">
+        <ref bean="testJob"/>
+    </util:list>
+
+</beans>

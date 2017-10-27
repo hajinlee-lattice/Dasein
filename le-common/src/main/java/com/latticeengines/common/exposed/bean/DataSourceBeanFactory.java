@@ -80,7 +80,6 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setCheckoutTimeout(60000);
         cpds.setMaxIdleTime(30);
         cpds.setIdleConnectionTestPeriod(10);
-        Runtime.getRuntime().addShutdownHook(new Thread(cpds::close));
         return cpds;
     }
 
