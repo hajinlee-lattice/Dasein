@@ -151,6 +151,7 @@ def buildAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
     # rename to conform to event table column names
     transactionS.columns = ['LEAccount_ID', 'Period_ID', 'Product_ID', 'Revenue', 'Units']
     # set index, include product_id because pivot doesn't work with multiindex yet
+    transactionS = transactionS.drop_duplicates(['LEAccount_ID', 'Period_ID', 'Product_ID'])
     transactionS = transactionS.set_index(['LEAccount_ID', 'Period_ID', 'Product_ID'])
 
     # unstack product_id columns, using nan as a filler
