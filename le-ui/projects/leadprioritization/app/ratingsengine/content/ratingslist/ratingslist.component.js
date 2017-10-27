@@ -37,6 +37,9 @@ angular.module('lp.ratingsengine.ratingslist', [
     });
 
     vm.init = function($q, $filter) {
+
+        // console.log(vm.current.ratings);
+
         RatingsEngineStore.clear();
 
         vm.header.filter.filtered = vm.current.ratings;
