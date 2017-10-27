@@ -41,7 +41,7 @@ class ApsDataLoader(object):
             if inputPath.endswith("*.avro"):
                 filePath, fileName = os.path.split(inputPath)
                 files = self.hdfs.listdir(filePath)
-                newInputPaths = newInputPaths + [ filePath + "/" + file for file in files ]
+                newInputPaths = newInputPaths + [ filePath + "/" + file for file in files if file.endswith(".avro")]
             else:
                 newInputPaths.append(inputPath)
         i = 0
