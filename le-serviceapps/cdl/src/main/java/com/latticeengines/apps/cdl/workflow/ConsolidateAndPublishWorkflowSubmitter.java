@@ -137,7 +137,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .bucketContact(dataCollectionProxy.getTable(customerSpace, //
                         TableRoleInCollection.ContactProfile) != null) //
                 .transactionIdField(InterfaceName.Id.name()) //
-                .periodStrategy(PeriodStrategy.CalendarQuarter) //
+                .periodStrategy(PeriodStrategy.CalendarMonth) //
                 .bucketTransaction(true) //
                 .bucketProduct(true) //
                 .workflowContainerMem(workflowMemMb) //
