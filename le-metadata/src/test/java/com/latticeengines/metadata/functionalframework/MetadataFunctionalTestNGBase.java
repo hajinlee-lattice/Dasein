@@ -45,7 +45,7 @@ import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListen
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:metadata-aspects-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:common-testclient-env-context.xml", "classpath:metadata-aspects-context.xml" })
 @Listeners({ GlobalAuthCleanupTestListener.class })
 public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     
