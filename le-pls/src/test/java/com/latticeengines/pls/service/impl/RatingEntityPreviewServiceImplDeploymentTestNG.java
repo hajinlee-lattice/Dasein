@@ -166,11 +166,13 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     @Test(groups = "deployment", dependsOnMethods = { "testGetSegmentAccountCount" })
     public void testEntityPreviewFourthTimeToTestEdgeCase() {
         Set<String> accIds1 = testEntityPreview(segmentAccountsCount - 3L, 6L);
-        Assert.assertEquals(accIds1.size(), 2);
+        Assert.assertEquals(accIds1.size(), 3);
         Set<String> accIds2 = testEntityPreview(segmentAccountsCount - 2L, 6L);
-        Assert.assertEquals(accIds2.size(), 1);
+        Assert.assertEquals(accIds2.size(), 2);
         Set<String> accIds3 = testEntityPreview(segmentAccountsCount, 6L);
         Assert.assertEquals(accIds3.size(), 0);
+        Set<String> accIds4 = testEntityPreview(segmentAccountsCount + 10, 6L);
+        Assert.assertEquals(accIds4.size(), 0);
     }
 
     public Set<String> testEntityPreview(Long offset, Long max) {
