@@ -169,19 +169,26 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertEquals(accIds1.size(), 3);
         Set<String> accIds2 = testEntityPreview(segmentAccountsCount - 2L, 6L);
         Assert.assertEquals(accIds2.size(), 2);
-        Set<String> accIds3 = testEntityPreview(segmentAccountsCount, 6L);
+        Set<String> accIds3 = testEntityPreview(segmentAccountsCount, 6L, false);
         Assert.assertEquals(accIds3.size(), 0);
-        Set<String> accIds4 = testEntityPreview(segmentAccountsCount + 10, 6L);
+        Set<String> accIds4 = testEntityPreview(segmentAccountsCount + 10, 6L, false);
         Assert.assertEquals(accIds4.size(), 0);
     }
 
     public Set<String> testEntityPreview(Long offset, Long max) {
+        return testEntityPreview(offset, max, true);
+    }
+
+    public Set<String> testEntityPreview(Long offset, Long max, boolean expectingSomeAccounts) {
         DataPage response = ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, max,
                 BusinessEntity.Account, InterfaceName.AccountId.name(), false, RATING_BUCKET_FIELD, null, false, null,
                 null);
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getData());
-        Assert.assertTrue(response.getData().size() > 0);
+
+        if (expectingSomeAccounts) {
+            Assert.assertTrue(response.getData().size() > 0);
+        }
 
         Set<String> accIds = new HashSet<>();
         for (Map<String, Object> row : response.getData()) {
