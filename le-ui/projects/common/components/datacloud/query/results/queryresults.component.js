@@ -261,6 +261,7 @@ angular.module('common.datacloud.query.results', [
 
         if(oldVal === newVal){
             vm.saveSegmentEnabled = false;
+            vm.saved = false;
         } else {
             vm.saveSegmentEnabled = true;
         };
@@ -269,6 +270,10 @@ angular.module('common.datacloud.query.results', [
     vm.inModel = function() {
         var name = $state.current.name.split('.');
         return name[1] == 'model';
+    }
+
+    vm.hideMessage = function() {
+        vm.saved = false;
     }
 
     vm.saveSegment = function() {
@@ -289,13 +294,12 @@ angular.module('common.datacloud.query.results', [
                     }
                 };
 
-            console.log(segment);
-
             SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                 QueryStore.setupStore(result.data);
 
                 vm.saveSegmentEnabled = false;
                 $state.go('.', { segment: 'segment' + ts }, { notify: false });
+                vm.saved = true;
             });
         } else {
             SegmentStore.getSegmentByName(segmentName).then(function(result) {
@@ -313,14 +317,12 @@ angular.module('common.datacloud.query.results', [
                         }
                     };
 
-                console.log(segmentData);
-                console.log(segment);
-
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                     QueryStore.setupStore(result.data);
                     
                     vm.saveSegmentEnabled = false;
                     $state.go('.', { segment: 'segment' + ts }, { notify: false });
+                    vm.saved = true;
                 });
             });
         };

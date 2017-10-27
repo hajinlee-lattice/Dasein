@@ -1,4 +1,11 @@
 
+
+<div class="success-message" ng-if="vm.saved === true">
+    <h3>Your segment was saved successfully!</h3>
+    <i class="fa fa-times fa-inverse" data-ng-click="vm.hideMessage()"></i>
+</div>
+
+
 <ul class="filters-tabs">
     <li class="ratingsengine-selected" ng-if="vm.section == 'wizard.ratingsengine_segment'">
         <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = (vm.metadata.selectedForRatingsEngine > 0) && !vm.addBucketTreeRoot;">
