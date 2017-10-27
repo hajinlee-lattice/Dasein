@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,7 +26,7 @@ import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("entityProxy")
-@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 @CacheConfig(cacheNames = "EntityCache")
 public class EntityProxy extends MicroserviceRestApiProxy {
 
@@ -143,7 +142,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         optimizeRestrictions(frontEndQuery);
         DataPage dataPage = getDataFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
-        if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
+        if (dataPage == null || dataPage.getData() == null) {
             throw new LedpException(LedpCode.LEDP_18158);
         }
 
