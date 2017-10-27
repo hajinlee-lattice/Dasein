@@ -255,6 +255,9 @@ public class CheckpointService {
             String tableName = tableHdfsPath.substring(tableHdfsPath.lastIndexOf("/") + 1);
             if (!"VisiDB".equals(tableName) && !tableName.contains("copy")) {
                 logger.info("Checking table " + tableName);
+                if (tableName.startsWith("AnalyticPurchaseState")) {
+                    continue;
+                }
                 Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, tableHdfsPath + "/*.avro");
                 Assert.assertTrue(iterator.hasNext(), "Table at " + tableHdfsPath + " does not have avro record.");
             }
