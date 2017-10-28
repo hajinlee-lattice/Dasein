@@ -10,9 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -32,22 +32,19 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.util.Lists;
-import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
@@ -219,15 +216,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (name == null) {
             return;
         }
-        Iterables.removeIf(attributes, new Predicate<Attribute>() {
-            @Override
-            public boolean apply(@Nullable Attribute attribute) {
-                if (attribute.getName() == null) {
-                    return false;
-                }
-                return attribute.getName().equals(name);
-            }
-        });
+        attributes.removeIf(attr -> name.equals(attr.getName()));
     }
 
     public List<Attribute> getAttributes() {
@@ -251,13 +240,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (interfaceName == null) {
             return null;
         }
-        return Iterables.find(attributes, new Predicate<Attribute>() {
-
-            @Override
-            public boolean apply(@Nullable Attribute attribute) {
-                return interfaceName == attribute.getInterfaceName();
-            }
-        }, null);
+        return attributes.stream().filter(attr -> interfaceName.equals(attr.getInterfaceName())).findFirst()
+                .orElse(null);
     }
 
     @JsonIgnore
@@ -289,15 +273,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (displayName == null) {
             return null;
         }
-        return Iterables.find(attributes, new Predicate<Attribute>() {
-            @Override
-            public boolean apply(@Nullable Attribute attribute) {
-                if (attribute.getDisplayName() == null) {
-                    return false;
-                }
-                return attribute.getDisplayName().equals(displayName);
-            }
-        }, null);
+        return attributes.stream().filter(attr -> displayName.equals(attr.getDisplayName())).findFirst().orElse(null);
     }
 
     @JsonIgnore
@@ -305,18 +281,13 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (logicalDataType == null) {
             return null;
         }
-        return findAttributes(new Predicate<Attribute>() {
-
-            @Override
-            public boolean apply(@Nullable Attribute attribute) {
-                return attribute.getLogicalDataType() == logicalDataType;
-            }
-        });
+        return attributes.stream().filter(attr -> logicalDataType.equals(attr.getLogicalDataType()))
+                .collect(Collectors.toList());
     }
 
     @JsonIgnore
     public List<Attribute> findAttributes(Predicate<Attribute> predicate) {
-        return Lists.newArrayList(Iterables.filter(attributes, predicate));
+        return attributes.stream().filter(predicate).collect(Collectors.toList());
     }
 
     /**

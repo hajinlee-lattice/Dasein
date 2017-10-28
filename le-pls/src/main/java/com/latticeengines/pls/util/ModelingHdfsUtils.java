@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
@@ -21,7 +20,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -35,17 +33,12 @@ import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 public class ModelingHdfsUtils {
 
     public static String findModelSummaryPath(Configuration config, String dir) throws IOException {
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(config, dir, new HdfsUtils.HdfsFileFilter() {
-
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-                String name = file.getPath().getName().toString();
-                return name.equals("modelsummary.json");
+        List<String> paths = HdfsUtils.getFilesForDirRecursive(config, dir, file -> {
+            if (file == null) {
+                return false;
             }
-
+            String name = file.getPath().getName().toString();
+            return name.equals("modelsummary.json");
         });
         if (paths.size() == 0) {
             throw new LedpException(LedpCode.LEDP_00002);
@@ -79,12 +72,9 @@ public class ModelingHdfsUtils {
 
     public static String getStandardDataComposition(Configuration conf, String sourceDataDir,
             final String eventTableName) throws IOException {
-        List<String> paths = HdfsUtils.onlyGetFilesForDirRecursive(conf, sourceDataDir, new HdfsFileFilter() {
-            @Override
-            public boolean accept(FileStatus file) {
-                return file.getPath().getName().equals("datacomposition.json") //
-                        && file.getPath().getParent().getName().startsWith(eventTableName);
-            }
+        List<String> paths = HdfsUtils.onlyGetFilesForDirRecursive(conf, sourceDataDir, file -> {
+            return file.getPath().getName().equals("datacomposition.json") //
+                    && file.getPath().getParent().getName().startsWith(eventTableName);
         }, true);
 
         return paths.get(0);
@@ -92,8 +82,8 @@ public class ModelingHdfsUtils {
 
     public static String getStandardDataCompositionWithRegex(Configuration conf, String sourceDataDir,
             final String eventTableName) throws IOException {
-        List<String> paths = HdfsUtils.getFilesForDir(conf, sourceDataDir, String.format("^%s.*Metadata$",
-                eventTableName));
+        List<String> paths = HdfsUtils.getFilesForDir(conf, sourceDataDir,
+                String.format("^%s.*Metadata$", eventTableName));
 
         if (paths.size() == 0) {
             throw new LedpException(LedpCode.LEDP_00002);
@@ -107,26 +97,26 @@ public class ModelingHdfsUtils {
         String sourceDataRoot = sourceCustomerRoot + "/data/" + eventTableName;
         String targetDataRoot = targetCustomerRoot + "/data/" + cpEventTableName;
 
-        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory - copy " +
-                "files")) {
+        try (PerformanceTimer timer = new PerformanceTimer(
+                "Copy hdfs data: Copy modeling data directory - copy " + "files")) {
             HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
         }
 
         String sourceStandardDataCompositionPath = null;
-        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory - get " +
-                "standard data composition")) {
+        try (PerformanceTimer timer = new PerformanceTimer(
+                "Copy hdfs data: Copy modeling data directory - get " + "standard data composition")) {
             sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataCompositionWithRegex(yarnConfiguration,
                     sourceCustomerRoot + "/data/", eventTableName);
 
-            Logger log  = LoggerFactory.getLogger(ModelingHdfsUtils.class);
+            Logger log = LoggerFactory.getLogger(ModelingHdfsUtils.class);
             log.info("sourceStandardDataCompositionPath is: " + sourceStandardDataCompositionPath);
         }
 
         String targetStandardDataCompositionPath = sourceStandardDataCompositionPath
                 .replace(sourceCustomerRoot, targetCustomerRoot).replace(eventTableName, cpEventTableName);
 
-        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory - copy " +
-                "files")) {
+        try (PerformanceTimer timer = new PerformanceTimer(
+                "Copy hdfs data: Copy modeling data directory - copy " + "files")) {
             HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(),
                     new Path(targetStandardDataCompositionPath).getParent().toString());
         }
@@ -169,14 +159,9 @@ public class ModelingHdfsUtils {
     public static String getEventTableNameFromHdfs(Configuration yarnConfiguration, String customerModelBaseDir,
             String modelId) throws IOException {
         final String uuid = UuidUtils.extractUuid(modelId);
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelBaseDir,
-                new HdfsFileFilter() {
-
-                    @Override
-                    public boolean accept(FileStatus file) {
-                        return file.getPath().getName().equals(uuid);
-                    }
-                });
+        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelBaseDir, file -> {
+            return file.getPath().getName().equals(uuid);
+        });
         if (paths.size() == 0) {
             throw new LedpException(LedpCode.LEDP_00002);
         }

@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,17 +54,21 @@ public class PythonScriptModelService extends ModelServiceBase {
                 .filter(attr -> attr.isCustomerPredictor() || attr.getInterfaceName() == InterfaceName.Id)
                 .collect(Collectors.toList());
         Set<String> excludeParentNames = attrs.stream()
-                .filter(attr -> attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString()))
+                .filter(attr -> attr.getApprovedUsage() != null
+                        && attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString()))
                 .flatMap(attr -> attr.getParentAttributeNames().stream())//
+                .filter(Objects::nonNull) //
                 .distinct() //
                 .filter(name -> eventTable.getAttribute(name) != null
-                        && eventTable.getAttribute(name).getApprovedUsage().contains(ApprovedUsage.NONE.toString()))
+                        && eventTable.getAttribute(name).getApprovedUsage() != null
+                        && eventTable.getAttribute(name).getApprovedUsage().contains(ApprovedUsage.NONE.toString()))//
                 .collect(Collectors.toSet());
         return attrs.stream()
                 .filter(attr -> attr.isInternalPredictor() && !excludeParentNames.contains(attr.getName())
                         && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
                         && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType())
                         && !LogicalDataType.isExcludedFromScoringFileMapping(attr.getLogicalDataType()))
+                .filter(Objects::nonNull) //
                 .collect(Collectors.toList());
 
     }
@@ -75,10 +80,11 @@ public class PythonScriptModelService extends ModelServiceBase {
             log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
-        Set<String> attrNameSet = eventTable.getAttributes().stream()
-                .filter(attr -> attr.isInternalPredictor() //
+        Set<String> attrNameSet = eventTable.getAttributes().stream() //
+                .filter(attr -> attr.getTags() != null && !attr.isInternalPredictor()
                         && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
                         && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType()))
+                .filter(Objects::nonNull)//
                 .map(Attribute::getName).collect(Collectors.toSet());
         log.info("The column names are : " + attrNameSet);
         return attrNameSet;

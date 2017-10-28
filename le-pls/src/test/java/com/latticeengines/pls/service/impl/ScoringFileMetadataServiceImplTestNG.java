@@ -14,11 +14,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -200,16 +202,30 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
 
         SourceFileService sourceFileService = Mockito.mock(SourceFileService.class);
         SourceFile sourceFile = new SourceFile();
-        sourceFile.setName("file2");
+        sourceFile.setName("mockfile");
+        sourceFile.setPath(ClassLoader
+                .getSystemResource("com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/mockfile.csv")
+                .getPath());
         when(sourceFileService.findByName(anyString())).thenReturn(sourceFile);
         Mockito.doNothing().when(sourceFileService).update(any(SourceFile.class));
 
         MetadataProxy metadataProxy = Mockito.mock(MetadataProxy.class);
         Mockito.doNothing().when(metadataProxy).createTable(anyString(), anyString(), any(Table.class));
 
+        ModelSummaryEntityMgr modelSummaryEntityMgr = Mockito.mock(ModelSummaryEntityMgr.class);
+        ModelSummary summary = new ModelSummary();
+        summary.setId("modelid");
+        summary.setSourceSchemaInterpretation(SchemaInterpretation.Account.name());
+        when(modelSummaryEntityMgr.findValidByModelId(anyString())).thenReturn(summary);
+
+        Configuration localFileSystemConfig = new Configuration();
+        localFileSystemConfig.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
+
         ReflectionTestUtils.setField(scoringFileMetadataService, "modelMetadataService", modelMetadataService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "sourceFileService", sourceFileService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "metadataProxy", metadataProxy);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryEntityMgr", modelSummaryEntityMgr);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "yarnConfiguration", localFileSystemConfig);
 
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
 
@@ -238,17 +254,16 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         fieldMappingDocument.setRequiredFields(Arrays.asList(new String[] { "A" }));
         fieldMappingDocument.setFieldMappings(
                 new ArrayList<>(Arrays.asList(new FieldMapping[] { mapping, mapping2, mapping3, mapping4 })));
-        fieldMappingDocument.setIgnoredFields(Arrays.asList(new String[] { "Email" }));
+        fieldMappingDocument.setIgnoredFields(Collections.emptyList());
 
         Tenant t = new Tenant();
         t.setId("t1");
         MultiTenantContext.setTenant(t);
-        Table table = scoringFileMetadataService.saveFieldMappingDocument("csvfilename", "modelid",
+        Table table = scoringFileMetadataService.saveFieldMappingDocument("csvfilename", summary.getId(),
                 fieldMappingDocument);
 
         assertEquals(table.getAttributes().size(),
-                5 + SchemaRepository.instance().matchingAttributes(SchemaInterpretation.Account).size()
-                - fieldMappingDocument.getIgnoredFields().size());
+                5 + SchemaRepository.instance().matchingAttributes(SchemaInterpretation.Account).size());
         assertNotNull(table.getAttribute("C_1"));
         assertNotNull(table.getAttribute("C_2"));
     }

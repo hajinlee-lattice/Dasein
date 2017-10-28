@@ -10,10 +10,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -22,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -88,8 +85,9 @@ public class MetadataResolver {
         Set<String> headerFields = getHeaderFields();
         log.info("Current header list: " + headerFields);
         List<Attribute> attrs = headerFields.stream().map(h -> table.getAttributeFromDisplayName(h))
-                .collect(Collectors.toList());
-        List<Attribute> remaining = table.getAttributes().stream().filter(attr -> !attrs.contains(attr))
+                .filter(Objects::nonNull).collect(Collectors.toList());
+        List<Attribute> remaining = table.getAttributes().stream() //
+                .filter(attr -> !attrs.contains(attr)) //
                 .collect(Collectors.toList());
         attrs.addAll(remaining);
         table.setAttributes(attrs);
@@ -131,19 +129,7 @@ public class MetadataResolver {
         }
 
         if (fieldMappingDocument.getIgnoredFields() != null) {
-            for (final String ignoredField : fieldMappingDocument.getIgnoredFields()) {
-                if (ignoredField != null) {
-                    Attribute attribute = Iterables.find(attributes, new Predicate<Attribute>() {
-                        @Override
-                        public boolean apply(@Nullable Attribute input) {
-                            return ignoredField.equals(input.getDisplayName());
-                        }
-                    }, null);
-                    if (attribute != null) {
-                        attributes.remove(attribute);
-                    }
-                }
-            }
+            attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().equals(attr.getDisplayName()));
         }
         Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
         if (lastModified == null) {

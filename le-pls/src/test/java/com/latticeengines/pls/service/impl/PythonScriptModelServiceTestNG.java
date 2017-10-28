@@ -1,7 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -82,6 +82,8 @@ public class PythonScriptModelServiceTestNG extends PlsFunctionalTestNGBase {
         ATTRIBUTE_2.setName(ATTRIBUTE_NAME_2);
         ATTRIBUTE_2.setTags(Tag.EXTERNAL.toString());
         ATTRIBUTE_3.setName(ATTRIBUTE_NAME_ID);
+        ATTRIBUTE_3.setInterfaceName(ATTRIBUTE_NAME_ID);
+        ATTRIBUTE_3.setTags(Tag.INTERNAL.toString());
         TABLE.addAttribute(ATTRIBUTE_1);
         TABLE.addAttribute(ATTRIBUTE_2);
         TABLE.addAttribute(ATTRIBUTE_3);

@@ -132,6 +132,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SchemaRepository repository = SchemaRepository.instance();
         Table metadata = repository.getSchema(schema);
         List<Attribute> attributes = metadata.getAttributes();
+        attributes.addAll(repository.matchingAttributes(schema));
 
         ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
         ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
