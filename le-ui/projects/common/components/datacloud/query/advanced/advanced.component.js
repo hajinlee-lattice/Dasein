@@ -281,7 +281,7 @@ angular.module('common.datacloud.query.builder', [
                 RatingsEngineStore.getCoverageMap(RatingEngineCopy, CurrentRatingEngine.segment.name).then(function(result) {
                     vm.initCoverageMap(result);
                 }); 
-            }, 1);
+            }, 250);
         } else {
             $timeout(function() {
                 var segment = { 
@@ -297,7 +297,7 @@ angular.module('common.datacloud.query.builder', [
                 QueryService.GetCountByQuery(vm.treeMode + 's', SegmentStore.sanitizeSegment(segment)).then(function(result) {
                     QueryStore.setResourceTypeCount(vm.treeMode + 's', false, result);
                 });
-            }, 100);
+            }, 250);
         }
     }
 
