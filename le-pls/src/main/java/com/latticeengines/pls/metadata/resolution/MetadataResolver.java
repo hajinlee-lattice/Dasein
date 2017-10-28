@@ -129,7 +129,7 @@ public class MetadataResolver {
         }
 
         if (fieldMappingDocument.getIgnoredFields() != null) {
-            attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().equals(attr.getDisplayName()));
+            attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getDisplayName()));
         }
         Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
         if (lastModified == null) {

@@ -269,8 +269,10 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             modelAttributes.add(getAttributeFromFieldName(sb.toString(), fieldMapping.getMappedField()));
         }
 
-        log.info(String.format("After resolving attributes, the model attributes are: %s",
-                Arrays.toString(modelAttributes.toArray())));
+        modelAttributes.stream().filter(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getDisplayName()))
+                .forEach(attr -> attr.getApprovedUsage().add(ApprovedUsage.IGNORED.toString()));
+
+        log.info(String.format("After resolving attributes, the model attributes are: %s", modelAttributes));
     }
 
     private Attribute getAttributeFromFieldName(String scoringHeaderName, String fieldName) {

@@ -176,8 +176,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToIgnore_assertColumnsIgnored() {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(
-                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
+        Table table = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount);
+        table.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount));
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(table);
 
         assertFalse(resolver.isMetadataFullyDefined());
         List<String> ignoredFields = new ArrayList<>();
@@ -192,13 +193,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
         assertTrue(resolver.isMetadataFullyDefined());
-        Table table = resolver.getMetadata();
+        table = resolver.getMetadata();
         for (Attribute attribute : table.getAttributes()) {
-            if (ignoredFields.contains(attribute.getDisplayName())) {
-                log.info("The ignored field is " + attribute.getDisplayName());
-                assertEquals(attribute.getApprovedUsage(),
-                        Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE, ModelingMetadata.IGNORED_APPROVED_USAGE));
-            }
+            assertFalse(ignoredFields.contains(attribute.getDisplayName()));
         }
     }
 
