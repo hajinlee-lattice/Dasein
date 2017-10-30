@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.util;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -45,22 +46,27 @@ public class QueryTranslator {
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
-        Map<String, Lookup> ruleBasedModels = ruleBasedModels(mainEntity, frontEndQuery.getRatingModels());
-
-        Restriction restriction = translateFrontEndRestriction(mainEntity,
-                getEntityFrontEndRestriction(mainEntity, frontEndQuery), ruleBasedModels);
-
-        restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
-
-        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, ruleBasedModels);
-
-        if (frontEndQuery.getPageFilter() == null) {
-            frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
+        Restriction restriction;
+        if (BusinessEntity.Product.equals(mainEntity)) {
+            frontEndQuery.setAccountRestriction(null);
+            frontEndQuery.setContactRestriction(null);
+            frontEndQuery.setRatingModels(null);
+            restriction = Restriction.builder().and(Collections.emptyList()).build();
         } else {
-            if (frontEndQuery.getPageFilter().getNumRows() > MAX_ROWS) {
-                log.warn(String.format("Refusing to accept a query requesting more than %s rows."
-                        + " Currently specified page filter: %s", MAX_ROWS, frontEndQuery.getPageFilter()));
-                frontEndQuery.getPageFilter().setNumRows(MAX_ROWS);
+            Map<String, Lookup> ruleBasedModels = ruleBasedModels(mainEntity, frontEndQuery.getRatingModels());
+            restriction = translateFrontEndRestriction(mainEntity,
+                    getEntityFrontEndRestriction(mainEntity, frontEndQuery), ruleBasedModels);
+            restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
+            restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, ruleBasedModels);
+
+            if (frontEndQuery.getPageFilter() == null) {
+                frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
+            } else {
+                if (frontEndQuery.getPageFilter().getNumRows() > MAX_ROWS) {
+                    log.warn(String.format("Refusing to accept a query requesting more than %s rows."
+                            + " Currently specified page filter: %s", MAX_ROWS, frontEndQuery.getPageFilter()));
+                    frontEndQuery.getPageFilter().setNumRows(MAX_ROWS);
+                }
             }
         }
 

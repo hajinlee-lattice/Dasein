@@ -14,13 +14,13 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.http.message.BasicNameValuePair;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -111,7 +111,12 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 }
             }
         } else {
-            log.info("Disabled metric store because an empty url is provided.");
+            if (StringUtils.isEmpty(url)) {
+                log.info("Disabled metric store because an empty url is provided.");
+                if (Boolean.valueOf(enableInflux)) {
+                    enableInflux = String.valueOf(false);
+                }
+            }
         }
     }
 

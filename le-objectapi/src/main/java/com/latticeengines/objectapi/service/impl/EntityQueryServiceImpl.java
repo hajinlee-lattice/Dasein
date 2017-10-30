@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.util.AccountQueryDecorator;
 import com.latticeengines.objectapi.util.ContactQueryDecorator;
+import com.latticeengines.objectapi.util.ProductQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
@@ -174,6 +175,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             return addSelects ? AccountQueryDecorator.WITH_SELECTS : AccountQueryDecorator.WITHOUT_SELECTS;
         case Contact:
             return addSelects ? ContactQueryDecorator.WITH_SELECTS : ContactQueryDecorator.WITHOUT_SELECTS;
+        case Product:
+            return addSelects ? ProductQueryDecorator.WITH_SELECTS : ProductQueryDecorator.WITHOUT_SELECTS;
         default:
             throw new UnsupportedOperationException("Cannot find a decorator for entity " + entity);
         }

@@ -16,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -59,6 +60,27 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     public void setup() {
         mockDataCollectionProxy();
         MultiTenantContext.setTenant(new Tenant("LocalTest"));
+    }
+
+    @Test(groups = "functional")
+    public void testProductCountAndData() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Product);
+
+        Long count = entityQueryService.getCount(frontEndQuery);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(149L));
+
+        DataPage dataPage = entityQueryService.getData(frontEndQuery);
+        for (Map<String, Object> product : dataPage.getData()) {
+            Assert.assertTrue(product.containsKey(InterfaceName.ProductId.name()));
+            Assert.assertTrue(product.containsKey(InterfaceName.ProductName.name()));
+            System.out.println(JsonUtils.pprint(product));
+        }
     }
 
     @Test(groups = "functional")
