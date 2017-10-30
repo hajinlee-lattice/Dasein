@@ -11,9 +11,9 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,7 +30,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
-@ContextConfiguration(locations = { "classpath:common-properties-context.xml", "classpath:dellebi-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-dellebi-context.xml" })
 public class DellEbiTestNGBase extends AbstractTestNGSpringContextTests {
 
     static final Logger log = LoggerFactory.getLogger(DellEbiTestNGBase.class);
