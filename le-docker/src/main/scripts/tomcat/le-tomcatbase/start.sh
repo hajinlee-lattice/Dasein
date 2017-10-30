@@ -7,6 +7,14 @@ if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
     cp /tmp/conf/env/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp
 fi
 
+if [ ! -f "/etc/ledp/ledp_keystore.jks" ]; then
+    echo "copying jks file from /etc/ledp/ledp_keystore.jks"
+    cp -f /etc/ledp/ledp_keystore.jks /etc/pki/java/tomcat.jks
+    chmod 600 /etc/pki/java/tomcat.jks
+    cp -f /etc/ledp/ledp_keystore.jks /etc/pki/java/cacerts
+    chmod 600 /etc/pki/java/cacerts
+fi
+
 # mail config
 if [ "${LE_ENVIRONMENT}" = "prodcluster" ] && [ -f "/root/postfix/main.cf.production" ]; then
     echo "use production cf"
