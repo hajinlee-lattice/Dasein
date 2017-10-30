@@ -74,7 +74,7 @@ public abstract class AbstractMatcher implements Matcher {
             Map<String, Object> record, //
             MatchInput matchInput, //
             MatchOutput matchOutput, //
-            List<String> matchLogs, List<String> matchErrorLogs) {
+            List<String> matchLogs, List<String> matchErrorLogs, String recordId) {
         // to safegaurd against null list
         if (matchLogs == null) {
             matchLogs = new ArrayList<String>();
@@ -86,7 +86,7 @@ public abstract class AbstractMatcher implements Matcher {
         }
 
         if (matchOutput.getResult().isEmpty()) {
-            warnings.addWarning(new Warning(WarningCode.NO_MATCH,
+            warnings.addWarning(recordId, new Warning(WarningCode.NO_MATCH,
                     new String[] { JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
         } else {
             List<String> matchFieldNames = matchOutput.getOutputFields();
@@ -117,9 +117,9 @@ public abstract class AbstractMatcher implements Matcher {
                         nameLocationStr, errorMessages));
             }
 
-            mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
+            mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record, recordId);
             if (!outputRecord.isMatched()) {
-                warnings.addWarning(
+                warnings.addWarning(recordId,
                         new Warning(WarningCode.NO_MATCH, new String[] { JsonUtils.serialize(matchInput.getKeyMap()),
                                 Strings.nullToEmpty(outputRecord.getPreMatchDomain()) + nameLocationStr }));
             }
@@ -239,7 +239,8 @@ public abstract class AbstractMatcher implements Matcher {
     private void mergeMatchedOutput(List<String> matchFieldNames, //
             OutputRecord outputRecord, //
             Map<String, FieldSchema> fieldSchemas, //
-            Map<String, Object> record) {
+            Map<String, Object> record, //
+            String recordId) {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
         if (matchFieldNames == null
@@ -273,7 +274,7 @@ public abstract class AbstractMatcher implements Matcher {
                 if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
                     Boolean isPublicDomain = (Boolean) fieldValue;
                     if (Boolean.TRUE == isPublicDomain) {
-                        warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN,
+                        warnings.addWarning(recordId, new Warning(WarningCode.PUBLIC_DOMAIN,
                                 new String[] { Strings.nullToEmpty(outputRecord.getPreMatchDomain()) }));
                     }
                 }

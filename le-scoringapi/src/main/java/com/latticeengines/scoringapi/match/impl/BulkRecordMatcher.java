@@ -158,7 +158,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
         Map<String, Object> matchedRecordResult = new HashMap<>(tuple.getParsedData().getKey());
         getRecordFromMatchOutput(fieldSchemas, matchedRecordResult, matchInput, tupleOutput, //
-                matchLogs, matchErrorLogs);
+                matchLogs, matchErrorLogs, tuple.getRecord().getRecordId());
 
         boolean setEnrichmentData = false;
         if (matchInput.getUnionSelection() != null) {

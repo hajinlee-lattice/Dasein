@@ -187,7 +187,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
 
         MatchOutput matchOutput = callMatch(matchInput, isDebugMode);
 
-        getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput, matchLogs, matchErrorLogs);
+        getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput, matchLogs, matchErrorLogs, requestId);
 
         Map<String, Map<String, Object>> resultMap = new HashMap<>();
 
