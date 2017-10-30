@@ -10,20 +10,20 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.ModelNotes;
+import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.pls.service.ModelNotesService;
+import com.latticeengines.pls.service.ModelNoteService;
 
 public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization/csvfiles";
 
     @Autowired
-    private ModelNotesService modelNotesService;
+    private ModelNoteService modelNoteService;
 
     @Test(groups = "workflow")
     public void modelSmallAccountData() throws Exception {
@@ -42,9 +42,9 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         assertNotEquals(percentiles.size(), 0);
 
         ModelSummary modelSummary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
-        List<ModelNotes> list = modelNotesService.getAllByModelSummaryId(modelSummary.getId());
+        List<ModelNote> list = modelNoteService.getAllByModelSummaryId(modelSummary.getId());
         assertEquals(list.size(), 1);
-        ModelNotes note = list.get(0);
+        ModelNote note = list.get(0);
         assertEquals(note.getNotesContents(), "this is a test case!");
     }
 

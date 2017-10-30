@@ -1,6 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -8,35 +9,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.pls.ModelNotes;
-import com.latticeengines.domain.exposed.pls.ModelNotesOrigin;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.NoteParams;
-import com.latticeengines.pls.dao.ModelNotesDao;
-import com.latticeengines.pls.dao.ModelSummaryDao;
-import com.latticeengines.pls.entitymanager.ModelNotesEntityMgr;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.domain.exposed.pls.ModelNote;
+import com.latticeengines.pls.dao.ModelNoteDao;
+import com.latticeengines.pls.entitymanager.ModelNoteEntityMgr;
 
 @Component("modelNotesEntityMgr")
-public class ModelNotesEntityMgrImpl extends BaseEntityMgrImpl<ModelNotes> implements ModelNotesEntityMgr{
+public class ModelNoteEntityMgrImpl extends BaseEntityMgrImpl<ModelNote> implements ModelNoteEntityMgr {
 
     @Autowired
-    private ModelNotesDao modelNotesDao;
+    private ModelNoteDao modelNotesDao;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ModelNotes> getAllByModelSummaryId(String modelSummaryId) {
+    public List<ModelNote> getAllByModelSummaryId(String modelSummaryId) {
         return modelNotesDao.getAllByModelSummaryId(modelSummaryId);
     }
 
     @Override
-    public BaseDao<ModelNotes> getDao() {
+    public BaseDao<ModelNote> getDao() {
         return modelNotesDao;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelNotes findByNoteId(String noteId) {
+    public ModelNote findByNoteId(String noteId) {
         return modelNotesDao.findByNoteId(noteId);
     }
 

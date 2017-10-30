@@ -9,6 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,6 +32,7 @@ import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
+@Component
 public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImplTestNG.class);
@@ -213,7 +215,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(usedAttributesInSegment.size(), expectedResult.size());
 
         for (String attr : usedAttributesInSegment) {
-            if(!expectedResult.contains(attr)) {
+            if (!expectedResult.contains(attr)) {
                 log.info("Selected attribute not expected: " + attr);
             }
             Assert.assertTrue(expectedResult.contains(attr));
@@ -283,4 +285,16 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
             + "    ] " //
             + "  } " //
             + "} ";
+
+    public MetadataSegment getSegment() {
+        return this.segment;
+    }
+
+    public RatingEngine getRatingEngine() {
+        return this.ratingEngine;
+    }
+
+    public Tenant getTenant() {
+        return this.tenant;
+    }
 }

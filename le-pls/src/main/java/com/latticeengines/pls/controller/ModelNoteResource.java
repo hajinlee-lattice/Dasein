@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.pls.ModelNotes;
+import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.NoteParams;
-import com.latticeengines.pls.service.ModelNotesService;
+import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -25,27 +25,28 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/modelnotes")
 @PreAuthorize("hasRole('View_PLS_Data')")
-public class ModelNotesResource {
+public class ModelNoteResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelNotesResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelNoteResource.class);
 
     @Autowired
-    private ModelNotesService modelNotesService;
+    private ModelNoteService modelNoteService;
 
     @RequestMapping(value = "/{modelSummaryId}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get all notes for single model summary.")
-    public List<ModelNotes> getAllNotes(@PathVariable String modelSummaryId) {
+    public List<ModelNote> getAllNotes(@PathVariable String modelSummaryId) {
         log.debug(String.format("get all modelNotes by ModelSummaryId %s", modelSummaryId));
-        return modelNotesService.getAllByModelSummaryId(modelSummaryId);
+        return modelNoteService.getAllByModelSummaryId(modelSummaryId);
     }
 
     @RequestMapping(value = "/{modelSummaryId}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams) {
-        log.debug(String.format("ModelSummary %s's ModelNotes created by %s", modelSummaryId, noteParams.getUserName()));
-        modelNotesService.create(modelSummaryId, noteParams);
+        log.debug(
+                String.format("ModelSummary %s's ModelNote created by %s", modelSummaryId, noteParams.getUserName()));
+        modelNoteService.create(modelSummaryId, noteParams);
         return true;
     }
 
@@ -53,8 +54,8 @@ public class ModelNotesResource {
     @ResponseBody
     @ApiOperation(value = "Delete one note from certain model summary.")
     public boolean deleteNote(@PathVariable String modelSummaryId, @PathVariable String noteId) {
-        log.debug(String.format("ModelNotes %s deleted by user %s", noteId, MultiTenantContext.getEmailAddress()));
-        modelNotesService.deleteByNoteId(noteId);
+        log.debug(String.format("ModelNote %s deleted by user %s", noteId, MultiTenantContext.getEmailAddress()));
+        modelNoteService.deleteById(noteId);
         return true;
     }
 
@@ -62,9 +63,9 @@ public class ModelNotesResource {
     @ResponseBody
     @ApiOperation(value = "Update the content of one certain note.")
     public boolean updateNote(@PathVariable String modelSummaryId, @PathVariable String noteId,
-                              @RequestBody NoteParams noteParams) {
-        log.debug(String.format("ModelNotes %s update by %s", noteId, noteParams.getUserName()));
-        modelNotesService.updateByNoteId(noteId, noteParams);
+            @RequestBody NoteParams noteParams) {
+        log.debug(String.format("ModelNote %s update by %s", noteId, noteParams.getUserName()));
+        modelNoteService.updateById(noteId, noteParams);
         return true;
     }
 

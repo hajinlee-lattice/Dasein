@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.pls.ModelNotesOrigin;
+import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
@@ -37,10 +37,10 @@ public class CreateNote extends BaseModelStep<ModelStepConfiguration> {
             noteParams.setContent(content);
             noteParams.setUserName(userName);
             if(sourceModelSummary != null) {
-                noteParams.setOrigin(ModelNotesOrigin.REMODEL.getOrigin());
+                noteParams.setOrigin(NoteOrigin.REMODEL.getOrigin());
             }
             else {
-                noteParams.setOrigin(ModelNotesOrigin.MODELCREATED.getOrigin());
+                noteParams.setOrigin(NoteOrigin.MODELCREATED.getOrigin());
             }
 
             log.info(String.format("Create a new note by user %s", userName));

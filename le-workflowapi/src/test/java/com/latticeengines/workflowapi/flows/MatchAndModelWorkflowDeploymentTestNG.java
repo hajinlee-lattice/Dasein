@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
-import com.latticeengines.domain.exposed.pls.ModelNotes;
+import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
-import com.latticeengines.pls.service.ModelNotesService;
+import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -77,7 +77,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Autowired
-    private ModelNotesService modelNotesService;
+    private ModelNoteService modelNoteService;
 
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
@@ -86,6 +86,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         setupModels();
     }
 
+    @SuppressWarnings("deprecation")
     private void setupTables() throws IOException {
         InputStream ins = getClass().getClassLoader().getResourceAsStream(RESOURCE_BASE + "/tables/Account.json");
         accountTable = JsonUtils.deserialize(IOUtils.toString(ins), Table.class);
@@ -153,7 +154,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
                 assertEquals(field.getApprovedUsage(), ApprovedUsage.NONE.toString());
             }
         }
-        List<ModelNotes> list = modelNotesService.getAllByModelSummaryId(summary.getId());
+        List<ModelNote> list = modelNoteService.getAllByModelSummaryId(summary.getId());
         assertEquals(list.size(), 2);
     }
 
@@ -170,7 +171,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         NoteParams noteParams = new NoteParams();
         noteParams.setUserName("penglong.liu@lattice-engines.com");
         noteParams.setContent("this is a test case");
-        modelNotesService.create(modelSummary.getId(), noteParams);
+        modelNoteService.create(modelSummary.getId(), noteParams);
         MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());

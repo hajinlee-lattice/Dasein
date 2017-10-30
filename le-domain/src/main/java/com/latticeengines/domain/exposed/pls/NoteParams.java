@@ -11,7 +11,7 @@ public class NoteParams {
     private String content;
 
     @JsonProperty("origin")
-    private String Origin = "NOTE";
+    private String origin = NoteOrigin.NOTE.name();
 
     public String getUserName() {
         return userName;
@@ -30,11 +30,11 @@ public class NoteParams {
     }
 
     public String getOrigin() {
-        return Origin;
+        return this.origin;
     }
 
     public void setOrigin(String origin) {
-        Origin = origin;
+        this.origin = origin;
     }
 
 }

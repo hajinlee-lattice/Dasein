@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -72,6 +73,8 @@ public class TestPlayCreationHelper {
 
     private Play play;
 
+    private RatingEngine ratingEngine;
+
     private PlayLaunch playLaunch;
 
     private MetadataSegment segment;
@@ -98,7 +101,7 @@ public class TestPlayCreationHelper {
         RatingRule ratingRule = createRatingRule();
 
         segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
-        playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
+        ratingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
 
         playResourceDeploymentTestNG.getCrud();
         playResourceDeploymentTestNG.createPlayLaunch();
@@ -163,6 +166,10 @@ public class TestPlayCreationHelper {
 
     public PlayLaunch getPlayLaunch() {
         return playLaunch;
+    }
+
+    public RatingEngine getRatingEngine() {
+        return ratingEngine;
     }
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {

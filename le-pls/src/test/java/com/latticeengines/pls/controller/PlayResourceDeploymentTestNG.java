@@ -82,7 +82,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         createRatingEngine(retrievedSegment, new RatingRule());
     }
 
-    public void createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
+    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
         ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
         ratingEngine1.setCreatedBy(CREATED_BY);
@@ -104,6 +104,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
 
         ratingEngine1 = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
+        return ratingEngine1;
     }
 
     MetadataSegment createSegment() {
@@ -366,5 +367,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     public void setShouldSkipAutoTenantCreation(boolean shouldSkipAutoTenantCreation) {
         this.shouldSkipAutoTenantCreation = shouldSkipAutoTenantCreation;
+    }
+
+    public RatingEngine getRatingEngine() {
+        return this.ratingEngine1;
     }
 }

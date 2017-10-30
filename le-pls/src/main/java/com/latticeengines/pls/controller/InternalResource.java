@@ -93,7 +93,7 @@ import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelMetadataService;
-import com.latticeengines.pls.service.ModelNotesService;
+import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
@@ -190,7 +190,7 @@ public class InternalResource extends InternalResourceBase {
     private BucketedScoreService bucketedScoreService;
 
     @Autowired
-    private ModelNotesService modelNotesService;
+    private ModelNoteService modelNoteService;
 
     @Autowired
     private PlayLaunchService playLaunchService;
@@ -1268,8 +1268,8 @@ public class InternalResource extends InternalResourceBase {
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams) {
         log.debug(
-                String.format("ModelSummary %s's ModelNotes created by %s", modelSummaryId, noteParams.getUserName()));
-        modelNotesService.create(modelSummaryId, noteParams);
+                String.format("ModelSummary %s's ModelNote created by %s", modelSummaryId, noteParams.getUserName()));
+        modelNoteService.create(modelSummaryId, noteParams);
         return true;
     }
 
@@ -1277,9 +1277,9 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId) {
-        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNotes", fromModelSummaryId,
+        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNote", fromModelSummaryId,
                 toModelSummaryId));
-        modelNotesService.copyNotes(fromModelSummaryId, toModelSummaryId);
+        modelNoteService.copyNotes(fromModelSummaryId, toModelSummaryId);
         return true;
     }
 

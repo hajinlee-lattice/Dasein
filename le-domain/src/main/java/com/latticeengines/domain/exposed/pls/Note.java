@@ -4,51 +4,53 @@ import java.io.Serializable;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.Index;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import javax.persistence.MappedSuperclass;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.IsUserModifiable;
 
-@Table(name = "MODEL_NOTES")
-@Entity
+@MappedSuperclass
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ModelNotes implements HasId<String>, HasPid, IsUserModifiable, Serializable {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT, property = "property")
+@JsonSubTypes({ //
+        @Type(value = ModelNote.class, name = "modelNote"), //
+        @Type(value = RatingEngineNote.class, name = "ratingEngineNote") })
+public abstract class Note implements HasId<String>, HasPid, IsUserModifiable, Serializable {
 
+    private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = -863043454467222812L;
+    public Note() {
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
-    @Column(name = "PID", unique = true, nullable = false)
+    @Column(name = "PID", nullable = false)
     private Long pid;
 
     @JsonProperty("Id")
     @Column(name = "ID", unique = true, nullable = false)
-    @Index(name = "MODEL_NOTES_ID_IDX")
     private String id;
 
     @JsonProperty("CreationTimestamp")
-    @Column(name = "CREATION_TIMESTAMP")
+    @Column(name = "CREATION_TIMESTAMP", nullable = false)
     private Long creationTimestamp;
 
     @JsonProperty("LastModificationTimestamp")
-    @Column(name = "LAST_MODIFICATION_TIMESTAMP")
+    @Column(name = "LAST_MODIFICATION_TIMESTAMP", nullable = false)
     private Long lastModificationTimestamp;
 
     @JsonProperty("CreatedByUser")
@@ -58,16 +60,6 @@ public class ModelNotes implements HasId<String>, HasPid, IsUserModifiable, Seri
     @JsonProperty("LastModifiedByUser")
     @Column(name = "LAST_MODIFIED_BY_USER")
     private String lastModifiedByUser;
-
-    @ManyToOne
-    @JoinColumn(name = "MODEL_ID", nullable = false)
-    @JsonIgnore
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private ModelSummary modelSummary;
-
-    @Column(name = "PARENT_MODEL_ID")
-    @JsonProperty("ParentModelId")
-    private String parentModelId;
 
     @JsonProperty("NotesContents")
     @Column(name = "NOTES_CONTENTS", length = 2048)
@@ -131,14 +123,6 @@ public class ModelNotes implements HasId<String>, HasPid, IsUserModifiable, Seri
         this.lastModifiedByUser = lastModifiedByUser;
     }
 
-    public ModelSummary getModelSummary() {
-        return modelSummary;
-    }
-
-    public void setModelSummary(ModelSummary modelSummary) {
-        this.modelSummary = modelSummary;
-    }
-
     public String getNotesContents() {
         return notesContents;
     }
@@ -147,20 +131,17 @@ public class ModelNotes implements HasId<String>, HasPid, IsUserModifiable, Seri
         this.notesContents = notesContents;
     }
 
-    public String getParentModelId() {
-        return parentModelId;
-    }
-
-    public void setParentModelId(String parentModelId) {
-        this.parentModelId = parentModelId;
-    }
-
     public String getOrigin() {
         return origin;
     }
 
     public void setOrigin(String origin) {
         this.origin = origin;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }
