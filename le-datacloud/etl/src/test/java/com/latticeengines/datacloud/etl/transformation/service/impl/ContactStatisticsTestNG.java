@@ -78,7 +78,7 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
         TransformationStepConfig step = super.profile();
         step.setBaseSources(Collections.singletonList(contact.getSourceName()));
         step.setTargetSource(contactProfile.getSourceName());
-        step.setConfiguration(setDataFlowEngine(step.getConfiguration(), "FLINK"));
+        step.setConfiguration(setDataFlowEngine(step.getConfiguration(), "TEZ"));
         return step;
     }
 
@@ -95,6 +95,7 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
         step.setBaseSources(Collections.singletonList(contact.getSourceName()));
         step.setInputSteps(Collections.singletonList(profileStep));
         step.setTargetSource(contactBucket.getSourceName());
+        step.setConfiguration(setDataFlowEngine(step.getConfiguration(), "TEZ"));
         return step;
     }
 
