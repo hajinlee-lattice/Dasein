@@ -28,6 +28,16 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     private static final Logger log = LoggerFactory.getLogger(FirstConsolidateAndProfileDeploymentTestNG.class);
 
+    private static final int ACCOUNT_IMPORT_SIZE_1_1 = 350;
+    private static final int ACCOUNT_IMPORT_SIZE_1_2 = 150;
+    private static final int CONTACT_IMPORT_SIZE_1_1 = 600;
+    private static final int CONTACT_IMPORT_SIZE_1_2 = 500;
+    private static final int PRODUCT_IMPORT_SIZE_1_1 = 70;
+    private static final int PRODUCT_IMPORT_SIZE_1_2 = 30;
+    private static final int TRANSACTION_IMPORT_SIZE_1_1 = 20000;
+    private static final int TRANSACTION_IMPORT_SIZE_1_2 = 10000;
+
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         runPreCheckInTest();
@@ -37,6 +47,12 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     @Test(groups = "precheckin")
     public void runPreCheckInTest() throws Exception {
+
+        Assert.assertEquals(ACCOUNT_IMPORT_SIZE_1_1 + ACCOUNT_IMPORT_SIZE_1_2, ACCOUNT_IMPORT_SIZE_1);
+        Assert.assertEquals(CONTACT_IMPORT_SIZE_1_1 + CONTACT_IMPORT_SIZE_1_1, CONTACT_IMPORT_SIZE_1);
+        Assert.assertEquals(ACCOUNT_IMPORT_SIZE_1_1 + ACCOUNT_IMPORT_SIZE_1_2, PRODUCT_IMPORT_SIZE_1);
+        Assert.assertEquals(ACCOUNT_IMPORT_SIZE_1_1 + ACCOUNT_IMPORT_SIZE_1_2, TRANSACTION_IMPORT_SIZE_1);
+
         importData();
         verifyCannotProfile();
         consolidate();
@@ -47,15 +63,15 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     private void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        mockVdbImport(BusinessEntity.Account, 0, ACCOUNT_IMPORT_SIZE_1);
-        mockVdbImport(BusinessEntity.Contact, 0, CONTACT_IMPORT_SIZE_1);
-        mockVdbImport(BusinessEntity.Product, 0, PRODUCT_IMPORT_SIZE_1);
-        mockVdbImport(BusinessEntity.Transaction, 0, TRANSACTION_IMPORT_SIZE_1);
+        mockVdbImport(BusinessEntity.Account, 0, ACCOUNT_IMPORT_SIZE_1_1);
+        mockVdbImport(BusinessEntity.Contact, 0, CONTACT_IMPORT_SIZE_1_1);
+        mockVdbImport(BusinessEntity.Product, 0, PRODUCT_IMPORT_SIZE_1_1);
+        mockVdbImport(BusinessEntity.Transaction, 0, TRANSACTION_IMPORT_SIZE_1_1);
         Thread.sleep(2000);
-        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, 100);
-        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 200);
-        mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, 10);
-        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1, 500);
+        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1_1, ACCOUNT_IMPORT_SIZE_1_2);
+        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1_1, CONTACT_IMPORT_SIZE_1_2);
+        mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1_1, PRODUCT_IMPORT_SIZE_1_2);
+        mockVdbImport(BusinessEntity.Transaction, TRANSACTION_IMPORT_SIZE_1_1, TRANSACTION_IMPORT_SIZE_1_2);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
