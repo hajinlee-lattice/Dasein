@@ -167,7 +167,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
         List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableDao.getDataFeedTaskTables(task);
         datafeedTaskTables.stream().map(DataFeedTaskTable::getTable).forEach(dataTable -> {
-            dataTable = HibernateUtils.inflateDetails(dataTable);
+            TableEntityMgr.inflateTable(dataTable);
             if (dataTable != null) {
                 if (!dataTable.getExtracts().isEmpty()) {
                     task.setImportData(dataTable);

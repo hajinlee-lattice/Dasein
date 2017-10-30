@@ -81,7 +81,7 @@ public class DataFeedTask implements HasPid, Serializable {
     @JsonIgnore
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_DATA_ID")
+    @JoinColumn(name = "`FK_DATA_ID`")
     private Table importData;
 
     @Column(name = "ACTIVE_JOB", nullable = false)
