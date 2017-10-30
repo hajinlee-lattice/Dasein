@@ -13,8 +13,8 @@
         <property name="jdbcUrl" value="${quartzclient.datasource.url}"/>
         <property name="user" value="${quartzclient.datasource.user}" />
         <property name="password" value="${quartzclient.datasource.password.encrypted}" />
-        <property name="minPoolSize" value="2"/>
-        <property name="maxPoolSize" value="8"/>
+        <property name="minPoolSize" value="0"/>
+        <property name="maxPoolSize" value="4"/>
         <property name="acquireIncrement" value="1"/>
     </bean>
 

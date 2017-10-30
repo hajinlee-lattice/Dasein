@@ -14,7 +14,7 @@
         <property name="jdbcUrl" value="${auth.globalauth.datasource.url}" />
         <property name="user" value="${auth.globalauth.datasource.user}" />
         <property name="password" value="${auth.globalauth.datasource.password.encrypted}" />
-        <property name="minPoolSize" value="1"/>
+        <property name="minPoolSize" value="0"/>
         <property name="maxPoolSize" value="4"/>
         <property name="acquireIncrement" value="1"/>
     </bean>
