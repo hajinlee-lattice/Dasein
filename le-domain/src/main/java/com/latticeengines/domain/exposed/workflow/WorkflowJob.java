@@ -14,18 +14,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
@@ -49,7 +49,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
