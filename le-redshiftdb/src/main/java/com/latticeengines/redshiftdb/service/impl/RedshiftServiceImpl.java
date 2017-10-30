@@ -28,7 +28,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Qualifier(value = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
-    @Value("${aws.default.access.key.encrypted}")
+    @Value("${aws.default.access.key}")
     private String awsAccessKey;
 
     @Value("${aws.default.secret.key.encrypted}")

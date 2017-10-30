@@ -20,7 +20,7 @@
     </bean>
 
     <bean name="awsCredentials" class="com.amazonaws.auth.BasicAWSCredentials">
-        <constructor-arg index="0" value="${aws.default.access.key.encrypted}"/>
+        <constructor-arg index="0" value="${aws.default.access.key}"/>
         <constructor-arg index="1" value="${aws.default.secret.key.encrypted}"/>
     </bean>
 

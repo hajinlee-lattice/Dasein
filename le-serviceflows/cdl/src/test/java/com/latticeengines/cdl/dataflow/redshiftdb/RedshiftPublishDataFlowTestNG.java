@@ -36,7 +36,7 @@ public class RedshiftPublishDataFlowTestNG extends ServiceFlowsDataFlowFunctiona
     @Value("${common.le.stack}")
     private String leStack;
 
-    @Value("${aws.default.access.key.encrypted}")
+    @Value("${aws.default.access.key}")
     private String awsAccessKey;
 
     @Value("${aws.default.secret.key.encrypted}")

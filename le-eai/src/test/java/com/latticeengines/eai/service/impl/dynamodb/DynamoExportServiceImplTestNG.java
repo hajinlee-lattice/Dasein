@@ -75,7 +75,7 @@ public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestN
     @Value("${aws.dynamo.endpoint}")
     private String endpoint;
 
-    @Value("${aws.default.access.key.encrypted}")
+    @Value("${aws.default.access.key}")
     private String accessKey;
 
     @Value("${aws.default.secret.key.encrypted}")

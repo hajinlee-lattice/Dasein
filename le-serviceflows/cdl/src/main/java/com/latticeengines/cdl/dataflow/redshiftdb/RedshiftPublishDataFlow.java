@@ -26,7 +26,7 @@ import cascading.tuple.Fields;
 @Component("redshiftPublishDataflow")
 public class RedshiftPublishDataFlow extends TypesafeDataFlowBuilder<RedshiftPublishDataFlowParameters> {
 
-    @Value("${aws.default.access.key.encrypted}")
+    @Value("${aws.default.access.key}")
     private String awsAccessKey;
 
     @Value("${aws.default.secret.key.encrypted}")
