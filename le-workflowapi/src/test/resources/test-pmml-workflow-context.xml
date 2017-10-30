@@ -7,7 +7,7 @@
 
     <import resource="classpath:proxy-context.xml" />
     <import resource="classpath:datafabric-context.xml" />
-    <import resource="classpath:test-pls-no-env-context.xml" />
+    <import resource="classpath:test-pls-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.scoringapi.enrich" />
     <context:component-scan base-package="com.latticeengines.scoringapi.entitymanager" />
