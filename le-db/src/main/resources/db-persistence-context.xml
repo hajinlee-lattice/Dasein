@@ -13,7 +13,7 @@
         <property name="jdbcUrl" value="${db.datasource.url}"/>
         <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
-        <property name="minPoolSize" value="1"/>
+        <property name="minPoolSize" value="0"/>
         <property name="maxPoolSize" value="8"/>
         <property name="acquireIncrement" value="1"/>
     </bean>

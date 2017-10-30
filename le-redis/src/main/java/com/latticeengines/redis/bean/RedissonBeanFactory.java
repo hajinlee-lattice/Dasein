@@ -22,7 +22,7 @@ public class RedissonBeanFactory implements FactoryBean<RedissonClient> {
         }
         switch (currentEnv) {
             case WebApp:
-                return constructClient(3, 1, 3, 1);
+                return constructClient(3, 0, 3, 0);
             case AppMaster:
                 return constructClient(2, 0, 2, 0);
             case TestClient:
