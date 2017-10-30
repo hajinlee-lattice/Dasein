@@ -258,10 +258,11 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.updateCount = function() {
-        QueryStore.counts[vm.treeMode + 's'].loading = true;
         vm.prevBucketCountAttr = null;
 
         if (vm.mode == 'rules') {
+            QueryStore.counts[vm.treeMode + 's'].loading = true;
+
             var RatingEngineCopy = angular.copy(RatingEngineModel),
                 BucketMap = RatingEngineCopy.rule.ratingRule.bucketToRuleMap;
 
@@ -283,6 +284,14 @@ angular.module('common.datacloud.query.builder', [
                 }); 
             }, 250);
         } else {
+            if (QueryStore.counts['accounts']) {
+                QueryStore.counts['accounts'].loading = true;
+            }
+
+            if (QueryStore.counts['contacts']) {
+                QueryStore.counts['contacts'].loading = true;
+            }
+
             $timeout(function() {
                 var segment = { 
                     'free_form_text_search': "",
@@ -292,10 +301,16 @@ angular.module('common.datacloud.query.builder', [
                     }
                 };
 
-                segment[vm.treeMode + '_restriction'] = angular.copy(vm.restriction),
+                segment['account_restriction'] = angular.copy(QueryStore.accountRestriction);
+                segment['contact_restriction'] = angular.copy(QueryStore.contactRestriction);
 
-                QueryService.GetCountByQuery(vm.treeMode + 's', SegmentStore.sanitizeSegment(segment)).then(function(result) {
-                    QueryStore.setResourceTypeCount(vm.treeMode + 's', false, result);
+                QueryService.GetCountByQuery('accounts', SegmentStore.sanitizeSegment(segment)).then(function(result) {
+                    QueryStore.setResourceTypeCount('accounts', false, result);
+                });
+
+
+                QueryService.GetCountByQuery('contacts', SegmentStore.sanitizeSegment(segment)).then(function(result) {
+                    QueryStore.setResourceTypeCount('contacts', false, result);
                 });
             }, 250);
         }
