@@ -1,7 +1,5 @@
 package com.latticeengines.pls.controller.datacollection;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +14,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -34,11 +31,12 @@ public class AccountResource extends BaseFrontEndEntityResource {
         super(entityProxy, segmentProxy);
     }
 
+    @Deprecated
     @Override
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getCount(@RequestBody FrontEndQuery frontEndQuery) {
+    public Long getCount(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         try {
             return super.getCount(frontEndQuery);
         } catch (LedpException e) {
@@ -52,24 +50,9 @@ public class AccountResource extends BaseFrontEndEntityResource {
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@RequestBody FrontEndQuery frontEndQuery) {
+    public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         try {
             return super.getData(frontEndQuery);
-        } catch (LedpException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_36002, e);
-        }
-    }
-
-    @Deprecated
-    @Override
-    @RequestMapping(value = "/ratingcount", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query")
-    public Map<String, Long> getRatingCount(@RequestBody FrontEndQuery frontEndQuery) {
-        try {
-            return super.getRatingCount(frontEndQuery);
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {

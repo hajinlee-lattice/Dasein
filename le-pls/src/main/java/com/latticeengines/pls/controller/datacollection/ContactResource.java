@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -32,11 +31,12 @@ public class ContactResource extends BaseFrontEndEntityResource {
         super(entityProxy, segmentProxy);
     }
 
+    @Deprecated
     @Override
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getCount(@RequestBody FrontEndQuery frontEndQuery) {
+    public Long getCount(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         try {
             return super.getCount(frontEndQuery);
         } catch (LedpException e) {
@@ -50,7 +50,7 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@RequestBody FrontEndQuery frontEndQuery) {
+    public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         try {
             return super.getData(frontEndQuery);
         } catch (LedpException e) {

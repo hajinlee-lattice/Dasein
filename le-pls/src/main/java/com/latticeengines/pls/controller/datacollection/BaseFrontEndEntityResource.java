@@ -10,7 +10,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -26,7 +25,14 @@ public abstract class BaseFrontEndEntityResource {
         this.segmentProxy = segmentProxy;
     }
 
-    public long getCount(FrontEndQuery frontEndQuery) {
+    public Long getCount(FrontEndQuery frontEndQuery) {
+        return getCount(frontEndQuery, getMainEntity());
+    }
+
+    protected Long getCount(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
+        if (frontEndQuery == null) {
+            frontEndQuery = new FrontEndQuery();
+        }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
@@ -34,6 +40,9 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery) {
+        if (frontEndQuery == null) {
+            frontEndQuery = new FrontEndQuery();
+        }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
@@ -42,6 +51,9 @@ public abstract class BaseFrontEndEntityResource {
 
     @Deprecated
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
+        if (frontEndQuery == null) {
+            frontEndQuery = new FrontEndQuery();
+        }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();

@@ -31,13 +31,6 @@ public class ProductResource extends BaseFrontEndEntityResource {
         super(entityProxy, segmentProxy);
     }
 
-    @RequestMapping(value = "/count", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Retrieve the number of products")
-    public long getCount() {
-        return super.getCount(new FrontEndQuery());
-    }
-
     @RequestMapping(value = "/data", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Retrieve all the products")
