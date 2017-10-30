@@ -4,13 +4,15 @@ import static com.latticeengines.domain.exposed.query.AggregationType.AT_LEAST_O
 import static com.latticeengines.domain.exposed.query.AggregationType.EACH;
 
 import java.math.BigDecimal;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.lang.RandomStringUtils;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.FunctionLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
@@ -28,7 +30,6 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 
 public class TransactionRestrictionTranslator {
-    private AtomicInteger aliasCounter = new AtomicInteger(0);
     private TransactionRestriction txnRestriction;
 
     public final static String PERIOD_AMOUNT = "PeriodAmount";
@@ -39,6 +40,29 @@ public class TransactionRestrictionTranslator {
 
     public TransactionRestrictionTranslator(TransactionRestriction txnRestriction) {
         this.txnRestriction = txnRestriction;
+    }
+
+    public Restriction convert(BusinessEntity entity) {
+        if (txnRestriction.getTimeFilter() == null) {
+            txnRestriction.setTimeFilter(TimeFilter.ever());
+        }
+
+        // treat PRIOR_TO_LAST specially to match playmaker functionality
+        if (ComparisonType.PRIOR_TO_LAST == txnRestriction.getTimeFilter().getRelation()) {
+
+            if (txnRestriction.isNegate()) {
+                Restriction notPriorRestriction = translateToPrior(entity, txnRestriction, true);
+                Restriction withinRestriction = translateToHasNotPurchasedWithin(entity, txnRestriction, true);
+                return Restriction.builder().or(notPriorRestriction, withinRestriction).build();
+            } else {
+                Restriction priorRestriction = translateToPrior(entity, txnRestriction, false);
+                Restriction notWithinRestriction = translateToHasNotPurchasedWithin(entity, txnRestriction, false);
+                return Restriction.builder().and(priorRestriction, notWithinRestriction).build();
+            }
+
+        } else {
+            return translate(entity);
+        }
     }
 
     private FunctionLookup<Integer, Object, String> createPeriodOffsetLookup() {
@@ -70,11 +94,40 @@ public class TransactionRestrictionTranslator {
         return period;
     }
 
-    public Restriction convert(BusinessEntity entity) {
+    private Restriction translateToPrior(BusinessEntity businessEntity, TransactionRestriction res, boolean negate) {
+
+        TimeFilter timeFilter = new TimeFilter(res.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
+                res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
+        TransactionRestriction prior = new TransactionRestriction(res.getProductName(), //
+                res.getProductId(), //
+                timeFilter, //
+                negate, //
+                res.getSpentFilter(), //
+                res.getUnitFilter());
+
+        return new TransactionRestrictionTranslator(prior).translate(businessEntity);
+    }
+
+    private Restriction translateToHasNotPurchasedWithin(BusinessEntity businessEntity, TransactionRestriction res, //
+            boolean negate) {
+
+        TimeFilter timeFilter = new TimeFilter(res.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
+                res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
+
+        TransactionRestriction notWithin = new TransactionRestriction(res.getProductName(), //
+                res.getProductId(), //
+                timeFilter, //
+                !negate, //
+                null, //
+                null);
+
+        return new TransactionRestrictionTranslator(notWithin).translate(businessEntity);
+    }
+
+    private Restriction translate(BusinessEntity entity) {
+
         Restriction productRestriction = filterByProduct();
-        if (txnRestriction.getTimeFilter() == null) {
-            txnRestriction.setTimeFilter(TimeFilter.ever());
-        }
+
         AttributeLookup amountLookup = new AttributeLookup(BusinessEntity.Transaction,
                 InterfaceName.TotalAmount.name());
         AttributeLookup quantityLookup = new AttributeLookup(BusinessEntity.Transaction,
@@ -247,7 +300,7 @@ public class TransactionRestrictionTranslator {
     }
 
     private String generateAlias(BusinessEntity entity) {
-        return entity.name() + aliasCounter.incrementAndGet();
+        return entity.name() + RandomStringUtils.randomAlphanumeric(8);
     }
 
     private Restriction filterByProduct() {

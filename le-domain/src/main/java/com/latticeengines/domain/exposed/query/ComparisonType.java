@@ -23,6 +23,7 @@ public enum ComparisonType {
     IN_CURRENT_PERIOD, //
     BETWEEN, //
     PRIOR, //
+    PRIOR_TO_LAST, //
     WITHIN;
 
     public boolean isLikeTypeOfComparison() {

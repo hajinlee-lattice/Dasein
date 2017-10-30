@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator.restriction;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -31,7 +32,8 @@ public class TimeResolver extends BaseRestrictionResolver<TimeRestriction> imple
         } else if (filter.getRelation().equals(ComparisonType.IN_CURRENT_PERIOD)) {
             rhs = new DateValueLookup(0, filter.getPeriod());
         } else {
-            rhs = new DateValueLookup(filter.getValues().get(0), filter.getPeriod());
+            BigDecimal offset = new BigDecimal(filter.getValues().get(0).toString()).negate();
+            rhs = new DateValueLookup(offset, filter.getPeriod());
         }
 
         LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
@@ -45,7 +47,7 @@ public class TimeResolver extends BaseRestrictionResolver<TimeRestriction> imple
 
         switch (filter.getRelation()) {
         case IN_CURRENT_PERIOD:
-            booleanExpression = lhsPath.goe(rhsPaths.get(0));
+            booleanExpression = lhsPath.eq(rhsPaths.get(0));
             break;
         case PRIOR:
             booleanExpression = lhsPath.loe(rhsPaths.get(0));

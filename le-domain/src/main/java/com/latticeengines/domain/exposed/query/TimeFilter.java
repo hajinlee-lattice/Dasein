@@ -78,6 +78,6 @@ public class TimeFilter {
     }
 
     public enum Period {
-        Day, Week, Month, Quarter, Year;
+        Day, Week, Month, Quarter, Year, Custom;
     }
 }
