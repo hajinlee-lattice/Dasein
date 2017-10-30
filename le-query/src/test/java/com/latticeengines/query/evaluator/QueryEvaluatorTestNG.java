@@ -423,6 +423,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testWindowFunction() {
         String accountTotalAmount = "AccountTotalAmount";
+        String maxAmount = "MaxAmount";
         String caseAmount = "CaseAmount";
         AttributeLookup amount = new AttributeLookup(BusinessEntity.Transaction, ATTR_TOTAL_AMOUNT);
         AttributeLookup accountId = new AttributeLookup(BusinessEntity.Transaction, ATTR_ACCOUNT_ID);
@@ -432,8 +433,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         CaseLookup caseAmountLookup = new CaseLookup(caseMap, "0", caseAmount);
 
         WindowFunctionLookup sumLookup = WindowFunctionLookup.sum(amount, accountId, accountTotalAmount);
+        WindowFunctionLookup maxLookup = WindowFunctionLookup.max(amount, maxAmount);
         Restriction accountRestriction = Restriction.builder().let(accountId).eq("0012400001DNJYKAA5").build();
-        Query query = Query.builder().select(accountId, sumLookup, caseAmountLookup).from(BusinessEntity.Transaction)
+        Query query = Query.builder().select(accountId, sumLookup, maxLookup, caseAmountLookup)
+                .from(BusinessEntity.Transaction)
                 .where(accountRestriction).build();
 
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
@@ -441,6 +444,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 String.format("select %s.%s as %s, sum(%s.%s) over (partition by %s.%s) as %s,", TRANSACTION,
                         ATTR_ACCOUNT_ID, ATTR_ACCOUNT_ID, TRANSACTION, ATTR_TOTAL_AMOUNT, TRANSACTION, ATTR_ACCOUNT_ID,
                         accountTotalAmount));
+        sqlContains(sqlQuery, String.format("max(%s.%s) over () as %s", TRANSACTION, ATTR_TOTAL_AMOUNT, maxAmount));
         sqlContains(sqlQuery, String.format("(case when %s.%s > ? then ? else ? end) as %s", TRANSACTION,
                 ATTR_TOTAL_AMOUNT, caseAmount));
         sqlContains(sqlQuery, String.format("from %s as %s", transactionTableName, TRANSACTION));

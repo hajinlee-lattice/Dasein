@@ -38,6 +38,10 @@ public class WindowFunctionLookup extends Lookup {
         return new WindowFunctionLookup(FunctionType.SUM, target).withPartition(partition).as(alias);
     }
 
+    public static WindowFunctionLookup max(Lookup target, String alias) {
+        return new WindowFunctionLookup(FunctionType.MAX, target).as(alias);
+    }
+
     public WindowFunctionLookup withPartition(Lookup partition) {
         this.partitionBy.add(partition);
         return this;
@@ -81,6 +85,6 @@ public class WindowFunctionLookup extends Lookup {
     }
 
     public enum FunctionType {
-        SUM, AVG
+        SUM, AVG, MAX, MIN
     }
 }

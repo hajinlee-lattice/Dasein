@@ -31,6 +31,10 @@ public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLoo
         switch (lookup.getFunctionType()) {
         case SUM:
             return windowExpressionForSelect(lookup, asAlias);
+        case MAX:
+            return windowExpressionForSelect(lookup, asAlias);
+        case MIN:
+            return windowExpressionForSelect(lookup, asAlias);
         default:
             throw new RuntimeException("Unsupported window function " + lookup.getFunctionType());
         }
@@ -75,6 +79,10 @@ public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLoo
             return SQLExpressions.sum(targetExpression).over();
         case AVG:
             return SQLExpressions.avg(targetExpression).over();
+        case MAX:
+            return SQLExpressions.max(targetExpression).over();
+        case MIN:
+            return SQLExpressions.min(targetExpression).over();
         default:
             throw new UnsupportedOperationException("Unsupported window function " + functionType);
         }
@@ -84,9 +92,6 @@ public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLoo
         Expression<?>[] expressions = partitionLookups.stream().map(this::resolvePartitionBy).filter(Objects::nonNull)
                 .toArray(Expression<?>[]::new);
 
-        if (expressions.length == 0) {
-            throw new IllegalArgumentException("Missing partition key for window function");
-        }
         return expressions;
     }
 
