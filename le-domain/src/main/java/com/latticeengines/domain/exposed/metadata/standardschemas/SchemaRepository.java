@@ -88,7 +88,7 @@ public class SchemaRepository {
         table.addAttribute(attr("CategoryId") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CATEGORY", "CATEGORY ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Reference) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
@@ -97,7 +97,7 @@ public class SchemaRepository {
         table.addAttribute(attr("SubcategoryId") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "SUBCATEGORY", "SUBCATEGORY ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
@@ -114,7 +114,7 @@ public class SchemaRepository {
         table.addAttribute(attr("LastModifiedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -138,7 +138,7 @@ public class SchemaRepository {
         table.addAttribute(attr("AccountId") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ACCOUNT_ID", "ACCOUNTID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.AccountId) //
                 .logicalType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
@@ -147,7 +147,7 @@ public class SchemaRepository {
         table.addAttribute(attr("SubcategoryId") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "SUBCATEGORY_ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.SubcategoryId) //
                 .logicalType(LogicalDataType.Reference) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
@@ -156,7 +156,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Timestamp") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -166,7 +166,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Quantity") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "QUANTITY" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Quantity) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
@@ -176,7 +176,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Amount") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AMOUNT" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
@@ -195,7 +195,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Id") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "ACCOUNT", "ACCOUNT ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
@@ -205,7 +205,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Event") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "EVENT", "WON", "P1_EVENT" })) //
                 .type(Schema.Type.BOOLEAN) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
@@ -296,7 +296,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Id") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "LEAD", "LEAD ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Id) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -306,7 +306,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Event") //
                 .type(Schema.Type.BOOLEAN) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "EVENT", "WON", "P1_EVENT" })) //
-                .required()//
+                .notNull()//
                 .interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -420,6 +420,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.AccountId) //
                 .logicalType(LogicalDataType.Id) //
@@ -507,6 +508,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.ContactId) //
                 .logicalType(LogicalDataType.Id) //
@@ -525,6 +527,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.AccountId) //
                 .logicalType(LogicalDataType.Id) //
@@ -635,7 +638,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "PRODUCT_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.ProductId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -676,6 +679,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "TRANSACTION_ID", "TRANSACTION ID" })) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.TransactionId) //
                 .logicalType(LogicalDataType.Id) //
@@ -695,6 +699,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(
                         new String[] { "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT" })) //
                 .type(Schema.Type.STRING) //
+                .defaultValueStr("")
                 .interfaceName(InterfaceName.ContactId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -704,6 +709,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets
                         .newHashSet(new String[] { "PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.ProductId) //
                 .logicalType(LogicalDataType.Id) //
@@ -790,7 +796,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "PRODUCT_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.ProductId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -814,7 +820,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.TotalAmount.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AMOUNT", "TOTAL AMOUNT" })) //
                 .type(Schema.Type.DOUBLE) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.TotalAmount) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -823,7 +829,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.TotalQuantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "QUANTITY", "TOTAL QUANTITY" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.TotalQuantity) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -998,8 +1004,18 @@ public class SchemaRepository {
             return this;
         }
 
-        public AttributeBuilder required() {
+        public AttributeBuilder notNull() {
             attribute.setNullable(false);
+            return this;
+        }
+
+        public AttributeBuilder required() {
+            attribute.setRequired(true);
+            return this;
+        }
+
+        public AttributeBuilder defaultValueStr(String defaultValueStr) {
+            attribute.setDefaultValueStr(defaultValueStr);
             return this;
         }
 

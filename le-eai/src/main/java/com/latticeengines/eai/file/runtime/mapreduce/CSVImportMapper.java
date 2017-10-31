@@ -206,6 +206,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 try {
                     validateAttribute(validators, csvRecord, attr);
                     if (!attr.isNullable() || !StringUtils.isEmpty(csvFieldValue)) {
+                        if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
+                            csvFieldValue = attr.getDefaultValueStr();
+                        }
                         avroFieldValue = toAvro(csvFieldValue, avroType, attr);
                         if (attr.getName().equals(InterfaceName.Id.name())) {
                             id = String.valueOf(avroFieldValue);
@@ -228,8 +231,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private void validateAttribute(List<InputValidator> validators, CSVRecord csvRecord, Attribute attr) {
         String attrKey = attr.getName();
         if (!attr.isNullable() && StringUtils.isEmpty(csvRecord.get(attr.getDisplayName()))) {
-            missingRequiredColValue = true;
-            throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
+            if (attr.getDefaultValueStr() == null) {
+                missingRequiredColValue = true;
+                throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
+            }
         }
         if (CollectionUtils.isNotEmpty(validators)) {
             InputValidator validator = validators.get(0);

@@ -756,6 +756,34 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public Boolean getRequired() {
+        Boolean required = (Boolean) properties.get("Required");
+        if (required == null) {
+            return false;
+        }
+        return required;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setRequired(Boolean required) {
+        properties.put("Required", required);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getDefaultValueStr() {
+        return properties.get("DefaultValueStr") != null ? properties.get("DefaultValueStr").toString() : null;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setDefaultValueStr(String defaultValueStr) {
+        properties.put("DefaultValueStr", defaultValueStr);
+    }
+
+    @Transient
+    @JsonIgnore
     @SuppressWarnings("unchecked")
     public List<String> getAllowedDisplayNames() {
         return (List<String>) properties.get("AllowedDisplayNames");

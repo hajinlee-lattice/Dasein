@@ -99,7 +99,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         if (findMatch.size() != attributes.size()) {
             List<String> missingField = new ArrayList<>();
             for (Attribute attr : attributes) {
-                if (!attr.isNullable() && !findMatch.contains(attr.getName())) {
+                if (attr.getRequired() && !findMatch.contains(attr.getName())) {
                     missingField.add(attr.getName());
                 }
             }
@@ -113,8 +113,13 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
             if (!findMatch.contains(attribute.getName())) {
-                log.info(String.format("Remove unmatched column : %s", attribute.getName()));
-                attrIterator.remove();
+                if (attribute.getDefaultValueStr() == null) {
+                    log.info(String.format("Remove unmatched column : %s", attribute.getName()));
+                    attrIterator.remove();
+                } else {
+                    log.info(String.format("Keep unmatched column: %s with default value: %s", attribute.getName(),
+                            attribute.getDefaultValueStr()));
+                }
             }
         }
 

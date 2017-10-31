@@ -646,11 +646,16 @@ public class VdbTableImportServiceImpl extends ImportService {
             if (attributeMap.containsKey(column.getColumnName())) {
                 if (!attributeMap.get(column.getColumnName()).isNullable()) {
                     if (StringUtils.isEmpty(column.getValues().get(index))) {
-                        result = false;
-                        String record = getVdbRecord(vdbQueryDataResult, index);
-                        log.error(String.format("Missing required field: %s. Record values: %s",
-                                attributeMap.get(column.getColumnName()).getName(), record));
-                        break;
+                        if (attributeMap.get(column.getColumnName()).getDefaultValueStr() != null) {
+                            column.getValues()
+                                    .set(index, attributeMap.get(column.getColumnName()).getDefaultValueStr());
+                        } else {
+                            result = false;
+                            String record = getVdbRecord(vdbQueryDataResult, index);
+                            log.error(String.format("Missing required field: %s. Record values: %s",
+                                    attributeMap.get(column.getColumnName()).getName(), record));
+                            break;
+                        }
                     }
                 }
             }
