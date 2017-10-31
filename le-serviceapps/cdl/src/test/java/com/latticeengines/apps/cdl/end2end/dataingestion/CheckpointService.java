@@ -65,7 +65,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "4";
+    private static final String S3_CHECKPOINTS_VERSION = "5";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 300;

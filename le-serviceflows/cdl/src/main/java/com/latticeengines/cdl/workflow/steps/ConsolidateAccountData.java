@@ -144,7 +144,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         setupMasterTable(step4);
         step4.setInputSteps(Arrays.asList(mergeStep, matchStep));
         step4.setTransformer("consolidateDataTransformer");
-        step4.setConfiguration(getConsolidateDataMasterConfig());
+        step4.setConfiguration(getMergeMasterConfig());
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -188,13 +188,13 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         return step;
     }
 
-    private String getConsolidateDataMasterConfig() {
+    private String getMergeMasterConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(Collections.singleton(CREATION_DATE));
-        return appendEngineConf(config, lightEngineConfig());
+        return appendEngineConf(config, heavyEngineConfig());
     }
 
     private String getMatchConfig() {

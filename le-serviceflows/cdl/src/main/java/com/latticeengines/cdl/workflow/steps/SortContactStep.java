@@ -186,10 +186,11 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
         SorterConfig conf = new SorterConfig();
         conf.setPartitions(200);
         conf.setSplittingThreads(maxSplitThreads);
+        conf.setSplittingChunkSize(10000L);
         conf.setCompressResult(true);
         conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
                                                           // single sort key now
-        String confStr = appendEngineConf(conf, lightEngineConfig());
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
