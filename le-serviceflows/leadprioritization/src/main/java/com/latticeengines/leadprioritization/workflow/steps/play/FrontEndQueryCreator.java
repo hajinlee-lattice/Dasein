@@ -6,10 +6,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,14 +69,11 @@ public class FrontEndQueryCreator {
         accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
         contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
 
-        // TODO - anoop - enable it once CDL team ensures that LastModifiedDate
-        // column is present in all tenant data
-        //
-        // setSortField(BusinessEntity.Account,
-        // InterfaceName.LastModifiedDate.name(), false, accountFrontEndQuery);
-        setSortField(BusinessEntity.Account, InterfaceName.AccountId.name(), false, accountFrontEndQuery);
+        setSortField(BusinessEntity.Account, Arrays.asList(InterfaceName.AccountId.name()), false,
+                accountFrontEndQuery);
 
-        setSortField(BusinessEntity.Contact, InterfaceName.ContactId.name(), false, contactFrontEndQuery);
+        setSortField(BusinessEntity.Contact, Arrays.asList(InterfaceName.ContactId.name()), false,
+                contactFrontEndQuery);
     }
 
     private void prepareLookupsForFrontEndQueries(FrontEndQuery accountFrontEndQuery,
@@ -104,14 +102,15 @@ public class FrontEndQueryCreator {
                         field -> lookups.add(new AttributeLookup(businessEntity, field)));
     }
 
-    private void setSortField(BusinessEntity entityType, String sortBy, boolean descending,
+    private void setSortField(BusinessEntity entityType, List<String> sortBy, boolean descending,
             FrontEndQuery entityFrontEndQuery) {
-        List<AttributeLookup> lookups = new ArrayList<>();
-        AttributeLookup attrLookup = new AttributeLookup(entityType,
-                // StringUtils.isNotBlank(sortBy) ? sortBy :
-                // InterfaceName.LastModifiedDate.name());
-                StringUtils.isNotBlank(sortBy) ? sortBy : InterfaceName.AccountId.name());
-        lookups.add(attrLookup);
+        if (CollectionUtils.isEmpty(sortBy)) {
+            sortBy = Arrays.asList(InterfaceName.AccountId.name());
+        }
+
+        List<AttributeLookup> lookups = sortBy.stream() //
+                .map(sort -> new AttributeLookup(entityType, sort)) //
+                .collect(Collectors.toList());
 
         FrontEndSort sort = new FrontEndSort(lookups, descending);
         entityFrontEndQuery.setSort(sort);

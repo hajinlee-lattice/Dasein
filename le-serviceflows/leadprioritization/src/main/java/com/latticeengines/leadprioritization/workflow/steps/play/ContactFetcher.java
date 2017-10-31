@@ -34,7 +34,7 @@ public class ContactFetcher {
         Map<Object, List<Map<String, String>>> mapForAccountAndContactList = new HashMap<>();
 
         try {
-            FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
+            FrontEndQuery contactFrontEndQuery = playLaunchContext.getClonedContactFrontEndQuery();
 
             contactFrontEndQuery.setPageFilter(null);
             log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
@@ -62,7 +62,7 @@ public class ContactFetcher {
     private long fetchContactsPage(PlayLaunchContext playLaunchContext,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Long contactsCount,
             long processedContactsCount, int pageNo) {
-        FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
+        FrontEndQuery contactFrontEndQuery = playLaunchContext.getClonedContactFrontEndQuery();
 
         log.info(String.format("Contacts Loop #%d", pageNo));
         long expectedPageSize = Math.min(pageSize, (contactsCount - processedContactsCount));

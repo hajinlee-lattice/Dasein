@@ -26,17 +26,16 @@ public class AccountFetcher {
     public long getCount(PlayLaunchContext playLaunchContext) {
         log.info(String.format("Requesting count for payload: %s", //
                 playLaunchContext.getAccountFrontEndQuery() == null //
-                        ? "null" : JsonUtils.serialize(playLaunchContext.getAccountFrontEndQuery())));
-
+                        ? "null" : JsonUtils.serialize(playLaunchContext.getClonedAccountFrontEndQuery())));
         return entityProxy.getCount( //
                 playLaunchContext.getCustomerSpace().toString(), //
-                playLaunchContext.getAccountFrontEndQuery());
+                playLaunchContext.getClonedAccountFrontEndQuery());
     }
 
     public DataPage fetch(PlayLaunchContext playLaunchContext, //
             long segmentAccountsCount, long processedSegmentAccountsCount) {
         long expectedPageSize = Math.min(pageSize, (segmentAccountsCount - processedSegmentAccountsCount));
-        FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
+        FrontEndQuery accountFrontEndQuery = playLaunchContext.getClonedAccountFrontEndQuery();
         accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
 
         log.info(String.format("Account query => %s", JsonUtils.serialize(accountFrontEndQuery)));

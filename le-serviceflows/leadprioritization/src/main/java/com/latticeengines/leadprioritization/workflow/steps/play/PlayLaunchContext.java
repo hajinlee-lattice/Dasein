@@ -3,6 +3,7 @@ package com.latticeengines.leadprioritization.workflow.steps.play;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -116,6 +117,14 @@ public class PlayLaunchContext {
 
     public FrontEndQuery getContactFrontEndQuery() {
         return contactFrontEndQuery;
+    }
+
+    public FrontEndQuery getClonedAccountFrontEndQuery() {
+        return accountFrontEndQuery == null ? null : JsonUtils.clone(accountFrontEndQuery);
+    }
+
+    public FrontEndQuery getClonedContactFrontEndQuery() {
+        return contactFrontEndQuery == null ? null : JsonUtils.clone(contactFrontEndQuery);
     }
 
     public List<Object> getModifiableAccountIdCollectionForContacts() {

@@ -5,7 +5,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -159,6 +161,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         AtomicInteger contactCounts = new AtomicInteger();
+        Set<String> accountIds = ConcurrentHashMap.newKeySet();
 
         recommendations.stream().forEach(rec -> {
             Assert.assertNotNull(rec.getAccountId());
@@ -176,6 +179,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             if (CollectionUtils.isNotEmpty(rec.getExpandedContacts())) {
                 contactCounts.addAndGet(rec.getExpandedContacts().size());
             }
+
+            Assert.assertFalse(accountIds.contains(rec.getAccountId()));
+            accountIds.add(rec.getAccountId());
         });
 
         Assert.assertTrue(contactCounts.get() > 0);
