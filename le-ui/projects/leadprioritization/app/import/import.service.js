@@ -78,7 +78,7 @@ angular.module('lp.import')
 
 	        $http({
 	            method: 'GET',
-	            url: '/pls/models/uploadfile/latticeschema/cdl',
+	            url: '/pls/models/uploadfile/latticeschema',
 	            params: params,
 	            headers: { 'Content-Type': 'application/json' }
 	        }).then(function(data) {
@@ -95,9 +95,10 @@ angular.module('lp.import')
 
 	        $http({
 	            method: 'POST',
-	            url: '/pls/models/uploadfile/' + FileName + '/fieldmappings/cdl',
+	            url: '/pls/models/uploadfile/' + FileName + '/fieldmappings',
 	            params: params,
 	            headers: { 'Content-Type': 'application/json' },
+	            data: {}
 	        })
 	        .success(function(data, status, headers, config) {
 	            if (data == null || !data.Success) {

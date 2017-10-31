@@ -142,7 +142,7 @@ angular
                     var deferred = $q.defer();
 
                     ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
-                        deferred.resolve(result);
+                        deferred.resolve(result['Account']);
                     });
 
                     return deferred.promise;

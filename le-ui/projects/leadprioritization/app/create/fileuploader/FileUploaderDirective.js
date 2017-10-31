@@ -354,7 +354,7 @@ angular
                     ImportWizardStore.setCsvFileName(fileName);
                     options = {
                             file: file,
-                            url: vm.params.url || '/pls/models/uploadfile/cdl',
+                            url: vm.params.url || '/pls/models/uploadfile',
                             params: {
                                 entity: 'account',
                                 fileName: fileName,
