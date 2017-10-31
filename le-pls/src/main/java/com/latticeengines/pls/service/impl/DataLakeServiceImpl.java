@@ -81,9 +81,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|%s\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)" //
-            + "#offset, #max)")
+    @Cacheable(key = "T(java.lang.String).format(\"%s|%d|%d\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id, #offset, #max)")
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
         List<ColumnMetadata> cms = getAllAttributes();
         Stream<ColumnMetadata> stream = cms.stream().sorted(Comparator.comparing(ColumnMetadata::getColumnId));
