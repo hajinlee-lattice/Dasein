@@ -110,7 +110,6 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
             thrown = true;
             assertTrue(e instanceof LedpException);
             assertTrue(e.getMessage().contains(InterfaceName.Id.name()));
-            assertTrue(e.getMessage().contains(InterfaceName.Website.name()));
             assertTrue(e.getMessage().contains(InterfaceName.Event.name()));
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18087);
         } finally {
