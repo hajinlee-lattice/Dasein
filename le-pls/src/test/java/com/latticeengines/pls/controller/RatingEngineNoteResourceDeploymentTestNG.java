@@ -39,9 +39,9 @@ public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestN
         noteParams.setUserName(RatingEngineNoteServiceImplTestNG.user1);
         noteParams.setOrigin(NoteOrigin.NOTE.name());
         Assert.assertTrue(restTemplate.postForObject(
-                getRestAPIHostPort() + "/pls/ratingenginenotes/" + ratingEngine.getId(), noteParams, Boolean.class));
+                getRestAPIHostPort() + "/pls/ratingengines/notes/" + ratingEngine.getId(), noteParams, Boolean.class));
         List<?> listObject = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/ratingenginenotes/" + ratingEngine.getId(), List.class);
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines/notes/" + ratingEngine.getId(), List.class);
         List<RatingEngineNote> noteList = JsonUtils.convertList(listObject, RatingEngineNote.class);
         Assert.assertNotNull(noteList);
         Assert.assertEquals(noteList.size(), 1);
@@ -55,11 +55,11 @@ public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestN
         noteParams.setContent(RatingEngineNoteServiceImplTestNG.content3);
         noteParams.setUserName(RatingEngineNoteServiceImplTestNG.user2);
         Assert.assertTrue(restTemplate.postForObject(
-                getRestAPIHostPort() + "/pls/ratingenginenotes/" + ratingEngine.getId() + "/" + note1.getId(),
+                getRestAPIHostPort() + "/pls/ratingengines/notes/" + ratingEngine.getId() + "/" + note1.getId(),
                 noteParams, Boolean.class));
 
         List<?> listObject = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/ratingenginenotes/" + ratingEngine.getId(), List.class);
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines/notes/" + ratingEngine.getId(), List.class);
         List<RatingEngineNote> noteList = JsonUtils.convertList(listObject, RatingEngineNote.class);
         Assert.assertNotNull(noteList);
         Assert.assertEquals(noteList.size(), 1);
@@ -71,10 +71,10 @@ public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestN
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
-        restTemplate
-                .delete(getRestAPIHostPort() + "/pls/ratingenginenotes/" + ratingEngine.getId() + "/" + note1.getId());
+        restTemplate.delete(
+                getRestAPIHostPort() + "/pls/ratingengines/notes/" + ratingEngine.getId() + "/" + note1.getId());
         List<?> listObject = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/ratingenginenotes/" + ratingEngine.getId(), List.class);
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines/notes/" + ratingEngine.getId(), List.class);
         List<RatingEngineNote> noteList = JsonUtils.convertList(listObject, RatingEngineNote.class);
         Assert.assertNotNull(noteList);
         Assert.assertEquals(noteList.size(), 0);

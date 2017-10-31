@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
+import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -31,6 +33,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
+import com.latticeengines.pls.service.RatingEngineNoteService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -54,6 +57,9 @@ public class RatingEngineResource {
 
     @Autowired
     private RatingCoverageService ratingCoverageService;
+
+    @Autowired
+    private RatingEngineNoteService ratingEngineNoteService;
 
     @Autowired
     private RatingEntityPreviewService ratingEntityPreviewService;
@@ -182,6 +188,42 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId, //
             HttpServletRequest request, HttpServletResponse response) {
         return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
+    }
+
+    @RequestMapping(value = "/notes/{ratingEngineId}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get all notes for single rating engine via rating engine id.")
+    public List<RatingEngineNote> getAllNotes(@PathVariable String ratingEngineId) {
+        log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s", ratingEngineId));
+        return ratingEngineNoteService.getAllByRatingEngineId(ratingEngineId);
+    }
+
+    @RequestMapping(value = "/notes/{ratingEngineId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Insert one note for a certain rating engine.")
+    public boolean createNote(@PathVariable String ratingEngineId, @RequestBody NoteParams noteParams) {
+        log.info(String.format("RatingEngineId=%s's note createdUser=%s", ratingEngineId, noteParams.getUserName()));
+        ratingEngineNoteService.create(ratingEngineId, noteParams);
+        return true;
+    }
+
+    @RequestMapping(value = "/notes/{ratingEngineId}/{noteId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    @ApiOperation(value = "Delete a note from a certain rating engine via rating engine id and note id.")
+    public void deleteNote(@PathVariable String ratingEngineId, @PathVariable String noteId) {
+        log.info(String.format("RatingEngineNoteId=%s deleted by user=%s", noteId,
+                MultiTenantContext.getEmailAddress()));
+        ratingEngineNoteService.deleteById(noteId);
+    }
+
+    @RequestMapping(value = "/notes/{ratingEngineId}/{noteId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Update the content of a certain note via note id.")
+    public boolean updateNote(@PathVariable String ratingEngineId, @PathVariable String noteId,
+            @RequestBody NoteParams noteParams) {
+        log.info(String.format("RatingEngineNoteId=%s update by %s", noteId, noteParams.getUserName()));
+        ratingEngineNoteService.updateById(noteId, noteParams);
+        return true;
     }
 
 }
