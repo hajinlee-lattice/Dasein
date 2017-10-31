@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +59,6 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -201,7 +199,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Resource csvResrouce = new ClassPathResource("end2end/csv/Account1.csv",
                 Thread.currentThread().getContextClassLoader());
         SourceFile sourceFile = fileUploadProxy.uploadFile("Account1.csv", false, "Account1.csv",
-                SchemaInterpretation.Account, EntityExternalType.Account, csvResrouce);
+                SchemaInterpretation.Account, "Account", csvResrouce);
         logger.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
     }
 

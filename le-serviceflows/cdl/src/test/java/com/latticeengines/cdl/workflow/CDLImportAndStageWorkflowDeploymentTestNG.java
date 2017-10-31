@@ -12,9 +12,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLCreateStagingTablesWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
@@ -34,14 +34,13 @@ public class CDLImportAndStageWorkflowDeploymentTestNG extends CDLWorkflowDeploy
         setupEnvironment();
         String resourceBase = "com/latticeengines/cdl/workflow/cdlImportWorkflow";
 
-        sourceFileMap.put("Account", uploadFile(resourceBase, "S_Account.csv", EntityExternalType.Account));
-        sourceFileMap.put("Transaction", uploadFile(resourceBase, "S_Transaction.csv", EntityExternalType.Opportunity));
-        sourceFileMap.put("Product", uploadFile(resourceBase, "S_Product.csv", EntityExternalType.Product));
+        sourceFileMap.put("Account", uploadFile(resourceBase, "S_Account.csv", BusinessEntity.Account));
+        sourceFileMap.put("Transaction", uploadFile(resourceBase, "S_Transaction.csv", BusinessEntity.Transaction));
+        sourceFileMap.put("Product", uploadFile(resourceBase, "S_Product.csv", BusinessEntity.Product));
 
-        resolveMetadata(sourceFileMap.get("Account"), SchemaInterpretation.Account, EntityExternalType.Account);
-        resolveMetadata(sourceFileMap.get("Transaction"), SchemaInterpretation.TimeSeries,
-                EntityExternalType.Opportunity);
-        resolveMetadata(sourceFileMap.get("Product"), SchemaInterpretation.Category, EntityExternalType.Product);
+        resolveMetadata(sourceFileMap.get("Account"), SchemaInterpretation.Account, BusinessEntity.Account);
+        resolveMetadata(sourceFileMap.get("Transaction"), SchemaInterpretation.TimeSeries, BusinessEntity.Transaction);
+        resolveMetadata(sourceFileMap.get("Product"), SchemaInterpretation.Category, BusinessEntity.Product);
     }
 
     @Test(groups = "deployment")

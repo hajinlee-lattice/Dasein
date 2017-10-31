@@ -156,4 +156,13 @@ public enum BusinessEntity implements GraphNode {
         }
     }
 
+    public static BusinessEntity getByName(String entity) {
+        for (BusinessEntity businessEntity : values()) {
+            if (businessEntity.name().equalsIgnoreCase(entity)) {
+                return businessEntity;
+            }
+        }
+        throw new IllegalArgumentException(String.format("There is no entity name %s in BusinessEntity", entity));
+    }
+
 }

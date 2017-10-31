@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -96,11 +97,11 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "STATE")
     @Enumerated(EnumType.STRING)
     private SourceFileState state;
-    
-    @JsonProperty("entity_external_type")
-    @Column(name = "ENTITY_EXTERNAL_TYPE", nullable = true)
+
+    @JsonProperty("entity")
+    @Column(name = "BUSINESS_ENTITY")
     @Enumerated(EnumType.STRING)
-    private EntityExternalType entityExternalType;
+    private BusinessEntity businessEntity;
 
     @Override
     public String getName() {
@@ -223,12 +224,11 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
         this.state = state;
     }
 
-    public EntityExternalType getEntityExternalType() {
-        return entityExternalType;
+    public BusinessEntity getBusinessEntity() {
+        return businessEntity;
     }
 
-    public void setEntityExternalType(EntityExternalType entityExternalType) {
-        this.entityExternalType = entityExternalType;
+    public void setBusinessEntity(BusinessEntity businessEntity) {
+        this.businessEntity = businessEntity;
     }
-
 }

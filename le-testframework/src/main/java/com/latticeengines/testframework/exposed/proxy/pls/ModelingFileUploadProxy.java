@@ -11,7 +11,6 @@ import org.springframework.util.MultiValueMap;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -25,7 +24,7 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
 
     @SuppressWarnings("unchecked")
     public SourceFile uploadFile(String fileName, boolean compressed, String csvFileName, SchemaInterpretation schemaInterpretation, //
-                           EntityExternalType entityExternalType, Resource fileResource){
+                                 String entity, Resource fileResource){
         List<Object> args = new ArrayList<>();
         args.add(fileName);
         args.add(csvFileName);
@@ -35,9 +34,9 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
             urlPattern += "&schemaInterpretation={schemaInterpretation}";
             args.add(schemaInterpretation);
         }
-        if (entityExternalType != null) {
-            urlPattern += "&entityExternalType={entityExternalType}";
-            args.add(entityExternalType);
+        if (!StringUtils.isEmpty(entity)) {
+            urlPattern += "&entity={entity}";
+            args.add(entity);
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();

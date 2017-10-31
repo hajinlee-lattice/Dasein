@@ -3,11 +3,12 @@ package com.latticeengines.pls.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,10 +20,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -53,7 +54,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Override
     public SourceFile uploadFile(String outputFileName, //
             SchemaInterpretation schemaInterpretation, // 
-            EntityExternalType entityExternalType, //
+            String entity, //
             String displayName, //
             InputStream inputStream) {
         log.info(String.format(
@@ -71,7 +72,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
             file.setSchemaInterpretation(schemaInterpretation);
-            file.setEntityExternalType(entityExternalType);
+            file.setBusinessEntity(StringUtils.isEmpty(entity) ? null : BusinessEntity.getByName(entity));
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(displayName);
 
