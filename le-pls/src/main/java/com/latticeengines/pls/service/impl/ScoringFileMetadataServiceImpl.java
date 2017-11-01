@@ -112,7 +112,11 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
-        requiredAttributes.addAll(SchemaRepository.instance().matchingAttributes(getSchemaInterpretation(modelId)));
+        List<Attribute> matchingAttributes = SchemaRepository.instance()
+                .matchingAttributes(getSchemaInterpretation(modelId));
+        matchingAttributes.removeIf(matchingAttr -> requiredAttributes.stream()
+                .anyMatch(requiredAttr -> requiredAttr.getInterfaceName() == matchingAttr.getInterfaceName()));
+        requiredAttributes.addAll(matchingAttributes);
 
         Iterator<String> scoringHeaderFieldsIterator = scoringHeaderFields.iterator();
         while (scoringHeaderFieldsIterator.hasNext()) {
@@ -170,11 +174,16 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     public Table saveFieldMappingDocument(String csvFileName, String modelId,
             FieldMappingDocument fieldMappingDocument) {
 
-        List<Attribute> matchKeys = new ArrayList<>(
-                SchemaRepository.instance().matchingAttributes(getSchemaInterpretation(modelId)));
-        matchKeys.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getName()));
-        List<Attribute> modelAttributes = new ArrayList<>(matchKeys);
-        modelAttributes.addAll(modelMetadataService.getRequiredColumns(modelId));
+        List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
+        List<Attribute> matchingAttributes = SchemaRepository.instance()
+                .matchingAttributes(getSchemaInterpretation(modelId));
+        matchingAttributes
+                .removeIf(matchingAttr -> fieldMappingDocument.getIgnoredFields().contains(matchingAttr.getName())
+                        || requiredAttributes.stream().anyMatch(
+                                requiredAttr -> requiredAttr.getInterfaceName() == matchingAttr.getInterfaceName()));
+
+        List<Attribute> modelAttributes = new ArrayList<>(matchingAttributes);
+        modelAttributes.addAll(requiredAttributes);
 
         SourceFile sourceFile = sourceFileService.findByName(csvFileName);
         resolveModelAttributeBasedOnFieldMapping(modelAttributes, fieldMappingDocument);
