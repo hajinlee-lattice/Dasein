@@ -1,22 +1,107 @@
-USE `PLS_MultiTenant`;
+CREATE PROCEDURE `UpdateCDLTables`()
+    BEGIN
+        CREATE TABLE `CDL_JOB_DETAIL` (
+            `PID`              BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
+            `APPLICATION_ID`   VARCHAR(255),
+            `CDL_JOB_STATUS`   VARCHAR(255) NOT NULL,
+            `CDL_JOB_TYPE`     VARCHAR(255) NOT NULL,
+            `CREATE_DATE`      DATETIME,
+            `LAST_UPDATE_DATE` DATETIME,
+            `RETRY_COUNT`      INTEGER      NOT NULL,
+            `TENANT_ID`        BIGINT       NOT NULL,
+            FK_TENANT_ID       BIGINT       NOT NULL,
+            PRIMARY KEY (`PID`)
+        )
+            ENGINE = InnoDB;
 
-create table `CDL_JOB_DETAIL` (`PID` bigint not null auto_increment unique, `APPLICATION_ID` varchar(255), `CDL_JOB_STATUS` varchar(255) not null, `CDL_JOB_TYPE` varchar(255) not null, `CREATE_DATE` datetime, `LAST_UPDATE_DATE` datetime, `RETRY_COUNT` integer not null, `TENANT_ID` bigint not null, FK_TENANT_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
-alter table `CDL_JOB_DETAIL` add index FK41487BE736865BC (FK_TENANT_ID), add constraint FK41487BE736865BC foreign key (FK_TENANT_ID) references `TENANT` (`TENANT_PID`) on delete cascade;
+        ALTER TABLE `CDL_JOB_DETAIL`
+            ADD INDEX FK41487BE736865BC (FK_TENANT_ID),
+            ADD CONSTRAINT FK41487BE736865BC FOREIGN KEY (FK_TENANT_ID) REFERENCES `TENANT` (`TENANT_PID`)
+            ON DELETE CASCADE;
 
-create table `RATING_ENGINE_NOTE` (`PID` bigint not null auto_increment, `CREATED_BY_USER` varchar(255), `CREATION_TIMESTAMP` bigint not null, `ID` varchar(255) not null unique, `LAST_MODIFICATION_TIMESTAMP` bigint not null, `LAST_MODIFIED_BY_USER` varchar(255), `NOTES_CONTENTS` varchar(2048), `ORIGIN` varchar(255), FK_RATING_ENGINE_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
-alter table `RATING_ENGINE_NOTE` add index FKCF998C2D94623258 (FK_RATING_ENGINE_ID), add constraint FKCF998C2D94623258 foreign key (FK_RATING_ENGINE_ID) references `RATING_ENGINE` (`PID`) on delete cascade;
+        ALTER TABLE `PLS_MultiTenant`.`DATAFEED`
+            ADD COLUMN `AUTO_SCHEDULING` boolean not null DEFAULT 0,
+            ADD COLUMN `DRAINING_STATUS` varchar(255) not null DEFAULT 'NONE';
 
-create table `MODEL_NOTE` (`PID` bigint not null auto_increment, `CREATED_BY_USER` varchar(255), `CREATION_TIMESTAMP` bigint not null, `ID` varchar(255) not null unique, `LAST_MODIFICATION_TIMESTAMP` bigint not null, `LAST_MODIFIED_BY_USER` varchar(255), `NOTES_CONTENTS` varchar(2048), `ORIGIN` varchar(255), `PARENT_MODEL_ID` varchar(255), MODEL_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
-alter table `MODEL_NOTE` add index FK9C22DB68815935F7 (MODEL_ID), add constraint FK9C22DB68815935F7 foreign key (MODEL_ID) references `MODEL_SUMMARY` (`PID`) on delete cascade;
+        ALTER TABLE `PLS_MultiTenant`.`SOURCE_FILE`
+            CHANGE COLUMN `ENTITY_EXTERNAL_TYPE` `BUSINESS_ENTITY` VARCHAR(255);
+    END;
+//
+DELIMITER ;
 
-insert into `MODEL_NOTE` (`CREATED_BY_USER`, `CREATION_TIMESTAMP`, `ID`, `LAST_MODIFICATION_TIMESTAMP`, `LAST_MODIFIED_BY_USER`, `NOTES_CONTENTS`, `ORIGIN`, `MODEL_ID`, `PARENT_MODEL_ID`)
-select `CREATED_BY_USER`, `CREATION_TIMESTAMP`, `ID`, `LAST_MODIFICATION_TIMESTAMP`, `LAST_MODIFIED_BY_USER`, `NOTES_CONTENTS`, `ORIGIN`, `MODEL_ID`, `PARENT_MODEL_ID`
-from `MODEL_NOTES`;
+CREATE PROCEDURE `UpdateNoteTables`()
+    BEGIN
+        CREATE TABLE `RATING_ENGINE_NOTE` (
+            `PID`                         BIGINT       NOT NULL AUTO_INCREMENT,
+            `CREATED_BY_USER`             VARCHAR(255),
+            `CREATION_TIMESTAMP`          BIGINT       NOT NULL,
+            `ID`                          VARCHAR(255) NOT NULL UNIQUE,
+            `LAST_MODIFICATION_TIMESTAMP` BIGINT       NOT NULL,
+            `LAST_MODIFIED_BY_USER`       VARCHAR(255),
+            `NOTES_CONTENTS`              VARCHAR(2048),
+            `ORIGIN`                      VARCHAR(255),
+            FK_RATING_ENGINE_ID           BIGINT       NOT NULL,
+            PRIMARY KEY (`PID`)
+        )
+            ENGINE = InnoDB;
+        ALTER TABLE `RATING_ENGINE_NOTE`
+            ADD INDEX FKCF998C2D94623258 (FK_RATING_ENGINE_ID),
+            ADD CONSTRAINT FKCF998C2D94623258 FOREIGN KEY (FK_RATING_ENGINE_ID) REFERENCES `RATING_ENGINE` (`PID`)
+            ON DELETE CASCADE;
 
-ALTER TABLE `PLS_MultiTenant`.`DATAFEED`
-    ADD COLUMN `AUTO_SCHEDULING` boolean not null DEFAULT 0, 
-    ADD COLUMN `DRAINING_STATUS` varchar(255) not null DEFAULT 'NONE';
+        CREATE TABLE `MODEL_NOTE` (
+            `PID`                         BIGINT       NOT NULL AUTO_INCREMENT,
+            `CREATED_BY_USER`             VARCHAR(255),
+            `CREATION_TIMESTAMP`          BIGINT       NOT NULL,
+            `ID`                          VARCHAR(255) NOT NULL UNIQUE,
+            `LAST_MODIFICATION_TIMESTAMP` BIGINT       NOT NULL,
+            `LAST_MODIFIED_BY_USER`       VARCHAR(255),
+            `NOTES_CONTENTS`              VARCHAR(2048),
+            `ORIGIN`                      VARCHAR(255),
+            `PARENT_MODEL_ID`             VARCHAR(255),
+            MODEL_ID                      BIGINT       NOT NULL,
+            PRIMARY KEY (`PID`)
+        )
+            ENGINE = InnoDB;
+        ALTER TABLE `MODEL_NOTE`
+            ADD INDEX FK9C22DB68815935F7 (MODEL_ID),
+            ADD CONSTRAINT FK9C22DB68815935F7 FOREIGN KEY (MODEL_ID) REFERENCES `MODEL_SUMMARY` (`PID`)
+            ON DELETE CASCADE;
 
-ALTER TABLE `PLS_MultiTenant`.`SOURCE_FILE` 
-    CHANGE COLUMN `ENTITY_EXTERNAL_TYPE` `BUSINESS_ENTITY` VARCHAR(255);
+        INSERT INTO `MODEL_NOTE` (`CREATED_BY_USER`, `CREATION_TIMESTAMP`, `ID`, `LAST_MODIFICATION_TIMESTAMP`, `LAST_MODIFIED_BY_USER`, `NOTES_CONTENTS`, `ORIGIN`, `MODEL_ID`, `PARENT_MODEL_ID`)
+            SELECT
+                `CREATED_BY_USER`,
+                `CREATION_TIMESTAMP`,
+                `ID`,
+                `LAST_MODIFICATION_TIMESTAMP`,
+                `LAST_MODIFIED_BY_USER`,
+                `NOTES_CONTENTS`,
+                `ORIGIN`,
+                `MODEL_ID`,
+                `PARENT_MODEL_ID`
+            FROM `MODEL_NOTES`;
+    END;
+//
+DELIMITER ;
 
+
+CREATE PROCEDURE `UpdateMetadataAttribute`()
+    BEGIN
+        ALTER TABLE `METADATA_ATTRIBUTE` ADD COLUMN `GROUPS` VARCHAR(1000);
+    END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE `UpdateSchema`()
+    BEGIN
+        START TRANSACTION;
+        CALL `UpdateCDLTables`();
+        CALL `UpdateNoteTables`();
+        CALL `UpdateMetadataAttribute`();
+        COMMIT;
+    END;
+//
+DELIMITER ;
+
+CALL `UpdateSchema`();

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -37,6 +38,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -112,10 +114,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     private Long tenantId;
 
-    @Column(name = "VALIDATORS", nullable = true)
+    @Column(name = "VALIDATORS")
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
+
+    @Column(name = "GROUPS", length = 1000)
+    @JsonIgnore
+    private String groups;
 
     public Attribute() {
 
@@ -328,6 +334,39 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             }
         } else {
             setPropertyValue(key, Arrays.asList(value));
+        }
+    }
+
+    @JsonIgnore
+    private String getGroups() {
+        return groups;
+    }
+
+    @JsonIgnore
+    private void setGroups(String groups) {
+        this.groups = groups;
+    }
+
+    @JsonProperty("Groups")
+    public List<ColumnSelection.Predefined> getGroupsAsList() {
+        if (StringUtils.isNotBlank(groups)) {
+            return Arrays.stream(groups.split(",")) //
+                    .map(ColumnSelection.Predefined::fromName) //
+                    .collect(Collectors.toList());
+        } else {
+            return null;
+        }
+    }
+
+    @JsonProperty("Groups")
+    public void setGroupsViaList(List<ColumnSelection.Predefined> groupList) {
+        if (groupList == null || groupList.isEmpty()) {
+            this.groups = null;
+        } else {
+            List<String> groupNames = groupList.stream() //
+                    .map(ColumnSelection.Predefined::getName) //
+                    .collect(Collectors.toList());
+            this.groups = StringUtils.join(groupNames, ",");
         }
     }
 

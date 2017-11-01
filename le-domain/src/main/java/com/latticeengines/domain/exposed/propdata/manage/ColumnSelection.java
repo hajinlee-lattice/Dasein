@@ -122,13 +122,18 @@ public class ColumnSelection {
     }
 
     public enum Predefined implements Dimension {
+        // DataCloud
         LeadEnrichment("LeadEnrichment"), //
         Enrichment("Enrichment"), //
         DerivedColumns("DerivedColumns"), //
         Model("Model"), //
         Segment("Segment"), //
         ID("ID"), //
-        RTS("RTS");
+        RTS("RTS"),
+
+        // CDL
+        TalkingPoint("TalkingPoint"), //
+        CompanyProfile("CompanyProfile");
 
         private final String name;
         private static Map<String, Predefined> nameMap;
