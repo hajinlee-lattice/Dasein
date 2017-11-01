@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
-import com.latticeengines.common.exposed.period.PeriodFactory;
 import com.latticeengines.common.exposed.period.PeriodStrategy;
 
 import cascading.flow.FlowProcess;
@@ -28,7 +28,6 @@ public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements
     public ConsolidateAddPeriodColumnFunction(PeriodStrategy periodStrategy, String trxDateColumn, String minColumn,
                                               String targetField) {
         super(new Fields(targetField));
-        periodBuilder = PeriodFactory.getInstance(periodStrategy);
         this.trxDateColumn = trxDateColumn;
         this.minColumn = minColumn;
         this.namePositionMap = getPositionMap(Arrays.asList(trxDateColumn, minColumn));
@@ -40,8 +39,15 @@ public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements
         String minDateStr = arguments.getString(namePositionMap.get(minColumn));
         String trxDateStr = arguments.getString(namePositionMap.get(trxDateColumn));
 
-        Integer result = periodBuilder.toPeriodId(trxDateStr);
+        Integer result = getPeriodBuilder(minDateStr).toPeriodId(trxDateStr);
         functionCall.getOutputCollector().add(new Tuple(result));
+    }
+
+    private PeriodBuilder getPeriodBuilder(String minDateStr) {
+        if (periodBuilder == null) {
+            periodBuilder = new CalendarMonthPeriodBuilder(minDateStr);
+        }
+        return periodBuilder;
     }
 
     private Map<String, Integer> getPositionMap(List<String> fields) {
