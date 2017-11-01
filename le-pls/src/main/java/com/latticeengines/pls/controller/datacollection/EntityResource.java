@@ -40,7 +40,7 @@ public class EntityResource extends BaseFrontEndEntityResource {
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Map<BusinessEntity, Long> getCounts(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         Map<BusinessEntity, Long> counts = new HashMap<>();
-        for (BusinessEntity entity: BusinessEntity.values()) {
+        for (BusinessEntity entity: BusinessEntity.SEGMENT_ENTITIES) {
             try {
                 Long count = getCount(frontEndQuery, entity);
                 if (count != null) {

@@ -34,7 +34,7 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery = new FrontEndQuery();
         }
         appendSegmentRestriction(frontEndQuery);
-        frontEndQuery.setMainEntity(getMainEntity());
+        frontEndQuery.setMainEntity(mainEntity);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getCount(tenantId, frontEndQuery);
     }
