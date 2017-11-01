@@ -516,7 +516,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 "The count of table " + role + " does not meet the expectation."));
     }
 
-    void verifyDataFeedStatsu(DataFeed.Status expected) {
+    void verifyDataFeedStatus(DataFeed.Status expected) {
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertNotNull(dataFeed);
         Assert.assertEquals(dataFeed.getStatus(), expected);

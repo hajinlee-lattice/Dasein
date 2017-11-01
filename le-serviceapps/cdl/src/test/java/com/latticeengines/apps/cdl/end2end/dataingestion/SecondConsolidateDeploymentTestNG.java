@@ -96,7 +96,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
                 BusinessEntity.Transaction.getServingStore(),
                 (long) TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2);
         verifyConsolidateReport(consolidateAppId, expectedCounts);
-        verifyDataFeedStatsu(DataFeed.Status.Active);
+        verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion);
 
         StatisticsContainer postConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());

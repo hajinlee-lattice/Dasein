@@ -90,7 +90,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
                 BusinessEntity.Product.getServingStore(), (long) PRODUCT_IMPORT_SIZE_1,
                 BusinessEntity.Transaction.getServingStore(), (long) TRANSACTION_IMPORT_SIZE_1);
         verifyConsolidateReport(consolidateAppId, expectedCounts);
-        verifyDataFeedStatsu(DataFeed.Status.InitialConsolidated);
+        verifyDataFeedStatus(DataFeed.Status.InitialConsolidated);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
         Assert.assertEquals(numAccounts, ACCOUNT_IMPORT_SIZE_1);
@@ -110,7 +110,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
                 BusinessEntity.Contact.getServingStore(), (long) CONTACT_IMPORT_SIZE_1,
                 BusinessEntity.Product.getServingStore(), (long) PRODUCT_IMPORT_SIZE_1);
         verifyProfileReport(profileAppId, expectedCounts);
-        verifyDataFeedStatsu(DataFeed.Status.Active);
+        verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();

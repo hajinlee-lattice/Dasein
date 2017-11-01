@@ -47,7 +47,7 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 BusinessEntity.Contact.getServingStore(), numContacts,
                 BusinessEntity.Product.getServingStore(), numProducts);
         verifyProfileReport(profileAppId, expectedCounts);
-        verifyDataFeedStatsu(DataFeed.Status.Active);
+        verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion.complement());
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
