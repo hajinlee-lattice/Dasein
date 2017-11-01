@@ -4,24 +4,28 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.ChronoField;
 
-@SuppressWarnings("serial")
 public class CalendarQuarterPeriodBuilder implements PeriodBuilder {
 
+    private static final long serialVersionUID = -4975605566623744278L;
+
     @Override
-    public int getPeriodsBetweenDates(String startStr, String endStr) {
-        LocalDate start = LocalDate.parse(startStr);
-        LocalDate end = LocalDate.parse(endStr);
-        return getPeriodsBetweenDates(start, end);
+    public int toPeriodId(String date) {
+        return getPeriodsBetweenDates(T0, LocalDate.parse(date));
     }
 
-    public int getPeriodsBetweenDates(LocalDate start, LocalDate end) {
+    @Override
+    public int toPeriodId(LocalDate date) {
+        return getPeriodsBetweenDates(T0, date);
+    }
+
+    private int getPeriodsBetweenDates(LocalDate start, LocalDate end) {
         int quarters = getQuarter(end) - getQuarter(start);
         int years = end.get(ChronoField.YEAR) - start.get(ChronoField.YEAR);
         quarters += years * 4;
         return Math.abs(quarters);
     }
 
-    public static int getQuarter(LocalDate cal) {
+    private static int getQuarter(LocalDate cal) {
         int month = cal.get(ChronoField.MONTH_OF_YEAR);
         switch (Month.of(month)) {
         case JANUARY:

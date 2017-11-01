@@ -18,15 +18,15 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "serial" })
-public class ConsolidateAddPeriodColumnFuction extends BaseOperation implements Function {
+public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements Function {
     private Map<String, Integer> namePositionMap;
     private String trxDateColumn;
     private String minColumn;
 
     private PeriodBuilder periodBuilder;
 
-    public ConsolidateAddPeriodColumnFuction(PeriodStrategy periodStrategy, String trxDateColumn, String minColumn,
-            String targetField) {
+    public ConsolidateAddPeriodColumnFunction(PeriodStrategy periodStrategy, String trxDateColumn, String minColumn,
+                                              String targetField) {
         super(new Fields(targetField));
         periodBuilder = PeriodFactory.getInstance(periodStrategy);
         this.trxDateColumn = trxDateColumn;
@@ -40,7 +40,7 @@ public class ConsolidateAddPeriodColumnFuction extends BaseOperation implements 
         String minDateStr = arguments.getString(namePositionMap.get(minColumn));
         String trxDateStr = arguments.getString(namePositionMap.get(trxDateColumn));
 
-        Integer result = periodBuilder.getPeriodsBetweenDates(minDateStr, trxDateStr);
+        Integer result = periodBuilder.toPeriodId(trxDateStr);
         functionCall.getOutputCollector().add(new Tuple(result));
     }
 

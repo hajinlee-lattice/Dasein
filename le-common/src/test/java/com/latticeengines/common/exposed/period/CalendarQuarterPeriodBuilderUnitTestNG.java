@@ -9,18 +9,19 @@ public class CalendarQuarterPeriodBuilderUnitTestNG {
     private PeriodBuilder builder = PeriodFactory.getInstance(PeriodStrategy.CalendarQuarter);
 
     @Test(groups = "unit", dataProvider = "dataProvider")
-    public void extractModelArtifacts(String startDate, String endDate, int period) throws Exception {
-        int actualPeriod = builder.getPeriodsBetweenDates(startDate, endDate);
-        Assert.assertTrue(actualPeriod == period);
+    public void extractModelArtifacts(String date, int period) throws Exception {
+        int actualPeriod = builder.toPeriodId(date);
+        Assert.assertEquals(actualPeriod, period);
     }
 
     @DataProvider(name = "dataProvider")
     public Object[][] dataProvider() {
         return new Object[][] { //
-                new Object[] { "2016-02-05", "2016-03-30", 0 }, //
-                new Object[] { "2016-02-05", "2016-09-30", 2 }, //
-                new Object[] { "2016-12-31", "2017-01-30", 1 }, //
-                new Object[] { "2015-12-31", "2017-01-30", 5 }, //
+                new Object[] { "1987-12-31", 0 }, //
+                new Object[] { "1988-01-01", 1 }, //
+                new Object[] { "2016-02-29", 113 }, //
+                new Object[] { "2016-04-01", 114 }, //
+                new Object[] { "2017-01-30", 117 }, //
         };
     }
 }

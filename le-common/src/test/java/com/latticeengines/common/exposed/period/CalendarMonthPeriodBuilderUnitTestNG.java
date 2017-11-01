@@ -9,19 +9,20 @@ public class CalendarMonthPeriodBuilderUnitTestNG {
     private PeriodBuilder builder = PeriodFactory.getInstance(PeriodStrategy.CalendarMonth);
 
     @Test(groups = "unit", dataProvider = "dataProvider")
-    public void extractModelArtifacts(String startDate, String endDate, int period) throws Exception {
-        int actualPeriod = builder.getPeriodsBetweenDates(startDate, endDate);
+    public void extractModelArtifacts(String date, int period) throws Exception {
+        int actualPeriod = builder.toPeriodId(date);
         Assert.assertEquals(new Integer(actualPeriod), new Integer(period));
     }
 
     @DataProvider(name = "dataProvider")
     public Object[][] dataProvider() {
         return new Object[][] { //
-                new Object[] { "2016-02-05", "2016-02-29", 0 }, //
-                new Object[] { "2016-02-05", "2016-03-30", 1 }, //
-                new Object[] { "2016-02-05", "2016-09-30", 7 }, //
-                new Object[] { "2016-12-31", "2017-01-30", 1 }, //
-                new Object[] { "2015-12-31", "2017-01-30", 13 }, //
+                new Object[] { "1987-12-31", 0 }, //
+                new Object[] { "1988-01-01", 1 }, //
+                new Object[] { "2016-02-29", 338 }, //
+                new Object[] { "2016-03-30", 339 }, //
+                new Object[] { "2016-09-30", 345 }, //
+                new Object[] { "2017-01-30", 349 }, //
         };
     }
 }

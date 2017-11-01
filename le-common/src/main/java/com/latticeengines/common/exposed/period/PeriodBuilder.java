@@ -5,8 +5,14 @@ import java.time.LocalDate;
 
 public interface PeriodBuilder extends Serializable {
 
-    public int getPeriodsBetweenDates(LocalDate start, LocalDate end);
+    LocalDate T0 = LocalDate.parse("1987-12-20");
 
-    public int getPeriodsBetweenDates(String start, String end);
+    // int getPeriodsBetweenDates(LocalDate start, LocalDate end);
+
+    // int getPeriodsBetweenDates(String start, String end);
+
+    int toPeriodId(String date);
+
+    int toPeriodId(LocalDate date);
 
 }
