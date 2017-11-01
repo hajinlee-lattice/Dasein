@@ -79,7 +79,6 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         for (Map<String, Object> product : dataPage.getData()) {
             Assert.assertTrue(product.containsKey(InterfaceName.ProductId.name()));
             Assert.assertTrue(product.containsKey(InterfaceName.ProductName.name()));
-            System.out.println(JsonUtils.pprint(product));
         }
     }
 

@@ -94,26 +94,58 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         if (asAlias && StringUtils.isNotBlank(lookup.getAlias())) {
             switch (lookup.getAggregator()) {
             case SUM:
-                return numberPath.sum().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
+                if (numberPath != null) {
+                    return numberPath.sum().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
+                } else {
+                    return numberExpression.sum().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
+                }
             case AVG:
-                return numberPath.avg().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
+                if (numberPath != null) {
+                    return numberPath.avg().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
+                } else {
+                    return numberExpression.avg().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
+                }
             case MAX:
-                return numberPath.max().as(lookup.getAlias());
+                if (numberPath != null) {
+                    return numberPath.max().as(lookup.getAlias());
+                } else {
+                    return numberExpression.max().as(lookup.getAlias());
+                }
             case MIN:
-                return numberExpression.min().as(lookup.getAlias());
+                if (numberPath != null) {
+                    return numberPath.min().as(lookup.getAlias());
+                } else {
+                    return numberExpression.min().as(lookup.getAlias());
+                }
             default:
                 throw new UnsupportedOperationException("Aggregator " + lookup.getAggregator() + " is not supported");
             }
         } else {
             switch (lookup.getAggregator()) {
             case SUM:
-                return numberPath.sum().coalesce(lookup.getNvl()).asNumber();
+                if (numberPath != null) {
+                    return numberPath.sum().coalesce(lookup.getNvl()).asNumber();
+                } else {
+                    return numberExpression.sum().coalesce(lookup.getNvl()).asNumber();
+                }
             case AVG:
-                return numberPath.avg().coalesce(lookup.getNvl()).asNumber();
+                if (numberPath != null) {
+                    return numberPath.avg().coalesce(lookup.getNvl()).asNumber();
+                } else {
+                    return numberExpression.avg().coalesce(lookup.getNvl()).asNumber();
+                }
             case MAX:
-                return numberPath.max();
+                if (numberPath != null) {
+                    return numberPath.max();
+                } else {
+                    return numberExpression.max();
+                }
             case MIN:
-                return numberExpression.min();
+                if (numberPath != null) {
+                    return numberPath.min();
+                } else {
+                    return numberExpression.min();
+                }
             default:
                 throw new UnsupportedOperationException("Aggregator " + lookup.getAggregator() + " is not supported");
             }

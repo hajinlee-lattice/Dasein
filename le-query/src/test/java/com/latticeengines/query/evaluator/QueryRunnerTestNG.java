@@ -130,7 +130,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(accountAndTxSpentSum).build();
         List<Map<String, Object>> spentSumResults = queryEvaluatorService.getData(attrRepo, querySpentSum).getData();
-        Assert.assertEquals(spentSumResults.size(), 1);
+        Assert.assertEquals(spentSumResults.size(), 0);
 
         // period spent >= 200 in each period
         TransactionRestriction txRestrictionSpentEach = new TransactionRestriction();
@@ -229,7 +229,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
-        Assert.assertEquals(results.size(), 2);
+        Assert.assertEquals(results.size(), 1);
 
         // period spent > 200 at_least_once within quarter of 2017/4/1
         TransactionRestriction txRestriction1 = new TransactionRestriction();
