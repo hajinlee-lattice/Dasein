@@ -167,6 +167,11 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     @Override
+    public void deleteModelSummaryByModelId(String modelId) {
+        modelSummaryEntityMgr.deleteByModelId(modelId);
+    }
+
+    @Override
     public ModelSummary getModelSummaryEnrichedByDetails(String modelId) {
         ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, false, true, true);
         if (summary != null) {

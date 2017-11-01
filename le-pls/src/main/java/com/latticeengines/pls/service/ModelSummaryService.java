@@ -18,6 +18,8 @@ public interface ModelSummaryService {
 
     ModelSummary getModelSummaryByModelId(String modelId);
 
+    void deleteModelSummaryByModelId(String modelId);
+
     ModelSummary getModelSummaryEnrichedByDetails(String modelId);
 
     List<ModelSummary> getAllByTenant(Tenant tenant);

@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
+import com.latticeengines.pls.service.ModelCleanUpService;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelReplaceService;
@@ -88,6 +89,9 @@ public class ModelResource {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private ModelCleanUpService modelCleanUpService;
 
     @Value("${common.test.microservice.url}")
     private String microserviceEndpoint;
@@ -255,6 +259,14 @@ public class ModelResource {
     @ApiOperation(value = "Get the row results")
     public ResponseDocument<List<RowRuleResult>> getRowRuleResults(@PathVariable String modelId) {
         return ResponseDocument.successResponse(metadataProxy.getRowResults(modelId));
+    }
+
+    @RequestMapping(value = "/cleanup/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Clean up model")
+    public ResponseDocument<Boolean> cleanUpModel(@PathVariable String modelId) {
+        log.info("Clean up model by user: " + MultiTenantContext.getEmailAddress());
+        return ResponseDocument.successResponse(modelCleanUpService.cleanUpModel(modelId));
     }
 
     private List<VdbMetadataField> filterAttributesForModelReview(
