@@ -21,7 +21,7 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements
 
     @Override
     public Boolean setSchedulerStatus(String status) {
-        String url = constructUrl("/status?{status}", status);
+        String url = constructUrl("/status?status={status}", status);
         return post("setSchedulerStatus", url, null, Boolean.class);
     }
 

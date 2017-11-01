@@ -510,7 +510,7 @@ public enum LedpCode {
 
     // le-quartz 30000-31000
     LEDP_30000("Destination Url {0} invalid."), //
-    LEDP_30001("The required job bean does not exist."), //
+    LEDP_30001("The required job bean {0} does not exist."), //
     LEDP_30002("Can't get host address."), //
 
     // le-scoringapi internal facing errors
