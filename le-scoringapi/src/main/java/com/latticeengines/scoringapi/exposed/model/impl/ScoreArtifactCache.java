@@ -168,15 +168,22 @@ public class ScoreArtifactCache {
         }
         long weight = pmmlFileSize * scoreArtifactCachePMMLFileRatio;
         log.info(String.format("model=%s, weight=%d.", key.getValue(), weight));
-        throttleLargePmmlFileBasedOnWeight(weight, key.getValue());
-        return Ints.checkedCast(weight);
+        return Ints.checkedCast(throttleLargePmmlFileBasedOnWeight(weight, key.getValue()));
     }
 
-    private void throttleLargePmmlFileBasedOnWeight(long weight, String modelId) {
+    @VisibleForTesting
+    long throttleLargePmmlFileBasedOnWeight(long weight, String modelId) {
         if (weight >= maxCacheThreshold * scoreArtifactCacheMaxWeight) {
             log.error(String.format("The pmml file is too big to be loaded into the cache with modelId=%s", modelId));
             throw new LedpException(LedpCode.LEDP_31026, new String[] { modelId });
         }
+        if (weight > Integer.MAX_VALUE) {
+            log.warn(String.format(
+                    "The pmml file with modelId=%s is greater than Integer.MAX_VALUE, force it to be MAX_VALUE",
+                    modelId));
+            return Integer.MAX_VALUE;
+        }
+        return weight;
     }
 
     @VisibleForTesting
