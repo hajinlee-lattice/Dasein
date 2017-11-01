@@ -3,6 +3,7 @@ package com.latticeengines.quartz.entitymanager.impl;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -25,6 +26,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -48,6 +50,7 @@ import com.latticeengines.quartz.service.CustomQuartzJob;
 import com.latticeengines.quartz.service.JobHistoryCleanupJob;
 import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 import com.latticeengines.quartzclient.entitymanager.JobSourceEntityMgr;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @Component("schedulerEntityMgr")
 public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
@@ -80,6 +83,9 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
     @Value("${quartz.scheduler.jobs.history.cleanup.trigger:0 0 5 * * ?}")
     private String jobHistoryCleanupJobCronTrigger;
 
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
+    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
+            .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @Override
@@ -259,13 +265,19 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
             URI queryUrl = UriComponentsBuilder.fromUriString(url).build().toUri();
             jobBeanExist = restTemplate.postForObject(queryUrl, jobArgs, Boolean.class);
         } catch (Exception e) {
+            log.error("Check job bean error message: " + e.getMessage());
             jobBeanExist = false;
         }
         return jobBeanExist;
     }
 
-    @SuppressWarnings("unchecked")
     @PostConstruct
+    private void setup() {
+        restTemplate.setInterceptors(addMagicAuthHeaders);
+        addPredefinedJobs();
+    }
+
+    @SuppressWarnings("unchecked")
     private void addPredefinedJobs() {
         if (enabledPredefinedJobs != null && enabledPredefinedJobs.trim().length() > 0) {
             log.info("Add predefined jobs.");
