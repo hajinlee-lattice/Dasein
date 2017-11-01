@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,9 +20,9 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.TargetMarketService;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModelWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -89,9 +89,8 @@ public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                     .directoryToScore(accountMasterPath) //
                     .registerScoredTable(true) //
                     .prematchFlowTableName("PrematchFlow") //
-                    .attributes(
-                            Arrays.asList(new String[] { "BusinessIndustry", "BusinessIndustry2",
-                                    "BusinessRevenueRange", "BusinessEmployeesRange" })) //
+                    .attributes(Arrays.asList("BusinessIndustry", "BusinessIndustry2", "BusinessRevenueRange",
+                            "BusinessEmployeesRange")) //
                     .modelName("Default Model") //
                     .inputProperties(inputProperties) //
                     .build();

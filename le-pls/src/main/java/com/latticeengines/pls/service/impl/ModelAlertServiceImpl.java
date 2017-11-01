@@ -217,9 +217,9 @@ public class ModelAlertServiceImpl implements ModelAlertService {
             throws Exception {
         List<Map.Entry<String, String>> returnList = new ArrayList<Map.Entry<String, String>>();
         String topPredictorContents = getFileContents(tenantId, modelId, TOP_PREDICTOR_CSV_FILE_SUFFIX);
-        List<String> possibleNullValueList = Arrays.asList(new String[] { TOP_PREDICTOR_CSV_FILE_NULL_VALUE_1,
+        List<String> possibleNullValueList = Arrays.asList(TOP_PREDICTOR_CSV_FILE_NULL_VALUE_1,
                 TOP_PREDICTOR_CSV_FILE_NULL_VALUE_2, TOP_PREDICTOR_CSV_FILE_NULL_VALUE_3,
-                TOP_PREDICTOR_CSV_FILE_NULL_VALUE_4 });
+                TOP_PREDICTOR_CSV_FILE_NULL_VALUE_4);
 
         String[] rows = topPredictorContents.split("\n");
         for (int i = 0; i < rows.length; i++) {

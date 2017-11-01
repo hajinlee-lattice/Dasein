@@ -2,8 +2,11 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,13 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 
 public class ModelMetadataServiceImplUnitTestNG {
@@ -27,83 +28,6 @@ public class ModelMetadataServiceImplUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(ModelMetadataServiceImplUnitTestNG.class);
 
     private ModelMetadataServiceImpl modelMetadataService = new ModelMetadataServiceImpl();
-
-    @Test(groups = "unit", enabled = false)
-    public void getRequiredColumnsFromPythonScriptModel() {
-        PythonScriptModelService pythonScriptModelService = new PythonScriptModelService();
-
-        Attribute a1 = new Attribute();
-        a1.setName(InterfaceName.Id.name());
-        a1.setDisplayName("Lead ID");
-        a1.setTags(Tag.INTERNAL);
-        a1.setApprovedUsage(ApprovedUsage.NONE);
-
-        Attribute a2 = new Attribute();
-        a2.setName(InterfaceName.Country.name());
-        a2.setDisplayName("Country Name");
-        a2.setTags(Tag.EXTERNAL);
-        a2.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-
-        Attribute a3 = new Attribute();
-        a3.setName("SomePropdataColumn");
-        a3.setDisplayName("SomePropdataColumn");
-        a3.setTags(Tag.EXTERNAL);
-        a3.setApprovedUsage(ApprovedUsage.NONE);
-
-        Attribute a4 = new Attribute();
-        a4.setName("SomePropdataColumn2");
-        a4.setDisplayName("SomePropdataColumn2");
-        a4.setTags(Tag.EXTERNAL);
-        a4.setApprovedUsage(ApprovedUsage.MODEL);
-
-        Attribute a5 = new Attribute();
-        a5.setName("SomeTransformationColumn");
-        a5.setDisplayName("SomePropdataColumn");
-        a5.setTags(Tag.INTERNAL_TRANSFORM);
-        a5.setApprovedUsage(ApprovedUsage.MODEL);
-
-        Attribute a6 = new Attribute();
-        a6.setName("SomeTransformationColumn");
-        a6.setDisplayName("SomeTransformationColumn");
-        a6.setTags(Tag.EXTERNAL_TRANSFORM);
-        a6.setApprovedUsage(ApprovedUsage.MODEL);
-
-        Attribute a7 = new Attribute();
-        a7.setName(InterfaceName.Id.name());
-        a7.setDisplayName(InterfaceName.Id.name());
-        a7.setApprovedUsage(ApprovedUsage.NONE);
-
-        Attribute a8 = new Attribute();
-        a8.setName(InterfaceName.Event.name());
-        a8.setDisplayName(InterfaceName.Event.name());
-        a8.setLogicalDataType(LogicalDataType.Event);
-        a8.setTags(Tag.INTERNAL);
-        a8.setApprovedUsage(ApprovedUsage.NONE);
-
-        Attribute a9 = new Attribute();
-        a9.setName("SomeCustomerFeatureColumn");
-        a9.setDisplayName("Some Customer Feature Column");
-        a9.setTags(Tag.INTERNAL);
-        a9.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
-
-        Attribute a10 = new Attribute();
-        a10.setName("SomeCustomerColumn");
-        a10.setDisplayName("Some Customer Column");
-        a10.setTags(Tag.INTERNAL);
-        a10.setApprovedUsage(ApprovedUsage.NONE);
-
-        List<Attribute> attributes = Arrays
-                .<Attribute>asList(new Attribute[] { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 });
-        Table t = new Table();
-        t.setAttributes(attributes);
-        List<Attribute> requiredColumns = pythonScriptModelService.getRequiredColumns(t);
-        System.out.println(requiredColumns);
-        assertEquals(requiredColumns.size(), 4);
-        assertEquals(requiredColumns.get(0), a1);
-        assertEquals(requiredColumns.get(1), a2);
-        assertEquals(requiredColumns.get(2), a7);
-        assertEquals(requiredColumns.get(3), a9);
-    }
 
     @Test(groups = "unit")
     public void checkCascadingMetadata() {
@@ -252,5 +176,16 @@ public class ModelMetadataServiceImplUnitTestNG {
         assertEquals(updatedAttributes.get(7).getApprovedUsage().get(0), ApprovedUsage.NONE.toString());
         assertEquals(updatedAttributes.get(8).getApprovedUsage().get(0), ApprovedUsage.NONE.toString());
 
+    }
+
+    @Test(groups = "unit")
+    public void getRequiredColumnsFromPythonScriptModel() throws FileNotFoundException {
+        URL csvFileUrl = ClassLoader.getSystemResource("com/latticeengines/pls/util/pythonscriptmodeltable.json");
+        Table t = JsonUtils.deserialize(new FileInputStream(new File(csvFileUrl.getPath())), Table.class);
+        PythonScriptModelService pythonScriptModelService = new PythonScriptModelService();
+        List<Attribute> attrs = pythonScriptModelService.getRequiredColumns(t);
+        assertEquals(attrs.size(), 9);
+        assertEquals(attrs.toString(),
+                "[Id, FirstName, LastName, Title, LeadSource, Email, CompanyName, State, PhoneNumber]");
     }
 }

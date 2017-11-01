@@ -39,7 +39,6 @@ import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBa
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
@@ -995,6 +994,20 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (getInterfaceName() != null)
             return false;
         return true;
+    }
+
+    @Transient
+    @JsonIgnore
+    public boolean isInternalAndInternalTransformField() {
+        List<String> tags = getTags();
+        if (tags != null) {
+            for (String tag : tags) {
+                if (tag.equals(Tag.INTERNAL.toString()) || tag.equals(Tag.INTERNAL_TRANSFORM.toString())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Transient

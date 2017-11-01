@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -140,7 +140,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         try {
             ValidateFileHeaderUtils.checkForReservedHeaders("file",
                     Sets.newHashSet(new String[] { "a", "b", reservedName, "c" }),
-                    Arrays.asList(new String[] { reservedName }));
+                    Collections.singletonList(reservedName));
         } catch (LedpException e) {
             thrown = e;
         }

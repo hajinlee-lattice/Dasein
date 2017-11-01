@@ -101,9 +101,9 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         fieldMappingList.add(mappedToModelRequiredColumnField2);
         fieldMappingList.add(mappedToSchemaColumnField);
 
-        fieldMappingDocument.setIgnoredFields(Arrays.asList(new String[] { InterfaceName.Website.name(),
-                InterfaceName.DUNS.name(), InterfaceName.City.name(), InterfaceName.State.name(),
-                InterfaceName.PhoneNumber.name(), InterfaceName.PostalCode.name() }));
+        fieldMappingDocument.setIgnoredFields(
+                Arrays.asList(InterfaceName.Website.name(), InterfaceName.DUNS.name(), InterfaceName.City.name(),
+                        InterfaceName.State.name(), InterfaceName.PhoneNumber.name(), InterfaceName.PostalCode.name()));
 
         return fieldMappingDocument;
     }

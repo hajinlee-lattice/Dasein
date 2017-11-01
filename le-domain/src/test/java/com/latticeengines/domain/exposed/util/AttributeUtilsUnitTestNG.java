@@ -55,9 +55,9 @@ public class AttributeUtilsUnitTestNG {
         base.setInterfaceName(InterfaceName.CompanyName);
         base.setFundamentalType("alpha");
         base.setStatisticalType("ratio");
-        base.setApprovedUsage(Arrays.asList(new String[] {"abc", "def"}));
-        base.setDataSource(Arrays.asList(new String[] {"abc", "vdb"}));
-        base.setTags(Arrays.asList(new String[] {"abc", "def"}));
+        base.setApprovedUsage(Arrays.asList("abc", "def"));
+        base.setDataSource(Arrays.asList("abc", "vdb"));
+        base.setTags(Arrays.asList("abc", "def"));
 
         Attribute target = new Attribute();
         target.setDisplayName("Foo");
@@ -69,9 +69,9 @@ public class AttributeUtilsUnitTestNG {
         target.setFundamentalType("alpha");
         target.setDisplayDiscretizationStrategy("strategy");
         target.setCategory("");
-        target.setApprovedUsage(Arrays.asList(new String[] {"abc", "def"}));
-        target.setDataSource(Arrays.asList(new String[] {"abc", "csv"}));
-        target.setTags(Arrays.asList(new String[] {"def", "abc"}));
+        target.setApprovedUsage(Arrays.asList("abc", "def"));
+        target.setDataSource(Arrays.asList("abc", "csv"));
+        target.setTags(Arrays.asList("def", "abc"));
 
         HashSet<String> diffFields = AttributeUtils.diffBetweenAttributes(base, target);
         Assert.assertEquals(diffFields.size(), 6);

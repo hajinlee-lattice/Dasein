@@ -50,24 +50,24 @@ public class PythonScriptModelService extends ModelServiceBase {
 
     @VisibleForTesting
     List<Attribute> getRequiredColumns(Table eventTable) {
-        List<Attribute> attrs = eventTable.getAttributes().stream()
-                .filter(attr -> attr.isCustomerPredictor() || attr.getInterfaceName() == InterfaceName.Id)
+        List<Attribute> attrs = eventTable.getAttributes().stream().filter(
+                attr -> attr.isInternalAndInternalTransformField() || attr.getInterfaceName() == InterfaceName.Id)
                 .collect(Collectors.toList());
-        Set<String> excludeParentNames = attrs.stream()
-                .filter(attr -> attr.getApprovedUsage() != null
-                        && attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString()))
-                .flatMap(attr -> attr.getParentAttributeNames().stream())//
+        Set<String> includeParentNames = attrs.stream()
+                .filter(attr -> !attr.getParentAttributeNames().isEmpty()
+                        && !attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString())) //
+                .flatMap(attr -> attr.getParentAttributeNames().stream()) //
                 .filter(Objects::nonNull) //
                 .distinct() //
-                .filter(name -> eventTable.getAttribute(name) != null
-                        && eventTable.getAttribute(name).getApprovedUsage() != null
-                        && eventTable.getAttribute(name).getApprovedUsage().contains(ApprovedUsage.NONE.toString()))//
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet());////
         return attrs.stream()
-                .filter(attr -> attr.isInternalPredictor() && !excludeParentNames.contains(attr.getName())
-                        && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
-                        && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType())
-                        && !LogicalDataType.isExcludedFromScoringFileMapping(attr.getLogicalDataType()))
+                .filter(attr -> attr.getInterfaceName() == InterfaceName.Id
+                        || includeParentNames.contains(attr.getName())
+                        || attr.isInternalPredictor()
+                                && !attr.getApprovedUsage().contains(ApprovedUsage.NONE.toString())
+                                && !LogicalDataType.isEventTypeOrDerviedFromEventType(attr.getLogicalDataType())
+                                && !LogicalDataType.isSystemGeneratedEventType(attr.getLogicalDataType())
+                                && !LogicalDataType.isExcludedFromScoringFileMapping(attr.getLogicalDataType()))
                 .filter(Objects::nonNull) //
                 .collect(Collectors.toList());
 

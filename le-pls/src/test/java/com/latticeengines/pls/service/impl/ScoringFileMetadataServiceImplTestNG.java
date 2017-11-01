@@ -251,7 +251,7 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         mapping4.setMappedToLatticeField(false);
         mapping4.setFieldType(UserDefinedType.TEXT);
 
-        fieldMappingDocument.setRequiredFields(Arrays.asList(new String[] { "A" }));
+        fieldMappingDocument.setRequiredFields(Collections.singletonList("A"));
         fieldMappingDocument.setFieldMappings(
                 new ArrayList<>(Arrays.asList(new FieldMapping[] { mapping, mapping2, mapping3, mapping4 })));
         fieldMappingDocument.setIgnoredFields(Collections.emptyList());

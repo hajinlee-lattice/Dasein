@@ -98,7 +98,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     public void testRatingIdCoverage() {
         RatingsCountRequest request = new RatingsCountRequest();
 
-        List<String> ratingEngineIds = Arrays.asList(new String[] { ratingEngine.getId(), DUMMY_ID });
+        List<String> ratingEngineIds = Arrays.asList(ratingEngine.getId(), DUMMY_ID);
         request.setRatingEngineIds(ratingEngineIds);
         RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
         Assert.assertNotNull(response);

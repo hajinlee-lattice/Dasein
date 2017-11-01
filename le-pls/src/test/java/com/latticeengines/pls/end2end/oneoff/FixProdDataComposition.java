@@ -46,8 +46,8 @@ public class FixProdDataComposition extends PlsFunctionalTestNGBase {
     @Test(groups = "manual")
     public void fixDataComposition() throws Exception {
         conf.setInt("dfs.replication", 3);
-        List<String> customers = Arrays.asList(new String[] { "Halladay_POC.Halladay_POC.Production",
-                "LP3_Sales.LP3_Sales.Production", "LP3_Taylor.LP3_Taylor.Production" });
+        List<String> customers = Arrays.asList("Halladay_POC.Halladay_POC.Production", "LP3_Sales.LP3_Sales.Production",
+                "LP3_Taylor.LP3_Taylor.Production");
 
         for (String c : customers) {
             List<String> paths = HdfsUtils.getFilesForDirRecursive(conf, "/user/s-analytics/customers/" + c + "/data",

@@ -136,7 +136,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
         ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
-        Collection<String> reservedWords = Arrays.asList(new String[] { ReservedField.Rating.displayName });
+        Collection<String> reservedWords = Arrays.asList(ReservedField.Rating.displayName);
         ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords);
         return stream;
     }
@@ -160,7 +160,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
-        Collection<String> reservedWords = Arrays.asList(new String[] { ReservedField.Rating.displayName });
+        Collection<String> reservedWords = Arrays.asList(ReservedField.Rating.displayName);
         ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords);
         return stream;
     }

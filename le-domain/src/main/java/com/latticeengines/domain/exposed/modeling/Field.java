@@ -20,7 +20,7 @@ public class Field implements HasName {
     
     public Field(String name, String type) {
         this.name = name;
-        this.typeInfo = Arrays.asList(new String[] { type, "null" });
+        this.typeInfo = Arrays.asList(type, "null");
     }
 
     @Override

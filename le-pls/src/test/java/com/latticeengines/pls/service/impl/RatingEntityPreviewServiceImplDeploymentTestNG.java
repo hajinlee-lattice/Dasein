@@ -142,7 +142,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewThirdTimeWithPartiallyOverlappingPages" })
     public void testGetSegmentAccountCount() {
         RatingsCountRequest request = new RatingsCountRequest();
-        List<String> segmentIds = Arrays.asList(new String[] { play.getRatingEngine().getSegment().getName() });
+        List<String> segmentIds = Arrays.asList(play.getRatingEngine().getSegment().getName());
         request.setSegmentIds(segmentIds);
         RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
         Assert.assertNotNull(response);
