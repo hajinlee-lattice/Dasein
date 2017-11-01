@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS `QuartzDB`;
 GRANT ALL ON QuartzDB.* TO root@localhost;
 USE `QuartzDB`;
 
-source WSHOME/le-quartzclient/ddl_quartzdb_mysql5innodb.sql;
+source WSHOME/ddl_quartzdb_mysql5innodb.sql;
 
 DROP TABLE IF EXISTS QRTZ_FIRED_TRIGGERS;
 DROP TABLE IF EXISTS QRTZ_PAUSED_TRIGGER_GRPS;

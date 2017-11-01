@@ -2,6 +2,11 @@
 
 function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != "$1"; }
 
+DDL="$WSHOME/ddl_scoringdb_mysql5innodb.sql"
+if [ ! -f "${DDL}" ]; then
+    mvn -T6 -f $WSHOME/db-pom.xml -DskipTests clean install
+fi
+
 UNAME=`uname`
 threshold_version=5.6
 echo "Setting up ScoringDB"
@@ -9,13 +14,13 @@ echo "Setting up ScoringDB"
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     # Remove alter table drop foreign key statements from the script
-    sed -i '' 's/alter table .* drop foreign key .*;//g' $WSHOME/le-scoring/ddl_scoringdb_mysql5innodb.sql
-    sed -i '' 's/varchar(65535)/varchar(4000)/g' $WSHOME/le-scoring/ddl_scoringdb_mysql5innodb.sql
+    sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
+    sed -i '' 's/varchar(65535)/varchar(4000)/g' $DDL
 else
     echo "You are on ${UNAME}"
     # Remove alter table drop foreign key statements from the script
-    sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-scoring/ddl_scoringdb_mysql5innodb.sql
-    sed -i 's/varchar(65535)/varchar(4000)/g' $WSHOME/le-scoring/ddl_scoringdb_mysql5innodb.sql
+    sed -i 's/alter table .* drop foreign key .*;//g' $DDL
+    sed -i 's/varchar(65535)/varchar(4000)/g' $DDL
 fi
 
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true

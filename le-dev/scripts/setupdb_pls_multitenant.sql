@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS PLS_MultiTenant;
 GRANT ALL ON PLS_MultiTenant.* TO root@localhost;
 USE `PLS_MultiTenant`;
 
-SOURCE WSHOME/le-db/ddl_pls_multitenant_mysql5innodb.sql
+SOURCE WSHOME/ddl_pls_multitenant_mysql5innodb.sql
 
 INSERT INTO TENANT(
 TENANT_ID,

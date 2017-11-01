@@ -6,7 +6,7 @@ GRANT ALL ON GlobalAuthentication.* TO root@localhost;
 
 USE `GlobalAuthentication`;
 
-source WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
+source WSHOME/ddl_globalauthentication_mysql5innodb.sql
 
 INSERT INTO GlobalTenant (
   Deployment_ID,

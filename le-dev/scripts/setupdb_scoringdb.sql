@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS `ScoringDB`;
 GRANT ALL ON ScoringDB.* TO root@localhost;
 USE `ScoringDB`;
 
-source WSHOME/le-scoring/ddl_scoringdb_mysql5innodb.sql;
+source WSHOME/ddl_scoringdb_mysql5innodb.sql;
 
 drop table if exists `TestLeadsTable`;
 drop table if exists `ScoringDeploymentTestNG_Base_LeadsTable`;

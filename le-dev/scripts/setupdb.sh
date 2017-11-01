@@ -18,20 +18,8 @@ UNAME=`uname`
 . $WSHOME/le-dev/scripts/setupzk.sh
 . $WSHOME/le-dev/scripts/setuphdfs.sh
 
-# Compile le-domain
-cd $WSHOME/le-domain
-mvn -DskipTests clean install 2> /tmp/errors.txt
-processErrors
-
-for project in 'db' 'dataplatform' 'scoring' 'quartzclient' 'metadata' 'datadb' 
-do
-    echo "Deploying ${project} to local MySQL" &&
-    pushd $WSHOME/le-$project &&
-    mvn -DskipTests clean install 2> /tmp/errors.txt &&
-    popd &&
-    processErrors &
-done
-wait
+# Compile
+mvn -T6 -f $WSHOME/db-pom.xml -DskipTests clean install
 
 source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 

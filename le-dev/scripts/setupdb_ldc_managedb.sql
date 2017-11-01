@@ -4,7 +4,7 @@ GRANT ALL ON LDC_ManageDB.* TO root@localhost;
 ALTER DATABASE LDC_ManageDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `LDC_ManageDB`;
 
-SOURCE WSHOME/le-db/ddl_ldc_managedb_mysql5innodb.sql;
+SOURCE WSHOME/ddl_ldc_managedb_mysql5innodb.sql;
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv' INTO TABLE `AccountMasterColumn`
 FIELDS TERMINATED BY '\t'

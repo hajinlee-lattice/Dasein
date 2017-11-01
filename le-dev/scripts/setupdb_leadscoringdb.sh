@@ -2,6 +2,11 @@
 
 function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != "$1"; }
 
+DDL="$WSHOME/ddl_leadscoringdb_mysql.sql"
+if [ ! -f "${DDL}" ]; then
+    mvn -T6 -f $WSHOME/db-pom.xml -DskipTests clean install
+fi
+
 UNAME=`uname`
 threshold_version=5.6
 echo "Setting up LeadScoringDB"
@@ -9,11 +14,11 @@ echo "Setting up LeadScoringDB"
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     # Remove alter table drop foreign key statements from the script
-    sed -i '' 's/alter table .* drop foreign key .*;//g' $WSHOME/le-dataplatform/ddl_leadscoringdb_mysql.sql
+    sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
 else
     echo "You are on ${UNAME}"
     # Remove alter table drop foreign key statements from the script
-    sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-dataplatform/ddl_leadscoringdb_mysql.sql
+    sed -i 's/alter table .* drop foreign key .*;//g' $DDL
 fi
 
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true
