@@ -1,0 +1,172 @@
+package com.latticeengines.cdl.workflow.steps;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
+import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
+import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
+import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+
+@Listeners({ GlobalAuthCleanupTestListener.class })
+@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
+        "classpath:test-playlaunch-properties-context.xml" })
+public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestNGSpringContextTests {
+
+    private PlayLaunchInitStep playLaunchInitStep;
+
+    private PlayLaunchInitStepTestHelper helper;
+
+    @Mock
+    PlayLaunchInitStepConfiguration configuration;
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+
+    @Autowired
+    RecommendationService recommendationService;
+
+    RecommendationService badRecommendationService;
+
+    @Mock
+    DanteLeadProxy danteLeadProxy;
+
+    @Autowired
+    TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private TestPlayCreationHelper testPlayCreationHelper;
+
+    String randId = UUID.randomUUID().toString();
+
+    private Tenant tenant;
+
+    private Play play;
+
+    private PlayLaunch playLaunch;
+
+    private CustomerSpace customerSpace;
+
+    @BeforeClass(groups = "workflow")
+    public void setup() throws Exception {
+        testPlayCreationHelper.setupTenantAndCreatePlay();
+
+        tenant = testPlayCreationHelper.getTenant();
+        play = testPlayCreationHelper.getPlay();
+        playLaunch = testPlayCreationHelper.getPlayLaunch();
+
+        String playId = play.getName();
+        String playLaunchId = playLaunch.getId();
+        long pageSize = 20L;
+
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+
+        MockitoAnnotations.initMocks(this);
+
+        EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
+
+        mockDanteLeadProxy();
+
+        // setting bad recommendation service to simulate total failure during
+        // recommendation creation/saving which should in turn cause
+        // play launch to go in FAILED state
+        badRecommendationService = null;
+
+        helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, badRecommendationService,
+                danteLeadProxy, pageSize);
+
+        playLaunchInitStep = new PlayLaunchInitStep();
+        playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
+        playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
+        playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
+
+        customerSpace = CustomerSpace.parse(tenant.getId());
+        playLaunchInitStep.setConfiguration(createConf(customerSpace, playId, playLaunchId));
+    }
+
+    @AfterClass(groups = { "workflow" })
+    public void teardown() throws Exception {
+        testPlayCreationHelper.cleanupArtifacts();
+    }
+
+    @Test(groups = "workflow")
+    public void testExecute() {
+        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
+        Assert.assertNull(playLaunch.getAccountsLaunched());
+        Assert.assertEquals(playLaunch.getLaunchCompletionPercent(), 0.0D);
+
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        Assert.assertNotNull(recommendations);
+        Assert.assertEquals(recommendations.size(), 0);
+
+        try {
+            playLaunchInitStep.execute();
+            Assert.fail("Total failure in recommendation creation should have caused workflow to fail");
+        } catch (Exception ex) {
+            PlayLaunch updatedPlayLaunch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, play.getName(),
+                    playLaunch.getId());
+
+            Assert.assertNotNull(updatedPlayLaunch);
+            Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Failed);
+            Assert.assertEquals(updatedPlayLaunch.getAccountsLaunched().longValue(), 0L);
+            Assert.assertEquals(updatedPlayLaunch.getContactsLaunched().longValue(), 0L);
+            Assert.assertTrue(updatedPlayLaunch.getAccountsErrored().longValue() > 0L);
+            Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
+        }
+    }
+
+    @Test(groups = "workflow", dependsOnMethods = { "testExecute" })
+    public void verifyRecommendationsDirectly() {
+        List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
+        Assert.assertNotNull(recommendations);
+        Assert.assertEquals(recommendations.size(), 0);
+    }
+
+    private PlayLaunchInitStepConfiguration createConf(CustomerSpace customerSpace, String playName,
+            String playLaunchId) {
+        PlayLaunchInitStepConfiguration config = new PlayLaunchInitStepConfiguration();
+        config.setCustomerSpace(customerSpace);
+        config.setPlayLaunchId(playLaunchId);
+        config.setPlayName(playName);
+        return config;
+    }
+
+    private void mockDanteLeadProxy() {
+        doNothing() //
+                .when(danteLeadProxy) //
+                .create(any(DanteLeadDTO.class), anyString());
+    }
+}
