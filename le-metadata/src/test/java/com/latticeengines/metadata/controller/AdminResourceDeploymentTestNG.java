@@ -14,14 +14,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class AdminResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AdminResourceDeploymentTestNG.class);
-
-    @Autowired
-    protected MetadataProxy metadataProxy;
 
     @Autowired
     protected TenantService tenantService;

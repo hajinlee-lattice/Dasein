@@ -70,6 +70,9 @@ public class DefaultDataCollectionResourceDeploymentTestNG extends MetadataDeplo
         Table table1 = dataCollectionProxy.getTable(customerSpace1, TableRoleInCollection.Profile, DataCollection.Version.Blue);
         assertNotNull(table);
         assertEquals(table.getName(), table1.getName());
+
+        Table nullTable = dataCollectionProxy.getTable(customerSpace1, TableRoleInCollection.AccountMaster);
+        assertNull(nullTable);
     }
 
     @Test(groups = "deployment")
