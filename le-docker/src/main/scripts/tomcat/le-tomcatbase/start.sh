@@ -11,6 +11,7 @@ if [ -f "/etc/ledp/ledp_keystore.jks" ]; then
     echo "copying jks file from /etc/ledp/ledp_keystore.jks"
     cp -f /etc/ledp/ledp_keystore.jks /etc/pki/java/tomcat.jks
     chmod 600 /etc/pki/java/tomcat.jks
+    rm -rf /etc/pki/java/cacerts || true
     cp -f /etc/ledp/cacerts /etc/pki/java/cacerts
     chmod 600 /etc/pki/java/cacerts
 fi
