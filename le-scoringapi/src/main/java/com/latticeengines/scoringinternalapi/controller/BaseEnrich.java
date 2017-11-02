@@ -41,22 +41,22 @@ public abstract class BaseEnrich extends CommonBase {
             }
             String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
             EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest, requestId);
-            if (warnings.hasWarnings()) {
-                response.setWarnings(warnings.getWarnings());
-                requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
+            if (warnings.hasWarnings(requestId)) {
+                response.setWarnings(warnings.getWarnings(requestId));
+                requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings(requestId)));
             }
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));
             }
 
-            requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings()));
+            requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings(requestId)));
             requestInfo.put(HAS_ERROR, Boolean.toString(false));
             requestInfo.put(IS_BULK_REQUEST, Boolean.FALSE.toString());
             requestInfo.put(IS_ENRICHMENT_REQUESTED, Boolean.toString(true));
 
             requestInfo.logSummary(requestInfo.getStopWatchSplits());
 
-            EnrichRequestMetrics metrics = generateMetrics(enrichRequest, response, customerSpace);
+            EnrichRequestMetrics metrics = generateMetrics(enrichRequest, response, customerSpace, requestId);
             SingleEnrichRecordMeasurement measurement = new SingleEnrichRecordMeasurement(metrics);
             metricService.write(MetricDB.SCORING, measurement);
 
@@ -65,9 +65,9 @@ public abstract class BaseEnrich extends CommonBase {
     }
 
     private EnrichRequestMetrics generateMetrics(EnrichRequest scoreRequest, EnrichResponse response,
-            CustomerSpace customerSpace) {
+            CustomerSpace customerSpace, String requestId) {
         EnrichRequestMetrics metrics = new EnrichRequestMetrics();
-        metrics.setHasWarning(warnings.hasWarnings());
+        metrics.setHasWarning(warnings.hasWarnings(requestId));
         metrics.setSource(StringUtils.trimToEmpty(scoreRequest.getSource()));
         metrics.setTenantId(customerSpace.toString());
         metrics.setIsEnrich(true);

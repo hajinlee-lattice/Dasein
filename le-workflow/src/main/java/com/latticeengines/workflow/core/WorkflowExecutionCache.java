@@ -124,7 +124,7 @@ public class WorkflowExecutionCache {
                 return null;
             }
             JobInstance jobInstance = jobExecution.getJobInstance();
-            WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
+            WorkflowStatus workflowStatus = workflowService.getStatus(jobExecution);
             WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
 
             Job job = new Job();
@@ -163,6 +163,11 @@ public class WorkflowExecutionCache {
                 job.setEndTimestamp(workflowStatus.getEndTime());
                 cache.put(job.getId(), job);
             }
+            log.info(String.format("Got job status for workflow %d%s: Status=%s, Tenant=%s, ApplicationId=%s",
+                    workflowId.getId(),
+                    Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus()) ? "(loaded into cache)" : "",
+                    job.getJobStatus(), workflowJob != null ? workflowJob.getTenant().getName() : null,
+                    workflowJob != null ? workflowJob.getApplicationId() : null));
             return job;
         } catch (Exception e) {
             log.error(String.format("Getting job status for workflow: %d failed", workflowId.getId()), e);

@@ -41,7 +41,7 @@ public class WorkflowExecutionCacheTestNG extends WorkflowTestNGBase {
         workflowJobEntityMgr.create(workflowJob);
 
         WorkflowService workflowService = mock(WorkflowService.class);
-        when(workflowService.getStatus(any(WorkflowExecutionId.class)))
+        when(workflowService.getStatus(any(JobExecution.class)))
                 .thenReturn(new WorkflowStatus(BatchStatus.COMPLETED));
 
         workflowExecutionCache.setWorkflowService(workflowService);

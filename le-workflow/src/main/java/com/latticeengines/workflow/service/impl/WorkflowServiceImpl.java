@@ -240,6 +240,23 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    public WorkflowStatus getStatus(JobExecution jobExecution) {
+        WorkflowStatus workflowStatus = new WorkflowStatus();
+        workflowStatus.setStatus(jobExecution.getStatus());
+        workflowStatus.setStartTime(jobExecution.getStartTime());
+        workflowStatus.setEndTime(jobExecution.getEndTime());
+        workflowStatus.setLastUpdated(jobExecution.getLastUpdated());
+        workflowStatus.setWorkflowName(getWorkflowName(jobExecution));
+
+        String customerSpace = jobExecution.getJobParameters().getString(CUSTOMER_SPACE);
+        if (!Strings.isNullOrEmpty(customerSpace)) {
+            workflowStatus.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        }
+
+        return workflowStatus;
+    }
+
+    @Override
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
         com.latticeengines.domain.exposed.workflow.Job job = workflowExecutionCache.getJob(workflowId);
         if (job == null) {
@@ -338,7 +355,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 if (--retryOnException == 0)
                     throw e;
             } finally {
-                Thread.sleep(10000);
+                Thread.sleep(30000);
             }
         } while (System.currentTimeMillis() - start < maxWaitTime);
 

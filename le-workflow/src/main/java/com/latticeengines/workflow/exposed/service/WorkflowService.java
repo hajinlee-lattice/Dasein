@@ -3,6 +3,7 @@ package com.latticeengines.workflow.exposed.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.context.ApplicationContext;
 
@@ -26,6 +27,8 @@ public interface WorkflowService {
     void stop(WorkflowExecutionId workflowId);
 
     WorkflowStatus getStatus(WorkflowExecutionId workflowId);
+
+    WorkflowStatus getStatus(JobExecution jobExecution);
 
     List<String> getStepNames(WorkflowExecutionId workflowId);
 

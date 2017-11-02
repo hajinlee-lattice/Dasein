@@ -177,15 +177,15 @@ public abstract class BaseScoring extends CommonBase {
             ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug,
                     enrichInternalAttributes, performFetchOnlyForMatching, requestId, isCalledViaApiConsole,
                     enforceFuzzyMatch, skipDnBCache);
-            if (warnings.hasWarnings()) {
-                response.setWarnings(warnings.getWarnings());
-                requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
+            if (warnings.hasWarnings(requestId)) {
+                response.setWarnings(warnings.getWarnings(requestId));
+                requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings(requestId)));
             }
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));
             }
 
-            requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings()));
+            requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings(requestId)));
             requestInfo.put(HAS_ERROR, Boolean.toString(false));
             requestInfo.put(SCORE, String.valueOf(response.getScore()));
             requestInfo.put(IS_BULK_REQUEST, Boolean.FALSE.toString());
@@ -198,7 +198,7 @@ public abstract class BaseScoring extends CommonBase {
 
             requestInfo.logSummary(requestInfo.getStopWatchSplits());
 
-            ScoreRequestMetrics metrics = generateMetrics(scoreRequest, response, customerSpace);
+            ScoreRequestMetrics metrics = generateMetrics(scoreRequest, response, customerSpace, requestId);
             SingleRecordMeasurement measurement = new SingleRecordMeasurement(metrics);
             metricService.write(MetricDB.SCORING, measurement);
 
@@ -207,9 +207,9 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     private ScoreRequestMetrics generateMetrics(ScoreRequest scoreRequest, ScoreResponse response,
-            CustomerSpace customerSpace) {
+            CustomerSpace customerSpace, String requestId) {
         ScoreRequestMetrics metrics = new ScoreRequestMetrics();
-        metrics.setHasWarning(warnings.hasWarnings());
+        metrics.setHasWarning(warnings.hasWarnings(requestId));
         metrics.setScore(response.getScore());
         metrics.setSource(StringUtils.trimToEmpty(scoreRequest.getSource()));
         metrics.setRule(StringUtils.trimToEmpty(scoreRequest.getRule()));
