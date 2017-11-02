@@ -16,7 +16,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -93,6 +92,12 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(105163L));
+
+        // must have transaction
+        frontEndQuery.setRestrictHasTransaction(true);
+        count = entityQueryService.getCount(frontEndQuery);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(1329L));
     }
 
     @Test(groups = "functional")

@@ -58,6 +58,7 @@ public class QueryTranslator {
                     getEntityFrontEndRestriction(mainEntity, frontEndQuery), ruleBasedModels);
             restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
             restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, ruleBasedModels);
+            restriction = addHasTransactionRestriction(frontEndQuery, restriction);
 
             if (frontEndQuery.getPageFilter() == null) {
                 frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
@@ -137,6 +138,17 @@ public class QueryTranslator {
                 Restriction sfidRestriction = Restriction.builder().let(entity, "SalesforceAccountID").isNotNull()
                         .build();
                 restriction = Restriction.builder().and(restriction, sfidRestriction).build();
+            }
+        }
+        return restriction;
+    }
+
+    private static Restriction addHasTransactionRestriction(FrontEndQuery frontEndQuery, Restriction restriction) {
+        // only apply has transaction restriction to account entity
+        if (BusinessEntity.Account.equals(frontEndQuery.getMainEntity())) {
+            if (Boolean.TRUE.equals(frontEndQuery.getRestrictHasTransaction())) {
+                Restriction hasTransaction = Restriction.builder().exists(BusinessEntity.Transaction).that(null).build();
+                return joinRestrictions(restriction, hasTransaction);
             }
         }
         return restriction;

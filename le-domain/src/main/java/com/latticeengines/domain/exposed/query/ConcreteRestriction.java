@@ -97,7 +97,9 @@ public class ConcreteRestriction extends Restriction {
     public Collection<? extends GraphNode> getChildren() {
         List<GraphNode> children = new ArrayList<>();
         children.add(lhs);
-        children.add(rhs);
+        if (rhs != null) {
+            children.add(rhs);
+        }
         return children;
     }
 
@@ -106,7 +108,9 @@ public class ConcreteRestriction extends Restriction {
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
         map.put("lhs", Collections.singletonList(lhs));
-        map.put("rhs", Collections.singletonList(rhs));
+        if (rhs != null) {
+            map.put("rhs", Collections.singletonList(rhs));
+        }
         return map;
     }
 

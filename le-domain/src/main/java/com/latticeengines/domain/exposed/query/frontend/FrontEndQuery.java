@@ -59,6 +59,9 @@ public class FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.PREEXISTING_SEGMENT_NAME)
     private String preexistingSegmentName;
 
+    @JsonProperty(FrontEndQueryConstants.RESTRICT_HAS_TRANSACTION)
+    private Boolean restrictHasTransaction;
+
     public FrontEndRestriction getAccountRestriction() {
         return accountRestriction;
     }
@@ -145,6 +148,14 @@ public class FrontEndQuery {
 
     public void setPreexistingSegmentName(String preexistingSegmentName) {
         this.preexistingSegmentName = preexistingSegmentName;
+    }
+
+    public Boolean getRestrictHasTransaction() {
+        return restrictHasTransaction;
+    }
+
+    public void setRestrictHasTransaction(Boolean restrictHasTransaction) {
+        this.restrictHasTransaction = restrictHasTransaction;
     }
 
     public void addLookups(BusinessEntity businessEntity, String... attrNames) {
