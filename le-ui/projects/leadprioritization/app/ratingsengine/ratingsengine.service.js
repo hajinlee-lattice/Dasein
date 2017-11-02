@@ -17,7 +17,8 @@ angular.module('lp.ratingsengine')
             segment: true,
             attributes: true,
             rules: true,
-            summary: true
+            summary: true,
+            prospect: false
         }
 
         this.segment_form = {
@@ -59,6 +60,40 @@ angular.module('lp.ratingsengine')
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveSummary(nextState);
                     }
+                }
+            ],
+            "ai": [
+                { 
+                    label: 'Segment', 
+                    state: 'segment', 
+                    nextLabel: 'Next', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    } 
+                },
+                { 
+                    label: 'Prospect', 
+                    state: 'segment.prospect', 
+                    nextLabel: 'Next, choose Products', 
+                    // nextFn: function(nextState) {
+                    //     RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    // } 
+                },
+                { 
+                    label: 'Products', 
+                    state: 'segment.prospect.products', 
+                    nextLabel: 'Next, choose what to model', 
+                    // nextFn: function(nextState) {
+                    //     RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    // } 
+                },
+                { 
+                    label: 'Model', 
+                    state: 'segment.prospect.products.model', 
+                    nextLabel: '?', 
+                    // nextFn: function(nextState) {
+                    //     RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    // } 
                 }
             ],
             "segment": [

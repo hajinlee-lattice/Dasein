@@ -10,7 +10,14 @@ angular.module('common.wizard.controls', [])
         items: WizardProgressItems,
         state: $state.current.name,
         prev: WizardControlsOptions.backState,
-        next: 'home.' + WizardProgressContext + '.wizard',
+        next: function() {
+                var nextValue = 'home.' + WizardProgressContext;
+                if(WizardControlsOptions.suffix === undefined){
+                    nextValue += '.wizard';
+                }
+                return nextValue;
+        }() ,
+        
         valid: false,
         toState: $state.current,
         nextDisabled: false
@@ -18,11 +25,13 @@ angular.module('common.wizard.controls', [])
 
     vm.init = function() {
         vm.rootState = vm.next + '.';
-
+        console.log($state);
         vm.setButtons();
 
         vm.items.forEach(function(item) {
-            vm.itemMap[vm.rootState + item.state] = item;
+            var key = vm.rootState + item.state;
+            console.log(key);
+            vm.itemMap[key] = item;
         });
         vm.item = vm.itemMap[vm.toState.name];
     }
@@ -56,6 +65,7 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.go = function(state, isPrev, params) {
+        console.log($state.current.name, vm.itemMap);
         var current = vm.itemMap[$state.current.name];
 
         vm.nextDisabled = true;

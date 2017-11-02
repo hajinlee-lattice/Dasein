@@ -10,7 +10,9 @@ angular
     'lp.ratingsengine.dashboard',
     'lp.ratingsengine.wizard.segment',
     'lp.ratingsengine.wizard.attributes',
-    'lp.ratingsengine.wizard.summary'
+    'lp.ratingsengine.wizard.summary',
+    'lp.ratingsengine.ai',
+    'lp.ratingsengine.ai.prospect'
 ])
 .config(function($stateProvider, DataCloudResolvesProvider) {
     $stateProvider
@@ -158,7 +160,7 @@ angular
                 'main@': {
                     resolve: {
                         WizardHeaderTitle: function() {
-                            return 'Create Rating Engine';
+                           return 'Create Rating Engine';
                         },
                         WizardContainerId: function() {
                             return 'ratingsengine';
@@ -172,6 +174,7 @@ angular
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'
+                    
                 },
                 'wizard_controls@home.ratingsengine.wizard': {
                     resolve: {
@@ -189,6 +192,118 @@ angular
             },
             redirectTo: 'home.ratingsengine.wizard.segment'
         })
+        .state('home.ratingsengine.ai', {
+            url: '/ai',
+            params: {
+                wizard_steps: 'ai'
+            },
+            resolve: {
+                WizardValidationStore: function(RatingsEngineStore) {
+                    return RatingsEngineStore;
+                },
+                WizardProgressContext: function() {
+                    return 'ratingsengine.ai';
+                },
+                WizardProgressStep : function(){
+
+                },
+                WizardProgressItems: function($stateParams, RatingsEngineStore) {
+                    var rating_id = $stateParams.rating_id || '';
+                    var wizard_steps = $stateParams.wizard_steps;
+
+                    return RatingsEngineStore.getWizardProgressItems(wizard_steps || 'ai', rating_id);
+                }
+            },
+            views: {
+                'summary@': {
+                    controller: function($scope, RatingsEngineStore) {
+                        $scope.$on('$destroy', function () {
+                            RatingsEngineStore.clear();
+                        });
+                    }
+                },
+                'main@': {
+                    resolve: {
+                        WizardHeaderTitle: function() {
+                            return 'Choose a Segment to analyze for modeling';
+                        },
+                        WizardContainerId: function() {
+                            return 'ratingsengine.ai';
+                        }
+                    },
+                    controller: 'ImportWizard',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/wizard.component.html'
+                },
+                'wizard_progress@home.ratingsengine.ai': {
+                    controller: 'ImportWizardProgress',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/progress/progress.component.html'
+                    
+                },
+                'wizard_controls@home.ratingsengine.ai': {
+                    resolve: {
+                        WizardControlsOptions: function(RatingsEngineStore) {
+                            return { 
+                                suffix : '',
+                                backState: 'home.ratingsengine.list', 
+                                nextState: 'home.ratingsengine.list'
+                            };
+                        }
+                    },
+                    controller: 'ImportWizardControls',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/controls/controls.component.html'
+                }
+            },
+            redirectTo: 'home.ratingsengine.ai.segment'
+        })
+        .state('home.ratingsengine.ai.segment.prospect', {
+            url: '/prospect',
+            resolve: {
+                WizardHeaderTitle: function() {
+                    return 'Select the model to build';
+                }
+            },
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    controller: 'RatingsEngineAIProspect',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/prospect.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment', {
+            url: '/segment',
+            
+            resolve: {
+                Segments: function(SegmentService) {
+                    return SegmentService.GetSegments();
+                },
+                CurrentRatingEngine: function($q, $stateParams, RatingsEngineStore) {
+                    var deferred = $q.defer();
+
+                    if (!$stateParams.rating_id) {
+                        deferred.resolve(RatingsEngineStore.currentRating);
+                    } else {
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    }
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'wizard_content@home.ratingsengine.ai': {
+                    controller: 'RatingsEngineSegment',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
+                }
+            }
+        })
+
         .state('home.ratingsengine.wizard.segment', {
             url: '/segment',
             params: {

@@ -1,0 +1,40 @@
+section.ratings-engine-ai-prospect.container{
+    p {
+        // border: 1px solid yellowgreen;
+        margin: 10px 0 20px 0;
+        font-size: 16px;
+    }
+    .wizard-content {
+        width: 100%;
+        font-size: 16px;
+       
+    }
+    .graphs {
+        height: 250px;
+        border: 1px solid #c3c3c3;
+        display: -webkit-flex; /* Safari */
+        -webkit-flex-direction: row; /* Safari 6.1+ */
+        display: flex;
+        flex-direction: row;
+        -ms-flex-align: end;
+        align-items: flex-end;
+        justify-content: space-around;
+    }
+    
+    .prospect-graph{
+        // height: 50%;
+        color: white;
+        background-color: rgba(0, 128, 0, 1);
+    }
+
+    .customers-graph {
+        // height: 80%;
+        color: white;
+        background-color: rgba(0, 128, 0, 1);
+    }
+    .prospect-choises {
+        // border: 1px solid blue;
+    }
+ 
+}
+

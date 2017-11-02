@@ -8,6 +8,12 @@ angular.module('lp.ratingsengine.ratingsenginetype', [])
 
     vm.setType = function(type) {
         RatingsEngineStore.setType(type);
-        $state.go('home.ratingsengine.wizard');
+        var url = 'home.ratingsengine';
+        if('AI' === type) {
+            url += '.ai';
+        } else {
+            url += '.wizard';
+        }
+        $state.go(url);
     }
 });

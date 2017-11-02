@@ -11,7 +11,7 @@
                 How would you like to create Ratings for sales Plays and marketing campaigns?
             </p>
             <ul class="types" ng-init="type = 'RULE_BASED'">
-                <li disabled class="type ai" ng-mouseover="type = 'AI'" ng-click="vm.setType(type)" ng-class="{selected: type == 'AI'}">
+                <li class="type ai" ng-mouseover="type = 'AI'" ng-click="vm.setType(type)" ng-class="{selected: type == 'AI'}">
                     <strong>Aritifical Intelligence</strong>
                 </li>
                 <li class="type rulebased" ng-mouseover="type = 'RULE_BASED'" ng-click="vm.setType(type)" ng-class="{selected: type == 'RULE_BASED'}">
