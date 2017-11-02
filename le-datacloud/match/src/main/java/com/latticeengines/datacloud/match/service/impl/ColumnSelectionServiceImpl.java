@@ -100,7 +100,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private void initCache() {
         predefinedSelectionCache = WatcherCache.builder() //
                 .name("PredefinedSelectionCacheForRTSCache") //
-                .watch(AMRelease) //
+                .watch(AMRelease.name()) //
                 .maximum(10) //
                 .load(selection -> {
                     List<ExternalColumn> externalColumns = externalColumnService.findByColumnSelection((Predefined) selection,

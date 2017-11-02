@@ -1,22 +1,26 @@
 package com.latticeengines.proxy.exposed.objectapi;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLConsolidate;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.MapUtils;
-import org.springframework.cache.annotation.CacheConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.watchers.WatcherCache;
+import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -27,84 +31,49 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("entityProxy")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-@CacheConfig(cacheNames = "EntityCache")
 public class EntityProxy extends MicroserviceRestApiProxy {
 
-    private final WatcherCache<String, Long> countCache;
+    private static final Logger log = LoggerFactory.getLogger(EntityProxy.class);
 
-    private final WatcherCache<String, DataPage> dataCache;
+    @Autowired
+    private CacheManager cacheManager;
 
-    private final WatcherCache<String, Map<String, Long>> ratingCache;
+    private LocalCacheManager<String, Long> countCache;
 
-    @SuppressWarnings("unchecked")
+    private LocalCacheManager<String, DataPage> dataCache;
+
+    private LocalCacheManager<String, Map<String, Long>> ratingCache;
+
     public EntityProxy() {
         super("objectapi/customerspaces");
-        countCache = WatcherCache.builder() //
-                .name("EntityCountCache") //
-                .watch(CDLConsolidate) //
-                .maximum(2000) //
-                .load(o -> {
-                    String serializedKey = (String) o;
-                    return getCountFromObjectApi(serializedKey);
-                }) //
-                .build();
-        dataCache = WatcherCache.builder() //
-                .name("EntityDataCache") //
-                .watch(CDLConsolidate) //
-                .maximum(200) //
-                .load(o -> {
-                    String serializedKey = (String) o;
-                    return getDataFromObjectApi(serializedKey);
-                }) //
-                .build();
-        ratingCache = WatcherCache.builder() //
-                .name("EntityDataCache") //
-                .watch(CDLConsolidate) //
-                .maximum(2000) //
-                .load(o -> {
-                    String serializedKey = (String) o;
-                    return getRatingCountFromObjectApi(serializedKey);
-                }) //
-                .build();
+        countCache = new LocalCacheManager<>(CacheNames.EntityCountCache, o -> {
+            String str = (String) o;
+            String[] tokens = str.split("\\|");
+            return getCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
+        }, 2000); //
 
-        countCache.setEvictKeyResolver((updateSignal, existingKeys) -> {
-            String customerSpace = shortenCustomerSpace(updateSignal);
-            List<String> keysToEvict = new ArrayList<>();
-            existingKeys.forEach(key -> {
-                String tenantId = key.substring(0, key.indexOf("|"));
-                if (customerSpace.equals(tenantId)) {
-                    keysToEvict.add(key);
-                }
-            });
-            return keysToEvict;
-        });
-        countCache.setRefreshKeyResolver((updateSignal, existingKeys) -> Collections.emptyList());
-        dataCache.setEvictKeyResolver((updateSignal, existingKeys) -> {
-            String customerSpace = shortenCustomerSpace(updateSignal);
-            List<String> keysToEvict = new ArrayList<>();
-            existingKeys.forEach(key -> {
-                String tenantId = key.substring(0, key.indexOf("|"));
-                if (customerSpace.equals(tenantId)) {
-                    keysToEvict.add(key);
-                }
-            });
-            return keysToEvict;
-        });
-        dataCache.setRefreshKeyResolver((updateSignal, existingKeys) -> Collections.emptyList());
-        ratingCache.setEvictKeyResolver((updateSignal, existingKeys) -> {
-            String customerSpace = shortenCustomerSpace(updateSignal);
-            List<String> keysToEvict = new ArrayList<>();
-            existingKeys.forEach(key -> {
-                String tenantId = key.substring(0, key.indexOf("|"));
-                if (customerSpace.equals(tenantId)) {
-                    keysToEvict.add(key);
-                }
-            });
-            return keysToEvict;
-        });
-        ratingCache.setRefreshKeyResolver((updateSignal, existingKeys) -> Collections.emptyList());
+        dataCache = new LocalCacheManager<>(CacheNames.EntityDataCache, o -> {
+            String str = (String) o;
+            String[] tokens = str.split("\\|");
+            return getDataFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
+        }, 200); //
+
+        ratingCache = new LocalCacheManager<>(CacheNames.EntityRatingCountCache, o -> {
+            String str = (String) o;
+            String[] tokens = str.split("\\|");
+            return getRatingCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
+        }, 2000); //
     }
 
+    @PostConstruct
+    public void addCacheManager() {
+        if (cacheManager instanceof CompositeCacheManager) {
+            log.info("adding local entity cache manager to composite cache manager");
+            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(countCache, dataCache, ratingCache));
+        }
+    }
+
+    @Cacheable(cacheNames = "EntityCountCache", key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -112,11 +81,13 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return getCountFromCache(customerSpace, frontEndQuery);
     }
 
+    @Cacheable(cacheNames = "EntityDataCache", key = "T(java.lang.String).format(\"%s|%s|data\", #customerSpace, #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         return getDataFromCache(customerSpace, frontEndQuery);
     }
 
+    @Cacheable(cacheNames = "EntityRatingCountCache", key = "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace, #frontEndQuery)", sync = true)
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -124,8 +95,10 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return getRatingCountFromCache(customerSpace, frontEndQuery);
     }
 
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
-    private Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    // @Cacheable(cacheNames = "EntityCountCache", key =
+    // "T(java.lang.String).format(\"%s|%s|count\", #customerSpace,
+    // #frontEndQuery)", sync = true)
+    public Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
@@ -137,8 +110,10 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return count;
     }
 
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|data\", #customerSpace, #frontEndQuery)", sync = true)
-    private DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    // @Cacheable(cacheNames = "EntityDataCache", key =
+    // "T(java.lang.String).format(\"%s|%s|data\", #customerSpace,
+    // #frontEndQuery)", sync = true)
+    public DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         DataPage dataPage = getDataFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
@@ -149,8 +124,10 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return dataPage;
     }
 
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace, #frontEndQuery)", sync = true)
-    private Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    // @Cacheable(cacheNames = "EntityRatingCountCache", key =
+    // "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace,
+    // #frontEndQuery)", sync = true)
+    public Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
@@ -163,7 +140,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return ratingCountInfo;
     }
 
-    private Long getCountFromObjectApi(String serializedKey) {
+    public Long getCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);

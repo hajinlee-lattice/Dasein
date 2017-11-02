@@ -10,12 +10,12 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -243,7 +243,7 @@ public class ModelingServiceExecutor {
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
-        model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
+        model.setKeyCols(Arrays.asList(builder.getKeyColumn()));
         model.setDataFormat("avro");
         List<String> props = new ArrayList<>();
         if (builder.getEventTableTable() != null) {

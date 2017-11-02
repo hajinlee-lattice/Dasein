@@ -29,8 +29,8 @@ public class MadisonDataFlowGroupAndExpandBuilder extends CascadingDataFlowBuild
         addSource("MadisonLogicForToday", sources.get("MadisonLogic0"));
 
         String lastAggregatedOperatorName = addGroupByAndExpand("MadisonLogicForToday", new FieldList("DomainID"),
-                "Category", Arrays.asList(new String[] { "ML_30Day_%s_Total", "ML_30Day_%s_UniqueUsers",
-                        "ML_30Day_%s_Total_PctChange", "ML_30Day_%s_UniqueUsers_PctChange" }), new FieldList(
+                "Category", Arrays.asList("ML_30Day_%s_Total", "ML_30Day_%s_UniqueUsers",
+                        "ML_30Day_%s_Total_PctChange", "ML_30Day_%s_UniqueUsers_PctChange" ), new FieldList(
                         new String[] { "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers",
                                 "ML_30Day_Category_Total_PctChange", "ML_30Day_Category_UniqueUsers_PctChange" }),
                 buildDeclaredFieldList(dataFlowCtx));

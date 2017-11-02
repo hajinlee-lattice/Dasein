@@ -59,19 +59,29 @@ public class NodeWatcher {
         return PathBuilder.buildWatcherPath(CamilleEnvironment.getPodId(), watcherName);
     }
 
-    public static synchronized void updateWatchedData(String watcherName, String serializedData) {
-        Path path = getWatcherPath(watcherName);
-        try {
-            if (!CamilleEnvironment.getCamille().exists(path)) {
-                log.info("Creating watched node " + path + " with data " + serializedData);
-                CamilleEnvironment.getCamille().create(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            } else {
-                log.info("Changing data at watched node " + path + " to " + serializedData);
-                CamilleEnvironment.getCamille().upsert(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+    public static void updateWatchedData(String watcherName, String serializedData) {
+        synchronized (watcherName) {
+            Path path = getWatcherPath(watcherName);
+            try {
+                if (!CamilleEnvironment.getCamille().exists(path)) {
+                    log.info("Creating watched node " + path + " with data " + serializedData);
+                    CamilleEnvironment.getCamille().create(path, new Document(serializedData),
+                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                } else {
+                    log.info("Changing data at watched node " + path + " to " + serializedData);
+                    CamilleEnvironment.getCamille().upsert(path, new Document(serializedData),
+                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to update watcher " + watcherName, e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update watcher " + watcherName, e);
         }
+    }
+
+    public static void notifyCacheWatchersAsync(String watcherName, String signal) {
+        new Thread(() -> {
+            NodeWatcher.updateWatchedData(watcherName, signal);
+        }).run();
     }
 
     public static synchronized String getWatchedData(String watcherName) {

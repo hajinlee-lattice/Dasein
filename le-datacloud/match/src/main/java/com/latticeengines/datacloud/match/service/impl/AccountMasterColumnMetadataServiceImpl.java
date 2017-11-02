@@ -107,7 +107,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     private void initCache() {
         statsCache = WatcherCache.builder() //
                 .name("AMStatsCache") //
-                .watch(AMRelease) //
+                .watch(AMRelease.name()) //
                 .maximum(10) //
                 .load(dataCloudVersion -> readStatsPairFromHdfs((String) dataCloudVersion)) //
                 .initKeys(new String[] { versionEntityMgr.currentApprovedVersionAsString() }) //

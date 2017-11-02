@@ -138,9 +138,9 @@ public class DefaultDataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get mocked metadat of attribute group for company profile and talking point")
     public List<String> getAttributeGroupsForCompanyProfileAndTalkingPoints(@PathVariable String customerSpace) {
-        List<String> result = Arrays.asList(new String[] { InterfaceName.CompanyName.toString(),
-                InterfaceName.City.toString(), InterfaceName.Country.toString(), InterfaceName.Industry.toString(),
-                InterfaceName.Website.toString(), InterfaceName.YearStarted.toString() });
+        List<String> result = Arrays.asList(InterfaceName.CompanyName.toString(), InterfaceName.City.toString(),
+                InterfaceName.Country.toString(), InterfaceName.Industry.toString(), InterfaceName.Website.toString(),
+                InterfaceName.YearStarted.toString());
         return result;
     }
 

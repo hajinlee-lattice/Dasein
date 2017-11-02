@@ -1,8 +1,7 @@
 package com.latticeengines.app.exposed.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLProfile;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,13 +17,17 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.support.CompositeCacheManager;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.DataLakeService;
-import com.latticeengines.camille.exposed.watchers.WatcherCache;
+import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
+import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -49,7 +52,7 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataLakeService")
-@CacheConfig(cacheNames = "DataLakeCache")
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DataLakeServiceImpl implements DataLakeService {
 
     private static final Logger log = LoggerFactory.getLogger(DataLakeServiceImpl.class);
@@ -60,18 +63,45 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Autowired
     private AttributeCustomizationService attributeCustomizationService;
 
-    private WatcherCache<String, Statistics> statsCache = null;
-    private WatcherCache<String, List<ColumnMetadata>> cmCache = null;
+    @Autowired
+    private CacheManager cacheManager;
+
+    private final DataLakeService _dataLakeService;
+
+    private LocalCacheManager<String, Statistics> statsCache;
+    private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
+
+    @Autowired
+    public DataLakeServiceImpl(DataLakeService dataLakeService) {
+        _dataLakeService = dataLakeService;
+        statsCache = new LocalCacheManager<>(CacheNames.DataLakeStatsCache, o -> {
+            String str = (String) o;
+            String[] tokens = str.split("\\|");
+            String customerSpace = tokens[0];
+            return getStatistics(customerSpace);
+        }, 100); //
+
+        cmCache = new LocalCacheManager<>(CacheNames.DataLakeCMCache, o -> {
+            String str = (String) o;
+            String[] tokens = str.split("\\|");
+            TableRoleInCollection role = TableRoleInCollection.valueOf(tokens[1]);
+            String customerSpace = tokens[0];
+            return getAttributesInTableRole(customerSpace, role);
+        }, 100); //
+    }
 
     @PostConstruct
     private void postConstruct() {
-        initStatsCache();
-        initCmCache();
+        if (cacheManager instanceof CompositeCacheManager) {
+            log.info("adding local entity cache manager to composite cache manager");
+            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(statsCache, cmCache));
+        }
     }
 
     @Override
-    @Cacheable(key = "T(java.lang.String).format(\"%s|count\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|count\", "
+    // +
+    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public long getAttributesCount() {
         List<ColumnMetadata> cms = getAllAttributes();
         if (cms == null) {
@@ -82,8 +112,10 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%d|%d\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id, #offset, #max)")
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|%d|%d\", "
+    // +
+    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id,
+    // #offset, #max)")
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
         List<ColumnMetadata> cms = getAllAttributes();
         Stream<ColumnMetadata> stream = cms.stream().sorted(Comparator.comparing(ColumnMetadata::getColumnId));
@@ -118,10 +150,11 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    @Cacheable(key = "T(java.lang.String).format(\"%s|statscub\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|statscub\", "
+    // +
+    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public StatsCube getStatsCube() {
-        Statistics statistics = getStatistics();
+        Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {
             return null;
         }
@@ -129,10 +162,11 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    @Cacheable(key = "T(java.lang.String).format(\"%s|statscubs\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|statscubs\", "
+    // +
+    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public Map<BusinessEntity, StatsCube> getStatsCubes() {
-        Statistics statistics = getStatistics();
+        Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {
             return null;
         }
@@ -140,10 +174,11 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    @Cacheable(key = "T(java.lang.String).format(\"%s|topntree\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|topntree\", "
+    // +
+    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public TopNTree getTopNTree(boolean includeTopBkt) {
-        Statistics statistics = getStatistics();
+        Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {
             return null;
         }
@@ -151,10 +186,11 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    @Cacheable(key = "T(java.lang.String).format(\"%s|%s|%s\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id), #entity, #attribute")
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|%s|%s\",
+    // T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id),#entity,
+    // #attribute")
     public AttributeStats getAttributeStats(BusinessEntity entity, String attribute) {
-        Statistics statistics = getStatistics();
+        Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {
             return null;
         }
@@ -175,7 +211,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (role == null) {
             return Collections.emptyList();
         }
-        List<ColumnMetadata> cms = getAttributesInTableRole(customerSpace, role);
+        List<ColumnMetadata> cms = _dataLakeService.getAttributesInTableRole(customerSpace, role);
         cms.forEach(cm -> cm.setEntity(entity));
         return cms;
     }
@@ -185,40 +221,11 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
     }
 
-    private Statistics getStatistics() {
+    @Cacheable(cacheNames = "DataLakeStatsCache", key = "T(java.lang.String).format(\"%s|stats\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+    public Statistics getStatistics() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        initStatsCache();
-        // return statsCache.get(customerSpace);
         return getStatistics(customerSpace);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void initStatsCache() {
-        if (statsCache == null) {
-            statsCache = WatcherCache.builder() //
-                    .name("DataLakeStatsCache") //
-                    .watch(CDLProfile) //
-                    .maximum(100) //
-                    .load(o -> {
-                        String customerSpace = (String) o;
-                        return getStatistics(customerSpace);
-                    }).build();
-            statsCache.setRefreshKeyResolver((updateSignal, existingKeys) -> {
-                try {
-                    String customerSpace = CustomerSpace.parse(updateSignal).toString();
-                    if (customerSpace.equals(updateSignal)) {
-                        log.info("Attempt to refresh the stats cache of tenant " + customerSpace);
-                        return Collections.singletonList(updateSignal);
-                    } else {
-                        throw new IllegalArgumentException("Parsed customer space " + customerSpace
-                                + " is different from the watched data " + updateSignal);
-                    }
-                } catch (Exception e) {
-                    log.warn("Cannot parse watched data " + updateSignal + " into a customer space.", e);
-                    return Collections.emptyList();
-                }
-            });
-        }
     }
 
     private Statistics getStatistics(String customerSpace) {
@@ -254,38 +261,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         return subcatStats;
     }
 
-    @SuppressWarnings("unchecked")
-    private void initCmCache() {
-        if (cmCache == null) {
-            cmCache = WatcherCache.builder() //
-                    .name("DataLakeColumnMetadataCache") //
-                    .watch(CDLProfile) //
-                    .maximum(100) //
-                    .load(o -> {
-                        String str = (String) o;
-                        String[] tokens = str.split("\\|");
-                        TableRoleInCollection role = TableRoleInCollection.valueOf(tokens[1]);
-                        String customerSpace = tokens[0];
-                        return getAttributesInTableRole(customerSpace, role);
-                    }).build();
-            cmCache.setRefreshKeyResolver((updateSignal, existingKeys) -> {
-                String customerSpace = CustomerSpace.parse(updateSignal).toString();
-                List<String> keysToUpdate = new ArrayList<>();
-                existingKeys.forEach(key -> {
-                    String[] tokens = key.split("\\|");
-                    TableRoleInCollection role = TableRoleInCollection.valueOf(tokens[1]);
-                    String csInKey = CustomerSpace.parse(tokens[0]).toString();
-                    if (customerSpace.equals(csInKey)) {
-                        log.info("Attempt to refresh the table metadata cache of " + role + " in tenant " + csInKey);
-                        keysToUpdate.add(key);
-                    }
-                });
-                return keysToUpdate;
-            });
-        }
-    }
-
-    private List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role) {
+    @Cacheable(cacheNames = "DataLakeCMCache", key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id, #role)")
+    public List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role) {
         if (role == null) {
             return Collections.emptyList();
         }

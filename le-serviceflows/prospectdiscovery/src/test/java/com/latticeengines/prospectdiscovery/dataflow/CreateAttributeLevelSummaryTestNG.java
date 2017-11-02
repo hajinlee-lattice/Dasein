@@ -13,7 +13,7 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 public class CreateAttributeLevelSummaryTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     private CreateAttributeLevelSummaryParameters getStandardParameters() {
-        List<String> groupByCols = Arrays.asList(new String[] { "BusinessIndustry", "AverageProbability" });
+        List<String> groupByCols = Arrays.asList("BusinessIndustry", "AverageProbability");
         CreateAttributeLevelSummaryParameters params = new CreateAttributeLevelSummaryParameters("ScoredEventTable",
                 groupByCols, "Probability");
         params.aggregationType = "AVG";

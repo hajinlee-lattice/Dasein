@@ -53,21 +53,21 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private void postConstruct() {
         latestDataCloudVersionCache = WatcherCache.builder() //
                 .name("LatestDataCloudVersionCache") //
-                .watch(AMApiUpdate) //
+                .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(compatibleVersion -> requestLatestVersion((String) compatibleVersion)) //
                 .initKeys(new String[] { "" }) //
                 .build();
         enrichmentColumnsCache = WatcherCache.builder() //
                 .name("EnrichmentColumnsCache") //
-                .watch(AMApiUpdate) //
+                .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Enrichment, (String) dataCloudVersion)) //
                 .initKeys(() -> new String[] { requestLatestVersion("").getVersion() }) //
                 .build();
         segmentColumnsCache = WatcherCache.builder() //
                 .name("SegmentColumnsCache") //
-                .watch(AMApiUpdate) //
+                .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Segment, (String) dataCloudVersion)) //
                 .initKeys(() -> new String[] { requestLatestVersion("").getVersion() }) //
@@ -76,14 +76,14 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         columnCacheMap.put(Predefined.Segment, segmentColumnsCache);
         amStatsCache = WatcherCache.builder() //
                 .name("AMStatsCubeCache") //
-                .watch(AMApiUpdate) //
+                .watch(AMApiUpdate.name()) //
                 .maximum(5) //
                 .load(key -> getStatsObjectViaREST((String) key)) //
                 .initKeys(new String[] { STATS_CUBE, TOPN_TREE }) //
                 .build();
         premiumColumnsCache = WatcherCache.builder() //
                 .name("PremiumColumnsCache") //
-                .watch(AMApiUpdate) //
+                .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestPremiumColumns((String) dataCloudVersion)) //
                 .initKeys(() -> new String[] { requestLatestVersion("").getVersion() }) //

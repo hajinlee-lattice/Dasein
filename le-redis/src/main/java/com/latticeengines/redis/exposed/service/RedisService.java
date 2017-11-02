@@ -32,4 +32,6 @@ public interface RedisService {
 
     Future<Map<Object, Object>> getValuesAsync(String mapName, Set<Object> keys);
 
+    boolean fastPutValue(String mapName, Object key, Object value);
+
 }

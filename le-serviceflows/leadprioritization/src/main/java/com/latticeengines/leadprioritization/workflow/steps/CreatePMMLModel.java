@@ -179,7 +179,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
                 field.setType(Arrays.asList(fieldType.avroTypes()[0]));
             } else {
                 field.setName(pmmlField.miningField.getName().getValue());
-                field.setType(Arrays.asList(new String[] { "boolean" }));
+                field.setType(Arrays.asList("boolean"));
             }
 
             dataSchema.addField(field);
@@ -190,7 +190,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             UserDefinedType userType = sourceColumnTypes.get(name);
             Field field = new Field();
             field.setName(name);
-            field.setType(Arrays.asList(new String[] { userType.getAvroType().toString().toLowerCase() }));
+            field.setType(Arrays.asList(userType.getAvroType().toString().toLowerCase()));
             dataSchema.addField(field);
         }
         return JsonUtils.serialize(dataSchema);
@@ -239,15 +239,14 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             }
             AttributeMetadata attrMetadatum = new AttributeMetadata();
             attrMetadatum.setColumnName(columnName);
-            attrMetadatum.setApprovedUsage(
-                    Arrays.asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
+            attrMetadatum.setApprovedUsage(Arrays.asList(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE));
 
             if (field.getOpType() == OpType.CATEGORICAL || field.getOpType() == OpType.ORDINAL) {
                 attrMetadatum.setStatisticalType(ModelingMetadata.NOMINAL_STAT_TYPE);
             } else {
                 attrMetadatum.setStatisticalType(ModelingMetadata.RATIO_STAT_TYPE);
             }
-            attrMetadatum.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+            attrMetadatum.setTags(Arrays.asList(ModelingMetadata.INTERNAL_TAG));
             attrMetadata.add(attrMetadatum);
         }
         Map<String, List<AbstractMap.Entry<String, String>>> pivotValuesBySourceColumn = pivotValues.pivotValuesBySourceColumn;
@@ -258,11 +257,10 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             UserDefinedType userType = sourceColumnTypes.get(name);
             AttributeMetadata attrMetadatum = new AttributeMetadata();
             attrMetadatum.setColumnName(name);
-            attrMetadatum.setApprovedUsage(
-                    Arrays.asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
+            attrMetadatum.setApprovedUsage(Arrays.asList(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE));
             // pivot columns are always categorical
             attrMetadatum.setStatisticalType(ModelingMetadata.NOMINAL_STAT_TYPE);
-            attrMetadatum.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+            attrMetadatum.setTags(Arrays.asList(ModelingMetadata.INTERNAL_TAG));
 
             // build extension for pivot values
             List<Map<String, ?>> pValues = new ArrayList<>();

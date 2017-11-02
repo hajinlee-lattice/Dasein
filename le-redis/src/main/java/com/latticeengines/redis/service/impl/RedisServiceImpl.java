@@ -84,6 +84,11 @@ public class RedisServiceImpl implements RedisService {
         return getMap(mapName).getAllAsync(keys);
     }
 
+    @Override
+    public boolean fastPutValue(String mapName, Object key, Object value) {
+        return getMap(mapName).fastPut(key, value);
+    }
+
     private RMap<Object, Object> getMap(String mapName) {
         return redisson.getMap(mapName);
     }

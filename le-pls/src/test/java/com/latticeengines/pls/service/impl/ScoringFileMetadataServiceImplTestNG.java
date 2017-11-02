@@ -263,7 +263,7 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
                 fieldMappingDocument);
 
         assertEquals(table.getAttributes().size(),
-                5 + SchemaRepository.instance().matchingAttributes(SchemaInterpretation.Account).size());
+                5 + SchemaRepository.instance().getMatchingAttributes(SchemaInterpretation.Account).size());
         assertNotNull(table.getAttribute("C_1"));
         assertNotNull(table.getAttribute("C_2"));
     }

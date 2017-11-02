@@ -76,7 +76,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         MultiTenantContext.setTenant(tenant);
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
-        schemaTable.addAttributes(SchemaRepository.instance().matchingAttributes(BusinessEntity.valueOf(entity)));
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);

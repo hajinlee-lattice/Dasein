@@ -88,7 +88,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(configuration.getCustomerSpace().toString());
         String modelId = getModelId();
-        scoringConfig.setModelGuids(Arrays.asList(new String[] { modelId }));
+        scoringConfig.setModelGuids(Arrays.asList(modelId));
         scoringConfig.setSourceDataDir(getSourceDir());
         scoringConfig.setUniqueKeyColumn(getUniqueKeyColumn());
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), //

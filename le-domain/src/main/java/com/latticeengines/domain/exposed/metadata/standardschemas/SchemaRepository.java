@@ -41,43 +41,62 @@ public class SchemaRepository {
     }
 
     public Table getSchema(BusinessEntity entity) {
+        Table table = null;
         switch (entity) {
         case Account:
-            return getAccountSchema();
+            table = getAccountSchema();
+            break;
         case Contact:
-            return getContactSchema();
+            table = getContactSchema();
+            break;
         case Product:
-            return getProductSchema();
+            table = getProductSchema();
+            break;
         case Transaction:
-            return getTransactionSchema();
+            table = getTransactionSchema();
+            break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
+        table.addAttributes(matchingAttributes(entity));
+        return table;
     }
 
     public Table getSchema(SchemaInterpretation schema) {
+        Table table = null;
         switch (schema) {
         case SalesforceAccount:
-            return getSalesforceAccountSchema();
+            table = getSalesforceAccountSchema();
+            break;
         case SalesforceLead:
-            return getSalesforceLeadSchema();
+            table = getSalesforceLeadSchema();
+            break;
         case Account:
-            return getAccountSchema();
+            table = getAccountSchema();
+            break;
         case Contact:
-            return getContactSchema();
+            table = getContactSchema();
+            break;
         case Product:
-            return getProductSchema();
+            table = getProductSchema();
+            break;
         case TimeSeries:
-            return getTimeSeriesSchema();
+            table = getTimeSeriesSchema();
+            break;
         case Category:
-            return getCategorySchema();
+            table = getCategorySchema();
+            break;
         case Transaction:
-            return getTransactionSchema();
+            table = getTransactionSchema();
+            break;
         case TransactionDailyAggregation:
-            return getTransactionDailyAggregationSchema();
+            table = getTransactionDailyAggregationSchema();
+            break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
+        table.addAttributes(getMatchingAttributes(schema));
+        return table;
     }
 
     private Table getCategorySchema() {
@@ -871,7 +890,7 @@ public class SchemaRepository {
         return builder;
     }
 
-    public List<Attribute> matchingAttributes(SchemaInterpretation schema) {
+    public List<Attribute> getMatchingAttributes(SchemaInterpretation schema) {
         Attribute website = attr("Website") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "WEBSITE" })) //
                 .type(Schema.Type.STRING) //
@@ -964,9 +983,9 @@ public class SchemaRepository {
 
     public List<Attribute> matchingAttributes(BusinessEntity entity) {
         if (entity == BusinessEntity.Contact)
-            return matchingAttributes(SchemaInterpretation.Contact);
+            return getMatchingAttributes(SchemaInterpretation.Contact);
         if (entity == BusinessEntity.Account)
-            return matchingAttributes(SchemaInterpretation.Account);
+            return getMatchingAttributes(SchemaInterpretation.Account);
         return Collections.emptyList();
     }
 

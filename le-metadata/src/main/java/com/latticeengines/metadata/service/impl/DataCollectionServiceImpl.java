@@ -1,8 +1,6 @@
 package com.latticeengines.metadata.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLConsolidate;
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLProfile;
-
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -66,8 +65,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         dataCollectionEntityMgr.update(collection);
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
         notifyCacheWatchers(customerSpace);
-        cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.DataLakeCache,
-                CacheNames.EntityCache);
+        cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.DataLakeStatsCache,
+                CacheNames.DataLakeCMCache, CacheNames.EntityCountCache, CacheNames.EntityDataCache,
+                CacheNames.EntityRatingCountCache);
         return newVersion;
     }
 
@@ -210,15 +210,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     private void notifyCacheWatchers(String customerSpace) {
-        new Thread(() -> {
-            NodeWatcher.updateWatchedData(CDLProfile.name(), customerSpace);
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                log.warn("Thread sleep interrupted", e);
-            }
-            NodeWatcher.updateWatchedData(CDLConsolidate.name(), customerSpace);
-        }).run();
+        Arrays.asList(CacheNames.DataLakeStatsCache, CacheNames.DataLakeCMCache, CacheNames.EntityCountCache,
+                CacheNames.EntityDataCache, CacheNames.EntityRatingCountCache).stream().forEach(cache -> {
+                    NodeWatcher.notifyCacheWatchersAsync(cache.name(),
+                            String.format("%s|all|%s", CacheOperation.Put.name(), customerSpace));
+                    try {
+                        Thread.sleep(1000L);
+                    } catch (InterruptedException e) {
+                        log.warn("Thread sleep interrupted", e);
+                    }
+                });
     }
 
 }

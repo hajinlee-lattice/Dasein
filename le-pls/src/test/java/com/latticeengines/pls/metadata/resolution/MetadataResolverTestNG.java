@@ -76,13 +76,12 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
 
         Table table = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount);
-        table.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount));
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(table);
 
         Set<String> expectedUnknownColumns = Sets.newHashSet(
                 new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column", "Date" });
         expectedUnknownColumns
-                .addAll(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount).stream()
+                .addAll(SchemaRepository.instance().getMatchingAttributes(SchemaInterpretation.SalesforceAccount).stream()
                         .flatMap(attr -> attr.getAllowedDisplayNames().stream()).collect(Collectors.toSet()));
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -94,7 +93,6 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         resolver.setFieldMappingDocument(fieldMappingDocument);
 
         table = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount);
-        table.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount));
         resolver.calculateBasedOnFieldMappingDocument(table);
 
         assertTrue(resolver.isMetadataFullyDefined());
@@ -177,7 +175,6 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     public void getMappingFromDocument_mapUnknownColumnToIgnore_assertColumnsIgnored() {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
         Table table = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount);
-        table.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount));
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(table);
 
         assertFalse(resolver.isMetadataFullyDefined());
@@ -235,7 +232,6 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         table.getAttributeFromDisplayName("Some Column").setApprovedUsage(ApprovedUsage.NONE.toString());
 
         final Table schema = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead);
-        schema.addAttributes(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceLead));
         Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
             @Override
             public boolean apply(@Nullable Attribute attr) {

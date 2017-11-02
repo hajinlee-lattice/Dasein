@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.listeners;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CDLConsolidate;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -50,8 +51,18 @@ public class DataFeedExecutionListener extends LEJobListener {
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
-            cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.EntityCache);
-            NodeWatcher.updateWatchedData(CDLConsolidate.name(), customerSpace);
+            cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.EntityDataCache,
+                    CacheNames.EntityRatingCountCache);
+            Arrays.asList(CacheNames.EntityCountCache, CacheNames.EntityDataCache, CacheNames.EntityRatingCountCache)
+                    .stream().forEach(cache -> {
+                        NodeWatcher.notifyCacheWatchersAsync(cache.name(),
+                                String.format("%s|", CacheOperation.Put.name()));
+                        try {
+                            Thread.sleep(1000L);
+                        } catch (InterruptedException e) {
+                            log.warn("Thread sleep interrupted", e);
+                        }
+                    });
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
             DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);

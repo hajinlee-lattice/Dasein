@@ -72,7 +72,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         modelGuidString = "modelGuid";
         HdfsUtils.rmdir(yarnConfiguration, dir);
         rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
-        rtsBulkScoringConfig.setModelGuids(Arrays.asList(new String[] { modelGuidString }));
+        rtsBulkScoringConfig.setModelGuids(Arrays.asList(modelGuidString));
         rtsBulkScoringConfig.setModelType(ModelType.PYTHONMODEL.getModelType());
         rtsBulkScoringConfig.setEnableLeadEnrichment(true);
         rtsBulkScoringConfig.setScoreTestFile(true);

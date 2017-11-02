@@ -74,7 +74,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     private Table getTableFromParameters(SchemaInterpretation schemaInterpretation) {
         Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
-        table.addAttributes(SchemaRepository.instance().matchingAttributes(schemaInterpretation));
         if (plsFeatureFlagService.isFuzzyMatchEnabled()) {
             SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
                 Attribute domainAttribute = table.getAttribute(interfaceName);
@@ -132,7 +131,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SchemaRepository repository = SchemaRepository.instance();
         Table metadata = repository.getSchema(schema);
         List<Attribute> attributes = metadata.getAttributes();
-        attributes.addAll(repository.matchingAttributes(schema));
 
         ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
         ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
@@ -173,8 +171,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<Attribute> accountAttributes = SchemaRepository.instance()
                 .getSchema(SchemaInterpretation.SalesforceAccount).getAttributes();
         List<LatticeSchemaField> latticeAccountSchemaFields = new ArrayList<>();
-        accountAttributes
-                .addAll(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceAccount));
         for (Attribute accountAttribute : accountAttributes) {
             latticeAccountSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
         }
@@ -182,7 +178,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         List<Attribute> leadAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead)
                 .getAttributes();
-        leadAttributes.addAll(SchemaRepository.instance().matchingAttributes(SchemaInterpretation.SalesforceLead));
         List<LatticeSchemaField> latticeLeadSchemaFields = new ArrayList<>();
         for (Attribute leadAttribute : leadAttributes) {
             latticeLeadSchemaFields.add(getLatticeFieldFromTableAttribute(leadAttribute));
@@ -196,7 +191,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public List<LatticeSchemaField> getSchemaToLatticeSchemaFields(SchemaInterpretation schemaInterpretation) {
         List<LatticeSchemaField> latticeSchemaFields = new ArrayList<>();
         List<Attribute> attributes = SchemaRepository.instance().getSchema(schemaInterpretation).getAttributes();
-        attributes.addAll(SchemaRepository.instance().matchingAttributes(schemaInterpretation));
         for (Attribute accountAttribute : attributes) {
             latticeSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
         }

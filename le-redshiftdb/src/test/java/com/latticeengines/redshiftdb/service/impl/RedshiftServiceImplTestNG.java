@@ -107,7 +107,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
         redshiftTableConfig.setDistStyle(DistStyle.Key);
         redshiftTableConfig.setDistKey("lastmodifieddate");
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(Arrays.asList(new String[] { "id" }));
+        redshiftTableConfig.setSortKeys(Arrays.asList("id"));
         redshiftTableConfig.setS3Bucket(s3Bucket);
         redshiftService.createTable(redshiftTableConfig, schema);
         redshiftService.loadTableFromAvroInS3(TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);

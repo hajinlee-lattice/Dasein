@@ -51,7 +51,7 @@ public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
-        model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
+        model.setKeyCols(Arrays.asList(builder.getKeyColumn()));
         model.setDataFormat("avro");
         model.setTargetsList(Arrays.asList(builder.getTargets()));
         model.setFeaturesList(Arrays.asList(builder.getFeatureList()));

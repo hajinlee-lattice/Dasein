@@ -112,7 +112,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         scoringConfig.setEnableLeadEnrichment(configuration.getEnableLeadEnrichment());
         scoringConfig.setEnableDebug(configuration.getEnableDebug());
         scoringConfig.setScoreTestFile(configuration.getScoreTestFile());
-        scoringConfig.setModelGuids(Arrays.asList(new String[] { modelId }));
+        scoringConfig.setModelGuids(Arrays.asList(modelId));
         scoringConfig.setModelType(configuration.getModelType());
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
                 configuration.getCustomerSpace());

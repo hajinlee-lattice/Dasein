@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher;
 
 public class WatcherCache<K, V> {
 
@@ -73,6 +72,21 @@ public class WatcherCache<K, V> {
             loadKey(key);
         }
         return cache.getIfPresent(key);
+    }
+
+    public V getWithoutLoading(K key) {
+        if (cache == null) {
+            initialize();
+        }
+        return cache.getIfPresent(key);
+    }
+
+    public String getCacheName() {
+        return cacheName;
+    }
+
+    public Object getNativeCache() {
+        return cache;
     }
 
     public void scheduleInit(long duration, TimeUnit timeUnit) {
@@ -129,7 +143,8 @@ public class WatcherCache<K, V> {
                 log.info("Going to evict " + keysToEvict.size() + " keys.");
                 keysToEvict.forEach(cache::invalidate);
             }
-            Collection<K> keysToRefresh = new ArrayList<>(refreshKeyResolver.apply(watchedData, cache.asMap().keySet()));
+            Collection<K> keysToRefresh = new ArrayList<>(
+                    refreshKeyResolver.apply(watchedData, cache.asMap().keySet()));
             keysToRefresh.retainAll(cache.asMap().keySet());
             if (!keysToRefresh.isEmpty()) {
                 log.info("Going to refresh " + keysToRefresh.size() + " keys.");
@@ -141,6 +156,10 @@ public class WatcherCache<K, V> {
         }
     }
 
+    public synchronized void put(K key, V value) {
+        cache.put(key, value);
+    }
+
     private synchronized void loadKey(K key) {
         try {
             try {
@@ -148,6 +167,9 @@ public class WatcherCache<K, V> {
                 Thread.sleep(random.nextInt(3000));
             } catch (InterruptedException e) {
                 log.warn("Thread sleep interrupted.", e);
+            }
+            if (load == null) {
+                return;
             }
             V val = load.apply(key);
             if (val == null) {
@@ -189,8 +211,8 @@ public class WatcherCache<K, V> {
         }
 
         @SuppressWarnings("rawtypes")
-        public Builder watch(CamilleWatcher watcher) {
-            this.watcherName = watcher.name();
+        public Builder watch(String watcherName) {
+            this.watcherName = watcherName;
             return this;
         }
 

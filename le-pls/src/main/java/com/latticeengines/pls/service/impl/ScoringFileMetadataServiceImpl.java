@@ -113,7 +113,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
         List<Attribute> matchingAttributes = SchemaRepository.instance()
-                .matchingAttributes(getSchemaInterpretation(modelId));
+                .getMatchingAttributes(getSchemaInterpretation(modelId));
         matchingAttributes.removeIf(matchingAttr -> requiredAttributes.stream()
                 .anyMatch(requiredAttr -> requiredAttr.getInterfaceName() == matchingAttr.getInterfaceName()));
         requiredAttributes.addAll(matchingAttributes);
@@ -176,7 +176,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
         List<Attribute> matchingAttributes = SchemaRepository.instance()
-                .matchingAttributes(getSchemaInterpretation(modelId));
+                .getMatchingAttributes(getSchemaInterpretation(modelId));
         matchingAttributes
                 .removeIf(matchingAttr -> fieldMappingDocument.getIgnoredFields().contains(matchingAttr.getName())
                         || requiredAttributes.stream().anyMatch(

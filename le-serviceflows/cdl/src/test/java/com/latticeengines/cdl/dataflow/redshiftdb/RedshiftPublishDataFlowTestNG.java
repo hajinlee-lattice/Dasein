@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
@@ -20,10 +20,10 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
@@ -54,7 +54,7 @@ public class RedshiftPublishDataFlowTestNG extends ServiceFlowsDataFlowFunctiona
         redshiftTableConfig.setDistStyle(DistStyle.Key);
         redshiftTableConfig.setDistKey("lastmodifieddate");
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(Arrays.asList(new String[] { "id" }));
+        redshiftTableConfig.setSortKeys(Collections.singletonList("id"));
         RedshiftPublishDataFlowParameters parameters = new RedshiftPublishDataFlowParameters("SourceTable",
                 redshiftTableConfig);
         executeDataFlow(parameters);

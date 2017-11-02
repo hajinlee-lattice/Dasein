@@ -1,6 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,9 +25,9 @@ public class GroupAndExpandFieldsBufferUnitTestNG {
 
     @Test(groups = "unit")
     public void operate() {
-        GroupAndExpandFieldsBuffer buffer = new GroupAndExpandFieldsBuffer(3, "Category", Arrays.asList(new String[] {
-                "ML_%s_Topic", "ML_%s_User" }), new Fields("DomainID", "ML_Category1_Topic",
-                "ML_Category1_User", "ML_Category2_Topic", "ML_Category2_User"));
+        GroupAndExpandFieldsBuffer buffer = new GroupAndExpandFieldsBuffer(3, "Category",
+                Arrays.asList("ML_%s_Topic", "ML_%s_User"), new Fields("DomainID", "ML_Category1_Topic",
+                        "ML_Category1_User", "ML_Category2_Topic", "ML_Category2_User"));
         BufferCall<?> bufferCall = mock(BufferCall.class);
 
         Fields fields = new Fields("DomainID");

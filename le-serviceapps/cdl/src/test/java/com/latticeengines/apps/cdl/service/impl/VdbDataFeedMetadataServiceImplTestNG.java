@@ -81,7 +81,6 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     @Test(groups = "functional", dependsOnMethods = "testGetMetadata")
     public void testResolveMetadata() {
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.Account);
-        schemaTable.addAttributes(SchemaRepository.instance().matchingAttributes(BusinessEntity.Account));
 
         resolvedTable = vdbDataFeedMetadataService.resolveMetadata(testTable, schemaTable);
         Assert.assertNotNull(resolvedTable);
