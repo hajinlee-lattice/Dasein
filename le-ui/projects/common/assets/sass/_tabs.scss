@@ -1,56 +1,3 @@
-/* 
-Tabs
-==================================================== */
-.tabs {
-  position: relative;   
-  min-height: 410px; /* This part sucks */
-  clear: both;
-  margin: 25px 0;
-}
-.tab {
-  float: left;
-}
-.tab > label {
-  padding: 12px 16px;  
-  margin-left: -1px; 
-  position: relative;
-  left: 1px; 
-  display: inline;
-}
-.tab > [type=radio] {
-  display: none;   
-}
-.content {
-  position: absolute;
-  top: 28px;
-  left: 0;
-  right: 0;
-  background: white;
-  bottom: 0;
-  padding-top: 20px;
-  border-top: 1px solid #ccc; 
-  &:after {
-    display: table;
-    content: "";
-    clear: both;
-  }
-}
-[type=radio]:checked ~ label {
-  background: white;
-  color: #498ad4;
-  border-top: 1px solid #ccc; 
-  border-left: 1px solid #ccc; 
-  border-right: 1px solid #ccc; 
-  border-bottom: 1px solid white;
-  z-index: 2;
-  outline: none;
-  border: none;
-}
-[type=radio]:checked ~ label ~ .content {
-  z-index: 1;
-}
-
-
 /*
 Simple Tabs
 ==================================== */
@@ -82,9 +29,6 @@ ul.tabs_ {
         }
     }
 }
-
-
-
 
 
 /* 
@@ -176,3 +120,226 @@ Link Tabs
     }
   }
 }
+
+
+
+/*
+Chunky Interior Tabs (My Data, Play List, etc...)
+================================================== */
+.tabs.interior {
+    @include flex-container;
+    position: relative;
+    z-index: 3;
+    &:hover {
+        z-index: 6;
+    }
+    border-top: 1px solid #d0d1d0;
+    border-bottom: 1px solid #d0d1d0;
+    background: #efefef;
+    margin-top: 0;
+    margin-bottom: 2em;
+    & > ul {
+        @include flex-container;
+        @include flex-item(1 1 auto);
+        border-left: 1px solid #d0d1d0;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        & > li {
+            @include flex-item(1 1 auto);
+            border-right: 1px solid #d0d1d0;
+            font-size: 9px;
+            position: relative;
+            height: 73px;
+            min-width: 237px;
+            max-width: 320px;
+            cursor: pointer;
+            .tab-container {
+                margin: 0;
+                padding: 14px 20px;
+                border-top: 5px solid transparent;
+                border-bottom: 1px solid transparent;
+                height: calc(100% + 1px);
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2;
+                cursor: pointer;
+            }
+            &:last-child {
+                border-right: 1px solid #d0d1d0;
+            }
+            &.active {
+                background: #fafafa;
+                pointer-events: none;
+                .more-info {
+                    pointer-events: all;
+                    z-index: 999;
+                }
+                .tab-container {
+                    border-top-color: orange;
+                    border-bottom-color: transparent;
+                    background: #fafafa;
+                    z-index: 1;
+                    //cursor: default;
+                }
+            }
+            .count {
+                color: #26649b;
+                font-size: 18px;
+            }
+            &.disabled {
+                display: none;
+            }
+            .enrichmentCounts {
+                    white-space: nowrap;
+                    text-transform: uppercase;
+                    .count {
+                        margin-right: 5px;
+                        &:not(:first-child) {
+                            margin-left: 5px;
+                            padding-left: 5px;
+                            border-left: 1px solid #d0d1d0;
+                        }
+                    }
+                }
+            & > .tab-container > h2 {
+                position: relative;
+                &:after {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+                    transform: translateY(-50%);
+                    margin-top: -1px;
+                    height: 20px;
+                    width: 20px;
+                    background-size: contain;
+                }
+            }
+            &.tab-browse {
+                .tab-container > h2 {
+                    padding-left: 24px;
+                    &:after {
+                        height: 16px;
+                        width: 16px;
+                        background: url(/assets/images/enrichments/tabs/attribute.png) no-repeat center center;
+                    }
+                }
+            }
+            &.tab-edit {
+                .tab-container > h2 {
+                    padding-left: 24px;
+                    &:after {
+                        height: 16px;
+                        width: 16px;
+                        background: url(/assets/images/enrichments/tabs/accounts.png) no-repeat center center;
+                    }
+                }
+            }
+            &.tab-team {
+                .tab-container > h2 {
+                    padding-left: 24px;
+                    &:after {
+                        height: 16px;
+                        width: 16px;
+                        background: url(/assets/images/enrichments/tabs/contacts.png) no-repeat center center;
+                    }
+                }
+            }
+            &.tab-lookup {
+                &.active {
+                    pointer-events: none;
+                }
+                h2 {
+                    position: relative;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    padding: 0;
+                    text-align: center;
+                }
+            }
+            h2, h3 {
+                font-weight: normal;
+            }
+            h2 {
+                font-size: 14px;
+            }
+            h3 {
+                font-size: 18px;
+                color: white;
+            }
+            .more-info {
+                padding: 0;
+                text-align: center;
+                width: 12px;
+                height: 12px;
+                position: relative;
+                top: -1px;
+                .tooltip_ {
+                    text-align: left;
+                    h3 {
+                        margin-bottom: 25px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+// /* 
+// Tabs
+// ==================================================== */
+// .tabs {
+//   position: relative;   
+//   min-height: 410px; /* This part sucks */
+//   clear: both;
+//   margin: 25px 0;
+// }
+// .tab {
+//   float: left;
+// }
+// .tab > label {
+//   padding: 12px 16px;  
+//   margin-left: -1px; 
+//   position: relative;
+//   left: 1px; 
+//   display: inline;
+// }
+// .tab > [type=radio] {
+//   display: none;   
+// }
+// .content {
+//   position: absolute;
+//   top: 28px;
+//   left: 0;
+//   right: 0;
+//   background: white;
+//   bottom: 0;
+//   padding-top: 20px;
+//   border-top: 1px solid #ccc; 
+//   &:after {
+//     display: table;
+//     content: "";
+//     clear: both;
+//   }
+// }
+// [type=radio]:checked ~ label {
+//   background: white;
+//   color: #498ad4;
+//   border-top: 1px solid #ccc; 
+//   border-left: 1px solid #ccc; 
+//   border-right: 1px solid #ccc; 
+//   border-bottom: 1px solid white;
+//   z-index: 2;
+//   outline: none;
+//   border: none;
+// }
+// [type=radio]:checked ~ label ~ .content {
+//   z-index: 1;
+// }

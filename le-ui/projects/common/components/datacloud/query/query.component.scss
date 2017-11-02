@@ -68,16 +68,6 @@
             font-weight: normal;
         }
 
-        th {
-            text-transform: uppercase;
-            border: none;
-            background: transparent;
-            &.sortable {
-                &:hover {
-                    cursor: pointer;
-                }   
-            }
-        }
 
 
         .results-table-item-company,

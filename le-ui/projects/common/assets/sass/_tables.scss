@@ -25,14 +25,22 @@ table {
     border-spacing: 0;
     vertical-align: baseline;
     width: 100%;
-    tbody tr {
-        border-bottom: $palladium solid 1px;
-        background: #fff;
-        &:nth-child(odd) {
-            background: #f9f9f9;
-        }
-        &:last-child {
-            border-bottom: none;
+    thead {
+        border-color: #D0D1D0;
+        border-style: solid;
+        border-width: 1px 0 1px 0;
+    }
+    tbody {
+        border-top: #F3F3F3 solid 1px;
+        tr {
+            border-bottom: $palladium solid 1px;
+            background: #fff;
+            &:nth-child(odd) {
+                background: #f9f9f9;
+            }
+            &:last-child {
+                border-bottom: none;
+            }
         }
     }
     td, th {
@@ -41,7 +49,13 @@ table {
     th {
         padding: 4px 10px; 
         font-weight: bold;
-        border-bottom: #d0d2d3 solid 3px;
+        line-height: 1.25;
+        vertical-align: bottom;
+        &.sortable {
+            &:hover {
+                cursor: pointer;
+            }   
+        }
     }
     td {
         padding: 7px 10px;

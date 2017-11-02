@@ -129,6 +129,8 @@ angular.module('common.datacloud.query.results', [
             vm.loading = false;
         }
 
+        console.log(vm.page);
+
         if(vm.page === 'Accounts' || vm.page === 'Available Targets' || vm.page === 'Playbook'){
             QueryStore.GetCountByQuery('accounts').then(function(data){ 
             

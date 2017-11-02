@@ -7,40 +7,50 @@ angular.module('lp.playbook.dashboard.launch_history', [])
     angular.extend(vm, {
         stored: PlaybookWizardStore.settings_form,
         launches: LaunchHistoryData,
-        suppressed: 0,
-        totalRecoGen: 0,
-        errors: 0,
-        expired: 0,
-        disqualified: 0,
-        totalSuppressed: 0
+        cumulativeStats: LaunchHistoryData.cumulativeStats,
+        summaryData: {},
+        launching: false
     });
 
     vm.init = function() {
-        if($stateParams.play_name) {
-            PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
 
-                console.log(play);
+        console.log($state);
 
-                vm.stored.play_name = play.name;
-                vm.stored.play_display_name = play.displayName;
-                vm.stored.play_description = play.description;
-                if(vm.stored.play_name) {
-                    PlaybookWizardStore.setValidation('settings', true);
-                }
-
-
-                for (var i = 0; i < vm.launches.length; i++) {
-                    vm.totalRecoGen = vm.totalRecoGen + vm.launches[i].accountsNum;
-                    vm.totalSuppressed = 0;
-                }
-
-
-           });
+        if($state.current.name === 'home.playbook.plays.launch_history'){
+            vm.allPlaysHistory = true;
+        } else {
+            vm.allPlaysHistory = false;
         }
 
-        vm.totalSuppressed = function(){
-            
-        };
+        // if($stateParams.play_name) {
+        //     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+
+        //         // console.log(play);
+
+        //         vm.stored.play_name = play.name;
+        //         vm.stored.play_display_name = play.displayName;
+        //         vm.stored.play_description = play.description;
+        //         if(vm.stored.play_name) {
+        //             PlaybookWizardStore.setValidation('settings', true);
+        //         }
+
+
+        //         for (var i = 0; i < vm.launches.length; i++) {
+        //             vm.totalRecoGen = vm.totalRecoGen + vm.launches[i].accountsNum;
+        //             vm.totalSuppressed = 0;
+        //         }
+
+
+        //    });
+        // }
+
+        vm.summaryData = {
+            selectedTargets: vm.cumulativeStats.selectedTargets,
+            suppressed: vm.cumulativeStats.suppressed,
+            errors: vm.cumulativeStats.errors,
+            recommendationsLaunched: vm.cumulativeStats.recommendationsLaunched,
+            contactsWithinRecommendations: vm.cumulativeStats.contactsWithinRecommendations
+        }
 
         console.log(vm.launches);
 
@@ -48,7 +58,18 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
     vm.play_name_required = function(){
         return !vm.stored.play_display_name;
-    }
+    };
+
+    vm.relaunchPlay = function() {
+
+        vm.launching = true;
+
+        PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+            PlaybookWizardStore.launchPlay(play).then(function(result){
+                $state.reload();
+            });
+        });
+    };
 
     vm.checkValidDelay = function(form) {
         $timeout(function() {

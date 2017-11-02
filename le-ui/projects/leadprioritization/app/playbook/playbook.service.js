@@ -215,16 +215,18 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.getPlayLaunches = function(play_name, launch_state) {
+    this.getPlayLaunches = function(play_name) {
+
         var deferred = $q.defer();
         if(this.playLaunches) {
             return this.playLaunches;
         } else {
-            PlaybookWizardService.playLaunches(play_name, launch_state).then(function(data){
+            PlaybookWizardService.playLaunches(play_name).then(function(data){
                 deferred.resolve(data);
             });
             return deferred.promise;
         }
+        
     }
     this.launchPlay = function(play) {
         var deferred = $q.defer();
@@ -385,14 +387,16 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.playLaunches = function(play_name, launch_state) {
+    this.playLaunches = function(play_name) {
         var deferred = $q.defer();
         $http({
             method: 'GET',
-            url: this.host + '/play/' + play_name + '/launches',
+            url: this.host + '/play/launches/dashboard/',
             params: {
                 playName: play_name,
-                launchStates: launch_state
+                startTimestamp: 0,
+                offset: 0,
+                max: 10
             }
         }).then(function(response){
             deferred.resolve(response.data);

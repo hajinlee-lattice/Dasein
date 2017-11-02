@@ -1,40 +1,52 @@
 
 
 <section class="playbook playbook-launch-history container">
+    <div class="card-content">
 
-    <div class="header">
-        <h2>{{vm.totalRecoGen | number}}</h2>
-        <h3>Total Recommendations Generated</h3>
-    </div>
-    <ul class="history-metadata">
-    	<li>
-    		<dl>
-    			<dt>Errors</dt>
-    			<dd class="blue-text">{{vm.errors | number}}</dd>
-    		</dl>
-    	</li>
-    	<li>
-    		<dl>
-    			<dt>Suppressed</dt>
-    			<dd class="blue-text">{{vm.suppressed | number}}</dd>
-    		</dl>
-    	</li>
-    	<li>
-    		<dl>
-    			<dt>Expired</dt>
-    			<dd class="blue-text">{{vm.expired | number}}</dd>
-    		</dl>
-    	</li>
-    	<li>
-    		<dl>
-    			<dt>Disqualified</dt>
-    			<dd class="blue-text">{{vm.disqualified | number}}</dd>
-    		</dl>
-    	</li>
-    </ul>
-    <div class="table">
+        <select 
+            ng-if="vm.allPlaysHistory"
+            name="category-group" 
+            id="categoryGroup" 
+            ng-model="itemSelected" 
+            ng-change="onCategoryChange(itemSelected)" 
+            ng-options="category.name group by category.group for category in categories">
+        </select>
+
+        <ul class="history-metadata">
+        	<li>
+        		<dl>
+        			<dt>Selected Targets</dt>
+        			<dd class="blue-text">{{vm.summaryData.selectedTargets | number}}</dd>
+        		</dl>
+        	</li>
+        	<li>
+        		<dl>
+        			<dt>Suppressed</dt>
+        			<dd class="red-text">{{vm.summaryData.suppressed | number}}</dd>
+        		</dl>
+        	</li>
+            <li>
+                <dl>
+                    <dt>Errors</dt>
+                    <dd class="red-text">{{vm.summaryData.errors | number}}</dd>
+                </dl>
+            </li>
+        	<li>
+        		<dl>
+        			<dt>Launched Recommendations</dt>
+        			<dd class="green-text">{{vm.summaryData.recommendationsLaunched | number}}</dd>
+        		</dl>
+        	</li>
+        	<li>
+        		<dl>
+        			<dt>Contacts within Recommendations</dt>
+        			<dd class="green-text">{{vm.summaryData.contactsWithinRecommendations | number}}</dd>
+        		</dl>
+        	</li>
+        </ul>
+
     	<div class="table-metadata">
-    		<span class="blue-text">{{vm.launches.length}}</span> play launches resulting in <span class="blue-text">{{vm.totalRecoGen | number}}</span> total recommendations.
+    		{{vm.launches.launchSummaries.length}} play launches
     	</div>
     	<!-- <div class="pagination">
     		pagination is here
@@ -43,25 +55,50 @@
     	<table>
     		<thead>
     			<tr>
-    				<th>Launch Time</th>
+    				<th>Launch Date</th>
     				<th>Selected Targets</th>
-    				<th>Supressed</th>
-    				<th>Launched</th>
-    				<th>Contacts within Recommendation</th>
+    				<th>Suppressed</th>
+                    <th>Errors</th>
+    				<th>Recommendation <br/>Launched</th>
+    				<th>Contacts within <br/>Recommendation</th>
+                    <th>Status</th>
     			</tr>
     		</thead>
     		<tbody>
-    			<tr ng-repeat="launch in vm.launches">
-    				<td>{{launch.updated | date}}</td>
-    				<td>{{launch.contactsLaunched | number}}</td>
-    				<td>{{vm.totalSuppressed | number}}</td>
-    				<td>{{launch.accountsLaunched | number}}</td>
-    				<td>{{launch.contactsLaunched | number}}</td>
+    			<tr ng-repeat="launch in vm.launches.launchSummaries">
+    				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
+
+    				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
+    				<td class="red-text">{{launch.stats.suppressed | number}}</td>
+    				<td class="red-text">{{launch.stats.errors | number}}</td>
+                    <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
+    				<td class="green-text">{{launch.stats.contactsWithinRecommendations | number}}</td>
+                    <td>
+                        <span class="fa fa-check" ng-if="launch.launchState === 'Launched'"></span>
+                        <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching'"></span>
+                        {{launch.launchState}}
+                    </td>
     			</tr>
     		</tbody>
     	</table>
-    </div>
 
+    </div><!-- End .content -->
+    <div class="card-footer">
+        <button 
+            type="button"
+            class="button blue-button pull-right"
+            ng-if="!vm.launching"
+            ng-click="vm.relaunchPlay()">
+            Re-Launch
+        </button>
+        <button 
+            type="button"
+            class="button blue-button pull-right"
+            ng-if="vm.launching"
+            disabled>
+            <span class="fa fa-spinner fa-pulse fw"></span> Launching...
+        </button>
+    </div><!-- End .footer -->
 </section>
 
 

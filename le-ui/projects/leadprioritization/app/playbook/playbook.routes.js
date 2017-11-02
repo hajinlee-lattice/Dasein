@@ -2,6 +2,7 @@ angular
 .module('lp.playbook', [
     'common.wizard',
     'lp.cg.talkingpoint',
+    'lp.playbook.playlisttabs',
     'lp.playbook.plays',
     'lp.playbook.dashboard',
     'lp.playbook.dashboard.launch_history',
@@ -24,6 +25,17 @@ angular
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Playbook'
             },
+            views: {
+                "summary@": {
+                    controller: 'PlayListTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/playList/tabs/playlisttabs.component.html'
+                }
+            },
+            redirectTo: 'home.playbook.plays.list'
+        })
+        .state('home.playbook.plays.list', {
+            url: '/list',
             resolve: {
                 PlayList: function($q, PlaybookWizardService) {
                     var deferred = $q.defer();
@@ -40,6 +52,26 @@ angular
                     controller: 'PlayListController',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/playList/playList.component.html'
+                }
+            }
+        })
+        .state('home.playbook.plays.launch_history', {
+            url: '/launch_history',
+            resolve: {
+                LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+                    PlaybookWizardStore.getPlayLaunches($stateParams.play_name).then(function(result){
+                        console.log(result);
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'main@': {
+                    controller: 'PlaybookDashboardLaunchHistory',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/launch_history/launch_history.component.html'
                 }
             }
         })
@@ -330,7 +362,7 @@ angular
             resolve: {
                 LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
                     var deferred = $q.defer();
-                    PlaybookWizardStore.getPlayLaunches($stateParams.play_name, "Launched").then(function(result){
+                    PlaybookWizardStore.getPlayLaunches($stateParams.play_name).then(function(result){
                         console.log(result);
                         deferred.resolve(result);
                     });
