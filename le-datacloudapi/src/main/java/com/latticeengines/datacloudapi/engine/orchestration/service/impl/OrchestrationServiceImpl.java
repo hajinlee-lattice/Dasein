@@ -231,4 +231,20 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         publicationService.kickoff(stage.getEngineName(), request);
     }
 
+    @Override
+    public DataCloudEngineStage getDataCloudEngineStatus(DataCloudEngineStage stage) {
+        if (StringUtils.isBlank(stage.getEngineName()) || StringUtils.isBlank(stage.getEngine().name())
+                || StringUtils.isBlank(stage.getVersion())) {
+            throw new RuntimeException(
+                    "Required fields are not populated. Expected fields are engineName, engine and version");
+        }
+        DataCloudEngineService engineService = serviceMap.get(stage.getEngine());
+        if (engineService == null) {
+            throw new UnsupportedOperationException(String
+                    .format("Specified engine name %s is not supported.", stage.getEngine().name()));
+        }
+        DataCloudEngineStage status = engineService.findProgressAtVersion(stage);
+        return status;
+    }
+
 }
