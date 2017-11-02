@@ -1,17 +1,17 @@
-<table class="readonly-table" ng-if="readonly && !isObject">
+<table class="readonly-table" ng-if="readonly && !isObject && !editing">
     <td class="readonly-label">
         <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
         <span class="node">{{ config.Node }} :</span>
     </td>
     <td>
         <span ng-show="!isList && !isPassword">{{ config.Data }}</span>
-        <span ng-show="isList">{{ listData }}</span>
+        <span ng-show="isList">{{ config.Data }}</span>
         <span ng-show="isPassword" class="text-muted">encrypted</span>
     </td>
 </table>
 
 <form name="configform" ng-hide="isObject || isList" class="form-inline" ng-class='{"has-error": showError}' novalidate>
-    <div ng-if="!readonly">
+    <div ng-if="!readonly || editing">
         <label class="control-label">
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
             {{ config.Node }}<span ng-if="required" class="required-mark">*</span>
@@ -38,7 +38,7 @@
     </div>
 </form>
 
-<list-entry ng-if="isList" is-valid="isValid" readonly="readonly" config="config"></list-entry>
+<list-entry ng-if="isList" is-valid="isValid" readonly="readonly" config="config" editing="editing"></list-entry>
 
 <div uib-accordion-group class="panel-default" ng-if="isObject" ng-init="isOpen = !readonly" is-open="isOpen">
     <uib-accordion-heading class="accordion-heading" is-open="isOpen">

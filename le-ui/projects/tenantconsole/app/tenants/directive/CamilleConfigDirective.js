@@ -15,7 +15,7 @@ app.directive('componentsConfig', function(){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/ComponentsConfigView.html',
-        scope: {data: '=', isValid: '=', readonly: '='},
+        scope: {data: '=', isValid: '=', readonly: '=', editing: '='},
         controller: function($scope, TenantUtility){
             $scope.TenantUtility = TenantUtility;
             $scope.getStatusHtml = function(state) {
@@ -29,7 +29,7 @@ app.directive('camilleConfig', function(RecursionCompiler, TenantUtility){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/CamilleConfigView.html',
-        scope: {config: '=', isValid: '=', readonly: '='},
+        scope: {config: '=', isValid: '=', readonly: '=', editing: '='},
         controller: function($scope){
             $scope.TenantUtility = TenantUtility;
 
@@ -52,7 +52,7 @@ app.directive('configEntry', function(){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/ConfigEntryView.html',
-        scope: {config: '=', isValid: '=', isOpen: '=', expandable: '=', readonly: '='},
+        scope: {config: '=', isValid: '=', isOpen: '=', expandable: '=', readonly: '=', editing: '='},
         controller: function($scope, $rootScope, CamilleConfigUtility){
             if (!$scope.config.hasOwnProperty("Data") && !$scope.config.hasOwnProperty("Children")) {
                 $scope.config.Data = "";

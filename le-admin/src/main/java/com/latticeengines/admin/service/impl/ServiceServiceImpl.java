@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -166,12 +167,9 @@ public class ServiceServiceImpl implements ServiceService {
 
     public Boolean patchDefaultConfigWithoutValidation(String serviceName, String nodePath, String data) {
         try {
-            Camille camille = CamilleEnvironment.getCamille();
             Path configPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), serviceName);
             configPath = configPath.append(new Path(nodePath));
-            Document doc = camille.get(configPath);
-            doc.setData(data);
-            camille.set(configPath, doc);
+            patchConfig(configPath, data);
             return true;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_19101, String.format(
@@ -266,4 +264,25 @@ public class ServiceServiceImpl implements ServiceService {
         }
         return true;
     }
+
+	@Override
+	public Boolean patchTenantServiceConfig(String tenantId, String serviceName, String nodePath, String data) {
+		try {
+            Path configPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),tenantId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
+            configPath = configPath.append(new Path(nodePath));
+            patchConfig(configPath, data);
+            return true;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_19101, String.format(
+                    "Failed to patch configuration for node %s in component %s for tenant %s", nodePath, serviceName, tenantId), e);
+        }
+	}
+
+	private void patchConfig(Path configPath, String data) throws Exception {
+		Camille camille = CamilleEnvironment.getCamille();
+        Document doc = camille.get(configPath);
+        doc.setData(data);
+        camille.set(configPath, doc);
+	}
+
 }

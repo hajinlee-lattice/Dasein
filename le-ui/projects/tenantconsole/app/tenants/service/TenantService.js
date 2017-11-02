@@ -252,5 +252,40 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
         return this.PostFeatureFlags(tenantId, featureFlags);
     };
 
+    this.PostComponents = function (tenantId, components) {
+        var defer = $q.defer();
+
+        var result = {
+            success: false,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'POST',
+            url: '/admin/internal/'+tenantId+'/components',
+            headers: {
+                'MagicAuthentication': "Security through obscurity!"
+            },
+            data: components
+        }).success(function (data) {
+            result.success = true;
+            result.resultObj = data;
+
+            defer.resolve(result);
+        }).error(function (err, status) {
+            SessionUtility.handleAJAXError(err, status);
+
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
+    this.UpdateComponents = function (tenantId, components) {
+        return this.PostComponents(tenantId, components);
+    };
+
 });
 

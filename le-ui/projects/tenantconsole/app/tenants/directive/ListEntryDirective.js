@@ -6,7 +6,7 @@ app.directive('listEntry', function(){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/ListEntryView.html',
-        scope: {config: '=', isValid: '=', readonly: '='},
+        scope: {config: '=', isValid: '=', readonly: '=', editing: '= '},
         controller: function($scope){
             $scope.list = _.map(JSON.parse($scope.config.Data), function(str){
                 return {value: str};

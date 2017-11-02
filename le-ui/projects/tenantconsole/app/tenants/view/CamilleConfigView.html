@@ -1,10 +1,10 @@
 <config-entry ng-if="!hasChildren"
-              is-valid="isValid" expandable="false" readonly="readonly"
+              is-valid="isValid" expandable="false" readonly="readonly" editing="editing"
               class="config-entry" config="config"></config-entry>
 
 <div uib-accordion-group class="panel-default" ng-if="hasChildren" ng-init="isOpen = !readonly" is-open="isOpen">
     <uib-accordion-heading class="accordion-heading" is-open="isOpen">
-        <config-entry expandable="true" is-valid="isValid" is-open="isOpen" readonly="readonly" config="config"></config-entry>
+        <config-entry expandable="true" is-valid="isValid" is-open="isOpen" readonly="readonly" config="config" editing="editing"></config-entry>
     </uib-accordion-heading>
-    <camille-config config="child" is-valid="isValid" readonly="readonly" ng-repeat="child in config.Children"></camille-config>
+    <camille-config config="child" is-valid="isValid" readonly="readonly" ng-repeat="child in config.Children" editing="editing"></camille-config>
 </div>

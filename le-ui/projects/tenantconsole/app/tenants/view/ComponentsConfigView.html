@@ -6,6 +6,6 @@
             <span ng-if="readonly" ng-bind-html="getStatusHtml(component.State.state)"></span>
         </uib-accordion-heading>
         <p ng-if="component.Message">{{ component.Message }}</p>
-        <camille-config ng-hide="component.Message" config="config" is-valid="isValid" readonly="readonly" ng-repeat="config in component.Nodes"></camille-config>
+        <camille-config ng-hide="component.Message" config="config" is-valid="isValid" readonly="readonly" editing="editing" ng-repeat="config in component.Nodes"></camille-config>
     </div>
 </uib-accordion>

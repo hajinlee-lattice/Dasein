@@ -124,11 +124,13 @@
         <br/>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages below.</p>
         <br/>
-        <components-config data="selectedComponents" readonly="readonly" is-valid="isValid"></components-config>
+        <components-config data="selectedComponents" readonly="readonly" is-valid="isValid" editing="isEditingComponents"></components-config>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages above.</p>
         <button class="btn btn-primary" ng-if="new" ng-disabled="!isValid.valid" ng-click="onSaveClick()">INSTALL</button>
         <button class="btn btn-primary" ng-if="!new" ng-click="onDeleteClick()"><i class="fa fa-trash-o"></i> DELETE</button>
-        <br/>
+        <button class="btn btn-primary" ng-if="!new && !isEditingComponents" ng-click="editComponents()">EDIT</button>
+        <button class="btn btn-primary" ng-if="isEditingComponents" ng-click="saveComponents()">SAVE</button>
+        <button class="btn btn-primary" ng-if="isEditingComponents" ng-click="cancelComponents()">CACEL</button>
         <br/>
     </div>
 </div>

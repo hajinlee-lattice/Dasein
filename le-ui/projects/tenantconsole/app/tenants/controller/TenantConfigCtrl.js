@@ -641,6 +641,80 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         }
     }
 
+
+    $scope.isEditingComponents = false;
+    var componentsBackUp = null;
+
+    $scope.editComponents = function () {
+    	backupComponents();
+        $scope.isEditingComponents = true;
+    };
+    $scope.saveComponents = function () {
+    	 $scope.ComponentsUpdateError = null;
+
+         var componentsToUpdate = {};
+         if (componentsBackup) {
+             _.each($scope.selectedComponents, function (component) {
+                 if (componentsBackup[component.Component] !== undefined) {
+                	 var copy = componentsBackup[component.Component];
+                	 var update = {};
+                	 _.each(component.Nodes, function(node)  {
+                		 if(copy[node.Node] !== undefined) {
+                		     if (copy[node.Node] !== node.Data) {
+                		    	 update['/'+ node.Node] = angular.copy(node.Data);
+                		     }
+                		 }
+                	 });
+                	 if (!angular.equals(update, {})) {
+                         componentsToUpdate[component.Component] = update;
+                	 }
+                 }
+                 
+             });
+         }
+
+         TenantService.UpdateComponents($scope.tenantId, componentsToUpdate)
+             .then(function(results) {
+                $scope.isEditingComponents = false;
+                componentsBackup = null;
+             }).catch(function(error) {
+                 if (error && error.errorMsg) {
+                     $scope.componentsUpdateError = 'Error updating feature flag. ' + error.errMsg.errorCode + ': '+ error.errMsg.ErrorMsg;
+                 } else {
+                     $scope.componentsUpdateError = 'Error updating feature flag';
+                 }
+             });
+    };
+    $scope.cancelComponents = function () {
+    	undoComponentsChanges();
+        $scope.isEditingComponents = false;
+        $scope.componentsUpdateError = null;
+    };
+    function backupComponents() {
+        componentsBackup = {};
+        _.each($scope.selectedComponents, function (component) {
+        	var copy = {};
+        	_.each(component.Nodes, function(node)  {
+        		copy[node.Node] = angular.copy(node.Data);
+        	});
+        	componentsBackup[component.Component]=copy;
+        });
+    }
+    function undoComponentsChanges() {
+        if (componentsBackup) {
+            _.each($scope.selectedComponents, function (component) {
+            	if (componentsBackup[component.Component] !== undefined) {
+            		var copy = componentsBackup[component.Component];
+            		_.each(component.Nodes, function (node) {
+            		    if (copy[node.Node] !== undefined) {
+            		    	node.Data = copy[node.Node];
+            		    }
+            	    });
+            	}
+            });
+            componentsBackup = null;
+        }
+    }
 });
 
 

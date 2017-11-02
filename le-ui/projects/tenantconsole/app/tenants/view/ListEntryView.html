@@ -1,5 +1,5 @@
 <form name="configform" class="form-inline list-entry-form" ng-class='{"has-error": showError}' novalidate>
-    <div ng-if="!readonly">
+    <div ng-if="!readonly || editing">
         <label class="control-label">
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
             {{ config.Node }}

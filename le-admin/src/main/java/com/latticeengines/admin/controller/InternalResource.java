@@ -3,7 +3,10 @@ package com.latticeengines.admin.controller;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,6 +30,8 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Components.ComponentsMap;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -176,5 +181,19 @@ public class InternalResource {
             userName = tokens[0];
         }
         return userName;
+    }
+
+    @RequestMapping(value = "/{tenantId}/components", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Set components for a tenant")
+    public Boolean setComponents(@PathVariable String tenantId, @RequestBody ComponentsMap components) {
+        for (HashMap.Entry<String, HashMap<String, String>> entry : components.entrySet()) {
+            String service = entry.getKey();
+            HashMap<String, String> nodes = entry.getValue();
+            for (HashMap.Entry<String, String> node : nodes.entrySet()) {
+                 serviceService.patchTenantServiceConfig(tenantId, service, node.getKey(), node.getValue());
+            }
+        }
+        return true;
     }
 }

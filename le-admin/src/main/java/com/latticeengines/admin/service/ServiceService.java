@@ -31,4 +31,6 @@ public interface ServiceService {
     Boolean patchNewConfig(String serviceName, AccessLevel level, String emails);
 
     Boolean reduceConfig(String serviceName, String emails);
+
+	Boolean patchTenantServiceConfig(String tenantId, String service, String key, String value);
 }
