@@ -84,6 +84,9 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                     } else if (interfaceAttr.getAllowedDisplayNames().contains(vdbAttrName.toUpperCase()
                             .replace(" ", "_"))) {
                         matched = true;
+                    } else if (interfaceAttr.getAllowedDisplayNames().contains(vdbAttrName.toUpperCase()
+                            .replace(" ", ""))) {
+                        matched = true;
                     }
                 }
                 if (matched) {

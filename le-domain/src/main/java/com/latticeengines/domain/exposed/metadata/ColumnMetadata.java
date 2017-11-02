@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -52,6 +53,9 @@ public class ColumnMetadata implements HasAttributeCustomizations {
     private String tags;
     private String decodeStrategy;
     private LogicalDataType logicalDataType;
+
+    @JsonProperty("Groups")
+    private List<ColumnSelection.Predefined> groups;
 
     @JsonProperty("BitOffset")
     private Integer bitOffset;
@@ -333,6 +337,18 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         }
     }
 
+    public void removeApprovedUsageList() {
+        this.approvedUsage = null;
+    }
+
+    public List<ColumnSelection.Predefined> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<ColumnSelection.Predefined> groups) {
+        this.groups = groups;
+    }
+
     @JsonProperty("Category")
     public void setCategoryByString(String categoryName) {
         setCategory(Category.fromName(categoryName));
@@ -380,6 +396,10 @@ public class ColumnMetadata implements HasAttributeCustomizations {
             tokens.add(tag.getName());
         }
         this.tags = StringUtils.join(tokens, ",");
+    }
+
+    public void removeTagList() {
+        this.tags = null;
     }
 
     public String getDecodeStrategy() {

@@ -1070,7 +1070,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public ColumnMetadata getColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setDisplayName(getDisplayName());
-        metadata.setColumnName(getName());
         metadata.setColumnId(getName());
         metadata.setDescription(getDescription());
         metadata.setLogicalDataType(getLogicalDataType());
@@ -1090,7 +1089,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         } else {
             metadata.setSubcategory(getSubcategory());
         }
-        metadata.setDataType(getDataType());
         if (StringUtils.isBlank(getFundamentalType())) {
             metadata.setFundamentalType(FundamentalType.ALPHA);
         } else {
@@ -1101,6 +1099,19 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
                         "Cannot parse fundamental type " + getFundamentalType() + " for attribute " + getName());
             }
         }
+
+        if (metadata.getTagList() != null && metadata.getTagList().isEmpty()) {
+            metadata.removeTagList();
+        }
+
+        if (metadata.getApprovedUsageList() != null && metadata.getApprovedUsageList().isEmpty()) {
+            metadata.removeApprovedUsageList();
+        }
+
+        if (getGroupsAsList() != null && !getGroupsAsList().isEmpty()) {
+            metadata.setGroups(getGroupsAsList());
+        }
+
         metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
         metadata.setDiscretizationStrategy(getDisplayDiscretizationStrategy());
         metadata.setBitOffset(getBitOffset());
