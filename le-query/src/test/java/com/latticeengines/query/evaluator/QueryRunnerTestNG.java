@@ -286,7 +286,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction4).build();
         List<Map<String, Object>> results4 = queryEvaluatorService.getData(attrRepo, query4).getData();
-        Assert.assertEquals(results4.size(), 51);
+        Assert.assertEquals(results4.size(), 37);
 
         // has purchased prior to quarter of 4/1/2017, but not within
         TransactionRestriction txRestriction5 = new TransactionRestriction();
