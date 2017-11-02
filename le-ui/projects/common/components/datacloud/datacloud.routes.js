@@ -328,6 +328,7 @@ angular
                             resolveQueryRestriction();
                         } else {
                             SegmentStore.getSegmentByName(segmentName).then(function(result) {
+
                                 if (segmentName && !result) {
                                     if (modelId) {
                                         $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
@@ -442,7 +443,9 @@ angular
 
                         deferred.resolve( QueryStore.GetDataByQuery('accounts', query).then(function(data){ return data; }));
                     } else {
+
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
+
                             var segment = result;
                             query = { 
                                 'free_form_text_search': '',

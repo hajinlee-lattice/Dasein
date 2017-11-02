@@ -80,6 +80,8 @@ angular.module('common.datacloud.query.results', [
                 }
             };
 
+            // vm.setCurrentRestrictionForSaveButton();
+
             if (vm.page === 'Accounts'){
                 QueryStore.setAccounts(dataQuery).then(function(response) {
                     vm.accounts = response.data;
@@ -92,8 +94,6 @@ angular.module('common.datacloud.query.results', [
                     vm.loading = false;
                 });
             }
-
-            vm.setCurrentRestrictionForSaveButton();
 
         } else {
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
@@ -152,8 +152,6 @@ angular.module('common.datacloud.query.results', [
             });
         }
 
-
-
         if((vm.page === 'Accounts' || vm.page === 'Available Targets') && vm.counts.accounts.value > 10){
             vm.showAccountPagination = true;
             vm.showContactPagination = false;
@@ -161,6 +159,8 @@ angular.module('common.datacloud.query.results', [
             vm.showAccountPagination = false;
             vm.showContactPagination = true;
         }
+
+        vm.checkSaveButtonState();
 
     };
 
@@ -173,8 +173,6 @@ angular.module('common.datacloud.query.results', [
         } else {
             vm.excludeNonSalesForce = false;
         }
-
-        console.log(vm.excludeNonSalesForce);
 
         updatePage();
         
@@ -215,46 +213,8 @@ angular.module('common.datacloud.query.results', [
     };
 
 
-    vm.setCurrentRestrictionForSaveButton = function(){
-        var segmentName = $stateParams.segment;
-
-        if (segmentName === 'Create') {
-            var accountRestriction = JSON.stringify({
-                "restriction": {
-                    "logicalRestriction": {
-                        "operator": "AND",
-                        "restrictions": []
-                    }
-                }
-            });
-
-            var contactRestriction = JSON.stringify({
-                "restriction": {
-                    "logicalRestriction": {
-                        "operator": "AND",
-                        "restrictions": []
-                    }
-                }
-            });
-
-            $stateParams.defaultSegmentRestriction = accountRestriction + contactRestriction;
-            
-            vm.checkSaveButtonState();
-        } else {
-            SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                var accountRestriction = JSON.stringify(result.account_restriction),
-                    contactRestriction = JSON.stringify(result.contact_restriction);
-                
-                $stateParams.defaultSegmentRestriction = accountRestriction + contactRestriction;
-                
-                vm.checkSaveButtonState();
-            });
-        };
-    };
-
-
     vm.checkSaveButtonState = function(){
-        var oldVal = $stateParams.defaultSegmentRestriction,
+        var oldVal = QueryStore.getDefaultRestrictions(),
             newAccountVal = JSON.stringify(QueryStore.getAccountRestriction()),
             newContactVal = JSON.stringify(QueryStore.getContactRestriction()),
             newVal = newAccountVal + newContactVal;

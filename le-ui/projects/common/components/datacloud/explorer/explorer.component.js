@@ -97,6 +97,8 @@ angular.module('common.datacloud.explorer', [
 
     vm.init = function() {
 
+
+
         if(vm.segment != null && vm.segment != "Create"){
             SegmentStore.getSegmentByName(vm.segment).then(function(result) {
                 vm.displayName = result.display_name;
@@ -133,8 +135,10 @@ angular.module('common.datacloud.explorer', [
         }
 
         if (vm.section === 'segment.analysis') {
-            vm.setCurrentRestrictionForSaveButton();
+            // vm.setCurrentRestrictionForSaveButton();
             vm.metadataSegments = QueryRestriction;
+
+            vm.checkSaveButtonState();
         }
 
         // for Advanced Query Builder
@@ -1499,11 +1503,8 @@ angular.module('common.datacloud.explorer', [
             }
         }
 
-        if (segmentName === 'Create') {
-            vm.setCurrentRestrictionForSaveButton(); 
-        } else {
-            vm.checkSaveButtonState();
-        }
+
+        vm.checkSaveButtonState();
 
     }
 
@@ -1534,11 +1535,6 @@ angular.module('common.datacloud.explorer', [
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
-        
-
-        console.log(attributeKey);
-        console.log(attributeRangeKey);
-
 
         if(entity === 'Account') {
             if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
@@ -1554,17 +1550,15 @@ angular.module('common.datacloud.explorer', [
             }
         }
 
-
         vm.TileTableItems = {};
         if(vm.metadataSegments || QueryRestriction) {
             getExplorerSegments(vm.enrichments);
         }
 
-        if (segmentName === 'Create') {
-            vm.setCurrentRestrictionForSaveButton(); 
-        } else {
-            vm.checkSaveButtonState();
-        }
+            // vm.setCurrentRestrictionForSaveButton(); 
+
+        vm.checkSaveButtonState();
+
     }
 
     var getSegmentBucketInputs = function() {
@@ -1609,53 +1603,17 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.setCurrentRestrictionForSaveButton = function(){
-        var segmentName = $stateParams.segment;
-
-        if (segmentName === 'Create') {
-
-            var accountRestriction = JSON.stringify({
-                "restriction": {
-                    "logicalRestriction": {
-                        "operator": "AND",
-                        "restrictions": []
-                    }
-                }
-            });
-            var contactRestriction = JSON.stringify({
-                "restriction": {
-                    "logicalRestriction": {
-                        "operator": "AND",
-                        "restrictions": []
-                    }
-                }
-            });
-
-            $stateParams.defaultSegmentRestriction = accountRestriction + contactRestriction;
-            
-            vm.checkSaveButtonState();
-
-        } else {
-
-            SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-                var accountRestriction = JSON.stringify(result.account_restriction),
-                    contactRestriction = JSON.stringify(result.contact_restriction);
-                
-                $stateParams.defaultSegmentRestriction = accountRestriction + contactRestriction;
-                
-                vm.checkSaveButtonState();
-            });
-        };
-        
-    };
-
     vm.checkSaveButtonState = function(){
 
-        var oldVal = $stateParams.defaultSegmentRestriction,
+        var oldVal = QueryStore.getDefaultRestrictions(),
             newAccountVal = JSON.stringify(QueryStore.getAccountRestriction()),
             newContactVal = JSON.stringify(QueryStore.getContactRestriction()),
             newVal = newAccountVal + newContactVal;
+
+
+
+        console.log(oldVal);
+        console.log(newVal);
 
         if(oldVal === newVal){
             vm.saveSegmentEnabled = false;

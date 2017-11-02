@@ -100,6 +100,12 @@ angular.module('common.datacloud.query.service',[
         self.setResourceTypeCount(resourceType, true);
     });
 
+    this.setDefaultRestrictions = function(defaultRestrictions) {
+        this.defaultRestrictions = defaultRestrictions;
+    };
+    this.getDefaultRestrictions = function() {
+        return this.defaultRestrictions;
+    };
 
     this.setAccountRestriction = function(accountRestriction) {
         if (accountRestriction) {
@@ -137,14 +143,20 @@ angular.module('common.datacloud.query.service',[
         var self = this,
             deferred = $q.defer();
 
-        this.setSegment(segment);
+        this.setSegment(segment)
 
         if (segment != null) {
-            accountRestriction = segment.account_restriction ? [segment.account_restriction.restriction] : [];
-            contactRestriction = segment.contact_restriction ? [segment.contact_restriction.restriction] : [];
+            accountRestriction = segment.account_restriction ? segment.account_restriction : [];
+            contactRestriction = segment.contact_restriction ? segment.contact_restriction : [];
 
             this.setAccountRestriction(segment.account_restriction);
             this.setContactRestriction(segment.contact_restriction);
+
+            accountRestrictionsString = JSON.stringify(accountRestriction);
+            contactRestrictionsString = JSON.stringify(contactRestriction);
+            defaultRestrictions = accountRestrictionsString + contactRestrictionsString;
+
+            this.setDefaultRestrictions(defaultRestrictions);
 
             deferred.resolve();
 
@@ -168,6 +180,11 @@ angular.module('common.datacloud.query.service',[
                     }
                 }
             });
+
+            accountRestrictionsString = JSON.stringify(this.getAccountRestriction());
+            contactRestrictionsString = JSON.stringify(this.getContactRestriction());
+            defaultRestrictions = accountRestrictionsString + contactRestrictionsString;
+            this.setDefaultRestrictions(defaultRestrictions);
 
             deferred.resolve();
 
