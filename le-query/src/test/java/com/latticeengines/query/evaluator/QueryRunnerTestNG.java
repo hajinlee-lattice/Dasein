@@ -192,7 +192,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(accountAndTxUnitAvg).build();
         List<Map<String, Object>> unitAvgResults = queryEvaluatorService.getData(attrRepo, queryUnitAvg).getData();
-        Assert.assertEquals(unitAvgResults.size(), 1);
+        Assert.assertEquals(unitAvgResults.size(), 0);
     }
 
     @Test(groups = "functional")
@@ -258,7 +258,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction2).build();
         List<Map<String, Object>> results2 = queryEvaluatorService.getData(attrRepo, query2).getData();
-        Assert.assertEquals(results2.size(), 70);
+        Assert.assertEquals(results2.size(), 49);
 
         // no qualified account in current period
         TransactionRestriction txRestriction3 = new TransactionRestriction();
