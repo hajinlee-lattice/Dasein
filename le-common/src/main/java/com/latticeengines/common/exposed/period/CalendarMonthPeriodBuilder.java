@@ -16,7 +16,7 @@ public class CalendarMonthPeriodBuilder extends StartTimeBasedPeriodBuilder impl
         int months = getMonth(end) - getMonth(start);
         int years = end.get(ChronoField.YEAR) - start.get(ChronoField.YEAR);
         months += years * 12;
-        return Math.abs(months);
+        return Math.abs(months) + 1;
     }
 
     private static int getMonth(LocalDate cal) {

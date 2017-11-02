@@ -17,7 +17,7 @@ public class CalendarQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder im
         int quarters = getQuarter(end) - getQuarter(start);
         int years = end.get(ChronoField.YEAR) - start.get(ChronoField.YEAR);
         quarters += years * 4;
-        return Math.abs(quarters);
+        return Math.abs(quarters) + 1;
     }
 
     private static int getQuarter(LocalDate cal) {
