@@ -96,9 +96,9 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
-            Long offset, Long max, Long endTimestamp) {
+            Long offset, Long max, String sortby, boolean descending, Long endTimestamp) {
         List<PlayLaunch> playLaunches = playLaunchDao.findByPlayStatesAndPagination(playId, states, startTimestamp,
-                offset, max, endTimestamp);
+                offset, max, sortby, descending, endTimestamp);
         return convertToSummaries(playLaunches);
     }
 

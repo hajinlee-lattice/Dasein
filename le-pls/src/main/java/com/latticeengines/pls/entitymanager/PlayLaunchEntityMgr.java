@@ -26,7 +26,7 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
     List<PlayLaunch> findByState(LaunchState state);
 
     List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
-            Long max, Long endTimestamp);
+            Long max, String sortby, boolean descending, Long endTimestamp);
 
     Long findDashboardEntriesCount(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp);
 

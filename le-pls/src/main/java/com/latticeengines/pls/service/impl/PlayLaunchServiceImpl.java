@@ -71,13 +71,13 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
-            Long offset, Long max, Long endTimestamp) {
+            Long offset, Long max, String sortby, boolean descending, Long endTimestamp) {
         PlayLaunchDashboard dashboard = new PlayLaunchDashboard();
         Stats totalCounts = playLaunchEntityMgr.findDashboardCumulativeStats(playId, launchStates, startTimestamp,
                 endTimestamp);
 
         List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
-                startTimestamp, offset, max, endTimestamp);
+                startTimestamp, offset, max, sortby, descending, endTimestamp);
 
         dashboard.setLaunchSummaries(launchSummaries);
         dashboard.setCumulativeStats(totalCounts);

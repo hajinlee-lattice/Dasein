@@ -334,7 +334,7 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, Long endTimestamp, long expectedCount) {
         List<LaunchSummary> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
-                offset, max, endTimestamp);
+                offset, max, null, true, endTimestamp);
         Assert.assertNotNull(dashboardEntries);
         Assert.assertEquals(dashboardEntries.size(), expectedCount);
 

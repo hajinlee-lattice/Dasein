@@ -26,7 +26,7 @@ public interface PlayLaunchService {
     PlayLaunch update(PlayLaunch existingPlayLaunch);
 
     PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long offset,
-            Long max, Long endTimestamp);
+            Long max, String sortby, boolean descending, Long endTimestamp);
 
     Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp);
 }

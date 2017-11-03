@@ -85,10 +85,14 @@ public class PlayResource {
             @RequestParam(value = "offset", required = true) Long offset, //
             @ApiParam(value = "Maximum number of play launches to consider", required = true) //
             @RequestParam(value = "max", required = true) Long max, //
+            @ApiParam(value = "Sort by", required = false) //
+            @RequestParam(value = "sortby", required = false) String sortby, //
+            @ApiParam(value = "Sort in descending order", required = false, defaultValue = "true") //
+            @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending, //
             @ApiParam(value = "End date in Unix timestamp", required = false) //
             @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
-        return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max,
-                endTimestamp);
+        return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max, sortby,
+                descending, endTimestamp);
     }
 
     @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET, headers = "Accept=application/json")

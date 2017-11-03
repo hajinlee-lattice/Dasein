@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -328,7 +328,7 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
     private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, Long endTimestamp, Long expectedCount) {
         PlayLaunchDashboard dashboardEntries = playLaunchService.getDashboard(playId, states, startTimestamp, offset,
-                max, endTimestamp);
+                max, null, true, endTimestamp);
 
         Assert.assertNotNull(dashboardEntries);
         Assert.assertNotNull(dashboardEntries.getCumulativeStats());

@@ -20,6 +20,8 @@ import com.latticeengines.pls.dao.PlayLaunchDao;
 @Component("playLaunchDao")
 public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLaunchDao {
 
+    private static final String CREATED_COL = "created";
+
     @Override
     protected Class<PlayLaunch> getEntityClass() {
         return PlayLaunch.class;
@@ -135,13 +137,13 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @Override
     @SuppressWarnings("unchecked")
     public List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
-            Long offset, Long max, Long endTimestamp) {
+            Long offset, Long max, String sortby, boolean descending, Long endTimestamp) {
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
 
         String queryStr = "";
-        Query query = createQueryForDashboard(playId, states, startTimestamp, offset, max, endTimestamp, session,
-                entityClz, queryStr);
+        Query query = createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending,
+                endTimestamp, session, entityClz, queryStr);
 
         return query.list();
     }
@@ -153,8 +155,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         Class<PlayLaunch> entityClz = getEntityClass();
 
         String queryStr = "SELECT count(*) ";
-        Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, endTimestamp, session,
-                entityClz, queryStr);
+        Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
+                session, entityClz, queryStr);
 
         return Long.parseLong(query.uniqueResult().toString());
     }
@@ -178,8 +180,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 + " SUM(COALESCE(accountsErrored)) AS " + totalAccountsErrored + ", " //
                 + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + " " + ") ";
 
-        Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, endTimestamp, session,
-                entityClz, queryStr);
+        Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
+                session, entityClz, queryStr);
 
         List<Map<String, Object>> queryResult = query.list();
         Stats totalCounts = new Stats();
@@ -199,7 +201,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
-            Long max, Long endTimestamp, Session session, Class<PlayLaunch> entityClz, String queryStr) {
+            Long max, String sortby, boolean descending, Long endTimestamp, Session session,
+            Class<PlayLaunch> entityClz, String queryStr) {
         queryStr += String.format(
                 " FROM %s "//
                         + " WHERE created >= :startTimestamp ", //
@@ -217,7 +220,15 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             queryStr += " AND state IN ( :states ) ";
         }
 
-        queryStr += " ORDER BY created DESC ";
+        if (StringUtils.isBlank(sortby)) {
+            sortby = CREATED_COL;
+        } else if (sortby.trim().equalsIgnoreCase(CREATED_COL)) {
+            sortby = String.format("%s, %s ", sortby, CREATED_COL);
+        }
+
+        queryStr += String.format( //
+                " ORDER BY %s %s ", //
+                sortby, descending ? "DESC" : "ASC");
 
         Query query = session.createQuery(queryStr);
         if (offset != null) {
