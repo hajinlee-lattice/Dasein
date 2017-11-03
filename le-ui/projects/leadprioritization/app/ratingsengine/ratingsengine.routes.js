@@ -12,7 +12,8 @@ angular
     'lp.ratingsengine.wizard.attributes',
     'lp.ratingsengine.wizard.summary',
     'lp.ratingsengine.ai',
-    'lp.ratingsengine.ai.prospect'
+    'lp.ratingsengine.ai.prospect',
+    'lp.ratingsengine.ai.products'
 ])
 .config(function($stateProvider, DataCloudResolvesProvider) {
     $stateProvider
@@ -273,14 +274,11 @@ angular
         })
         .state('home.ratingsengine.ai.segment.prospect.products', {
             url: '/products',
-            resolve: {
-                WizardHeaderTitle: function() {
-                    return 'What Products will you sell into this Segment?';
-                }
-            },
             views: {
                 
                 'wizard_content@home.ratingsengine.ai': {
+                    controller: 'RatingsEngineAIProducts',
+                    controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/ai/products.component.html'
                 }
             }
