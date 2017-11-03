@@ -112,34 +112,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema,
-            CloseableResourcePool closeableResourcePool, String fileDisplayName) {
-
-        if (!stream.markSupported()) {
-            stream = new BufferedInputStream(stream);
-        }
-
-        stream.mark(1024 * 500);
-
-        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
-        try {
-            stream.reset();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            throw new LedpException(LedpCode.LEDP_00002, e);
-        }
-        SchemaRepository repository = SchemaRepository.instance();
-        Table metadata = repository.getSchema(schema);
-        List<Attribute> attributes = metadata.getAttributes();
-
-        ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
-        ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
-        Collection<String> reservedWords = Arrays.asList(ReservedField.Rating.displayName);
-        ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords);
-        return stream;
-    }
-
-    @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
             String fileDisplayName) {
 

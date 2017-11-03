@@ -103,15 +103,12 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         boolean thrown = false;
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
             closeableResourcePool.close();
         } catch (Exception e) {
             thrown = true;
             assertTrue(e instanceof LedpException);
-            assertTrue(e.getMessage().contains(InterfaceName.Id.name()));
-            assertTrue(e.getMessage().contains(InterfaceName.Event.name()));
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18087);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18120);
         } finally {
             closeableResourcePool.close();
             assertTrue(thrown);
@@ -127,8 +124,7 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         boolean thrown = false;
 
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
         } catch (Exception e) {
             thrown = true;
             assertTrue(e instanceof LedpException);
@@ -147,8 +143,7 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
 
-        modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                closeableResourcePool, dataFile.getName());
+        modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
 
         closeableResourcePool.close();
 
@@ -162,8 +157,7 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         boolean thrown = false;
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
         } catch (Exception e) {
             thrown = true;
         } finally {
@@ -173,19 +167,18 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void uploadFileWithDuplicateHeaders2() throws Exception {
+    public void uploadFileWithHeadersHavingReservedWords() throws Exception {
         dataFile = new File(ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_duplicate_headers2.csv").getPath());
+                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_headers_with_reserved_words.csv").getPath());
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         boolean thrown = false;
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
         } catch (Exception e) {
             thrown = true;
             assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18107);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18122);
         } finally {
             closeableResourcePool.close();
             assertTrue(thrown);
