@@ -59,7 +59,6 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId()) + "/models";
         final long acceptTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
