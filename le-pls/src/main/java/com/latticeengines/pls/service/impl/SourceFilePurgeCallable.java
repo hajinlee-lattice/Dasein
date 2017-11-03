@@ -38,7 +38,6 @@ public class SourceFilePurgeCallable implements Callable<Boolean> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         log.info("Begin purge old source files");
         List<SourceFile> allSourceFiles = sourceFileEntityMgr.findAllSourceFiles();

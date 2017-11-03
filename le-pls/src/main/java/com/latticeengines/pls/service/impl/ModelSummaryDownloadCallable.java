@@ -2,7 +2,6 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,9 +10,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.latticeengines.common.exposed.util.UuidUtils;
@@ -70,7 +69,6 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         log.debug("ModelDownloader is ready to pick up models.");
         timeStampContainer.setTimeStamp();

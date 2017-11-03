@@ -6,11 +6,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.context.ApplicationContext;
@@ -57,7 +57,6 @@ public class ScoringManagerCallable implements Callable<Boolean> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
 
         List<Future<Long>> futures = new ArrayList<>();

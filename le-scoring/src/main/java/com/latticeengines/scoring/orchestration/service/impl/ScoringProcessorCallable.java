@@ -85,7 +85,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Long call() throws Exception {
         int result = ScoringDaemonService.SUCCESS;
         try {
