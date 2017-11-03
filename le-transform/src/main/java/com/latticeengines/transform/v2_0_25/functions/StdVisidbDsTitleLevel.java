@@ -63,7 +63,7 @@ public class StdVisidbDsTitleLevel implements RealTimeTransform {
         metadata.setApprovedUsage(ApprovedUsage.MODEL_MODELINSIGHTS);
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.NUMERIC);
-        metadata.setStatisticalType(StatisticalType.ORDINAL);
+        metadata.setStatisticalType(StatisticalType.RATIO);
         metadata.setTags(Tag.INTERNAL_TRANSFORM);
         metadata.setDisplayDiscretizationStrategy("{\"linear\": { \"minValue\":0,\"stepSize\":1,\"minSamples\":100," //
                 + "\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}");

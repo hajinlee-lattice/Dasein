@@ -44,7 +44,7 @@ public class StdVisidbDsEmailPrefixlength implements RealTimeTransform {
         metadata.setApprovedUsage(ApprovedUsage.MODEL);
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.NUMERIC);
-        metadata.setStatisticalType(StatisticalType.ORDINAL);
+        metadata.setStatisticalType(StatisticalType.RATIO);
         metadata.setDescription("Email Prefix Length");
         metadata.setDisplayName("Email Prefix Length");
         metadata.setTags(Tag.INTERNAL_TRANSFORM);

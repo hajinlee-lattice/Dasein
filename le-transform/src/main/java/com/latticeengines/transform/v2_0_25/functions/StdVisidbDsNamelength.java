@@ -44,7 +44,7 @@ public class StdVisidbDsNamelength implements RealTimeTransform {
         metadata.setApprovedUsage(ApprovedUsage.MODEL);
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.NUMERIC);
-        metadata.setStatisticalType(StatisticalType.ORDINAL);
+        metadata.setStatisticalType(StatisticalType.RATIO);
         metadata.setDescription("Name Length");
         metadata.setDisplayName("Name Length");
         metadata.setTags(Tag.INTERNAL_TRANSFORM);

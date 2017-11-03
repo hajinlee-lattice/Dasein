@@ -41,7 +41,7 @@ public class StdVisidbDsEmailLength implements RealTimeTransform {
         metadata.setApprovedUsage(ApprovedUsage.MODEL);
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.NUMERIC);
-        metadata.setStatisticalType(StatisticalType.ORDINAL);
+        metadata.setStatisticalType(StatisticalType.RATIO);
         metadata.setDescription("Email Length");
         metadata.setDisplayName("Email Length");
         metadata.setTags(Tag.INTERNAL_TRANSFORM);
