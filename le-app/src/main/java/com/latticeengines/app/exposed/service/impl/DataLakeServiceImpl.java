@@ -145,8 +145,10 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Override
     public List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
-        // TODO: DP-4643, complete the implementation
-        return Collections.emptyList();
+        // Only return attributes for account now
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, BusinessEntity.Account);
+        return cms.stream().filter(cm -> cm.getGroups().contains(predefined)).collect(Collectors.toList());
     }
 
     @Override
