@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import org.redisson.api.RMap;
+import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -89,7 +89,7 @@ public class RedisServiceImpl implements RedisService {
         return getMap(mapName).fastPut(key, value);
     }
 
-    private RMap<Object, Object> getMap(String mapName) {
-        return redisson.getMap(mapName);
+    private RMapCache<Object, Object> getMap(String mapName) {
+        return redisson.getMapCache(mapName);
     }
 }

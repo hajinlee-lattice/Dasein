@@ -19,7 +19,11 @@ public class RedisServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = { "functional" })
     private void test() {
-        Set<Object> set = redisson.getMap("DataLakeCache").keySet("*FisherScientific.FisherScientific.Production*");
+        // redisson.getMap("DataLakeCache").put("ASF|C", "BC");
+        Set<Object> set = redisson.getMapCache("DataLakeCache").keySet("*LETest1509677393871*");
+
+        // Object o =
+        // redisson.getMapCache("DataLakeStatsCache").get("LocalTest.LocalTest.Production|stats");
         // for (Object o : set) {
         // System.out.println(o);
         // }

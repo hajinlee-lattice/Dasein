@@ -2,7 +2,10 @@ package com.latticeengines.redis.bean;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.Codec;
 import org.redisson.client.codec.JsonJacksonMapCodec;
+import org.redisson.client.codec.StringCodec;
+import org.redisson.codec.CompositeCodec;
 import org.redisson.config.Config;
 import org.redisson.config.ReplicatedServersConfig;
 import org.springframework.beans.factory.FactoryBean;
@@ -44,8 +47,10 @@ public class RedissonBeanFactory implements FactoryBean<RedissonClient> {
 
     private RedissonClient constructClient(int masterPoolSize, int masterIdle, int slavePoolSize, int slaveIdle) {
         Config config = new Config();
-        config.setCodec(JsonJacksonMapCodec.INSTANCE);
+        Codec codec = new CompositeCodec(StringCodec.INSTANCE, JsonJacksonMapCodec.INSTANCE);
+        config.setCodec(codec);
         ReplicatedServersConfig serverConfig = config.useReplicatedServers()  //
+                .setTimeout(10000) //
                 .setRetryInterval(2500).setScanInterval(2000) //
                 .setMasterConnectionPoolSize(masterPoolSize).setMasterConnectionMinimumIdleSize(masterIdle) //
                 .setSlaveConnectionPoolSize(slavePoolSize).setSlaveConnectionMinimumIdleSize(slaveIdle);
