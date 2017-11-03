@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 public class BitCodeBookUtils {
 
-    private static Log log = LogFactory.getLog(BitCodeBookUtils.class);
+    private static Logger log = LoggerFactory.getLogger(BitCodeBookUtils.class);
 
     /**
      * @param codeBookMap

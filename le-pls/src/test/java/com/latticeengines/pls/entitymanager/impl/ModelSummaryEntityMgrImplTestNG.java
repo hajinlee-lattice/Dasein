@@ -33,8 +33,6 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired

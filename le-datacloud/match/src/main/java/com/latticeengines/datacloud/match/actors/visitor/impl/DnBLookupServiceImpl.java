@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,8 +55,6 @@ import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("dnbLookupService")
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements DnBLookupService {

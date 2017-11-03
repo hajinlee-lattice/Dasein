@@ -2,6 +2,7 @@ package com.latticeengines.dante.service.impl;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -26,8 +27,6 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dante.DanteAttribute;
 import com.latticeengines.domain.exposed.dante.DanteNotionAttributes;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
@@ -72,11 +71,10 @@ public class DanteAttributeServiceImplTestNG extends AbstractTestNGSpringContext
         Assert.assertEquals(8, attributes.size());
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void testAttributes() {
-        List<String> notions = Arrays.asList(
-                new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable" });
+        List<String> notions = Arrays.asList( //
+                "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable" );
         DanteNotionAttributes notionAttributes = danteAttributeService.getAttributesForNotions(notions, tenantName);
         Assert.assertNotNull(notionAttributes);
         Assert.assertNotNull(notionAttributes.getInvalidNotions());

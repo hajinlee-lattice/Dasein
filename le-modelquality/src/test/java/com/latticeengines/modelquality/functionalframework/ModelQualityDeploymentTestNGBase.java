@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +51,6 @@ import com.latticeengines.modelquality.service.impl.PipelineStepType;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 

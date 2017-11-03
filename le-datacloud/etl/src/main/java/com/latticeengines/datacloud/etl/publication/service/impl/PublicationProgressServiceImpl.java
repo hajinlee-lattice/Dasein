@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -30,8 +31,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("publicationProgressService")
 public class PublicationProgressServiceImpl implements PublicationProgressService {

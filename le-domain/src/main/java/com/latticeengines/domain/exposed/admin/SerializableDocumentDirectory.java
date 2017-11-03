@@ -12,9 +12,10 @@ import java.util.Queue;
 import java.util.Stack;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.validator.routines.EmailValidator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -572,6 +573,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         private static boolean isNumber(String str)
         {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
             try
             {
                 Double.parseDouble(str);
@@ -590,6 +594,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         private static boolean isPath(String str)
         {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
             try {
                 new Path(str);
                 return true;
@@ -600,6 +607,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         private static boolean isObject(String str)
         {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(str);
@@ -611,6 +621,9 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
 
         private static boolean isArray(String str)
         {
+            if (StringUtils.isBlank(str)) {
+                return false;
+            }
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(str);
@@ -639,7 +652,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                     String data;
                     if (Metadata.isObject(dataNode.toString()) || Metadata.isArray(dataNode.toString())) {
                         data = dataNode.toString();
-                    }else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
+                    } else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
                         data = unescapeDataText(dataNode.toString().substring(1, dataNode.toString().length() - 1));
                         mustBeString = isNumber(dataNode.asText()) || isBoolean(dataNode.asText());
                     } else {

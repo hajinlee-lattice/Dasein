@@ -1,9 +1,9 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("setConfigurationForScoring")
 public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfigurationForScoringConfiguration> {
 
-    private static final Log log = LogFactory.getLog(SetConfigurationForScoring.class);
+    private static final Logger log = LoggerFactory.getLogger(SetConfigurationForScoring.class);
 
     @Autowired
     protected ColumnMetadataProxy columnMetadataProxy;

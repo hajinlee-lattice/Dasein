@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator.lookup;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -13,8 +14,6 @@ import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup>
         implements LookupResolver<DateAttributeLookup> {
@@ -45,7 +44,7 @@ public class DateAttributeResolver extends AttributeResolver<DateAttributeLookup
         if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return Collections.singletonList(resolveForDate(lookup, cm, lookup.getPeriod(), false));
+        return Collections.singletonList((ComparableExpression<? extends Comparable<?>>) resolveForDate(lookup, cm, lookup.getPeriod(), false));
     }
 
     private Expression<? extends Comparable<?>> resolveForDate(DateAttributeLookup lookup, ColumnMetadata cm, Period p,

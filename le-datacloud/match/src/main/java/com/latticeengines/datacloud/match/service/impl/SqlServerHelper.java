@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.newrelic.api.agent.Trace;
 
 @Component("sqlServerHelper")
 public class SqlServerHelper implements DbHelper {
@@ -450,7 +449,6 @@ public class SqlServerHelper implements DbHelper {
         distributeQueryResults(records, null, rows);
     }
 
-    @Trace
     private void distributeQueryResults(List<InternalOutputRecord> records, String sourceName,
             List<Map<String, Object>> rows) {
         boolean singlePartitionMode = StringUtils.isEmpty(sourceName);

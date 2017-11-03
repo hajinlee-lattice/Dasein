@@ -11,7 +11,6 @@ import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.newrelic.api.agent.Trace;
 
 public class DellEbiDailyJobCallable implements Callable<Boolean> {
 
@@ -31,7 +30,6 @@ public class DellEbiDailyJobCallable implements Callable<Boolean> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         log.info("Start to process files from inbox.");
         long startTime = System.currentTimeMillis();

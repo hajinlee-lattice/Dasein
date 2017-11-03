@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -23,8 +24,6 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dante.DanteAttribute;
 import com.latticeengines.domain.exposed.dante.DanteNotionAttributes;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class DanteAttributesResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 

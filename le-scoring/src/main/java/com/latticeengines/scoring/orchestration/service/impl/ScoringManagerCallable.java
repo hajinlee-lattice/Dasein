@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
-import com.newrelic.api.agent.Trace;
 
 public class ScoringManagerCallable implements Callable<Boolean> {
 

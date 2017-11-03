@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,6 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public abstract class AttrStatsDetailsMergeTemplate implements AttrStatsDetailsMergeTool, Serializable {
 

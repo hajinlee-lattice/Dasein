@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator.lookup;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
@@ -13,8 +14,6 @@ import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class AttributeResolver<T extends AttributeLookup> extends BaseLookupResolver<T> implements LookupResolver<T> {
 
@@ -32,7 +31,7 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
         if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return Collections.singletonList(resolveBucketRange(lookup.getEntity(), cm, false));
+        return Collections.singletonList((ComparableExpression<? extends Comparable<?>>) resolveBucketRange(lookup.getEntity(), cm, false));
     }
 
     @Override

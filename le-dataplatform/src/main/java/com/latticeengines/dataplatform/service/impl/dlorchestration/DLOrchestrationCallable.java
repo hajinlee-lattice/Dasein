@@ -6,9 +6,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -26,7 +26,6 @@ import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-import com.newrelic.api.agent.Trace;
 
 public class DLOrchestrationCallable implements Callable<Boolean> {
 
@@ -84,7 +83,6 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         List<Future<Long>> futures = new ArrayList<>();
         List<ModelCommand> modelCommands = modelCommandEntityMgr.getNewAndInProgress();

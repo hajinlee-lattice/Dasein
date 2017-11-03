@@ -1,11 +1,10 @@
 package com.latticeengines.common.exposed.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * Used to standardize name/city/street string
@@ -23,13 +22,11 @@ public class NameStringStandardizationUtils extends StringStandardizationUtils {
         return singletonUtil.getStandardStringInternal(str);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected List<Character> getCharactersToRemove() {
         return new ArrayList<>(Arrays.asList(removed));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected List<Character> getCharactersToReplaceWithWhiteSpace() {
         return new ArrayList<>(Arrays.asList(replacedBySpace));

@@ -34,7 +34,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.newrelic.api.agent.Trace;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
 
@@ -390,7 +389,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
-    @Trace
     private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection, String dataCloudVersion) {
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
         List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection, dataCloudVersion);
@@ -399,7 +397,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
-    @Trace
     private MatchOutput appendMetadata(MatchOutput matchOutput, List<ColumnMetadata> metadata) {
         matchOutput.setMetadata(metadata);
         return matchOutput;

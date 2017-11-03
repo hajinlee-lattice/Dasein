@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator.lookup;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -8,8 +9,6 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.SimpleExpression;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class FunctionResolver<T extends Comparable<?>, I, O> extends BaseLookupResolver<FunctionLookup<T, I, O>>
         implements LookupResolver<FunctionLookup<T, I, O>> {
@@ -29,7 +28,7 @@ public class FunctionResolver<T extends Comparable<?>, I, O> extends BaseLookupR
     @SuppressWarnings({ "unchecked" })
     @Override
     public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(FunctionLookup<T, I, O> lookup) {
-        return Collections.singletonList(resolve(lookup, false));
+        return Collections.singletonList((ComparableExpression<? extends Comparable<?>>) resolve(lookup, false));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

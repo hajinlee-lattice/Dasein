@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation.stats.report;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsPa
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component("amStatsDimAggregateWithHQDunsFlow")
 public class AMStatsDimAggregateWithHQDunsFlow extends AMStatsFlowBase {

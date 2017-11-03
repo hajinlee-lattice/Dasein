@@ -1,6 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class StringStandardizationUtils {
 
@@ -74,14 +73,12 @@ public class StringStandardizationUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected List<Character> getCharactersToRemove() {
-        return new ArrayList<Character>(Arrays.asList(removed));
+        return new ArrayList<>(Arrays.asList(removed));
     }
 
-    @SuppressWarnings("unchecked")
     protected List<Character> getCharactersToReplaceWithWhiteSpace() {
-        return new ArrayList<Character>(Arrays.asList(replacedBySpace));
+        return new ArrayList<>(Arrays.asList(replacedBySpace));
     }
 
     protected Map<String, String> getCharactersToReplaceWithWord() {

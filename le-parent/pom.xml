@@ -58,7 +58,7 @@
         <hdp.guava.version>16.0</hdp.guava.version>
         <avro.version>1.7.7</avro.version>
         <parquet.avro.version>1.4.3</parquet.avro.version> <!-- remove ? -->
-        <aws.version>1.11.160</aws.version>
+        <aws.version>1.11.222</aws.version>
         <cascading.version>3.2.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version>
@@ -67,26 +67,23 @@
         <cascading.flink.version>0.3.0</cascading.flink.version>
         <scala.version>2.11.8</scala.version>
         <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
-        <grizzled.slf4j_2.11.version>1.3.0</grizzled.slf4j_2.11.version> <!-- bind to flink -->
-        <codahale.metrics.version>3.0.2</codahale.metrics.version> <!-- bind to flink -->
-        <jackson.fasterxml.version>2.8.8</jackson.fasterxml.version>
+        <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
+        <jackson.fasterxml.version>2.9.2</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->
         <hibernate.version>4.1.9.Final</hibernate.version>
         <hibernate.jpa.version>1.0.1.Final</hibernate.jpa.version>
         <jetty.version>9.3.14.v20161028</jetty.version> <!-- camel-salesforce 2.19.1 -->
         <javax.servlet.version>3.1.0</javax.servlet.version> <!-- just keep up with tomcat version -->
         <javax.jsp.version>2.2</javax.jsp.version> <!-- just keep up with tomcat version -->
-        <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
         <redshift.jdbc.version>1.2.8.1005</redshift.jdbc.version> <!-- we upload to nexus -->
         <joda.version>2.8.1</joda.version>
-        <cronutils.version>4.0.1</cronutils.version> <!-- need to upgrade joda -->
+        <cronutils.version>4.1.2</cronutils.version> <!-- need to upgrade joda -->
         <marketo.soap.sdk.version>2.7</marketo.soap.sdk.version> <!-- uploaded to nexues ? -->
         <natty.version>0.11</natty.version> <!-- this is the latest update with date parser ? -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
         <jacoco.version>0.7.9</jacoco.version>
         <quartz.version>2.3.0</quartz.version>
-        <newrelic.version>2.14.1</newrelic.version> <!-- to be removed -->
         <aspectj.version>1.8.7</aspectj.version>
         <reflections.version>0.9.9</reflections.version>
         <jython.version>2.7.0</jython.version>
@@ -131,6 +128,7 @@
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <spring.batch.version>3.0.7.RELEASE</spring.batch.version>
         <spring.security.version>4.2.3.RELEASE</spring.security.version>
+        <spring.saml2.version>1.0.2.RELEASE</spring.saml2.version>
         <spring.oauth2.version>2.2.0.RELEASE</spring.oauth2.version>
         <!-- Camel -->
         <camel.version>2.19.1</camel.version>
@@ -138,7 +136,7 @@
         <!-- DB Drivers -->
         <c3p0.version>0.9.5.2</c3p0.version>
         <influxdb.version>2.7</influxdb.version>
-        <hive.version>1.1.0</hive.version>
+        <hive.version>1.2.1.2.3.6.0-3796</hive.version>
         <sqljdbc.version>6.2.2.jre8</sqljdbc.version>
         <mysql.connector.version>5.1.30</mysql.connector.version>
         <!-- commons -->
@@ -160,6 +158,7 @@
         <commons.collections.version>3.2.2</commons.collections.version>
         <commons.beanutils.version>1.9.3</commons.beanutils.version>
         <commons.lang.version>2.6</commons.lang.version>
+        <commons.logging.version>1.2</commons.logging.version>
 
         <!-- parameters: can be overwritten in child projects -->
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
@@ -1086,6 +1085,11 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven.dependency.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-ant-plugin</artifactId>
                     <version>2.4</version>
                 </plugin>
@@ -1222,6 +1226,12 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${apache.http.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -1262,6 +1272,25 @@
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.mnode.ical4j</groupId>
+                        <artifactId>ical4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hive</groupId>
+                <artifactId>hive-jdbc</artifactId>
+                <version>${hive.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -1292,6 +1321,11 @@
                 <version>${commons.lang.version}</version>
             </dependency>
             <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons.logging.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
                 <version>${commons.net.version}</version>
@@ -1300,6 +1334,12 @@
                 <groupId>commons-vfs</groupId>
                 <artifactId>commons-vfs</artifactId>
                 <version>${commons.vfs.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -1325,6 +1365,10 @@
                         <groupId>commons-collections</groupId>
                         <artifactId>commons-collections</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1335,6 +1379,10 @@
                     <exclusion>
                         <groupId>commons-collections</groupId>
                         <artifactId>commons-collections</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1367,6 +1415,30 @@
                 </exclusions>
             </dependency>
 
+            <!-- AWS dependencies -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>${aws.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-osgi</artifactId>
+                <version>${aws.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <!-- Camel Dependencies -->
             <dependency>
                 <groupId>org.apache.camel</groupId>
@@ -1390,6 +1462,17 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-hdfs2</artifactId>
+                <version>${camel.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
             <!-- Confluent Dependencies -->
             <dependency>
@@ -1404,6 +1487,10 @@
                     <exclusion>
                         <groupId>org.apache.hive</groupId>
                         <artifactId>hive-cli</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1448,6 +1535,28 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security.extensions</groupId>
+                <artifactId>spring-security-saml2-core</artifactId>
+                <version>${spring.saml2.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.batch</groupId>
                 <artifactId>spring-batch-core</artifactId>
                 <version>${spring.batch.version}</version>
@@ -1472,6 +1581,10 @@
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1488,6 +1601,10 @@
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1498,6 +1615,10 @@
                     <exclusion>
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1511,12 +1632,27 @@
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-annotations</artifactId>
                 <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-common</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
@@ -1527,33 +1663,17 @@
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-mapreduce-client-app</artifactId>
                 <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
                 <version>${hadoop.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-yarn-common</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-lang</groupId>
-                        <artifactId>commons-lang</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-yarn-api</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-lang</groupId>
-                        <artifactId>commons-lang</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
@@ -1572,12 +1692,46 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-yarn-common</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-yarn-api</artifactId>
+                <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-yarn-client</artifactId>
                 <version>${hadoop.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1594,6 +1748,10 @@
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1605,18 +1763,34 @@
                         <groupId>commons-lang</groupId>
                         <artifactId>commons-lang</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-yarn-server-tests</artifactId>
                 <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-yarn-server-tests</artifactId>
                 <version>${hadoop.version}</version>
                 <classifier>tests</classifier>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.data</groupId>
@@ -1626,6 +1800,10 @@
                     <exclusion> <!-- we use our jar -->
                         <groupId>org.springframework.data</groupId>
                         <artifactId>spring-yarn-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1637,6 +1815,10 @@
                     <exclusion> <!-- we use our jar -->
                         <groupId>org.springframework.data</groupId>
                         <artifactId>spring-yarn-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1691,6 +1873,10 @@
                     <exclusion>
                         <groupId>org.apache.tez</groupId>
                         <artifactId>tez-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1802,6 +1988,43 @@
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
             </dependency>
+
+            <!-- LE Dependencies -->
+            <dependency>
+                <groupId>com.latticeengines</groupId>
+                <artifactId>le-metadata</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.latticeengines</groupId>
+                <artifactId>le-sqoop</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.latticeengines</groupId>
+                <artifactId>le-sqoop</artifactId>
+                <version>${project.version}</version>
+                <classifier>intf</classifier>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

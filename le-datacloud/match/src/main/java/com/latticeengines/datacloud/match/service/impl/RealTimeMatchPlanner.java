@@ -11,7 +11,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.newrelic.api.agent.Trace;
 
 @Component("realTimeMatchPlanner")
 public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlanner {
@@ -24,7 +23,6 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     }
 
     @MatchStep
-    @Trace
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         validate(input);
         setDecisionGraph(input);

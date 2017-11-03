@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.newrelic.api.agent.Trace;
 
 public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         implements ColumnMetadataService {
@@ -48,7 +47,6 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     }
 
     @Override
-    @Trace
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
         List<E> metadataColumns = getMetadataColumnService()
                 .getMetadataColumns(selection.getColumnIds(), dataCloudVersion);

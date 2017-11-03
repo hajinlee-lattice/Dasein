@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.newrelic.api.agent.Trace;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 

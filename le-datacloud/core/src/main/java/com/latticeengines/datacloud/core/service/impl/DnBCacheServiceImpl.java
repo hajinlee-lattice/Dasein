@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,6 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("dnbCacheService")
 public class DnBCacheServiceImpl implements DnBCacheService {

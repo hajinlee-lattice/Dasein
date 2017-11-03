@@ -7,14 +7,13 @@ import static com.latticeengines.domain.exposed.swlib.SoftwareLibrary.Module.dat
 import static com.latticeengines.domain.exposed.swlib.SoftwareLibrary.Module.workflowapi;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class SoftwareLibraryUnitTestNG {
 

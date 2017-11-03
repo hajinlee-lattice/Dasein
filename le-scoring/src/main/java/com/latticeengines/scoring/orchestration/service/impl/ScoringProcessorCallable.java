@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -34,7 +34,6 @@ import com.latticeengines.scoring.orchestration.service.ScoringStepProcessor;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.orchestration.service.ScoringValidationService;
 import com.latticeengines.yarn.exposed.service.JobService;
-import com.newrelic.api.agent.Trace;
 
 @Component("scoringProcessor")
 @Scope("prototype")

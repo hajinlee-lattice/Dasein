@@ -5,16 +5,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.newrelic.api.agent.Trace;
 
 public class SourceFilePurgeCallable implements Callable<Boolean> {
 

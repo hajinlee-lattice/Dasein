@@ -37,7 +37,6 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
-import com.newrelic.api.agent.Trace;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
 
@@ -165,7 +164,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @SuppressWarnings("unchecked")
     @VisibleForTesting
     @MatchStep
-    @Trace
     MatchContext mergeResults(MatchContext matchContext) {
         ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(matchContext);
         MetadataColumnService<MetadataColumn> metadataColumnService = beanDispatcher

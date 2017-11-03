@@ -41,9 +41,9 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-import parquet.org.slf4j.Logger;
-import parquet.org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {

@@ -2,6 +2,7 @@ package com.latticeengines.matchapi.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,8 +48,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("accountMasterStatisticsService")
 public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisticsService {

@@ -23,7 +23,6 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.newrelic.api.agent.Trace;
 
 public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 

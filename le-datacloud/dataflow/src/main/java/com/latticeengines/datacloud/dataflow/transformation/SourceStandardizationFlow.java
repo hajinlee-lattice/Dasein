@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,8 +14,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -40,12 +39,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component(SourceStandardizationFlow.DATAFLOW_BEAN_NAME)
 public class SourceStandardizationFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, StandardizationFlowParameter> {
-    private static final Logger log = LoggerFactory.getLogger(SourceStandardizationFlow.class);
 
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {

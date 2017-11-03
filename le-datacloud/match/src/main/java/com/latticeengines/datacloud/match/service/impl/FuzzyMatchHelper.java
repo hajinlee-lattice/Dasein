@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.newrelic.api.agent.Trace;
 
 import scala.concurrent.Future;
 
@@ -240,7 +239,6 @@ public class FuzzyMatchHelper implements DbHelper {
         record.setQueryResult(queryResult);
     }
 
-    @Trace
     private Map<String, Object> parseLatticeAccount(LatticeAccount account, ColumnSelection columnSelection,
             String dataCloudVersion) {
         Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService.getDecodeParameters(

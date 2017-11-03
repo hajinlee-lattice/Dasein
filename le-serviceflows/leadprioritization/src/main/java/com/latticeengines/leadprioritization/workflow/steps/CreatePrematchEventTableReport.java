@@ -1,16 +1,16 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePrematchEventTableReportConfiguration;
+import java.util.Collections;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.FilterReportColumn;
 import com.latticeengines.domain.exposed.dataflow.ReportColumn;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseDataFlowReportStep;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("createPrematchEventTableReport")
 public class CreatePrematchEventTableReport extends BaseDataFlowReportStep<CreatePrematchEventTableReportConfiguration> {

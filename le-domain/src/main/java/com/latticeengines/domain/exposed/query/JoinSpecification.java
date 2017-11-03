@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,8 +10,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Specification of a join within the context of a Query. We can use a secondary

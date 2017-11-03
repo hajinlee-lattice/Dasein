@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +20,7 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfiguration> extends AbstractStep<T>
         implements ApplicationContextAware {
-    private static Log log = LogFactory.getLog(BaseAwsPythonBatchStep.class);
+    private static Logger log = LoggerFactory.getLogger(BaseAwsPythonBatchStep.class);
 
     @Value("${hadoop.fs.web.defaultFS}")
     String webHdfs;

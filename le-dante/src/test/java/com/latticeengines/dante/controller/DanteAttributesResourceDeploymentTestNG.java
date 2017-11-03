@@ -2,6 +2,7 @@ package com.latticeengines.dante.controller;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -25,8 +26,6 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dante.DanteAttribute;
 import com.latticeengines.domain.exposed.dante.DanteNotionAttributes;
 import com.latticeengines.proxy.exposed.dante.DanteAttributesProxy;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class DanteAttributesResourceDeploymentTestNG extends DanteTestNGBase {
 
@@ -59,7 +58,6 @@ public class DanteAttributesResourceDeploymentTestNG extends DanteTestNGBase {
         camille.create(metadataDocumentPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testGetAccountAttributes() {
         List<DanteAttribute> rawAttributes = danteAttributesProxy
@@ -70,7 +68,6 @@ public class DanteAttributesResourceDeploymentTestNG extends DanteTestNGBase {
         Assert.assertEquals(27, attributes.size());
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testGetRecommendationAttributes() {
         List<DanteAttribute> rawAttributes = danteAttributesProxy
@@ -81,11 +78,10 @@ public class DanteAttributesResourceDeploymentTestNG extends DanteTestNGBase {
         Assert.assertEquals(8, attributes.size());
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testAttributes() {
-        List<String> notions = Arrays.asList(
-                new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable" });
+        List<String> notions = Arrays.asList( //
+                "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable" );
         DanteNotionAttributes notionAttributes = danteAttributesProxy.getAttributesByNotions(notions,
                 mainTestCustomerSpace.toString());
         Assert.assertNotNull(notionAttributes);

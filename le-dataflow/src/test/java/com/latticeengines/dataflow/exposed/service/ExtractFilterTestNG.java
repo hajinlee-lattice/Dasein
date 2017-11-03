@@ -2,6 +2,7 @@ package com.latticeengines.dataflow.exposed.service;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +27,6 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
 
