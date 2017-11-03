@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -71,4 +73,38 @@ public class MetadataSegmentResource {
         metadataSegmentService.deleteSegmentByName(segmentName);
     }
 
+    @RequestMapping(value = "/export", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create or update a segment export job")
+    public MetadataSegmentExport createOrUpdateSegmentExportJob(
+            @RequestBody MetadataSegmentExport metadataSegmentExportJob, HttpServletRequest request) {
+        Session session = SecurityUtils.getSessionFromRequest(request, sessionService);
+        if (session != null) {
+            String email = session.getEmailAddress();
+            if (StringUtils.isNotBlank(email)) {
+                metadataSegmentExportJob.setCreatedBy(email);
+            }
+        }
+        return metadataSegmentExportJob;
+    }
+
+    @RequestMapping(value = "/export", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of segment export job")
+    public List<MetadataSegmentExport> getSegmentExportJobs(HttpServletRequest request) {
+        return new ArrayList<>();
+    }
+
+    @RequestMapping(value = "/export/{name}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get segment export job")
+    public MetadataSegmentExport getSegmentExportJob(@PathVariable String name, HttpServletRequest request) {
+        return new MetadataSegmentExport();
+    }
+
+    @RequestMapping(value = "/export/cleanup", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Cleanup expired export jobs")
+    public void cleanupExpiredJobs(@PathVariable String name, HttpServletRequest request) {
+    }
 }
