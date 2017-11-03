@@ -16,7 +16,7 @@ import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.commons.collections.comparators.NullComparator;
+import org.apache.commons.collections4.comparators.NullComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -50,8 +50,6 @@ import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -199,6 +197,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return addSource(sourceTableName, allColumns);
     }
 
+    @SuppressWarnings("unchecked")
     protected Node addSource(String sourceTableName, Map<String, Field> allColumns) {
         DataFlowContext ctx = getDataFlowCtx();
         Map sourceTables = ctx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);

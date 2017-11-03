@@ -7,7 +7,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import org.apache.commons.collections.BagUtils;
 
 public interface EnrichmentService {
 

@@ -12,6 +12,8 @@
         <component-name>oauth2</component-name>
         <spring.oauth2.version>2.2.0.RELEASE</spring.oauth2.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
+        <commons.collections.version>3.2.2</commons.collections.version>
+        <commons.lang.version>2.6</commons.lang.version>
         <maven.surefire.version>2.20</maven.surefire.version>
         <jetty.version>9.2.22.v20170606</jetty.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
@@ -81,12 +83,28 @@
             <artifactId>le-common</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -244,6 +262,20 @@
             <artifactId>jsp-api</artifactId>
             <version>${javax.jsp.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${commons.collections.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>${commons.lang.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

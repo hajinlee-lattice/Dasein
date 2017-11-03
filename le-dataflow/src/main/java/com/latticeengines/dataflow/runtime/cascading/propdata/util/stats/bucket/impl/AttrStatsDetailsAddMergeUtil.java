@@ -2,11 +2,8 @@ package com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket
 
 import java.io.IOException;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 
@@ -16,8 +13,7 @@ public class AttrStatsDetailsAddMergeUtil extends AttrStatsDetailsMergeTemplate 
 
     @Override
     protected void combineIndividualBuckets(Buckets resultBucketsObj, Buckets secondBucketsObj)
-            throws IOException, JsonParseException, //
-            JsonMappingException, JsonProcessingException {
+            throws IOException {
         for (Bucket secondBucket : secondBucketsObj.getBucketList()) {
 
             Bucket matchingResultBucket = //

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class DanteLeadServiceImpl implements DanteLeadService {
     private DanteLead convertForDante(DanteLeadDTO danteLeadDTO, String customerSpace) {
         DanteLead lead = new DanteLead();
         Date now = new Date();
-        if (org.apache.commons.lang.StringUtils.isBlank(danteLeadDTO.getRecommendation().getSfdcAccountID())) {
+        if (StringUtils.isBlank(danteLeadDTO.getRecommendation().getSfdcAccountID())) {
             lead.setAccountExternalID(danteLeadDTO.getRecommendation().getLeAccountExternalID());
         } else {
             lead.setAccountExternalID(danteLeadDTO.getRecommendation().getSfdcAccountID());

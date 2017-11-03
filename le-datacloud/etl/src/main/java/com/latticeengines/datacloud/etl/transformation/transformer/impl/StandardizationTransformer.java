@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;

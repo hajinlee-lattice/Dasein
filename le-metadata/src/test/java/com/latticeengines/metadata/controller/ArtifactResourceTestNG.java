@@ -6,7 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -59,7 +59,7 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
                     null, ResponseDocument.class);
             assertTrue(false);
         } catch (HttpServerErrorException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getStackTrace(e));
             log.warn("ResponseBodyAsString is " + e.getResponseBodyAsString());
             assertTrue(e.getResponseBodyAsString()
                     .contains("Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType]"));

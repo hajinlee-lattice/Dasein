@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -197,16 +197,16 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> queryForListOfMap(String sql, MapSqlParameterSource parameters) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("Not implemented.");
     }
 
     @Override
     public <T> T queryForObject(String sql, MapSqlParameterSource parameters, Class<T> requiredType) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("Not implemented.");
     }
 
     @Override
     public void update(String sql, MapSqlParameterSource parameters) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("Not implemented.");
     }
 }

@@ -2,7 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertNotNull;
 
-import org.apache.commons.collections.Closure;
+import org.apache.commons.collections4.Closure;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.testng.Assert;

@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;

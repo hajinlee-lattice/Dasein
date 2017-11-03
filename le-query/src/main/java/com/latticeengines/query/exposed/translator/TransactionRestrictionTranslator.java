@@ -5,7 +5,7 @@ import static com.latticeengines.domain.exposed.query.AggregationType.EACH;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;

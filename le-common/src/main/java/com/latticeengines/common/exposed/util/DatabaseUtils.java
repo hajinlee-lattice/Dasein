@@ -1,6 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
-import org.apache.commons.collections.Closure;
+import org.apache.commons.collections4.Closure;
 import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +17,9 @@ public class DatabaseUtils {
         retry(operationName, retries, null, "Deadlock detected performing", null, action);
     }
 
+    @SuppressWarnings("unchecked")
     public static void retry(String operationName, int retries, Class<? extends Exception> customExceptionClazz,
-            String customMessage, String customExcetionMessageSubstr, Closure action) {
+                             String customMessage, String customExcetionMessageSubstr, Closure action) {
         Class<? extends Exception> defaultExceptionClazz = LockAcquisitionException.class;
         String defaultMessage = "Deadlock detected performing";
 

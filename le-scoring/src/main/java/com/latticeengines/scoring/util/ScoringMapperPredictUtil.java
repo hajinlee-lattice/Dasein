@@ -21,7 +21,7 @@ import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
