@@ -4,12 +4,13 @@
     <div class="card-content">
 
         <select 
-            ng-if="vm.allPlaysHistory"
             name="category-group" 
             id="categoryGroup" 
-            ng-model="itemSelected" 
-            ng-change="onCategoryChange(itemSelected)" 
-            ng-options="category.name group by category.group for category in categories">
+            ng-if="vm.allPlaysHistory"
+            ng-model="play" 
+            ng-change="vm.playSelectChange(play)" 
+            ng-options="play.playDisplayName for play in vm.launches.launchSummaries | unique:'playName'">
+            <option value="0">All Plays</option>
         </select>
 
         <ul class="history-metadata">
@@ -56,6 +57,7 @@
     		<thead>
     			<tr>
     				<th>Launch Date</th>
+                    <th ng-if="vm.allPlaysHistory">Play Name</th>
     				<th>Selected Targets</th>
     				<th>Suppressed</th>
                     <th>Errors</th>
@@ -67,7 +69,7 @@
     		<tbody>
     			<tr ng-repeat="launch in vm.launches.launchSummaries">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
-
+                    <td ng-if="vm.allPlaysHistory">{{launch.playDisplayName}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>
     				<td class="red-text">{{launch.stats.errors | number}}</td>

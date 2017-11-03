@@ -1,5 +1,11 @@
 .playbook-launch-history {
 
+	select {
+		margin-bottom: 16px;
+		height: 36px;
+    	font-size: 16px;
+	}
+
 	.card-content, .card-footer {
 		background: #fff;
 		border-color: #ddd;
