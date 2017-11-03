@@ -8,9 +8,9 @@
             id="categoryGroup" 
             ng-if="vm.allPlaysHistory"
             ng-model="play" 
-            ng-change="vm.playSelectChange(play)" 
-            ng-options="play.playDisplayName for play in vm.launches.launchSummaries | unique:'playName'">
-            <option value="0">All Plays</option>
+            ng-change="vm.playSelectChange(play)"
+            ng-options="play.playDisplayName for play in vm.defaultPlayLaunchList | unique:'playName'"
+            ng-init="play=vm.defaultPlayLaunchList[0]">
         </select>
 
         <ul class="history-metadata">

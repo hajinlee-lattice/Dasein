@@ -16,6 +16,9 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
         console.log($state);
 
+        vm.defaultPlayLaunchList = angular.copy(vm.launches.launchSummaries);
+        vm.defaultPlayLaunchList.unshift({playName: null, playDisplayName: 'All Launched Plays'});
+
         if($state.current.name === 'home.playbook.plays.launch_history'){
             vm.allPlaysHistory = true;
         } else {
@@ -57,7 +60,18 @@ angular.module('lp.playbook.dashboard.launch_history', [])
     };
 
     vm.playSelectChange = function(play){
+    
         console.log(play);
+
+        var params = {
+            playName: play.playName
+        }
+
+        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+            // console.log(result);
+            vm.launches = result;
+        });
+
     };
 
     vm.play_name_required = function(){
