@@ -56,7 +56,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.test.salesforce.password}")
+    @Value("${eai.test.salesforce.password.encrypted}")
     private String salesforcePasswd;
 
     @Value("${eai.test.salesforce.securitytoken}")

@@ -1,6 +1,6 @@
 package com.latticeengines.eai.service.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNull;
@@ -8,6 +8,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +64,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
 
-    @Value("${eai.test.salesforce.password}")
+    @Value("${eai.test.salesforce.password.encrypted}")
     private String salesforcePasswd;
 
     @Value("${eai.test.salesforce.securitytoken}")
@@ -175,7 +176,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         attr.setFundamentalType("");
         attr.setPhysicalName(attr.getName());
         attr.setStatisticalType("");
-        attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+        attr.setTags(Collections.singletonList(ModelingMetadata.INTERNAL_TAG));
         PrimaryKey pk = new PrimaryKey();
         pk.addAttribute(attr.getName());
         table.setPrimaryKey(pk);
@@ -194,7 +195,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         lmd.setFundamentalType("");
         lmd.setPhysicalName(attr.getName());
         lmd.setStatisticalType("");
-        lmd.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+        lmd.setTags(Collections.singletonList(ModelingMetadata.INTERNAL_TAG));
         LastModifiedKey lmk = EaiMetadataUtil.createLastModifiedKey();
         lmk.addAttribute(lmd.getName());
         lmk.setLastModifiedTimestamp(1000000000000L);

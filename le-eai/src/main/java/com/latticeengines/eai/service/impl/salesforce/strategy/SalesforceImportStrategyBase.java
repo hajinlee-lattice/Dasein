@@ -167,7 +167,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                     attr.setName(attr.getInterfaceName().toString());
                 }
                 attr.setStatisticalType(attrFromImportTables.getStatisticalType());
-                attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
+                attr.setTags(Arrays.asList(ModelingMetadata.INTERNAL_TAG));
 
                 Schema.Type avroType = salesforceToAvroTypeConverter.convertTypeToAvro(type);
 
