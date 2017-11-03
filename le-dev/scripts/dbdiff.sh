@@ -15,8 +15,8 @@ elif [ "${ENV}" = "qa" ]; then
 fi
 
 echo 'regenerate ddl'
-pushd $WSHOME/le-db &&
-mvn -DskipTests clean install &&
+pushd $WSHOME &&
+mvn -T6 -f db-pom.xml -DskipTests package &&
 popd
 
 echo "using mysqldiff to find db diff in ${DB} ..."

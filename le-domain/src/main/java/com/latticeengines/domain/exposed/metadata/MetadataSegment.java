@@ -111,6 +111,18 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonIgnore
     private Long tenantId;
 
+    @Column(name = "ACCOUNTS")
+    @JsonProperty("accounts")
+    private Long accounts;
+
+    @Column(name = "CONTACTS")
+    @JsonProperty("contacts")
+    private Long contacts;
+
+    @Column(name = "PRODUCTS")
+    @JsonProperty("products")
+    private Long products;
+
     @Override
     public Long getPid() {
         return pid;
@@ -244,6 +256,30 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public Long getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(Long accounts) {
+        this.accounts = accounts;
+    }
+
+    public Long getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(Long contacts) {
+        this.contacts = contacts;
+    }
+
+    public Long getProducts() {
+        return products;
+    }
+
+    public void setProducts(Long products) {
+        this.products = products;
     }
 
     @Override

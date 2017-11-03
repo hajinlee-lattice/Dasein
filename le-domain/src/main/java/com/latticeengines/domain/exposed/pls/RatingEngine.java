@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,6 +25,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -117,6 +120,10 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RatingModel> ratingModels = new HashSet<>();
+
+    @Column(name = "COUNTS", length = 1000)
+    @JsonIgnore
+    private String counts;
 
     @JsonProperty("lastRefreshedDate")
     @Transient
@@ -242,6 +249,32 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     public void setLastRefreshedDate(Date lastRefreshedDate) {
         this.lastRefreshedDate = lastRefreshedDate;
+    }
+
+    private String getCounts() {
+        return counts;
+    }
+
+    private void setCounts(String counts) {
+        this.counts = counts;
+    }
+
+    @JsonProperty("counts")
+    public Map<String, Long> getCountsAsMap() {
+        if (StringUtils.isBlank(counts)) {
+            return null;
+        }
+        Map map = JsonUtils.deserialize(counts, Map.class);
+        return JsonUtils.convertMap(map, String.class, Long.class);
+    }
+
+    @JsonProperty("counts")
+    public void setCountsByMap(Map<String, Long> countMap) {
+        if (MapUtils.isEmpty(countMap)) {
+            counts = null;
+        } else {
+            counts = JsonUtils.serialize(countMap);
+        }
     }
 
     @Override

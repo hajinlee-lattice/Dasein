@@ -92,6 +92,19 @@ CREATE PROCEDURE `UpdateMetadataAttribute`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateSegmentAndRatingEngine`()
+    BEGIN
+        ALTER TABLE `METADATA_SEGMENT`
+            ADD COLUMN `ACCOUNTS` BIGINT,
+            ADD COLUMN `CONTACTS` BIGINT,
+            ADD COLUMN `PRODUCTS` BIGINT;
+
+        ALTER TABLE `RATING_ENGINE`
+            ADD COLUMN `COUNTS`  VARCHAR(1000);
+    END;
+//
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
     BEGIN
@@ -99,6 +112,7 @@ CREATE PROCEDURE `UpdateSchema`()
         CALL `UpdateCDLTables`();
         CALL `UpdateNoteTables`();
         CALL `UpdateMetadataAttribute`();
+        CALL `UpdateSegmentAndRatingEngine`();
         COMMIT;
     END;
 //
