@@ -204,9 +204,6 @@ angular
                 WizardProgressContext: function() {
                     return 'ratingsengine.ai';
                 },
-                WizardProgressStep : function(){
-
-                },
                 WizardProgressItems: function($stateParams, RatingsEngineStore) {
                     var rating_id = $stateParams.rating_id || '';
                     var wizard_steps = $stateParams.wizard_steps;
@@ -225,7 +222,7 @@ angular
                 'main@': {
                     resolve: {
                         WizardHeaderTitle: function() {
-                            return 'Choose a Segment to analyze for modeling';
+                            return 'Create Rating Engine';
                         },
                         WizardContainerId: function() {
                             return 'ratingsengine.ai';
@@ -274,6 +271,20 @@ angular
                 }
             }
         })
+        .state('home.ratingsengine.ai.segment.prospect.products', {
+            url: '/products',
+            resolve: {
+                WizardHeaderTitle: function() {
+                    return 'What Products will you sell into this Segment?';
+                }
+            },
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    templateUrl: 'app/ratingsengine/content/ai/products.component.html'
+                }
+            }
+        })
         .state('home.ratingsengine.ai.segment', {
             url: '/segment',
             
@@ -293,10 +304,25 @@ angular
                     }
 
                     return deferred.promise;
+                },
+                RatingsEngineStore : function(RatingsEngineStore){
+                    return RatingsEngineStore;
                 }
             },
             views: {
                 'wizard_content@home.ratingsengine.ai': {
+                   
+                    controller: function($state){
+                        var vm = this;
+                        vm.goToCreateSegment = function() {
+                            $state.go('home.segment.explorer.attributes');
+                        }
+                    },
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/ai-segment.component.html',
+
+                },
+                'segment_view@home.ratingsengine.ai.segment': {
                     controller: 'RatingsEngineSegment',
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/segment/segment.component.html'

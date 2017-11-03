@@ -14,15 +14,15 @@ angular.module('lp.ratingsengine.ai.prospect', [])
 
         vm.init = function () {
             $scope.$watch('vm.buildOption', function () {
-                vm.setValidation('prospect', false);
                 if (vm.initializing) {
                     $timeout(function () {
                         vm.initializing = false;
-                        vm.setValidation('prospect', false);
+                        vm.setValidation('prospect', true);
                     });
                 } else {
+                    //This condition is here for future implementation
+                    //when all the building options are going to be enabled
                     vm.setValidation('prospect', false);
-                    alert('Changed ' + vm.buildOption);
                 }
             }, true);
         }
