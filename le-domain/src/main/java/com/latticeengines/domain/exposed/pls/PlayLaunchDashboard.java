@@ -10,6 +10,8 @@ public class PlayLaunchDashboard {
 
     private List<LaunchSummary> launchSummaries;
 
+    private List<Play> uniquePlaysWithLaunches;
+
     public Stats getCumulativeStats() {
         return cumulativeStats;
     }
@@ -24,6 +26,14 @@ public class PlayLaunchDashboard {
 
     public void setLaunchSummaries(List<LaunchSummary> launchSummaries) {
         this.launchSummaries = launchSummaries;
+    }
+
+    public List<Play> getUniquePlaysWithLaunches() {
+        return uniquePlaysWithLaunches;
+    }
+
+    public void setUniquePlaysWithLaunches(List<Play> uniquePlaysWithLaunches) {
+        this.uniquePlaysWithLaunches = uniquePlaysWithLaunches;
     }
 
     public static class LaunchSummary {
@@ -150,5 +160,4 @@ public class PlayLaunchDashboard {
             this.contactsWithinRecommendations = contactsWithinRecommendations;
         }
     }
-
 }

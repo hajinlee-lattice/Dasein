@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
@@ -24,6 +25,9 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp);
 
     Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long endTimestamp);
+
+    List<Play> findDashboardPlaysWithLaunches(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp);
 
     Stats findTotalCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -360,6 +361,18 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
                                 matchingPlayLaunch.getAccountsLaunched().longValue());
                         Assert.assertEquals(stats.getSuppressed(),
                                 matchingPlayLaunch.getAccountsSuppressed().longValue());
+                    });
+
+            Set<String> playIdSet = ConcurrentHashMap.newKeySet();
+
+            Assert.assertNotNull(dashboardEntries.getUniquePlaysWithLaunches());
+            dashboardEntries.getUniquePlaysWithLaunches().stream() //
+                    .forEach(pl -> {
+                        Assert.assertNotNull(pl.getPid());
+                        Assert.assertNotNull(pl.getName());
+                        Assert.assertNotNull(pl.getDisplayName());
+                        Assert.assertFalse(playIdSet.contains(pl.getName()));
+                        playIdSet.add(pl.getName());
                     });
         }
     }

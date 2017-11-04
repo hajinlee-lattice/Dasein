@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.pls.dao.PlayLaunchDao;
@@ -143,7 +144,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "";
         Query query = createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending,
-                endTimestamp, session, entityClz, queryStr);
+                endTimestamp, session, entityClz, queryStr, true);
 
         return query.list();
     }
@@ -156,9 +157,22 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "SELECT count(*) ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr);
+                session, entityClz, queryStr, false);
 
         return Long.parseLong(query.uniqueResult().toString());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Play> findDashboardPlaysWithLaunches(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long endTimestamp) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<PlayLaunch> entityClz = getEntityClass();
+
+        String queryStr = "FROM Play WHERE pid IN ( SELECT distinct play ";
+        Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
+                session, entityClz, queryStr, ")", false);
+        return query.list();
     }
 
     @Override
@@ -181,7 +195,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + " " + ") ";
 
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr);
+                session, entityClz, queryStr, false);
 
         List<Map<String, Object>> queryResult = query.list();
         Stats totalCounts = new Stats();
@@ -202,7 +216,14 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
-            Class<PlayLaunch> entityClz, String queryStr) {
+            Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded) {
+        return createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending, endTimestamp,
+                session, entityClz, queryStr, null, sortNeeded);
+    }
+
+    private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
+            Long max, String sortby, boolean descending, Long endTimestamp, Session session,
+            Class<PlayLaunch> entityClz, String queryStr, String closingQueryStr, boolean sortNeeded) {
         queryStr += String.format(
                 " FROM %s "//
                         + " WHERE created >= :startTimestamp ", //
@@ -220,15 +241,21 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             queryStr += " AND state IN ( :states ) ";
         }
 
-        if (StringUtils.isBlank(sortby)) {
-            sortby = CREATED_COL;
-        } else if (sortby.trim().equalsIgnoreCase(CREATED_COL)) {
-            sortby = String.format("%s, %s ", sortby, CREATED_COL);
+        if (sortNeeded) {
+            if (StringUtils.isBlank(sortby)) {
+                sortby = CREATED_COL;
+            } else if (sortby.trim().equalsIgnoreCase(CREATED_COL)) {
+                sortby = String.format("%s, %s ", sortby, CREATED_COL);
+            }
+
+            queryStr += String.format( //
+                    " ORDER BY %s %s ", //
+                    sortby, descending ? "DESC" : "ASC");
         }
 
-        queryStr += String.format( //
-                " ORDER BY %s %s ", //
-                sortby, descending ? "DESC" : "ASC");
+        if (StringUtils.isNotBlank(closingQueryStr)) {
+            queryStr += closingQueryStr;
+        }
 
         Query query = session.createQuery(queryStr);
         if (offset != null) {

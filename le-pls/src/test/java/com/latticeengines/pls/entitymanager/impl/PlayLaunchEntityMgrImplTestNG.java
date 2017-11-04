@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -318,6 +319,23 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(cumulativeStats.getRecommendationsLaunched(), recommendationsLaunched.longValue());
         Assert.assertEquals(cumulativeStats.getContactsWithinRecommendations(),
                 contactsWithinRecommendations.longValue());
+
+        List<Play> uniquePlays = playLaunchEntityMgr.findDashboardPlaysWithLaunches(playId, states, startTimestamp,
+                endTimestamp);
+        Assert.assertNotNull(uniquePlays);
+
+        if (recommendationsLaunched > 0L) {
+            Set<String> playIdSet = ConcurrentHashMap.newKeySet();
+
+            Assert.assertTrue(uniquePlays.size() > 0);
+            uniquePlays.stream().forEach(pl -> {
+                Assert.assertNotNull(pl.getPid());
+                Assert.assertNotNull(pl.getName());
+                Assert.assertNotNull(pl.getDisplayName());
+                Assert.assertFalse(playIdSet.contains(pl.getName()));
+                playIdSet.add(pl.getName());
+            });
+        }
     }
 
     private void checkForEntriesDashboard(Long playId, List<LaunchState> goodStates, List<LaunchState> badStates,

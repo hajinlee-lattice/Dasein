@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
@@ -76,11 +77,15 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         Stats totalCounts = playLaunchEntityMgr.findDashboardCumulativeStats(playId, launchStates, startTimestamp,
                 endTimestamp);
 
+        List<Play> uniquePlaysWithLaunches = playLaunchEntityMgr.findDashboardPlaysWithLaunches(playId, launchStates,
+                startTimestamp, endTimestamp);
+
         List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
                 startTimestamp, offset, max, sortby, descending, endTimestamp);
 
         dashboard.setLaunchSummaries(launchSummaries);
         dashboard.setCumulativeStats(totalCounts);
+        dashboard.setUniquePlaysWithLaunches(uniquePlaysWithLaunches);
         return dashboard;
     }
 
