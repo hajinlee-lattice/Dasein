@@ -247,20 +247,28 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     public void deduplicateAttributeNames() {
         Set<String> nameSet = new HashSet<String>();
-        deduplicateAttributeNames(nameSet);
+        deduplicateAttributeNames(nameSet, false);
     }
 
     @JsonIgnore
-    public void deduplicateAttributeNames(Set<String> nameSet) {
+    public void deduplicateAttributeNamesIgnoreCase() {
+        Set<String> nameSet = new HashSet<String>();
+        deduplicateAttributeNames(nameSet, true);
+    }
+
+    @JsonIgnore
+    public void deduplicateAttributeNames(Set<String> nameSet, boolean ignoreCase) {
         for (int i = 0; i < attributes.size(); i++) {
             Attribute attribute = attributes.get(i);
             String rootAttributeName = attribute.getName();
             String possibleName = rootAttributeName;
+            String possibleNameIgnoreCase = ignoreCase ? possibleName.toLowerCase() : possibleName;
             int version = 0;
-            while (nameSet.contains(possibleName)) {
+            while (nameSet.contains(possibleNameIgnoreCase)) {
                 possibleName = String.format(rootAttributeName + "_%d", ++version);
+                possibleNameIgnoreCase = ignoreCase ? possibleName.toLowerCase() : possibleName;
             }
-            nameSet.add(possibleName);
+            nameSet.add(possibleNameIgnoreCase);
             if (version > 0) {
                 attribute.setName(possibleName);
                 log.info(String.format("Replacing %s with %s.", rootAttributeName, possibleName));

@@ -143,6 +143,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         }
 
+        schemaTable.deduplicateAttributeNamesIgnoreCase();
         return schemaTable;
     }
 

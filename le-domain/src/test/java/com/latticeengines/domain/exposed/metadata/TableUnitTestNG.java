@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import org.apache.avro.Schema;
@@ -36,7 +37,7 @@ public class TableUnitTestNG {
     @Test(groups = "unit")
     public void getModelingMetadata() {
         ModelingMetadata metadata = table.getModelingMetadata();
-        assertEquals(metadata.getAttributeMetadata().size(), 7);
+        assertEquals(metadata.getAttributeMetadata().size(), 9);
     }
 
     @Test(groups = "unit")
@@ -51,6 +52,13 @@ public class TableUnitTestNG {
         assertNotNull(table.getAttribute("avro_1_200"));
         assertNotNull(table.getAttribute("avro_1_200_1"));
         assertNotNull(table.getAttribute("avro_1_200_2"));
+        assertNotNull(table.getAttribute("Avro_1_200"));
+        assertNotNull(table.getAttribute("AVRO_1_200"));
+        table.deduplicateAttributeNamesIgnoreCase();
+        assertNull(table.getAttribute("Avro_1_200"));
+        assertNull(table.getAttribute("AVRO_1_200"));
+        assertNotNull(table.getAttribute("Avro_1_200_3"));
+        assertNotNull(table.getAttribute("AVRO_1_200_4"));
     }
 
     private Table createTable() {
@@ -127,6 +135,12 @@ public class TableUnitTestNG {
         Attribute duplicateAttribute3 = new Attribute();
         duplicateAttribute3.setName("avro_1_200");
 
+        Attribute duplicateAttribute4 = new Attribute();
+        duplicateAttribute4.setName("Avro_1_200");
+
+        Attribute duplicateAttribute5 = new Attribute();
+        duplicateAttribute5.setName("AVRO_1_200");
+
         table.addAttribute(pkAttr);
         table.addAttribute(lkAttr);
         table.addAttribute(spamIndicator);
@@ -134,6 +148,8 @@ public class TableUnitTestNG {
         table.addAttribute(duplicateAttribute1);
         table.addAttribute(duplicateAttribute2);
         table.addAttribute(duplicateAttribute3);
+        table.addAttribute(duplicateAttribute4);
+        table.addAttribute(duplicateAttribute5);
 
         return table;
     }
