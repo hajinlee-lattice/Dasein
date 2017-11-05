@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("csvDataFeedMetadataService")
 public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
+
+    private static final Logger log = LoggerFactory.getLogger(CSVDataFeedMetadataServiceImpl.class);
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -34,6 +38,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         } catch (Exception e) {
             throw new RuntimeException("Cannot deserialize CSV import metadata!");
         }
+        log.info("Template table name: " + importConfig.getTemplateName());
         return metadataProxy.getTable(importConfig.getCustomerSpace().toString(), importConfig.getTemplateName());
     }
 

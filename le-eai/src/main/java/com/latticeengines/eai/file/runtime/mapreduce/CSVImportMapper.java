@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,6 +48,8 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -60,6 +63,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String ERROR_FILE = "error.csv";
 
+    private static final String DUPLICATE_FILE = "duplicate.csv";
+
     private Schema schema;
 
     private Table table;
@@ -68,13 +73,23 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private Configuration conf;
 
+    private boolean deduplicate;
+
     private boolean missingRequiredColValue = Boolean.FALSE;
     private boolean fieldMalFormed = Boolean.FALSE;
     private boolean rowError = Boolean.FALSE;
 
     private Map<String, String> errorMap = new HashMap<>();
 
+    private Map<String, String> duplicateMap = new HashMap<>();
+
+    private Set<String> uniqueIds = new HashSet<>();
+
     private CSVPrinter csvFilePrinter;
+
+    private CSVPrinter duplicateRecordPrinter;
+
+    private String idColumnName;
 
     private long lineNum = 2;
 
@@ -91,11 +106,27 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         LOG.info("table is:" + table);
 
+        deduplicate = Boolean.parseBoolean(conf.get("eai.dedup.enable"));
+        LOG.info("Deduplicate enable = " + String.valueOf(deduplicate));
+
+        idColumnName = conf.get("eai.id.column.name");
+        LOG.info("Import file id column is: " + idColumnName);
+
+        if (StringUtils.isEmpty(idColumnName)) {
+            LOG.info("The id column does not exist.");
+            deduplicate = false;
+        }
+
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
 
         csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
                 LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+
+        if (deduplicate) {
+            duplicateRecordPrinter = new CSVPrinter(new FileWriter(DUPLICATE_FILE),
+                    LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+        }
 
         if (StringUtils.isEmpty(table.getName())) {
             avroFileName = "file.avro";
@@ -136,11 +167,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         beforeEachRecord();
                         CSVRecord csvRecord = parser.getRecords().get(0);
                         GenericRecord avroRecord = toGenericRecord(Sets.newHashSet(headers), csvRecord);
-                        if (errorMap.size() == 0) {
+                        if (errorMap.size() == 0 && duplicateMap.size() == 0) {
                             dataFileWriter.append(avroRecord);
                             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
                         } else {
-                            handleError(context, lineNum);
+                            if (errorMap.size() > 0) {
+                                handleError(context, lineNum);
+                            }
+                            if (duplicateMap.size() > 0) {
+                                handleDuplicate(context, lineNum);
+                            }
                         }
                     } catch (Exception e) {
                         LOG.warn(e.getMessage(), e);
@@ -180,6 +216,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         errorMap.clear();
     }
 
+    private void handleDuplicate(Context context, long lineNumber) throws IOException {
+        LOG.info("Handle duplicate record in line: " + String.valueOf(lineNumber));
+        context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).increment(1);
+        id = id != null ? id : "";
+        duplicateRecordPrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
+        duplicateRecordPrinter.flush();
+
+        duplicateMap.clear();
+    }
+
     public String getCSVFilePath(URI[] uris) {
         for (URI uri : uris) {
             if (uri.getPath().endsWith(".csv")) {
@@ -210,11 +256,25 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             csvFieldValue = attr.getDefaultValueStr();
                         }
                         avroFieldValue = toAvro(csvFieldValue, avroType, attr);
-                        if (attr.getName().equals(InterfaceName.Id.name())) {
+                        if (attr.getName().equals(idColumnName)) {
                             id = String.valueOf(avroFieldValue);
+                            if (deduplicate) {
+                                if (uniqueIds.contains(id)) {
+                                    throw new LedpException(LedpCode.LEDP_17017, new String[]{id});
+                                } else {
+                                    uniqueIds.add(id);
+                                }
+                            }
                         }
                     }
                     avroRecord.put(attr.getName(), avroFieldValue);
+                } catch (LedpException e) {
+                    LOG.warn(e.getMessage(), e);
+                    if (e.getCode().equals(LedpCode.LEDP_17017)) {
+                        duplicateMap.put(attr.getDisplayName(), e.getMessage());
+                    } else {
+                        throw e;
+                    }
                 } catch (Exception e) {
                     LOG.warn(e.getMessage(), e);
                     errorMap.put(attr.getDisplayName(), e.getMessage());
@@ -309,6 +369,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(0);
         } else {
             HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
+        }
+
+        if (context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue() == 0) {
+            context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).setValue(0);
+        } else {
+            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), DUPLICATE_FILE, outputPath + "/" + DUPLICATE_FILE);
         }
 
         if (context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue() == 0) {

@@ -499,14 +499,6 @@ public class SchemaRepository {
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
-        table.addAttribute(attr(InterfaceName.PhoneNumber.name()) //
-                .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE NUMBER")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.PhoneNumber) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
         table.addAttribute(attr(InterfaceName.SalesforceAccountID.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID")) //
                 .type(Schema.Type.STRING) //

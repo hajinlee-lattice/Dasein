@@ -20,4 +20,6 @@ public class ImportProperty extends BaseProperty {
     public static final String MULTIPLE_EXTRACT = "multipleExtract";
     public static final String EXTRACT_PATH_LIST = "extractPathList";
     public static final String EXTRACT_RECORDS_LIST = "extractRecordsList";
+    public static final String DEDUP_ENABLE = "dedupEnable";
+    public static final String ID_COLUMN_NAME = "idColumnName";
 }

@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
@@ -76,6 +77,8 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             context.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
             context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
             context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
+            context.setProperty(ImportProperty.DEDUP_ENABLE, Boolean.TRUE.toString());
+            context.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find the dataFeed task for import!");

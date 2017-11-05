@@ -109,6 +109,7 @@ public enum LedpCode {
     LEDP_17014("Import table metadata error! {0}"), //
     LEDP_17015("Import table data error! {0}"), //
     LEDP_17016("Failed to get data from DL!"),
+    LEDP_17017("The id {0} is duplicated."),
 
     // le-pls 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //

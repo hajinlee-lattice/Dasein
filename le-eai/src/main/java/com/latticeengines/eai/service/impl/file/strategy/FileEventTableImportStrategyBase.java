@@ -11,11 +11,12 @@ import java.util.Properties;
 import org.apache.avro.Schema.Type;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -102,6 +103,18 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
         props.put(MapReduceProperty.INPUT.name(), hdfsFileToImport);
         props.put("eai.table.schema", JsonUtils.serialize(table));
+        String idColumnName = ctx.getProperty(ImportProperty.ID_COLUMN_NAME, String.class);
+        if (StringUtils.isEmpty(idColumnName)) {
+            props.put("eai.id.column.name", "");
+        } else {
+            props.put("eai.id.column.name", idColumnName);
+        }
+        String dedupEnable = ctx.getProperty(ImportProperty.DEDUP_ENABLE, String.class);
+        if (StringUtils.isEmpty(dedupEnable)) {
+            props.put("eai.dedup.enable", "false");
+        } else {
+            props.put("eai.dedup.enable", "true");
+        }
         List<String> cacheFiles = new ArrayList<>();
         try {
             cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
@@ -140,6 +153,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         for (Attribute attr : table.getAttributes()) {
             ModelingMetadata.AttributeMetadata attrMetadata = attrMap.get(attr.getName());
             if (attr.getInterfaceName() != null) {
+                if (attr.getName().equals(InterfaceName.Id.name())) {
+                    ctx.setProperty(ImportProperty.ID_COLUMN_NAME, attr.getInterfaceName().name());
+                }
                 attr.setName(attr.getInterfaceName().name());
             }
             if (attrMetadata != null && attr.getSourceLogicalDataType() == null) {

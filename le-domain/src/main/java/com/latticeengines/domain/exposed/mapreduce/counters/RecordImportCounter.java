@@ -5,5 +5,6 @@ public enum RecordImportCounter {
     IGNORED_RECORDS, //
     REQUIRED_FIELD_MISSING, //
     FIELD_MALFORMED, //
-    ROW_ERROR;
+    ROW_ERROR, //
+    DUPLICATE_RECORDS
 }

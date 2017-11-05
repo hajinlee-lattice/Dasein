@@ -59,6 +59,10 @@ public class CSVImportJob extends MRJobCustomizationBase {
             String tableSchema = properties.getProperty("eai.table.schema");
             config.set("eai.table.schema", tableSchema);
 
+            config.set("eai.dedup.enable", properties.getProperty("eai.dedup.enable"));
+
+            config.set("eai.id.column.name", properties.getProperty("eai.id.column.name"));
+
             // get schema
             Table table = JsonUtils.deserialize(tableSchema, Table.class);
             Schema schema = TableUtils.createSchema(table.getName(), table);
