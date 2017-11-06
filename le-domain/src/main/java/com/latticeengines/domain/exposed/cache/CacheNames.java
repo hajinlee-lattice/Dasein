@@ -11,4 +11,13 @@ public enum CacheNames {
     JobsCache, //
     MetadataCache, //
     SessionCache;//
+
+    public static CacheNames[] getCdlConsolidateCacheGroup() {
+        return new CacheNames[] { EntityDataCache, EntityCountCache, EntityRatingCountCache };
+    }
+
+    public static CacheNames[] getCdlProfileCacheGroup() {
+        return new CacheNames[] { DataLakeStatsCache, DataLakeCMCache, EntityCountCache, EntityDataCache,
+                EntityRatingCountCache };
+    }
 }

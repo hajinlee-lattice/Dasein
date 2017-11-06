@@ -65,9 +65,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         dataCollectionEntityMgr.update(collection);
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
         notifyCacheWatchers(customerSpace);
-        cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.DataLakeStatsCache,
-                CacheNames.DataLakeCMCache, CacheNames.EntityCountCache, CacheNames.EntityDataCache,
-                CacheNames.EntityRatingCountCache);
+        cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.getCdlProfileCacheGroup());
         return newVersion;
     }
 
@@ -210,16 +208,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     private void notifyCacheWatchers(String customerSpace) {
-        Arrays.asList(CacheNames.DataLakeStatsCache, CacheNames.DataLakeCMCache, CacheNames.EntityCountCache,
-                CacheNames.EntityDataCache, CacheNames.EntityRatingCountCache).stream().forEach(cache -> {
-                    NodeWatcher.notifyCacheWatchersAsync(cache.name(),
-                            String.format("%s|all|%s", CacheOperation.Put.name(), customerSpace));
-                    try {
-                        Thread.sleep(1000L);
-                    } catch (InterruptedException e) {
-                        log.warn("Thread sleep interrupted", e);
-                    }
-                });
+        Arrays.asList(CacheNames.getCdlProfileCacheGroup()).stream().forEach(cache -> {
+            NodeWatcher.notifyCacheWatchersAsync(cache.name(),
+                    String.format("%s|all|%s", CacheOperation.Put.name(), customerSpace));
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                log.warn("Thread sleep interrupted", e);
+            }
+        });
     }
 
 }

@@ -51,18 +51,16 @@ public class DataFeedExecutionListener extends LEJobListener {
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
-            cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.EntityDataCache,
-                    CacheNames.EntityRatingCountCache);
-            Arrays.asList(CacheNames.EntityCountCache, CacheNames.EntityDataCache, CacheNames.EntityRatingCountCache)
-                    .stream().forEach(cache -> {
-                        NodeWatcher.notifyCacheWatchersAsync(cache.name(),
-                                String.format("%s|", CacheOperation.Put.name()));
-                        try {
-                            Thread.sleep(1000L);
-                        } catch (InterruptedException e) {
-                            log.warn("Thread sleep interrupted", e);
-                        }
-                    });
+            cacheService.dropKeysByPattern(String.format("*%s*", customerSpace),
+                    CacheNames.getCdlConsolidateCacheGroup());
+            Arrays.asList(CacheNames.getCdlConsolidateCacheGroup()).stream().forEach(cache -> {
+                NodeWatcher.notifyCacheWatchersAsync(cache.name(), String.format("%s|", CacheOperation.Put.name()));
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    log.warn("Thread sleep interrupted", e);
+                }
+            });
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
             DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);
