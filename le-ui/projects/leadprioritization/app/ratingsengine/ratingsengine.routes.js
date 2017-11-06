@@ -13,6 +13,7 @@ angular
     'lp.ratingsengine.wizard.summary',
     'lp.ratingsengine.ai',
     'lp.ratingsengine.ai.prospect',
+    'lp.ratingsengine.ai.prospect.prospect-graph',
     'lp.ratingsengine.ai.products'
 ])
 .config(function($stateProvider, DataCloudResolvesProvider) {
@@ -268,7 +269,12 @@ angular
                 'wizard_content@home.ratingsengine.ai': {
                     controller: 'RatingsEngineAIProspect',
                     controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/ai/prospect.component.html'
+                    templateUrl: 'app/ratingsengine/content/ai/prospect/prospect.component.html'
+                },
+                'prospect-graph@home.ratingsengine.ai.segment.prospect': {
+                    controller: 'RatingsEngineAIProspectGraph',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/prospect/prospect-graph.component.html'
                 }
             }
         })
@@ -279,7 +285,29 @@ angular
                 'wizard_content@home.ratingsengine.ai': {
                     controller: 'RatingsEngineAIProducts',
                     controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/ai/products.component.html'
+                    templateUrl: 'app/ratingsengine/content/ai/products/products.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment.prospect.products.settings', {
+            url: '/products',
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    controller: function(RatingsEngineStore){
+                        RatingsEngineStore.setValidation('settings', true);
+                    },
+                    templateUrl: 'app/ratingsengine/content/ai/model/ai-model-settings.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment.prospect.products.settings.model', {
+            url: '/products',
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    
+                    templateUrl: 'app/ratingsengine/content/ai/model/ai-model.component.html'
                 }
             }
         })
@@ -317,7 +345,7 @@ angular
                         }
                     },
                     controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/ai/ai-segment.component.html',
+                    templateUrl: 'app/ratingsengine/content/ai/segment/ai-segment.component.html',
 
                 },
                 'segment_view@home.ratingsengine.ai.segment': {

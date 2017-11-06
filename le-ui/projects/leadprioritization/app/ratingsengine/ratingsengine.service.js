@@ -18,7 +18,9 @@ angular.module('lp.ratingsengine')
             attributes: true,
             rules: true,
             summary: true,
-            prospect: false
+            prospect: false,
+            products: false,
+            settings: false
         }
 
         this.segment_form = {
@@ -88,8 +90,16 @@ angular.module('lp.ratingsengine')
                     // } 
                 },
                 { 
+                    label: 'Settings', 
+                    state: 'segment.prospect.products.settings', 
+                    nextLabel: 'Create Model', 
+                    // nextFn: function(nextState) {
+                    //     RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    // } 
+                },
+                { 
                     label: 'Model', 
-                    state: 'segment.prospect.products.model', 
+                    state: 'segment.prospect.products.settings.model', 
                     nextLabel: '?', 
                     // nextFn: function(nextState) {
                     //     RatingsEngineStore.nextSaveRatingEngine(nextState);
