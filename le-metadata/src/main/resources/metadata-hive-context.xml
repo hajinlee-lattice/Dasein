@@ -13,7 +13,7 @@
         <property name="url" value="${metadata.hive.url}"/>
         <property name="initialSize" value="3"/>
         <property name="username" value="${metadata.hive.username}"/>
-        <property name="password" value="${metadata.hive.password}"/>
+        <property name="password" value="${metadata.hive.password.encrypted}"/>
     </bean>
 
     <bean id="hiveJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="hiveDataSource"/>
