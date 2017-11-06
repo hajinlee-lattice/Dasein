@@ -10,7 +10,7 @@ import threading
 import time
 
 from .consul import write_to_stack, read_from_stack
-from .module.ecs import ContainerDefinition, TaskDefinition
+from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import *
 from .module.stack import ECSStack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
 from .module.template import TEMPLATE_DIR
@@ -139,9 +139,11 @@ def haproxy_task(stackname, ec2s, ecr):
             "awslogs-region": { "Ref": "AWS::Region" },
             "awslogs-stream-prefix": "haproxy"
         }}) \
-        .set_env("HOSTS", ips)
+        .set_env("HOSTS", ips) \
+        .mount("/etc/ledp", "ledp")
     task = TaskDefinition("haproxytask")
     task.add_container(container)
+    task.add_volume(Volume("ledp", "/etc/ledp"))
 
     for ec2 in ec2s:
         task.depends_on(ec2)
