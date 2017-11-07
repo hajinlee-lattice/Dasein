@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -275,6 +276,16 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
         return proxy.findReportByName(name, space.toString());
+    }
+
+    protected Report createReport(String json, ReportPurpose purpose, String name) {
+        Report report = new Report();
+        KeyValue kv = new KeyValue();
+        kv.setPayload(json);
+        report.setJson(kv);
+        report.setPurpose(purpose);
+        report.setName(name);
+        return report;
     }
 
     protected Map<String, String> retrieveModelIds(Map<String, ModelSummary> eventToModelSummary) {

@@ -28,7 +28,7 @@ public enum ReportPurpose {
      * 
      */
     CONSOLIDATE_NEW_RECORDS_COUNT_SUMMARY("ConsolidateNewRecordsCount"), //
-
+    CONSOLIDATE_RECORDS_SUMMARY("ConsolidateRecordsSummary"), //
     /**
      * Generic
      */

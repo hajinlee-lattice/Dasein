@@ -99,9 +99,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|count\", "
-    // +
-    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public long getAttributesCount() {
         List<ColumnMetadata> cms = getAllAttributes();
         if (cms == null) {
@@ -112,10 +109,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|%d|%d\", "
-    // +
-    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id,
-    // #offset, #max)")
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
         List<ColumnMetadata> cms = getAllAttributes();
         Stream<ColumnMetadata> stream = cms.stream().sorted(Comparator.comparing(ColumnMetadata::getColumnId));
@@ -152,9 +145,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|statscub\", "
-    // +
-    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public StatsCube getStatsCube() {
         Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {
@@ -164,9 +154,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|statscubs\", "
-    // +
-    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public Map<BusinessEntity, StatsCube> getStatsCubes() {
         Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {
@@ -176,9 +163,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|topntree\", "
-    // +
-    // "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public TopNTree getTopNTree(boolean includeTopBkt) {
         Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {
@@ -188,9 +172,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|%s|%s\",
-    // T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id),#entity,
-    // #attribute")
     public AttributeStats getAttributeStats(BusinessEntity entity, String attribute) {
         Statistics statistics = _dataLakeService.getStatistics();
         if (statistics == null) {

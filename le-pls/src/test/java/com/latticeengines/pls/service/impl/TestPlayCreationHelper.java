@@ -174,7 +174,7 @@ public class TestPlayCreationHelper {
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        EntityProxy entityProxy = new EntityProxy();
+        EntityProxy entityProxy = new EntityProxy(null);
 
         Field f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);

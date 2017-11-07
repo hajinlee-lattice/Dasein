@@ -45,19 +45,34 @@ public class CacheBeansConfiguration {
     }
 
     private CacheManager redisCacheManager() {
-        CacheConfig entityCacheConfig = new CacheConfig(0, 0);
-        entityCacheConfig.setMaxSize(3000 * 3 * 2);
+        long maxIdleTime = 5 * 24 * 60 * 60 * 1000;
+        CacheConfig attributeRepoCacheConfig = new CacheConfig(0, maxIdleTime);
+        attributeRepoCacheConfig.setMaxSize(100 * 2);
 
-        CacheConfig dataLakeCacheConfig = new CacheConfig(0, 0);
-        dataLakeCacheConfig.setMaxSize(100 * 2 * 2);
+        CacheConfig dataLakeCMCacheConfig = new CacheConfig(0, maxIdleTime);
+        dataLakeCMCacheConfig.setMaxSize(100 * 2);
+        CacheConfig dataLakeStatsCacheConfig = new CacheConfig(0, maxIdleTime);
+        dataLakeStatsCacheConfig.setMaxSize(100 * 2);
+
+        CacheConfig entityCountCacheConfig = new CacheConfig(0, maxIdleTime);
+        entityCountCacheConfig.setMaxSize(3000 * 2);
+        CacheConfig entityDataCacheConfig = new CacheConfig(0, maxIdleTime);
+        entityDataCacheConfig.setMaxSize(300 * 2);
+        CacheConfig entityRatingCountCacheConfig = new CacheConfig(0, maxIdleTime);
+        entityRatingCountCacheConfig.setMaxSize(3000 * 2);
 
         CacheConfig metadataCacheConfig = new CacheConfig(10 * 60 * 1000, 10 * 60 * 1000);
 
-        CacheConfig sessionCacheConfig = new CacheConfig(5 * 60 * 1000, 5 * 60 * 1000);
+        CacheConfig sessionCacheConfig = new CacheConfig(5 * 60 * 1000, 15 * 60 * 1000);
 
         Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
-        config.put(CacheNames.DataLakeStatsCache.name(), dataLakeCacheConfig);
-        config.put(CacheNames.EntityCountCache.name(), entityCacheConfig);
+        config.put(CacheNames.AttributeRepoCache.name(), attributeRepoCacheConfig);
+        config.put(CacheNames.DataLakeCMCache.name(), dataLakeCMCacheConfig);
+        config.put(CacheNames.DataLakeStatsCache.name(), dataLakeStatsCacheConfig);
+
+        config.put(CacheNames.EntityCountCache.name(), entityCountCacheConfig);
+        config.put(CacheNames.EntityDataCache.name(), entityDataCacheConfig);
+        config.put(CacheNames.EntityRatingCountCache.name(), entityRatingCountCacheConfig);
         config.put(CacheNames.MetadataCache.name(), metadataCacheConfig);
         config.put(CacheNames.SessionCache.name(), sessionCacheConfig);
 

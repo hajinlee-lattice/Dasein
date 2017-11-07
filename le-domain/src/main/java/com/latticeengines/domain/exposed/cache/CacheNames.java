@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cache;
 public enum CacheNames {
 
     PLSCache, //
+    AttributeRepoCache, //
     DataLakeCMCache, //
     DataLakeStatsCache, //
     EntityCountCache, //
@@ -17,7 +18,8 @@ public enum CacheNames {
     }
 
     public static CacheNames[] getCdlProfileCacheGroup() {
-        return new CacheNames[] { DataLakeStatsCache, DataLakeCMCache, EntityCountCache, EntityDataCache,
+        return new CacheNames[] { AttributeRepoCache, DataLakeStatsCache, DataLakeCMCache, EntityCountCache,
+                EntityDataCache,
                 EntityRatingCountCache };
     }
 }

@@ -5,10 +5,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
@@ -18,6 +22,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataB
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -64,6 +70,25 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
             });
             putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
         }
+        // createReport(null);
+    }
+
+    private void createReport(Map<String, Report> importReports) {
+        ObjectNode json = JsonUtils.createObjectNode();
+        ArrayNode arrayNode = json.putArray(ReportPurpose.IMPORT_SUMMARY.getKey());
+        importReports.entrySet().forEach(entry -> {
+            ObjectNode importReport = JsonUtils.createObjectNode();
+            try {
+                importReport.set(entry.getKey(),
+                        JsonUtils.getObjectMapper().readTree(entry.getValue().getJson().getPayload()));
+                arrayNode.add(importReport);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Report report = createReport(json.toString(), ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY,
+                UUID.randomUUID().toString());
+        registerReport(configuration.getCustomerSpace(), report);
     }
 
 }

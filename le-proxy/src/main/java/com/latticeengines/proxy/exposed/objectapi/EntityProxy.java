@@ -6,11 +6,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.support.CompositeCacheManager;
@@ -35,8 +35,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(EntityProxy.class);
 
-    @Autowired
-    private CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
     private LocalCacheManager<String, Long> countCache;
 
@@ -44,8 +43,10 @@ public class EntityProxy extends MicroserviceRestApiProxy {
 
     private LocalCacheManager<String, Map<String, Long>> ratingCache;
 
-    public EntityProxy() {
+    @Inject
+    public EntityProxy(CacheManager cacheManager) {
         super("objectapi/customerspaces");
+        this.cacheManager = cacheManager;
         countCache = new LocalCacheManager<>(CacheNames.EntityCountCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
@@ -95,9 +96,6 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return getRatingCountFromCache(customerSpace, frontEndQuery);
     }
 
-    // @Cacheable(cacheNames = "EntityCountCache", key =
-    // "T(java.lang.String).format(\"%s|%s|count\", #customerSpace,
-    // #frontEndQuery)", sync = true)
     public Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -110,9 +108,6 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return count;
     }
 
-    // @Cacheable(cacheNames = "EntityDataCache", key =
-    // "T(java.lang.String).format(\"%s|%s|data\", #customerSpace,
-    // #frontEndQuery)", sync = true)
     public DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         DataPage dataPage = getDataFromObjectApi(
@@ -124,9 +119,6 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return dataPage;
     }
 
-    // @Cacheable(cacheNames = "EntityRatingCountCache", key =
-    // "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace,
-    // #frontEndQuery)", sync = true)
     public Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
