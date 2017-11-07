@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,8 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.domain.exposed.scoringapi.Warning;
+import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
@@ -227,6 +230,34 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                     result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
             idx++;
         }
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void scoreRecordWithWarnings() throws IOException {
+        ScoreRequest scoreRequest = getScoreRequest();
+        scoreRequest.getRecord().remove(MISSING_FIELD_COUNTRY);
+        postAndAssertWarnings(scoreRequest, WarningCode.MISSING_COLUMN);
+        scoreRequest = getScoreRequest();
+        scoreRequest.getRecord().put("ExtraField", "ExtraValue");
+        postAndAssertWarnings(scoreRequest, WarningCode.EXTRA_FIELDS);
+        scoreRequest = getScoreRequest();
+        scoreRequest.getRecord().put("Activity_Count_Click_Email",
+                "$200 to $1000 range ModelExpects this to be a number");
+        postAndAssertWarnings(scoreRequest, WarningCode.MISMATCHED_DATATYPE);
+    }
+
+    private void postAndAssertWarnings(ScoreRequest scoreRequest, WarningCode warningCode) {
+        String url = apiHostPort + "/score/record";
+        scoreRequest.setModelId(MODEL_ID);
+        ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
+                ScoreResponse.class);
+        ScoreResponse scoreResponse = response.getBody();
+        List<Warning> warnings = scoreResponse.getWarnings();
+        Map<String, String> observedWarningCodes = new HashMap<>();
+        for (Warning warning : warnings) {
+            observedWarningCodes.put(warning.getWarning(), warning.getDescription());
+        }
+        Assert.assertTrue(observedWarningCodes.containsKey(warningCode.getExternalCode()));
     }
 
     private void assertScoreIsWithinAcceptableRange(int score, int expectedScore) {

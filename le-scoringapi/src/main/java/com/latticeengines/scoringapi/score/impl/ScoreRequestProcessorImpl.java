@@ -13,10 +13,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -126,7 +126,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
             if (!shouldSkipMatching) {
                 ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts,
-                        fieldSchemas, request.getRecord(), modelJsonTypeHandler);
+                        fieldSchemas, request.getRecord(), modelJsonTypeHandler, requestId);
                 if (missingEssentialFieldsException != null) {
                     if (!performFetchOnlyForMatching || StringStandardizationUtils.objectIsNullOrEmptyString(
                             request.getRecord().get(FieldInterpretation.LatticeAccountId.toString()))) {
@@ -141,7 +141,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         }
 
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
-                fieldSchemas, request.getRecord(), modelJsonTypeHandler);
+                fieldSchemas, request.getRecord(), modelJsonTypeHandler, requestId);
         String recordId = getIdIfAvailable(parsedRecordAndInterpretedFields.getValue(), request.getRecord());
         requestInfo.put("RecordId", recordId);
         split("parseRecord");
@@ -859,14 +859,14 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            ModelJsonTypeHandler modelJsonTypeHandler) {
-        return parseRecord(null, fieldSchemas, record, modelJsonTypeHandler);
+            ModelJsonTypeHandler modelJsonTypeHandler, String requestId) {
+        return parseRecord(requestId, fieldSchemas, record, modelJsonTypeHandler);
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(String recordId,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
             ModelJsonTypeHandler modelJsonTypeHandler) {
-        return modelJsonTypeHandler.parseRecord(null, fieldSchemas, record, null);
+        return modelJsonTypeHandler.parseRecord(recordId, fieldSchemas, record, null);
     }
 
     private void addMissingFields(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
@@ -885,8 +885,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     private ScoringApiException checkForMissingFields(ScoringArtifacts scoringArtifact,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            ModelJsonTypeHandler modelJsonTypeHandler) {
-        return checkForMissingFields(null, scoringArtifact, fieldSchemas, record, modelJsonTypeHandler, null);
+            ModelJsonTypeHandler modelJsonTypeHandler, String requestId) {
+        return checkForMissingFields(requestId, scoringArtifact, fieldSchemas, record, modelJsonTypeHandler, null);
     }
 
     private ScoringApiException checkForMissingFields(String recordId, ScoringArtifacts scoringArtifact,
