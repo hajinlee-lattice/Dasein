@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -47,8 +50,12 @@ import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataLakeService")
@@ -67,6 +74,9 @@ public class DataLakeServiceImpl implements DataLakeService {
     private CacheManager cacheManager;
 
     private final DataLakeService _dataLakeService;
+
+    @Autowired
+    private EntityProxy entityProxy;
 
     private LocalCacheManager<String, Statistics> statsCache;
     private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
@@ -187,6 +197,41 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         log.warn("Did not find attribute stats for " + lookup);
         return null;
+    }
+
+    @Override
+    public DataPage getAccountById(String accountID, ColumnSelection.Predefined predefined) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+
+        List<Restriction> restrictions = new ArrayList<>();
+
+        List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
+                .map(ColumnMetadata::getColumnId).collect(Collectors.toList());
+
+        attributes.add(InterfaceName.AccountId.name());
+        attributes.add(InterfaceName.SalesforceAccountID.name());
+
+        if (!StringUtils.isNotEmpty(accountID)) {
+            throw new LedpException(LedpCode.LEDP_39001, new String[] { accountID, customerSpace });
+        }
+
+        Restriction restriction = Restriction.builder() //
+                .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+                .eq(accountID) //
+                .build();
+
+        Restriction sfdcRestriction = Restriction.builder() //
+                .let(BusinessEntity.Account, InterfaceName.SalesforceAccountID.name()) //
+                .eq(accountID) //
+                .build();
+        Restriction.builder().and(Arrays.asList(restriction, sfdcRestriction)).build();
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+
+        frontEndQuery.addLookups(BusinessEntity.Account, attributes.toArray(new String[attributes.size()]));
+
+        log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
+        return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
     private List<ColumnMetadata> getAttributesInEntity(String customerSpace, BusinessEntity entity) {

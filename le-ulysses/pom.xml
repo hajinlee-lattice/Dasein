@@ -222,6 +222,10 @@
             <version>${spring.security.version}</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-playmakercore</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

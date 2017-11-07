@@ -108,7 +108,7 @@ public enum LedpCode {
     LEDP_17013("Cannot get table metadata from DL! Error message: {0}"), //
     LEDP_17014("Import table metadata error! {0}"), //
     LEDP_17015("Import table data error! {0}"), //
-    LEDP_17016("Failed to get data from DL!"),
+    LEDP_17016("Failed to get data from DL!"), //
     LEDP_17017("The id {0} is duplicated."),
 
     // le-pls 18000-18999
@@ -377,8 +377,8 @@ public enum LedpCode {
     LEDP_22000("Can not create data source for tenant {0}"), //
     LEDP_22001("Can not find DB connection info for tenant {0}"), //
     LEDP_22002("Tenant exists, but there's no such oauth user, tenant name={0}"), //
-    LEDP_22003("Tenant exists, but username is blank, tenant name={0}"),
-    LEDP_22004("Tenant exists, but user password is blank, tenant name={0}"),
+    LEDP_22003("Tenant exists, but username is blank, tenant name={0}"), //
+    LEDP_22004("Tenant exists, but user password is blank, tenant name={0}"), //
     LEDP_22007("Failed to get recommendations after retry."), //
 
     // le-oauth2db
@@ -636,7 +636,11 @@ public enum LedpCode {
     LEDP_38019("Failed to revert Talkingpoints for the play {0}, CustomerSpace {1}"), //
     LEDP_38020("Unable to create lead in Dante for the recommendation {0}, play {1} ,CustomerSpace {2}"), //
     LEDP_38021("Empty or null recommendation, Failed to create lead in dante for CustomerSpace {0}"), //
-    LEDP_38022("Empty or null play, Failed to create lead in dante for CustomerSpace {0}");
+    LEDP_38022("Empty or null play, Failed to create lead in dante for CustomerSpace {0}"), //
+
+    // le-ulysses
+    LEDP_39001("No account with id {0} found for CustomerSpace {0}") //
+    ;
 
     private String message;
 

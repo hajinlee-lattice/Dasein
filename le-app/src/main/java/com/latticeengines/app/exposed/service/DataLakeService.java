@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 
 public interface DataLakeService {
 
@@ -31,5 +32,7 @@ public interface DataLakeService {
     Statistics getStatistics();
 
     List<ColumnMetadata> getAttributesInPredefinedGroup(Predefined predefined);
+
+    DataPage getAccountById(String accountID, Predefined predefined);
 
 }
