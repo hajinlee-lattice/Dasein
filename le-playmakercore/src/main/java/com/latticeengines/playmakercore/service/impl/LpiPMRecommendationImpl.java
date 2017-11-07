@@ -1,4 +1,4 @@
-package com.latticeengines.playmaker.service.impl;
+package com.latticeengines.playmakercore.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,12 +21,13 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
+import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
-import com.latticeengines.playmaker.service.LpiPMRecommendation;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
+import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -155,13 +156,18 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 syncDestination.name(), playIds);
     }
 
+    @Override
+    public Recommendation getRecommendationById(String recommendationId) {
+        return recommendationEntityMgr.findByRecommendationId(recommendationId);
+    }
+
     @VisibleForTesting
-    void setRecommendationEntityMgr(RecommendationEntityMgr recommendationEntityMgr) {
+    public void setRecommendationEntityMgr(RecommendationEntityMgr recommendationEntityMgr) {
         this.recommendationEntityMgr = recommendationEntityMgr;
     }
 
     @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
+    public void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
         this.internalResourceRestApiProxy = internalResourceRestApiProxy;
     }
 }

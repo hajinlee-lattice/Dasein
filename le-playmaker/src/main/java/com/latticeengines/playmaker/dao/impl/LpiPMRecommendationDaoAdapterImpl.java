@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinatio
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
-import com.latticeengines.playmaker.service.LpiPMRecommendation;
+import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 
 @Component("lpiPMRecommendationDaoAdapter")
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
@@ -74,10 +74,8 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             columns = ACC_EXT_LAST_MODIFIED_FIELD_NAME + "," + columns;
         }
 
-        List<Map<String, Object>> result = lpiPMAccountExtension.getAccountExtensions(start, offset, maximum,
-                accountIds, recStart, columns, hasSfdcContactId);
-
-        return result;
+        return lpiPMAccountExtension.getAccountExtensions(start, offset, maximum, accountIds, recStart, columns,
+                hasSfdcContactId);
     }
 
     @Override

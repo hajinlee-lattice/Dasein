@@ -92,6 +92,15 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
+    public void testGetRecommendationById() {
+        tenant = new Tenant(CUSTOMER_SPACE);
+        MultiTenantContext.setTenant(tenant);
+        Recommendation result = recommendationEntityMgr.findByRecommendationId(recommendation.getRecommendationId());
+        Assert.assertEquals(result.getAccountId(), recommendation.getAccountId());
+        Assert.assertEquals(result.getPid(), recommendation.getPid());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
     public void testGetRecommendationByLaunchId() {
 
         tenant = new Tenant(CUSTOMER_SPACE);

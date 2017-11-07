@@ -11,6 +11,8 @@ public interface RecommendationEntityMgr extends BaseEntityMgr<Recommendation> {
 
     void create(Recommendation entity);
 
+    Recommendation findByRecommendationId(String recommendationId);
+
     List<Recommendation> findByLaunchId(String launchId);
 
     List<Recommendation> findRecommendations(Date lastModificationDate, //

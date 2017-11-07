@@ -9,6 +9,8 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 
 public interface RecommendationDao extends BaseDao<Recommendation> {
 
+    Recommendation findByRecommendationId(String recommendationId);
+
     List<Recommendation> findByLaunchId(String launchId);
 
     List<Recommendation> findRecommendations(Date lastModificationDate, //

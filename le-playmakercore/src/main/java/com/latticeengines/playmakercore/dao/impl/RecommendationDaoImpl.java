@@ -26,6 +26,18 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
     @SuppressWarnings("unchecked")
     @Override
+    public Recommendation findByRecommendationId(String recommendationId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = String.format("FROM %s WHERE recommendationId = :recommendationId",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("recommendationId", recommendationId);
+        return (Recommendation) query.uniqueResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<Recommendation> findByLaunchId(String launchId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();

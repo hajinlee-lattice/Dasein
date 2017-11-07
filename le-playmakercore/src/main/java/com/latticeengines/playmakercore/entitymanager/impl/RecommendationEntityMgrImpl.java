@@ -48,6 +48,12 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
 
     @Override
     @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Recommendation findByRecommendationId(String recommendationId) {
+        return recommendationDao.findByRecommendationId(recommendationId);
+    }
+
+    @Override
+    @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Recommendation> findByLaunchId(String launchId) {
         return recommendationDao.findByLaunchId(launchId);
     }

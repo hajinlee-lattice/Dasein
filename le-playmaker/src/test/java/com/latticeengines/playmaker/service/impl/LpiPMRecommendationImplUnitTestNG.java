@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -27,10 +28,9 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
+import com.latticeengines.playmakercore.service.impl.LpiPMRecommendationImpl;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-
-import junit.framework.Assert;
 
 public class LpiPMRecommendationImplUnitTestNG {
 
