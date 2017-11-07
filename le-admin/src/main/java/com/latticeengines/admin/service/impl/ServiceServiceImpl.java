@@ -205,11 +205,11 @@ public class ServiceServiceImpl implements ServiceService {
             Set<String> emailSet = new HashSet<>();
             for (String email : Arrays.asList(emails.trim().split(listDelimiter))) {
                 email = email.trim();
-                if(!StringUtils.isEmpty(email) && !data.contains(email)) {
+                if (!StringUtils.isEmpty(email) && !data.contains(email)) {
                     emailSet.add(email);
                 }
             }
-            if(emailSet != null && emailSet.size() > 0) {
+            if (emailSet != null && emailSet.size() > 0) {
                 try {
                     @SuppressWarnings("unchecked")
                     List<String> initial = mapper.readValue(data, List.class);
@@ -222,19 +222,20 @@ public class ServiceServiceImpl implements ServiceService {
                 return true;
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_19101, String.format(
-                    "Failed to patch new configuration for node %s in component %s", nodePath, serviceName), e);
+            throw new LedpException(LedpCode.LEDP_19101, String
+                    .format("Failed to patch new configuration for node %s in component %s", nodePath, serviceName), e);
         }
         return false;
     }
 
     @Override
     public Boolean reduceConfig(String serviceName, String emails) {
-        String[] nodePaths = {"/LatticeAdminEmails", "/SuperAdminEmails", "/ExternalAdminEmails", "/ThirdPartyUserEmails"};
+        String[] nodePaths = { "/LatticeAdminEmails", "/SuperAdminEmails", "/ExternalAdminEmails",
+                "/ThirdPartyUserEmails" };
         Set<String> emailSet = new HashSet<>();
         for (String email : Arrays.asList(emails.trim().split(listDelimiter))) {
             email = email.trim();
-            if(!StringUtils.isEmpty(email)) {
+            if (!StringUtils.isEmpty(email)) {
                 emailSet.add(email);
             }
         }
@@ -247,8 +248,8 @@ public class ServiceServiceImpl implements ServiceService {
                 try {
                     @SuppressWarnings("unchecked")
                     List<String> initial = mapper.readValue(data, List.class);
-                    for(String email : emailSet) {
-                        if(initial.contains(email)) {
+                    for (String email : emailSet) {
+                        if (initial.contains(email)) {
                             initial.remove(email);
                         }
                     }
@@ -258,31 +259,34 @@ public class ServiceServiceImpl implements ServiceService {
                 }
                 patchDefaultConfigWithoutValidation(serviceName, nodePath, data);
             } catch (Exception e) {
-                LOGGER.error(String.format(
-                        "Failed to patch new configuration for node %s in component %s", nodePath, serviceName), e);
+                LOGGER.error(String.format("Failed to patch new configuration for node %s in component %s", nodePath,
+                        serviceName), e);
             }
         }
         return true;
     }
 
-	@Override
-	public Boolean patchTenantServiceConfig(String tenantId, String serviceName, String nodePath, String data) {
-		try {
-            Path configPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),tenantId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
+    @Override
+    public Boolean patchTenantServiceConfig(String tenantId, String serviceName, String nodePath, String data) {
+        try {
+            Path configPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), tenantId,
+                    tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
             configPath = configPath.append(new Path(nodePath));
             patchConfig(configPath, data);
             return true;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_19101, String.format(
-                    "Failed to patch configuration for node %s in component %s for tenant %s", nodePath, serviceName, tenantId), e);
+            throw new LedpException(LedpCode.LEDP_19101,
+                    String.format("Failed to patch configuration for node %s in component %s for tenant %s", nodePath,
+                            serviceName, tenantId),
+                    e);
         }
-	}
+    }
 
-	private void patchConfig(Path configPath, String data) throws Exception {
-		Camille camille = CamilleEnvironment.getCamille();
+    private void patchConfig(Path configPath, String data) throws Exception {
+        Camille camille = CamilleEnvironment.getCamille();
         Document doc = camille.get(configPath);
         doc.setData(data);
         camille.set(configPath, doc);
-	}
+    }
 
 }
