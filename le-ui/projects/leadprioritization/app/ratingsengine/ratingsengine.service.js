@@ -76,7 +76,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Prospect', 
                     state: 'segment.prospect', 
-                    nextLabel: 'Next, choose Products', 
+                    nextLabel: 'Next, choose Products' 
                     // nextFn: function(nextState) {
                     //     RatingsEngineStore.nextSaveRatingEngine(nextState);
                     // } 
@@ -84,15 +84,15 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Products', 
                     state: 'segment.prospect.products', 
-                    nextLabel: 'Next, choose what to model', 
+                    nextLabel: 'Next, choose what to model' 
                     // nextFn: function(nextState) {
                     //     RatingsEngineStore.nextSaveRatingEngine(nextState);
                     // } 
                 },
                 { 
                     label: 'Refine', 
-                    state: 'segment.prospect.products.refine', 
-                    nextLabel: 'Create Model', 
+                    state: 'segment.prospect.products.refine',
+                    nextLabel: 'Create Model'
                     // nextFn: function(nextState) {
                     //     RatingsEngineStore.nextSaveRatingEngine(nextState);
                     // } 
@@ -100,7 +100,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Model', 
                     state: 'segment.prospect.products.refine.model', 
-                    nextLabel: '?', 
+                    nextLabel: '?'
                     // nextFn: function(nextState) {
                     //     RatingsEngineStore.nextSaveRatingEngine(nextState);
                     // } 

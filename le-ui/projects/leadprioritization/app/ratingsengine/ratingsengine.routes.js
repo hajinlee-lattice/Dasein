@@ -194,190 +194,7 @@ angular
             },
             redirectTo: 'home.ratingsengine.wizard.segment'
         })
-        .state('home.ratingsengine.ai', {
-            url: '/ai',
-            params: {
-                wizard_steps: 'ai'
-            },
-            resolve: {
-                WizardValidationStore: function(RatingsEngineStore) {
-                    return RatingsEngineStore;
-                },
-                WizardProgressContext: function() {
-                    return 'ratingsengine.ai';
-                },
-                WizardProgressItems: function($stateParams, RatingsEngineStore) {
-                    var rating_id = $stateParams.rating_id || '';
-                    var wizard_steps = $stateParams.wizard_steps;
-
-                    return RatingsEngineStore.getWizardProgressItems(wizard_steps || 'ai', rating_id);
-                }
-            },
-            views: {
-                'summary@': {
-                    controller: function($scope, RatingsEngineStore) {
-                        $scope.$on('$destroy', function () {
-                            RatingsEngineStore.clear();
-                        });
-                    }
-                },
-                'main@': {
-                    resolve: {
-                        WizardHeaderTitle: function() {
-                            return 'Create Rating Engine';
-                        },
-                        WizardContainerId: function() {
-                            return 'ratingsengine.ai';
-                        }
-                    },
-                    controller: 'ImportWizard',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/wizard.component.html'
-                },
-                'wizard_progress@home.ratingsengine.ai': {
-                    controller: 'ImportWizardProgress',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/progress/progress.component.html'
-                    
-                },
-                'wizard_controls@home.ratingsengine.ai': {
-                    resolve: {
-                        WizardControlsOptions: function(RatingsEngineStore) {
-                            return { 
-                                suffix : '',
-                                backState: 'home.ratingsengine.list', 
-                                nextState: 'home.ratingsengine.list'
-                            };
-                        }
-                    },
-                    controller: 'ImportWizardControls',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/controls/controls.component.html'
-                }
-            },
-            redirectTo: 'home.ratingsengine.ai.segment'
-        })
-        .state('home.ratingsengine.ai.segment.prospect', {
-            url: '/prospect',
-            resolve: {
-                WizardHeaderTitle: function() {
-                    return 'Select the model to build';
-                },
-                Prospect: function($q, $stateParams, RatingsEngineStore, RatingsEngineAIService, RatingsEngineAIStore) {
-                    var deferred = $q.defer();
-                    var segment_id = 15;
-
-                    RatingsEngineAIService.getProspect(segment_id).then(function(data) {
-                        deferred.resolve(data);
-                    });
-
-                    return deferred.promise;
-                }
-            },
-            views: {
-                
-                'wizard_content@home.ratingsengine.ai': {
-                    controller: 'RatingsEngineAIProspect',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/ai/prospect/prospect.component.html'
-                },
-                'prospect-graph@home.ratingsengine.ai.segment.prospect': {
-                    controller: 'RatingsEngineAIProspectGraph',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/ai/prospect/prospect-graph.component.html'
-                }
-            }
-        })
-        .state('home.ratingsengine.ai.segment.prospect.products', {
-            url: '/products',
-            resolve: {
-                ProductsCount : function($q, RatingsEngineAIService){
-                    var deferred = $q.defer();
-                    var segment_id = 15;
-
-                    RatingsEngineAIService.getProductsCount(segment_id).then(function(data) {
-                        deferred.resolve(data);
-                    });
-
-                    return deferred.promise;
-                }
-            },
-            views: {
-                
-                'wizard_content@home.ratingsengine.ai': {
-                    controller: 'RatingsEngineAIProducts',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/ai/products/products.component.html'
-                }
-            }
-        })
-        .state('home.ratingsengine.ai.segment.prospect.products.refine', {
-            url: '/refinetarget',
-            views: {
-                
-                'wizard_content@home.ratingsengine.ai': {
-                    controller: function(RatingsEngineStore, RatingsEngineAIStore){
-                        RatingsEngineStore.setValidation('refine', true);
-                    },
-                    templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-target.component.html'
-                }
-            }
-        })
-        .state('home.ratingsengine.ai.segment.prospect.products.refine.model', {
-            url: '/model',
-            views: {
-                
-                'wizard_content@home.ratingsengine.ai': {
-                    
-                    templateUrl: 'app/ratingsengine/content/ai/model/ai-model.component.html'
-                }
-            }
-        })
-        .state('home.ratingsengine.ai.segment', {
-            url: '/segment',
-            
-            resolve: {
-                Segments: function(SegmentService) {
-                    return SegmentService.GetSegments();
-                },
-                CurrentRatingEngine: function($q, $stateParams, RatingsEngineStore) {
-                    var deferred = $q.defer();
-
-                    if (!$stateParams.rating_id) {
-                        deferred.resolve(RatingsEngineStore.currentRating);
-                    } else {
-                        RatingsEngineStore.getRating($stateParams.rating_id).then(function(result) {
-                            deferred.resolve(result);
-                        });
-                    }
-
-                    return deferred.promise;
-                },
-                RatingsEngineStore : function(RatingsEngineStore){
-                    return RatingsEngineStore;
-                }
-            },
-            views: {
-                'wizard_content@home.ratingsengine.ai': {
-                   
-                    controller: function($state){
-                        var vm = this;
-                        vm.goToCreateSegment = function() {
-                            $state.go('home.segment.explorer.attributes');
-                        }
-                    },
-                    controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/ai/segment/ai-segment.component.html',
-
-                },
-                'segment_view@home.ratingsengine.ai.segment': {
-                    controller: 'RatingsEngineSegment',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
-                }
-            }
-        })
-
+        
         .state('home.ratingsengine.wizard.segment', {
             url: '/segment',
             params: {
@@ -563,6 +380,189 @@ angular
                     controller: 'RatingsEngineSummary',
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/summary/summary.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai', {
+            url: '/ai',
+            params: {
+                wizard_steps: 'ai'
+            },
+            resolve: {
+                WizardValidationStore: function(RatingsEngineStore) {
+                    return RatingsEngineStore;
+                },
+                WizardProgressContext: function() {
+                    return 'ratingsengine.ai';
+                },
+                WizardProgressItems: function($stateParams, RatingsEngineStore) {
+                    var rating_id = $stateParams.rating_id || '';
+                    var wizard_steps = $stateParams.wizard_steps;
+
+                    return RatingsEngineStore.getWizardProgressItems(wizard_steps || 'ai', rating_id);
+                }
+            },
+            views: {
+                'summary@': {
+                    controller: function($scope, RatingsEngineStore) {
+                        $scope.$on('$destroy', function () {
+                            RatingsEngineStore.clear();
+                        });
+                    }
+                },
+                'main@': {
+                    resolve: {
+                        WizardHeaderTitle: function() {
+                            return 'Create Rating Engine';
+                        },
+                        WizardContainerId: function() {
+                            return 'ratingsengine.ai';
+                        }
+                    },
+                    controller: 'ImportWizard',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/wizard.component.html'
+                },
+                'wizard_progress@home.ratingsengine.ai': {
+                    controller: 'ImportWizardProgress',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/progress/progress.component.html'
+                    
+                },
+                'wizard_controls@home.ratingsengine.ai': {
+                    resolve: {
+                        WizardControlsOptions: function(RatingsEngineStore) {
+                            return { 
+                                suffix : '',
+                                backState: 'home.ratingsengine.list', 
+                                nextState: 'home.ratingsengine.list'
+                            };
+                        }
+                    },
+                    controller: 'ImportWizardControls',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/controls/controls.component.html'
+                }
+            },
+            redirectTo: 'home.ratingsengine.ai.segment'
+        })
+        .state('home.ratingsengine.ai.segment.prospect', {
+            url: '/prospect',
+            resolve: {
+                WizardHeaderTitle: function() {
+                    return 'Select the model to build';
+                },
+                Prospect: function($q, $stateParams, RatingsEngineStore, RatingsEngineAIService, RatingsEngineAIStore) {
+                    var deferred = $q.defer();
+                    var segment_id = 15;
+
+                    RatingsEngineAIService.getProspect(segment_id).then(function(data) {
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    controller: 'RatingsEngineAIProspect',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/prospect/prospect.component.html'
+                },
+                'prospect-graph@home.ratingsengine.ai.segment.prospect': {
+                    controller: 'RatingsEngineAIProspectGraph',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/prospect/prospect-graph.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment.prospect.products', {
+            url: '/products',
+            resolve: {
+                ProductsCount : function($q, RatingsEngineAIService){
+                    var deferred = $q.defer();
+                    var segment_id = 15;
+
+                    RatingsEngineAIService.getProductsCount(segment_id).then(function(data) {
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    controller: 'RatingsEngineAIProducts',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/products/products.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment.prospect.products.refine', {
+            url: '/refinetarget',
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    controller: function(RatingsEngineStore, RatingsEngineAIStore){
+                        RatingsEngineStore.setValidation('refine', true);
+                    },
+                    templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-target.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment.prospect.products.refine.model', {
+            url: '/model',
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    
+                    templateUrl: 'app/ratingsengine/content/ai/model/ai-model.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment', {
+            url: '/segment',
+            
+            resolve: {
+                Segments: function(SegmentService) {
+                    return SegmentService.GetSegments();
+                },
+                CurrentRatingEngine: function($q, $stateParams, RatingsEngineStore) {
+                    var deferred = $q.defer();
+
+                    if (!$stateParams.rating_id) {
+                        deferred.resolve(RatingsEngineStore.currentRating);
+                    } else {
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function(result) {
+                            deferred.resolve(result);
+                        });
+                    }
+
+                    return deferred.promise;
+                },
+                RatingsEngineStore : function(RatingsEngineStore){
+                    return RatingsEngineStore;
+                }
+            },
+            views: {
+                'wizard_content@home.ratingsengine.ai': {
+                   
+                    controller: function($state){
+                        var vm = this;
+                        vm.goToCreateSegment = function() {
+                            $state.go('home.segment.explorer.attributes');
+                        }
+                    },
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/segment/ai-segment.component.html',
+
+                },
+                'segment_view@home.ratingsengine.ai.segment': {
+                    controller: 'RatingsEngineSegment',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
                 }
             }
         });
