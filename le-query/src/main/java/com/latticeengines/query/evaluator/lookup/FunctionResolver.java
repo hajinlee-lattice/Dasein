@@ -28,7 +28,7 @@ public class FunctionResolver<T extends Comparable<?>, I, O> extends BaseLookupR
     @SuppressWarnings({ "unchecked" })
     @Override
     public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(FunctionLookup<T, I, O> lookup) {
-        return Collections.singletonList((ComparableExpression<? extends Comparable<?>>) resolve(lookup, false));
+        return Collections.singletonList(Expressions.asComparable(resolve(lookup, false)));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
