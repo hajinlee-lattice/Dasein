@@ -10,6 +10,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.LocalCache;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.cache.CacheNames;
@@ -64,7 +65,8 @@ public class DataFeedExecutionListener extends LEJobListener {
             cacheService.dropKeysByPattern(String.format("*%s*", customerSpace),
                     CacheNames.getCdlConsolidateCacheGroup());
             Arrays.stream(CacheNames.getCdlConsolidateCacheGroup()).forEach(cache -> {
-                NodeWatcher.notifyCacheWatchersAsync(cache.name(), String.format("%s|", CacheOperation.Put.name()));
+                NodeWatcher.notifyCacheWatchersAsync(cache.name(),
+                        LocalCache.getAllOperation(CacheOperation.Put, customerSpace));
                 try {
                     Thread.sleep(1000L);
                 } catch (InterruptedException e) {

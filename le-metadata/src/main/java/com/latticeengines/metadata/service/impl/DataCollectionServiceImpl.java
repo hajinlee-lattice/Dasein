@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.LocalCache;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.cache.CacheNames;
@@ -210,7 +211,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private void notifyCacheWatchers(String customerSpace) {
         Arrays.asList(CacheNames.getCdlProfileCacheGroup()).stream().forEach(cache -> {
             NodeWatcher.notifyCacheWatchersAsync(cache.name(),
-                    String.format("%s|all|%s", CacheOperation.Put.name(), customerSpace));
+                    LocalCache.getAllOperation(CacheOperation.Put, customerSpace));
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {

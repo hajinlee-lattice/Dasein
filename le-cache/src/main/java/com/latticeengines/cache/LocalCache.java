@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.domain.exposed.cache.CacheNames;
@@ -88,12 +90,19 @@ public class LocalCache<K, V> implements Cache {
     @Override
     public void put(Object key, Object value) {
         cache.put((K) key, (V) value);
-        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
-                String.format("%s|%s", CacheOperation.Put.name(), key));
+        String lockName = String.format("%s|%s", getName(), key.toString());
+        LockManager.registerCrossDivisionLock(lockName);
         try {
-            Thread.sleep(1000L);
-        } catch (InterruptedException e) {
-            log.warn("Thread sleep interrupted", e);
+            LockManager.acquireWriteLock(lockName, 8, TimeUnit.SECONDS);
+            NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
+                    getKeyOperation(CacheOperation.Put, key.toString()));
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                log.warn("Thread sleep interrupted", e);
+            }
+        } finally {
+            LockManager.releaseWriteLock(lockName);
         }
     }
 
@@ -116,14 +125,13 @@ public class LocalCache<K, V> implements Cache {
 
     @Override
     public void evict(Object key) {
-        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(), String.format("%s|key|%s",
-                com.latticeengines.domain.exposed.cache.operation.CacheOperation.Evict.name(), key));
+        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
+                getKeyOperation(CacheOperation.Evict, key.toString()));
     }
 
     @Override
     public void clear() {
-        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
-                String.format("%s|all|", CacheOperation.Evict.name()));
+        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(), getAllOperation(CacheOperation.Evict, ""));
     }
 
     public List<K> getDefaultKeyResolver(String updateSignal, Set<K> existingKeys, CacheOperation expectedOp) {
@@ -155,5 +163,13 @@ public class LocalCache<K, V> implements Cache {
 
     public void setRefreshKeyResolver(BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver) {
         cache.setRefreshKeyResolver(refreshKeyResolver);
+    }
+
+    public static String getKeyOperation(CacheOperation op, String key) {
+        return String.format("%s|key|%s", op.name(), key);
+    }
+
+    public static String getAllOperation(CacheOperation op, String key) {
+        return String.format("%s|all|%s", op.name(), key);
     }
 }
