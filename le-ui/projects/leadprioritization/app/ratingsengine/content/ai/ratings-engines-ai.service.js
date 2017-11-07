@@ -10,13 +10,12 @@ angular.module('lp.ratingsengine.ai', [])
     ) {
 
         this.buildOptions = [];
-        this.prospect = {'prospect':0, 'customers':0};
+        
         this.productsSelected = {};
 
 
         this.init = function () {
-            this.prospect = RatingsEngineAIService.getProspectCount();
-            this.customers = RatingsEngineAIService.getCustomersCount();
+            this.prospect = {'prospect':0, 'customers':0}; 
             this.settings = {};
 
             this.buildOptions = RatingsEngineAIService.getBuildOptions();
@@ -28,12 +27,12 @@ angular.module('lp.ratingsengine.ai', [])
             this.init();
         }
 
-        this.setProspect = function(prospect) {
-            this.prospect = prospect;
-        }
+        this.getNumberOfProducts = function() {
+            RatingsEngineAIService.getProductsCount(segment_id).then(function(data) {
+                deferred.resolve(data);
+            });
 
-        this.loadProducts = function(pageNumber) {
-
+            return deferred.promise;
         }
         
         this.clearSelection = function() {
@@ -58,20 +57,11 @@ angular.module('lp.ratingsengine.ai', [])
             }
         }
         this.getProductsSelectedCount = function(){
-            var c = Object.keys(this.productsSelected).length;
-            return c;
+            return Object.keys(this.productsSelected).length;
         }
 
     })
     .service('RatingsEngineAIService', function ($q, $http, $state) {
-
-        this.getProspectCount = function () {
-            return 2000;
-        };
-
-        this.getCustomersCount = function () {
-            return 5000;
-        }
 
         this.getBuildOptions = function () {
             var buildOptions = [
@@ -89,21 +79,28 @@ angular.module('lp.ratingsengine.ai', [])
          */
         this.getProspect = function(id) {
             var deferred = $q.defer();
-            var data = {'prospect':1500, 'customers':350};
+            var data = {'prospect':500, 'customers':150};
             deferred.resolve(data);
             
     
             return deferred.promise;
         }
         /**
+         * Return the number of product
+         */
+        this.getProductsCount = function() {
+            var deferred = $q.defer();
+            var data = {'count': 100};
+            deferred.resolve(data);
+            return deferred.promise;
+        }
+
+        /**
          * Load the products by page number
          */
-        this.getProducts = function(page){
+        this.getProducts = function(from, to){
             var deferred = $q.defer();
-
             var data = [];
-            var from = (page-1)*10;
-            var to = page * 10;
             for(var i=from; i< to; i++){
                 data.push({'selected':false, 'id':i, 'name': "Product Name "+i});
             }

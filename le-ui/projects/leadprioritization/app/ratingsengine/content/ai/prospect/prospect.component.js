@@ -4,8 +4,8 @@ angular.module('lp.ratingsengine.ai.prospect', [])
 
         angular.extend(vm, {
             initializing: true,
-            prospect: 0,//RatingsEngineAIStore.prospect,
-            customers: 0,//RatingsEngineAIStore.customers,
+            prospect: 0,
+            customers: 0,
             prospectPercentage: '50%',
             customersPercentage: '80%',
             buildOptions: RatingsEngineAIStore.buildOptions,
@@ -13,9 +13,6 @@ angular.module('lp.ratingsengine.ai.prospect', [])
         });
 
         vm.init = function () {
-            console.log('================= Prospect =============================');
-            console.log(Prospect);
-            console.log('========================================================');
             vm.prospect = Prospect.prospect;
             vm.customers = Prospect.customers;
             $scope.$watch('vm.buildOption', function () {

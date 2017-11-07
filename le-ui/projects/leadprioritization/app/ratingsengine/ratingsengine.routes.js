@@ -268,7 +268,6 @@ angular
                     var segment_id = 15;
 
                     RatingsEngineAIService.getProspect(segment_id).then(function(data) {
-                        RatingsEngineAIStore.setProspect(data);
                         deferred.resolve(data);
                     });
 
@@ -291,6 +290,18 @@ angular
         })
         .state('home.ratingsengine.ai.segment.prospect.products', {
             url: '/products',
+            resolve: {
+                ProductsCount : function($q, RatingsEngineAIService){
+                    var deferred = $q.defer();
+                    var segment_id = 15;
+
+                    RatingsEngineAIService.getProductsCount(segment_id).then(function(data) {
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 
                 'wizard_content@home.ratingsengine.ai': {
