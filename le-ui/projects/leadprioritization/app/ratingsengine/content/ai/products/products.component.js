@@ -69,6 +69,10 @@ angular.module('lp.ratingsengine.ai.products', [])
             });
         }
 
+        vm.getTotalProductsCount = function(){
+            return vm.productsCount.count;
+        }
+
         /**
          * @param index index in the visible page of the grid
          */

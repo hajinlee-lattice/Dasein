@@ -311,21 +311,20 @@ angular
                 }
             }
         })
-        .state('home.ratingsengine.ai.segment.prospect.products.settings', {
-            url: '/products',
+        .state('home.ratingsengine.ai.segment.prospect.products.refine', {
+            url: '/refinetarget',
             views: {
                 
                 'wizard_content@home.ratingsengine.ai': {
                     controller: function(RatingsEngineStore, RatingsEngineAIStore){
-                        console.log(RatingsEngineAIStore.getProductsSelected());
-                        RatingsEngineStore.setValidation('settings', true);
+                        RatingsEngineStore.setValidation('refine', true);
                     },
-                    templateUrl: 'app/ratingsengine/content/ai/model/ai-model-settings.component.html'
+                    templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-target.component.html'
                 }
             }
         })
-        .state('home.ratingsengine.ai.segment.prospect.products.settings.model', {
-            url: '/products',
+        .state('home.ratingsengine.ai.segment.prospect.products.refine.model', {
+            url: '/model',
             views: {
                 
                 'wizard_content@home.ratingsengine.ai': {
