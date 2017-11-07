@@ -91,13 +91,15 @@ angular
                 WizardProgressContext: function() {
                     return 'import';
                 },
-                WizardProgressItems: function() {
+                WizardProgressItems: function($state, ImportWizardService, ImportWizardStore) {
                     return [
                         { label: 'Account IDs', state: 'accounts.one' },
                         { label: '3rd Party IDs', state: 'accounts.one.two' },
                         { label: 'Lattice Fields', state: 'accounts.one.two.three' },
-                        { label: 'Custom Fields', state: 'accounts.one.two.three.four' },
-                        { label: 'Import Data', state: 'accounts.one.two.three.four.five' }
+                        { label: 'Custom Fields', state: 'accounts.one.two.three.four', nextFn: function(nextState){ ImportWizardService.SaveFieldDocuments(ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument());
+                        $state.go(nextState);}},
+                        { label: 'Import Data', state: 'accounts.one.two.three.four.five', nextFn: function(nextState){ ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+                        $state.go(nextState);} }
                     ];
                 }
             },

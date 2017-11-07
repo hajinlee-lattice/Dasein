@@ -40,17 +40,10 @@ angular.module('common.wizard.controls', [])
         vm.setButtons();
 
         if (vm.next && !isPrev) {
-            if (vm.next == 'home.import.wizard.accounts.one.two.three.four.five') {
-                ImportWizardService.SaveFieldDocuments(ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument());
-        	} 
             vm.go(vm.next, isPrev);
         } else if (isPrev && vm.prev) {
             vm.go(vm.prev, isPrev);
         } else if (!isPrev && !vm.next) {
-            // FIXME:  there should be no ImportWizard specific code in this generic component
-        	if (vm.prev == 'home.import.wizard.accounts.one.two.three.four') {
-                ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-        	}
             if (WizardControlsOptions.nextState) {
                 var params = WizardControlsOptions.nextStateParams
                     ? typeof WizardControlsOptions.nextStateParams == 'function'
