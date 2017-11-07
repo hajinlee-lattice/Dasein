@@ -190,7 +190,7 @@ public class RatingEngineResource {
         return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
     }
 
-    @RequestMapping(value = "/notes/{ratingEngineId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get all notes for single rating engine via rating engine id.")
     public List<RatingEngineNote> getAllNotes(@PathVariable String ratingEngineId) {
@@ -198,7 +198,7 @@ public class RatingEngineResource {
         return ratingEngineNoteService.getAllByRatingEngineId(ratingEngineId);
     }
 
-    @RequestMapping(value = "/notes/{ratingEngineId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one note for a certain rating engine.")
     public boolean createNote(@PathVariable String ratingEngineId, @RequestBody NoteParams noteParams) {
@@ -207,7 +207,7 @@ public class RatingEngineResource {
         return true;
     }
 
-    @RequestMapping(value = "/notes/{ratingEngineId}/{noteId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{ratingEngineId}/notes/{noteId}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a note from a certain rating engine via rating engine id and note id.")
     public void deleteNote(@PathVariable String ratingEngineId, @PathVariable String noteId) {
@@ -216,7 +216,7 @@ public class RatingEngineResource {
         ratingEngineNoteService.deleteById(noteId);
     }
 
-    @RequestMapping(value = "/notes/{ratingEngineId}/{noteId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/{ratingEngineId}/notes/{noteId}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Update the content of a certain note via note id.")
     public boolean updateNote(@PathVariable String ratingEngineId, @PathVariable String noteId,
