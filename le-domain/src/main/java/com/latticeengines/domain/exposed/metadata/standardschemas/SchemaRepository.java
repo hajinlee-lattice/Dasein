@@ -886,7 +886,7 @@ public class SchemaRepository {
         Attribute website = attr("Website") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "WEBSITE" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Website) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -897,7 +897,7 @@ public class SchemaRepository {
         Attribute email = attr("Email") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "EMAIL" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
+                .notNull() //
                 .interfaceName(InterfaceName.Email) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_EMAIL) //
