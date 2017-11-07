@@ -1,11 +1,11 @@
 angular.module('lp.ratingsengine.ai.prospect', [])
-    .controller('RatingsEngineAIProspect', function ($q, $timeout, $state, $stateParams, $scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore) {
+    .controller('RatingsEngineAIProspect', function ($q, $timeout, $state, $stateParams, $scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore, Prospect) {
         var vm = this;
 
         angular.extend(vm, {
             initializing: true,
-            prospect: RatingsEngineAIStore.prospect,
-            customers: RatingsEngineAIStore.customers,
+            prospect: 0,//RatingsEngineAIStore.prospect,
+            customers: 0,//RatingsEngineAIStore.customers,
             prospectPercentage: '50%',
             customersPercentage: '80%',
             buildOptions: RatingsEngineAIStore.buildOptions,
@@ -13,6 +13,11 @@ angular.module('lp.ratingsengine.ai.prospect', [])
         });
 
         vm.init = function () {
+            console.log('================= Prospect =============================');
+            console.log(Prospect);
+            console.log('========================================================');
+            vm.prospect = Prospect.prospect;
+            vm.customers = Prospect.customers;
             $scope.$watch('vm.buildOption', function () {
                 if (vm.initializing) {
                     $timeout(function () {

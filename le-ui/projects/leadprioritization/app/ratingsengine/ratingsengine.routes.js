@@ -262,6 +262,17 @@ angular
             resolve: {
                 WizardHeaderTitle: function() {
                     return 'Select the model to build';
+                },
+                Prospect: function($q, $stateParams, RatingsEngineStore, RatingsEngineAIService, RatingsEngineAIStore) {
+                    var deferred = $q.defer();
+                    var segment_id = 15;
+
+                    RatingsEngineAIService.getProspect(segment_id).then(function(data) {
+                        RatingsEngineAIStore.setProspect(data);
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
                 }
             },
             views: {
@@ -294,7 +305,8 @@ angular
             views: {
                 
                 'wizard_content@home.ratingsengine.ai': {
-                    controller: function(RatingsEngineStore){
+                    controller: function(RatingsEngineStore, RatingsEngineAIStore){
+                        console.log(RatingsEngineAIStore.getProductsSelected());
                         RatingsEngineStore.setValidation('settings', true);
                     },
                     templateUrl: 'app/ratingsengine/content/ai/model/ai-model-settings.component.html'

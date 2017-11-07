@@ -21,6 +21,53 @@ section.ratings-engine-ai-products.container{
             }
         }
     }
-    
+    .product-table-container{
+        // border: 1px solid red;
+        width: 100%;
+    }
 
+    .product-table-toolbar{
+        // border: 1px solid green;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .search-container {
+        border: 1px solid rgba(128, 128, 128, 0.44);  
+        border-radius: 4px; 
+        .search-input {
+            border: 0px solid red;
+            padding-left: 10px;
+        }
+    }
+
+    .footer{
+        height: 26px;
+        padding-top: 15px;
+        // border: 1px solid red;
+    }
+    .pagination {
+        width: 120px;
+        height: 26px;
+        // border: 1px solid green;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+
+    }
+    .pagination-left {
+        padding-right: 10px;
+        // border: 1px solid gray;
+    }
+
+    .max-pages{
+        width: 45px;
+        border: 1px solid rgba(182, 178, 178, 0.309);
+    }
+
+    .table-selection{
+        padding: .5em 1em;
+    }
 }

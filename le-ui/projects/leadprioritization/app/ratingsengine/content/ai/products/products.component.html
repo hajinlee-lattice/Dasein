@@ -9,8 +9,54 @@
     </div>
 
     <div class="row">
-        <div class="columns twelve">
-            <p>Here the products</p>
+        <div class="columns twelve product-table-container">
+            <div class="product-table-toolbar">
+                <div class="search-container">
+                    <a>
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </a>
+                    <input type="text" placeholder="Search" class="search-input">
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" disabled>
+                            <span></span>
+                        </th>
+                        <th>Id</th>
+                        <th>Product Name</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="footer">
+                            <div class="pagination">
+                                <a class="pagination-left" ng-click="vm.loadPreviousePage()" ng-disabled="{{vm.page == 1}}">
+                                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                </a>
+                                <label for="">
+                                    <input type="text" id="page" class="max-pages" value="{{vm.page}}">
+                                    <span>/ {{vm.maxpages}}</span>
+                                </label>
+                                <a ng-click="vm.loadNextPage()" ng-disabled="{{vm.page == vm.maxpages}}">
+                                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr ng-repeat="product in vm.products">
+                        <td class="table-selection">
+                            <input type="checkbox" ng-click="vm.selectProduct($index)" ng-checked="{{product.selected}}">
+                        </td>
+                        <td>{{product.id}}</td>
+                        <td>{{product.name}}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </section>
