@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +18,7 @@ import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("csvDataFeedMetadataService")
@@ -39,7 +42,14 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             throw new RuntimeException("Cannot deserialize CSV import metadata!");
         }
         log.info("Template table name: " + importConfig.getTemplateName());
-        return metadataProxy.getTable(importConfig.getCustomerSpace().toString(), importConfig.getTemplateName());
+        Table metaTable = metadataProxy.getTable(importConfig.getCustomerSpace().toString(),
+                importConfig.getTemplateName());
+        List<ColumnSelection.Predefined> groups = new ArrayList<>();
+        groups.add(ColumnSelection.Predefined.TalkingPoint);
+        for (Attribute attribute : metaTable.getAttributes()) {
+            attribute.setGroupsViaList(groups);
+        }
+        return metaTable;
     }
 
     @Override

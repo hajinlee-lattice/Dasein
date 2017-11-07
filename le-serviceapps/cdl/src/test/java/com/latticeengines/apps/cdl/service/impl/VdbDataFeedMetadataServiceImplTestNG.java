@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -54,6 +56,16 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(testTable.getName(), "FS_Data_For_Dante_Accounts_1000");
         Attribute requiredField = testTable.getAttribute("account");
         Assert.assertNotNull(requiredField);
+        Attribute zipField = testTable.getAttribute("zip");
+        Attribute urlField = testTable.getAttribute("url");
+        Attribute verticalField = testTable.getAttribute("vertical");
+        Assert.assertNotNull(zipField);
+        Assert.assertNotNull(urlField);
+        Assert.assertNotNull(verticalField);
+        Assert.assertNull(zipField.getGroupsAsList());
+        Assert.assertEquals(urlField.getGroupsAsList(), Arrays.asList(ColumnSelection.Predefined.CompanyProfile));
+        Assert.assertEquals(verticalField.getGroupsAsList(),
+                Arrays.asList(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.CompanyProfile));
         Table error = vdbDataFeedMetadataService.getMetadata(errorVdbMetadata);
     }
 
@@ -85,8 +97,6 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         resolvedTable = vdbDataFeedMetadataService.resolveMetadata(testTable, schemaTable);
         Assert.assertNotNull(resolvedTable);
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.AccountId));
-        Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.Website));
-        Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.CompanyName));
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.SalesforceAccountID));
     }
 

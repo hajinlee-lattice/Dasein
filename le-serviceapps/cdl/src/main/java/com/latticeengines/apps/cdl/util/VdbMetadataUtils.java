@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public class VdbMetadataUtils {
 
@@ -55,6 +57,7 @@ public class VdbMetadataUtils {
                 attr.setLogicalDataType(LogicalDataType.Timestamp);
             }
             setAttributeExtensions(attr, metadata.getExtensions());
+            setAttributeGroup(attr);
             return attr;
         } catch (Exception e) {
             // see the log to add unit test
@@ -82,6 +85,17 @@ public class VdbMetadataUtils {
                 attribute.setExcludeFromAll(extension.getValue());
             }
         }
+    }
+
+    private static void setAttributeGroup(Attribute attribute) {
+        List<ColumnSelection.Predefined> groups = new ArrayList<>();
+        if (!attribute.getExcludeFromTalkingPoints()) {
+            groups.add(ColumnSelection.Predefined.TalkingPoint);
+        }
+        if (!attribute.getExcludeFromDetailView()) {
+            groups.add(ColumnSelection.Predefined.CompanyProfile);
+        }
+        attribute.setGroupsViaList(groups);
     }
 
     public static boolean validateVdbTable(Table vdbTable) {
