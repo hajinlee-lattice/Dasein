@@ -3,6 +3,8 @@ package com.latticeengines.metadata.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
 
@@ -70,12 +72,14 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
     }
 
     @Test(groups = "functional")
-    public void createSegment() {
+    public void createSegment() throws InterruptedException {
+        Date preCreateTime = new Date();
+        System.out.println("Start create test at " + preCreateTime.getTime());
+        Thread.sleep(1000);
+
         METADATA_SEGMENT.setName(SEGMENT_NAME);
         METADATA_SEGMENT.setDisplayName(SEGMENT_DISPLAY_NAME);
         METADATA_SEGMENT.setDescription(SEGMENT_DESCRIPTION);
-        METADATA_SEGMENT.setUpdated(new Date());
-        METADATA_SEGMENT.setCreated(new Date());
         METADATA_SEGMENT.setAccountRestriction(
                 Restriction.builder().let(BusinessEntity.Account, arbitraryAttribute.getName()).eq(null).build());
         METADATA_SEGMENT.setDataCollection(dataCollection);
@@ -83,30 +87,52 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
 
         MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
         assertNotNull(retrieved);
+
+        assertNull(retrieved.getAccounts());
+        assertNull(retrieved.getContacts());
+        assertNull(retrieved.getProducts());
+
         assertEquals(retrieved.getName(), METADATA_SEGMENT.getName());
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT.getDisplayName());
         assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
         assertFalse(retrieved.getMasterSegment());
+
+        System.out.println("Finish create test at " + new Date().getTime());
+
+        assertNotNull(retrieved.getCreated());
+        assertTrue(preCreateTime.before(retrieved.getCreated()));
+        assertNotNull(retrieved.getUpdated());
+        assertTrue(preCreateTime.before(retrieved.getUpdated()));
     }
 
     @Test(groups = "functional", dependsOnMethods = "createSegment")
-    public void updateSegment() {
+    public void updateSegment() throws InterruptedException {
+        Date preUpdateTime = new Date();
+        System.out.println("Start create test at " + preUpdateTime.getTime());
+        Thread.sleep(1000);
+
         MetadataSegment UPDATED_SEGMENT = new MetadataSegment();
         UPDATED_SEGMENT.setName(SEGMENT_NAME);
         UPDATED_SEGMENT.setDisplayName(UPDATED_DISPLAY_SEGMENT_NAME);
         UPDATED_SEGMENT.setDescription(UPDATED_SEGMENT_DESCRIPTION);
-        UPDATED_SEGMENT.setUpdated(new Date());
-        UPDATED_SEGMENT.setCreated(new Date());
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Hello")
                 .build();
         UPDATED_SEGMENT.setAccountRestriction(restriction);
         UPDATED_SEGMENT.setDataCollection(dataCollection);
+
+        UPDATED_SEGMENT.setAccounts(1L);
+        UPDATED_SEGMENT.setContacts(2L);
+        UPDATED_SEGMENT.setProducts(3L);
+
         segmentEntityMgr.createOrUpdate(UPDATED_SEGMENT);
 
         MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
         assertNotNull(retrieved);
         assertEquals(retrieved.getDisplayName(), UPDATED_DISPLAY_SEGMENT_NAME);
         assertEquals(retrieved.getDescription(), UPDATED_SEGMENT_DESCRIPTION);
+        assertEquals(retrieved.getAccounts(), new Long(1));
+        assertEquals(retrieved.getContacts(), new Long(2));
+        assertEquals(retrieved.getProducts(), new Long(3));
         assertFalse(retrieved.getMasterSegment());
 
         Statistics statistics = new Statistics();
@@ -117,6 +143,15 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
 
         retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
         assertNotNull(retrieved);
+
+        System.out.println("Finish update test at " + new Date().getTime());
+
+        assertTrue(preUpdateTime.after(retrieved.getCreated()),
+                String.format("Created time %d should be before the pre-update time %d", retrieved.getCreated().getTime(),
+                        preUpdateTime.getTime()));
+        assertTrue(preUpdateTime.before(retrieved.getUpdated()),
+                String.format("Updated time %d should be after the pre-update time %d", retrieved.getUpdated().getTime(),
+                        preUpdateTime.getTime()));
     }
 
     @Test(groups = "functional", dependsOnMethods = "updateSegment")

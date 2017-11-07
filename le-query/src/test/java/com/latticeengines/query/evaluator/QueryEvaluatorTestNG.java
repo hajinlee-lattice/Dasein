@@ -58,7 +58,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery,
-                String.format("select (%s.%s&?)>>? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, BUCKETED_NOMINAL_ATTR));
+                String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, BUCKETED_NOMINAL_ATTR));
     }
 
     @Test(groups = "functional")
@@ -218,21 +218,21 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("(%s.%s&?)>>? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, "?"));
+        sqlContains(sqlQuery, String.format("(%s.%s>>?)&? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, "?"));
 
         restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notcontains("e") //
                 .build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("not (%s.%s&?)>>? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, "?"));
+        sqlContains(sqlQuery, String.format("not (%s.%s>>?)&? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, "?"));
 
         restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).startsWith("y") //
                 .build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("(%s.%s&?)>>? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, "?"));
+        sqlContains(sqlQuery, String.format("(%s.%s>>?)&? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, "?"));
     }
 
     @Test(groups = "functional")
@@ -272,7 +272,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Restriction restriction = builder.build();
         Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("(%s.%s&?)>>? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, expectedRhs));
+        sqlContains(sqlQuery, String.format("(%s.%s>>?)&? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, expectedRhs));
     }
 
     @DataProvider(name = "bitEncodedData", parallel = true)
@@ -470,7 +470,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
         sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_CITY));
-        sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
+        sqlContains(sqlQuery, String.format("when (%s.%s>>?)&? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");
         sqlContains(sqlQuery, "then ? else ? end) = ?");
@@ -503,7 +503,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
         sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_CITY));
-        sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
+        sqlContains(sqlQuery, String.format("when (%s.%s>>?)&? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");
         sqlContains(sqlQuery, "group by Score");

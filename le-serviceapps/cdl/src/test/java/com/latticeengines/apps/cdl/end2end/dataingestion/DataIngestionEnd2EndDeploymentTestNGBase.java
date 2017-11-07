@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -52,6 +55,8 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -63,7 +68,13 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -76,6 +87,7 @@ import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
@@ -87,6 +99,18 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
     private static final String S3_VDB_VERSION = "1";
+
+    private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
+    protected static final long SEGMENT_1_ACCOUNT_1 = 21;
+    protected static final long SEGMENT_1_CONTACT_1 = 23;
+    protected static final long SEGMENT_1_ACCOUNT_2 = 21;
+    protected static final long SEGMENT_1_CONTACT_2 = 23;
+
+    private static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
+    protected static final long SEGMENT_2_ACCOUNT_1 = 24;
+    protected static final long SEGMENT_2_CONTACT_1 = 27;
+    protected static final long SEGMENT_2_ACCOUNT_2 = 24;
+    protected static final long SEGMENT_2_CONTACT_2 = 27;
 
     @Inject
     DataCollectionProxy dataCollectionProxy;
@@ -118,6 +142,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     @Inject
     private TestArtifactService testArtifactService;
 
+    @Inject
+    private TestMetadataSegmentProxy testMetadataSegmentProxy;
+
     @Value("${camille.zk.pod.id}")
     private String podId;
 
@@ -134,7 +161,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
-        // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         checkpointService.setMaintestTenant(mainTestTenant);
 
         logger.info("Test environment setup finished.");
@@ -142,6 +169,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(plsCDLImportProxy);
+        attachProtectedProxy(testMetadataSegmentProxy);
     }
 
     @AfterClass(groups = { "end2end", "precheckin" })
@@ -171,28 +199,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 false);
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
         profileAppId = appId.toString();
-    }
-
-    protected Schema getCsvImportSchema(BusinessEntity entity) throws IOException {
-        InputStream avscIs = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(String.format("end2end/csv/%s.avsc", entity.name()));
-        return new Schema.Parser().parse(avscIs);
-    }
-
-    protected String uploadMockedCsvImportData(BusinessEntity entity, int fileId) throws IOException {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
-        InputStream dataIs = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(String.format("end2end/csv/%s%d.avro", entity.name(), fileId));
-        try {
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, dataIs, targetPath + "/part-00000.avro");
-            logger.info(String.format("Uploaded %s records to %s", entity.name(), targetPath + "/part-00000.avro"));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload avro for " + entity);
-        }
-        return targetPath;
     }
 
     void uploadAccountCSV() {
@@ -524,6 +530,86 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     void verifyActiveVersion(DataCollection.Version expected) {
         Assert.assertEquals(dataCollectionProxy.getActiveVersion(mainTestTenant.getId()), expected);
+    }
+
+    void createTestSegments() {
+        testMetadataSegmentProxy.createOrUpdate(constructTestSegment1());
+        testMetadataSegmentProxy.createOrUpdate(constructTestSegment2());
+        Assert.assertNotNull(testMetadataSegmentProxy.getSegment(SEGMENT_NAME_1));
+        Assert.assertNotNull(testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2));
+
+        MetadataSegment segment1 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_1);
+        MetadataSegment segment2 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2);
+        System.out.println(JsonUtils.pprint(segment1));
+        System.out.println(JsonUtils.pprint(segment2));
+    }
+
+    void verifyTestSegment1Counts(Map<BusinessEntity, Long> expectedCounts) {
+        verfiySegmentCounts(SEGMENT_NAME_1, expectedCounts);
+    }
+
+    void verifyTestSegment2Counts(Map<BusinessEntity, Long> expectedCounts) {
+        verfiySegmentCounts(SEGMENT_NAME_2, expectedCounts);
+    }
+
+    private void verfiySegmentCounts(String segmentName, Map<BusinessEntity, Long> expectedCounts) {
+        MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
+        Assert.assertNotNull(segment);
+        expectedCounts.forEach((entity, count) -> {
+            Assert.assertNotNull(segment.getEntityCount(entity));
+            Assert.assertEquals(segment.getEntityCount(entity), count);
+        });
+    }
+
+    private MetadataSegment constructTestSegment1() {
+        Bucket websiteBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(".com"));
+        BucketRestriction websiteRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), websiteBkt);
+        Bucket.Transaction txn = new Bucket.Transaction("A80D4770376C1226C47617C071324C0B", TimeFilter.ever(), null,
+                null, false);
+        Bucket purchaseBkt = Bucket.txnBkt(txn);
+        BucketRestriction purchaseRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyName"), purchaseBkt);
+        Restriction accountRestriction = Restriction.builder().and(websiteRestriction, purchaseRestriction).build();
+
+        Bucket titleBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("Buyer"));
+        BucketRestriction titleRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
+        Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_1);
+        segment.setDisplayName("End2End Segment 1");
+        segment.setDescription("A test segment for CDL end2end tests.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+        segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
+
+        return segment;
+    }
+
+    private MetadataSegment constructTestSegment2() {
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION,
+                Arrays.asList("CALIFORNIA", "TEXAS", "MICHIGAN", "NEW YORK"));
+        BucketRestriction stateRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "LDC_State"), stateBkt);
+        Bucket techBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("Moderate"));
+        BucketRestriction techRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "BmbrSurge_EmployeeScreening_Intent"), techBkt);
+        Restriction accountRestriction = Restriction.builder().or(stateRestriction, techRestriction).build();
+
+        Bucket titleBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+        BucketRestriction titleRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
+        Restriction contactRestriction = Restriction.builder().and(titleRestriction).build();
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_2);
+        segment.setDisplayName("End2End Segment 2");
+        segment.setDescription("A test segment for CDL end2end tests.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+        segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
+
+        return segment;
     }
 
 }

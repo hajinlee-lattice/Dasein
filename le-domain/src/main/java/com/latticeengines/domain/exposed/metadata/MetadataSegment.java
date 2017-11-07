@@ -30,7 +30,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -285,6 +287,46 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public void setEntityCount(BusinessEntity entity, Long count) {
+        switch (entity) {
+            case Account:
+                setAccounts(count);
+                break;
+            case Contact:
+                setContacts(count);
+                break;
+            case Product:
+                setProducts(count);
+                break;
+            default:
+                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+        }
+    }
+
+    public Long getEntityCount(BusinessEntity entity) {
+        switch (entity) {
+            case Account:
+                return getAccounts();
+            case Contact:
+                return getContacts();
+            case Product:
+                return getProducts();
+            default:
+                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+        }
+    }
+
+    public FrontEndQuery toFrontEndQuery() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction accountRestriction = getAccountRestriction() == null ? getAccountFrontEndRestriction()
+                : new FrontEndRestriction(getAccountRestriction());
+        FrontEndRestriction contactRestriction = getContactRestriction() == null ? getContactFrontEndRestriction()
+                : new FrontEndRestriction(getContactRestriction());
+        frontEndQuery.setAccountRestriction(accountRestriction);
+        frontEndQuery.setContactRestriction(contactRestriction);
+        return frontEndQuery;
     }
 
 }

@@ -30,7 +30,7 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
         segmentEntityMgr.createOrUpdate(segment);
-        return segment;
+        return segmentEntityMgr.findByName(segment.getName());
     }
 
     @Override

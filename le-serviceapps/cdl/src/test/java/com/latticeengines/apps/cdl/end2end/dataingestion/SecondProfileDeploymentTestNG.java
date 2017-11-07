@@ -51,6 +51,18 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         verifyActiveVersion(initialVersion.complement());
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+
+        createTestSegments();
+//        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+//                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
+//                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
+//                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+//        verifyTestSegment1Counts(segment1Counts);
+//        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
+//                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
+//                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
+//                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+//        verifyTestSegment2Counts(segment2Counts);
     }
 
 }

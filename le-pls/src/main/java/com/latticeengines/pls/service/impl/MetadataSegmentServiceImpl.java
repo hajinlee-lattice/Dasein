@@ -1,22 +1,25 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.security.exposed.util.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Service("metadataSegmentService")
@@ -25,9 +28,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private final SegmentProxy segmentProxy;
 
+    private final EntityProxy entityProxy;
+
     @Inject
-    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy) {
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, EntityProxy entityProxy) {
         this.segmentProxy = segmentProxy;
+        this.entityProxy = entityProxy;
     }
 
     @Override
@@ -70,6 +76,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        updateEntityCounts(segment);
         translateForBackend(segment);
         return translateForFrontend(segmentProxy.createOrUpdateSegment(customerSpace, segment));
     }
@@ -83,11 +90,15 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private MetadataSegment translateForBackend(MetadataSegment segment) {
         try {
             FrontEndRestriction accountFrontEndRestriction = segment.getAccountFrontEndRestriction();
-            segment.setAccountRestriction(accountFrontEndRestriction.getRestriction());
-            segment.setAccountFrontEndRestriction(null);
+            if (segment.getAccountRestriction() == null) {
+                segment.setAccountRestriction(accountFrontEndRestriction.getRestriction());
+                segment.setAccountFrontEndRestriction(null);
+            }
             FrontEndRestriction contactFrontEndRestriction = segment.getContactFrontEndRestriction();
-            segment.setContactRestriction(contactFrontEndRestriction.getRestriction());
-            segment.setContactFrontEndRestriction(null);
+            if (segment.getContactRestriction() == null) {
+                segment.setContactRestriction(contactFrontEndRestriction.getRestriction());
+                segment.setContactFrontEndRestriction(null);
+            }
         } catch (Exception e) {
             log.error("Encountered error translating frontend restriction for segment with name " + segment.getName(),
                     e);
@@ -123,6 +134,48 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                     e);
         }
         return segment;
+    }
+
+    private void updateEntityCounts(MetadataSegment segment) {
+        Map<BusinessEntity, Long> counts = getEntityCounts(segment);
+        counts.forEach(segment::setEntityCount);
+    }
+
+    private Map<BusinessEntity, Long> getEntityCounts(MetadataSegment segment) {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        FrontEndRestriction accountRestriction = segment.getAccountFrontEndRestriction();
+        if (accountRestriction == null) {
+            accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        }
+        FrontEndRestriction contactRestriction = segment.getContactFrontEndRestriction();
+        if (contactRestriction == null) {
+            contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+        }
+        for (BusinessEntity entity : BusinessEntity.COUNT_ENTITIES) {
+            try {
+                Long count = getEntityCount(entity, accountRestriction, contactRestriction);
+                if (count != null) {
+                    map.put(entity, count);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to count " + entity + ": " + e.getMessage());
+            }
+        }
+        return map;
+    }
+
+    private Long getEntityCount(BusinessEntity entity, FrontEndRestriction accountRestriction,
+            FrontEndRestriction contactRestriction) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        if (accountRestriction != null) {
+            frontEndQuery.setAccountRestriction(accountRestriction);
+        }
+        if (contactRestriction != null) {
+            frontEndQuery.setContactRestriction(contactRestriction);
+        }
+        frontEndQuery.setMainEntity(entity);
+        return entityProxy.getCount(customerSpace, frontEndQuery);
     }
 
 }

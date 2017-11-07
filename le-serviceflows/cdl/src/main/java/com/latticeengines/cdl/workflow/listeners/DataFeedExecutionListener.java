@@ -2,11 +2,12 @@ package com.latticeengines.cdl.workflow.listeners;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
@@ -18,6 +19,8 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Sta
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -26,14 +29,20 @@ public class DataFeedExecutionListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedExecutionListener.class);
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private CacheService cacheService;
+
+    @Inject
+    private SegmentProxy segmentProxy;
+
+    @Inject
+    private EntityProxy entityProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -51,9 +60,10 @@ public class DataFeedExecutionListener extends LEJobListener {
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
+            // refresh caches
             cacheService.dropKeysByPattern(String.format("*%s*", customerSpace),
                     CacheNames.getCdlConsolidateCacheGroup());
-            Arrays.asList(CacheNames.getCdlConsolidateCacheGroup()).stream().forEach(cache -> {
+            Arrays.stream(CacheNames.getCdlConsolidateCacheGroup()).forEach(cache -> {
                 NodeWatcher.notifyCacheWatchersAsync(cache.name(), String.format("%s|", CacheOperation.Put.name()));
                 try {
                     Thread.sleep(1000L);
@@ -61,6 +71,8 @@ public class DataFeedExecutionListener extends LEJobListener {
                     log.warn("Thread sleep interrupted", e);
                 }
             });
+            // update segment counts
+            SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
             DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);

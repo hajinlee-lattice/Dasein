@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -66,8 +66,8 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     @Override
     public void populateData(String tenantId) {
         final String shortTenantId = CustomerSpace.parse(tenantId).getTenantId();
-        DataCollection vl = dataCollectionProxy.getDefaultDataCollection(shortTenantId);
-        ExecutorService executors = Executors.newCachedThreadPool();
+        dataCollectionProxy.getDefaultDataCollection(shortTenantId);
+        ExecutorService executors = ThreadPoolUtils.getCachedThreadPool("cdl-test-data");
         Set<Future> futures = new HashSet<>();
         futures.add(executors.submit(() -> {
             populateStats(shortTenantId);

@@ -45,6 +45,18 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
 
+        createTestSegments();
+        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_1,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_1,
+                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+        verifyTestSegment1Counts(segment1Counts);
+        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_1,
+                BusinessEntity.Contact, SEGMENT_2_CONTACT_1,
+                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+        verifyTestSegment2Counts(segment2Counts);
+
         preConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
 
         importData();
@@ -106,6 +118,17 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+
+//        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+//                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
+//                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
+//                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+//        verifyTestSegment1Counts(segment1Counts);
+//        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
+//                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
+//                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
+//                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+//        verifyTestSegment2Counts(segment2Counts);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -85,8 +85,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
         MetadataSegment existing = findByName(segment.getName());
         if (existing != null) {
-            segment = cloneForUpdate(existing, segment);
-            segmentDao.update(segment);
+            existing = cloneForUpdate(existing, segment);
+            segmentDao.update(existing);
         } else {
             segmentDao.create(segment);
         }
@@ -138,7 +138,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         existing.setDisplayName(incoming.getDisplayName());
         existing.setDescription(incoming.getDescription());
         existing.setMasterSegment(incoming.getMasterSegment());
-        existing.setUpdated(new Date());
+        existing.setAccounts(incoming.getAccounts());
+        existing.setContacts(incoming.getContacts());
+        existing.setProducts(incoming.getProducts());
         return existing;
     }
 

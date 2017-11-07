@@ -16,6 +16,11 @@ public class ThreadPoolUtils {
         return Executors.newFixedThreadPool(size, threadFac);
     }
 
+    public static ExecutorService getCachedThreadPool(String name) {
+        ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
+        return Executors.newCachedThreadPool(threadFac);
+    }
+
     public static ForkJoinPool getForkJoinThreadPool(String name, int size) {
         // custom workerThreadFactory for ensuring specified thread name prefix
         ForkJoinWorkerThreadFactory workerThreadFactory = //

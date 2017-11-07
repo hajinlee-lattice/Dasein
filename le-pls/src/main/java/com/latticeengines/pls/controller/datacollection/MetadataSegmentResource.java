@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,11 +56,10 @@ public class MetadataSegmentResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create or update a segment by name")
-    public MetadataSegment createOrUpdateSegmentWithName(@RequestBody MetadataSegment metadataSegment,
-            HttpServletRequest request) {
-        Session session = SecurityUtils.getSessionFromRequest(request, sessionService);
-        if (session != null) {
-            String email = session.getEmailAddress();
+    public MetadataSegment createOrUpdateSegmentWithName(@RequestBody MetadataSegment metadataSegment) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal != null) {
+            String email = principal.toString();
             if (StringUtils.isNotBlank(email)) {
                 metadataSegment.setCreatedBy(email);
             }

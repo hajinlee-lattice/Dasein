@@ -3,6 +3,9 @@ package com.latticeengines.query.evaluator.lookup;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -16,6 +19,8 @@ import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 
 public class AttributeResolver<T extends AttributeLookup> extends BaseLookupResolver<T> implements LookupResolver<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(AttributeResolver.class);
 
     public AttributeResolver(AttributeRepository repository) {
         super(repository);
@@ -58,18 +63,19 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
                 if (offset == null) {
                     offset = 0;
                 }
-                long bitMask = BitCodecUtils.bitMask(0L, offset, numBits);
+                long bitMask = BitCodecUtils.bitMask(0L, 0, numBits);
+                log.info("Using bit mask " + bitMask + " and right shift " + offset + " to extract " + cm.getColumnId() + " from " + cm.getPhysicalName());
                 if (alias) {
                     return Expressions
-                            .stringTemplate("({0}&{1})>>{2}", QueryUtils.getAttributePath(entity, physicalColumnName), //
-                                    bitMask, //
-                                    offset)
+                            .stringTemplate("({0}>>{1})&{2}", QueryUtils.getAttributePath(entity, physicalColumnName), //
+                                    offset, //
+                                    bitMask)
                             .as(Expressions.stringPath(cm.getName()));
                 } else {
-                    return Expressions.stringTemplate("({0}&{1})>>{2}",
+                    return Expressions.stringTemplate("({0}>>{1})&{2}",
                             QueryUtils.getAttributePath(entity, physicalColumnName), //
-                            bitMask, //
-                            offset);
+                            offset, //
+                            bitMask);
                 }
             }
         } else {

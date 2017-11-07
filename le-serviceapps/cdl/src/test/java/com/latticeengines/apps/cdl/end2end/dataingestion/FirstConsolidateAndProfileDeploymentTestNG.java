@@ -47,7 +47,6 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     @Test(groups = "precheckin")
     public void runPreCheckInTest() throws Exception {
-
         Assert.assertEquals(ACCOUNT_IMPORT_SIZE_1_1 + ACCOUNT_IMPORT_SIZE_1_2, ACCOUNT_IMPORT_SIZE_1);
         Assert.assertEquals(CONTACT_IMPORT_SIZE_1_1 + CONTACT_IMPORT_SIZE_1_2, CONTACT_IMPORT_SIZE_1);
         Assert.assertEquals(PRODUCT_IMPORT_SIZE_1_1 + PRODUCT_IMPORT_SIZE_1_2, PRODUCT_IMPORT_SIZE_1);
@@ -134,6 +133,18 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
+
+        createTestSegments();
+        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
+                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+        verifyTestSegment1Counts(segment1Counts);
+        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
+                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
+                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+        verifyTestSegment2Counts(segment2Counts);
     }
 
 }

@@ -2,11 +2,12 @@ package com.latticeengines.cdl.workflow.listeners;
 
 import java.lang.reflect.Method;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.ProxyUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -25,14 +28,20 @@ public class ProfileAndPublishListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(ProfileAndPublishListener.class);
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Inject
+    private SegmentProxy segmentProxy;
+
+    @Inject
+    private EntityProxy entityProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -55,6 +64,8 @@ public class ProfileAndPublishListener extends LEJobListener {
             DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
             log.info("Switch data collection to version " + inactiveVersion);
             dataCollectionProxy.switchVersion(customerSpace, inactiveVersion);
+            // update segment counts
+            SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
         } else {
             log.warn("Workflow ended in an unknown state.");
         }
