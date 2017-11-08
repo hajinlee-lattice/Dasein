@@ -50,8 +50,8 @@ public class DataFileResource {
     public void getDiagnosticsJsonFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        dataFileProviderService
-                .downloadFile(request, response, modelId, MediaType.APPLICATION_JSON, "diagnostics.json");
+        dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_JSON,
+                "diagnostics.json");
     }
 
     @RequestMapping(value = "/metadataavsc", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -93,8 +93,8 @@ public class DataFileResource {
     @RequestMapping(value = "/explorercsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get threshold explorer csv file for specific model summary")
-    public void getThresholdExplorerCsvFile(@RequestParam(value = "modelId") String modelId,
-            HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void getThresholdExplorerCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
 
         dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_explorer.csv");
     }
@@ -117,7 +117,7 @@ public class DataFileResource {
         if (eventTableType.equalsIgnoreCase("training")) {
             dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*allTraining.*.csv");
-        } else if(eventTableType.equalsIgnoreCase("exportrftrain")) {
+        } else if (eventTableType.equalsIgnoreCase("exportrftrain")) {
             try {
                 dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                         ".*exportrftrain.csv");
@@ -169,20 +169,37 @@ public class DataFileResource {
     @ResponseBody
     @ApiOperation(value = "Get model profile avro file.")
     public void getModelProfileAvroFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
-                                      HttpServletResponse response) throws IOException {
+            HttpServletResponse response) throws IOException {
         response.setHeader("Content-Encoding", "gzip");
         dataFileProviderService.downloadModelProfile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
     }
 
     @RequestMapping(value = "/sourcefilecsv/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get source file uploaded to create model or score against model")
-    public ResponseDocument<Boolean> getSourceFileCSV(@PathVariable String applicationId,
-            @RequestParam(value = "fileName", required = true) String fileName, HttpServletRequest request,
+    @ApiOperation(value = "Get source file uploaded to create model or score against model via Application Id")
+    public ResponseDocument<Boolean> getSourceFileViaAppId( //
+            @PathVariable String applicationId, //
+            @RequestParam(value = "fileName", required = true) String fileName, //
+            HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
         try {
             dataFileProviderService.downloadFileByApplicationId(request, response, "application/csv", applicationId,
                     fileName);
+        } catch (Exception e) {
+            throw e;
+        }
+        return ResponseDocument.successResponse(true);
+    }
+
+    @RequestMapping(value = "/sourcefile", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get source file uploaded to create model or score against model via internal file name")
+    public ResponseDocument<Boolean> getSourceFileViaFileName( //
+            @RequestParam(value = "fileName", required = true) String fileName, //
+            HttpServletRequest request, //
+            HttpServletResponse response) throws IOException {
+        try {
+            dataFileProviderService.downloadFileByFileName(request, response, "application/csv", fileName);
         } catch (Exception e) {
             throw e;
         }

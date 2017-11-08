@@ -6,12 +6,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -22,6 +24,8 @@ import com.latticeengines.pls.service.impl.HdfsFileHttpDownloader.DownloadReques
 
 @Component("dataFileProviderService")
 public class DataFileProviderServiceImpl implements DataFileProviderService {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFileProviderServiceImpl.class);
 
     private static String MODEL_PROFILE_AVRO = "model_profile.avro";
 
@@ -75,20 +79,44 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Override
     public void downloadFileByApplicationId(HttpServletRequest request, HttpServletResponse response, String mimeType,
-            String applicationId, String fileName) throws IOException, LedpException {
+            String applicationId, String fileDisplayName) throws IOException {
+        log.info(String.format("Download file with applicationId=%s", applicationId));
         SourceFile sourceFile = sourceFileEntityMgr.findByApplicationId(applicationId);
+        validateSourceFile(sourceFile);
+        downloadSourceFileCsv(request, response, mimeType, fileDisplayName, sourceFile);
+    }
+
+    @Override
+    public void downloadFileByFileName(HttpServletRequest request, HttpServletResponse response, String mimeType,
+            String fileName) throws IOException {
+        log.info(String.format("Download file with fileName=%s", fileName));
+        SourceFile sourceFile = sourceFileEntityMgr.findByName(fileName);
+        validateSourceFile(sourceFile);
+        downloadSourceFileCsv(request, response, mimeType, sourceFile.getDisplayName(), sourceFile);
+    }
+
+    private void validateSourceFile(SourceFile sourceFile) {
+        if (sourceFile == null) {
+            throw new NullPointerException("source file is null");
+        }
+    }
+
+    @VisibleForTesting
+    void downloadSourceFileCsv(HttpServletRequest request, HttpServletResponse response, String mimeType,
+            String fileDisplayName, SourceFile sourceFile) throws IOException {
         boolean fileDownloaded = false;
         if (sourceFile != null) {
             String filePath = sourceFile.getPath();
             if (filePath != null && !filePath.isEmpty()) {
-                CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType, filePath, fileName);
+                CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType, filePath,
+                        fileDisplayName);
                 downloader.downloadFile(request, response);
                 fileDownloaded = true;
             }
         }
 
         if (!fileDownloaded) {
-            throw new IOException(String.format("Error downloading source file with name: %s", fileName));
+            throw new IOException(String.format("Error downloading source file with name: %s", fileDisplayName));
         }
     }
 
@@ -129,5 +157,20 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         if (summary == null) {
             throw new NullPointerException(String.format("Modelsummary with id %s is null", modelId));
         }
+    }
+
+    @VisibleForTesting
+    void setConfiguration(Configuration configuration) {
+        this.yarnConfiguration = configuration;
+    }
+
+    @VisibleForTesting
+    void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
+        this.modelSummaryEntityMgr = modelSummaryEntityMgr;
+    }
+
+    @VisibleForTesting
+    void setModelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
+        this.modelingServiceHdfsBaseDir = modelingServiceHdfsBaseDir;
     }
 }

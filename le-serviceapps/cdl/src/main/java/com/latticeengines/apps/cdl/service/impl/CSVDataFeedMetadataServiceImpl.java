@@ -35,12 +35,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     @Override
     public Table getMetadata(String metadataStr) {
-        CSVToHdfsConfiguration importConfig;
-        try {
-            importConfig = JsonUtils.deserialize(metadataStr, CSVToHdfsConfiguration.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot deserialize CSV import metadata!");
-        }
+        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
         log.info("Template table name: " + importConfig.getTemplateName());
         Table metaTable = metadataProxy.getTable(importConfig.getCustomerSpace().toString(),
                 importConfig.getTemplateName());
@@ -72,7 +67,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         result = true;
         HashMap<String, Attribute> srcAttrs = new HashMap<>();
         for (Attribute attr : srcTable.getAttributes()) {
-            srcAttrs.put(attr.getName(),attr);
+            srcAttrs.put(attr.getName(), attr);
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
@@ -94,23 +89,13 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     @Override
     public CustomerSpace getCustomerSpace(String metadataStr) {
-        CSVToHdfsConfiguration importConfig;
-        try {
-            importConfig = JsonUtils.deserialize(metadataStr, CSVToHdfsConfiguration.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot deserialize CSV import metadata!");
-        }
+        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
         return importConfig.getCustomerSpace();
     }
 
     @Override
     public String getConnectorConfig(String metadataStr, String jobIdentifier) {
-        CSVToHdfsConfiguration importConfig;
-        try {
-            importConfig = JsonUtils.deserialize(metadataStr, CSVToHdfsConfiguration.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot deserialize CSV import metadata!");
-        }
+        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
         importConfig.setJobIdentifier(jobIdentifier);
         return JsonUtils.serialize(importConfig);
     }
@@ -122,5 +107,27 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         } else {
             return Type.valueOf(attribute.getDataType().toUpperCase());
         }
+    }
+
+    @Override
+    public String getFileName(String metadataStr) {
+        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
+        return importConfig.getFileName();
+    }
+
+    @Override
+    public String getFileDisplayName(String metadataStr) {
+        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
+        return importConfig.getFileDisplayName();
+    }
+
+    private CSVToHdfsConfiguration deserializeMetadataStrToConfig(String metadataStr) {
+        CSVToHdfsConfiguration importConfig;
+        try {
+            importConfig = JsonUtils.deserialize(metadataStr, CSVToHdfsConfiguration.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot deserialize CSV import metadata!");
+        }
+        return importConfig;
     }
 }

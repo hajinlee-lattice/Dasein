@@ -1,8 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,9 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -33,10 +37,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -45,6 +50,12 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DataFileProviderServiceTestNG.class);
     private static final String TENANT_ID = "TENANT1";
+
+    @Mock
+    private SourceFileEntityMgr sourceFileEntityMgr;
+
+    @Mock
+    private SourceFile sourceFile;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -58,8 +69,8 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private DataFileProviderService dataFileProviderService;
+    @Spy
+    private DataFileProviderServiceImpl dataFileProviderService = new DataFileProviderServiceImpl();
 
     @Autowired
     private TenantService tenantService;
@@ -74,7 +85,10 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-
+        MockitoAnnotations.initMocks(this);
+        dataFileProviderService.setConfiguration(yarnConfiguration);
+        dataFileProviderService.setModelSummaryEntityMgr(modelSummaryEntityMgr);
+        dataFileProviderService.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
         Tenant tenant1 = new Tenant();
         tenant1.setId(TENANT_ID);
         tenant1.setName(TENANT_ID);
@@ -98,8 +112,8 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
-        HdfsUtils
-                .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(),
+                dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
@@ -108,10 +122,10 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
         dir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID) + "/data/ANY_TABLE/csv_files";
         tableFileFolder = dir;
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
-                + "/postMatchEventTable_allTraining-r-00000.csv");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
-                + "/postMatchEventTable_allTest-r-00000.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(),
+                dir + "/postMatchEventTable_allTraining-r-00000.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(),
+                dir + "/postMatchEventTable_allTest-r-00000.csv");
 
     }
 
@@ -130,6 +144,26 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
             when(response.getOutputStream()).thenReturn(os);
             dataFileProviderService.downloadFile(request, response, modelId, mimeType, filter);
             verify(response, atMost(2)).setHeader(eq("Content-Disposition"), anyString());
+            verify(response).setContentType(mimeType);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Assert.fail(ex.getMessage());
+        }
+    }
+
+    @Test(groups = { "functional" }, dataProvider = "dataFilePathProvider", enabled = true)
+    public void testDownloadSourceFileCsv(final String mimeType, final String filePath) {
+
+        when(sourceFileEntityMgr.findByName(anyString())).thenReturn(sourceFile);
+        doReturn(filePath).when(sourceFile).getPath();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        ServletOutputStream os = mock(ServletOutputStream.class);
+        try {
+            when(response.getOutputStream()).thenReturn(os);
+            dataFileProviderService.downloadSourceFileCsv(request, response, mimeType, filePath, sourceFile);
+            verify(response).setHeader(eq("Content-Disposition"), anyString());
             verify(response).setContentType(mimeType);
 
         } catch (Exception ex) {

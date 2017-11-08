@@ -13,15 +13,16 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 @Component
 public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
-    public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig) {
+    public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
+            String fileName, String fileDisplayName) {
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
-                connectorConfig);
+                connectorConfig, fileName, fileDisplayName);
 
         return workflowJobService.submit(configuration);
     }
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
-            DataFeedTask dataFeedTask, String connectorConfig) {
+            DataFeedTask dataFeedTask, String connectorConfig, String fileName, String fileDisplayName) {
 
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
@@ -31,6 +32,8 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .importConfig(connectorConfig) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER, dataFeedTask.getUniqueId()) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName) //
                         .build())
                 .build();
     }

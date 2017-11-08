@@ -1,12 +1,8 @@
 package com.latticeengines.domain.exposed.eai;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class VdbConnectorConfiguration extends ConnectorConfiguration {
 
@@ -92,10 +88,6 @@ public class VdbConnectorConfiguration extends ConnectorConfiguration {
     }
 
     public ImportVdbTableConfiguration getVdbTableConfiguration(String tableName) {
-        ImportVdbTableConfiguration configuration = null;
-        if (tableConfigurations.containsKey(tableName)) {
-            configuration = tableConfigurations.get(tableName);
-        }
-        return configuration;
+        return tableConfigurations.get(tableName);
     }
 }

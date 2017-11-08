@@ -120,4 +120,13 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         vdbDataFeedMetadataService.compareMetadata(resolvedTable, updateTable2, true);
     }
 
+    @Test(groups = "functional")
+    public void testGetFileNames() {
+        String fileDisplayName = vdbDataFeedMetadataService.getFileDisplayName(testVdbMetadata);
+        Assert.assertNotNull(fileDisplayName);
+        String fileName = vdbDataFeedMetadataService.getFileName(testVdbMetadata);
+        Assert.assertNotNull(fileName);
+        log.info(String.format("fileName=%s, fileDisplayName=%s", fileName, fileDisplayName));
+    }
+
 }

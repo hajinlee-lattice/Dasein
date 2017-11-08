@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
+import org.python.icu.text.SimpleDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,9 +33,13 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(VdbDataFeedMetadataServiceImpl.class);
 
-    private static final String[] VDB_ATTR_FIELDS = {"DisplayName", "SourceLogicalDataType", "Description",
+    public final String DEFAULT_FILE_FORMAT = "%s_%s.csv";
+
+    public final String DATE_FORMAT = "MM-dd-yyyy";
+
+    private static final String[] VDB_ATTR_FIELDS = { "DisplayName", "SourceLogicalDataType", "Description",
             "FundamentalType", "StatisticalType", "DisplayDiscretizationStrategy", "DataQuality", "DataSource",
-            "ApprovedUsage", "Tags", "SourceAttrName"};
+            "ApprovedUsage", "Tags", "SourceAttrName" };
 
     public VdbDataFeedMetadataServiceImpl() {
         super(SourceType.VISIDB.getName());
@@ -73,19 +79,19 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         Set<String> originalAttrMatch = new HashSet<>();
 
         // Match the DL metadata with table in SchemaRepository.
-        for (Attribute vdbAttr: original.getAttributes()) {
+        for (Attribute vdbAttr : original.getAttributes()) {
             String vdbAttrName = vdbAttr.getName();
-            for (Attribute interfaceAttr: attributes) {
+            for (Attribute interfaceAttr : attributes) {
                 String interfaceAttrName = interfaceAttr.getName();
                 boolean matched = false;
                 if (!findMatch.contains(interfaceAttrName)) {
                     if (interfaceAttrName.equalsIgnoreCase(vdbAttrName)) {
                         matched = true;
-                    } else if (interfaceAttr.getAllowedDisplayNames().contains(vdbAttrName.toUpperCase()
-                            .replace(" ", "_"))) {
+                    } else if (interfaceAttr.getAllowedDisplayNames()
+                            .contains(vdbAttrName.toUpperCase().replace(" ", "_"))) {
                         matched = true;
-                    } else if (interfaceAttr.getAllowedDisplayNames().contains(vdbAttrName.toUpperCase()
-                            .replace(" ", ""))) {
+                    } else if (interfaceAttr.getAllowedDisplayNames()
+                            .contains(vdbAttrName.toUpperCase().replace(" ", ""))) {
                         matched = true;
                     }
                 }
@@ -290,31 +296,31 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         Type type = null;
         String typeStrLowerCase = attribute.getSourceLogicalDataType().toLowerCase();
         switch (typeStrLowerCase) {
-            case "bit":
-                type = Type.BOOLEAN;
-                break;
-            case "byte":
-            case "short":
-            case "int":
-                type = Type.INT;
-                break;
-            case "long":
-            case "date":
-            case "datetime":
-            case "datetimeoffset":
-                type = Type.LONG;
-                break;
-            case "float":
-                type = Type.FLOAT;
-                break;
-            case "double":
-                type = Type.DOUBLE;
-                break;
-            case "string":
-                type = Type.STRING;
-                break;
-            default:
-                break;
+        case "bit":
+            type = Type.BOOLEAN;
+            break;
+        case "byte":
+        case "short":
+        case "int":
+            type = Type.INT;
+            break;
+        case "long":
+        case "date":
+        case "datetime":
+        case "datetimeoffset":
+            type = Type.LONG;
+            break;
+        case "float":
+            type = Type.FLOAT;
+            break;
+        case "double":
+            type = Type.DOUBLE;
+            break;
+        case "string":
+            type = Type.STRING;
+            break;
+        default:
+            break;
         }
         if (type == null) {
             if (typeStrLowerCase.startsWith("nvarchar") || typeStrLowerCase.startsWith("varchar")) {
@@ -322,5 +328,17 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         }
         return type;
+    }
+
+    @Override
+    public String getFileName(String metadataStr) {
+        return String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
+                new SimpleDateFormat(DATE_FORMAT).format(new Date()));
+    }
+
+    @Override
+    public String getFileDisplayName(String metadataStr) {
+        return String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
+                new SimpleDateFormat(DATE_FORMAT).format(new Date()));
     }
 }

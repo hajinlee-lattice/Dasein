@@ -22,6 +22,7 @@ public class WorkflowContextConstants {
         public static final String MODEL_TYPE = "MODEL_TYPE";
         public static final String SOURCE_FILE_EXISTS = "SOURCE_FILE_EXISTS";
         public static final String SOURCE_DISPLAY_NAME = "SOURCE_DISPLAY_NAME";
+        public static final String SOURCE_FILE_NAME = "SOURCE_FILE_NAME";
         public static final String JOB_TYPE = "JOB_TYPE";
         public static final String DATAFEED_STATUS = "DATAFEED_STATUS";
         public static final String INITIAL_DATAFEED_STATUS = "INITIAL_DATAFEED_STATUS";

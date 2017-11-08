@@ -149,8 +149,11 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         }
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(dataFeedTask.getSource());
         String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getUniqueId());
-
-        ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig);
+        String fileName = dataFeedMetadataService.getFileName(importConfig);
+        String fileDisplayName = dataFeedMetadataService.getFileDisplayName(importConfig);
+        log.info(String.format("fileName=%s, fileDisplayName=%s", fileName, fileDisplayName));
+        ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
+                fileName, fileDisplayName);
         return appId.toString();
     }
 

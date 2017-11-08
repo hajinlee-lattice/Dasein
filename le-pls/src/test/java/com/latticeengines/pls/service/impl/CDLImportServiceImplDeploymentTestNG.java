@@ -32,7 +32,9 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLImportService;
 import com.latticeengines.pls.service.FileUploadService;
@@ -47,6 +49,10 @@ public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
     private final static Logger log = LoggerFactory.getLogger(CDLImportServiceImplDeploymentTestNG.class);
 
     public static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
+
+    private static final String FILE_DISPLAY_NAME = "cdlImportCSV_data.csv";
+
+    private static final String TEMPLATE_NAME = "cdlImportCSV_template.csv";
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -76,22 +82,22 @@ public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
         flags.put(featureFlag, true);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
         tenant = testBed.getMainTestTenant();
-        testBed.loginAndAttach(TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN), TestFrameworkUtils
-                .GENERAL_PASSWORD, tenant);
+        testBed.loginAndAttach(TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN),
+                TestFrameworkUtils.GENERAL_PASSWORD, tenant);
         MultiTenantContext.setTenant(tenant);
-        File templateFile = new File(ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/cdlImportCSV_template.csv").getPath());
+        File templateFile = new File(
+                ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/" + TEMPLATE_NAME).getPath());
 
-        File dataFile = new File(ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/cdlImportCSV_data.csv").getPath());
+        File dataFile = new File(
+                ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/" + FILE_DISPLAY_NAME).getPath());
 
-        template = fileUploadService.uploadFile("cdlImportCSV_template.csv", SchemaInterpretation.Account,
-                null, null, new FileInputStream(templateFile));
-        data = fileUploadService.uploadFile("cdlImportCSV_data.csv", SchemaInterpretation.Account,
-                null, null, new FileInputStream(dataFile));
+        template = fileUploadService.uploadFile(TEMPLATE_NAME, SchemaInterpretation.Account, null, null,
+                new FileInputStream(templateFile));
+        data = fileUploadService.uploadFile(FILE_DISPLAY_NAME, SchemaInterpretation.Account, null, FILE_DISPLAY_NAME,
+                new FileInputStream(dataFile));
 
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort(
-                template.getName(), SchemaInterpretation.Account, null);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -101,7 +107,7 @@ public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
         modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument);
     }
 
-    @Test(groups = "deployment", enabled = false )
+    @Test(groups = "deployment", enabled = false)
     public void testImportJob() throws Exception {
         long startMillis = System.currentTimeMillis();
         ApplicationId appId = cdlImportService.submitCSVImport(CustomerSpace.parse(tenant.getName()).toString(),
@@ -109,13 +115,20 @@ public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertNotNull(appId);
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString());
+        Assert.assertNotNull(job);
+        Assert.assertTrue(job.getInputs().containsKey(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME));
+        Assert.assertTrue(job.getInputs().containsKey(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME));
+        Assert.assertEquals(job.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME),
+                FILE_DISPLAY_NAME);
+        log.info(String.format("fileName=%s", job.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME)));
         long endMillis = System.currentTimeMillis();
         checkExtractFolderExist(startMillis, endMillis);
     }
 
     private void checkExtractFolderExist(long startMillis, long endMillis) throws Exception {
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant.getId())).toString(),
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts", PathBuilder
+                .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant.getId())).toString(),
                 SourceType.FILE.getName());
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, targetPath);

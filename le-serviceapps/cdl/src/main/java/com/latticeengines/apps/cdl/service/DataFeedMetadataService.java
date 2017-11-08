@@ -29,6 +29,10 @@ public abstract class DataFeedMetadataService {
 
     public abstract CustomerSpace getCustomerSpace(String metadataStr);
 
+    public abstract String getFileName(String metadataStr);
+
+    public abstract String getFileDisplayName(String metadataStr);
+
     public abstract String getConnectorConfig(String metadataStr, String jobIdentifier);
 
     public boolean needUpdateDataFeedStatus() {

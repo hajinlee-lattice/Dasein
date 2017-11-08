@@ -7,6 +7,12 @@ public class CSVToHdfsConfiguration extends ImportConfiguration {
     @JsonProperty("file_path")
     private String filePath;
 
+    @JsonProperty("file_display_name")
+    private String fileDisplayName;
+
+    @JsonProperty("file_name")
+    private String fileName;
+
     @JsonProperty("file_source")
     private String fileSource;
 
@@ -46,5 +52,21 @@ public class CSVToHdfsConfiguration extends ImportConfiguration {
 
     public void setJobIdentifier(String jobIdentifier) {
         this.jobIdentifier = jobIdentifier;
+    }
+
+    public String getFileDisplayName() {
+        return this.fileDisplayName;
+    }
+
+    public void setFileDisplayName(String fileDisplayName) {
+        this.fileDisplayName = fileDisplayName;
+    }
+
+    public String getFileName() {
+        return this.fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }
