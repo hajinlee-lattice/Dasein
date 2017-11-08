@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
 
-import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.domain.exposed.cache.CacheNames;
@@ -91,19 +89,12 @@ public class LocalCache<K, V> implements Cache {
     @Override
     public void put(Object key, Object value) {
         cache.put((K) key, (V) value);
-        String lockName = String.format("/%s-%s", getName(), key.toString()).replace('|', '-');
-        LockManager.registerCrossDivisionLock(lockName);
+        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
+                CacheUtils.getKeyOperation(CacheOperation.Put, key.toString()));
         try {
-            LockManager.acquireWriteLock(lockName, 8, TimeUnit.SECONDS);
-            NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
-                    CacheUtils.getKeyOperation(CacheOperation.Put, key.toString()));
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                log.warn("Thread sleep interrupted", e);
-            }
-        } finally {
-            LockManager.releaseWriteLock(lockName);
+            Thread.sleep(1000L);
+        } catch (InterruptedException e) {
+            log.warn("Thread sleep interrupted", e);
         }
     }
 
