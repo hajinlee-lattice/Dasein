@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CONSOLIDATE_RETAIN;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateRetainFieldConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -257,6 +259,30 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         config.setCompressResult(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
+        return step;
+    }
+
+    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable) {
+        if (!isBucketing()) {
+            return null;
+        }
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(previousStep));
+        step.setTransformer(TRANSFORMER_CONSOLIDATE_RETAIN);
+
+        if (useTargetTable) {
+            TargetTable targetTable = new TargetTable();
+            targetTable.setCustomerSpace(customerSpace);
+            targetTable.setNamePrefix(servingStoreTablePrefix);
+            targetTable.setPrimaryKey(servingStorePrimaryKey);
+            targetTable.setExpandBucketedAttrs(true);
+            step.setTargetTable(targetTable);
+        }
+        ConsolidateRetainFieldConfig config = new ConsolidateRetainFieldConfig();
+        Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), servingStore);
+        List<String> fieldsToRetain = servingTable != null ? Arrays.asList(servingTable.getAttributeNames()) : null;
+        config.setFieldsToRetain(fieldsToRetain);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 

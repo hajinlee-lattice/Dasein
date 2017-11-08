@@ -254,10 +254,6 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField("ID");
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
-        if (masterTable != null) {
-            List<String> fields = Arrays.asList(masterTable.getAttributeNames());
-            config.setOrigMasterFields(fields);
-        }
         return JsonUtils.serialize(config);
     }
 

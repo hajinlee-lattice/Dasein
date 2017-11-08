@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -51,6 +50,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
     private int bucketStep;
     @SuppressWarnings("unused")
     private int sortStep;
+    private int retainStep;
 
     @Override
     protected void initializeConfiguration() {
@@ -72,7 +72,8 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             diffStep = 4;
             matchDiffStep = 5;
             bucketStep = 6;
-            sortStep = 7;
+            retainStep = 7;
+            sortStep = 8;
 
             TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig mergeNew = mergeNew();
@@ -81,7 +82,8 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig matchDiff = matchDiff();
             TransformationStepConfig bucket = bucket(matchDiffStep, true);
-            TransformationStepConfig sort = sortDiff(bucketStep, 200);
+            TransformationStepConfig retainFields = retainFields(bucketStep, false);
+            TransformationStepConfig sort = sortDiff(retainStep, 200);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
@@ -92,6 +94,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
                 steps.add(diff);
                 steps.add(matchDiff);
                 steps.add(bucket);
+                steps.add(retainFields);
                 steps.add(sort);
             }
             request.setSteps(steps);
@@ -103,14 +106,8 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         }
     }
 
-
     @Override
     protected void setupConfig(ConsolidateDataTransformerConfig config) {
-        if (inputMasterTableName != null) {
-            List<String> fields = AvroUtils.getSchemaFields(yarnConfiguration,
-                    masterTable.getExtracts().get(0).getPath());
-            config.setOrigMasterFields(fields);
-        }
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
 
     }

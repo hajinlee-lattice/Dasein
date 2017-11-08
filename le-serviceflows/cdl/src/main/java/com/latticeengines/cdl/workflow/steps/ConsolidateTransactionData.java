@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidatePartitionConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -61,10 +60,12 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
             partitionAndAggregateStep = 1;
             TransformationStepConfig inputMerge = mergeInputs(true);
             TransformationStepConfig partitionAggr = partitionAndAggregate();
+            TransformationStepConfig retainFields = retainFields(partitionAndAggregateStep, true);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(inputMerge);
             steps.add(partitionAggr);
+            steps.add(retainFields);
             request.setSteps(steps);
             return request;
 
@@ -80,10 +81,6 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         step2.setInputSteps(Collections.singletonList(inputMergeStep));
         step2.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_PARTITION);
 
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(servingStoreTablePrefix);
-        step2.setTargetTable(targetTable);
         step2.setConfiguration(getPartitionConfig());
         return step2;
     }

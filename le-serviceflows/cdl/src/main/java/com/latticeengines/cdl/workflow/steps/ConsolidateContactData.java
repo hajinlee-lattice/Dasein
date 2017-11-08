@@ -1,13 +1,8 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
-import com.latticeengines.domain.exposed.metadata.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,17 +10,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateContactDataStepConfiguration;
-
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 
 @Component("consolidateContactData")
 public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateContactDataStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateContactData.class);
 
-    private int mergeStep, upsertMasterStep, diffStep, bucketDiffStep;
+    private int mergeStep, upsertMasterStep, diffStep, bucketDiffStep, sortStep, retainStep;
 
     @Override
     protected void initializeConfiguration() {
@@ -43,11 +37,14 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
             upsertMasterStep = 1;
             diffStep = 2;
             bucketDiffStep = 3;
+            retainStep = 4;
+            sortStep = 5;
             TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig bucketDiff = bucket(diffStep, false);
-            TransformationStepConfig sort = sortDiff(bucketDiffStep, 50);
+            TransformationStepConfig retainFields = retainFields(bucketDiffStep, false);
+            TransformationStepConfig sort = sortDiff(retainStep, 50);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
@@ -55,6 +52,7 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
             if (isBucketing()) {
                 steps.add(diff);
                 steps.add(bucketDiff);
+                steps.add(retainFields);
                 steps.add(sort);
             }
             request.setSteps(steps);
@@ -68,7 +66,8 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
 
     @Override
     protected void findProfileTable() {
-        Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.ContactProfile);
+        Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                TableRoleInCollection.ContactProfile);
         if (profileTable != null) {
             profileTableName = profileTable.getName();
             log.info("Set profileTableName=" + profileTableName);

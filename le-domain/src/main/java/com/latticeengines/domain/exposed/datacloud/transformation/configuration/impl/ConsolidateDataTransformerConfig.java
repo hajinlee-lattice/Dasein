@@ -12,7 +12,6 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     private Set<String> columnsFromRight;
     private List<String> compositeKeys;
-    private List<String> origMasterFields;
     private boolean isDedupeSource;
 
     public String getSrcIdField() {
@@ -53,14 +52,6 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     public void setCompositeKeys(List<String> compositeKeys) {
         this.compositeKeys = compositeKeys;
-    }
-
-    public List<String> getOrigMasterFields() {
-        return origMasterFields;
-    }
-
-    public void setOrigMasterFields(List<String> origMasterFields) {
-        this.origMasterFields = origMasterFields;
     }
 
     public boolean isDedupeSource() {

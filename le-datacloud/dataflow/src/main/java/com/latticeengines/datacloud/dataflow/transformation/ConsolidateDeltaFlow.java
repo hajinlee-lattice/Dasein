@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,9 +39,6 @@ public class ConsolidateDeltaFlow extends ConsolidateBaseFlow<ConsolidateDataTra
         Node idNode = sources.get(0).retain(new FieldList(masterId));
         Node masterNode = sources.get(1);
         List<String> fieldToRetain = masterNode.getFieldNames();
-        if (CollectionUtils.isNotEmpty(config.getOrigMasterFields())) {
-            fieldToRetain = config.getOrigMasterFields();
-        }
         Node result = idNode.leftJoin(new FieldList(masterId), masterNode, new FieldList(masterId));
         log.info("Fields to retain=" + fieldToRetain);
         result = result.retain(new FieldList(fieldToRetain));

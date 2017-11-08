@@ -55,4 +55,5 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_TRANSACTION_AGGREGATOR = "transactionAggregator";
 
     public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
+    public static final String TRANSFORMER_CONSOLIDATE_RETAIN = "consolidateRetainFieldTransformer";
 }
