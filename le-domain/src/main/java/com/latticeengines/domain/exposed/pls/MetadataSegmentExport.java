@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
@@ -25,20 +26,23 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_SEGMENT_EXPORT")
+@javax.persistence.Table(name = "METADATA_SEGMENT_EXPORT", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "EXPORT_ID" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class MetadataSegmentExport implements HasName, HasPid, HasTenantId, HasAuditingFields {
+public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,16 +51,21 @@ public class MetadataSegmentExport implements HasName, HasPid, HasTenantId, HasA
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("name")
-    @Index(name = "METADATA_SEGMENT_EXPORT_NAME")
-    @Column(name = "NAME", nullable = false)
-    private String name;
+    @JsonProperty("exportId")
+    @Index(name = "METADATA_SEGMENT_EXPORT_ID")
+    @Column(name = "EXPORT_ID", nullable = false)
+    private String exportId;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_SEGMENT_ID", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment segment;
+
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Tenant tenant;
 
     @JsonProperty("created_by")
     @Column(name = "CREATED_BY")
@@ -100,7 +109,7 @@ public class MetadataSegmentExport implements HasName, HasPid, HasTenantId, HasA
     private Date updated;
 
     @JsonProperty("cleanupBy")
-    @Index(name = "METADATA_SEGMENT_EXPORT_NAME")
+    @Index(name = "METADATA_SEGMENT_EXPORT_TTL")
     @Column(name = "CLEANUP_BY", nullable = false)
     private Date cleanupBy;
 
@@ -112,106 +121,134 @@ public class MetadataSegmentExport implements HasName, HasPid, HasTenantId, HasA
     @JsonIgnore
     private Long tenantId;
 
-    @Override
     public Long getPid() {
         return pid;
     }
 
-    public String getName() {
-        return name;
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    public String getExportId() {
+        return exportId;
+    }
+
+    public void setExportId(String exportId) {
+        this.exportId = exportId;
     }
 
     public MetadataSegment getSegment() {
         return segment;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public String getRestrictionString() {
-        return restrictionString;
-    }
-
-    public String getContactRestrictionString() {
-        return contactRestrictionString;
-    }
-
-    public FrontEndRestriction getAccountFrontEndRestriction() {
-        return accountFrontEndRestriction;
-    }
-
-    public FrontEndRestriction getContactFrontEndRestriction() {
-        return contactFrontEndRestriction;
-    }
-
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    @Override
-    public Date getUpdated() {
-        return updated;
-    }
-
-    @Override
-    public Date getCreated() {
-        return created;
-    }
-
-    @Override
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setPid(Long pid) {
-        this.pid = pid;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public void setSegment(MetadataSegment segment) {
         this.segment = segment;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
     }
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
 
-    public void setRestrictionString(String restrictionString) {
-        this.restrictionString = restrictionString;
+    @JsonProperty("account_raw_restriction")
+    public Restriction getAccountRestriction() {
+        return JsonUtils.deserialize(restrictionString, Restriction.class);
     }
 
-    public void setContactRestrictionString(String contactRestrictionString) {
-        this.contactRestrictionString = contactRestrictionString;
+    @JsonProperty("account_raw_restriction")
+    public void setAccountRestriction(Restriction restriction) {
+        this.restrictionString = JsonUtils.serialize(restriction);
+    }
+
+    @JsonProperty("contact_raw_restriction")
+    public Restriction getContactRestriction() {
+        return JsonUtils.deserialize(contactRestrictionString, Restriction.class);
+    }
+
+    @JsonProperty("contact_raw_restriction")
+    public void setContactRestriction(Restriction restriction) {
+        this.contactRestrictionString = JsonUtils.serialize(restriction);
+    }
+
+    public FrontEndRestriction getAccountFrontEndRestriction() {
+        return accountFrontEndRestriction;
     }
 
     public void setAccountFrontEndRestriction(FrontEndRestriction accountFrontEndRestriction) {
         this.accountFrontEndRestriction = accountFrontEndRestriction;
     }
 
+    public FrontEndRestriction getContactFrontEndRestriction() {
+        return contactFrontEndRestriction;
+    }
+
     public void setContactFrontEndRestriction(FrontEndRestriction contactFrontEndRestriction) {
         this.contactFrontEndRestriction = contactFrontEndRestriction;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
     }
 
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
 
-    @Override
-    public void setUpdated(Date updated) {
-        this.updated = updated;
+    public Status getStatus() {
+        return status;
     }
 
-    @Override
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
     public void setCreated(Date created) {
         this.created = created;
     }
 
-    @Override
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Date getCleanupBy() {
+        return cleanupBy;
+    }
+
+    public void setCleanupBy(Date cleanupBy) {
+        this.cleanupBy = cleanupBy;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }

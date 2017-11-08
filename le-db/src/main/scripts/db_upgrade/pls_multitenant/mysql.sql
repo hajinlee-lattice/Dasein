@@ -29,6 +29,47 @@ CREATE PROCEDURE `UpdateCDLTables`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateSegmentExportTables`()
+    BEGIN
+        CREATE TABLE `METADATA_SEGMENT_EXPORT` (
+          `PID` bigint(20) NOT NULL AUTO_INCREMENT,
+          `APPLICATION_ID` varchar(255) DEFAULT NULL,
+          `CLEANUP_BY` datetime NOT NULL,
+          `CONTACT_RESTRICTION` longtext,
+          `CREATED` datetime NOT NULL,
+          `CREATED_BY` varchar(255) DEFAULT NULL,
+          `EXPORT_ID` varchar(255) NOT NULL,
+          `PATH` varchar(255) NOT NULL,
+          `RESTRICTION` longtext,
+          `STATUS` varchar(255) NOT NULL,
+          `TENANT_ID` bigint(20) NOT NULL,
+          `UPDATED` datetime NOT NULL,
+          `FK_SEGMENT_ID` bigint(20) DEFAULT NULL,
+          `FK_TENANT_ID` bigint(20) NOT NULL,
+          PRIMARY KEY (`PID`),
+          UNIQUE KEY `EXPORT_ID` (`EXPORT_ID`)
+        )
+            ENGINE = InnoDB;
+
+        ALTER TABLE `METADATA_SEGMENT_EXPORT`
+            ADD INDEX `FKCBB92D70E88DD898` (`FK_SEGMENT_ID`),
+            ADD CONSTRAINT `FKCBB92D70E88DD898` FOREIGN KEY (`FK_SEGMENT_ID`) REFERENCES `METADATA_SEGMENT` (`PID`) 
+            ON DELETE CASCADE;
+
+        ALTER TABLE `METADATA_SEGMENT_EXPORT`
+            ADD INDEX `FKCBB92D7036865BC` (`FK_TENANT_ID`),
+            ADD CONSTRAINT `FKCBB92D7036865BC` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`)
+            ON DELETE CASCADE;
+
+        ALTER TABLE `METADATA_SEGMENT_EXPORT`
+          ADD INDEX `METADATA_SEGMENT_EXPORT_TTL` (`CLEANUP_BY`);
+
+        ALTER TABLE `METADATA_SEGMENT_EXPORT`
+          ADD INDEX `METADATA_SEGMENT_EXPORT_ID` (`EXPORT_ID`);
+    END;
+//
+DELIMITER ;
+
 CREATE PROCEDURE `UpdateNoteTables`()
     BEGIN
         CREATE TABLE `RATING_ENGINE_NOTE` (
@@ -110,6 +151,7 @@ CREATE PROCEDURE `UpdateSchema`()
     BEGIN
         START TRANSACTION;
         CALL `UpdateCDLTables`();
+        CALL `UpdateSegmentExportTables`();
         CALL `UpdateNoteTables`();
         CALL `UpdateMetadataAttribute`();
         CALL `UpdateSegmentAndRatingEngine`();
