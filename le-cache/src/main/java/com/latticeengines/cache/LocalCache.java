@@ -91,7 +91,7 @@ public class LocalCache<K, V> implements Cache {
     @Override
     public void put(Object key, Object value) {
         cache.put((K) key, (V) value);
-        String lockName = String.format("%s|%s", getName(), key.toString());
+        String lockName = String.format("/%s-%s", getName(), key.toString()).replace('|', '-');
         LockManager.registerCrossDivisionLock(lockName);
         try {
             LockManager.acquireWriteLock(lockName, 8, TimeUnit.SECONDS);
