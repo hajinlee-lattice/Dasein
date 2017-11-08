@@ -23,7 +23,7 @@ public class Path implements Serializable {
             throw new IllegalArgumentException("Path " + rawPath + " is invalid.  Paths must start with a /.");
         }
 
-        if (!rawPath.equals("/") && !rawPath.matches("^(/[\\w\\-.]+)+$")) {
+        if (!rawPath.equals("/") && !rawPath.matches("^(/[\\w\\-|.]+)+$")) {
             throw new IllegalArgumentException("Path " + rawPath
                     + " is invalid.  A path must contain only word characters or .'s");
         }
