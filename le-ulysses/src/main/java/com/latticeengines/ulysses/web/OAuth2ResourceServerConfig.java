@@ -3,6 +3,7 @@ package com.latticeengines.ulysses.web;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,6 +26,9 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
     @Resource(name = "dataSourceOauth2")
     private DataSource dataSource;
 
+    @Autowired
+    private UlyssesOauth2AuthenticationManager ulyssesAuthenticationManager;
+
     @Bean
     public JdbcTokenStore tokenStore() {
         return new JdbcTokenStore(dataSource);
@@ -38,6 +42,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
         ExceptionEncodingTranslator translator = new ExceptionEncodingTranslator();
         authenticationEntryPoint.setExceptionTranslator(translator);
         resources.authenticationEntryPoint(authenticationEntryPoint);
+        resources.authenticationManager(ulyssesAuthenticationManager);
     }
 
     @Override
@@ -57,7 +62,12 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                 .permitAll() //
                 .antMatchers("/ulysses/latticeinsights/**", //
                         "/ulysses/companyprofiles/**", //
-                        "/ulysses/attributes/**", "/ulysses/tenant/**") //
+                        "/ulysses/attributes/**", //
+                        "/ulysses/tenant/**", //
+                        "/ulysses/datacollection/attributes/**", //
+                        "/ulysses/datacollection/accounts/**", //
+                        "/ulysses/recommendations/**", //
+                        "/ulysses/talkingpoints/**") //
                 .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))")
                 .antMatchers("/ulysses/**").denyAll();
 
