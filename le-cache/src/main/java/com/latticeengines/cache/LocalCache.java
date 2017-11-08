@@ -20,6 +20,7 @@ import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
+import com.latticeengines.domain.exposed.util.CacheUtils;
 
 public class LocalCache<K, V> implements Cache {
 
@@ -95,7 +96,7 @@ public class LocalCache<K, V> implements Cache {
         try {
             LockManager.acquireWriteLock(lockName, 8, TimeUnit.SECONDS);
             NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
-                    getKeyOperation(CacheOperation.Put, key.toString()));
+                    CacheUtils.getKeyOperation(CacheOperation.Put, key.toString()));
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
@@ -126,12 +127,13 @@ public class LocalCache<K, V> implements Cache {
     @Override
     public void evict(Object key) {
         NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
-                getKeyOperation(CacheOperation.Evict, key.toString()));
+                CacheUtils.getKeyOperation(CacheOperation.Evict, key.toString()));
     }
 
     @Override
     public void clear() {
-        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(), getAllOperation(CacheOperation.Evict, ""));
+        NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
+                CacheUtils.getAllOperation(CacheOperation.Evict, ""));
     }
 
     public List<K> getDefaultKeyResolver(String updateSignal, Set<K> existingKeys, CacheOperation expectedOp) {
@@ -163,13 +165,5 @@ public class LocalCache<K, V> implements Cache {
 
     public void setRefreshKeyResolver(BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver) {
         cache.setRefreshKeyResolver(refreshKeyResolver);
-    }
-
-    public static String getKeyOperation(CacheOperation op, String key) {
-        return String.format("%s|key|%s", op.name(), key);
-    }
-
-    public static String getAllOperation(CacheOperation op, String key) {
-        return String.format("%s|all|%s", op.name(), key);
     }
 }

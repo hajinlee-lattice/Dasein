@@ -10,13 +10,13 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cache.LocalCache;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
+import com.latticeengines.domain.exposed.util.CacheUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -66,7 +66,7 @@ public class DataFeedExecutionListener extends LEJobListener {
                     CacheNames.getCdlConsolidateCacheGroup());
             Arrays.stream(CacheNames.getCdlConsolidateCacheGroup()).forEach(cache -> {
                 NodeWatcher.notifyCacheWatchersAsync(cache.name(),
-                        LocalCache.getAllOperation(CacheOperation.Put, customerSpace));
+                        CacheUtils.getAllOperation(CacheOperation.Put, customerSpace));
                 try {
                     Thread.sleep(1000L);
                 } catch (InterruptedException e) {

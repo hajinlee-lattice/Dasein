@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cache.LocalCache;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.cache.CacheNames;
@@ -27,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.CacheUtils;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -211,7 +211,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private void notifyCacheWatchers(String customerSpace) {
         Arrays.asList(CacheNames.getCdlProfileCacheGroup()).stream().forEach(cache -> {
             NodeWatcher.notifyCacheWatchersAsync(cache.name(),
-                    LocalCache.getAllOperation(CacheOperation.Put, customerSpace));
+                    CacheUtils.getAllOperation(CacheOperation.Put, customerSpace));
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
