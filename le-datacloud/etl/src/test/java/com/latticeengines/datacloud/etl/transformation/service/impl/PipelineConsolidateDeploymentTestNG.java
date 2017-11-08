@@ -104,7 +104,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
     private void verifyDeltaTable() {
         String deltaTableFullName = TableSource.getFullTableName(deltaTableName, targetVersion);
-        verifyRegisteredTable(deltaTableFullName, 5);
+        verifyRegisteredTable(deltaTableFullName, 8);
     }
 
     private void verifyMergedTable() {
