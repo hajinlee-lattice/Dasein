@@ -14,7 +14,8 @@ angular
     'lp.ratingsengine.ai',
     'lp.ratingsengine.ai.prospect',
     'lp.ratingsengine.ai.prospect.prospect-graph',
-    'lp.ratingsengine.ai.products'
+    'lp.ratingsengine.ai.products',
+    'lp.ratingsengine.ai.refine'
 ])
 .config(function($stateProvider, DataCloudResolvesProvider) {
     $stateProvider
@@ -505,9 +506,11 @@ angular
             views: {
                 
                 'wizard_content@home.ratingsengine.ai': {
-                    controller: function(RatingsEngineStore, RatingsEngineAIStore){
-                        RatingsEngineStore.setValidation('refine', true);
-                    },
+                    controller: 'RatingsEngineAIRefine',
+                    // function(RatingsEngineStore, RatingsEngineAIStore){
+                    //     RatingsEngineStore.setValidation('refine', true);
+                    // },
+                    controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-target.component.html'
                 }
             }

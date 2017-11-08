@@ -1,3 +1,5 @@
+$break-small: 1128px;
+
 section.ratings-engine-ai-refine-target.container{
     p {
         // border: 1px solid yellowgreen;
@@ -28,7 +30,87 @@ section.ratings-engine-ai-refine-target.container{
                 border: 1px solid gray;
                 border-radius: 7px;
             }
+            
+            .action-description{
+                font-size: 1em;
+                white-space: nowrap;
+
+                @media screen and (max-width: $break-small) {
+                    font-size: 0.6em;
+                }
+            }
         }
     }
-    
+    .body-container {
+        border: 0px solid red;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        height: 100%;
+
+        .sell-charts-container{
+            height: 100%;
+            width: 100%;
+            border: 0px solid green;
+        }
+
+        .sell-options-container{
+            height: 100%;
+            width: 100%;
+            border: 0px solid blue;
+            display: flex;
+
+            .choises-container {
+                border: 0px solid pink;
+                width: 100%;
+                .choises{
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    padding: 10px;
+                    .choise{
+                        padding-top: 10px;
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: flex-start;
+
+                        .selection {
+                            border-left: 1px solid rgba(181, 180, 180, 0.8);
+                            margin-left: 50px;
+                            padding-left: 10px;
+                        }
+                    }
+                }
+
+                .results{
+                    padding: 10px;
+                    border-top: 1px solid gray;
+                    border-bottom: 1px solid gray;
+                    .result{
+                        padding: 10px 0 10px 0;
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: flex-start;
+
+                        .counter-text{
+                            padding-right: 5px;
+                            padding-left:5px;
+                        }
+                        .counter{
+                            width: 55px;
+                            font-size: 0.9em;
+                            font-weight: bold;
+                            text-align: center;
+                            padding: 1px;
+                            border-radius: 45%;
+                            border: 0px solid gray;
+                            background-color: rgba(92, 159, 232, 0.52);
+                        }
+
+                    }
+                   
+                }
+            }
+        }
+    }
 }

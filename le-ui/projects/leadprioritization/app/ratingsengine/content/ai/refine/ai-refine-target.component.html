@@ -5,8 +5,61 @@
         </div>
         <div class="actions-container">
             <!-- <button class="button orange-button">Change Products</button> -->
-            <button class="sub-action" title="Refine Modeling"><i class="fa fa-sliders fa-2x" aria-hidden="true"></i></button>
-            <span>Refine Modeling</span>
+            <button class="sub-action" title="Refine Modeling">
+                <i class="fa fa-sliders fa-2x" aria-hidden="true"></i>
+            </button>
+            <span class="action-description">Refine Modeling</span>
+        </div>
+    </div>
+    <div class="body-container">
+        <div class="sell-charts-container">
+            L
+        </div>
+        <div class="sell-options-container">
+            <div class="choises-container">
+                <div class="choises">
+                    <div class="choise">
+                        <input type="radio" id="not-yet" name="type-sell" value="notyet">
+                        <label for="not-yet">Sell to "Not yet" group for the first time</label>
+                    </div>
+                    <div class="choise">
+                        <input type="radio" id="resell" name="type-sell" value="resell">
+                        <label for="resell">Resell to customers who already bought</label>
+                    </div>
+                    <div class="choise">
+                        <div class="selection">
+                            <label for="customers-no-bought">Choose customers who haven't bought in last</label>
+                            <select>
+                                <option>6 months</option>
+                                <option>12 months</option>
+                                <option>18 months</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="results">
+                    <div class="result">
+                        <span class="counter-text">You will rate</span>
+                        <div class="counter">200,956</div>
+                        <span class="counter-text">Customers</span>
+                    </div>
+                    <div class="result">
+                        <span class="counter-text">Your model will learn from</span>
+                        <div class="counter">5</div>
+                        <span class="counter-text">past successes</span>
+                    </div>
+                </div>
+                <div class="choises">
+                    <div class="choise">
+                        <input type="radio" id="buy" name="buy" value="buy">
+                        <label for="buy">Prioritize by likelihood to buy</label>
+                    </div>
+                    <div class="choise">
+                        <input type="radio" id="spend" name="spend" value="spend">
+                        <label for="spend">Prioritize by likely amount to spend</label>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
