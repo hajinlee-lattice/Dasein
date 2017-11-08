@@ -105,7 +105,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         for (var y = 0; y < predictor.Elements.length; y++) {
             var element = predictor.Elements[y];
             var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
-            var percentTotal = (element.Count / totalLeads) * 100;
+            var percentTotal = ((element.Count / totalLeads) * 100).toFixed(0);
             if (attributeValue != null &&
                 (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE" ||
                             attributeValue === "") &&
@@ -213,7 +213,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
                     for (var y = 0; y < predictor.Elements.length; y++) {
                         var element = predictor.Elements[y];
-                        var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
+                        var percentTotal = ((element.Count / modelSummary.ModelDetails.TotalLeads) * 100).toFixed(0);
                         var isCategorical = this.IsPredictorElementCategorical(element);
                         if (isCategorical && percentTotal < 1) {
                             continue;
@@ -386,12 +386,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
                 for (var y = 0; y < predictor.Elements.length; y++) {
                     var element = predictor.Elements[y];
-                    var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
+                    var percentTotal = ((element.Count / modelSummary.ModelDetails.TotalLeads) * 100).toFixed(0);
+
                     var isCategorical = this.IsPredictorElementCategorical(element);
                     if (isCategorical && percentTotal < 1) {
                         continue;
                     }
-                    percentTotal = percentTotal.toFixed(1);
+                    // percentTotal = percentTotal.toFixed(1);
                     var lift = element.Lift.toPrecision(2);
                     var conversionRate = (element.Lift * averageConversionRate).toFixed(2);
                     var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
@@ -482,13 +483,11 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (attributeName == null || predictorList == null) {
             return null;
         }
-
         for (var i = 0; i < predictorList.length; i++) {
             if (attributeName == predictorList[i].Name) {
                 return predictorList[i];
             }
         }
-
         return null;
     };
 
@@ -498,6 +497,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
 
         var predictor = this.GetAttributeByName(attributeName, modelSummary.Predictors);
+
         if (predictor == null) {
             return null;
         }
@@ -508,6 +508,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             description: predictor.Description || "",
             elementList: []
         };
+
         var nullBucket = null,
             miscBucket = null;
 
@@ -525,11 +526,15 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var isNumericRange = predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Numeric ||
                 predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Currency;
         var maxBucket = null;
-        for (var i = 0; i < predictor.Elements.length; i++) {
-            var bucket = predictor.Elements[i];
-            var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
 
-            var foundMax = false;
+        for (var i = 0; i < predictor.Elements.length; i++) {
+
+            var bucket = predictor.Elements[i];
+            var matchingBuckets = [];
+
+            var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor),
+                foundMax = false;
+
             if (isNumericRange && bucket.LowerInclusive !== null) {
                 if (maxBucket === null) {
                     maxBucket = {};
@@ -542,21 +547,36 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 }
             }
 
-            var bucketToDisplay = {
-                name: bucketName,
-                lift: bucket.Lift,
-                percentTotal: (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0
-            };
+            var percentTotal = ((bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100).toFixed(0),
+                bucketToDisplay = {
+                    name: bucketName,
+                    lift: bucket.Lift,
+                    percentTotal: percentTotal
+                };
 
             // Set sort property based on whether it is a discrete versus a continuous value
             if (isContinuous) {
                 bucketToDisplay.SortProperty = bucket.LowerInclusive != null ? bucket.LowerInclusive : bucket.UpperExclusive;
                 // Only when the attribute is continuous, sorting is increasing order
+            } else if (toReturn.name === "Employee Range") {
+
+                if (bucketToDisplay.name.indexOf(">") > -1) {
+                    var lessThanBucketName = bucketToDisplay.name,
+                        removedLessThanCharacter = lessThanBucketName.substr(1);
+
+                    bucketToDisplay.SortProperty = parseFloat(removedLessThanCharacter.replace(/,/g, ''));
+                } else if (bucketToDisplay.name.indexOf("-") > -1) {
+                    var values = bucketToDisplay.name.split('-'),
+                        maxValue = parseInt(values[1]);
+
+                    bucketToDisplay.SortProperty = maxValue;
+                }
             } else {
                 bucketToDisplay.SortProperty = bucketToDisplay.lift;
             }
 
             if (bucket.IsVisible) {
+
                 if (bucketToDisplay.name != null && typeof bucketToDisplay.name === 'string' &&
                     (bucketToDisplay.name.toUpperCase() === "NULL" || bucketToDisplay.name.toUpperCase() === "NONE" || bucketToDisplay.name.toUpperCase() === "NOT AVAILABLE")) {
                     nullBucket = bucketToDisplay;
@@ -568,12 +588,14 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     miscBucket = bucketToDisplay;
                     continue;
                 }
+
                 toReturn.elementList.push(bucketToDisplay);
 
                 if (foundMax) {
                     maxBucket.indexOfMax = toReturn.elementList.length - 1;
                 }
             }
+
         }
 
         if (maxBucket !== null) {
@@ -606,6 +628,50 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (isContinuous && nullBucket != null && toReturn.elementList.length == 2) {
             toReturn.elementList[0].name = "Available";
         }
+
+        //
+        //
+        // Duplicate code exampkles here need to be made more efficient
+        // I'll look into this weekend (Nov 11)
+        // - Jon
+        //
+        //
+        var foundOther = toReturn.elementList.some(function (el) {
+            return el.name === "Other, Less Popular";
+        });
+        var foundZeroPercent = toReturn.elementList.some(function (el) {
+            return el.percentTotal === "0";
+        });
+        if(foundOther && foundZeroPercent) {
+            // Combine "Other, Less Popular" bucket and buckets with 0 percent total
+            var otherLessPopular = {},
+                zeroPercentTotal = {};
+
+            // Find and remove current buckets, store in variable
+            for(var i = 0; i < toReturn.elementList.length; i++) {
+                if (toReturn.elementList[i].name === "Other, Less Popular") {
+                    otherLessPopular = toReturn.elementList[i];
+                    toReturn.elementList.splice(i, 1);
+                };
+            };
+            for(var i = 0; i < toReturn.elementList.length; i++) {
+                if (toReturn.elementList[i].percentTotal === "0") {
+                    zeroPercentTotal = toReturn.elementList[i];
+                    toReturn.elementList.splice(i, 1);
+                };
+            }
+            // Use variables to combine and create a new "Other, Less Popular" bucket
+            newCombinedBucket = {
+                name: otherLessPopular.name,
+                lift: otherLessPopular.lift + zeroPercentTotal.lift,
+                percentTotal: otherLessPopular.percentTotal + zeroPercentTotal.percentTotal,
+                SortProperty: otherLessPopular.lift + zeroPercentTotal.lift
+            };
+            // Push new bucket back to list
+            toReturn.elementList.push(newCombinedBucket);    
+        }
+
+        console.log(toReturn.elementList);
 
         return toReturn;
     };
@@ -662,7 +728,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 bucket = predictor.Elements[i];
                 bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
 
-                var percentTotal = (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0;
+                var percentTotal = ((bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100).toFixed(0);
                 if (percentTotal < 1 || (bucketName != null && typeof bucketName === 'string' && bucketName.toLowerCase() == "other")) {
                     otherBucketElements.push(bucket);
                 } else {
@@ -686,16 +752,40 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var bucketToDisplay = {
                 name: bucketName,
                 lift: bucket.Lift,
-                percentTotal: (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0
+                percentTotal: ((bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100).toFixed(0)
             };
+
+            // // Set sort property based on whether it is a discrete versus a continuous value
+            // if (isContinuous) {
+            //     bucketToDisplay.SortProperty = bucket.LowerInclusive != null ? bucket.LowerInclusive : bucket.UpperExclusive;
+            //     // Only when the attribute is continuous, sorting is increasing order
+            // } else {
+            //     bucketToDisplay.SortProperty = bucketToDisplay.lift;
+            // }
+
 
             // Set sort property based on whether it is a discrete versus a continuous value
             if (isContinuous) {
                 bucketToDisplay.SortProperty = bucket.LowerInclusive != null ? bucket.LowerInclusive : bucket.UpperExclusive;
                 // Only when the attribute is continuous, sorting is increasing order
+            } else if (toReturn.name === "Employee Range") {
+
+                if (bucketToDisplay.name.indexOf(">") > -1) {
+                    var lessThanBucketName = bucketToDisplay.name,
+                        removedLessThanCharacter = lessThanBucketName.substr(1);
+
+                    bucketToDisplay.SortProperty = parseFloat(removedLessThanCharacter.replace(/,/g, ''));
+                } else if (bucketToDisplay.name.indexOf("-") > -1) {
+                    var values = bucketToDisplay.name.split('-'),
+                        maxValue = parseInt(values[1]);
+
+                    bucketToDisplay.SortProperty = maxValue;
+                }
             } else {
                 bucketToDisplay.SortProperty = bucketToDisplay.lift;
             }
+
+
 
             if (bucket.IsVisible) {
                 // Always sort NA bucket to the bottom
@@ -754,7 +844,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             otherBucket = {
                 name: "Other",
                 lift: averagedLift / otherBucketTotalPercentage,
-                percentTotal: otherBucketTotalPercentage * 100.0
+                percentTotal: (otherBucketTotalPercentage * 100).toFixed(0)
             };
         }
 
@@ -810,17 +900,18 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 }
             }
         }
-        percentList[index] = topPercentage.toFixed(1);
+        percentList[index] = topPercentage.toFixed(0);
 
         return percentList;
     };
 
     this.FormatPercent = function (percent) {
+
         var formattedPercent = percent;
         if (formattedPercent >= 0.95) {
-            formattedPercent = Math.round(formattedPercent);
+            formattedPercent = formattedPercent;
         } else if (formattedPercent <= 0.95 && formattedPercent >= 0.1) {
-            formattedPercent = Number(formattedPercent.toFixed(1));
+            formattedPercent = formattedPercent;
         } else {
             formattedPercent = "<0.1";
         }

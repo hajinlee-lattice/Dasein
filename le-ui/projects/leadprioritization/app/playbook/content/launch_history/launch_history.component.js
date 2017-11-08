@@ -9,12 +9,19 @@ angular.module('lp.playbook.dashboard.launch_history', [])
         launches: LaunchHistoryData,
         cumulativeStats: LaunchHistoryData.cumulativeStats,
         summaryData: {},
-        launching: false
+        launching: false,
+        current: 1,
+        pagesize: 10,
+        showPagination: false
     });
 
     vm.init = function() {
 
-        console.log($state);
+        // console.log(vm.launches);
+
+        if(vm.launches.launchSummaries.length > 10){
+            vm.showPagination = true;
+        }
 
         vm.defaultPlayLaunchList = angular.copy(vm.launches.launchSummaries);
         vm.defaultPlayLaunchList.unshift({playName: null, playDisplayName: 'All Launched Plays'});
@@ -25,28 +32,6 @@ angular.module('lp.playbook.dashboard.launch_history', [])
             vm.allPlaysHistory = false;
         }
 
-        // if($stateParams.play_name) {
-        //     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-
-        //         // console.log(play);
-
-        //         vm.stored.play_name = play.name;
-        //         vm.stored.play_display_name = play.displayName;
-        //         vm.stored.play_description = play.description;
-        //         if(vm.stored.play_name) {
-        //             PlaybookWizardStore.setValidation('settings', true);
-        //         }
-
-
-        //         for (var i = 0; i < vm.launches.length; i++) {
-        //             vm.totalRecoGen = vm.totalRecoGen + vm.launches[i].accountsNum;
-        //             vm.totalSuppressed = 0;
-        //         }
-
-
-        //    });
-        // }
-
         vm.summaryData = {
             selectedTargets: vm.cumulativeStats.selectedTargets,
             suppressed: vm.cumulativeStats.suppressed,
@@ -54,8 +39,6 @@ angular.module('lp.playbook.dashboard.launch_history', [])
             recommendationsLaunched: vm.cumulativeStats.recommendationsLaunched,
             contactsWithinRecommendations: vm.cumulativeStats.contactsWithinRecommendations
         }
-
-        console.log(vm.launches);
 
     };
 

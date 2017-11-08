@@ -1,7 +1,7 @@
 
 
 <section class="playbook playbook-launch-history container">
-    <div class="card-content">
+    <div class="card-content" ng-class="{'has-footer': !vm.allPlaysHistory}">
 
         <select 
             name="category-group" 
@@ -12,6 +12,15 @@
             ng-options="play.playDisplayName for play in vm.defaultPlayLaunchList | unique:'playName'"
             ng-init="play=vm.defaultPlayLaunchList[0]">
         </select>
+
+
+        <!-- <input type="text" ng-model="searchLaunchedPlays" />
+        <ul>
+            <li 
+                ng-repeat="play in vm.launches.launchSummaries | unique:'playName'">{{play.playDisplayName}}</li>
+        </ul> -->
+
+
 
         <ul class="history-metadata">
         	<li>
@@ -49,9 +58,6 @@
     	<div class="table-metadata">
     		{{vm.launches.launchSummaries.length}} play launches
     	</div>
-    	<!-- <div class="pagination">
-    		pagination is here
-    	</div> -->
 
     	<table>
     		<thead>
@@ -78,14 +84,22 @@
                     <td>
                         <span class="fa fa-check" ng-if="launch.launchState === 'Launched'"></span>
                         <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching'"></span>
+                        <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'Failed'"></span>
                         {{launch.launchState}}
                     </td>
     			</tr>
     		</tbody>
     	</table>
 
+        <pd-pagination-controls
+            ng-if="vm.showPagination"
+            current="vm.current"
+            max="vm.launches.launchSummaries.length / vm.pagesize"
+            class="pull-right">
+        </pd-pagination-controls>
+
     </div><!-- End .content -->
-    <div class="card-footer">
+    <div class="card-footer" ng-if="!vm.allPlaysHistory">
         <button 
             type="button"
             class="button blue-button pull-right"

@@ -369,32 +369,28 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     };
 
     function showAttributeHover (attributeName, attributeColor, mouseX, mouseY, path) {
-        if (showAttributeTimeout != null) {
-            clearTimeout(showAttributeTimeout);
-        }
-        showAttributeTimeout = setTimeout(function () {
-            var topPredictorAttributeHover = $("#topPredictorAttributeHover");
-            var scope = $rootScope.$new();
-            scope.mouseX = mouseX;
-            scope.mouseY = mouseY;
-            scope.selectedPath = path; // for anchoring tail and hoverElem position
-            var displaySimpleBuckets = false;
-            for (var i = 0; i < data.ModelDetails.ModelSummaryProvenanceProperties.length; i++) {
-                if (data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.option == "IsV2ProfilingEnabled") {
-                    displaySimpleBuckets = data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.value == "true";
-                }
+
+        var topPredictorAttributeHover = $("#topPredictorAttributeHover");
+        var scope = $rootScope.$new();
+        scope.mouseX = mouseX;
+        scope.mouseY = mouseY;
+        scope.selectedPath = path; // for anchoring tail and hoverElem position
+        var displaySimpleBuckets = false;
+        for (var i = 0; i < data.ModelDetails.ModelSummaryProvenanceProperties.length; i++) {
+            if (data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.option == "IsV2ProfilingEnabled") {
+                displaySimpleBuckets = data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.value == "true";
             }
-            scope.data = displaySimpleBuckets ?
-                TopPredictorService.FormatSimpleBuckets(attributeName, attributeColor, data) :
-                TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
-            $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
-        }, 500);
+        }
+        scope.data = displaySimpleBuckets ?
+            TopPredictorService.FormatSimpleBuckets(attributeName, attributeColor, data) :
+            TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
+
+        $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
+
     }
 
     function hideAttributeHover () {
-        if (showAttributeTimeout != null) {
-            clearTimeout(showAttributeTimeout);
-        }
+
         var topPredictorAttributeHover = $("#topPredictorAttributeHover");
         topPredictorAttributeHover.hide();
         topPredictorAttributeHover.empty();

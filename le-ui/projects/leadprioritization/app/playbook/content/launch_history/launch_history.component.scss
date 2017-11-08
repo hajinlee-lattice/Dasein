@@ -14,10 +14,16 @@
 	}
 	.card-content {
 		border-width: 1px;
-		border-top-right-radius: 4px;
-		border-top-left-radius: 4px;
-		border-bottom-right-radius: 0;
-		border-bottom-left-radius: 0;
+		border-radius: 4px;
+		&.has-footer {
+			border-bottom-right-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+		&:after {
+			display: table;
+			content: "";
+			clear: both;
+		}
 	}
 	.card-footer {
 		border-width: 0 1px 1px;
