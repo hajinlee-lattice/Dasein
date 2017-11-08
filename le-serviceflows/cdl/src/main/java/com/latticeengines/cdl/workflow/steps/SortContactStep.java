@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -48,7 +49,7 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
     private static int profileStep;
     private static int bucketStep;
 
-    private String[] dedupFields = { "AccountId" };
+    private String[] dedupFields = { InterfaceName.AccountId.name() };
 
     @Override
     protected BusinessEntity getEntity() {

@@ -318,8 +318,9 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         }
     }
 
-    public FrontEndQuery toFrontEndQuery() {
+    public FrontEndQuery toFrontEndQuery(BusinessEntity mainEntity) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setMainEntity(mainEntity);
         FrontEndRestriction accountRestriction = getAccountRestriction() == null ? getAccountFrontEndRestriction()
                 : new FrontEndRestriction(getAccountRestriction());
         FrontEndRestriction contactRestriction = getContactRestriction() == null ? getContactFrontEndRestriction()

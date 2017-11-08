@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -24,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -85,6 +89,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 tenant.getId());
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
+        Assert.assertNotNull(createdRatingEngine.getActiveModel());
         Assert.assertNotNull(createdRatingEngine.getRatingModels());
         Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
         Assert.assertNotNull(createdRatingEngine.getSegment());
@@ -101,6 +106,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(createdRatingEngine.getType(), RatingEngineType.RULE_BASED);
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.INACTIVE);
+        Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
 
         String createdRatingEngineStr = createdRatingEngine.toString();
         log.info("createdRatingEngineStr is " + createdRatingEngineStr);
@@ -158,9 +164,14 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         re.setNote(RATING_ENGINE_NOTE);
         re.setStatus(RatingEngineStatus.ACTIVE);
         re.setId(ratingEngine.getId());
+        re.setCountsByMap(ImmutableMap.of( //
+                RuleBucketName.A.getName(), 1L, //
+                RuleBucketName.B.getName(), 2L, //
+                RuleBucketName.C.getName(), 3L));
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+        Assert.assertNotNull(createdRatingEngine.getActiveModel());
         Assert.assertNotNull(createdRatingEngine.getRatingModels());
         Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
         Assert.assertNotNull(createdRatingEngine.getSegment());
@@ -177,6 +188,12 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
         RatingEngine retrievedRatingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
         log.info("Rating Engine after update is " + retrievedRatingEngine.toString());
+        Map<String, Long> counts = re.getCountsAsMap();
+        Assert.assertTrue(MapUtils.isNotEmpty(counts));
+        Assert.assertEquals(counts.get(RuleBucketName.A.getName()), new Long(1));
+        Assert.assertEquals(counts.get(RuleBucketName.B.getName()), new Long(2));
+        Assert.assertEquals(counts.get(RuleBucketName.C.getName()), new Long(3));
+
 
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
                 RatingEngineStatus.ACTIVE.name());

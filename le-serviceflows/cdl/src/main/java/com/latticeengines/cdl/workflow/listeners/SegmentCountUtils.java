@@ -42,8 +42,7 @@ final class SegmentCountUtils {
         if (segment == null) {
             return null;
         }
-        FrontEndQuery frontEndQuery = segment.toFrontEndQuery();
-        frontEndQuery.setMainEntity(entity);
+        FrontEndQuery frontEndQuery = segment.toFrontEndQuery(entity);
         return entityProxy.getCount(customerSpace, frontEndQuery);
     }
 

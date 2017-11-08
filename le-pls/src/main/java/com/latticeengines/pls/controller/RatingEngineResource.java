@@ -116,8 +116,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
-    public RatingEngineDashboard getRatingsDashboard( //
-            @PathVariable String ratingEngineId) {
+    public RatingEngineDashboard getRatingsDashboard(@PathVariable String ratingEngineId) {
         return ratingEngineDashboardService.getRatingsDashboard(ratingEngineId);
     }
 
@@ -125,9 +124,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Register or update a Rating Engine")
     @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
-    public RatingEngine createRatingEngine( //
-            @RequestBody RatingEngine ratingEngine, //
-            HttpServletRequest request) {
+    public RatingEngine createRatingEngine(@RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.warn("Tenant is null for the request.");
@@ -143,9 +140,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
     @PreAuthorize("hasRole('Edit_PLS_RatingEngines')")
-    public Boolean deleteRatingEngine( //
-            @PathVariable String ratingEngineId, //
-            HttpServletRequest request) {
+    public Boolean deleteRatingEngine(@PathVariable String ratingEngineId) {
         ratingEngineService.deleteById(ratingEngineId);
         return true;
     }
@@ -153,40 +148,29 @@ public class RatingEngineResource {
     @RequestMapping(value = "/coverage", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
-    public RatingsCountResponse getRatingEngineCoverageInfo( //
-            @RequestBody RatingsCountRequest ratingModelSegmentIds) {
+    public RatingsCountResponse getRatingEngineCoverageInfo(@RequestBody RatingsCountRequest ratingModelSegmentIds) {
         return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
-    public Set<RatingModel> getRatingModels( //
-            @PathVariable String ratingEngineId, //
-            HttpServletRequest request, //
-            HttpServletResponse response) {
+    public Set<RatingModel> getRatingModels(@PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel getRatingModel( //
-            @PathVariable String ratingEngineId, //
-            @PathVariable String ratingModelId, //
-            HttpServletRequest request, //
-            HttpServletResponse response) {
+    public RatingModel getRatingModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel updateRatingModel( //
-            @RequestBody RatingModel ratingModel, //
-            @PathVariable String ratingEngineId, //
-            @PathVariable String ratingModelId, //
-            HttpServletRequest request, HttpServletResponse response) {
+    public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId) {
         return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
     }
 

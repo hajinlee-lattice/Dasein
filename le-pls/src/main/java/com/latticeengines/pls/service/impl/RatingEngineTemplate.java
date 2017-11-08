@@ -2,9 +2,10 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -12,7 +13,7 @@ import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
 public abstract class RatingEngineTemplate {
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
     @VisibleForTesting
@@ -35,14 +36,19 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
         ratingEngineSummary.setRatingModels(ratingEngine.getRatingModels());
 
+        MetadataSegment segment = ratingEngine.getSegment();
+        if (segment != null) {
+            ratingEngineSummary.setAccounts(segment.getAccounts());
+            ratingEngineSummary.setContacts(segment.getContacts());
+        }
+
         Date lastRefreshedDate = findLastRefreshedDate(tenantId);
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
         return ratingEngineSummary;
     }
 
-    protected Date findLastRefreshedDate(String tenantId) {
+    Date findLastRefreshedDate(String tenantId) {
         DataFeed dataFeed = dataFeedProxy.getDataFeed(tenantId);
-        Date lastRefreshedDate = dataFeed.getLastPublished();
-        return lastRefreshedDate;
+        return dataFeed.getLastPublished();
     }
 }

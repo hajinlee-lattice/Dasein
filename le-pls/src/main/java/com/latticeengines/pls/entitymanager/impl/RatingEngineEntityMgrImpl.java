@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +131,9 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
         if (ratingEngine.getStatus() != null) {
             retrievedRatingEngine.setStatus(ratingEngine.getStatus());
+        }
+        if (MapUtils.isNotEmpty(ratingEngine.getCountsAsMap())) {
+            retrievedRatingEngine.setCountsByMap(ratingEngine.getCountsAsMap());
         }
         retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);

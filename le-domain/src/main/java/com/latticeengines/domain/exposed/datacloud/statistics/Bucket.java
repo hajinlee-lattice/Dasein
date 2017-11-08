@@ -63,6 +63,12 @@ public class Bucket implements Serializable {
         return new Bucket();
     }
 
+    public static Bucket notNullBkt() {
+        Bucket bucket = new Bucket();
+        bucket.setComparisonType(ComparisonType.IS_NOT_NULL);
+        return bucket;
+    }
+
     public static Bucket rangeBkt(Object min, Object max) {
         return rangeBkt(min, max, true, false);
     }

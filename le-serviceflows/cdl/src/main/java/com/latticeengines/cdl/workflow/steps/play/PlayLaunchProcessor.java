@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -156,12 +155,7 @@ public class PlayLaunchProcessor {
                     String.format("Segment for Rating Engine %s cannot be null", ratingEngine.getId()));
         }
 
-        String modelId = null;
-        for (RatingModel model : ratingEngine.getRatingModels()) {
-            modelId = model.getId();
-            break;
-        }
-
+        String modelId = ratingEngine.getActiveModel().getId();
         String segmentName = segment.getName();
         log.info(String.format("Processing segment: %s", segmentName));
 

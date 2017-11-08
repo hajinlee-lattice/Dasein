@@ -257,6 +257,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+        Restriction contactRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
+        frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -313,9 +316,14 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
-        frontEndRestriction.setRestriction(restriction);
+        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
+        frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
+
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
+        Restriction contactRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
+        frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
+
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setSort(new FrontEndSort(
@@ -326,9 +334,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RuleBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 1675L);
+                Assert.assertEquals((long) count, 483L);
             } else if (RuleBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 361L);
+                Assert.assertEquals((long) count, 99L);
             }
         });
     }

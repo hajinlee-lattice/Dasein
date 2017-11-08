@@ -3,11 +3,13 @@ package com.latticeengines.proxy.exposed.objectapi;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -93,10 +96,27 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
+        if (CollectionUtils.isEmpty(frontEndQuery.getRatingModels()) || frontEndQuery.getRatingModels().size() != 1) {
+            throw new UnsupportedOperationException("Rating count api only works with single rating model.");
+        }
+
+        // normalize rating model to increase cache hit
+        RatingModel ratingModel = normalizeRatingModel(frontEndQuery.getRatingModels().get(0));
+        frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
+
         return getRatingCountFromCache(customerSpace, frontEndQuery);
     }
 
-    public Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    private RatingModel normalizeRatingModel(RatingModel ratingModel) {
+        ratingModel.setId("RatingEngine");
+        ratingModel.setPid(null);
+        ratingModel.setCreated(null);
+        ratingModel.setIteration(-1);
+        ratingModel.setRatingEngine(null);
+        return ratingModel;
+    }
+
+    private Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
@@ -108,7 +128,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return count;
     }
 
-    public DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    private DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         DataPage dataPage = getDataFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
@@ -119,7 +139,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return dataPage;
     }
 
-    public Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    private Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
@@ -132,7 +152,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return ratingCountInfo;
     }
 
-    public Long getCountFromObjectApi(String serializedKey) {
+    private Long getCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);

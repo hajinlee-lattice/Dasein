@@ -49,6 +49,12 @@ public class RatingEngineSummary {
     @JsonProperty("ratingModels")
     private Set<RatingModel> ratingModels;
 
+    @JsonProperty("accounts")
+    private Long accounts;
+
+    @JsonProperty("contacts")
+    private Long contacts;
+
     public String getId() {
         return this.id;
     }
@@ -143,6 +149,22 @@ public class RatingEngineSummary {
 
     public Set<RatingModel> getRatingModels() {
         return this.ratingModels;
+    }
+
+    public Long getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(Long accounts) {
+        this.accounts = accounts;
+    }
+
+    public Long getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(Long contacts) {
+        this.contacts = contacts;
     }
 
     @Override

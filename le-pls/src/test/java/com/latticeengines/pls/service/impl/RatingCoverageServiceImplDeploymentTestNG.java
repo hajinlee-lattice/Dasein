@@ -79,7 +79,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotNull(ratingModels);
         Assert.assertTrue(ratingModels.size() > 0);
         Assert.assertTrue(new ArrayList<>(ratingModels).get(0) instanceof RuleBasedModel);
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) new ArrayList<>(ratingModels).get(0);
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
 
         ratingRule = ruleBasedModel.getRatingRule();
 
@@ -167,7 +167,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Test(groups = "deployment")
     public void testRatingModelIdCoverage() {
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) new ArrayList<>(ratingEngine.getRatingModels()).get(0);
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
         RatingsCountRequest request = new RatingsCountRequest();
         RatingModelIdPair p1 = new RatingModelIdPair();
         p1.setRatingEngineId(ratingEngine.getId());
@@ -195,7 +195,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Test(groups = "deployment")
     public void testSegmentIdModelRulesCoverage() {
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) new ArrayList<>(ratingEngine.getRatingModels()).get(0);
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
         RatingsCountRequest request = new RatingsCountRequest();
         SegmentIdAndModelRulesPair r1 = new SegmentIdAndModelRulesPair();
         r1.setSegmentId(ratingEngine.getSegment().getName());

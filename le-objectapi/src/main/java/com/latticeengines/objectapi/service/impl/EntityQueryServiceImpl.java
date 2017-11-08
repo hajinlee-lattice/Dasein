@@ -25,9 +25,11 @@ import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.GroupBy;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.util.AccountQueryDecorator;
 import com.latticeengines.objectapi.util.ContactQueryDecorator;
@@ -139,6 +141,17 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     private Query ratingCountQuery(FrontEndQuery frontEndQuery) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
         if (models != null && models.size() == 1) {
+            Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
+                    : frontEndQuery.getAccountRestriction().getRestriction();
+            Restriction contactRestriction = frontEndQuery.getContactRestriction() == null ? null
+                    : frontEndQuery.getContactRestriction().getRestriction();
+            if (contactRestriction != null) {
+                // merge account and contact restrictions
+                accountRestriction = accountRestriction == null ? contactRestriction
+                        : Restriction.builder().and(accountRestriction, contactRestriction).build();
+                frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
+                frontEndQuery.setContactRestriction(null);
+            }
             Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
             query.setPageFilter(null);
             query.setSort(null);

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,6 +26,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
@@ -42,6 +44,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -284,5 +287,18 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     public static String generateIdStr() {
         return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
+    }
+
+    public RatingModel getActiveModel() {
+        return getRatingModels().stream().findFirst().orElse(null);
+    }
+
+    public FrontEndQuery toFrontEndQuery(BusinessEntity mainEntity) {
+        // get a front end query with only the latest rating model
+        MetadataSegment segment = getSegment();
+        FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(mainEntity) : new FrontEndQuery();
+        frontEndQuery.setRatingModels(Collections.singletonList(getActiveModel()));
+        frontEndQuery.setMainEntity(mainEntity);
+        return frontEndQuery;
     }
 }

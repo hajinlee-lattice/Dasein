@@ -244,7 +244,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertNotNull(createdRe.getRatingModels());
         Assert.assertNotNull(new ArrayList<>(createdRe.getRatingModels()));
 
-        RuleBasedModel ruModel = (RuleBasedModel) new ArrayList<>(createdRe.getRatingModels()).get(0);
+        RuleBasedModel ruModel = (RuleBasedModel) createdRe.getActiveModel();
         Assert.assertNotNull(ruModel);
         Assert.assertNotNull(ruModel.getSelectedAttributes());
         Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);

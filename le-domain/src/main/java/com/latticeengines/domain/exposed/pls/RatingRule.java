@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -35,6 +36,26 @@ public class RatingRule {
 
     public TreeMap<String, Map<String, Restriction>> getBucketToRuleMap() {
         return this.bucketToRuleMap;
+    }
+
+    @JsonIgnore
+    public void setRuleForBucket(RuleBucketName bucket, Restriction accountRestriction, Restriction contactRestriction) {
+        if (accountRestriction == null && contactRestriction == null) {
+            return;
+        }
+        Map<String, Restriction> rules = new HashMap<>();
+        if (accountRestriction != null) {
+            rules.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, accountRestriction);
+        }
+        if (contactRestriction != null) {
+            rules.put(FrontEndQueryConstants.CONTACT_RESTRICTION, contactRestriction);
+        }
+        bucketToRuleMap.put(bucket.getName(), rules);
+    }
+
+    @JsonIgnore
+    public Map<String, Restriction> getRuleForBucket(RuleBucketName bucket) {
+        return bucketToRuleMap.get(bucket.getName());
     }
 
     public void setDefaultBucketName(String defaultBucketName) {

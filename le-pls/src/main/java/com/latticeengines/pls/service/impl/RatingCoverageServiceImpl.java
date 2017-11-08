@@ -1,12 +1,14 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
@@ -72,8 +74,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private ForkJoinPool tpForParallelStream;
 
-    Random rand = new Random(System.currentTimeMillis());
-
     @PostConstruct
     public void init() {
         tpForParallelStream = ThreadPoolUtils.getForkJoinThreadPool("rating-coverage", fetcherNum);
@@ -106,6 +106,25 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
 
         return result;
+    }
+
+    @Override
+    public CoverageInfo getCoverageInfo(RatingEngine ratingEngine) {
+        CoverageInfo coverageInfo = new CoverageInfo();
+        MetadataSegment segment = ratingEngine.getSegment();
+        if (segment != null) {
+            coverageInfo.setAccountCount(segment.getAccounts());
+            coverageInfo.setContactCount(segment.getContacts());
+        }
+        Map<String, Long> ratingCounts = new TreeMap<>(ratingEngine.getCountsAsMap());
+        List<RatingBucketCoverage> coverages = ratingCounts.entrySet().stream().map(entry -> {
+            RatingBucketCoverage bktCvg = new RatingBucketCoverage();
+            bktCvg.setBucket(entry.getKey());
+            bktCvg.setCount(entry.getValue());
+            return bktCvg;
+        }).collect(Collectors.toList());
+        coverageInfo.setBucketCoverageCounts(coverages);
+        return coverageInfo;
     }
 
     private void processRatingIds(RatingsCountRequest request, RatingsCountResponse result) {
@@ -383,11 +402,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     createEntityFronEndQuery(BusinessEntity.Contact, //
                             isRestrictNotNullSalesforceId, segment);
 
-            List<RatingModel> ratingModels = new ArrayList<>();
-            for (RatingModel model : ratingEngine.getRatingModels()) {
-                ratingModels.add(model);
-                break;
-            }
+            List<RatingModel> ratingModels = Collections.singletonList(ratingEngine.getActiveModel());
             accountFrontEndQuery.setRatingModels(ratingModels);
 
             log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));

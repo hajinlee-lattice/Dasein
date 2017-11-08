@@ -1,11 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.Arrays;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -14,8 +14,6 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
-import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
-import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.RatingCoverageService;
@@ -28,13 +26,13 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineDashboardServiceImpl.class);
 
-    @Autowired
+    @Inject
     private RatingEngineService ratingEngineService;
 
-    @Autowired
+    @Inject
     private RatingCoverageService ratingCoverageService;
 
-    @Autowired
+    @Inject
     private PlayService playService;
 
     @Override
@@ -51,10 +49,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         log.info(String.format("Step 1 - Loading rating engine summary completed for : %s", ratingEngineId));
 
         // get coverage info
-        RatingsCountRequest coverageRequest = new RatingsCountRequest();
-        coverageRequest.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
-        RatingsCountResponse ratingsCountResponse = ratingCoverageService.getCoverageInfo(coverageRequest);
-        CoverageInfo coverageInfo = ratingsCountResponse.getRatingEngineIdCoverageMap().get(ratingEngine.getId());
+        CoverageInfo coverageInfo = ratingCoverageService.getCoverageInfo(ratingEngine);
         log.info(String.format("Step 2 - Loading ratings coverage completed for : %s", ratingEngineId));
 
         // get segment info

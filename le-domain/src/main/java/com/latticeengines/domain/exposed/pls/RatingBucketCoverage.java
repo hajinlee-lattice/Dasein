@@ -9,6 +9,7 @@ public class RatingBucketCoverage {
 
     @JsonProperty("bucket")
     private String bucket;
+
     @JsonProperty("count")
     private Long count;
 

@@ -1,14 +1,17 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -19,11 +22,14 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingModelService;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("ratingEngineService")
@@ -31,11 +37,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Autowired
+    @Inject
     private MetadataSegmentService metadataSegmentService;
+
+    @Inject
+    private EntityProxy entityProxy;
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -57,7 +66,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 "Get all the rating engine summaries for tenant %s with status set to %s and type set to %s",
                 tenant.getId(), status, type));
         List<RatingEngineSummary> result = new ArrayList<>();
-        ratingEngineEntityMgr.findAllByTypeAndStatus(type, status).stream()
+        ratingEngineEntityMgr.findAllByTypeAndStatus(type, status)
                 .forEach(re -> result.add(constructRatingEngineSummary(re, tenant.getId())));
         return result;
     }
@@ -119,13 +128,35 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
         ratingModel.setId(ratingModelId);
-        return ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
+        RatingModel updatedModel = ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
+        try {
+            updateRatingCount(ratingEngine, updatedModel);
+        } catch (Exception e) {
+            log.warn(String.format("Failed to update rating counts for rating engine %s - rating model %s: %s",
+                    ratingEngineId, ratingModelId, e.getMessage()));
+        }
+        return updatedModel;
+    }
+
+    private void updateRatingCount(RatingEngine ratingEngine, RatingModel ratingModel) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (tenant == null) {
+            log.warn("Cannot find a Tenant in MultiTenantContext, skip getting ratign count.");
+        } else {
+            MetadataSegment segment = ratingEngine.getSegment();
+            FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(BusinessEntity.Account) : new FrontEndQuery();
+            frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
+            Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
+            ratingEngine.setCountsByMap(counts);
+            createOrUpdate(ratingEngine, tenant.getId());
+        }
     }
 
     private void updateLastRefreshedDate(String tenantId, List<RatingEngine> ratingEngines) {
         if (CollectionUtils.isNotEmpty(ratingEngines)) {
             Date lastRefreshedDate = findLastRefreshedDate(tenantId);
-            ratingEngines.stream().forEach(re -> re.setLastRefreshedDate(lastRefreshedDate));
+            ratingEngines.forEach(re -> re.setLastRefreshedDate(lastRefreshedDate));
         }
     }
 

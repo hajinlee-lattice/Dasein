@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.play;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,11 +142,7 @@ public class FrontEndQueryCreator {
                     prepareContactRestriction(extractedContactRestriction, modifiableAccountIdCollectionForContacts));
         }
 
-        List<RatingModel> ratingModels = new ArrayList<>();
-        for (RatingModel model : ratingEngine.getRatingModels()) {
-            ratingModels.add(model);
-            break;
-        }
+        List<RatingModel> ratingModels = Collections.singletonList(ratingEngine.getActiveModel());
         accountFrontEndQuery.setRatingModels(ratingModels);
 
         List<Lookup> lookups = accountFrontEndQuery.getLookups();

@@ -84,7 +84,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         Assert.assertNotNull(ratingModels);
         Assert.assertTrue(ratingModels.size() > 0);
         Assert.assertTrue(new ArrayList<>(ratingModels).get(0) instanceof RuleBasedModel);
-        RuleBasedModel ruleBasedModel = (RuleBasedModel) new ArrayList<>(ratingModels).get(0);
+        RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
 
         ratingRule = ruleBasedModel.getRatingRule();
 
