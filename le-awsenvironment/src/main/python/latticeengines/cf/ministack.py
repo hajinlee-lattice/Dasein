@@ -124,7 +124,7 @@ def haproxy_task(stackname, ec2s, ecr):
     for ec2 in ec2s:
         tokens.append({ "Fn::GetAtt" : [ ec2.logical_id(), "PrivateIp" ]})
     ips = { "Fn::Join" : [ ",", tokens ]}
-
+    ledp = Volume("ledp", "/etc/ledp")
     container = ContainerDefinition("haproxy", ecr + "/latticeengines/haproxy") \
         .mem_mb("768") \
         .publish_port(80, 80) \
@@ -140,10 +140,10 @@ def haproxy_task(stackname, ec2s, ecr):
             "awslogs-stream-prefix": "haproxy"
         }}) \
         .set_env("HOSTS", ips) \
-        .mount("/etc/ledp", "ledp")
+        .mount("/etc/ledp", ledp)
     task = TaskDefinition("haproxytask")
     task.add_container(container)
-    task.add_volume(Volume("ledp", "/etc/ledp"))
+    task.add_volume(ledp)
 
     for ec2 in ec2s:
         task.depends_on(ec2)
