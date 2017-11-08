@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -414,43 +415,55 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "bitEncodedData")
-    public void testBitEncoded(String label, String start, String contain, long expectedCount) {
+    public void testBitEncoded(ComparisonType operator, String value, long expectedCount) {
         // bucket
-        Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(label) //
-                .build();
+        RestrictionBuilder builder = Restriction.builder();
+        switch (operator) {
+            case EQUAL:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(value);
+                break;
+            case NOT_EQUAL:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).neq(value);
+                break;
+            case STARTS_WITH:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).startsWith(value);
+                break;
+            case CONTAINS:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).contains(value);
+                break;
+            case IS_NULL:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNull();
+                break;
+            case IS_NOT_NULL:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
+                break;
+            default:
+                throw new UnsupportedOperationException("Does not support " + operator);
+        }
+        Restriction restriction = builder.build();
         Query query = Query.builder().where(restriction).build();
         long count = queryEvaluatorService.getCount(attrRepo, query);
         Assert.assertEquals(count, expectedCount);
-
-        if (label != null) {
-            restriction = Restriction.builder() //
-                    .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).startsWith(start) //
-                    .build();
-            query = Query.builder().where(restriction).build();
-            count = queryEvaluatorService.getCount(attrRepo, query);
-            Assert.assertEquals(count, expectedCount);
-
-            restriction = Restriction.builder() //
-                    .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).contains(contain) //
-                    .build();
-            query = Query.builder().where(restriction).build();
-            count = queryEvaluatorService.getCount(attrRepo, query);
-            Assert.assertEquals(count, expectedCount);
-
-            restriction = Restriction.builder() //
-                    .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notcontains(contain) //
-                    .build();
-            query = Query.builder().where(restriction).build();
-            count = queryEvaluatorService.getCount(attrRepo, query);
-            Assert.assertEquals(count, TOTAL_RECORDS - expectedCount);
-        }
     }
 
     @DataProvider(name = "bitEncodedData", parallel = true)
     private Object[][] provideBitEncodedData() {
-        return new Object[][] { { "Yes", "y", "e", BUCKETED_YES_IN_CUSTOEMR },
-                { "No", "N", "o", BUCKETED_NO_IN_CUSTOEMR }, { null, null, null, BUCKETED_NULL_IN_CUSTOEMR } };
+        return new Object[][] {
+                { ComparisonType.EQUAL, "Yes", BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.EQUAL, "No", BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.EQUAL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
+
+                { ComparisonType.IS_NULL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
+                { ComparisonType.IS_NOT_NULL, null, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+
+                { ComparisonType.NOT_EQUAL, "Yes", BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_EQUAL, "No", BUCKETED_YES_IN_CUSTOEMR }, //
+
+                { ComparisonType.STARTS_WITH, "y", BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.STARTS_WITH, "N", BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.CONTAINS, "e", BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.CONTAINS, "o", BUCKETED_NO_IN_CUSTOEMR }, //
+        };
     }
 
     @Test(groups = "functional")

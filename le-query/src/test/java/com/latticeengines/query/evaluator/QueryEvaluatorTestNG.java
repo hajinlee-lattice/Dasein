@@ -12,10 +12,10 @@ import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
-import com.latticeengines.domain.exposed.query.SelectAllLookup;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
@@ -256,29 +256,44 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "bitEncodedData")
-    public void testBitEncoded(String testCase, Object[] eqArgs, String expectedRhs) {
+    public void testBitEncoded(String testCase, ComparisonType operator, Object[] vals, String expectedPattern) {
         logger.info("Testing " + testCase);
         RestrictionBuilder builder = Restriction.builder();
-        if (eqArgs.length == 1) {
-            if (eqArgs[0] == null) {
+        switch (operator) {
+            case EQUAL:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(vals[0]);
+                break;
+            case NOT_EQUAL:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).neq(vals[0]);
+                break;
+            case IS_NULL:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNull();
-            } else {
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(eqArgs[0]);
-            }
-        } else {
-            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq((BusinessEntity) eqArgs[0],
-                    (String) eqArgs[1]);
+                break;
+            case IS_NOT_NULL:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
+                break;
+            default:
+                throw new UnsupportedOperationException("Does not support " + operator);
         }
         Restriction restriction = builder.build();
         Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("(%s.%s>>?)&? = %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, expectedRhs));
+        sqlContains(sqlQuery, expectedPattern);
     }
 
     @DataProvider(name = "bitEncodedData", parallel = true)
     private Object[][] provideBitEncodedData() {
-        return new Object[][] { { "bucket = label", new Object[] { "Yes" }, "?" },
-                { "bucket is null", new Object[] { null }, "?" } };
+        String equalPattern = String.format("(%s.%s>>?)&? = ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
+        String notNullPattern = String.format("(%s.%s>>?)&? != ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
+        String notEqualPattern = String.format("%s and %s", notNullPattern, notNullPattern);
+        return new Object[][] { //
+                { "bucket = label", ComparisonType.EQUAL, new Object[] { "Yes" }, equalPattern }, //
+                { "bucket is null", ComparisonType.EQUAL, new Object[] { null }, equalPattern }, //
+                { "bucket is null", ComparisonType.IS_NULL, null, equalPattern }, //
+                { "bucket is not null", ComparisonType.NOT_EQUAL, new Object[] { null }, notNullPattern }, //
+                { "bucket is not null", ComparisonType.IS_NOT_NULL, null, notNullPattern }, //
+                { "bucket != label", ComparisonType.NOT_EQUAL, new Object[] { "Yes" }, notEqualPattern }, //
+        };
     }
 
     @Test(groups = "functional")

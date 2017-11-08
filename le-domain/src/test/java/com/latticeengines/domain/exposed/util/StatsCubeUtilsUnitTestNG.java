@@ -49,7 +49,6 @@ public class StatsCubeUtilsUnitTestNG {
                 });
         Statistics statistics = StatsCubeUtils.constructStatistics(cubeMap, cmMap);
         Assert.assertNotNull(statistics);
-        System.out.println(JsonUtils.pprint(statistics));
     }
 
     private Iterator<GenericRecord> readAvro() throws IOException {

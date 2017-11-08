@@ -103,8 +103,8 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertNotNull(convertedRestriction);
         Assert.assertTrue(convertedRestriction instanceof ConcreteRestriction);
         ConcreteRestriction concreteRestriction = (ConcreteRestriction) convertedRestriction;
-        Assert.assertEquals(ComparisonType.EQUAL, concreteRestriction.getRelation());
-        Assert.assertTrue(concreteRestriction.getNegate());
+        Assert.assertEquals(ComparisonType.NOT_EQUAL, concreteRestriction.getRelation());
+        Assert.assertFalse(concreteRestriction.getNegate());
     }
 
     @Test(groups = "unit")

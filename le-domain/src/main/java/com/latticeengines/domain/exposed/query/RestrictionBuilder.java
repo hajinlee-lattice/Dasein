@@ -109,11 +109,17 @@ public class RestrictionBuilder {
     }
 
     public RestrictionBuilder neq(Object value) {
-        return this.not().eq(value);
+        operator = ComparisonType.NOT_EQUAL;
+        rhsLookup = new ValueLookup(value);
+        completeConcrete();
+        return this;
     }
 
     public RestrictionBuilder neq(BusinessEntity entity, String attrName) {
-        return this.not().eq(entity, attrName);
+        operator = ComparisonType.NOT_EQUAL;
+        rhsLookup = new AttributeLookup(entity, attrName);
+        completeConcrete();
+        return this;
     }
 
     public RestrictionBuilder gt(Object value) {
