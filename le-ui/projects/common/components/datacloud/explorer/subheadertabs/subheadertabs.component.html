@@ -1,0 +1,23 @@
+<div class="enrichment-wizard-container container explorer-subheader-tabs">
+    <ul class="subheader-tabs-links">
+        <li ng-click="vm.clickAttributes()" ng-class="{'active':vm.checkState('attributes')}">Attribute Browser</li>
+        <li>|</li>
+        <li ng-click="vm.clickBuilder()" ng-class="{'active':vm.checkState('builder')}">Query Builder</li>
+    </ul>
+    <ul class="subheader-tabs-buttons">
+        <li class="save-segment">
+            <button class="clear button white-button" 
+                    ng-click="vm.clearSegment()" 
+                    ng-if="vm.segment == 'Create'"
+                    ng-disabled="true">
+                CLEAR
+            </button>
+            &nbsp;
+            <button class="save button blue-button" 
+                    ng-click="vm.saveSegment()" 
+                    ng-disabled="!vm.public.enableSaveSegmentButton">
+                {{ vm.segment == 'Create' ? 'Create' : 'Save' }} Segment
+            </button>
+        </li>
+    </ul>
+</div>

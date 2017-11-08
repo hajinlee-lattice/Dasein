@@ -21,16 +21,14 @@ angular.module('lp.models.segments', [
                 order: '-',
                 property: 'created',
                 items: [
-                    { label: 'Creation Date',   icon: 'numeric',    property: 'created' },
-                    { label: 'Segment Name',      icon: 'alpha',      property: 'display_name' }
+                    { label: 'Creation Date', icon: 'numeric', property: 'created' },
+                    { label: 'Segment Name', icon: 'alpha', property: 'display_name' }
                 ]
             }
         }
     });
 
-
-    vm.init = function($q) {
-
+    vm.init = function() {
         SegmentsList.forEach(function(segment) {
             vm.tileStates[segment.name] = {
                 showCustomMenu: false,
@@ -39,11 +37,14 @@ angular.module('lp.models.segments', [
             };
         });
 
+        if ($stateParams.edit) {
+            var tileState = vm.tileStates[$stateParams.edit];
+            tileState.editSegment = !tileState.editSegment;
+            $stateParams.edit = null;
+        }
     }
-    vm.init();
 
     vm.customMenuClick = function ($event, segment) {
-
         if ($event != null) {
             $event.stopPropagation();
         }
@@ -71,8 +72,8 @@ angular.module('lp.models.segments', [
     vm.tileClick = function ($event, segment) {
         $event.preventDefault();
         if ($state.current.name == 'home.segments') {
-            $state.go('home.segment.accounts', {segment: segment.name}, { reload: true } );
-            // $state.go('home.segment.explorer.attributes', {segment: segment.name}, { reload: true } );
+            // $state.go('home.segment.accounts', {segment: segment.name}, { reload: true } );
+            $state.go('home.segment.explorer.builder', {segment: segment.name}, { reload: true } );
         } else {
             $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );
         };
@@ -93,19 +94,19 @@ angular.module('lp.models.segments', [
     };
 
     vm.cancelEditSegmentClicked = function($event, segment) {
-        $event.stopPropagation();
+        if ($event) {
+            $event.stopPropagation();
+        }
 
         var tileState = vm.tileStates[segment.name];
-        tileState.editSegment = !tileState.editSegment;
+        tileState.editSegment = false;
     };
 
     vm.saveSegmentClicked = function($event, segment) {
-
         $event.stopPropagation();
 
         vm.saveInProgress = true;
         createOrUpdateSegment(segment);
-        
     };
 
     vm.addSegment = function() {
@@ -141,11 +142,13 @@ angular.module('lp.models.segments', [
             var errorMsg = result.errorMsg;
 
             if (result.success) {
-                if ($state.current.name == 'home.segments') {
-                    $state.go('home.segments', {}, { reload: true});
-                } else {
-                    $state.go('home.model.segmentation', {}, { reload: true });
-                }
+                vm.cancelEditSegmentClicked(null, segment);        
+                // why reload?
+                // if ($state.current.name == 'home.segments') {
+                //     $state.go('home.segments', {}, { reload: true});
+                // } else {
+                //     $state.go('home.model.segmentation', {}, { reload: true });
+                // }
             } else {
                 vm.saveInProgress = false;
                 vm.addSegmentErrorMessage = errorMsg;
@@ -154,4 +157,6 @@ angular.module('lp.models.segments', [
         });
 
     }
+
+    vm.init();
 });

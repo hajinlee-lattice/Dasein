@@ -3,9 +3,9 @@ angular.module('common.datacloud.query.builder', [
     'common.datacloud.query.builder.tree'
 ])
 .controller('AdvancedQueryCtrl', function(
-    $state, $stateParams, $timeout, $q, QueryStore, $scope, QueryService,
-    SegmentStore, DataCloudStore, Cube, RatingsEngineStore, 
-    RatingEngineModel, CurrentRatingEngine
+    $state, $stateParams, $timeout, $q, $rootScope, Cube, 
+    QueryStore, QueryService, SegmentStore, DataCloudStore,
+    RatingsEngineStore, RatingEngineModel, CurrentRatingEngine
 ) {
     var vm = this, CoverageMap;
 
@@ -30,11 +30,24 @@ angular.module('common.datacloud.query.builder', [
         coverage_map: {},
         rating_id: $stateParams.rating_id,
         ratings: RatingsEngineStore ? RatingsEngineStore.ratings : null,
-        treeMode: 'account'
+        treeMode: 'account',
+        segment: $stateParams.segment
     });
 
     vm.init = function() {
         console.log('[AQB] RatingEngineModel:', RatingEngineModel);
+
+        if (vm.segment != null && vm.segment != "Create"){
+            SegmentStore.getSegmentByName(vm.segment).then(function(result) {
+                vm.displayName = result.display_name;
+
+                $rootScope.$broadcast('header-back', { 
+                    path: '^home.segment.accounts',
+                    displayName: vm.displayName,
+                    sref: 'home.segments'
+                });
+            });    
+        }
 
         if (vm.mode == 'rules') {
             vm.rating_rule = RatingEngineModel.rule.ratingRule;
@@ -133,7 +146,7 @@ angular.module('common.datacloud.query.builder', [
             var bucket = vm.rating_rule.bucketToRuleMap[vm.bucket],
                 fromBucket = bucket[vm.treeMode + '_restriction'],
                 restrictions = fromBucket.logicalRestriction.restrictions,
-                allBuckets = vm.recursiveGetBucketRestrictions(restrictions),
+                allBuckets = QueryStore.getAllBuckets(restrictions),
                 ids = [];
 
 
@@ -219,7 +232,7 @@ angular.module('common.datacloud.query.builder', [
         var filtered = [], restrictions = [];
 
         buckets.forEach(function(bucket, index) {
-            restrictions = vm.recursiveGetBucketRestrictions(bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions);
+            restrictions = QueryStore.getAllBuckets(bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions);
             
             filtered = filtered.concat(restrictions.filter(function(value, index) {
                 return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
@@ -308,7 +321,6 @@ angular.module('common.datacloud.query.builder', [
                     QueryStore.setResourceTypeCount('accounts', false, result);
                 });
 
-
                 QueryService.GetCountByQuery('contacts', SegmentStore.sanitizeSegment(segment)).then(function(result) {
                     QueryStore.setResourceTypeCount('contacts', false, result);
                 });
@@ -353,7 +365,6 @@ angular.module('common.datacloud.query.builder', [
             map[bucket.bucketRestriction.attr + '_' + index] = bucket;
         })
 
-// console.log('getRuleRecordCounts', restrictions);
         RatingsEngineStore.getBucketRuleCounts(angular.copy(restrictions), segmentId).then(function(result) {
             var buckets = result.segmentIdAndSingleRulesCoverageMap;
             
@@ -374,27 +385,11 @@ angular.module('common.datacloud.query.builder', [
         vm.bucketLabels.forEach(function(bucketName, index) {
             var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
 
-            vm.recursiveGetBucketRestrictions(logical.restrictions, restrictions);
+            QueryStore.getAllBuckets(logical.restrictions, restrictions);
         });
 
         return restrictions;
     }
-
-    vm.recursiveGetBucketRestrictions = function(tree, restrictions) {
-        restrictions = restrictions || [];
-
-        tree.forEach(function(branch) {
-            if (branch && branch.bucketRestriction && branch.bucketRestriction && branch.bucketRestriction.bkt.Id) {
-                restrictions.push(branch);
-            }
-
-            if (branch && branch.logicalRestriction) {
-                vm.recursiveGetBucketRestrictions(branch.logicalRestriction.restrictions, restrictions);
-            }
-        });
-
-        return restrictions;
-    };
 
     vm.saveSegment = function() {
         var segment = QueryStore.getSegment(),

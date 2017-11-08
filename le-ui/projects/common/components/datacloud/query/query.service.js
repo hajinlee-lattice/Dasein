@@ -1,6 +1,7 @@
 angular.module('common.datacloud.query.service',[
 ])
 .service('QueryStore', function($filter, $q, $stateParams, $timeout, QueryService, BucketRestriction, SegmentStore) {
+    var QueryStore = this;
 
     angular.extend(this, {});
     this.validResourceTypes = ['accounts', 'contacts'];
@@ -11,26 +12,6 @@ angular.module('common.datacloud.query.service',[
     this.history = [];
 
     this.validContexts = ['accounts', 'contacts'];
-
-    var accountRestriction = [],
-        contactRestriction = [];
-
-    this.accountRestriction = {
-        "restriction": {
-            "logicalRestriction": {
-                "operator": "AND",
-                "restrictions": accountRestriction 
-            }
-        }
-    };
-    this.contactRestriction = {
-        "restriction": {
-            "logicalRestriction": {
-                "operator": "AND",
-                "restrictions": contactRestriction
-            }
-        }
-    };
 
     this.counts = {
         accounts: {
@@ -45,6 +26,41 @@ angular.module('common.datacloud.query.service',[
     
     this.accounts = [];
     this.contacts = [];
+
+    this.public = {
+        enableSaveSegmentButton: false
+    };
+
+    this.init = function() {
+        this.resetRestrictions();
+    }
+
+    this.resetRestrictions = function() {
+        this.accountRestriction = {
+            "restriction": {
+                "logicalRestriction": {
+                    "operator": "AND",
+                    "restrictions": [] 
+                }
+            }
+        };
+        this.contactRestriction = {
+            "restriction": {
+                "logicalRestriction": {
+                    "operator": "AND",
+                    "restrictions": []
+                }
+            }
+        };
+    }
+
+    this.setPublicProperty = function(property, value) {
+        this.public[property] = value;
+    }
+
+    this.getPublic = function() {
+        return this.public;
+    }
 
     this.setResourceTypeCount = function(resourceType, loading, value) {
 
@@ -432,7 +448,23 @@ angular.module('common.datacloud.query.service',[
         return this.validResourceTypes.indexOf(resourceType) > -1;
     };
 
+    this.getAllBuckets = function(tree, restrictions) {
+        restrictions = restrictions || [];
 
+        tree.forEach(function(branch) {
+            if (branch && branch.bucketRestriction && branch.bucketRestriction && typeof branch.bucketRestriction.bkt.Id == 'number') {
+                restrictions.push(branch);
+            }
+
+            if (branch && branch.logicalRestriction) {
+                QueryStore.recursiveGetBucketRestrictions(branch.logicalRestriction.restrictions, restrictions);
+            }
+        });
+
+        return restrictions;
+    };
+
+    this.init();
 })
 .service('QueryService', function($http, $q, SegmentStore) {
     this.canceler = null;

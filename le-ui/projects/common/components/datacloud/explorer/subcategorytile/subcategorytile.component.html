@@ -68,7 +68,7 @@
             </li>
         </ul>
 
-        <div class="attributes-more noselect" ng-if="subcategoryAttributes.length > 5">More</div>
+        <div class="attributes-more noselect" ng-if="count > 5">More</div>
     </div>
     <ul class="controls noselect" ng-if="!vm.lookupMode">
         <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">

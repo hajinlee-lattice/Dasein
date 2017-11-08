@@ -1,0 +1,36 @@
+div.explorer-subheader-tabs {
+    position: relative;
+    height: 2.5em;
+    margin: 0 0 1em 0 !important;
+    line-height: 3em;
+    
+    ul.subheader-tabs-links {
+        display: inline-block;
+        
+        li {
+            display: inline-block;
+            font-size: 1.4em;
+            color: #ccc;
+            padding: 0 0.2em;
+            cursor: pointer;
+            -webkit-transition: none;
+            -moz-transition: none;
+            -ms-transition: none;
+            transition: none;
+            
+            &:hover {
+                color: #aaa;
+            }
+
+            &.active {
+                color: #333;
+                cursor: default;
+            }
+        }
+    }
+
+    ul.subheader-tabs-buttons {
+        margin-right: 14px;
+        float: right;
+    }
+}

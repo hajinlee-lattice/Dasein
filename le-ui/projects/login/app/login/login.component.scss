@@ -25,16 +25,14 @@
         clear: both;
         
         a.recent-link {
-            display: inline-block;
+            position: relative;
+            display: block;
             font-size: 0.95em;
             text-overflow: ellipsis;
             max-width: 13em;
             text-align: right;
-            overflow: hidden;
             padding: 0.4em 0em .3em;
             border-bottom: 1px dotted #aaa;
-            clear: both;
-            float: right;
             
             &:last-child {
                 border-bottom: none;
@@ -49,6 +47,9 @@
             }
             
             .fa-spinner {
+                position: absolute;
+                top: 0.5em;
+                left: -2em;
                 color: black;
             }
         }

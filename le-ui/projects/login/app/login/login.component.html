@@ -50,7 +50,7 @@
                                     title="[{{tenant.UIVersion}}] - {{tenant.DisplayName}} - {{tenant.RegisteredTime | date:'MM/dd/yyyy'}}"
                                     ng-click="$ctrl.clickTenant(tenant, $ctrl.login.username)"
                                     ng-repeat="tenant in $ctrl.history | limitTo: 5 track by tenant.Identifier">
-                                <i ng-if="$ctrl.loginInProgress[tenant.DisplayName]" class="fa fa-spinner fa-pulse fa-fw"></i>
+                                <i ng-show="$ctrl.loginInProgress[tenant.DisplayName]" class="fa fa-spinner fa-pulse fa-fw"></i>
                                 {{tenant.DisplayName}}
                             </a>
                         </li>

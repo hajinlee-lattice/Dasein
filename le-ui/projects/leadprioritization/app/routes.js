@@ -293,7 +293,8 @@ angular
             url: '/segments',
             params: {
                 pageTitle: 'Segments',
-                pageIcon: 'ico-segments'
+                pageIcon: 'ico-segments',
+                edit: null
             },
             views: {
                 "summary@": {

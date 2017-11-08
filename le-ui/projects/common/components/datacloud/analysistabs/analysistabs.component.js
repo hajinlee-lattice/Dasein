@@ -1,9 +1,6 @@
-angular.module('common.datacloud.analysistabs', [
-    'mainApp.appCommon.utilities.ResourceUtility'
-    ])
+angular.module('common.datacloud.analysistabs', [])
 .controller('AnalysisTabsController', function (
-    $state, $stateParams, $timeout, $scope, $rootScope, FeatureFlagService, 
-    BrowserStorageUtility, ResourceUtility, DataCloudStore, QueryService, QueryStore, SegmentStore
+    $state, $stateParams, FeatureFlagService, DataCloudStore, QueryStore
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -17,51 +14,48 @@ angular.module('common.datacloud.analysistabs', [
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         accountRestriction: QueryStore.getAccountRestriction() || null,
         contactRestriction: QueryStore.getContactRestriction() || null,
-        counts: QueryStore.getCounts()//,
-        // accountsCount: 0,
-        // contactsCount: 0
+        counts: QueryStore.getCounts()
     });
 
     vm.init = function() {
-
         QueryStore.history = [];
 
-        QueryStore.GetCountByQuery('accounts').then(function(data){ 
-            // vm.accountsCount = data;
-            vm.counts.accounts.value = data;
-            vm.counts.accounts.loading = false;
-        });
-        
-        QueryStore.GetCountByQuery('contacts').then(function(data){ 
-            // vm.contactsCount = data;
-            vm.counts.contacts.value = data;
-            vm.counts.contacts.loading = false;
+        ['accounts','contacts'].forEach(function(source) {
+            QueryStore.GetCountByQuery(source).then(function(data){ 
+                vm.counts[source].value = data;
+                vm.counts[source].loading = false;
+            });
         });
 
-        if(vm.segment === 'Create'){
-            var attributesUrl = "home.segment.explorer.attributes({segment:'Create'})";
-        } else {
-            var attributesUrl = "home.segment.explorer.attributes({segment:'" + vm.segment + "'})";
-        }
-        
+        var attributesUrl = "home.segment.explorer.attributes({segment:'" + vm.segment + "'})";
 
-        vm.attributes = vm.inModel()
-            ? 'home.model.analysis.explorer'
-            : attributesUrl;
-
-        vm.accounts = vm.inModel()
-            ? 'home.model.analysis.accounts'
-            : 'home.segment.accounts';
-
-        vm.contacts = vm.inModel()
-            ? 'home.model.analysis.contacts'
-            : 'home.segment.contacts';
-
+        vm.attributes = vm.ifInModel('home.model.analysis.explorer', attributesUrl);
+        vm.accounts = vm.ifInModel('home.model.analysis.accounts', 'home.segment.accounts');
+        vm.contacts = vm.ifInModel('home.model.analysis.contacts', 'home.segment.contacts');
     }
 
-    vm.inModel = function() {
-        var name = $state.current.name.split('.');
-        return name[1] == 'model';
+    vm.getRuleCount = function() {
+        var all = [];
+
+        ['accountRestriction','contactRestriction'].forEach(function(source) {
+            if (QueryStore[source].restriction) {
+                buckets = QueryStore.getAllBuckets(QueryStore[source].restriction.logicalRestriction.restrictions)
+                all = [].concat(all, buckets);
+            }
+        });
+
+        return all.length || 0;
+    }
+
+    vm.checkState = function(type) {
+        var map = {
+            'home.model.analysis.explorer.builder':'builder',
+            'home.segment.explorer.builder':'builder',
+            'home.model.analysis.explorer.attributes':'attributes',
+            'home.segment.explorer.attributes':'attributes'
+        };
+
+        return map[$state.current.name] == type;
     }
 
     vm.setStateParams = function(section) {
@@ -77,20 +71,23 @@ angular.module('common.datacloud.analysistabs', [
             section: vm.section
         };
 
-        var segment = {
-            segment: vm.segment
-        };
-
         if (goHome) {
             params.category = '';
             params.subcategory = '';
         }
 
-        if (vm.inModel()) {
-            $state.go('home.model.analysis', params, { notify: true });
-        } else {
-            $state.go('home.segment', params, { notify: true });
-        }
+        var state = vm.ifInModel('home.model.analysis', 'home.segment');
+
+        $state.go(state, params, { notify: true });
+    }
+
+    vm.inModel = function() {
+        var name = $state.current.name.split('.');
+        return name[1] == 'model';
+    }
+
+    vm.ifInModel = function(model, not) {
+        return vm.inModel() ? model : not;
     }
 
     vm.init();

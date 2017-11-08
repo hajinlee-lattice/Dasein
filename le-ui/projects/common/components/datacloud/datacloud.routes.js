@@ -353,14 +353,19 @@ angular
                     return null;
                 }],
             }),
-            redirectTo: 'home.model.analysis.explorer',
             views: {
                 "summary@": {
                     controller: 'AnalysisTabsController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/analysistabs/analysistabs.component.html'
+                },
+                "subsummary@": {
+                    controller: 'SubHeaderTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/subheadertabs/subheadertabs.component.html'
                 }
-            }
+            },
+            redirectTo: 'home.model.analysis.explorer'
         },
         explorer: { // no view, just puts attributes and query under same parent state
             url: '/explorer',
@@ -387,7 +392,7 @@ angular
             url: '/builder',
             params: {
                 pageIcon: 'ico-analysis',
-                pageTitle: 'Analysis'
+                pageTitle: 'Query Builder'
             },
             resolve: {
                 Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
@@ -516,6 +521,9 @@ angular
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
+                },
+                "subsummary@": {
+                    template: ''
                 }
             }
         },
@@ -580,6 +588,9 @@ angular
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
+                },
+                "subsummary@": {
+                    template: ''
                 }
             }
         },

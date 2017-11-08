@@ -1,5 +1,6 @@
 // grid view multple of 12 (24), dynamic across
 angular.module('common.datacloud.explorer', [
+    'common.datacloud.explorer.subheadertabs',
     'common.datacloud.explorer.filters',
     'common.datacloud.explorer.companyprofile',
     'common.datacloud.explorer.latticeratingcard',
@@ -30,8 +31,6 @@ angular.module('common.datacloud.explorer', [
             button_selected: 'Enrichment Enabled',
             button_deselect: 'Enrichment Enabled',
             button_import_data: 'Import Data', 
-            button_refine_query: 'Refine Query',
-            button_save_segment: 'Save Segment',
             deselected_messsage: 'Attribute will be turned off for enrichment',
             categories_see_all: 'See All Categories',
             categories_select_all: 'All Categories',
@@ -76,7 +75,6 @@ angular.module('common.datacloud.explorer', [
         userSelectedCount: 0,
         selectDisabled: 1,
         saveDisabled: 1,
-        saveSegmentEnabled: false,
         selectedCount: 0,
         section: $stateParams.section,
         category: $stateParams.category,
@@ -96,10 +94,9 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.init = function() {
+        QueryStore.setSegmentEnabled = false;
 
-
-
-        if(vm.segment != null && vm.segment != "Create"){
+        if (vm.segment != null && vm.segment != "Create"){
             SegmentStore.getSegmentByName(vm.segment).then(function(result) {
                 vm.displayName = result.display_name;
 
@@ -110,8 +107,6 @@ angular.module('common.datacloud.explorer', [
                 });
             });    
         }
-        
-
 
         if (vm.section == 'insights' && !vm.show_lattice_insights) {
             vm.statusMessage(vm.label.insufficientUserRights, { wait: 0, special: 'nohtml' });
@@ -1488,7 +1483,7 @@ angular.module('common.datacloud.explorer', [
 
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
-
+        
         if(entity === 'Account') {
             if (vm.segmentAttributeInput[attributeKey] === true) {
                 QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
@@ -1510,13 +1505,10 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
-        
-        console.log(enrichment);
-
         var disable = disable || false,
-            attributeKey = enrichment.Attribute || enrichment.ColumnName,
+            attributeKey = enrichment.Attribute || enrichment.ColumnName || enrichment.ColumnId,
             attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng, stat.Lbl),
-            fieldName = enrichment.ColumnName,
+            fieldName = enrichment.ColumnName || enrichment.ColumnId,
             entity = enrichment.Entity,
             segmentName = $stateParams.segment;
 
@@ -1581,7 +1573,8 @@ angular.module('common.datacloud.explorer', [
 
         vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
         
-        vm.saveSegmentEnabled = true;
+        QueryStore.setPublicProperty('enableSaveSegmentButton', true);
+        //QueryStore.saveSegmentEnabled = true;
         if (vm.segmentBucketInput[bucketId] === true) {
             QueryStore.addAccountRestriction({columnName: id, range: range});
         } else {
@@ -1604,87 +1597,12 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.checkSaveButtonState = function(){
-
         var oldVal = QueryStore.getDefaultRestrictions(),
             newAccountVal = JSON.stringify(QueryStore.getAccountRestriction()),
             newContactVal = JSON.stringify(QueryStore.getContactRestriction()),
             newVal = newAccountVal + newContactVal;
 
-
-
-        console.log(oldVal);
-        console.log(newVal);
-
-        if(oldVal === newVal){
-            vm.saveSegmentEnabled = false;
-        } else {
-            vm.saveSegmentEnabled = true;
-        };
-
-    };
-
-    vm.saveSegment = function() {
-        if (Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
-            var segmentName = $stateParams.segment,
-                ts = new Date().getTime();
-            if (segmentName === 'Create') {
-                var accountRestriction = QueryStore.getAccountRestriction(),
-                    contactRestriction = QueryStore.getContactRestriction(),
-                    segment = SegmentStore.sanitizeSegment({
-                        'name': 'segment' + ts,
-                        'display_name': 'segment' + ts,
-                        'account_restriction': accountRestriction,
-                        'contact_restriction': contactRestriction,
-                        'page_filter': {
-                            'row_offset': 0,
-                            'num_rows': 10
-                        }
-                    });
-
-                // console.log('saveSegment new', segmentName, ts, segment);
-
-                SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-                    
-                    vm.saveSegmentEnabled = false;
-                    $state.go('.', { segment: 'segment' + ts }, { notify: false });
-                    vm.saved = true;
-
-                });
-            } else {
-                SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-
-                    console.log("!!!!!!!!!!!!  ", result);
-
-
-                    var segmentData = result,
-                        accountRestriction = QueryStore.getAccountRestriction(),
-                        contactRestriction = QueryStore.getContactRestriction(),
-                        segment = SegmentStore.sanitizeSegment({
-                            'name': segmentData.name,
-                            'display_name': segmentData.display_name,
-                            'account_restriction': accountRestriction,
-                            'contact_restriction': contactRestriction,
-                            'page_filter': {
-                                'row_offset': 0,
-                                'num_rows': 10
-                            }
-                        });
-                    // console.log('saveSegment existing', segmentData, segment)
-
-                    SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-
-                        console.log("???????????????????  ", result);
-
-                        vm.saveSegmentEnabled = false;
-                        // $state.go('.', { segment: segment.name }, { notify: false }, { reload: true });
-                        vm.saved = true;
-
-                    });
-                });
-            };
-        };
-
+        QueryStore.setPublicProperty('enableSaveSegmentButton', (oldVal !== newVal));
     };
 
     vm.selectRatingsEngineAttribute = function(enrichment) {

@@ -364,7 +364,9 @@ angular
             }
 
             this.clickOperator = function() {
-                this.root.saveState();
+                $timeout(function() {
+                    this.root.saveState();
+                }, 50);
             }
 
             this.clickEditMode = function(value) {

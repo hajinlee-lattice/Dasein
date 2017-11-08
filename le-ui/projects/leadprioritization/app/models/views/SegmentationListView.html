@@ -121,9 +121,10 @@
                             <button
                                 type="button"
                                 class="button orange-button pull-right"
-                                ng-disabled="vm.tileStates[segment.name].saveEnabled === false"
+                                ng-disabled="vm.saveInProgress"
                                 ng-click="vm.saveSegmentClicked($event, segment)">
-                                Save</button>
+                                {{vm.saveInProgress ? 'Saving...' : 'Save'}}</button>
+                                <!--ng-disabled="vm.tileStates[segment.name].saveEnabled === false"-->
                         </div>
                     </form>
 

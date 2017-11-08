@@ -1,8 +1,9 @@
-<section class="tabs interior containerx">
+<section class="analysis-tabs tabs interior containerx">
     <ul>
         <li class="tab-browse"
             ui-sref="{{ vm.attributes }}"
-            ui-sref-active="active">
+            ui-sref-active="active" 
+            ng-class="{'active':vm.checkState('builder')}">
             <div class="tab-container">
                 <h2>Attributes
                     <span class="more-info">&#105;
@@ -19,7 +20,11 @@
                         </div>
                     </span>
                 </h2>
-                <div class="count" ng-if="vm.DataCloudStore.metadata.enrichmentsTotal">{{vm.DataCloudStore.metadata.enrichmentsTotal | number}}</div>
+                <div class="enrichmentCounts">
+                    <span class="count">{{(vm.DataCloudStore.metadata.enrichmentsTotal || 0) | number}}</span>
+                    <span class="count">{{ vm.getRuleCount() }}</span>
+                    SELECTIONS
+                </div>
             </div>
         </li>
         <li class="tab-edit info noselect-children" ui-sref="{{ vm.accounts }}" ui-sref-active="active">

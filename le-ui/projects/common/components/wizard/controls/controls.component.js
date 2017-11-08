@@ -1,7 +1,7 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
     $state, $stateParams, $scope, $timeout, $rootScope, ResourceUtility, WizardProgressItems,
-    WizardProgressContext, WizardControlsOptions, WizardValidationStore, ImportWizardService, ImportWizardStore
+    WizardProgressContext, WizardControlsOptions, WizardValidationStore/*, ImportWizardService, ImportWizardStore*/
 ) {
     var vm = this;
 
@@ -58,7 +58,6 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.go = function(state, isPrev, params) {
-        console.log($state.current.name, vm.itemMap);
         var current = vm.itemMap[$state.current.name];
 
         vm.nextDisabled = true;
