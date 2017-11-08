@@ -506,12 +506,26 @@ angular
             views: {
                 
                 'wizard_content@home.ratingsengine.ai': {
-                    controller: 'RatingsEngineAIRefine',
+                    controller: 'RatingsEngineAIRefineTarget',
                     // function(RatingsEngineStore, RatingsEngineAIStore){
                     //     RatingsEngineStore.setValidation('refine', true);
                     // },
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-target.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ai.segment.prospect.products.refine.refinemodel', {
+            url: '/refinemodel',
+            views: {
+                
+                'wizard_content@home.ratingsengine.ai': {
+                    controller: 'RatingsEngineAIRefineModel',
+                    function(RatingsEngineStore, RatingsEngineAIStore){
+                        RatingsEngineStore.setValidation('refine', true);
+                    },
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-model.component.html'
                 }
             }
         })

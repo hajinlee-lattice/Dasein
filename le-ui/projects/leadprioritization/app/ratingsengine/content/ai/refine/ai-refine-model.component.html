@@ -1,0 +1,98 @@
+<section class="ratings-engine-ai-refine container">
+    <div class="header-container">
+        <div class="title-container">
+            <h2>Refine what history the model will learn from</h2>
+        </div>
+    </div>
+    <div class="body-container">
+        <div class="options-container">
+            <div class="choises-container">
+                <div class="choises">
+                    <div class="choise">
+                        <input type="checkbox" id="spent" ng-model="vm.spent">
+                        <label for="spent">Only use success where spend in the quarter was</label>
+                    </div>
+                    <div class="choise" ng-if="vm.spent">
+                        <div class="selection">
+                            <div class="choise">
+                                <label for="spend-ammount" class="lable-left">$</label>
+                                <input type="number" id="spend-ammount">
+                                <select>
+                                    <option>At least</option>
+                                    <option>At most</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="choise">
+                        <input type="checkbox" id="bought" name="type-sell" value="resell" ng-model="vm.bought">
+                        <label for="bought">Only use success where quantity bought in the quarter was</label>
+                    </div>
+                    <div class="choise" ng-if="vm.bought">
+                        <div class="selection">
+                            <div class="choise">
+                                <label for="units" class="lable-left">Units</label>
+                                <input type="number" id="units">
+                                <select>
+                                    <option>At least</option>
+                                    <option>At most</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="choise">
+                        <input type="checkbox" id="historical" name="type-sell" value="resell" ng-model="vm.historical">
+                        <label for="historical">When modeling, only use historical records for the last</label>
+                    </div>
+                    <div class="choise" ng-if="vm.historical">
+                        <div class="selection">
+                            <div class="choise">
+                                <input type="number" id="historical">
+                                <select>
+                                    <option>Months</option>
+                                    <option>Years</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="choise">
+                        <input type="checkbox" id="historical" name="type-sell" value="resell" ng-model="vm.similarProducts">
+                        <label for="historical">Let me model on a similar Product, but not exacly the one I want to sell into</label>
+                    </div>
+                    <div class="choise" ng-if="vm.similarProducts">
+                        <div class="selection">
+                            <div class="choise">
+                                <label class="lable-left">Choose similar products</label>
+                                <select>
+                                    <option>-- Choose Product --</option>
+                                    <option>Product1</option>
+                                    <option>Product2</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="choise">
+                        <input type="checkbox" id="historical" name="type-sell" value="resell" ng-model="vm.similarSegments">
+                        <label for="historical">Let me model on a similar Segment, but not exacly the one I want to sell into</label>
+                    </div>
+                    <div class="choise" ng-if="vm.similarSegments">
+                        <div class="selection">
+                            <div class="choise">
+                                <label class="lable-left">Choose similar Segment</label>
+                                <select>
+                                    <option>-- Choose Segment --</option>
+                                    <option>Segment1</option>
+                                    <option>Segment2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

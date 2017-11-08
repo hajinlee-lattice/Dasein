@@ -4,7 +4,7 @@ angular.module('lp.ratingsengine.ai.products', [])
 
         angular.extend(vm, {
             products: [],
-            rowsPerPage: 12,
+            rowsPerPage: 10,
             productsCount: ProductsCount,
             page: 0,
             maxpages: 0,

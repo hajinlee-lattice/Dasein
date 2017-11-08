@@ -1,6 +1,6 @@
 $break-small: 1128px;
 
-section.ratings-engine-ai-refine-target.container{
+section.ratings-engine-ai-refine.container{
     p {
         // border: 1px solid yellowgreen;
         margin: 10px 0 20px 0;
@@ -54,7 +54,7 @@ section.ratings-engine-ai-refine-target.container{
             border: 0px solid green;
         }
 
-        .sell-options-container{
+        .options-container{
             height: 100%;
             width: 100%;
             border: 0px solid blue;
@@ -73,7 +73,15 @@ section.ratings-engine-ai-refine-target.container{
                         display: flex;
                         flex-direction: row;
                         justify-content: flex-start;
+                        
+                        .lable-left{
+                            padding-right: 10px;
 
+                        }
+                        .lable-right{
+                            padding-left: 10px;
+
+                        }
                         .selection {
                             border-left: 1px solid rgba(181, 180, 180, 0.8);
                             margin-left: 50px;
