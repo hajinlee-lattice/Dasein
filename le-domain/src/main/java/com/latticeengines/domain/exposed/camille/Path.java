@@ -38,7 +38,7 @@ public class Path implements Serializable {
 
     public Path(List<String> parts) throws IllegalArgumentException {
         for (String part : parts) {
-            if (!part.matches("^[\\w\\-.]+$")) {
+            if (!part.matches("^[\\w\\-|.]+$")) {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
@@ -48,7 +48,7 @@ public class Path implements Serializable {
 
     public Path(String... parts) throws IllegalArgumentException {
         for (String part : parts) {
-            if (!part.matches("^[\\w\\-.]+$")) {
+            if (!part.matches("^[\\w\\-|.]+$")) {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
