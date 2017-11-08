@@ -74,7 +74,7 @@ public class WorkflowUtils {
         if (YarnUtils.FAILED_STATUS.contains(status)) {
             return JobStatus.FAILED;
         } else if (status == FinalApplicationStatus.UNDEFINED) {
-            return JobStatus.PENDING;
+            return JobStatus.RUNNING;
         } else {
             return null;
         }

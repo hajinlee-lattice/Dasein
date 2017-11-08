@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.listeners;
 
-import java.util.Arrays;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -11,12 +9,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.cache.CacheNames;
-import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
-import com.latticeengines.domain.exposed.util.CacheUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -35,9 +31,6 @@ public class DataFeedExecutionListener extends LEJobListener {
 
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
-
-    @Inject
-    private CacheService cacheService;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -62,17 +55,8 @@ public class DataFeedExecutionListener extends LEJobListener {
                 throw new RuntimeException("Can't finish execution");
             }
             // refresh caches
-            cacheService.dropKeysByPattern(String.format("*%s*", customerSpace),
-                    CacheNames.getCdlConsolidateCacheGroup());
-            Arrays.stream(CacheNames.getCdlConsolidateCacheGroup()).forEach(cache -> {
-                NodeWatcher.notifyCacheWatchersAsync(cache.name(),
-                        CacheUtils.getAllOperation(CacheOperation.Put, customerSpace));
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    log.warn("Thread sleep interrupted", e);
-                }
-            });
+            CacheService cacheService = CacheServiceBase.getCacheService();
+            cacheService.refreshKeysByPattern(customerSpace, CacheNames.getCdlConsolidateCacheGroup());
             // update segment counts
             SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -26,12 +27,10 @@ public class DataCollectionController {
 
     private final DataCollectionManagerService collectionMgrSvc;
 
-    private final CacheService cacheService;
 
     @Inject
-    public DataCollectionController(DataCollectionManagerService collectionMgrSvc, CacheService cacheService) {
+    public DataCollectionController(DataCollectionManagerService collectionMgrSvc) {
         this.collectionMgrSvc = collectionMgrSvc;
-        this.cacheService = cacheService;
     }
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
@@ -57,7 +56,8 @@ public class DataCollectionController {
     @ResponseBody
     @ApiOperation(value = "Clear cache for data collection")
     public ResponseDocument<String> clearCache(@PathVariable String customerSpace) {
-        cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.getCdlProfileCacheGroup());
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(customerSpace, CacheNames.getCdlProfileCacheGroup());
         return ResponseDocument.successResponse("Success");
     }
 }

@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.service.impl;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.cache.CacheNames;
-import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -26,7 +24,6 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.util.CacheUtils;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -45,9 +42,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
-    @Autowired
-    private CacheService cacheService;
-
     @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
         if (StringUtils.isBlank(collectionName)) {
@@ -65,8 +59,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         log.info("Switching " + collection.getName() + " in " + customerSpace + " to " + version);
         dataCollectionEntityMgr.update(collection);
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
-        notifyCacheWatchers(customerSpace);
-        cacheService.dropKeysByPattern(String.format("*%s*", customerSpace), CacheNames.getCdlProfileCacheGroup());
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(customerSpace, CacheNames.getCdlProfileCacheGroup());
+
         return newVersion;
     }
 
@@ -206,18 +201,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 .map(entity -> BusinessEntity.PurchaseHistory.equals(entity) ? BusinessEntity.Transaction : entity) //
                 .collect(Collectors.toSet());
         return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
-    }
-
-    private void notifyCacheWatchers(String customerSpace) {
-        Arrays.asList(CacheNames.getCdlProfileCacheGroup()).stream().forEach(cache -> {
-            NodeWatcher.notifyCacheWatchersAsync(cache.name(),
-                    CacheUtils.getAllOperation(CacheOperation.Put, customerSpace));
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                log.warn("Thread sleep interrupted", e);
-            }
-        });
     }
 
 }

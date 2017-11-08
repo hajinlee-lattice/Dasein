@@ -81,7 +81,7 @@ public class LocalCache<K, V> implements Cache {
                         throw new RuntimeException(String.format("can't load value for key %s", key), e);
                     }
                 }
-                cache.put((K) key, (V) value);
+                put(key, value);
             }
         }
         return (T) value;
