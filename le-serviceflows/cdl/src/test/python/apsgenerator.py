@@ -146,6 +146,7 @@ if __name__ == '__main__':
                        'TotalAmount':'Amount', 'TotalQuantity':'Quantity' }, inplace=True) 
  
     apState = createAps(df)
+    apState.insert(0, 'AnalyticPurchaseState_ID', range(len(apState)))
     loader.writeDataFrameToAvro(apState)
     logger.info(apState.shape)
     loader.uploadFromLocal()

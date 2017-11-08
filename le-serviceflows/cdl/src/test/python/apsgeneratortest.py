@@ -28,9 +28,10 @@ if __name__ == '__main__':
     assert df.shape == (873967, 24)
      
     apState = apsgenerator.createAps(df)
+    apState.insert(0, 'AnalyticPurchaseState_ID', range(len(apState)))
     loader.writeDataFrameToAvro(apState)
     logger.info(apState.shape)
-    assert  apState.shape == (833038, 202)
+    assert  apState.shape == (833038, 203)
     newApSatate = loader.readDataFrameFromAvro("./output")
     print newApSatate.shape
     assert(apState.shape == newApSatate.shape)
