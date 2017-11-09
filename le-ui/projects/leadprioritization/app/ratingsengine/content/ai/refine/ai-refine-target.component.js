@@ -1,22 +1,39 @@
 angular.module('lp.ratingsengine.ai.refine', [])
-    .controller('RatingsEngineAIRefineTarget', function ($scope) {
+    .controller('RatingsEngineAIRefineTarget', function ($scope, RefineService) {
         var vm = this;
 
         angular.extend(vm, {
+            refine: RefineService.refineModel,
             sellOption: '',
             notyet: false,
-            resell: false
+            resell: false,
+
         });
 
         vm.init = function () {
-            console.log('Init refine');
+            console.log('Init refine Target');
+            console.info('Init refine Model');
+            $scope.$watch(function () {
+                return RefineService.refineModel;
+            },
+            function (newVal, oldVal) {
+                // alert("Inside watch");
+                vm.refine = newVal;
+                console.log('NEW ' + newVal + ' - OLD ' + oldVal);
+            }, true);
+        }
+
+        vm.showRefineModel = function () {
+            console.log('Change view');
+            RefineService.changeValue();
         }
 
         vm.init();
     })
-    .controller('RatingsEngineAIRefineModel', function ($scope) {
+    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService) {
         var vm = this;
         angular.extend(vm, {
+            refine: RefineService.refineModel,
             spent: false,
             bought: false,
             historical: false,
@@ -25,8 +42,30 @@ angular.module('lp.ratingsengine.ai.refine', [])
         });
 
         vm.init = function () {
-            console.info('Refine Model init');
+            console.info('Init refine Model');
+            $scope.$watch(function () {
+                return RefineService.refineModel;
+            },
+            function (newVal, oldVal) {
+                // alert("Inside watch");
+                vm.refine =newVal;
+                console.log('NEW ' + newVal + ' - OLD ' + oldVal);
+            }, true);
         }
 
         vm.init();
+    })
+    .service('RefineService', function () {
+        this.refineModel = false;
+
+        this.reset = function(){
+            this.refineModel = false;
+        }
+
+        this.changeValue = function () {
+            this.refineModel = !this.refineModel;
+        }
+        this.getRefineModel = function () {
+            return this.refineModel;
+        }
     });

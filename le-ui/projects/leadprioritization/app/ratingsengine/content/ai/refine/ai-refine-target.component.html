@@ -1,11 +1,12 @@
-<section class="ratings-engine-ai-refine container">
+<section class="ratings-engine-ai-refine container" ng-if="!vm.refinemodel">
     <div class="header-container">
         <div class="title-container">
             <h2>Here's how these products have sold into the Segment before:</h2>
         </div>
         <div class="actions-container">
             <!-- <button class="button orange-button">Change Products</button> -->
-            <button class="sub-action" title="Refine Modeling" ui-sref="home.ratingsengine.ai.segment.prospect.products.refine.refinemodel">
+            <!-- ui-sref="home.ratingsengine.ai.segment.prospect.products.refine.refinemodel" -->
+            <button class="sub-action" title="Refine Modeling" ng-click="vm.showRefineModel()">
                 <i class="fa fa-sliders fa-2x" aria-hidden="true"></i>
             </button>
             <span class="action-description">Refine Modeling</span>
