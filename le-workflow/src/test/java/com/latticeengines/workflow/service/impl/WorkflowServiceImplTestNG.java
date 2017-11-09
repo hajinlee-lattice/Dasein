@@ -197,7 +197,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
         Thread.sleep(1500L);
 
-        workflowService.stop(workflowId);
+        workflowService.stop(customerSpace, workflowId);
         List<String> stepNames = workflowService.getStepNames(workflowId);
         log.info("stepnames: " + stepNames);
         assertTrue(stepNames.contains(successfulStep.name()));

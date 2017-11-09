@@ -20,6 +20,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "WORKFLOW_JOB")
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJob.class);

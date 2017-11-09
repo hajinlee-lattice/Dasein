@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.workflowapi;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -10,11 +12,12 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.network.exposed.workflowapi.DeprecatedWorkflowInterface;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
-public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowInterface {
+public class WorkflowProxy extends MicroserviceRestApiProxy implements DeprecatedWorkflowInterface, WorkflowInterface {
 
     public WorkflowProxy() {
         super("workflowapi/workflows");
@@ -76,9 +79,9 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowI
     }
 
     @Override
-    public void stopWorkflow(String workflowId) {
-        String url = constructUrl("/job/{workflowId}/stop", workflowId);
+    public void stopWorkflow(String customerSpace, String workflowId) {
+        String url = constructUrl("/customerspaces/{customerspaces}/job/{workflowId}/stop",
+                shortenCustomerSpace(customerSpace), workflowId);
         post("stopWorkflow", url, null, Void.class);
     }
-
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -67,7 +68,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public void cancel(String jobId) {
-        workflowProxy.stopWorkflow(jobId);
+        Tenant tenantWithPid = getTenant();
+        workflowProxy.stopWorkflow(CustomerSpace.parse(tenantWithPid.getId()).toString(), jobId);
     }
 
     @Override

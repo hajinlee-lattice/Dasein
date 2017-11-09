@@ -13,6 +13,7 @@
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:aws-context.xml"/>
+    <import resource="classpath:workflow-aspect-context.xml"/>
 
     <bean id="jobRegistryBeanPostProcessor" class="com.latticeengines.workflow.core.CustomJobRegistryBeanPostProcessor">
         <property name="jobRegistry" ref="jobRegistry"/>

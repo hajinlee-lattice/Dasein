@@ -74,14 +74,14 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         return true;
     }
 
-    private void stopWorkflow(Long workflowId) {
+    private void stopWorkflow(String customerSpace, Long workflowId) {
         if (workflowId == null) {
             return;
         }
         try {
             Job job = workflowProxy.getWorkflowExecution(workflowId.toString());
             if ((job != null) && (job.isRunning())) {
-                workflowProxy.stopWorkflow(workflowId.toString());
+                workflowProxy.stopWorkflow(customerSpace, workflowId.toString());
             }
         } catch (Exception e) {
             log.error("Failed to stop workflow " + workflowId, e);
@@ -91,13 +91,13 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
     private void quiesceDataFeed(String customerSpaceStr, DataFeed df) {
         DataFeedExecution exec = df.getActiveExecution();
         if (exec != null) {
-            stopWorkflow(exec.getWorkflowId());
+            stopWorkflow(customerSpaceStr, exec.getWorkflowId());
             dataFeedProxy.finishExecution(customerSpaceStr, DataFeed.Status.Active.getName());
         }
 
         DataFeedProfile profile = df.getActiveProfile();
         if (profile != null) {
-            stopWorkflow(profile.getWorkflowId());
+            stopWorkflow(customerSpaceStr, profile.getWorkflowId());
         }
     }
 

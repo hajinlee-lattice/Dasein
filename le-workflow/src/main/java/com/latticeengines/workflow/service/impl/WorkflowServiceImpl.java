@@ -35,6 +35,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -213,9 +214,15 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public void stop(WorkflowExecutionId workflowId) {
+    @WithCustomerSpace
+    public void stop(String customerSpace, WorkflowExecutionId workflowId) {
         try {
-            jobOperator.stop(workflowId.getId());
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowIdWithFilter(workflowId.getId());
+            if(job != null) {
+                jobOperator.stop(workflowId.getId());
+            } else {
+                throw new LedpException(LedpCode.LEDP_28000, new String[] { String.valueOf(workflowId.getId()) });
+            }
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
             throw new LedpException(LedpCode.LEDP_28003, e, new String[] { String.valueOf(workflowId.getId()) });
         }

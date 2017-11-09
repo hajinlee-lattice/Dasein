@@ -18,14 +18,8 @@ public class WorkflowMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.findAll*(..))")
-    public void getWorkflowJobs(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.findByWorkflowIdWithFilter(..))")
+    public void findByWorkflowJobId(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
-
-    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.create*(..))")
-    public void createWorkflowJob(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
 }

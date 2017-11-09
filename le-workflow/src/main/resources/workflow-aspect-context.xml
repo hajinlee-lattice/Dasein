@@ -15,5 +15,6 @@
     <aop:aspectj-autoproxy/>
 
     <bean id="workflowMultiTenancyAspect" class="com.latticeengines.workflow.entitymanager.impl.WorkflowMultiTenantEntityMgrAspect" />
+    <bean id="workflowSetTenantAspect" class="com.latticeengines.workflow.infrastructure.SetTenantAspect" />
 
 </beans>
