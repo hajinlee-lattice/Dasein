@@ -42,7 +42,7 @@ public class ElastiCacheServiceImpl implements ElastiCacheService {
             for (CacheNode cacheNode : cacheCluster.getCacheNodes()) {
                 String addr = cacheNode.getEndpoint().getAddress();
                 int port = cacheNode.getEndpoint().getPort();
-                addrPortInfo.add(String.format("redis://%s:%d", addr, port));
+                addrPortInfo.add(String.format("rediss://%s:%d", addr, port));
             }
         }
         return addrPortInfo;
