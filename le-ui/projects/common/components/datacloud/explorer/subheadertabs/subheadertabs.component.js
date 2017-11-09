@@ -27,7 +27,9 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             'home.model.analysis.explorer.builder':'builder',
             'home.segment.explorer.builder':'builder',
             'home.model.analysis.explorer.attributes':'attributes',
-            'home.segment.explorer.attributes':'attributes'
+            'home.segment.explorer.attributes':'attributes',
+            'home.segment.accounts':'accounts',
+            'home.segment.contacts':'contacts'
         };
 
         return map[state] == type || ((type == 'builder' && vm.builderClicked) || (type == 'attributes' && vm.attribuesClicked));

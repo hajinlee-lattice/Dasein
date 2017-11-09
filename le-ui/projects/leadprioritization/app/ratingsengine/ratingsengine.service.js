@@ -325,7 +325,7 @@ angular.module('lp.ratingsengine')
             ids.push(rating.id);
         });
 
-        RatingsEngineStore.getChartDataConcurrently(ids);
+        RatingsEngineStore.getChartDataConcurrently(ids.reverse());
     }
     
     this.getRatings = function(active, cacheOnly) {
@@ -359,7 +359,7 @@ angular.module('lp.ratingsengine')
 
     this.getChartDataConcurrently = function(all){
         var deferred = $q.defer();
-        var chunks = [], size = 3;
+        var chunks = [], size = Math.floor(all.length / 5);
 
         while (all.length > 0) {
             chunks.push(all.splice(0, size));
@@ -369,7 +369,7 @@ angular.module('lp.ratingsengine')
         var maxConcurrent = chunks.length;
         var bucketCountMap = {};
         var rating = null;
-
+        
         $timeout(function() {
             chunks.forEach(function(ids) {
                 RatingsEngineService.getRatingsChartData({

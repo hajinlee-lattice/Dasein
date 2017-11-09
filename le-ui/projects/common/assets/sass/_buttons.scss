@@ -21,7 +21,7 @@ Buttons
 .button, button.button,
 a.button, .button a:link, .button a:focus, .button a:visited {
 	display: inline-block;
-	padding: 0.8em;
+	padding: 0.5em 1.2em;
 	margin-bottom: 0;
 	font-family: 'ProximaNova-Regular',Arial,sans-serif;
 	font-size: 14px;
@@ -41,7 +41,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	border: 1px solid transparent;
 	color: $pearl-white;
 	text-transform: uppercase;
-	border-radius: 5px;
+	border-radius: 3px;
 	font-weight: normal;
 	transition: all 200ms ease;
 	outline: none;
@@ -75,14 +75,17 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 		}
 	}
 	&.blue-button {
-		background-color: #3989C4;
-    border: 1px solid #2B6794;
-    box-shadow: 0px 0px 10px 0px rgba(57,137,195,0.20);
-		&:hover {
-			background-color: #2f83c0;
-		}
-		&:active {
-			background-color: #2f83c0;
+		background-color: #457EBA;
+    border: 1px solid #457EBA;
+    color: #FFFFFF;
+    // box-shadow: 0px 0px 10px 0px rgba(57,137,195,0.20);
+    &:hover {
+      background-color: #629ACC;
+      border: 1px solid #629ACC;
+    }
+    &:active {
+      background-color: #65B7E6;
+      border: 1px solid #65B7E6;
 		}
 	}
 	&.orange-button {
@@ -113,15 +116,18 @@ a.button, .button a:link, .button a:focus, .button a:visited {
     }
   }
 	&.white-button {
-		color: $black-titanium;
+		color: #222222;//$black-titanium;
 		background-color: $pearl-white;
 		border-color: $silver;
 		&:hover,
     &:focus {
-			background-color: $white-gold;
-		}
-		&:active {
-			background-color: $palladium;
+      color: #629ACC;
+      //background-color: $white-gold;
+    }
+    &:active {
+			color: #65B7E6;
+      border-color: #65B7E6;
+      //background-color: $palladium;
 		}
 	}
   &.gray-button {

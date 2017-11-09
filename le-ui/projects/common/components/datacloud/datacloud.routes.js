@@ -521,9 +521,6 @@ angular
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-                },
-                "subsummary@": {
-                    template: ''
                 }
             }
         },
@@ -588,9 +585,6 @@ angular
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-                },
-                "subsummary@": {
-                    template: ''
                 }
             }
         },
