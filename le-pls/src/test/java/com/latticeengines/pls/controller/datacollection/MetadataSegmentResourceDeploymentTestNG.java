@@ -28,7 +28,6 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
     private static final long CONTACTS_2 = 1989;
     private static final long PRODUCTS = 149;
 
-
     @Inject
     private CDLTestDataService cdlTestDataService;
 
@@ -76,9 +75,11 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(returned.getContactFrontEndRestriction());
 
         Assert.assertNotNull(returned.getCreated());
-        Assert.assertTrue(preCreationTime.before(returned.getCreated()));
+        Assert.assertTrue(preCreationTime.before(returned.getCreated()), "Segment creation time "
+                + returned.getCreated().getTime() + " should be after " + preCreationTime.getTime());
         Assert.assertNotNull(returned.getUpdated());
-        Assert.assertTrue(preCreationTime.before(returned.getUpdated()));
+        Assert.assertTrue(preCreationTime.before(returned.getUpdated()), "Segment creation time "
+                + returned.getCreated().getTime() + " should be after " + preCreationTime.getTime());
 
         Assert.assertEquals(returned.getAccounts(), new Long(ACCOUNTS_1));
         Assert.assertEquals(returned.getContacts(), new Long(CONTACTS_1));
@@ -107,9 +108,11 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(returned.getContactFrontEndRestriction());
 
         Assert.assertNotNull(returned.getCreated());
-        Assert.assertTrue(preUpdateTime.after(returned.getCreated()));
+        Assert.assertTrue(preUpdateTime.after(returned.getCreated()), "Segment creation time "
+                + returned.getCreated().getTime() + " should be before " + preUpdateTime.getTime());
         Assert.assertNotNull(returned.getUpdated());
-        Assert.assertTrue(preUpdateTime.before(returned.getUpdated()));
+        Assert.assertTrue(preUpdateTime.before(returned.getUpdated()), "Segment update time "
+                + returned.getUpdated().getTime() + " should be after " + preUpdateTime.getTime());
 
         Assert.assertEquals(returned.getAccounts(), new Long(ACCOUNTS_2));
         Assert.assertEquals(returned.getContacts(), new Long(CONTACTS_2));
