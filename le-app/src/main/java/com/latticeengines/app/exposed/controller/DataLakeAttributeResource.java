@@ -54,8 +54,8 @@ public class DataLakeAttributeResource {
     @RequestMapping(value = "/predefined/{groupName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes in a group")
-    public List<ColumnMetadata> getAttributesInPredefinedGroup(@PathVariable ColumnSelection.Predefined predefined) {
-        return dataLakeService.getAttributesInPredefinedGroup(predefined);
+    public List<ColumnMetadata> getAttributesInPredefinedGroup(@PathVariable ColumnSelection.Predefined groupName) {
+        return dataLakeService.getAttributesInPredefinedGroup(groupName);
     }
 
 }
