@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -280,8 +281,11 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         }
         ConsolidateRetainFieldConfig config = new ConsolidateRetainFieldConfig();
         Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), servingStore);
-        List<String> fieldsToRetain = servingTable != null ? Arrays.asList(servingTable.getAttributeNames()) : null;
-        config.setFieldsToRetain(fieldsToRetain);
+        if (servingTable != null) {
+            List<String> fieldsToRetain = AvroUtils.getSchemaFields(yarnConfiguration,
+                    servingTable.getExtracts().get(0).getPath());
+            config.setFieldsToRetain(fieldsToRetain);
+        }
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
