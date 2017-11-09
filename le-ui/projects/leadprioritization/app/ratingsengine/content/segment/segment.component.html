@@ -39,7 +39,7 @@
                         <ul>
                             <li class="name" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'display_name'">
                                 Segment
-                                <i ng-if="!vm.endsWith(vm.sortBy, 'display_name')"" class="fa fa-sort"></i>
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort"></i>
                                 <i ng-if="vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                             </li>
                             <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numAccounts'" ng-disabled="vm.loadingSupplementaryData">
@@ -50,7 +50,7 @@
                             </li>
                             <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numContacts'" ng-disabled="vm.loadingSupplementaryData">
                                 Contacts 
-                                <i ng-if="!vm.endsWith(vm.sortBy, 'numContacts')"" class="fa fa-sort"></i>
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'numContacts')" class="fa fa-sort"></i>
                                 <i ng-if="vm.endsWith(vm.sortBy, 'numContacts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                             </li>
                         </ul>
