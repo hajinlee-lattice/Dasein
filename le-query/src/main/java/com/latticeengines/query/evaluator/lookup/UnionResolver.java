@@ -94,7 +94,7 @@ public class UnionResolver extends BaseLookupResolver<UnionLookup> implements Lo
 
                 LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                 if (parent != null) {
-                    UnionCollector parentCollector = unionMap.getOrDefault(logicalRestriction, new UnionCollector());
+                    UnionCollector parentCollector = unionMap.getOrDefault(parent, new UnionCollector());
                     parentCollector.withUnion(merged);
                     unionMap.put(parent, parentCollector);
                 }

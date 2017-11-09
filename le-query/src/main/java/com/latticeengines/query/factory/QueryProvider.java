@@ -39,6 +39,17 @@ public abstract class QueryProvider implements ApplicationContextAware {
         }
     }
 
+    public SQLQueryFactory getCachedSQLQueryFactory(AttributeRepository repository) {
+        SQLQueryFactory factory = factoryCache.getIfPresent(repository.getIdentifier());
+        if (factory != null) {
+            return factory;
+        } else {
+            factory = getSQLQueryFactory();
+            factoryCache.put(repository.getIdentifier(), factory);
+            return factory;
+        }
+    }
+
     protected abstract SQLQueryFactory getSQLQueryFactory();
 
     @Override

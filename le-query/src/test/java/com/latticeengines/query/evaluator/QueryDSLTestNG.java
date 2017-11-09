@@ -1,21 +1,33 @@
 package com.latticeengines.query.evaluator;
 
+import static com.querydsl.core.group.GroupBy.groupBy;
 import static org.testng.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.hibernate.criterion.SubqueryExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.core.QueryException;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.SubQueryExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.PostgreSQLTemplates;
@@ -122,6 +134,264 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);
         return new SQLQueryFactory(configuration, redshiftDataSource);
+    }
+
+    @Test(groups = "functional")
+    @SuppressWarnings("unchecked")
+    public void testHasEngagedOneLegBehind() throws SQLException {
+        /*
+        select accountid, periodid
+        from   (select  keys.accountid,
+                        keys.periodid,
+                        trxn.val,
+                        max (case when trxn.val >= 0 then 1 else 0 end)
+                        over (partition by keys.accountid
+                              order by keys.periodid
+                              rows between 1 following and 1 following) as agg
+                from    keys
+                left join (select  accountid, periodid, totalamount as val
+                           from    tftest_4_transaction_2017_10_31_19_44_08_utc
+                           where   productid in ('3872223C9BA06C649D68E415E23A9446') ) as trxn
+                on  keys.accountid = trxn.accountid and  keys.periodid = trxn.periodid) as aps
+         where  agg = 1;
+         */
+        SQLQueryFactory factory = factory();
+        int followingOffset = 1;
+        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String productIdStr = "A78DF03BAC196BE9A08508FFDB433A31";
+        String aggrAmountStr = "agg";
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath accountId = Expressions.stringPath("accountid");
+        StringPath periodId = Expressions.stringPath("periodid");
+        StringPath productId = Expressions.stringPath("productId");
+        StringPath totalAmount = Expressions.stringPath("totalamount");
+        StringPath aggrAmount = Expressions.stringPath(aggrAmountStr);
+
+        EntityPath<String> keysPath = new PathBuilder<>(String.class, "keys");
+        EntityPath<String> trxnPath = new PathBuilder<>(String.class, "trxn");
+        EntityPath<String> apsPath = new PathBuilder<>(String.class, "aps");
+        StringPath keysAccountId = Expressions.stringPath(keysPath, "accountId");
+        StringPath trxnAccountId = Expressions.stringPath(trxnPath, "accountId");
+        StringPath keysPeriodId = Expressions.stringPath(keysPath, "periodId");
+        StringPath trxnPeriodId = Expressions.stringPath(trxnPath, "periodId");
+        StringPath trxnVal = Expressions.stringPath(trxnPath, "val");
+
+        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnPath, "val");
+        CaseBuilder caseBuilder = new CaseBuilder();
+        NumberExpression trxnValExists = caseBuilder.when(trxnValNumber.goe(0)).then(1).otherwise(0);
+
+        Expression windowAgg = SQLExpressions.max(trxnValExists).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
+                .rows().between().following(followingOffset).following(followingOffset).as(aggrAmount);
+
+        SQLQuery productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
+                .where(productId.eq(productIdStr));
+
+        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
+                .from(keysPath).leftJoin(productQuery, trxnPath)
+                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+
+        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+                .where(aggrAmount.eq(String.valueOf(1)));
+
+        System.out.println("finalQuery = " + finalQuery);
+    }
+
+    @Test(groups = "functional")
+    @SuppressWarnings("unchecked")
+    public void testHasEngagedPrior() throws SQLException {
+        SQLQueryFactory factory = factory();
+        /*
+        select accountid, periodid
+        from   (select  keys.accountid,
+                        keys.periodid,
+                        trxn.val,
+                        max (case when trxn.val >= 0 then 1 else 0 end)
+                           over (partition by keys.accountid
+                                 order by keys.periodid
+                                 rows between unbounded preceding and 5 preceding) as agg
+                from    keys
+                left join (select  accountid,
+                                   periodid,
+                                   totalamount as val
+                           from    tftest_4_transaction_2017_10_31_19_44_08_utc
+                           where   productid = 'A78DF03BAC196BE9A08508FFDB433A31') as trxn
+                 on  keys.accountid = trxn.accountid
+                     and  keys.periodid = trxn.periodid) as aps
+         where  agg = 1
+         */
+
+        int priorOffset = 5;
+        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String productIdStr = "A78DF03BAC196BE9A08508FFDB433A31";
+        String aggrValStr = "agg";
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath accountId = Expressions.stringPath("accountid");
+        StringPath periodId = Expressions.stringPath("periodid");
+        StringPath productId = Expressions.stringPath("productId");
+        StringPath totalAmount = Expressions.stringPath("totalamount");
+        StringPath aggrVal = Expressions.stringPath(aggrValStr);
+
+        EntityPath<String> keysPath = new PathBuilder<>(String.class, "keys");
+        EntityPath<String> trxnPath = new PathBuilder<>(String.class, "trxn");
+        EntityPath<String> apsPath = new PathBuilder<>(String.class, "aps");
+        StringPath keysAccountId = Expressions.stringPath(keysPath, "accountId");
+        StringPath trxnAccountId = Expressions.stringPath(trxnPath, "accountId");
+        StringPath keysPeriodId = Expressions.stringPath(keysPath, "periodId");
+        StringPath trxnPeriodId = Expressions.stringPath(trxnPath, "periodId");
+        StringPath trxnVal = Expressions.stringPath(trxnPath, "val");
+
+        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnPath, "val");
+        // change for ever, at_least_once, and each
+        CaseBuilder caseBuilder = new CaseBuilder();
+        NumberExpression trxnValExists = caseBuilder.when(trxnValNumber.goe(0)).then(1).otherwise(0);
+
+        // at_least_once and each
+        //NumberExpression trxnValExists = caseBuilder.when(trxnValNumber.gt(?).then(1).otherwise(0);
+
+        // change
+        Expression windowAgg = SQLExpressions.max(trxnValExists).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
+                .rows().between().unboundedPreceding().preceding(priorOffset).as(aggrVal);
+        // ever
+        // Expression windowAgg = SQLExpressions.max(existsTrxnVal).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
+        //         .rows().between().unboundedPreceding().currentRow().as(aggrAmount);
+
+        // at_least_once and each
+        //Expression windowAgg = SQLExpressions.max(trxnValExists).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
+        //        .rows().between().preceding(startOffset).preceding(endOffset).as(aggrAmount);
+
+        // change for spent or unit
+        SQLQuery productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
+                .where(productId.eq(productIdStr));
+
+        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
+                .from(keysPath).leftJoin(productQuery, trxnPath)
+                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+
+        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+                .where(aggrVal.eq(String.valueOf(1)));    // change
+        //        .where(aggrVal.gt(String.valueOf(0)));   // at_least_once
+        //        .where(aggrVal.gt(String.valueOf(?)));   // total sum
+        System.out.println("finalQuery = " + finalQuery);
+
+    }
+
+    @Test(groups = "functional")
+    @SuppressWarnings("unchecked")
+    public void testSumWithin() throws SQLException {
+        SQLQueryFactory factory = factory();
+        /*
+        select accountid, periodid
+        from   (select  keys.accountid,
+                keys.periodid,
+                trxn.val,
+                sum (nvl(trxn.val,0))
+                     over (partition by keys.accountid
+                           order by keys.periodid
+                           rows between 10 preceding
+                                    and 5 preceding) as agg
+                from    keys
+                left join (select  accountid,
+                           periodid,
+                           totalamount as val
+                     from    tftest_4_transaction_2017_10_31_19_44_08_utc
+                     where   productid in ('A78DF03BAC196BE9A08508FFDB433A31') ) as trxn
+                on keys.accountid = trxn.accountid and  keys.periodid = trxn.periodid) as aps
+          where  agg >= 5000.0
+         */
+        int startOffset = 10;
+        int endOffset = 5;
+        int amount = 5000;
+        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String productIdStr = "A78DF03BAC196BE9A08508FFDB433A31";
+        String aggrAmountStr = "agg";
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath accountId = Expressions.stringPath("accountid");
+        StringPath periodId = Expressions.stringPath("periodid");
+        StringPath productId = Expressions.stringPath("productId");
+        StringPath totalAmount = Expressions.stringPath("totalamount");
+        StringPath aggrAmount = Expressions.stringPath(aggrAmountStr);
+
+        EntityPath<String> keysPath = new PathBuilder<>(String.class, "keys");
+        EntityPath<String> trxnPath = new PathBuilder<>(String.class, "trxn");
+        EntityPath<String> apsPath = new PathBuilder<>(String.class, "aps");
+        StringPath keysAccountId = Expressions.stringPath(keysPath, "accountId");
+        StringPath trxnAccountId = Expressions.stringPath(trxnPath, "accountId");
+        StringPath keysPeriodId = Expressions.stringPath(keysPath, "periodId");
+        StringPath trxnPeriodId = Expressions.stringPath(trxnPath, "periodId");
+        StringPath trxnVal = Expressions.stringPath(trxnPath, "val");
+        NumberExpression trxnNumber = Expressions.numberPath(BigDecimal.class, trxnPath, "val").coalesce(BigDecimal.ZERO).asNumber();
+        Expression sumWindowAgg = SQLExpressions.sum(trxnNumber).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
+                .rows().between().preceding(startOffset).preceding(endOffset).as(aggrAmount);
+
+        SQLQuery productQuery = factory.query().select(accountId, periodId, totalAmount.as("val")).from(tablePath)
+                .where(productId.eq(productIdStr));
+
+        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, sumWindowAgg)
+                .from(keysPath).leftJoin(productQuery, trxnPath)
+                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+
+        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+                .where(aggrAmount.gt(String.valueOf(amount)));
+        System.out.println("finalQuery = " + finalQuery);
+    }
+
+    @Test(groups = "functional")
+    @SuppressWarnings("unchecked")
+    public void testMaxPeriodId() throws SQLException {
+        SQLQueryFactory factory = factory();
+        /*
+        select max(periodid) from 'tftest_4_transaction_2017_10_31_19_44_08_utc'
+         */
+        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath periodId = Expressions.stringPath("periodid");
+
+        SQLQuery maxPeriodIdSubQuery = factory.query().from(tablePath).select(periodId.max());
+        System.out.println(maxPeriodIdSubQuery.toString());
+    }
+
+    @Test(groups = "functional")
+    @SuppressWarnings("unchecked")
+    public void testAllKeys() throws SQLException {
+        SQLQueryFactory factory = factory();
+        /*
+        select  crossprod.accountid, periodid
+        from   (select  accountid,
+                         periodid
+                from   (select  distinct accountid
+                         from    tftest_4_transaction_2017_10_31_19_44_08_utc) as allaccounts,
+                        (select  distinct periodid
+                         from    tftest_4_transaction_2017_10_31_19_44_08_utc) as allperiods) as crossprod
+        inner join (select  accountid,
+                    min(periodid) as minpid
+                    from    tftest_4_transaction_2017_10_31_19_44_08_utc
+                    group by  accountid) as periodrange
+        on  crossprod.accountid = periodrange.accountid
+        where  crossprod.periodid >= periodrange.minpid - 2
+         */
+        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath accountId = Expressions.stringPath("accountid");
+        StringPath periodId = Expressions.stringPath("periodid");
+        EntityPath<String> periodRange = new PathBuilder<>(String.class, "periodRange");
+        NumberPath minPid = Expressions.numberPath(BigDecimal.class, periodRange, "minpid");
+        StringPath periodAccountId = Expressions.stringPath(periodRange, "accountid");
+        SQLQuery periodRangeSubQuery =
+                factory.query().select(accountId, SQLExpressions.min(periodId).as("minpid")).from(tablePath).groupBy(accountId);
+
+        EntityPath<String> crossProd = new PathBuilder<>(String.class, "crossprod");
+        StringPath crossAccountId = Expressions.stringPath(crossProd, "accountid");
+        StringPath crossPeriodId = Expressions.stringPath(crossProd, "periodid");
+        SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
+                factory.selectDistinct(accountId).from(tablePath).as("allaccounts"),
+                factory.selectDistinct(periodId).from(tablePath).as("allperiods"));
+
+        SQLQuery crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
+                .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
+                .where(crossPeriodId.goe(minPid.subtract(2)));
+        SQLQuery minusProdSubQuery = crossProdSubQuery.select(crossAccountId, periodId);
+        System.out.println(minusProdSubQuery.toString());
+        Assert.assertEquals(833038, minusProdSubQuery.fetchCount());
     }
 
     @Test(groups = "functional")

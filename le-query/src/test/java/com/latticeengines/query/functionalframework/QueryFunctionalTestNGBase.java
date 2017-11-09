@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.querydsl.sql.SQLQuery;
 
@@ -42,6 +43,10 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Autowired
     protected QueryProcessor queryProcessor;
+
+    @Autowired
+    protected QueryFactory queryFactory;
+
 
     protected static AttributeRepository attrRepo;
     protected static String accountTableName;

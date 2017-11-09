@@ -47,8 +47,8 @@ public class TransactionRestrictionTranslator {
             txnRestriction.setTimeFilter(TimeFilter.ever());
         }
 
-        // treat PRIOR_TO_LAST specially to match playmaker functionality
-        if (ComparisonType.PRIOR_TO_LAST == txnRestriction.getTimeFilter().getRelation()) {
+        // treat PRIOR_ONLY specially to match playmaker functionality
+        if (ComparisonType.PRIOR_ONLY == txnRestriction.getTimeFilter().getRelation()) {
 
             if (txnRestriction.isNegate()) {
                 Restriction notPriorRestriction = translateToPrior(entity, txnRestriction, true);

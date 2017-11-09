@@ -34,6 +34,7 @@ import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -59,13 +60,14 @@ public class QueryProcessor {
         resolverFactory.setRestrictionResolverFactory(rrFactory);
 
         SQLQuery<?> sqlQuery = from(repository, query);
+
         if (query.getRestriction() != null) {
             BooleanExpression whereClause = processRestriction(query.getRestriction(), resolverFactory,
-                    query.getExistsJoins());
+                                                               query.getExistsJoins());
             sqlQuery = sqlQuery.where(whereClause);
         }
         if (StringUtils.isNotBlank(query.getFreeFormTextSearch())
-                && !query.getFreeFormTextSearchAttributes().isEmpty()) {
+            && !query.getFreeFormTextSearchAttributes().isEmpty()) {
             sqlQuery = sqlQuery.where(processFreeTextSearch(query));
         }
         sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups()));
@@ -88,7 +90,14 @@ public class QueryProcessor {
      */
     private SQLQuery<?> from(AttributeRepository repository, Query query) {
         SubQuery subQuery = query.getSubQuery();
-        SQLQuery<?> sqlQuery = queryFactory.getQuery(repository);
+        SQLQuery<?> sqlQuery = null;
+
+        if (query.hasPreprocessed()) {
+            sqlQuery = (SQLQuery<?>) query.getSubQuery().getSubQueryExpression();
+        } else {
+            sqlQuery = queryFactory.getQuery(repository);
+        }
+
         for (SubQuery sq : query.getCommonTableQueryList()) {
             StringPath aliasTable = AttrRepoUtils.getTablePath(sq.getAlias());
             StringPath[] projectedColumns = sq.getProjections().stream().map(QueryUtils::getAttributePath)
@@ -99,6 +108,9 @@ public class QueryProcessor {
             } else {
                 sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, false));
             }
+        }
+        if (query.hasPreprocessed()) {
+            return sqlQuery;
         }
         if (subQuery != null) {
             Expression<?> subQueryExpression = processSubueryExpression(repository, subQuery, true);
@@ -113,8 +125,12 @@ public class QueryProcessor {
 
     private Expression<?> processSubueryExpression(AttributeRepository repository, SubQuery subQuery,
             boolean setAlias) {
-        return (setAlias) ? process(repository, subQuery.getQuery()).as(subQuery.getAlias())
-                : process(repository, subQuery.getQuery());
+        if (subQuery.getSubQueryExpression() != null) {
+            return (SubQueryExpression) subQuery.getSubQueryExpression();
+        } else {
+            return (setAlias) ? process(repository, subQuery.getQuery()).as(subQuery.getAlias())
+                    : process(repository, subQuery.getQuery());
+        }
     }
 
     /**
@@ -122,7 +138,6 @@ public class QueryProcessor {
      */
     private SQLQuery<?> addJoins(SQLQuery<?> sqlQuery, AttributeRepository repository, Query query) {
         sqlQuery = addLookupJoins(sqlQuery, repository, query);
-        sqlQuery = addCommonTableJoins(sqlQuery, query);
         return sqlQuery;
     }
 
@@ -146,33 +161,6 @@ public class QueryProcessor {
             sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
             joinKeys.addAll(QueryUtils.getJoinPredicates(relationship));
             joinedEntities.add(target);
-        }
-        for (Predicate predicate : joinKeys) {
-            sqlQuery = sqlQuery.on(predicate);
-        }
-        return sqlQuery;
-    }
-
-    private SQLQuery<?> addCommonTableJoins(SQLQuery<?> sqlQuery, Query query) {
-        List<Predicate> joinKeys = new ArrayList<>();
-        BusinessEntity srcEntity = query.getMainEntity();
-        for (JoinSpecification join : query.getCommonTableJoins()) {
-            BusinessEntity target = join.getDestinationEntity();
-            BusinessEntity.Relationship relationship = srcEntity.join(target);
-            if (relationship == null) {
-                throw new QueryEvaluationException("Broken Connectivity: Cannot find a connected path from entity "
-                        + join.getSourceEntity() + " to entity " + target + ".");
-            }
-            Map<BusinessEntity, String> entityAliasMap = new HashMap<>();
-            entityAliasMap.put(join.getSourceEntity(), join.getSource());
-            entityAliasMap.put(join.getDestinationEntity(), join.getDestination());
-            joinKeys.addAll(QueryUtils.getJoinPredicates(relationship, entityAliasMap));
-        }
-
-        for (SubQuery subQuery : query.getCommonTableQueryList()) {
-            // JOIN T1
-            EntityPath<String> targetTableName = AttrRepoUtils.getEntityPath(subQuery.getAlias());
-            sqlQuery = sqlQuery.join(targetTableName);
         }
         for (Predicate predicate : joinKeys) {
             sqlQuery = sqlQuery.on(predicate);

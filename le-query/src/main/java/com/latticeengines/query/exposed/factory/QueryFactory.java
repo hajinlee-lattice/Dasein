@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.query.factory.QueryProvider;
 import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 
 @Component("queryFactory")
 public class QueryFactory {
@@ -23,5 +24,15 @@ public class QueryFactory {
         }
         throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",
                 repository.getCollectionName()));
+    }
+
+    public SQLQueryFactory getSQLQueryFactory(AttributeRepository repository) {
+        for (QueryProvider provider : queryProviders) {
+            if (provider.providesQueryAgainst(repository)) {
+                return provider.getCachedSQLQueryFactory(repository);
+            }
+        }
+        throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",
+                                                 repository.getCollectionName()));
     }
 }

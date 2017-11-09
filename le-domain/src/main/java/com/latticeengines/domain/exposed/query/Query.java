@@ -174,6 +174,10 @@ public class Query implements GraphNode {
         this.freeFormTextSearchAttributes = freeFormTextSearchAttributes;
     }
 
+    public boolean hasPreprocessed() {
+        return subQuery != null && subQuery.getSubQueryExpression() != null;
+    }
+
     public void analyze() {
         if (subQuery != null) {
             // we may want to revisit this logic to use common tables

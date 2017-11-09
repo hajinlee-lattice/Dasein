@@ -27,7 +27,12 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
     @Override
     public ComparableExpression<String> resolveForSubselect(SubQueryAttrLookup lookup) {
         SubQuery subQuery = lookup.getSubQuery();
-        SQLQuery<?> sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery());
+        SQLQuery<?> sqlSubQuery;
+        if (subQuery.getSubQueryExpression() == null) {
+            sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery());
+        } else {
+            sqlSubQuery = (SQLQuery<?>) subQuery.getSubQueryExpression();
+        }
         String alias = subQuery.getAlias();
         StringPath subQueryPath = QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
         ComparableExpression<String> s = Expressions
