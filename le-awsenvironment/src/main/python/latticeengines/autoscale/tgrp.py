@@ -131,7 +131,14 @@ def find_full_group_name(prefix):
     client = get_as_client()
     try:
         response = client.describe_auto_scaling_groups()
-        for group in response["AutoScalingGroups"]:
+        grps = response["AutoScalingGroups"]
+        next_token = response["NextToken"]
+        while next_token:
+            LOG.info("Found NextToken=%s" % next_token)
+            response = client.describe_auto_scaling_groups(NextToken=next_token)
+            grps += response["AutoScalingGroups"]
+            next_token = response["NextToken"] if "NextToken" in response else None
+        for group in grps:
             grpname = group["AutoScalingGroupName"]
             if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
                 LOG.info("Found auto scaling group: " + grpname)
