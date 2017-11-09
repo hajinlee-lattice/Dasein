@@ -22,28 +22,31 @@
             </li>
 
             <!-- | filter: vm.enrichmentsFilter() -->
-            <li ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
-                    | filter: vm.enrichmentsFilter()
-                    | filter: vm.filterHideTrue
-                    | orderBy: vm.categoryOrderBy()
-                    | limitTo: 5))"
+            <li     class="attribute"
+                    ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
+                        | filter: vm.enrichmentsFilter()
+                        | filter: vm.filterHideTrue
+                        | orderBy: vm.categoryOrderBy()
+                        | limitTo: 5))"
                     ng-class="{'ignore-ngclick': vm.section !== 'segment.analysis'}"
                     ng-click="vm.selectSegmentAttribute(attribute)">
 
-                <div class="column label" title="{{attribute.DisplayName}}">
-                    <input 
+                <div class="column checkspace">
+                    <input  type="checkbox" 
+                            id="{{attribute.Attribute || attribute.ColumnId}}" 
+                            name="{{attribute.Attribute || attribute.ColumnId}}" 
+                            ng-show="false"
                             ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" 
                             ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
-                            name="{{attribute.Attribute || attribute.ColumnId}}" 
-                            id="{{attribute.Attribute || attribute.ColumnId}}" 
-                            type="checkbox" 
                             ng-if="vm.section == 'segment.analysis'" />
-
+                    <i class="plus fa fa-plus" ng-if="!(vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked)"></i>
+                    <i class="plus fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
+                    <i class="fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
+                </div>
+                <div class="column label" title="{{attribute.DisplayName}}">
                     <strong ng-if="attribute.DisplayName">{{ attribute.DisplayName }}</strong>
                     <strong ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</strong>
-
                 </div>
-
                 <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode || vm.section == 'segment.analysis'">
                     <div class="attribute-feedback-container">
                         <attribute-feedback-button 

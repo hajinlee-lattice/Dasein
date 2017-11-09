@@ -67,18 +67,20 @@
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
 
-                    <div class="column label" title="{{attribute.DisplayName}}">
-                        <input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" />
-                        
+                    <!--input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" /-->
+                    <div class="column checkspace" >
                         <input  type="checkbox" 
                                 ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]"
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
                                 name="{{attribute.Attribute || attribute.ColumnId}}" 
-                                id="{{attribute.Attribute || attribute.ColumnId}}" 
+                                id="{{attribute.Attribute || attribute.ColumnId}}"
+                                ng-show="false"
                                 ng-if="vm.section == 'segment.analysis' && attribute.TopBkt" />
-
-                        {{ attribute.DisplayName }}
+                        <i class="plus fa fa-plus" ng-if="!(vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked)"></i>
+                        <i class="plus fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
+                        <i class="fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
                     </div>
+                    <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
                     <div class="column data value" ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">{{ attribute.TopBkt.Lbl }}</div>
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data.Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>

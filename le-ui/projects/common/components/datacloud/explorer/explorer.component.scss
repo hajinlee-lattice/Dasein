@@ -1008,6 +1008,18 @@
             & > li {
                 @include flex-container;
                 padding: 5px;
+                
+                &,
+                div.column,
+                div.column strong,
+                i:before {
+                    -o-transition-property: none;
+                    -moz-transition-property: none;
+                    -ms-transition-property: none;
+                    -webkit-transition-property: none;
+                    transition-property: none;
+                }
+
                 &:nth-child(even) {
                     background-color: rgba(0,0,0,.06);
                 }
@@ -1043,6 +1055,16 @@
                 & > .column {
                     @include flex-item(1 1 auto);
                     padding: 0;
+                    &.checkspace {
+                        min-width: 1.5em;
+                        max-width: 1.5em;
+                        
+                        i.plus {
+                            display: none;
+                            width: 1.5em;
+                            color: #fff;
+                        }
+                    }
                     &.label {
                         @include text-ellipsis();
                         margin-right: 5px;
@@ -1101,6 +1123,25 @@
                     opacity: 1;
                 }
                 */
+            }
+            li.attribute:hover > .column {
+                &, strong {
+                    color: #fff !important;
+                }
+                
+                &.checkspace i {
+                    color: #fff;
+                    display: none;
+                            
+                    &.plus {
+                        display: inline-block;
+                        color: #fff;
+                        
+                        &.fa-plus {
+                            padding-left: 1px;
+                        }
+                    }
+                }
             }
         }
         .attributes-more {
@@ -1379,6 +1420,14 @@
         &.background-color {
             background-color: #33bdb7;
         }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #33bdb7;
+            }
+            li.attribute:hover {
+                background-color: #33bdb7 !important;
+            }
+        }
     }
     .category-growth-trends {
         &.color {
@@ -1397,6 +1446,14 @@
         }
         &.background-color {
             background-color: #65b7e6;
+        }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #65b7e6;
+            }
+            li.attribute:hover {
+                background-color: #65b7e6 !important;
+            }
         }
     }
     .category-intent {
@@ -1417,6 +1474,14 @@
         &.background-color {
             background-color: #f15a5a;
         }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #f15a5a;
+            }
+            li.attribute:hover {
+                background-color: #f15a5a !important;
+            }
+        }
     }
     .category-online-presence {
         &.color {
@@ -1435,6 +1500,14 @@
         }
         &.background-color {
             background-color: #8e71b2;
+        }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #8e71b2;
+            }
+            li.attribute:hover {
+                background-color: #8e71b2 !important;
+            }
         }
     }
     .category-technology-profile {
@@ -1455,6 +1528,14 @@
         &.background-color {
             background-color: #70bf4a;
         }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #70bf4a;
+            }
+            li.attribute:hover {
+                background-color: #70bf4a !important;
+            }
+        }
     }
     .category-website-keywords {
         &.color {
@@ -1473,6 +1554,14 @@
         }
         &.background-color {
             background-color: #fdbc49;
+        }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #fdbc49;
+            }
+            li.attribute:hover {
+                background-color: #fdbc49 !important;
+            }
         }
     }
     .category-website-profile {
@@ -1493,6 +1582,14 @@
         &.background-color {
             background-color: #26649b;
         }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #26649b;
+            }
+            li.attribute:hover {
+                background-color: #26649b !important;
+            }
+        }
     }
     .category-contact {
         &.color {
@@ -1511,6 +1608,14 @@
         }
         &.background-color {
             background-color: #ff9e64;
+        }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #ff9e64;
+            }
+            li.attribute:hover {
+                background-color: #ff9e64 !important;
+            }
         }
     }
     .category-product {
@@ -1531,6 +1636,14 @@
         &.background-color {
             background-color: #cd80bc;
         }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #cd80bc;
+            }
+            li.attribute:hover {
+                background-color: #cd80bc !important;
+            }
+        }
     }
     .category-engagement {
         &.color {
@@ -1550,6 +1663,14 @@
         &.background-color {
             background-color: #aac43b;
         }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #aac43b;
+            }
+            li.attribute:hover {
+                background-color: #aac43b !important;
+            }
+        }
     }
     .category-contact-attributes, .category-my-attributes {
         &.color {
@@ -1568,6 +1689,14 @@
         }
         &.background-color {
             background-color: #457EBA;
+        }
+        &.box-inner {
+            li.attribute div.column.checkspace i {
+                color: #457EBA;
+            }
+            li.attribute:hover {
+                background-color: #457EBA !important;
+            }
         }
     }
     .disabled-grayout {
