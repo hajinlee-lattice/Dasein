@@ -504,9 +504,9 @@ angular
             .state('home.ratingsengine.ai.segment.prospect.products.refine', {
                 url: '/refinetarget',
                 resolve: {
-                    function(RefineService) {
-                        RefineService.reset();
-                    }
+                    // function(RefineService) {
+                    //     RefineService.reset();
+                    // }
                 },
                 views: {
 
