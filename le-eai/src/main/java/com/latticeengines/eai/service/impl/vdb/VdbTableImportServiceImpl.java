@@ -189,21 +189,28 @@ public class VdbTableImportServiceImpl extends ImportService {
             targetPath = eaiImportJobDetail.getTargetPath();
         }
         if (StringUtils.isEmpty(targetPath)) {
-            targetPath = generateNewTargetPath(customerSpace, "");
+            targetPath = generateNewTargetPath(customerSpace, null);
         }
         return targetPath;
     }
 
-    private String generateNewTargetPath(CustomerSpace customerSpace, String oldPath) {
+    private String generateNewTargetPath(CustomerSpace customerSpace, Configuration yarnConfiguration) {
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
-        if (!StringUtils.isEmpty(oldPath)) {
-            if (targetPath.equals(oldPath)) {
-                targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
-                        PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                        SourceType.VISIDB.getName(),
-                        new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date(System.currentTimeMillis() + 1000L)));
+        if (yarnConfiguration != null) {
+            try {
+                int i = 1;
+                while(HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
+                    targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
+                            PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
+                            SourceType.VISIDB.getName(),
+                            new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date(System.currentTimeMillis() +
+                                    i * 1000L)));
+                    i++;
+                }
+            } catch (IOException e) {
+                log.error("Cannot access hdfs!");
             }
         }
         return targetPath;
@@ -221,100 +228,6 @@ public class VdbTableImportServiceImpl extends ImportService {
     public List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context,
             ConnectorConfiguration connectorConfiguration) {
         return null;
-        // VdbConnectorConfiguration vdbConnectorConfiguration = null;
-        // if(connectorConfiguration instanceof VdbConnectorConfiguration) {
-        // vdbConnectorConfiguration = (VdbConnectorConfiguration)
-        // connectorConfiguration;
-        // } else {
-        // throw new LedpException(LedpCode.LEDP_17010);
-        // }
-        //
-        // String statusUrl =
-        // vdbConnectorConfiguration.getReportStatusEndpoint();
-        // VdbLoadTableStatus vdbLoadTableStatus = new VdbLoadTableStatus();
-        // vdbLoadTableStatus.setJobStatus("Running");
-        // vdbLoadTableStatus.setMessage("Start import metadata for Vdb table");
-        //
-        // String customer = context.getProperty(ImportProperty.CUSTOMER,
-        // String.class);
-        // List<Table> newTables = new ArrayList<>();
-
-        // try {
-        // List<Table> tables = new ArrayList<>();
-        // for (Map.Entry<String, ImportVdbTableConfiguration> entry :
-        // vdbConnectorConfiguration
-        // .getTableConfigurations().entrySet()) {
-        // vdbLoadTableStatus.setVdbQueryHandle(entry.getValue().getVdbQueryHandle());
-        // tables.add(createTable(customer, entry.getKey(), entry.getValue()));
-        // }
-        // for (Table table : tables) {
-        // ImportVdbTableConfiguration importVdbTableConfiguration =
-        // vdbConnectorConfiguration
-        // .getVdbTableConfiguration(table.getName());
-        // if (importVdbTableConfiguration == null) {
-        // continue;
-        // }
-        // String queryHandle = importVdbTableConfiguration.getVdbQueryHandle();
-        // vdbLoadTableStatus.setVdbQueryHandle(queryHandle);
-        // try {
-        // List<VdbSpecMetadata> vdbSpecMetadataList =
-        // importVdbTableConfiguration.getMetadataList();
-        // HashMap<String, VdbSpecMetadata> vdbSpecMetadataHashMap = new
-        // HashMap<>();
-        // for (VdbSpecMetadata metadata : vdbSpecMetadataList) {
-        // vdbSpecMetadataHashMap.put(metadata.getColumnName(), metadata);
-        // }
-        // List<Attribute> attributes = table.getAttributes();
-        // for (Attribute attribute : attributes) {
-        // if (attribute == null) {
-        // log.warn(String.format("Empty attribute in table %s",
-        // table.getName()));
-        // continue;
-        // }
-        // if (vdbSpecMetadataHashMap.containsKey(attribute.getName())) {
-        // log.info(String.format("Processing attribute %s with logical type
-        // %s.", attribute.getName(),
-        // vdbSpecMetadataHashMap.get(attribute.getName()).getDataType()));
-        //
-        // if (vdbSpecMetadataHashMap.get(attribute.getName()) != null) {
-        // attribute.setSourceLogicalDataType(
-        // vdbSpecMetadataHashMap.get(attribute.getName()).getDataType());
-        // attribute.setPhysicalDataType(vdbTableToAvroTypeConverter
-        // .convertTypeToAvro(attribute.getSourceLogicalDataType().toLowerCase()).name());
-        //
-        // if
-        // (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
-        // attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
-        // }
-        // }
-        // }
-        // }
-        // Schema schema = TableUtils.createSchema(table.getName(), table);
-        // table.setSchema(schema);
-        // newTables.add(table);
-        // setExtractContextForVdbTable(table, context,
-        // importVdbTableConfiguration);
-        // } catch (Exception e) {
-        // EaiImportJobDetail eaiImportJobDetail =
-        // eaiImportJobDetailService.getImportJobDetail(
-        // importVdbTableConfiguration.getCollectionIdentifier());
-        // eaiImportJobDetail.setStatus(ImportStatus.FAILED);
-        // eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
-        // throw new LedpException(LedpCode.LEDP_17014, new String[]
-        // {e.toString()});
-        // }
-        // }
-        // } catch (Exception e) {
-        // log.error(String.format("Import table metadata failed with exception:
-        // %s", e.toString()));
-        // vdbLoadTableStatus.setJobStatus("Failed");
-        // vdbLoadTableStatus
-        // .setMessage(String.format("Import table metadata failed with
-        // exception: %s", e.toString()));
-        // reportStatus(statusUrl, vdbLoadTableStatus);
-        // throw e;
-        // }
-        // return newTables;
     }
 
     @Override
@@ -528,6 +441,9 @@ public class VdbTableImportServiceImpl extends ImportService {
                                         rowsAppend));
                             }
                             startRow += rowsToGet;
+                            if (startRow > totalRows) {
+                                startRow = totalRows;
+                            }
                             extractRecords += rowsAppend;
 
                             vdbGetQueryData.setStartRow(startRow);
@@ -555,7 +471,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                                     if (needMultipleExtracts) {
                                         updateExtractContext(table, context, targetPath, new Long(extractRecords));
                                         fileIndex = 0;
-                                        targetPath = generateNewTargetPath(customerSpace, targetPath);
+                                        targetPath = generateNewTargetPath(customerSpace, yarnConfiguration);
                                         extractRecords = 0;
                                     }
                                 }
