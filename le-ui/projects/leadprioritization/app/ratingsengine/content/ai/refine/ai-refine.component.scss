@@ -69,11 +69,15 @@ section.ratings-engine-ai-refine.container{
                     justify-content: flex-start;
                     padding: 10px;
                     .choise{
+
                         padding-top: 10px;
                         display: flex;
                         flex-direction: row;
                         justify-content: flex-start;
-                        
+                        input[type="number"] {
+                            width:50px;
+                         }
+
                         .lable-left{
                             padding-right: 10px;
 

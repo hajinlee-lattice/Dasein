@@ -16,7 +16,7 @@
                         <div class="selection">
                             <div class="choise">
                                 <label for="spend-ammount" class="lable-left">$</label>
-                                <input type="number" id="spend-ammount">
+                                <input type="number" id="spend-ammount" min="1">
                                 <select>
                                     <option>At least</option>
                                     <option>At most</option>
@@ -33,7 +33,7 @@
                         <div class="selection">
                             <div class="choise">
                                 <label for="units" class="lable-left">Units</label>
-                                <input type="number" id="units">
+                                <input type="number" id="units" min="1">
                                 <select>
                                     <option>At least</option>
                                     <option>At most</option>
@@ -49,7 +49,7 @@
                     <div class="choise" ng-if="vm.historical">
                         <div class="selection">
                             <div class="choise">
-                                <input type="number" id="historical">
+                                <input type="number" id="historical" min="1" width="10px">
                                 <select>
                                     <option>Months</option>
                                     <option>Years</option>
