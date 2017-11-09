@@ -1757,6 +1757,7 @@ angular.module('common.datacloud.explorer', [
             $scope.closeMenu = function($event) {
                 $scope.showMenu = false;
             }
+            
             $scope.open = function($event) {
                 $event.stopPropagation();
                 $scope.closeMenu($event);

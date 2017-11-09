@@ -20,7 +20,8 @@ angular.module('lp.import.entry', [
             importErrorMsg: '',
         },
         uploaded: false,
-        goState: null
+        goState: null,
+        next: false
     });
 
     vm.init = function() {
@@ -77,6 +78,7 @@ angular.module('lp.import.entry', [
 
         if (result.Result) {
             vm.fileName = result.Result.name;
+            vm.next = vm.goState;
         }
     }
     

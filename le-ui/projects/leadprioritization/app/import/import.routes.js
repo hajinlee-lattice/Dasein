@@ -91,16 +91,10 @@ angular
                 WizardProgressContext: function() {
                     return 'import';
                 },
-                WizardProgressItems: function($state, ImportWizardService, ImportWizardStore) {
-                    return [
-                        { label: 'Account IDs', state: 'accounts.one' },
-                        { label: '3rd Party IDs', state: 'accounts.one.two' },
-                        { label: 'Lattice Fields', state: 'accounts.one.two.three' },
-                        { label: 'Custom Fields', state: 'accounts.one.two.three.four', nextFn: function(nextState){ ImportWizardService.SaveFieldDocuments(ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument());
-                        $state.go(nextState);}},
-                        { label: 'Import Data', state: 'accounts.one.two.three.four.five', nextFn: function(nextState){ ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-                        $state.go(nextState);} }
-                    ];
+                WizardProgressItems: function($stateParams, ImportWizardStore) {
+                    var wizard_steps = $stateParams.wizard_steps;
+
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'all');
                 }
             },
             views: {
@@ -131,7 +125,7 @@ angular
                 }
             },
             resolve: {
-            	FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
                         ImportWizardStore.setFieldDocument(result.Result);
@@ -176,7 +170,7 @@ angular
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
-            	    return ImportWizardStore.getFieldDocument();
+                    return ImportWizardStore.getFieldDocument();
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     return ImportWizardStore.getUnmappedFields();
@@ -282,6 +276,26 @@ angular
                     controllerAs: 'vm',
                     templateUrl: 'app/import/content/accountids/accountids.component.html'
                 }
+            },
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
+                        deferred.resolve(result['Account']);
+                    });
+
+                    return deferred.promise;
+                }
             }
         })
         .state('home.import.wizard.accountfields.one.two', {
@@ -350,6 +364,24 @@ angular
         .state('home.import.wizard.contacts.one', {
             url: '/latticefields',
             resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
+                        deferred.resolve(result['Account']);
+                    });
+
+                    return deferred.promise;
+                },
                 Type: function(){
                     return "Contact";
                 },
@@ -447,7 +479,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     templateUrl: 'app/import/content/latticefields/latticefields.component.html'
                 }
-            }
+            },
         })
         .state('home.import.wizard.contactfields.one.two', {
             url: '/customfields',
@@ -510,6 +542,26 @@ angular
             views: {
                 'wizard_content@home.import.wizard': {
                     templateUrl: 'app/import/content/latticefields/latticefields.component.html'
+                }
+            },
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
+                        deferred.resolve(result['Account']);
+                    });
+
+                    return deferred.promise;
                 }
             }
         })

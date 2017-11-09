@@ -1,20 +1,11 @@
-<div class="import-accountid container">
-    <h2>Account IDs</h2>
+<div class="import-accountid container file-import-content">
+    <div class="header">
+        <h2>Account IDs</h2>
+    </div>
+    <p>Please provide unique identifier attribute Lattice platform should use to de-duplicate your account records.  The data provided in this file will override the existing data.</p>
 
-    <p ng-if="::vm.state.accountDedupeField">You chose to use your ID field for deduplication. It is important the IDs associated with any previously uploaded accounts remain the same, and any new accounts that you upload have a unique ID.</p>
-
-    <p>Note: This is a one time choice because changing later will cause your data to become unmanagable. If you feel you need to change it, please contact <a href="#">Lattice Support</a></p>
-
-    <div class="dedupe-options" ng-if="!vm.state.accountDedupeField">
-        <div class="dedupe-options-item">
-            <div class="button-tabs" ng-click="vm.state.dedupeType = 'custom'">
-                <div class="button {{vm.state.dedupeType === 'custom' ? 'blue' : 'white'}}-button custom-dedupe">
-                    <span>Use Your Unique IDs for Deduplication</span>
-                </div>
-            </div>
-            <div class="text-block">
-                If you have unique identifiers for each record, select this option. It is important that every account has a unique ID, and that they do not change on subsequent uploads.
-            </div>
+    <div class="id-options" ng-if="!vm.state.accountDedupeField">
+        <div class="id-options-item">
             <div ng-init="fieldMapping = vm.idFieldMapping">
                 <label for="dedupeField">Unique Identifier</label>
                <!--  <select id="dedupeField" class="form-control"
@@ -37,16 +28,6 @@
 					{{ AvailableField }}
 				</option>
                </select>
-            </div>
-        </div>
-        <div class="dedupe-options-item">
-            <div class="button-tabs" ng-click="vm.state.dedupeType = 'lattice'">
-                <div class="button {{vm.state.dedupeType === 'lattice' ? 'blue' : 'white'}}-button lattice-dedupe">
-                    <span>Use Lattice Matching Algorithms to Manage Deduplication</span>
-                </div>
-            </div>
-            <div class="text-block">
-                If you would rather have Lattice manage unique identifiers, select this option. This uses our matching and deuplication algorithms. The advantage is you don't have to worry about managing IDs and making sure they don't change as you upload more data later). The drawback is the matching has a possibility of error.
             </div>
         </div>
     </div>

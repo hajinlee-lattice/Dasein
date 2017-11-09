@@ -22,9 +22,12 @@
             padding-right: 2em;
         }
         &:last-child {
-            border-left: 1px solid #d0d0d0;
             padding-left: 2em;
         }
+    }
+
+    .id-options-item {
+        margin: 20px 0 34px;
     }
 
     .button-tabs {

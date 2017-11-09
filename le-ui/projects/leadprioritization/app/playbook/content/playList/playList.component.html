@@ -106,7 +106,7 @@
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                             ng-if="!play.launchHistory.playLaunch && !play.ratingEngine && !vm.tileStates[play.name].launching"
+                            ng-if="!play.launchHistory.playLaunch && !play.ratingEngine && !vm.tileStates[play.name].launching"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
@@ -133,6 +133,7 @@
                             <button 
                                 type="button"
                                 class="button blue-button pull-right"
+                                ng-disabled="play.ratingEngine.status != 'ACTIVE'"
                                 ng-click="vm.launchPlay($event, play)">
                                 Re-Launch
                             </button>

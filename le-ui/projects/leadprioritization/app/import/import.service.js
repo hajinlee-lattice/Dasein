@@ -1,5 +1,5 @@
 angular.module('lp.import')
-.service('ImportWizardStore', function($q, ImportWizardService){
+.service('ImportWizardStore', function($q, $state, ImportWizardService){
     var ImportWizardStore = this;
 
     this.csvFileName = null;
@@ -13,7 +13,67 @@ angular.module('lp.import')
     };
 
     this.validation = {
-        
+        one: true,
+        two: true,
+        three: true,
+        four: true,
+        five: true
+    }
+
+    this.wizardProgressItems = {
+        "all": [
+            { 
+                label: 'Account ID', 
+                state: 'accounts.one', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveGeneric(nextState);
+                } 
+            },{ 
+                label: 'Other IDs', 
+                state: 'accounts.one.two', 
+                nextLabel: 'Next'
+            },{ 
+                label: 'Lattice Fields', 
+                state: 'accounts.one.two.three', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveGeneric(nextState);
+                } 
+            },{ 
+                label: 'Custom Fields', 
+                state: 'accounts.one.two.three.four', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument() );
+                    $state.go(nextState); 
+                }
+            },{ 
+                label: 'Import Data', 
+                state: 'accounts.one.two.three.four.five', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+                    $state.go(nextState); 
+                }
+            }
+        ]
+    }
+
+    this.getWizardProgressItems = function(step) {
+        return this.wizardProgressItems[(step || 'all')];
+    }
+
+    this.getValidation = function(type) {
+        return this.validation[type];
+    }
+
+    this.setValidation = function(type, value) {
+        this.validation[type] = value;
+    }
+
+    this.nextSaveGeneric = function(nextState) {
+        $state.go(nextState);
     }
 
     this.getAccountIdState = function() {

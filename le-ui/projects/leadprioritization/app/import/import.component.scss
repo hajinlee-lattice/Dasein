@@ -9,3 +9,10 @@
 @import "content/latticefields/latticefields.component.scss";
 @import "content/customfields/customfields.component.scss";
 @import "content/jobstatus/jobstatus.component.scss";
+
+.file-import-content {
+    .header h2 {
+        background: none;
+        padding: 0;
+    }
+}
