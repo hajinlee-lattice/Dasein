@@ -22,7 +22,7 @@ public class RedisCacheService extends CacheServiceBase {
     @Override
     public void refreshKeysByPattern(String pattern, CacheNames... cacheNames) {
         for (CacheNames cacheName : cacheNames) {
-            redisService.deleteKeysByPattern(cacheName.name(), String.format("*%s*", pattern));
+            redisService.deleteKeysByPattern(cacheName.name(), String.format("^%s.*", pattern));
         }
     }
 }

@@ -3,6 +3,7 @@ package com.latticeengines.redis.service.impl;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
@@ -29,7 +30,8 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Set<Object> getKeys(String mapName, String pattern) {
-        return getMap(mapName).keySet(pattern);
+        return getMap(mapName).readAllKeySet().stream().filter(k -> k.toString().matches(pattern))
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.latticeengines.redis.service;
 
 import java.util.Set;
 
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -10,25 +9,22 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.redis.exposed.service.RedisService;
+
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-redis-context.xml" })
 public class RedisServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private RedissonClient redisson;
+    private RedisService redisService;
 
     @Test(groups = { "functional" })
     private void test() {
         // redisson.getMap("DataLakeCache").put("ASF|C", "BC");
-        Set<Object> set = redisson.getMap("DataLakeCMCache").keySet("*TFTest_4.TFTest_4.Production*");
+        Set<Object> set = redisService.getKeys(CacheNames.DataLakeCMCache.toString(),
+                "^TFTest_4.TFTest_4.Production.*");
 
-        // Object o =
-        // redisson.getMapCache("DataLakeStatsCache").get("LocalTest.LocalTest.Production|stats");
-        // for (Object o : set) {
-        // System.out.println(o);
-        // }
-        // redisson.getMap("DataLakeCache").fastRemove(set.toArray());
-        // set.clear();
-        System.out.println(set.size());
+        System.out.println(set);
     }
 }
