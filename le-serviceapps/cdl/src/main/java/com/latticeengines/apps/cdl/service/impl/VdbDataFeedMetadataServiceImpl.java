@@ -287,11 +287,6 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public boolean needUpdateDataFeedStatus() {
-        return true;
-    }
-
-    @Override
     public Type getAvroType(Attribute attribute) {
         Type type = null;
         String typeStrLowerCase = attribute.getSourceLogicalDataType().toLowerCase();
