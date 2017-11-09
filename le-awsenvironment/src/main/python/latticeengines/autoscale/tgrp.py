@@ -131,18 +131,21 @@ def find_full_group_name(prefix):
     client = get_as_client()
     try:
         response = client.describe_auto_scaling_groups()
-        grps = response["AutoScalingGroups"]
-        next_token = response["NextToken"]
-        while next_token:
-            LOG.info("Found NextToken=%s" % next_token)
-            response = client.describe_auto_scaling_groups(NextToken=next_token)
-            grps += response["AutoScalingGroups"]
-            next_token = response["NextToken"] if "NextToken" in response else None
-        for group in grps:
+        for group in response["AutoScalingGroups"]:
             grpname = group["AutoScalingGroupName"]
             if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
                 LOG.info("Found auto scaling group: " + grpname)
                 return grpname
+        next_token = response["NextToken"]
+        while next_token:
+            LOG.info("Fetching next page with NextToken=%s" % next_token)
+            response = client.describe_auto_scaling_groups(NextToken=next_token)
+            for group in response["AutoScalingGroups"]:
+                grpname = group["AutoScalingGroupName"]
+                if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
+                    LOG.info("Found auto scaling group: " + grpname)
+                    return grpname
+            next_token = response["NextToken"] if "NextToken" in response else None
         raise Exception("Cannot find auto scaling group with prefix " + prefix)
     except ClientError as e:
         LOG.error("Error: %s" % e)
