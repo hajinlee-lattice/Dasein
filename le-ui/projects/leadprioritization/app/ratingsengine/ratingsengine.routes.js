@@ -503,11 +503,6 @@ angular
             })
             .state('home.ratingsengine.ai.segment.prospect.products.refine', {
                 url: '/refinetarget',
-                resolve: {
-                    // function(RefineService) {
-                    //     RefineService.reset();
-                    // }
-                },
                 views: {
 
                     'wizard_content@home.ratingsengine.ai': {

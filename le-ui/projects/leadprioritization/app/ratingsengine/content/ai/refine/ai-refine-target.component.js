@@ -11,8 +11,8 @@ angular.module('lp.ratingsengine.ai.refine', [])
         });
 
         vm.init = function () {
+            RefineService.reset();
             console.log('Init refine Target');
-            console.info('Init refine Model');
             $scope.$watch(function () {
                 return RefineService.refineModel;
             },
