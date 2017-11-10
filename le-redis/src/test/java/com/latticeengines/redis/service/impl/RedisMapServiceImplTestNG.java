@@ -15,7 +15,7 @@ import com.latticeengines.redis.exposed.service.RedisMapService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-redis-context.xml" })
-public class RedisServiceImplTestNG extends AbstractTestNGSpringContextTests {
+public class RedisMapServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Inject
     private RedisMapService redisMapService;
