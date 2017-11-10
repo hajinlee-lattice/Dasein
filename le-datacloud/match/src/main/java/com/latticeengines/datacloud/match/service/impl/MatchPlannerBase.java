@@ -107,8 +107,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Set<String> keyFields = getKeyFields(input);
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
-                    input.getFields(), keyPositionMap, domainSet, nameLocationSet,
-                    input.getExcludePublicDomain(), input.isPublicDomainAsNormalDomain());
+                    input.getFields(), keyPositionMap, domainSet, nameLocationSet, input.getExcludePublicDomain(),
+                    input.isPublicDomainAsNormalDomain());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<>());
                 records.add(record);
@@ -334,7 +334,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             try {
                 String cleanDuns = null;
                 for (Integer dunsPos : dunsPosList) {
-                    String originalDuns = String.valueOf(inputRecord.get(dunsPos));
+                    String originalDuns = inputRecord.get(dunsPos) == null ? null
+                            : String.valueOf(inputRecord.get(dunsPos));
                     record.setOrigDuns(originalDuns);
                     if (StringUtils.isNotEmpty(originalDuns)) {
                         cleanDuns = StringStandardizationUtils.getStandardDuns(originalDuns);
@@ -356,7 +357,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             try {
                 String cleanId = null;
                 for (Integer idPos : idPosList) {
-                    String originalId = String.valueOf(inputRecord.get(idPos));
+                    String originalId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
                     if (StringUtils.isNotEmpty(originalId)) {
                         cleanId = originalId;
                         break;

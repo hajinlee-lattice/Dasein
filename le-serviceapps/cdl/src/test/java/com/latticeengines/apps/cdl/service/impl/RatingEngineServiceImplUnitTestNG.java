@@ -85,8 +85,6 @@ public class RatingEngineServiceImplUnitTestNG {
         Assert.assertEquals(ratingEngineSummary.getCreatedBy(), CREATED_BY);
         Assert.assertEquals(ratingEngineSummary.getCreated(), DATE);
         Assert.assertEquals(ratingEngineSummary.getUpdated(), DATE);
-        Assert.assertNotNull(ratingEngineSummary.getRatingModels());
-        Assert.assertEquals(ratingEngineSummary.getRatingModels().size(), 1);
         Assert.assertEquals(ratingEngineSummary.getLastRefreshedDate(), DATE);
     }
 }
