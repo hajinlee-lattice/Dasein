@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,14 +117,16 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             coverageInfo.setAccountCount(segment.getAccounts());
             coverageInfo.setContactCount(segment.getContacts());
         }
-        Map<String, Long> ratingCounts = new TreeMap<>(ratingEngine.getCountsAsMap());
-        List<RatingBucketCoverage> coverages = ratingCounts.entrySet().stream().map(entry -> {
-            RatingBucketCoverage bktCvg = new RatingBucketCoverage();
-            bktCvg.setBucket(entry.getKey());
-            bktCvg.setCount(entry.getValue());
-            return bktCvg;
-        }).collect(Collectors.toList());
-        coverageInfo.setBucketCoverageCounts(coverages);
+        if (MapUtils.isNotEmpty(ratingEngine.getCountsAsMap())) {
+            Map<String, Long> ratingCounts = new TreeMap<>(ratingEngine.getCountsAsMap());
+            List<RatingBucketCoverage> coverages = ratingCounts.entrySet().stream().map(entry -> {
+                RatingBucketCoverage bktCvg = new RatingBucketCoverage();
+                bktCvg.setBucket(entry.getKey());
+                bktCvg.setCount(entry.getValue());
+                return bktCvg;
+            }).collect(Collectors.toList());
+            coverageInfo.setBucketCoverageCounts(coverages);
+        }
         return coverageInfo;
     }
 
