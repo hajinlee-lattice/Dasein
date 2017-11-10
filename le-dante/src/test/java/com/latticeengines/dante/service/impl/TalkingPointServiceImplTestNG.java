@@ -24,8 +24,8 @@ import com.latticeengines.dante.testFramework.testDao.TestPlayDao;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 

@@ -16,6 +16,7 @@
         <property name="maxIdleTime" value="30"/>
     </bean>
 
+	<!--  
     <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="propDataManage"/>
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage, com.latticeengines.domain.exposed.datacloud.customer"/>
@@ -27,8 +28,38 @@
             </props>
         </property>
     </bean>
+    -->
+    
+    	<!-- Hibernate session factory -->
+    <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+	    <property name="entityManagerFactory" ref="entityManagerFactoryPropDataManage" />
+	</bean>
+	
+	<!-- Entity manager factory -->
+	<bean id="entityManagerFactoryPropDataManage" 
+			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="propDataManage" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage, com.latticeengines.domain.exposed.datacloud.customer" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<!-- property name="prepareConnection" value="false"/-->
+			</bean>
+		</property>
+		<property name="jpaProperties">
+          <props>
+            <prop key="hibernate.dialect">${datacloud.manage.dialect}</prop>
+            <prop key="hibernate.show_sql">false</prop>
+            <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            <prop key="hibernate.id.new_generator_mappings">true</prop>
+            <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+            <!-- prop key="hibernate.connection.release_mode">on_close</prop-->
+            <!-- prop key="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION</prop-->
+          </props>
+      </property>
+	</bean>
 
-    <bean id="transactionManagerPropDataManage" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+    <bean id="transactionManagerPropDataManage" class="org.springframework.orm.hibernate5.HibernateTransactionManager"
           p:sessionFactory-ref="sessionFactoryPropDataManage">
         <qualifier value="propDataManage"/>
     </bean>

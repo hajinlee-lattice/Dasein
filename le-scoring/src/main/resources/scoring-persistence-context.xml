@@ -17,6 +17,7 @@
     <bean id="scoringJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSourceScoring" />
 
     <!-- Hibernate session factory -->
+    <!-- 
     <bean id="sessionFactoryScoring" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceScoring" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.scoring" />
@@ -25,17 +26,45 @@
                 <prop key="hibernate.dialect">${scoring.dao.datasource.dialect}</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.globally_quoted_identifiers">true</prop>
-                <!--   <prop key="hibernate.current_session_context_class">thread</prop> -->
-                <!--   <prop key="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</prop>  -->
             </props>
         </property>
     </bean>
-
-    <bean id="transactionManagerScoring" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+ 	-->
+ 	
+ 	<!-- Hibernate session factory -->
+    <bean id="sessionFactoryScoring" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+	    <property name="entityManagerFactory" ref="entityManagerFactoryScoring" />
+	</bean>
+	
+	<!-- Entity manager factory -->
+	<bean id="entityManagerFactoryScoring" 
+			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSourceScoring" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.scoring" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<!-- property name="prepareConnection" value="false"/-->
+			</bean>
+		</property>
+		<property name="jpaProperties">
+          <props>
+            <prop key="hibernate.dialect">${scoring.dao.datasource.dialect}</prop>
+            <prop key="hibernate.show_sql">false</prop>
+            <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            <prop key="hibernate.id.new_generator_mappings">true</prop>
+            <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+            <!-- prop key="hibernate.connection.release_mode">on_close</prop-->
+            <!-- prop key="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION</prop-->
+          </props>
+      </property>
+	</bean>
+   
+    <bean id="transactionManagerScoring" class="org.springframework.orm.hibernate5.HibernateTransactionManager"
         p:sessionFactory-ref="sessionFactoryScoring" >
         <qualifier value="scoring"/>
     </bean>
-
+    
     <tx:annotation-driven transaction-manager="transactionManagerScoring" />
 
     <!--   All DAOs' EntityMgrs should be added to com.latticeengines.dataplatform.functionalframework.OrderedEntityMgrListForDbClean -->

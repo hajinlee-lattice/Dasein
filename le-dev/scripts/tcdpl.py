@@ -41,6 +41,11 @@ PRESETS = {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop',
                     'modelquality']
+    },
+    'all': {
+        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'playmaker', 'ulysses'],
+        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop', 'datacloudapi', 'cdl', 'dante',
+                    'objectapi']
     }
 }
 

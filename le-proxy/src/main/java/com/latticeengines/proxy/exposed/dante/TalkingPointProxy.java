@@ -2,11 +2,11 @@ package com.latticeengines.proxy.exposed.dante;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.security.exposed.serviceruntime.exception.PostResponseErrorHandler;

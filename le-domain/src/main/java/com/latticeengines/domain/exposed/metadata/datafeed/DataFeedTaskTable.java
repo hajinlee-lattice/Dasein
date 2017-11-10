@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK_TABLE", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "FK_TASK_ID", "FK_TABLE_ID" }))
+        "`FK_TASK_ID`", "`FK_TABLE_ID`" }))
 public class DataFeedTaskTable implements HasPid, Serializable {
 
     private static final long serialVersionUID = -278909761082585235L;

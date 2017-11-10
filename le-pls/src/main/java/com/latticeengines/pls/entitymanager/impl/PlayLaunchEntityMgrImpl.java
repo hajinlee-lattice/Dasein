@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.PlayLaunchDao;
 import com.latticeengines.pls.entitymanager.PlayLaunchEntityMgr;
+import com.latticeengines.pls.repository.PlayLaunchRepository;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -33,6 +35,9 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Autowired
     private PlayLaunchDao playLaunchDao;
+    
+    @Autowired
+    private PlayLaunchRepository playLaunchRepository;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -88,6 +93,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     }
 
     @Override
+    @Modifying
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByLaunchId(String launchId) {
         PlayLaunch playLaunch = findByLaunchId(launchId);
@@ -126,7 +132,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     private void deletePlayLaunch(PlayLaunch playLaunch) {
         if (playLaunch != null) {
-            playLaunchDao.delete(playLaunch);
+        		playLaunchDao.delete(playLaunch);
         }
     }
 

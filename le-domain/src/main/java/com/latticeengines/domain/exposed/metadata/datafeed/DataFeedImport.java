@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_IMPORT", uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE",
-        "ENTITY", "FEED_TYPE", "FK_FEED_EXEC_ID", "FK_DATA_ID" }))
+        "ENTITY", "FEED_TYPE", "`FK_FEED_EXEC_ID`", "`FK_DATA_ID`" }))
 public class DataFeedImport implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;

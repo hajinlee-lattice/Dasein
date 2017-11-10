@@ -34,7 +34,7 @@
                             <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
                             <arguments>
                                 <argument>PLS_MultiTenant</argument>
-                                <argument>com.latticeengines.domain.exposed.dante.multitenant</argument>
+                                <argument>com.latticeengines.domain.exposed.multitenant</argument>
                                 <argument>com.latticeengines.domain.exposed.dataflow</argument>
                                 <argument>com.latticeengines.domain.exposed.dataloader</argument>
                                 <argument>com.latticeengines.domain.exposed.dataplatform</argument>

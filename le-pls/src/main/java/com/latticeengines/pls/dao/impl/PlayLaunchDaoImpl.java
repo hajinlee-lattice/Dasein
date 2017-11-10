@@ -27,7 +27,6 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     protected Class<PlayLaunch> getEntityClass() {
         return PlayLaunch.class;
     }
-
     @SuppressWarnings("rawtypes")
     @Override
     public PlayLaunch findByLaunchId(String launchId) {
@@ -49,7 +48,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
         return (PlayLaunch) list.get(0);
     }
-
+	
     @SuppressWarnings("rawtypes")
     @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date created) {
@@ -73,7 +72,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
         return (PlayLaunch) list.get(0);
     }
-
+     
     @SuppressWarnings("unchecked")
     @Override
     public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
@@ -134,7 +133,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
         return null;
     }
-
+	
     @Override
     @SuppressWarnings("unchecked")
     public List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,

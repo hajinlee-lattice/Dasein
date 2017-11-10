@@ -21,6 +21,7 @@
             value="${playmaker.datasource.password.encrypted}" />
     </bean>
 
+	<!--  
     <bean id="sessionFactoryPlaymaker"
         class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourcePlaymaker" />
@@ -34,8 +35,39 @@
             </props>
         </property>
     </bean>
+    -->
+    
+    	<!-- Hibernate session factory -->
+    <bean id="sessionFactoryPlaymaker" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+	    <property name="entityManagerFactory" ref="entityManagerFactoryPlaymaker" />
+	</bean>
+	
+	<!-- Entity manager factory -->
+	<bean id="entityManagerFactoryPlaymaker" 
+			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSourcePlaymaker" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<!-- property name="prepareConnection" value="false"/-->
+			</bean>
+		</property>
+		<property name="jpaProperties">
+          <props>
+            <prop key="hibernate.dialect">${playmaker.datasource.dialect}</prop>
+            <prop key="hibernate.show_sql">false</prop>
+            <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            <prop key="hibernate.id.new_generator_mappings">true</prop>
+            <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+            <!-- prop key="hibernate.connection.release_mode">on_close</prop-->
+            <!-- prop key="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION</prop-->
+          </props>
+      </property>
+	</bean>
+	
     <bean id="transactionManagerPlaymaker"
-        class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+        class="org.springframework.orm.hibernate5.HibernateTransactionManager"
         p:sessionFactory-ref="sessionFactoryPlaymaker">
         <qualifier value="playmaker" />
     </bean>

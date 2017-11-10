@@ -34,7 +34,7 @@ public class TenantServiceImpl implements TenantService {
         try {
             globalTenantManagementService.registerTenant(tenant);
         } catch (LedpException e) {
-            log.warn("Error registering tenant with GA.");
+            log.warn("Error registering tenant with GA.", e);
         }
         tenantEntityMgr.create(tenant);
     }

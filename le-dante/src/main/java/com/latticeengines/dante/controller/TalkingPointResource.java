@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 
 import io.swagger.annotations.Api;

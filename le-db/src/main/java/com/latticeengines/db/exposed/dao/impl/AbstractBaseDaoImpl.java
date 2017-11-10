@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.orm.hibernate4.SessionFactoryUtils;
+import org.springframework.orm.hibernate5.SessionFactoryUtils;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -158,7 +158,10 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @Override
     public void delete(T entity) {
-        getSessionFactory().getCurrentSession().delete(entity);
+    		// This is needed as part of Hibernate and JPA integration for backward compatibility
+    		// Refer to section 5.4 and 5.7 in https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html
+    		Session currSession = getSessionFactory().getCurrentSession();
+    		currSession.delete(currSession.contains(entity) ? entity: currSession.merge(entity));
     }
 
     @Override

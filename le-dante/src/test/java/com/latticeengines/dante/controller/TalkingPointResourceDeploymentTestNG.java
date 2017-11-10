@@ -21,7 +21,7 @@ import com.latticeengines.dante.testFramework.DanteTestNGBase;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 
 public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {

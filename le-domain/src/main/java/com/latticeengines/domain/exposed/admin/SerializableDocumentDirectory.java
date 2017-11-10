@@ -613,7 +613,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(str);
-                return jNode.isObject();
+                return jNode != null && jNode.isObject();
             } catch (IOException e) {
                 return false;
             }
@@ -627,7 +627,7 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(str);
-                return jNode.isArray();
+                return jNode != null && jNode.isArray();
             } catch (IOException e) {
                 return false;
             }

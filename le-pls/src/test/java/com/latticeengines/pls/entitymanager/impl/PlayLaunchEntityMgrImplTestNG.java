@@ -252,7 +252,7 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testDelete" })
     public void testPostDelete() {
         try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(5L));
+            Thread.sleep(TimeUnit.SECONDS.toMillis(10L));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

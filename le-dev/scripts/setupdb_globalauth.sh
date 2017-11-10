@@ -11,7 +11,6 @@ UNAME=`uname`
 threshold_version=5.6
 echo "Setting up GlobalAuth"
 
-# Remove alter table drop foreign key statements from the script
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL

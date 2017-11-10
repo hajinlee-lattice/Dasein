@@ -1,4 +1,4 @@
-use `oauth2`;
+use `oauth2DB`;
 
 drop table if exists `oauth_client_details`;
 create table oauth_client_details (

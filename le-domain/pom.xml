@@ -48,11 +48,11 @@
         </dependency>
         <!-- use this instead of <artifactId>persistence-api</artifactId>
                     1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
-        <dependency>
+        <!-- dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.0-api</artifactId>
             <version>${hibernate.jpa.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>

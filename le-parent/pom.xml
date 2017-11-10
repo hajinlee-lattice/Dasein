@@ -52,6 +52,7 @@
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> <!-- need ledp3 classifier -->
+        <spring.data.jpa.version>2.0.0.RELEASE</spring.data.jpa.version> 
         <tez.version>0.9.0</tez.version>
         <guava.version>19.0</guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
@@ -70,8 +71,8 @@
         <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
         <jackson.fasterxml.version>2.9.2</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->
-        <hibernate.version>4.1.9.Final</hibernate.version>
-        <hibernate.jpa.version>1.0.1.Final</hibernate.jpa.version>
+        <hibernate.version>5.2.12.Final</hibernate.version>
+        <!-- hibernate.jpa.version>1.0.1.Final</hibernate.jpa.version-->
         <jetty.version>9.3.14.v20161028</jetty.version> <!-- camel-salesforce 2.19.1 -->
         <javax.servlet.version>3.1.0</javax.servlet.version> <!-- just keep up with tomcat version -->
         <javax.jsp.version>2.2</javax.jsp.version> <!-- just keep up with tomcat version -->
@@ -124,7 +125,7 @@
         <kafka.scala.version>2.11</kafka.scala.version>
         <confluent.version>3.3.0</confluent.version>
         <!-- Spring -->
-        <spring.version>4.3.9.RELEASE</spring.version>
+        <spring.version>5.0.1.RELEASE</spring.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <spring.batch.version>3.0.7.RELEASE</spring.batch.version>
         <spring.security.version>4.2.3.RELEASE</spring.security.version>
@@ -1249,6 +1250,17 @@
                 <version>${quartz.version}</version>
             </dependency>
             <dependency>
+	            <groupId>org.springframework.data</groupId>
+	            <artifactId>spring-data-jpa</artifactId>
+	            <version>${spring.data.jpa.version}</version>
+        		</dependency>
+        
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz-jobs</artifactId>
                 <version>${quartz.version}</version>
@@ -1897,7 +1909,6 @@
                 <version>${tez.version}</version>
                 <classifier>ledp</classifier>
             </dependency>
-
             <!-- Web Applications -->
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -1924,6 +1935,8 @@
                 <artifactId>jsp-api</artifactId>
                 <version>${javax.jsp.version}</version>
             </dependency>
+            
+            
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-server</artifactId>
@@ -2215,6 +2228,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
         </dependency>
 
         <!-- TEST dependencies -->

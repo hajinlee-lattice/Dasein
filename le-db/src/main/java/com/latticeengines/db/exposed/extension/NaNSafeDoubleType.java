@@ -8,6 +8,7 @@ import java.sql.Types;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
 
 public class NaNSafeDoubleType implements UserType {
@@ -32,7 +33,7 @@ public class NaNSafeDoubleType implements UserType {
     }
 
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner)
+    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
             throws HibernateException, SQLException {
         double value = rs.getDouble(names[0]);
         if (rs.wasNull()) {
@@ -42,7 +43,7 @@ public class NaNSafeDoubleType implements UserType {
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session)
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
             throws HibernateException, SQLException {
         if (value == null || Double.isNaN((Double) value)) {
             st.setNull(index, Types.DOUBLE);
@@ -50,7 +51,7 @@ public class NaNSafeDoubleType implements UserType {
             st.setDouble(index, ((Double) value));
         }
     }
-
+	
     @Override
     public Object deepCopy(Object value) throws HibernateException {
         // returning value should be OK since doubles are immutable
@@ -76,4 +77,5 @@ public class NaNSafeDoubleType implements UserType {
     public Object replace(Object original, Object target, Object owner) throws HibernateException {
         return original;
     }
+
 }

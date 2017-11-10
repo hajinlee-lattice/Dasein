@@ -4,16 +4,25 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.boot.registry.internal.StandardServiceRegistryImpl;
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.Action;
+import org.hibernate.tool.schema.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import com.latticeengines.db.exposed.schemagen.postprocess.PostProcessor;
 import com.latticeengines.db.exposed.schemagen.postprocess.SQLServerPostProcessor;
@@ -22,11 +31,14 @@ public class SchemaGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(SchemaGenerator.class);
 
-    private Configuration cfg;
     private String schemaName = "";
     private DBDialect dialect;
     private PostProcessor postProcessor;
 
+    private ServiceRegistry serviceRegistry;
+    private Metadata metadata;
+    private Map<String, Object> hibernateProperties;
+    
     /**
      * an new instance is only good for one dialect. It seems that Hibernate
      * configuration cannot be reused by other dialect.
@@ -38,10 +50,11 @@ public class SchemaGenerator {
      */
     public SchemaGenerator(String name, DBDialect dialect, PostProcessor postProcessor, String... packages)
             throws Exception {
-        cfg = new Configuration();
-        this.dialect = dialect;
+    		this.hibernateProperties = getConfigProperties(dialect);
+    		this.dialect = dialect;
+    		this.schemaName = name;
         this.postProcessor = postProcessor;
-        init(name, packages);
+        init(packages);
         log.info("SchemaGenerator " + name + " for " + dialect + " dialect");
     }
 
@@ -52,20 +65,30 @@ public class SchemaGenerator {
      * @param packages
      * @throws Exception
      */
+    /*
     public SchemaGenerator(String schemaName, Properties dbProp, DBDialect dialect, String... packages)
             throws Exception {
         cfg = new Configuration();
+        
         cfg.setProperties(dbProp);
         this.dialect = dialect;
         init(schemaName, packages);
     }
+	*/
+    
+    private Map<String, Object> getConfigProperties(DBDialect dialect) {
+		Map<String, Object> hibernateProperties = new HashMap<>();
+		hibernateProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.CREATE_DROP);
+		hibernateProperties.put(AvailableSettings.GLOBALLY_QUOTED_IDENTIFIERS, true);
+		hibernateProperties.put(AvailableSettings.AUTOCOMMIT, true);
+		hibernateProperties.put(AvailableSettings.DIALECT, dialect.getDialectClass());
+		
+		return hibernateProperties;
+    }
 
-    private void init(String name, String... packages) throws Exception {
-        this.schemaName = name;
-        cfg.setProperty("hibernate.hbm2ddl.auto", "create");
-        cfg.setProperty("hibernate.globally_quoted_identifiers", "true");
-        cfg.setProperty("connection.autocommit", "true");
-
+    private void init(String... packages) throws Exception {
+		this.serviceRegistry = new StandardServiceRegistryBuilder().applySettings(this.hibernateProperties).build();
+		
         List<Class<?>> classes = new ArrayList<>();
         for (String packageName : packages) {
             classes.addAll(getClasses(packageName));
@@ -75,29 +98,49 @@ public class SchemaGenerator {
             throw new ClassNotFoundException("class not found for package: " + packages);
         }
 
+        MetadataSources mdSources = new MetadataSources(serviceRegistry);
         for (Class<?> clazz : classes) {
-            cfg.addAnnotatedClass(clazz);
+        	    mdSources.addAnnotatedClass(clazz);
         }
+        this.metadata = mdSources.buildMetadata();
+    }
+    
+    private void cleanupResources() {
+    	    if (serviceRegistry != null)
+    	        ((StandardServiceRegistryImpl) serviceRegistry).destroy();
     }
 
+    
     private void generate(String outputFileName, boolean bScript, boolean bExportToDb) {
-        cfg.setProperty("hibernate.dialect", dialect.getDialectClass());
 
-        SchemaExport export = new SchemaExport(cfg);
-        export.setDelimiter(";");
-        export.setFormat(false);
-        if (outputFileName != null) {
-            export.setOutputFile(outputFileName);
-        }
-
-        export.execute(bScript, bExportToDb, false, false);
+    		try {
+    	        SchemaExport export = new SchemaExport();
+    	        export.setDelimiter(";");
+    	        export.setFormat(false);
+    	        if (outputFileName != null) {
+    	            export.setOutputFile(outputFileName);
+    	        }
+    	        
+    	        EnumSet<TargetType> targetTypes = EnumSet.noneOf( TargetType.class );
+    	        if (bScript) {
+    	        		targetTypes.add(TargetType.SCRIPT);
+    	        }
+    	        if (bExportToDb) {
+	        		targetTypes.add(TargetType.DATABASE);
+	        }
+    	        export.execute(targetTypes, SchemaExport.Action.BOTH, this.metadata, this.serviceRegistry);
+    			
+    		} finally {
+    			cleanupResources();
+    		}
     }
 
     public File generateToScript() throws IOException {
-        String exportFileName = "ddl_" + schemaName.toLowerCase() + "_" + dialect.name().toLowerCase() + ".sql";
+    		String exportFileName = "ddl_" + schemaName.toLowerCase() + "_" + dialect.name().toLowerCase() + ".sql";
         generate(exportFileName, true, false);
         postProcess(exportFileName);
-
+        
+        log.info("Genetated Schema at: " + exportFileName);
         return new File(exportFileName);
     }
 
@@ -272,7 +315,7 @@ public class SchemaGenerator {
          * uses a custom dialect for SQLSERVER
          **/
         SQLSERVER("com.latticeengines.db.exposed.schemagen.LeSQLServer2008Dialect"), //
-        MYSQL("org.hibernate.dialect.MySQLDialect"), //
+        MYSQL("org.hibernate.dialect.MySQL5Dialect"), //
         MYSQL5INNODB("org.hibernate.dialect.MySQL5InnoDBDialect"), //
         HSQL("org.hibernate.dialect.HSQLDialect");
 

@@ -40,7 +40,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.format.number.NumberFormatter;
+import org.springframework.format.number.NumberStyleFormatter;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -353,7 +353,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     @VisibleForTesting
     Number parseStringToNumber(String inputStr) throws ParseException {
-        NumberFormatter numberFormatter = new NumberFormatter();
+        NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
         return numberFormatter.parse(inputStr, Locale.getDefault());
     }
 

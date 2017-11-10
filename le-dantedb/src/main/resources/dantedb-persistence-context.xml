@@ -17,7 +17,8 @@
     </bean>
 
     <!-- Hibernate session factory -->
-    <bean id="danteSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    <!-- 
+    <bean id="danteSessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
         <property name="dataSource" ref="danteDataSource"/>
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.dante"/>
         <property name="entityTypeFilters" ref="ignoreMultitenantEntitiesRegexPattern"/>
@@ -26,13 +27,44 @@
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
                 <prop key="hibernate.show_sql">${dantedb.datasource.show_sql:false}</prop>
                 <prop key="hibernate.globally_quoted_identifiers">true</prop>
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            	    <prop key="hibernate.allow_refresh_detached_entity">true</prop>
             </props>
         </property>
     </bean>
-
+	 -->
+	
+	<!-- Hibernate session factory -->
+	
+    <bean id="danteSessionFactory" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+	    <property name="entityManagerFactory" ref="danteEntityManagerFactory" />
+	</bean>
+	 
+	<bean id="danteEntityManagerFactory" 
+			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="danteDataSource" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dante" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+			</bean>
+		</property>
+		<property name="jpaProperties">
+          <props>
+            <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
+            <prop key="hibernate.show_sql">${dantedb.datasource.show_sql:false}</prop>
+            <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            <prop key="hibernate.id.new_generator_mappings">true</prop>
+            <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+            
+          </props>
+      </property>
+	</bean>
+	
     <bean id="danteTransactionManager"
-          class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+          class="org.springframework.orm.hibernate5.HibernateTransactionManager"
           p:sessionFactory-ref="danteSessionFactory">
+          <qualifier value="dantedb"/>
     </bean>
 
     <tx:annotation-driven transaction-manager="danteTransactionManager"/>

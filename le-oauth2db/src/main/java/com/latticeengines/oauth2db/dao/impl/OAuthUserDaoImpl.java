@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.oauth2db.dao.OAuthUserDao;
+import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 
 public class OAuthUserDaoImpl extends BaseDaoImpl<OAuthUser> implements OAuthUserDao {
 
@@ -64,7 +65,7 @@ public class OAuthUserDaoImpl extends BaseDaoImpl<OAuthUser> implements OAuthUse
 
     @Override
     public String getAppIdByAccessToken(String token) {
-        JdbcTokenStore tokenStore = new JdbcTokenStore(getDataSource());
+        JdbcTokenStore tokenStore = new JsonJdbcTokenStore(getDataSource());
         String app_id = null;
         OAuth2Authentication auth = tokenStore.readAuthentication(token);
         if (auth != null) {

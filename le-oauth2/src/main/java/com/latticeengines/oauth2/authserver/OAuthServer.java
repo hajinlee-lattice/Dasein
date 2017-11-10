@@ -6,9 +6,8 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
+import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -20,18 +19,18 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
-import org.springframework.web.WebApplicationInitializer;
 
 import com.latticeengines.monitor.exposed.metric.service.StatsService;
 import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
+import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 
 @Configuration
-@EnableAutoConfiguration(exclude = { VelocityAutoConfiguration.class })
+@EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ImportResource(value = { //
         "classpath:oauth2-authserver-context.xml", //
         "classpath:common-properties-context.xml" })
-public class OAuthServer extends SpringBootServletInitializer implements WebApplicationInitializer {
+public class OAuthServer extends SpringBootServletInitializer {
 
     @Autowired
     private StatsService statsService;
@@ -60,7 +59,7 @@ public class OAuthServer extends SpringBootServletInitializer implements WebAppl
 
         @Bean
         public JdbcTokenStore tokenStore() {
-            JdbcTokenStore tokenStore = new JdbcTokenStore(dataSource);
+            JdbcTokenStore tokenStore = new JsonJdbcTokenStore(dataSource);
             tokenStore.setAuthenticationKeyGenerator(authenticationKeyGenerator);
             return tokenStore;
         }
@@ -94,5 +93,6 @@ public class OAuthServer extends SpringBootServletInitializer implements WebAppl
         public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
         }
     }
+
 
 }

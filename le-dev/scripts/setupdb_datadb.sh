@@ -15,6 +15,7 @@ if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     # Remove alter table drop foreign key statements from the script
     sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
+
 else
     echo "You are on ${UNAME}"
     # Remove alter table drop foreign key statements from the script

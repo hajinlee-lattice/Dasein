@@ -4,7 +4,7 @@ function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != 
 
 UNAME=`uname`
 threshold_version=5.6
-echo "Setting up OAuth2"
+echo "Setting up OAuth2DB"
 
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true
 if [ -z "${mysql_version}" ]; then

@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
+import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 import com.latticeengines.scoringapi.exposed.exception.ExceptionEncodingTranslator;
 
 @Configuration
@@ -27,7 +28,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Bean
     public JdbcTokenStore tokenStore() {
-        return new JdbcTokenStore(dataSource);
+        return new JsonJdbcTokenStore(dataSource);
     }
 
     @Override

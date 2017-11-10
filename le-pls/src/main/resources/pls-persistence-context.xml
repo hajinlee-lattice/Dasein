@@ -16,6 +16,7 @@
 
 
     <!-- Hibernate session factory -->
+    <!-- 
     <bean id="sessionFactoryAccountMaster" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceAccountMaster"/>
         <property name="packagesToScan"
@@ -28,8 +29,38 @@
             </props>
         </property>
     </bean>
+ 	-->
+ 	
+ 		<!-- Hibernate session factory -->
+    <bean id="sessionFactoryAccountMaster" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+	    <property name="entityManagerFactory" ref="entityManagerFactoryAccountMaster" />
+	</bean>
+	
+	<!-- Entity manager factory -->
+	<bean id="entityManagerFactoryAccountMaster" 
+			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSourceAccountMaster" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.pls, com.latticeengines.domain.exposed.metadata, com.latticeengines.domain.exposed.modelreview, com.latticeengines.domain.exposed.security, com.latticeengines.domain.exposed.workflow, com.latticeengines.domain.exposed.multitenant" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<!-- property name="prepareConnection" value="false"/-->
+			</bean>
+		</property>
+		<property name="jpaProperties">
+          <props>
+            <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
+            <prop key="hibernate.show_sql">true</prop>
+            <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            <prop key="hibernate.id.new_generator_mappings">true</prop>
+            <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            <prop key="hibernate.allow_refresh_detached_entity">true</prop>
+            <!-- prop key="hibernate.connection.release_mode">on_close</prop-->
+            <!-- prop key="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION</prop-->
+          </props>
+      </property>
+	</bean>
 
-    <bean id="transactionManagerAccountMaster" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+    <bean id="transactionManagerAccountMaster" class="org.springframework.orm.hibernate5.HibernateTransactionManager"
           p:sessionFactory-ref="sessionFactoryAccountMaster">
         <qualifier value="accountMaster"/>
     </bean>

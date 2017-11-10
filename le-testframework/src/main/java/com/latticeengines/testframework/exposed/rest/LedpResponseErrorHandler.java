@@ -61,14 +61,14 @@ public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
     protected Charset getCharset(ClientHttpResponse response) {
         HttpHeaders headers = response.getHeaders();
         MediaType contentType = headers.getContentType();
-        return contentType != null ? contentType.getCharSet() : null;
+        return contentType != null ? contentType.getCharset() : null;
     }
 
     private String getResponseBodyAsString(ClientHttpResponse response) {
         try {
             InputStream responseBody = response.getBody();
             if (responseBody != null) {
-                return IOUtils.toString(responseBody);
+                return IOUtils.toString(responseBody, getCharset(response));
             }
         }
         catch (IOException ex) {

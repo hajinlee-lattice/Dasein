@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;

@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonUtils {
@@ -64,11 +65,16 @@ public class JsonUtils {
     }
 
     public static <T> T deserialize(String jsonStr, Class<T> clazz) {
+        return deserialize(getObjectMapper(), jsonStr, clazz);
+    }
+    
+    public static <T> T deserialize(ObjectMapper objectMapper, String jsonStr, Class<T> clazz) {
         if (jsonStr == null) {
             return null;
         }
-        ObjectMapper objectMapper = getObjectMapper();
-
+        if (objectMapper == null) {
+        		objectMapper = getObjectMapper();
+        }
         T deserializedSchema;
         try {
             deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
@@ -145,6 +151,7 @@ public class JsonUtils {
     public static ObjectMapper getObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
+        
         return mapper;
     }
 

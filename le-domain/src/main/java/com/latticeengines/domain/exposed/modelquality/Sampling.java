@@ -86,17 +86,17 @@ public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLates
         this.pid = pid;
     }
 
-    public boolean isParallelEnabled() {
+    	public boolean isParallelEnabled() {
         return parallelEnabled;
     }
-
+	
     public void setParallelEnabled(boolean parallelEnabled) {
         this.parallelEnabled = parallelEnabled;
     }
 
     @MetricTag(tag = "IsParallelSamplingEnabled")
     @JsonIgnore
-    public String getParallelEnabled() {
+    public String getParallelEnabledStringValue() {
         return String.valueOf(parallelEnabled);
     }
     

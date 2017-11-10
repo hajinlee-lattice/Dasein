@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.exposed;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
@@ -25,5 +26,7 @@ public class TestProxy extends BaseRestApiProxy implements TestInterface {
     public void testRetry() {
         post("testRetry", "http://thiswillfail", null, Void.class);
     }
+    
+    
 
 }

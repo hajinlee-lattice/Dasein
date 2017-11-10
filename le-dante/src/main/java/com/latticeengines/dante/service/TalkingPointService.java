@@ -3,8 +3,8 @@ package com.latticeengines.dante.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 
 public interface TalkingPointService {
 
