@@ -6,7 +6,7 @@ angular
     ])
     .controller('SidebarRootController', function(
         $scope, $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, 
-        JobsStore, ModelRatingsService
+        JobsStore, ModelRatingsService, DataCloudStore
     ) {
         $scope.$state = $state;
         $scope.ResourceUtility = ResourceUtility;
@@ -25,6 +25,8 @@ angular
                 $rootScope.$broadcast('sidebar:toggle');
             }
         }
+
+        $scope.isDataAvailable = DataCloudStore.metadata.enrichmentsTotal;
 
         FeatureFlagService.GetAllFlags().then(function(result) {
             var flags = FeatureFlagService.Flags();

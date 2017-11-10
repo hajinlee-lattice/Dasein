@@ -5,10 +5,10 @@ angular
         .state('home.jobs', {
             url: '/jobs',
             views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
+                // "navigation@": {
+                //     controller: 'SidebarRootController',
+                //     templateUrl: 'app/navigation/sidebar/RootView.html'
+                // },
                 "summary@": {
                     controller: 'JobsTabsController',
                     controllerAs: 'vm',

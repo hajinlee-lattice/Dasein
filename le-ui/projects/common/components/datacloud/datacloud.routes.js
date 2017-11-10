@@ -421,6 +421,19 @@ angular
                 }
             }
         },
+        nodata: {
+            url: '/nodata',
+            params: {
+                pageTitle: 'My Data',
+                pageIcon: 'ico-analysis',
+                section: 'segment.analysis'               
+            },
+            views: {
+                "main@": {
+                    templateUrl: '/components/datacloud/explorer/nodata/nodata.component.html'
+                }
+            }
+        },
         accounts: {
             url: '/accounts',
             params: {
@@ -641,10 +654,19 @@ angular
             resolve: {
                 LookupResponse: [ function() {
                     return { attributes: null };
+                }],
+                RerouteToNoData: ['$state', '$stateParams', 'EnrichmentCount', function($state, $stateParams, EnrichmentCount) {
+                    if (EnrichmentCount == 0) {
+                        $state.go('home.nodata', { 
+                            tenantName: $stateParams.tenantName,
+                            segment: $stateParams.segment
+                        });
+                    }
                 }]
             }
         }))
         .state('home.segment.explorer.builder', getState('builder'))
+        .state('home.nodata', getState('nodata'))
         .state('home.segment.accounts', getState('accounts'))
         .state('home.segment.contacts', getState('contacts'));
 });
