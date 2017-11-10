@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.entitymanager.impl;
+package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import javax.inject.Inject;
 
@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.DLTenantMappingDao;
-import com.latticeengines.apps.cdl.entitymanager.DLTenantMappingEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DLTenantMappingEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;

@@ -22,6 +22,8 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
@@ -36,7 +38,6 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     private static final int PRODUCT_IMPORT_SIZE_1_2 = 30;
     private static final int TRANSACTION_IMPORT_SIZE_1_1 = 20000;
     private static final int TRANSACTION_IMPORT_SIZE_1_2 = 10000;
-
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -136,15 +137,23 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
         createTestSegments();
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_1,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_1,
                 BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_1,
+                BusinessEntity.Contact, SEGMENT_2_CONTACT_1,
                 BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
         verifyTestSegment2Counts(segment2Counts);
+
+        RatingEngine ratingEngine = createRuleBasedRatingEngine();
+        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RuleBucketName.A, RATING_A_COUNT_1, //
+                RuleBucketName.D, RATING_D_COUNT_1, //
+                RuleBucketName.F, RATING_F_COUNT_1
+        );
+        verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
 }

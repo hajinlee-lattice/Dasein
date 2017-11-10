@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.entitymanager.DLTenantMappingEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DLTenantMappingEntityMgr;
 import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 

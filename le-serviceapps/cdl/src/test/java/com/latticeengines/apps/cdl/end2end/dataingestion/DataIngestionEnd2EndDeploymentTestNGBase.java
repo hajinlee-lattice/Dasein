@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -64,6 +65,11 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingRule;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -81,6 +87,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -101,16 +108,24 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String S3_VDB_VERSION = "1";
 
     private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
-    protected static final long SEGMENT_1_ACCOUNT_1 = 21;
-    protected static final long SEGMENT_1_CONTACT_1 = 23;
-    protected static final long SEGMENT_1_ACCOUNT_2 = 21;
-    protected static final long SEGMENT_1_CONTACT_2 = 23;
+    static final long SEGMENT_1_ACCOUNT_1 = 21;
+    static final long SEGMENT_1_CONTACT_1 = 23;
+    static final long SEGMENT_1_ACCOUNT_2 = 58;
+    static final long SEGMENT_1_CONTACT_2 = 68;
 
     private static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
-    protected static final long SEGMENT_2_ACCOUNT_1 = 24;
-    protected static final long SEGMENT_2_CONTACT_1 = 27;
-    protected static final long SEGMENT_2_ACCOUNT_2 = 24;
-    protected static final long SEGMENT_2_CONTACT_2 = 27;
+    static final long SEGMENT_2_ACCOUNT_1 = 24;
+    static final long SEGMENT_2_CONTACT_1 = 27;
+    static final long SEGMENT_2_ACCOUNT_2 = 67;
+    static final long SEGMENT_2_CONTACT_2 = 81;
+
+    static final long RATING_A_COUNT_1 = 6;
+    static final long RATING_D_COUNT_1 = 17;
+    static final long RATING_F_COUNT_1 = 1;
+
+    static final long RATING_A_COUNT_2 = 19;
+    static final long RATING_D_COUNT_2 = 46;
+    static final long RATING_F_COUNT_2 = 2;
 
     @Inject
     DataCollectionProxy dataCollectionProxy;
@@ -144,6 +159,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     private TestMetadataSegmentProxy testMetadataSegmentProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -535,30 +553,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     void createTestSegments() {
         testMetadataSegmentProxy.createOrUpdate(constructTestSegment1());
         testMetadataSegmentProxy.createOrUpdate(constructTestSegment2());
-        Assert.assertNotNull(testMetadataSegmentProxy.getSegment(SEGMENT_NAME_1));
-        Assert.assertNotNull(testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2));
-
         MetadataSegment segment1 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_1);
         MetadataSegment segment2 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2);
+        Assert.assertNotNull(segment1);
+        Assert.assertNotNull(segment2);
         System.out.println(JsonUtils.pprint(segment1));
         System.out.println(JsonUtils.pprint(segment2));
-    }
-
-    void verifyTestSegment1Counts(Map<BusinessEntity, Long> expectedCounts) {
-        verfiySegmentCounts(SEGMENT_NAME_1, expectedCounts);
-    }
-
-    void verifyTestSegment2Counts(Map<BusinessEntity, Long> expectedCounts) {
-        verfiySegmentCounts(SEGMENT_NAME_2, expectedCounts);
-    }
-
-    private void verfiySegmentCounts(String segmentName, Map<BusinessEntity, Long> expectedCounts) {
-        MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
-        Assert.assertNotNull(segment);
-        expectedCounts.forEach((entity, count) -> {
-            Assert.assertNotNull(segment.getEntityCount(entity));
-            Assert.assertEquals(segment.getEntityCount(entity), count);
-        });
     }
 
     private MetadataSegment constructTestSegment1() {
@@ -610,6 +610,92 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
 
         return segment;
+    }
+
+    void verifyTestSegment1Counts(Map<BusinessEntity, Long> expectedCounts) {
+        verifySegmentCounts(SEGMENT_NAME_1, expectedCounts);
+    }
+
+    void verifyTestSegment2Counts(Map<BusinessEntity, Long> expectedCounts) {
+        verifySegmentCounts(SEGMENT_NAME_2, expectedCounts);
+    }
+
+    private void verifySegmentCounts(String segmentName, Map<BusinessEntity, Long> expectedCounts) {
+        MetadataSegment segment = testMetadataSegmentProxy.getSegment(segmentName);
+        int retries = 0;
+        while (segment == null && retries++ < 3) {
+            logger.info("Wait for 1 sec to retry getting rating engine.");
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            segment = testMetadataSegmentProxy.getSegment(segmentName);
+        }
+        Assert.assertNotNull(segment,
+                "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
+        final MetadataSegment segment1 = segment;
+        expectedCounts.forEach((entity, count) -> {
+            Assert.assertNotNull(segment1.getEntityCount(entity));
+            Assert.assertEquals(segment1.getEntityCount(entity), count);
+        });
+    }
+
+    RatingEngine createRuleBasedRatingEngine() {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setSegment(constructTestSegment2());
+        ratingEngine.setCreatedBy("test@lattice-engines.com");
+        ratingEngine.setType(RatingEngineType.RULE_BASED);
+        RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
+
+        String modelId = newEngine.getActiveModel().getId();
+        RuleBasedModel model = constructRuleModel(modelId);
+        ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), modelId, model);
+
+        return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
+    }
+
+    private RuleBasedModel constructRuleModel(String modelId) {
+        RatingRule ratingRule = new RatingRule();
+        ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
+
+        Bucket bktA = Bucket.valueBkt("CALIFORNIA");
+        Restriction resA = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "LDC_State"), bktA);
+        ratingRule.setRuleForBucket(RuleBucketName.A, resA, null);
+
+        Bucket bktF = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("BOB"));
+        Restriction resF = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), bktF);
+        ratingRule.setRuleForBucket(RuleBucketName.F, null, resF);
+
+        RuleBasedModel ruleBasedModel = new RuleBasedModel();
+        ruleBasedModel.setRatingRule(ratingRule);
+        ruleBasedModel.setId(modelId);
+        return ruleBasedModel;
+    }
+
+    void verifyRatingEngineCount(String engineId, Map<RuleBucketName, Long> expectedCounts) {
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), engineId);
+        int retries = 0;
+        while (ratingEngine == null && retries++ < 3) {
+            logger.info("Wait for 1 sec to retry getting rating engine.");
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), engineId);
+        }
+        Assert.assertNotNull(ratingEngine,
+                "Cannot find rating engine " + engineId + " in tenant " + mainTestTenant.getId());
+        System.out.println(JsonUtils.pprint(ratingEngine));
+        Map<String, Long> counts = ratingEngine.getCountsAsMap();
+        Assert.assertTrue(MapUtils.isNotEmpty(counts));
+        expectedCounts.forEach((bkt, count) -> {
+            Assert.assertNotNull(counts.get(bkt.getName()),
+                    "Cannot find count for bucket " + bkt.getName() + " in rating engine.");
+            Assert.assertEquals(counts.get(bkt.getName()), count);
+        });
     }
 
 }

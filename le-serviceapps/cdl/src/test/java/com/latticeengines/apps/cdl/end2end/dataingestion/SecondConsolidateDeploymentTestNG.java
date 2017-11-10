@@ -27,6 +27,8 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
@@ -34,6 +36,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
     private static final Logger log = LoggerFactory.getLogger(SecondConsolidateDeploymentTestNG.class);
 
     private StatisticsContainer preConsolidateStats;
+    private RatingEngine ratingEngine;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -56,6 +59,14 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
                 BusinessEntity.Contact, SEGMENT_2_CONTACT_1,
                 BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
         verifyTestSegment2Counts(segment2Counts);
+
+        ratingEngine = createRuleBasedRatingEngine();
+        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RuleBucketName.A, RATING_A_COUNT_1, //
+                RuleBucketName.D, RATING_D_COUNT_1, //
+                RuleBucketName.F, RATING_F_COUNT_1
+        );
+        verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
 
         preConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
 
@@ -119,16 +130,23 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
-//        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-//                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
-//                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
-//                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
-//        verifyTestSegment1Counts(segment1Counts);
-//        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
-//                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
-//                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
-//                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
-//        verifyTestSegment2Counts(segment2Counts);
+        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
+                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_2);
+        verifyTestSegment1Counts(segment1Counts);
+        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
+                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
+                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_2);
+        verifyTestSegment2Counts(segment2Counts);
+        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RuleBucketName.A, RATING_A_COUNT_2, //
+                RuleBucketName.D, RATING_D_COUNT_2, //
+                RuleBucketName.F, RATING_F_COUNT_2
+        );
+        verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
+
     }
 
 }

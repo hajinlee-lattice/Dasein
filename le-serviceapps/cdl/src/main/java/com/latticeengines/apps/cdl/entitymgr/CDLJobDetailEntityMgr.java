@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.entitymanager;
+package com.latticeengines.apps.cdl.entitymgr;
 
 import java.util.List;
 

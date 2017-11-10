@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -38,6 +39,9 @@ public class DataFeedExecutionListener extends LEJobListener {
     @Inject
     private EntityProxy entityProxy;
 
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -57,8 +61,9 @@ public class DataFeedExecutionListener extends LEJobListener {
             // refresh caches
             CacheService cacheService = CacheServiceBase.getCacheService();
             cacheService.refreshKeysByPattern(customerSpace, CacheNames.getCdlConsolidateCacheGroup());
-            // update segment counts
+            // update segment and rating engine counts
             SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
+            RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace);
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
             DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);

@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -25,10 +28,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
-import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.pls.service.RatingEngineService;
-import com.latticeengines.pls.service.RatingModelService;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -41,7 +41,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
     @Inject
-    private MetadataSegmentService metadataSegmentService;
+    private SegmentProxy segmentProxy;
 
     @Inject
     private EntityProxy entityProxy;
@@ -88,8 +88,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
         Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
-            MetadataSegmentDTO segmentDTO = metadataSegmentService
-                    .getSegmentDTOByName(ratingEngine.getSegment().getName(), false);
+            String segmentName = ratingEngine.getSegment().getName();
+            MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenantId, segmentName);
             MetadataSegment segment = segmentDTO.getMetadataSegment();
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingEngine.setSegment(segment);

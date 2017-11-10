@@ -314,7 +314,6 @@
                    create-session="stateless">
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-        <security:intercept-url pattern="pls/accounts/**" access="hasRole('Edit_PLS_Configurations')"/>
     </security:http>
 
     <security:http use-expressions="true"

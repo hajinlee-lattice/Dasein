@@ -5,7 +5,7 @@ import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 
 public abstract class PlsRestApiProxyBase extends ProtectedRestApiProxy {
 
-    PlsRestApiProxyBase(String rootpath, Object... urlVariables) {
+    public PlsRestApiProxyBase(String rootpath, Object... urlVariables) {
         super(PropertyUtils.getProperty("common.test.pls.url"), rootpath, urlVariables);
     }
 

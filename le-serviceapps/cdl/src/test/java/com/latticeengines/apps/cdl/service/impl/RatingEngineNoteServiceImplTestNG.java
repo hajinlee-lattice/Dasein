@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
 
@@ -7,30 +7,23 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
+import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
-import com.latticeengines.pls.entitymanager.impl.RatingEngineEntityMgrImplTestNG;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.RatingEngineNoteService;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 
-public class RatingEngineNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class RatingEngineNoteServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    public static final String content1 = "content1";
-
-    public static final String content2 = "content2";
-
-    public static final String content3 = "content3";
-
-    public static final String user1 = "user1";
-
-    public static final String user2 = "user2";
-
-    @Autowired
-    private RatingEngineEntityMgrImplTestNG ratingEngineEntityMgrImplTestNG;
+    private static final String content1 = "content1";
+    private static final String content2 = "content2";
+    private static final String content3 = "content3";
+    private static final String user1 = "user1";
+    private static final String user2 = "user2";
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
 
     @Autowired
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -38,20 +31,18 @@ public class RatingEngineNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private RatingEngineNoteService ratingEngineNoteService;
 
-    private Tenant tenant;
-
     private RatingEngine ratingEngine;
-
     private RatingEngineNote note1;
-
     private RatingEngineNote note2;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        ratingEngineEntityMgrImplTestNG.setup();
-        tenant = ratingEngineEntityMgrImplTestNG.getTenant();
-        ratingEngine = ratingEngineEntityMgr
-                .createOrUpdateRatingEngine(ratingEngineEntityMgrImplTestNG.getRatingEngine(), tenant.getId());
+        setupTestEnvironmentWithDummySegment();
+        ratingEngine = new RatingEngine();
+        ratingEngine.setSegment(testSegment);
+        ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setType(RatingEngineType.RULE_BASED);
+        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
     }
 
     @Test(groups = "functional")

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -49,11 +50,14 @@ public class RatingEngineSummary {
     @JsonProperty("ratingModels")
     private Set<RatingModel> ratingModels;
 
-    @JsonProperty("accounts")
-    private Long accounts;
+    @JsonProperty("accountsInSegment")
+    private Long accountsInSegment;
 
-    @JsonProperty("contacts")
-    private Long contacts;
+    @JsonProperty("contactsInSegment")
+    private Long contactsInSegment;
+
+    @JsonProperty("coverage")
+    private Map<String, Long> coverage;
 
     public String getId() {
         return this.id;
@@ -151,20 +155,28 @@ public class RatingEngineSummary {
         return this.ratingModels;
     }
 
-    public Long getAccounts() {
-        return accounts;
+    public Long getAccountsInSegment() {
+        return accountsInSegment;
     }
 
-    public void setAccounts(Long accounts) {
-        this.accounts = accounts;
+    public void setAccountsInSegment(Long accountsInSegment) {
+        this.accountsInSegment = accountsInSegment;
     }
 
-    public Long getContacts() {
-        return contacts;
+    public Long getContactsInSegment() {
+        return contactsInSegment;
     }
 
-    public void setContacts(Long contacts) {
-        this.contacts = contacts;
+    public void setContactsInSegment(Long contactsInSegment) {
+        this.contactsInSegment = contactsInSegment;
+    }
+
+    public Map<String, Long> getCoverage() {
+        return coverage;
+    }
+
+    public void setCoverage(Map<String, Long> coverage) {
+        this.coverage = coverage;
     }
 
     @Override

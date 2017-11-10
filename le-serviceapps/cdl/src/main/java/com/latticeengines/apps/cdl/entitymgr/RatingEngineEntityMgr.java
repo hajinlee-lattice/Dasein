@@ -1,0 +1,21 @@
+package com.latticeengines.apps.cdl.entitymgr;
+
+import java.util.List;
+
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+
+public interface RatingEngineEntityMgr {
+
+    RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId);
+
+    List<RatingEngine> findAll();
+
+    List<RatingEngine> findAllByTypeAndStatus(String type, String status);
+
+    RatingEngine findById(String id);
+
+    void deleteById(String id);
+
+    void deleteRatingEngine(RatingEngine ratingEngine);
+
+}

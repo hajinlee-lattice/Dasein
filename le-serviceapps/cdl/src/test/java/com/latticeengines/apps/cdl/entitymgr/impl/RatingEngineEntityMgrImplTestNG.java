@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -29,71 +30,43 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
-import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-@Component
-public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImplTestNG.class);
 
     private static final String RATING_ENGINE_NAME = "Rating Engine";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
-    private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static final String LDC_NAME = "LDC_Name";
     private static final String LE_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Autowired
-    private SegmentService segmentService;
-
     private RatingEngine ratingEngine;
-    private String ratingEngineId;
-    private MetadataSegment segment;
-    private Tenant tenant;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-
-        setupTestEnvironmentWithGATenants(1);
-        tenant = testBed.getTestTenants().get(0);
-        MultiTenantContext.setTenant(tenant);
-
-        segment = new MetadataSegment();
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
-        segment.setDisplayName(SEGMENT_NAME);
-        MetadataSegment createdSegment = segmentService
-                .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(tenant.getId()).toString(),
-                createdSegment.getName());
-        Assert.assertNotNull(retrievedSegment);
-        log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
+        setupTestEnvironmentWithDummySegment();
         ratingEngine = new RatingEngine();
-        ratingEngine.setSegment(retrievedSegment);
+        ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
-
     }
 
     @Test(groups = "functional")
     public void testBasicOperations() {
         // test creation
         RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine,
-                tenant.getId());
+                mainTestTenant.getId());
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getActiveModel());
         Assert.assertNotNull(createdRatingEngine.getRatingModels());
         Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
         Assert.assertNotNull(createdRatingEngine.getSegment());
-        ratingEngineId = createdRatingEngine.getId();
+        String ratingEngineId = createdRatingEngine.getId();
         createdRatingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertEquals(ratingEngineId, createdRatingEngine.getId());
@@ -302,16 +275,4 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
             + "    ] " //
             + "  } " //
             + "} ";
-
-    public MetadataSegment getSegment() {
-        return this.segment;
-    }
-
-    public RatingEngine getRatingEngine() {
-        return this.ratingEngine;
-    }
-
-    public Tenant getTenant() {
-        return this.tenant;
-    }
 }

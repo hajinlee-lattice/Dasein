@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.entitymanager.impl;
+package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.time.Instant;
 import java.util.Date;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.CDLJobDetailDao;
-import com.latticeengines.apps.cdl.entitymanager.CDLJobDetailEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.security.Tenant;

@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.ProxyUtils;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
@@ -43,6 +44,9 @@ public class ProfileAndPublishListener extends LEJobListener {
     @Inject
     private EntityProxy entityProxy;
 
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -64,8 +68,9 @@ public class ProfileAndPublishListener extends LEJobListener {
             DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
             log.info("Switch data collection to version " + inactiveVersion);
             dataCollectionProxy.switchVersion(customerSpace, inactiveVersion);
-            // update segment counts
+            // update segment and rating engine counts
             SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
+            RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace);
         } else {
             log.warn("Workflow ended in an unknown state.");
         }

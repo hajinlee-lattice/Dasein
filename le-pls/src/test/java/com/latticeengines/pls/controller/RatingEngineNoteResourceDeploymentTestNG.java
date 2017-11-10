@@ -13,13 +13,17 @@ import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.impl.RatingEngineNoteServiceImplTestNG;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
+    private static final String content1 = "content1";
+    private static final String content3 = "content3";
+    private static final String user1 = "user1";
+    private static final String user2 = "user2";
+
     @Autowired
-    PlayResourceDeploymentTestNG playResourceDeploymentTestNG;
+    private PlayResourceDeploymentTestNG playResourceDeploymentTestNG;
 
     private RatingEngine ratingEngine;
 
@@ -35,8 +39,8 @@ public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestN
     @Test(groups = "deployment")
     public void testCreate() {
         NoteParams noteParams = new NoteParams();
-        noteParams.setContent(RatingEngineNoteServiceImplTestNG.content1);
-        noteParams.setUserName(RatingEngineNoteServiceImplTestNG.user1);
+        noteParams.setContent(content1);
+        noteParams.setUserName(user1);
         noteParams.setOrigin(NoteOrigin.NOTE.name());
         Assert.assertTrue(restTemplate.postForObject(
                 getRestAPIHostPort() + "/pls/ratingengines/" + ratingEngine.getId() + "/notes", noteParams,
@@ -53,8 +57,8 @@ public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestN
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
     public void testUpdate() {
         NoteParams noteParams = new NoteParams();
-        noteParams.setContent(RatingEngineNoteServiceImplTestNG.content3);
-        noteParams.setUserName(RatingEngineNoteServiceImplTestNG.user2);
+        noteParams.setContent(content3);
+        noteParams.setUserName(user2);
         Assert.assertTrue(restTemplate.postForObject(
                 getRestAPIHostPort() + "/pls/ratingengines/" + ratingEngine.getId() + "/notes/" + note1.getId(),
                 noteParams, Boolean.class));
