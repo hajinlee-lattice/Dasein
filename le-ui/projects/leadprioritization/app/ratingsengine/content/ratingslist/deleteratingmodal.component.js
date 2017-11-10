@@ -41,10 +41,7 @@ angular.module('mainApp.ratingsengine.deleteratingmodal', [
         $("#deleteRatingError").hide();
 
         RatingsEngineStore.deleteRating(ratingId).then(function(result) {
-            $timeout( function(){
-                $("#modalContainer").modal('hide');
-                //$state.go('home.ratingsengine.list.ratings', {}, { reload: true } );
-            }, 100 );
+            $("#modalContainer").modal('hide');
         });
     }
 

@@ -1,7 +1,6 @@
 div.explorer-subheader-tabs {
     position: relative;
     height: 2.5em;
-    margin: 0 0 1em 0 !important;
     line-height: 3em;
     
     ul.subheader-tabs-links {
@@ -25,7 +24,7 @@ div.explorer-subheader-tabs {
             &.active {
                 color: #333;
                 cursor: default;
-            }
+            } 
         }
     }
 

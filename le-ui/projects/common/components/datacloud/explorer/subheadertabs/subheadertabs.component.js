@@ -25,9 +25,11 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
 
         var map = {
             'home.model.analysis.explorer.builder':'builder',
-            'home.segment.explorer.builder':'builder',
             'home.model.analysis.explorer.attributes':'attributes',
+            'home.model.analysis.accounts':'accounts',
+            'home.model.analysis.contacts':'contacts',
             'home.segment.explorer.attributes':'attributes',
+            'home.segment.explorer.builder':'builder',
             'home.segment.accounts':'accounts',
             'home.segment.contacts':'contacts'
         };

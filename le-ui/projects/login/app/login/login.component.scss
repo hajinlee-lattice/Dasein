@@ -33,6 +33,7 @@
             text-align: right;
             padding: 0.4em 0em .3em;
             border-bottom: 1px dotted #aaa;
+            overflow: hidden;
             
             &:last-child {
                 border-bottom: none;
