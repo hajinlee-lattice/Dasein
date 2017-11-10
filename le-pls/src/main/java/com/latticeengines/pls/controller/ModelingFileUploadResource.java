@@ -119,7 +119,7 @@ public class ModelingFileUploadResource {
             @PathVariable String sourceFileName,
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation,
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
-            @RequestBody ModelingParameters parameters) {
+            @RequestBody(required = false) ModelingParameters parameters) {
         if (!StringUtils.isEmpty(entity)) {
             schemaInterpretation = SchemaInterpretation.getByName(entity);
         }

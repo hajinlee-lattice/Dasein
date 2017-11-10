@@ -57,7 +57,7 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         args.add(csvFileName);
         args.add(compressed);
         args.add(entity);
-        String urlPattern = "/cdl?fileName={fileName}&displayName={csvFileName}&compressed={compressed}" +
+        String urlPattern = "/?fileName={fileName}&displayName={csvFileName}&compressed={compressed}" +
                 "&entity={entity}";
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
@@ -71,7 +71,7 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
     }
 
     public FieldMappingDocument getFieldMappings(String sourceFileName, String entity) {
-        String urlPattern = "/{sourceFileName}/fieldmappings/cdl?entity={entity}";
+        String urlPattern = "/{sourceFileName}/fieldmappings?entity={entity}";
         String url = constructUrl(urlPattern, sourceFileName, entity);
         ResponseDocument resp = post("get field mappings", url, null, ResponseDocument.class);
         if (resp.isSuccess()) {
