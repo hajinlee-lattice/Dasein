@@ -5,6 +5,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -75,13 +76,31 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy {
         return get("get rating model", url, RatingModel.class);
     }
 
-    public RatingModel updateRatingModel(String customerSpace, String ratingEngineId,
-            String ratingModelId, RatingModel ratingModel) {
+    public RatingModel updateRatingModel(String customerSpace, String ratingEngineId, String ratingModelId,
+            RatingModel ratingModel) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return post("update rating model", url, ratingModel, RatingModel.class);
     }
 
+    public List<String> getRatingEngineIdsInSegment(String customerSpace, String segment) {
+        String url = constructUrl(URL_PREFIX + "/ids?segment={segment}", shortenCustomerSpace(customerSpace), segment);
+        List list = get("get rating engine ids in segment", url, List.class);
+        return JsonUtils.convertList(list, String.class);
+    }
 
+    public List<String> getRatingEngineIds(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/ids", shortenCustomerSpace(customerSpace));
+        List list = get("get rating engine ids in segment", url, List.class);
+        return JsonUtils.convertList(list, String.class);
+    }
+
+    public Map<String, Long> updateRatingEngineCounts(String customerSpace, String ratingEngineId) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/counts", shortenCustomerSpace(customerSpace),
+                ratingEngineId);
+        // TODO: to convert to PUT
+        Map map = post("update rating engine counts", url, null, Map.class);
+        return JsonUtils.convertMap(map, String.class, Long.class);
+    }
 
 }

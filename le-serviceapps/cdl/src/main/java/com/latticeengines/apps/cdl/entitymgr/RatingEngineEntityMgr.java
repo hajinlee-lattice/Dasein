@@ -12,6 +12,8 @@ public interface RatingEngineEntityMgr {
 
     List<RatingEngine> findAllByTypeAndStatus(String type, String status);
 
+    List<String> findAllIdsInSegment(String segmentName);
+
     RatingEngine findById(String id);
 
     void deleteById(String id);

@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -64,6 +65,14 @@ public class RatingEngineResource {
         return Arrays.asList(RatingEngineType.values());
     }
 
+    @RequestMapping(value = "/ids", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get ids for Rating Engines. Can be filtered by segment name.")
+    public List<String> getRatingEngineTypes(@PathVariable String customerSpace,
+            @RequestParam(value = "segment", required = false) String segment) {
+        return ratingEngineService.getAllRatingEngineIdsInSegment(segment);
+    }
+
     @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a Rating Engine given its id")
@@ -93,6 +102,14 @@ public class RatingEngineResource {
     public Boolean deleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         ratingEngineService.deleteById(ratingEngineId);
         return true;
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/counts", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update rating engine counts")
+    public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+        // TODO: to convert to PUT
+        return ratingEngineService.updateRatingEngineCounts(ratingEngineId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")

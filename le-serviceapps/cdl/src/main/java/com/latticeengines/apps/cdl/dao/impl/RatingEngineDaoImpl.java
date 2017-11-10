@@ -2,6 +2,9 @@ package com.latticeengines.apps.cdl.dao.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.RatingEngineDao;
@@ -32,6 +35,24 @@ public class RatingEngineDaoImpl extends BaseDaoImpl<RatingEngine> implements Ra
         } else {
             return super.findAllByFields("type", type, "status", status);
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<String> findAllIdsInSegment(String segmentName) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<RatingEngine> entityClz = getEntityClass();
+        String queryPattern = "select re.id from %s as re";
+        if (StringUtils.isNotBlank(segmentName)) {
+            queryPattern += " where re.segment.name = :segmentName";
+        }
+        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        System.out.println(query.getQueryString());
+        if (StringUtils.isNotBlank(segmentName)) {
+            query.setString("segmentName", segmentName);
+        }
+        return (List<String>) query.list();
     }
 
 }

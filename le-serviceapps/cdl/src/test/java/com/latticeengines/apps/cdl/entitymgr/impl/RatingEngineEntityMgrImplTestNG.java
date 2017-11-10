@@ -107,6 +107,16 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
 
+        // test find ids
+        List<String> ratingEngineIds = ratingEngineEntityMgr.findAllIdsInSegment(testSegment.getName());
+        Assert.assertNotNull(ratingEngineIds);
+        Assert.assertEquals(ratingEngineIds.size(), 1);
+        Assert.assertEquals(ratingEngineIds.get(0), ratingEngineId);
+
+        ratingEngineIds = ratingEngineEntityMgr.findAllIdsInSegment("NoSuchSegment");
+        Assert.assertNotNull(ratingEngineIds);
+        Assert.assertEquals(ratingEngineIds.size(), 0);
+
         // test find all by type and status
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, null);
         Assert.assertEquals(ratingEngineList.size(), 1);

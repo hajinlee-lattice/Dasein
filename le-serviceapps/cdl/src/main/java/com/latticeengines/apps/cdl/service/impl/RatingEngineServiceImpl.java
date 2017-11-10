@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -69,6 +70,25 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         ratingEngineEntityMgr.findAllByTypeAndStatus(type, status)
                 .forEach(re -> result.add(constructRatingEngineSummary(re, tenant.getId())));
         return result;
+    }
+
+    @Override
+    public List<String> getAllRatingEngineIdsInSegment(String segmentName) {
+        return ratingEngineEntityMgr.findAllIdsInSegment(segmentName);
+    }
+
+    @Override
+    public Map<String, Long> updateRatingEngineCounts(String engineId) {
+        RatingEngine ratingEngine = getRatingEngineById(engineId, false);
+        if (ratingEngine != null) {
+            RatingModel ratingModel = ratingEngine.getActiveModel();
+            Map<String, Long> counts = updateRatingCount(ratingEngine, ratingModel);
+            log.info("Updated counts for rating engine " + engineId + " using model " + ratingModel.getId() + " to "
+                    + JsonUtils.serialize(counts));
+            return counts;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -138,18 +158,21 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         return updatedModel;
     }
 
-    private void updateRatingCount(RatingEngine ratingEngine, RatingModel ratingModel) {
+    private Map<String, Long> updateRatingCount(RatingEngine ratingEngine, RatingModel ratingModel) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.warn("Cannot find a Tenant in MultiTenantContext, skip getting rating count.");
+            return Collections.emptyMap();
         } else {
             MetadataSegment segment = ratingEngine.getSegment();
-            FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(BusinessEntity.Account) : new FrontEndQuery();
+            FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(BusinessEntity.Account)
+                    : new FrontEndQuery();
             frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
             frontEndQuery.setMainEntity(BusinessEntity.Account);
             Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
             ratingEngine.setCountsByMap(counts);
             createOrUpdate(ratingEngine, tenant.getId());
+            return counts;
         }
     }
 

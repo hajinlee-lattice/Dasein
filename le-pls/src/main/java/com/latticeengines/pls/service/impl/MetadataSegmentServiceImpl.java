@@ -7,10 +7,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -18,6 +21,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.service.MetadataSegmentService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -27,13 +31,15 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentServiceImpl.class);
 
     private final SegmentProxy segmentProxy;
-
     private final EntityProxy entityProxy;
+    private final RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, EntityProxy entityProxy) {
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, EntityProxy entityProxy,
+            RatingEngineProxy ratingEngineProxy) {
         this.segmentProxy = segmentProxy;
         this.entityProxy = entityProxy;
+        this.ratingEngineProxy = ratingEngineProxy;
     }
 
     @Override
@@ -78,7 +84,10 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         updateEntityCounts(segment);
         translateForBackend(segment);
-        return translateForFrontend(segmentProxy.createOrUpdateSegment(customerSpace, segment));
+        MetadataSegment updatedSegment = translateForFrontend(
+                segmentProxy.createOrUpdateSegment(customerSpace, segment));
+        updateRatingEngineCounts(updatedSegment.getName());
+        return updatedSegment;
     }
 
     @Override
@@ -176,6 +185,20 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         }
         frontEndQuery.setMainEntity(entity);
         return entityProxy.getCount(customerSpace, frontEndQuery);
+    }
+
+    private void updateRatingEngineCounts(String segmentName) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        List<String> engineIds = ratingEngineProxy.getRatingEngineIdsInSegment(customerSpace, segmentName);
+        if (CollectionUtils.isNotEmpty(engineIds)) {
+            log.info("There are " + engineIds.size() + " rating engines to update counts: "
+                    + StringUtils.join(engineIds, ", "));
+            engineIds.forEach(engineId -> {
+                Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace, engineId);
+                log.info("Updated counts for rating engine " + engineId + " to " + JsonUtils.serialize(counts));
+            });
+        }
+
     }
 
 }

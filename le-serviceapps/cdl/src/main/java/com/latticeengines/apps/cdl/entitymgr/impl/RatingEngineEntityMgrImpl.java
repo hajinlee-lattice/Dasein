@@ -71,6 +71,12 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<String> findAllIdsInSegment(String segmentName) {
+        return ratingEngineDao.findAllIdsInSegment(segmentName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public RatingEngine findById(String id) {
         return ratingEngineDao.findById(id);
     }
@@ -97,7 +103,6 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId) {
-
         if (ratingEngine.getId() == null) { // create a new Rating Engine
             ratingEngine.setId(RatingEngine.generateIdStr());
             createNewRatingEngine(ratingEngine, tenantId);

@@ -11,4 +11,6 @@ public interface RatingEngineDao extends BaseDao<RatingEngine> {
 
     List<RatingEngine> findAllByTypeAndStatus(String type, String status);
 
+    List<String> findAllIdsInSegment(String segmentName);
+
 }
