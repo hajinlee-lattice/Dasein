@@ -1,3 +1,8 @@
+<div class="success-message subheader-success-message" ng-if="vm.displayExportBanner"> 
+    <h3> Your export request was accepted. You will receive an email with a download link once it is complete.  </h3>
+    <i class="fa fa-times fa-inverse" data-ng-click="vm.hideExportBanner()"></i>
+</div>
+
 <div class="enrichment-wizard-container container explorer-subheader-tabs">
     <ul class="subheader-tabs-links" ng-if="vm.checkState('builder') || vm.checkState('attributes')">
         <li ng-click="vm.clickAttributes()" ng-class="{'active':vm.checkState('attributes')}">Attribute Browser</li>
@@ -12,6 +17,33 @@
     </ul>
     <ul class="subheader-tabs-buttons">
         <li class="save-segment">
+            <button class="save button white-button dropdown-container" ng-click="vm.toggleExportDropdown($event)" ng-mouseover="vm.showExportDropdown=true" ng-mouseleave="vm.showExportDropdown ? vm.toggleExportDropdown($event) : null"> 
+                <div> 
+                    Export 
+                    <span class="fa fa-chevron-down" ng-class="{'fa-rotate-180' : vm.showExportDropdown}"></span>
+                    <div>
+                </div>
+                <div ng-show="vm.showExportDropdown">
+                    <ul class="model-menu button-dropdown">
+                        <li data-ng-click="vm.exportAccounts()">
+                            <a href="javascript:void(0)"> Accounts
+                                <i class="fa fa-building-o"></i> 
+                            </a>
+                        </li>
+                        <li data-ng-click="vm.exportContacts()">
+                            <a href="javascript:void(0)"> Contacts
+                                <i class="fa fa-users"></i>
+                            </a>
+                        </li>
+                        <li class="ng-binding" data-ng-click="vm.exportAccountsAndContacts()">
+                            <a href="javascript:void(0)"> Accounts and Contacts 
+                                <i class="fa fa-briefcase"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </button>
+            &nbsp;
             <button class="clear button white-button" 
                     ng-click="vm.clearSegment()" 
                     ng-if="vm.segment == 'Create'"

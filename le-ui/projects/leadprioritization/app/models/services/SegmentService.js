@@ -208,7 +208,8 @@ angular
 
     this.CreateOrUpdateSegment = function(segment) {
         var deferred = $q.defer();
-
+        console.log('CreateOrUpdateSegment call');
+        console.log(segment);
         $http({
             method: 'POST',
             url: '/pls/datacollection/segments',
@@ -224,6 +225,7 @@ angular
                     success: true
                 };
                 deferred.resolve(result);
+                console.log(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
@@ -270,6 +272,151 @@ angular
 
         return deferred.promise;
     }
+
+    this.GetSegmentExports = function() {
+        var deferred = $q.defer(),
+            result,
+            url = '/pls/datacollection/segments/export';
+
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.GetSegmentExportByExportId = function(exportID) {
+        var deferred = $q.defer(),
+            result,
+            url = '/pls/datacollection/segments/export/' + exportID;
+
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.GetSegmentExportByName = function(name) {
+        var deferred = $q.defer(),
+            result,
+            url = '/pls/datacollection/segments/export/' + name;
+
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.CreateOrUpdateSegmentExport = function(segment) {
+        var deferred = $q.defer(),
+            result = {}, 
+            url = '/pls/datacollection/segments/export';
+
+        $http({
+            method: 'POST',
+            url: url,
+            data: segment,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.DeleteExpiredSegmentExports = function() {
+        var deferred = $q.defer(),
+            result = {},
+            url = '/pls/datacollection/segments/export/cleanup';
+
+        $http({
+            method: 'DELETE',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = {
+                    data: response.data,
+                    success: true
+                };
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
 
 
 });
