@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.ExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -37,7 +38,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsFunctio
 
     private Tenant tenant;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
 
         setupTestEnvironmentWithGATenants(1);
@@ -55,24 +56,25 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsFunctio
 
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void teardown() throws Exception {
         if (tenant != null) {
             tenantService.discardTenant(tenant);
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testBasicOperations() {
         MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
         metadataSegmentExport.setTenant(tenant);
+        metadataSegmentExport.setType(ExportType.ACCOUNT);
         metadataSegmentExport.setSegment(segment);
         metadataSegmentExport.setStatus(Status.RUNNING);
         metadataSegmentExport.setPath("some/path");
         metadataSegmentExport.setCreatedBy(CREATED_BY);
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
 
-        metadataSegmentExport = metadataSegmentExportService.createOrUpdateSegment(metadataSegmentExport);
+        metadataSegmentExport = metadataSegmentExportService.createOrUpdateSegmentExportJob(metadataSegmentExport);
 
         Assert.assertNotNull(metadataSegmentExport.getPid());
         Assert.assertNotNull(metadataSegmentExport.getExportId());

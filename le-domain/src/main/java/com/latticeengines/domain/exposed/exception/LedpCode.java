@@ -273,6 +273,8 @@ public enum LedpCode {
     LEDP_18159("Could not generate minimum required recommendations. " //
             + "Recommendations were generated for {0} accounts and for " //
             + "{1} accounts errors were encountered"), //
+    LEDP_18160("Could not download result of export job {0} as it is not valid anymore."), //
+    LEDP_18161("Could not download result of export job {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

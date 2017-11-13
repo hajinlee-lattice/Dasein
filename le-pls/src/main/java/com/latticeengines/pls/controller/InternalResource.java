@@ -70,6 +70,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -91,6 +92,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNoteService;
@@ -200,6 +202,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;
+
+    @Autowired
+    private MetadataSegmentExportService metadataSegmentExportService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1267,8 +1272,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams) {
-        log.debug(
-                String.format("ModelSummary %s's ModelNote created by %s", modelSummaryId, noteParams.getUserName()));
+        log.debug(String.format("ModelSummary %s's ModelNote created by %s", modelSummaryId, noteParams.getUserName()));
         modelNoteService.create(modelSummaryId, noteParams);
         return true;
     }
@@ -1367,6 +1371,16 @@ public class InternalResource extends InternalResourceBase {
         } else {
             return null;
         }
+    }
+
+    @RequestMapping(value = "/segment/export/{exportId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get Segment export job info.")
+    public MetadataSegmentExport getMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("exportId") String exportId) {
+        log.debug(String.format("Getting MetadataSegmentExport from %s exportId", exportId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+        return metadataSegmentExportService.getSegmentExportByExportId(exportId);
     }
 
     @RequestMapping(value = "/plays/{playName}/talkingpoints/publish/" + TENANT_ID_PATH, method = RequestMethod.POST)

@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
@@ -30,7 +31,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -95,6 +95,11 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @Column(name = "APPLICATION_ID", nullable = true)
     private String applicationId;
 
+    @JsonProperty("type")
+    @Column(name = "TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ExportType type;
+
     @JsonProperty("status")
     @Column(name = "STATUS", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -116,6 +121,14 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @JsonProperty("path")
     @Column(name = "PATH", nullable = false)
     private String path;
+
+    @JsonProperty("fileName")
+    @Column(name = "FILE_NAME", nullable = false)
+    private String fileName;
+
+    @JsonProperty("tableName")
+    @Column(name = "TABLE_NAME", nullable = false)
+    private String tableName;
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
@@ -161,40 +174,25 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
         this.createdBy = createdBy;
     }
 
-    @JsonProperty("account_raw_restriction")
-    public Restriction getAccountRestriction() {
-        return JsonUtils.deserialize(restrictionString, Restriction.class);
-    }
-
-    @JsonProperty("account_raw_restriction")
-    public void setAccountRestriction(Restriction restriction) {
-        this.restrictionString = JsonUtils.serialize(restriction);
-    }
-
-    @JsonProperty("contact_raw_restriction")
-    public Restriction getContactRestriction() {
-        return JsonUtils.deserialize(contactRestrictionString, Restriction.class);
-    }
-
-    @JsonProperty("contact_raw_restriction")
-    public void setContactRestriction(Restriction restriction) {
-        this.contactRestrictionString = JsonUtils.serialize(restriction);
-    }
-
     public FrontEndRestriction getAccountFrontEndRestriction() {
-        return accountFrontEndRestriction;
+        return StringUtils.isNoneBlank(restrictionString)
+                ? JsonUtils.deserialize(restrictionString, FrontEndRestriction.class) : new FrontEndRestriction();
     }
 
     public void setAccountFrontEndRestriction(FrontEndRestriction accountFrontEndRestriction) {
         this.accountFrontEndRestriction = accountFrontEndRestriction;
+        this.restrictionString = JsonUtils.serialize(accountFrontEndRestriction);
     }
 
     public FrontEndRestriction getContactFrontEndRestriction() {
-        return contactFrontEndRestriction;
+        return StringUtils.isNoneBlank(contactRestrictionString)
+                ? JsonUtils.deserialize(contactRestrictionString, FrontEndRestriction.class)
+                : new FrontEndRestriction();
     }
 
     public void setContactFrontEndRestriction(FrontEndRestriction contactFrontEndRestriction) {
         this.contactFrontEndRestriction = contactFrontEndRestriction;
+        this.contactRestrictionString = JsonUtils.serialize(contactFrontEndRestriction);
     }
 
     public String getApplicationId() {
@@ -251,6 +249,36 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public ExportType getType() {
+        return type;
+    }
+
+    public void setType(ExportType type) {
+        this.type = type;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public enum ExportType {
+        ACCOUNT, //
+        CONTACT, //
+        ACCOUNT_AND_CONTACT;
     }
 
     public enum Status {

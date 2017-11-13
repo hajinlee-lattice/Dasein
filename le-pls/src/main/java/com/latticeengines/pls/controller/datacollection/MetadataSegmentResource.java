@@ -1,12 +1,13 @@
 package com.latticeengines.pls.controller.datacollection;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mortbay.log.Log;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,10 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.security.exposed.service.SessionService;
-import com.latticeengines.security.exposed.util.SecurityUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,11 +31,14 @@ import io.swagger.annotations.ApiOperation;
 public class MetadataSegmentResource {
 
     private final MetadataSegmentService metadataSegmentService;
+    private final MetadataSegmentExportService metadataSegmentExportService;
     private final SessionService sessionService;
 
     @Inject
-    public MetadataSegmentResource(MetadataSegmentService metadataSegmentService, SessionService sessionService) {
+    public MetadataSegmentResource(MetadataSegmentService metadataSegmentService,
+            MetadataSegmentExportService metadataSegmentExportService, SessionService sessionService) {
         this.metadataSegmentService = metadataSegmentService;
+        this.metadataSegmentExportService = metadataSegmentExportService;
         this.sessionService = sessionService;
     }
 
@@ -78,33 +81,36 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Create or update a segment export job")
     public MetadataSegmentExport createOrUpdateSegmentExportJob(
             @RequestBody MetadataSegmentExport metadataSegmentExportJob, HttpServletRequest request) {
-        Session session = SecurityUtils.getSessionFromRequest(request, sessionService);
-        if (session != null) {
-            String email = session.getEmailAddress();
-            if (StringUtils.isNotBlank(email)) {
-                metadataSegmentExportJob.setCreatedBy(email);
-            }
-        }
-        return metadataSegmentExportJob;
+        return metadataSegmentExportService.createOrUpdateSegmentExportJob(metadataSegmentExportJob);
     }
 
     @RequestMapping(value = "/export", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of segment export job")
     public List<MetadataSegmentExport> getSegmentExportJobs(HttpServletRequest request) {
-        return new ArrayList<>();
+        return metadataSegmentExportService.getSegmentExports();
     }
 
-    @RequestMapping(value = "/export/{name}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/export/{exportId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment export job")
-    public MetadataSegmentExport getSegmentExportJob(@PathVariable String name, HttpServletRequest request) {
-        return new MetadataSegmentExport();
+    public MetadataSegmentExport getSegmentExportJob(@PathVariable String exportId, HttpServletRequest request) {
+        return metadataSegmentExportService.getSegmentExportByExportId(exportId);
     }
 
     @RequestMapping(value = "/export/cleanup", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Cleanup expired export jobs")
     public void cleanupExpiredJobs(@PathVariable String name, HttpServletRequest request) {
+        Log.info("Received call for cleanup");
+    }
+
+    @RequestMapping(value = "/export/{exportId}/download", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Download result of export job")
+    public void downloadSegmentExportResult(@PathVariable String exportId, HttpServletRequest request,
+            HttpServletResponse response) {
+        Log.info("Received call for downloading result of job " + exportId);
+        metadataSegmentExportService.downloadSegmentExportResult(exportId, request, response);
     }
 }

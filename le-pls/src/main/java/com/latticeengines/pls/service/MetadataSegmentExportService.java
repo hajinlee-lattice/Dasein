@@ -2,6 +2,9 @@ package com.latticeengines.pls.service;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
 public interface MetadataSegmentExportService {
@@ -9,7 +12,9 @@ public interface MetadataSegmentExportService {
 
     MetadataSegmentExport getSegmentExportByExportId(String exportId);
 
-    MetadataSegmentExport createOrUpdateSegment(MetadataSegmentExport segmentExport);
+    MetadataSegmentExport createOrUpdateSegmentExportJob(MetadataSegmentExport segmentExport);
 
-    void deleteSegmentExportByExportId(String name);
+    void deleteSegmentExportByExportId(String exportId);
+
+    void downloadSegmentExportResult(String exportId, HttpServletRequest request, HttpServletResponse response);
 }

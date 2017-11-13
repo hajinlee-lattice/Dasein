@@ -1,16 +1,22 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.MetadataSegmentExportDao;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
@@ -36,9 +42,19 @@ public class MetadataSegmentExportEntityMgrImpl extends BaseEntityMgrImpl<Metada
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void create(MetadataSegmentExport entity) {
         Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
+        CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
+        String path = PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), customerSpace).toString();
+        long currentTimeMillis = System.currentTimeMillis();
+        path = path.endsWith("/") ? path : path + "/";
+        path += currentTimeMillis + "/";
+        entity.setPath(path);
+
         entity.setTenant(tenant);
         entity.setTenantId(tenant.getPid());
         entity.setExportId(generateExportId());
+        entity.setStatus(Status.RUNNING);
+        entity.setCleanupBy(new Date(currentTimeMillis + TimeUnit.DAYS.toMillis(7)));
+
         metadataSegmentExportDao.create(entity);
     }
 
