@@ -57,7 +57,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
             metadataService.createTable(CustomerSpace.parse(customerSpace1), table);
         } catch (Exception e) {
             Throwable inner = e.getCause();
-            assertTrue(inner.getMessage().contains("DISPLAY_NAME"));
+            assertTrue(inner.getMessage().contains("displayName"));
         }
     }
 
