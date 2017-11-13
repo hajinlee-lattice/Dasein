@@ -67,3 +67,14 @@ class Container(Template):
         })
         return self
 
+    def ulimit(self, name, soft, hard):
+        limit = {
+            'name': name.lower(),
+            'softLimit': soft,
+            'hardLimit': hard
+        }
+        if "ulimits" not in self._template:
+            self._template["ulimits"] = []
+        self._template["ulimits"].append(limit)
+        return self
+

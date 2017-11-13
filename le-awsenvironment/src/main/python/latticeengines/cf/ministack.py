@@ -273,6 +273,7 @@ def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_dri
 
     container.publish_port(8443, alloc["port"])
     container.hostname("%s-%s" % (stackname, app))
+    container.ulimit("NOFILE", 2048, 2048)
 
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip

@@ -189,6 +189,17 @@ class ContainerDefinition(Template):
         self._template["MountPoints"].append(mount_point.template())
         return self
 
+    def ulimit(self, name, soft, hard):
+        limit = {
+            "Name": name.upper(),
+            "SoftLimit": soft,
+            "HardLimit": hard
+        }
+        if "Ulimits" not in self._template:
+            self._template["Ulimits"] = []
+        self._template["Ulimits"].append(limit)
+        return self
+
 
 class Volume(Template):
     def __init__(self, name, host_path):
