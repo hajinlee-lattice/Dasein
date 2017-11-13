@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -41,7 +44,9 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
@@ -364,16 +369,25 @@ public class SegmentExportProcessor {
                 Arrays.asList(InterfaceName.LDC_Name.name(), InterfaceName.AccountId.name()), false,
                 accountFrontEndQuery);
 
+        List<Object> modifiableAccountIdCollectionForContacts = new ArrayList<>();
+
         FrontEndQuery contactFrontEndQuery = new FrontEndQuery();
-        contactFrontEndQuery.setAccountRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
-        contactFrontEndQuery.setContactRestriction(metadataSegmentExport.getContactFrontEndRestriction());
+        if (metadataSegmentExport.getType() == ExportType.ACCOUNT_AND_CONTACT) {
+            FrontEndRestriction contactRestrictionWithAccountIdList = prepareContactRestriction(
+                    metadataSegmentExport.getContactFrontEndRestriction().getRestriction(),
+                    modifiableAccountIdCollectionForContacts);
+            contactFrontEndQuery.setContactRestriction(contactRestrictionWithAccountIdList);
+        } else {
+            contactFrontEndQuery.setAccountRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
+            contactFrontEndQuery.setContactRestriction(metadataSegmentExport.getContactFrontEndRestriction());
+        }
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
         setSortField(BusinessEntity.Contact,
                 Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
                 contactFrontEndQuery);
 
-        List<String> addFieldsAccounts = new ArrayList<>();
-        List<String> addFieldsContacts = new ArrayList<>();
+        Set<String> addFieldsAccounts = new HashSet<>();
+        Set<String> addFieldsContacts = new HashSet<>();
         List<BusinessEntity> addFieldsEntityType = new ArrayList<>();
         List<String> addFieldsWithFullName = new ArrayList<>();
 
@@ -388,6 +402,8 @@ public class SegmentExportProcessor {
             }
             addFieldsWithFullName.add(fullFieldName);
         }
+
+        addFieldsAccounts.add(InterfaceName.AccountId.name());
 
         log.info(schema.getFields().size() + " Fields <Accounts>: " + JsonUtils.serialize(addFieldsAccounts));
         log.info(schema.getFields().size() + " Fields <Contacts>: " + JsonUtils.serialize(addFieldsContacts));
@@ -414,10 +430,23 @@ public class SegmentExportProcessor {
                 .metadataSegmentExport(metadataSegmentExport) //
                 .accountFrontEndQuery(accountFrontEndQuery) //
                 .contactFrontEndQuery(contactFrontEndQuery) //
-                .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
+                .modifiableAccountIdCollectionForContacts(modifiableAccountIdCollectionForContacts) //
                 .counter(new Counter());
 
-        return segmentExportContextBuilder.build();
+        SegmentExportContext segmentExportContext = segmentExportContextBuilder.build();
+
+        return segmentExportContext;
+    }
+
+    private FrontEndRestriction prepareContactRestriction(Restriction extractedContactRestriction,
+            Collection<Object> modifiableAccountIdCollection) {
+        Restriction accountIdRestriction = Restriction.builder()
+                .let(BusinessEntity.Contact, InterfaceName.AccountId.name()).inCollection(modifiableAccountIdCollection)
+                .build();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
+                Restriction.builder().and(extractedContactRestriction, accountIdRestriction).build());
+
+        return frontEndRestriction;
     }
 
     private void prepareLookupsForFrontEndQueries(FrontEndQuery accountFrontEndQuery,
