@@ -359,7 +359,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 for (Integer idPos : idPosList) {
                     String originalId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
                     if (StringUtils.isNotEmpty(originalId)) {
-                        cleanId = originalId;
+                        cleanId = StringStandardizationUtils.getStandardizedInputLatticeID(originalId);
                         break;
                     }
                 }

@@ -15,6 +15,7 @@ public class StringStandardizationUtils {
     private Character[] removed = {};
     private Character[] replacedBySpace = {};
     private String[][] replaced = {};
+    private final static int LATTICE_ID_LENGTH = 13;
     private static StringStandardizationUtils singletonUtil = new StringStandardizationUtils();
 
     public static boolean objectIsNullOrEmptyString(Object obj) {
@@ -44,13 +45,27 @@ public class StringStandardizationUtils {
         return duns;
     }
 
-    protected String getStandardStringInternal(String str) {
+    public static String getStandardizedInputLatticeID(String latticeID) {
+        if (StringUtils.isBlank(latticeID) || latticeID.trim().startsWith("-") || latticeID.startsWith("+")) {
+            return null;
+        }
+
+        try {
+            Long id = Long.valueOf(latticeID.trim());
+            String latticeIdAsString = id.toString();
+            return (latticeIdAsString.length() > LATTICE_ID_LENGTH) ? null : latticeIdAsString;
+        } catch (NumberFormatException exc) {
+            return null;
+        }
+    }
+
+    String getStandardStringInternal(String str) {
         try {
             if (StringUtils.isEmpty(str)) {
                 return null;
             }
-            Set<Character> removedSet = new HashSet<Character>(getCharactersToRemove());
-            Set<Character> replacedBySpaceSet = new HashSet<Character>(getCharactersToReplaceWithWhiteSpace());
+            Set<Character> removedSet = new HashSet<>(getCharactersToRemove());
+            Set<Character> replacedBySpaceSet = new HashSet<>(getCharactersToReplaceWithWhiteSpace());
             StringBuilder sb = new StringBuilder(str.toUpperCase());    // Always change to upper case
             for (int i = 0; i < sb.length(); i++) {
                 if (removedSet.contains(sb.charAt(i))) {
@@ -82,11 +97,10 @@ public class StringStandardizationUtils {
     }
 
     protected Map<String, String> getCharactersToReplaceWithWord() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         for (String[] entry : replaced) {
             map.put(entry[0], entry[1]);
         }
         return map;
     }
-
 }

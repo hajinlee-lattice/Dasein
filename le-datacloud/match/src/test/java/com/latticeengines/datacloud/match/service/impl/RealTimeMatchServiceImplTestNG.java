@@ -184,7 +184,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { 1, "chevron.com" },
                 { 2, "my@gmail.com" }
         };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{"ID", "Domain"});
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[] { "ID", "Domain" });
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         MatchOutput output = realTimeMatchService.match(input);
@@ -201,15 +201,62 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { 1, latticeAccountId, "chevron.com" },
                 { 2, null, "my@gmail.com" }
         };
-        input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "ID", MatchConstants.LID_FIELD, "Domain" });
+        input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[] { "ID", MatchConstants.LID_FIELD, "Domain" });
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         input.setFetchOnly(true);
         output = realTimeMatchService.match(input);
 
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), 2);
-        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(2));
+        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(1));
         output.setMetadata(null);
         System.out.println(JsonUtils.serialize(output));
+    }
+
+    @Test(groups = "functional")
+    public void testStandardizedLatticeIdForInput() {
+        final String LATTICE_ID = "530001159335";
+        Object[][] data = new Object[][] {
+                { 0, LATTICE_ID },
+                { 1, "00000" + LATTICE_ID },
+                { 2, "  \t " + LATTICE_ID + " \t " },
+                { 3, "00000123456999000" },
+                { 4, "12345678901234567890" },
+                { 5, "530a0b0cdef11Z59XX33Y5X" },
+                { 6, "-" + LATTICE_ID },
+                { 7, "+" + LATTICE_ID },
+                { 8, "\t 5 300  01159\t33 5   \t  " },
+                { 9, "标识符530001标识符159335标识符" },
+                { 10, "530a0b0cdef11Z59XX33Y5X" },
+                { 11, null },
+                { 12, "" },
+                { 13, " " },
+                { 14, "null" },
+                { 15, "Null " },
+                { 16, " NULL" },
+                { 17, "NULL" },
+                { 18, "abcdefgh" },
+        };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[] { "ID", "LatticeAccountId" });
+        input.setPredefinedSelection(ColumnSelection.Predefined.ID);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        MatchOutput output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertEquals(output.getOutputFields().size(), 1);
+        Assert.assertEquals(output.getOutputFields().get(0), MatchConstants.LID_FIELD);
+        Assert.assertEquals(output.getStatistics().getColumnMatchCount().size(), 1);
+        Assert.assertEquals(output.getStatistics().getColumnMatchCount().get(0), Integer.valueOf(4));
+        Assert.assertEquals(output.getResult().size(), data.length);
+
+        for (int i = 0; i < output.getResult().size(); i++) {
+            String actualId = output.getResult().get(i).getMatchedLatticeAccountId();
+            if (i < 3) {
+                Assert.assertEquals(actualId, LATTICE_ID);
+            } else if (i == 3) {
+                Assert.assertEquals(actualId, "123456999000");
+            } else {
+                Assert.assertNull(actualId);
+            }
+        }
     }
 }
