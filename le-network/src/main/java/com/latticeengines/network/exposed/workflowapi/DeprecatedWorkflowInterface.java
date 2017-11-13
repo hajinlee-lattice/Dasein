@@ -25,6 +25,8 @@ public interface DeprecatedWorkflowInterface {
 
     List<Job> getWorkflowExecutionsForTenant(long tenantPid);
 
+    List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds);
+
     List<Job> getWorkflowExecutionsForTenant(long tenantPid, String type);
 
     String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig);

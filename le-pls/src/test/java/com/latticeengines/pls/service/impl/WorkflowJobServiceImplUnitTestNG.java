@@ -1,31 +1,36 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class WorkflowJobServiceImplUnitTestNG {
     @Mock
@@ -42,6 +47,8 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @InjectMocks
     private WorkflowJobServiceImpl workflowJobService;
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplUnitTestNG.class);
 
     private Long[] jobIds = { 123L, 456L };
 
@@ -80,6 +87,16 @@ public class WorkflowJobServiceImplUnitTestNG {
         assertEquals(job.getNumDisplayedSteps().intValue(), 2);
     }
 
+    @Test(groups = "unit")
+    public void testFindByJobIds() {
+        List<String> jobIdStrs = Arrays.asList(jobIds).stream().map(jobId -> jobId.toString())
+                .collect(Collectors.toList());
+        log.info(String.format("jobIdStrs are %s", jobIdStrs));
+        List<Job> jobs = workflowJobService.findByJobIds(jobIdStrs);
+        assertNotNull(jobs);
+        assertEquals(jobs.size(), jobIds.length);
+    }
+
     private void mockWorkflowProxy() {
         when(workflowProxy.getWorkflowExecution(anyString())).thenReturn(createJob(jobIds[0]));
 
@@ -87,6 +104,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         jobs.add(createJob(jobIds[0]));
         jobs.add(createJob(jobIds[1]));
         when(workflowProxy.getWorkflowExecutionsForTenant(anyLong())).thenReturn(jobs);
+        when(workflowProxy.getWorkflowExecutionsByJobIds(anyList())).thenReturn(jobs);
     }
 
     private void mockSourceFileEntityManager() {
@@ -98,7 +116,9 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     private void mockTenantEntityManager() {
-        when(tenantEntityMgr.findByTenantId(anyString())).thenReturn(new Tenant());
+        Tenant tenant = new Tenant();
+        tenant.setId("tenant");
+        when(tenantEntityMgr.findByTenantId(anyString())).thenReturn(tenant);
     }
 
     private Job createJob(Long jobId) {

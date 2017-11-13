@@ -107,6 +107,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
+    public List<Job> findByJobIds(List<String> jobIds) {
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsByJobIds(jobIds);
+        if (jobs == null) {
+            return Collections.emptyList();
+        }
+        updateAllJobsAndStepsWithModelModelSummaries(jobs);
+        return jobs;
+    }
+
+    @Override
     public List<Job> findAll() {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());

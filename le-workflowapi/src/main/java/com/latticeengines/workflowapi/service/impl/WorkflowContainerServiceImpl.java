@@ -63,9 +63,6 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     private WorkflowTenantService workflowTenantService;
 
     @Autowired
-    private WorkflowJobEntityMgr workflowEntityMgr;
-
-    @Autowired
     private WorkflowService workflowService;
 
     @Autowired
@@ -134,7 +131,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         workflowJob.setApplicationId(appId);
         workflowJob.setInputContext(workflowConfig.getInputProperties());
         workflowJob.setStartTimeInMillis(System.currentTimeMillis());
-        workflowEntityMgr.create(workflowJob);
+        workflowJobEntityMgr.create(workflowJob);
     }
 
     @Override

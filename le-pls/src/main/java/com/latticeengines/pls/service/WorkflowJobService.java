@@ -24,6 +24,8 @@ public interface WorkflowJobService {
 
     Job find(String jobId);
 
+    List<Job> findByJobIds(List<String> jobIds);
+
     List<Job> findAll();
 
 }

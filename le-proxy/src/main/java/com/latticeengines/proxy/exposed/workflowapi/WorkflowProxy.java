@@ -4,6 +4,8 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -18,6 +20,8 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
 public class WorkflowProxy extends MicroserviceRestApiProxy implements DeprecatedWorkflowInterface, WorkflowInterface {
+
+    private static Logger log = LoggerFactory.getLogger(WorkflowProxy.class);
 
     public WorkflowProxy() {
         super("workflowapi/workflows");
@@ -70,6 +74,16 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
         String url = constructUrl("/jobs/{tenantPid}", tenantPid);
         return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
+    }
+
+    @Override
+    public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds) {
+        StringBuilder sb = new StringBuilder();
+        for (String jobId : jobIds) {
+            sb.append(String.format("jobIds=%s&", jobId));
+        }
+        String url = constructUrl(String.format("/jobs?%s", sb.substring(0, sb.length() - 1).toString()));
+        return JsonUtils.convertList(get("getWorkflowExecutionsByJobIds", url, List.class), Job.class);
     }
 
     @Override

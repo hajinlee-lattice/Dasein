@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -144,5 +145,15 @@ public class DeprecatedWorkflowResource implements DeprecatedWorkflowInterface {
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
         List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid, type);
         return jobs;
+    }
+
+    @RequestMapping(value = "/jobs", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of workflow executions given list of job Ids")
+    @Override
+    public List<Job> getWorkflowExecutionsByJobIds(@RequestParam(value = "jobIds") List<String> jobIds) {
+        List<WorkflowExecutionId> workflowExecutionIds = jobIds.stream()
+                .map(jobId -> new WorkflowExecutionId((Long.valueOf(jobId)))).collect(Collectors.toList());
+        return workflowService.getJobs(workflowExecutionIds);
     }
 }

@@ -37,8 +37,11 @@ public class JobResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve all jobs")
-    public List<Job> findAll() {
-        return workflowJobService.findAll();
+    public List<Job> findAll(@RequestParam(value = "jobIds", required = false) List<String> jobIds) {
+        if (jobIds == null) {
+            return workflowJobService.findAll();
+        }
+        return workflowJobService.findByJobIds(jobIds);
     }
 
     @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

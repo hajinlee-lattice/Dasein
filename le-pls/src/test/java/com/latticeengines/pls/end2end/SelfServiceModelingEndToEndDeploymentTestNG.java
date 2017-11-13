@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -697,9 +698,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void assertJobExistsWithModelIdAndModelName(final String jobModelId) {
         log.info(String.format("The model_id is: %s", jobModelId));
-        @SuppressWarnings("unchecked")
         List<Object> rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()),
                 List.class);
         List<Job> jobs = JsonUtils.convertList(rawJobs, Job.class);
@@ -722,6 +723,19 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                                 .equals(job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME));
             }
         }), jobsInString);
+
+        List<String> workflowIds = jobs.stream().map(job -> job.getId().toString()).collect(Collectors.toList());
+        StringBuilder sb = new StringBuilder();
+        sb.append("?");
+        for (String jobId : workflowIds) {
+            sb.append(String.format("jobIds=%s&", jobId));
+        }
+        String urlSuffix = sb.substring(0, sb.length() - 1).toString();
+        rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs%s", getRestAPIHostPort(), urlSuffix),
+                List.class);
+        assertEquals(rawJobs.size(), jobs.size());
+        jobs = JsonUtils.convertList(rawJobs, Job.class);
+        log.info(String.format("Jobs are %s", jobs));
     }
 
     public String prepareModel(SchemaInterpretation schemaInterpretation, String fileName) throws InterruptedException {
