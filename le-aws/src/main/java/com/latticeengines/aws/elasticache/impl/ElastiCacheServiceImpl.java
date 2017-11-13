@@ -22,12 +22,16 @@ public class ElastiCacheServiceImpl implements ElastiCacheService {
 
     private AmazonElastiCache client;
 
+    private String clusterName;
+
     @Autowired
-    public ElastiCacheServiceImpl(AWSCredentials awsCredentials, @Value("${aws.region}") String region) {
-        client = AmazonElastiCacheClientBuilder.standard() //
+    public ElastiCacheServiceImpl(AWSCredentials awsCredentials, @Value("${aws.region}") String region,
+            @Value("${aws.elasticache.cluster.name}") String clusterName) {
+        this.client = AmazonElastiCacheClientBuilder.standard() //
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))//
                 .withRegion(region)//
                 .build();
+        this.clusterName = clusterName;
     }
 
     @Override
@@ -39,10 +43,17 @@ public class ElastiCacheServiceImpl implements ElastiCacheService {
         DescribeCacheClustersResult clusterResult = client.describeCacheClusters(dccRequest);
 
         for (CacheCluster cacheCluster : clusterResult.getCacheClusters()) {
+            if (!cacheCluster.getReplicationGroupId().equals(clusterName)) {
+                continue;
+            }
             for (CacheNode cacheNode : cacheCluster.getCacheNodes()) {
                 String addr = cacheNode.getEndpoint().getAddress();
                 int port = cacheNode.getEndpoint().getPort();
-                addrPortInfo.add(String.format("rediss://%s:%d", addr, port));
+                if (clusterName.contains("encrypted")) {
+                    addrPortInfo.add(String.format("rediss://%s:%d", addr, port));
+                } else {
+                    addrPortInfo.add(String.format("redis://%s:%d", addr, port));
+                }
             }
         }
         return addrPortInfo;
