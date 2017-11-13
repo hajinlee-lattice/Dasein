@@ -6,7 +6,8 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             refine: RefineService.refineModel,
             sellOption: '',
             notyet: false,
-            resell: false
+            resell: false,
+            resellOptions : [{'id': 1, 'name':'6 months'}, {'id': 2, 'name':'12 months'}, {'id': 3, 'name':'18 months'}]
 
         });
 
@@ -41,7 +42,8 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             similarProducts: false,
             similarSegments: false,
             productDataSource: [],
-            datasource: []
+            datasource: [],
+            spentOptions : [{'id': 1, 'name':'At least'}, {'id': 2, 'name':'At most'}]
 
         });
 

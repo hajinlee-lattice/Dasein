@@ -11,6 +11,11 @@ section.ratings-engine-ai-refine.container{
         font-size: 16px;
        
     }
+    .multiple-selection {
+        margin-bottom: 16px;
+        height: 36px;
+        font-size: 16px;
+    }
     .header-container {
         display: flex;
         flex-direction: row;
@@ -90,6 +95,9 @@ section.ratings-engine-ai-refine.container{
                             border-left: 1px solid rgba(181, 180, 180, 0.8);
                             margin-left: 50px;
                             padding-left: 10px;
+                        }
+                        .multiple-selection{
+                            width: 50%;
                         }
                     }
                 }

@@ -16,11 +16,17 @@
                         <div class="selection">
                             <div class="choise">
                                 <label for="spend-ammount" class="lable-left">$</label>
-                                <input type="number" id="spend-ammount" min="1">
-                                <select>
+                                <input type="number" id="spend-ammount" min="1" class="multiple-selection">
+                                <select name="spent-group" 
+                                        id="spentGroup" 
+                                        class="multiple-selection" 
+                                        ng-model="vm.spentOption" 
+                                        ng-options="spentOption.name for spentOption in vm.spentOptions">
+                                </select>
+                                <!-- <select>
                                     <option>At least</option>
                                     <option>At most</option>
-                                </select>
+                                </select> -->
                             </div>
 
                         </div>
@@ -65,7 +71,10 @@
                     <div class="choise" ng-if="vm.similarProducts">
                         <div class="selection">
                             <div class="choise">
-                                <chips placeholder="Choose similar Products" datasource = "vm.productsDataSource" callback-function="vm.productsCallback(args)"></chips>
+                                <chips placeholder="Choose similar Products"
+                                        datasource="vm.productsDataSource" 
+                                        callback-function="vm.productsCallback(args)"
+                                        single-selection="false"></chips>
                             </div>
                         </div>
                     </div>
@@ -78,7 +87,10 @@
                     <div class="choise" ng-if="vm.similarSegments">
                         <div class="selection">
                             <div class="choise">
-                                <chips placeholder="Choose similar Segment" datasource = "vm.datasource" callback-function="vm.callbackSegments(args)"></chips>
+                                <chips placeholder="Choose similar Segment" 
+                                        datasource="vm.datasource" 
+                                        callback-function="vm.callbackSegments(args)"
+                                        single-selection="false"></chips>
                             </div>
                         </div>
                     </div>

@@ -30,10 +30,17 @@
                     <div class="choise">
                         <div class="selection">
                             <label for="customers-no-bought">Choose customers who haven't bought in last</label>
-                            <select>
+                            <!-- <select>
                                 <option>6 months</option>
                                 <option>12 months</option>
                                 <option>18 months</option>
+                            </select> -->
+
+                            <select name="resell-group" 
+                                    id="resellGroup" 
+                                    class="multiple-selection"
+                                    ng-model="vm.resellOption"
+                                    ng-options="resellOption.name for resellOption in vm.resellOptions">
                             </select>
                         </div>
                     </div>

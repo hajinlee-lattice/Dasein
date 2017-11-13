@@ -2,7 +2,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
 .directive('chips', function () {
     return {
         restrict: 'E',
-        template: "<div></div>",//"<div class="chips-query-container"><div class="chips-container"><div class="chip" ng-repeat="(key, value) in chips"><div class="chip-container"><span>{{value.name}}</span><i class="chip-remove fa fa-times" aria-hidden="true" ng-click="removeItem(value.id)"></i></div></div></div><div class="text-container dropdown" ng-class="(showQueryList) ?"show-dropdown" : \"\""><input class="query" type="text" placeholder="{{placeholder}}"  ng-keydown="queryKeyPressed($event)" ng-model="query" ng-blur="blurText()" ng-disabled="isSelectionDone()"><div class="dropdown-content" ng-class="(showQueryList) ?"show-dropdown" : \"\""><div class="query-result-row" ng-repeat="item in (filteredItems = (queryItems | filter:query))" ng-class="(isRowSelected($index)) ?"query-result-row-selected-test" : \"\"" ng-click="chooseItem(item)" ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()">{{item.name}}</div></div></div></div>",
+        templateUrl: '/components/ai/chips.component.html',
         scope: { placeholder: '@', datasource: '=', callback: '&callbackFunction', singleSelection: '=' },
         link: function (scope, element, attrs, ctrl) {
 
