@@ -39,6 +39,7 @@ CREATE PROCEDURE `UpdateSegmentExportTables`()
           `CREATED` datetime NOT NULL,
           `CREATED_BY` varchar(255) DEFAULT NULL,
           `EXPORT_ID` varchar(255) NOT NULL,
+          `TYPE` varchar(255) NOT NULL,
           `FILE_NAME` varchar(255) NOT NULL,
           `PATH` varchar(2048) NOT NULL,
           `RESTRICTION` longtext,
