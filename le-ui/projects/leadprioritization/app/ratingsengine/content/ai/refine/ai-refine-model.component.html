@@ -59,38 +59,30 @@
                         </div>
                     </div>
                     <div class="choise">
-                        <input type="checkbox" id="historical" name="type-sell" value="resell" ng-model="vm.similarProducts">
-                        <label for="historical">Let me model on a similar Product, but not exacly the one I want to sell into</label>
+                        <input type="checkbox" id="products" name="type-sell" value="resell" ng-model="vm.similarProducts">
+                        <label for="products">Let me model on a similar Product, but not exacly the one I want to sell into</label>
                     </div>
                     <div class="choise" ng-if="vm.similarProducts">
                         <div class="selection">
                             <div class="choise">
-                                <label class="lable-left">Choose similar products</label>
-                                <select>
-                                    <option>-- Choose Product --</option>
-                                    <option>Product1</option>
-                                    <option>Product2</option>
-                                </select>
+                                <chips placeholder="Choose similar Products" datasource = "vm.productsDataSource" callback-function="vm.productsCallback(args)"></chips>
                             </div>
-
                         </div>
                     </div>
+
+
                     <div class="choise">
-                        <input type="checkbox" id="historical" name="type-sell" value="resell" ng-model="vm.similarSegments">
-                        <label for="historical">Let me model on a similar Segment, but not exacly the one I want to sell into</label>
+                        <input type="checkbox" id="segments" name="type-sell" value="resell" ng-model="vm.similarSegments">
+                        <label for="segments">Let me model on a similar Segment, but not exacly the one I want to sell into</label>
                     </div>
                     <div class="choise" ng-if="vm.similarSegments">
                         <div class="selection">
                             <div class="choise">
-                                <label class="lable-left">Choose similar Segment</label>
-                                <select>
-                                    <option>-- Choose Segment --</option>
-                                    <option>Segment1</option>
-                                    <option>Segment2</option>
-                                </select>
+                                <chips placeholder="Choose similar Segment" datasource = "vm.datasource" callback-function="vm.callbackSegments(args)"></chips>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
