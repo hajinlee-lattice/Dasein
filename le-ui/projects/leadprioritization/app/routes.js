@@ -97,6 +97,18 @@ angular
                 },
                 ApiHost: function() {
                     return '/pls'; // don't remove this. -Lazarus
+                },    
+                EnrichmentCount: function($q, $state, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
+
+                    DataCloudStore.getCount().then(function(result) {
+                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                        deferred.resolve(result.data);
+                    });
+                    
+                    return deferred.promise;
                 }
             },
             views: {
