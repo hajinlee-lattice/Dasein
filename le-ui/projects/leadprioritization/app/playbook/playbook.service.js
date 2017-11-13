@@ -216,7 +216,6 @@ angular.module('lp.playbook')
     }
 
     this.getPlayLaunches = function(params) {
-
         var deferred = $q.defer();
         if(this.playLaunches) {
             return this.playLaunches;

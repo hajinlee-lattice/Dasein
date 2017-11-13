@@ -9,10 +9,12 @@
             ng-if="vm.allPlaysHistory"
             ng-model="play" 
             ng-change="vm.playSelectChange(play)"
-            ng-options="play.playDisplayName for play in vm.defaultPlayLaunchList | unique:'playName'"
+            ng-options="play.displayName for play in vm.defaultPlayLaunchList"
             ng-init="play=vm.defaultPlayLaunchList[0]">
         </select>
 
+
+        
 
         <!-- <input type="text" ng-model="searchLaunchedPlays" />
         <ul>

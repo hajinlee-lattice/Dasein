@@ -17,14 +17,14 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
     vm.init = function() {
 
-        // console.log(vm.launches);
+        console.log(vm.launches);
 
         if(vm.launches.launchSummaries.length > 10){
             vm.showPagination = true;
         }
 
-        vm.defaultPlayLaunchList = angular.copy(vm.launches.launchSummaries);
-        vm.defaultPlayLaunchList.unshift({playName: null, playDisplayName: 'All Launched Plays'});
+        vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
+        vm.defaultPlayLaunchList.unshift({playName: null, displayName: 'All Launched Plays'});
 
         if($state.current.name === 'home.playbook.plays.launch_history'){
             vm.allPlaysHistory = true;
@@ -43,18 +43,13 @@ angular.module('lp.playbook.dashboard.launch_history', [])
     };
 
     vm.playSelectChange = function(play){
-    
-        console.log(play);
-
         var params = {
-            playName: play.playName
+            playName: play.name
         }
 
         PlaybookWizardStore.getPlayLaunches(params).then(function(result){
-            // console.log(result);
             vm.launches = result;
         });
-
     };
 
     vm.play_name_required = function(){
@@ -89,42 +84,4 @@ angular.module('lp.playbook.dashboard.launch_history', [])
     }
 
     vm.init();
-})
-.filter('unique', function () {
-
-    return function (items, filterOn) {
-
-        if (filterOn === false) {
-            return items;
-        }
-
-        if ((filterOn || angular.isUndefined(filterOn)) && angular.isArray(items)) {
-            var hashCheck = {}, newItems = [];
-
-            var extractValueToCompare = function (item) {
-                if (angular.isObject(item) && angular.isString(filterOn)) {
-                    return item[filterOn];
-                } else {
-                    return item;
-                }
-            };
-
-            angular.forEach(items, function (item) {
-                var valueToCheck, isDuplicate = false;
-
-                for (var i = 0; i < newItems.length; i++) {
-                    if (angular.equals(extractValueToCompare(newItems[i]), extractValueToCompare(item))) {
-                        isDuplicate = true;
-                        break;
-                    }
-                }
-                if (!isDuplicate) {
-                    newItems.push(item);
-                }
-
-            });
-            items = newItems;
-        }
-        return items;
-    };
 });

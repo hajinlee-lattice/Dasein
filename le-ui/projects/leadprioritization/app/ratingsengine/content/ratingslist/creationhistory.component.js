@@ -4,7 +4,9 @@ $stateParams, RatingsEngineStore, RatingsEngineService) {
 
     var vm = this;
     angular.extend(vm, {
-        
+        current: RatingsEngineStore.current,
+        currentPage: 1,
+        pageSize: 10
     });
 
     vm.init = function() {

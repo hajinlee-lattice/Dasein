@@ -65,6 +65,8 @@ angular
                         playName: $stateParams.play_name
                     };
 
+                    console.log(params.playName);
+
                     PlaybookWizardStore.getPlayLaunches(params).then(function(result){
                         deferred.resolve(result);
                     });
@@ -365,9 +367,11 @@ angular
             },
             resolve: {
                 LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
-                    var deferred = $q.defer();
-                    PlaybookWizardStore.getPlayLaunches($stateParams.play_name).then(function(result){
-                        console.log(result);
+                    var deferred = $q.defer(),
+                        params = {
+                            playName: $stateParams.play_name
+                        };
+                    PlaybookWizardStore.getPlayLaunches(params).then(function(result){
                         deferred.resolve(result);
                     });
                     return deferred.promise;
