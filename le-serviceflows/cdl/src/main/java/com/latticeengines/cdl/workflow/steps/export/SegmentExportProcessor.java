@@ -213,30 +213,34 @@ public class SegmentExportProcessor {
                 Map<Object, List<Map<String, String>>> mapForAccountAndContactList = //
                         contactFetcher.fetch(segmentExportContext);
 
-                for (Map<String, Object> account : accountList) {
-                    GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                    Object accountId = account.get(InterfaceName.AccountId.name());
-                    List<Map<String, String>> matchingContacts = mapForAccountAndContactList.get(accountId);
+                if (CollectionUtils.isNotEmpty(accountList)) {
+                    for (Map<String, Object> account : accountList) {
+                        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                        Object accountId = account.get(InterfaceName.AccountId.name());
+                        List<Map<String, String>> matchingContacts = mapForAccountAndContactList.get(accountId);
 
-                    for (Map<String, String> contact : matchingContacts) {
-                        for (Field field : schema.getFields()) {
-                            String fieldNameInAccountLookupResult = field.name();
-                            if (fieldNameInAccountLookupResult.startsWith(ACCOUNT_PREFIX)) {
-                                fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                        .substring(ACCOUNT_PREFIX.length());
-                            } else if (fieldNameInAccountLookupResult.startsWith(CONTACT_PREFIX)) {
-                                fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                        .substring(CONTACT_PREFIX.length());
-                            }
+                        if (CollectionUtils.isNotEmpty(matchingContacts)) {
+                            for (Map<String, String> contact : matchingContacts) {
+                                for (Field field : schema.getFields()) {
+                                    String fieldNameInAccountLookupResult = field.name();
+                                    if (fieldNameInAccountLookupResult.startsWith(ACCOUNT_PREFIX)) {
+                                        fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
+                                                .substring(ACCOUNT_PREFIX.length());
+                                    } else if (fieldNameInAccountLookupResult.startsWith(CONTACT_PREFIX)) {
+                                        fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
+                                                .substring(CONTACT_PREFIX.length());
+                                    }
 
-                            if (contact.get(fieldNameInAccountLookupResult) != null) {
-                                builder.set(field.name(), contact.get(fieldNameInAccountLookupResult));
-                            } else {
-                                builder.set(field.name(), account.get(fieldNameInAccountLookupResult));
+                                    if (contact.get(fieldNameInAccountLookupResult) != null) {
+                                        builder.set(field.name(), contact.get(fieldNameInAccountLookupResult));
+                                    } else {
+                                        builder.set(field.name(), account.get(fieldNameInAccountLookupResult));
+                                    }
+                                }
+
+                                records.add(builder.build());
                             }
                         }
-
-                        records.add(builder.build());
                     }
                 }
             } else if (segmentExportContext.getMetadataSegmentExport().getType() == ExportType.ACCOUNT) {
