@@ -329,7 +329,6 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     private List<String> getStepNamesFromExecution(JobExecution jobExecution) {
-        @SuppressWarnings("unchecked")
         Collection<String> stepNames = CollectionUtils.collect(jobExecution.getStepExecutions(),
                 TransformerUtils.invokerTransformer("getStepName"));
 
