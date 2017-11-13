@@ -26,6 +26,12 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
+    <li class="import" ng-if="!vm.inModel()">
+        <button class="button icon-button white-button" 
+                ui-sref="home.import.entry">
+            Import Data
+        </button>
+    </li>
     <li class="filter dropdown-container" ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || (vm.section != 'insights' && vm.metadata.toggle.show.enabled) || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
             <i class="fa fa-filter"></i>
