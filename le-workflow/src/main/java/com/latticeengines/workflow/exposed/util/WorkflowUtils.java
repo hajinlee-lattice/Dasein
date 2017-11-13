@@ -70,6 +70,9 @@ public class WorkflowUtils {
         if (jobState == YarnApplicationState.RUNNING) {
             return JobStatus.RUNNING;
         }
+        if (jobState == YarnApplicationState.ACCEPTED) {
+            return JobStatus.PENDING;
+        }
 
         if (YarnUtils.FAILED_STATUS.contains(status)) {
             return JobStatus.FAILED;
