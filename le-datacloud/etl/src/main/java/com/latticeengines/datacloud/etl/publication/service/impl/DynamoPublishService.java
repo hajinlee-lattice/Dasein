@@ -50,9 +50,6 @@ public class DynamoPublishService extends AbstractPublishService
     static final String TAG_LE_PRODUCT_VALUE = "lpi";
 
     @Inject
-    private DynamoService dynamoService;
-
-    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
     @Inject
@@ -60,6 +57,8 @@ public class DynamoPublishService extends AbstractPublishService
 
     @Inject
     private JobService jobService;
+
+    private DynamoService overridingDynamoService;
 
     @PostConstruct
     private void postConstruct() {
@@ -70,6 +69,7 @@ public class DynamoPublishService extends AbstractPublishService
     public PublicationProgress publish(PublicationProgress progress, PublishToDynamoConfiguration configuration) {
         log.info("Execute publish to dynamo.");
         configuration = configurationParser.parseDynamoAlias(configuration);
+        DynamoService dynamoService = getDynamoService(configuration);
 
         DynamoDestination destination = (DynamoDestination) progress.getDestination();
         log.info("Read destination for this progress: \n" + JsonUtils.pprint(destination));
@@ -82,7 +82,7 @@ public class DynamoPublishService extends AbstractPublishService
         case REPLACE:
             log.info("Delete table " + tableName + " if exists.");
             dynamoService.deleteTable(tableName);
-            createTable(tableName, configuration);
+            createTable(dynamoService, tableName, configuration);
             progress = progressService.update(progress).destination(destination).progress(0.3f).commit();
         case APPEND:
             if (PublicationConfiguration.PublicationStrategy.APPEND.equals(configuration.getPublicationStrategy())) {
@@ -96,7 +96,7 @@ public class DynamoPublishService extends AbstractPublishService
             progress = progressService.update(progress).destination(progress.getDestination()).progress(0.9f).commit();
             break;
         }
-        resumeThroughput(tableName, configuration);
+        resumeThroughput(dynamoService, tableName, configuration);
 
         long count = 0L;
         progress = progressService.update(progress) //
@@ -115,7 +115,7 @@ public class DynamoPublishService extends AbstractPublishService
         return convertToFabricStoreName(recordType);
     }
 
-    private void createTable(String tableName, PublishToDynamoConfiguration configuration) {
+    private void createTable(DynamoService dynamoService, String tableName, PublishToDynamoConfiguration configuration) {
         log.info("Creating dynamo table " + tableName);
         long readCapacity = configuration.getLoadingReadCapacity();
         long writeCapacity = configuration.getLoadingWriteCapacity();
@@ -149,7 +149,7 @@ public class DynamoPublishService extends AbstractPublishService
         log.info("Uploaded data to dynamo table " + tableName);
     }
 
-    private void resumeThroughput(String tableName, PublishToDynamoConfiguration configuration) {
+    private void resumeThroughput(DynamoService dynamoService, String tableName, PublishToDynamoConfiguration configuration) {
         long readCapacity = configuration.getRuntimeReadCapacity();
         long writeCapacity = configuration.getRuntimeWriteCapacity();
         dynamoService.updateTableThroughput(tableName, readCapacity, writeCapacity);
@@ -204,8 +204,19 @@ public class DynamoPublishService extends AbstractPublishService
     }
 
     // for test mock
-    void setDynamoService(DynamoService dynamoService) {
-        this.dynamoService = dynamoService;
+    void setOverridingDynamoService(DynamoService dynamoService) {
+        this.overridingDynamoService = dynamoService;
+    }
+
+    private DynamoService getDynamoService(PublishToDynamoConfiguration configuration) {
+        DynamoService constructed = configurationParser.constructDynamoService(configuration);
+        if (overridingDynamoService != null) {
+            // for test mock
+            log.info("Using an overriding mock service, instead of the one constructed from configuration.");
+            return overridingDynamoService;
+        } else {
+            return configurationParser.constructDynamoService(configuration);
+        }
     }
 
     void setEaiProxy(EaiProxy eaiProxy) {

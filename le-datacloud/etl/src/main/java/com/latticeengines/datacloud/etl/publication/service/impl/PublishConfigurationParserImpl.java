@@ -3,13 +3,20 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.aws.dynamo.impl.DynamoServiceImpl;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.etl.publication.metadata.SQLServerMetadataProvider;
@@ -27,6 +34,8 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("publishConfigurationParser")
 public class PublishConfigurationParserImpl implements PublishConfigurationParser {
+
+    private static final Logger log = LoggerFactory.getLogger(PublishConfigurationParserImpl.class);
 
     private static final String JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION = "-Dexport.statements.per.transaction=1";
     private static final String JVM_PARAM_EXPORT_RECORDS_PER_STATEMENT = "-Dsqoop.export.records.per.statement=1000";
@@ -82,11 +91,20 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     @Value("${datacloud.aws.prod.secret.key}")
     private String prodAwsSecretKey;
 
-    @Autowired
+    @Value("${aws.region}")
+    private String defaultAwsRegion;
+
+    @Inject
     private SourceService sourceService;
 
-    @Autowired
+    @Inject
     private SourceColumnService sourceColumnService;
+
+    @Inject
+    private DynamoService defaultDynamoSerivce;
+
+    @Inject
+    private ApplicationContext applicationContext;
 
     @Override
     public <T extends PublishToSqlConfiguration> T parseSqlAlias(T sqlConfiguration) {
@@ -116,7 +134,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
                 break;
             case SourceDB:
             default:
-                    break;
+                break;
             }
         }
         return sqlConfiguration;
@@ -127,12 +145,12 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
         SqlDestination destination = (SqlDestination) sqlConfiguration.getDestination();
         String tableName = destination.getTableName();
         switch (sqlConfiguration.getPublicationStrategy()) {
-            case VERSIONED:
-            case REPLACE:
-                tableName = tableName + STAGE_SUFFIX;
-                break;
-            case APPEND:
-                break;
+        case VERSIONED:
+        case REPLACE:
+            tableName = tableName + STAGE_SUFFIX;
+            break;
+        case APPEND:
+            break;
         }
         String customer = String.format(EngineConstants.SQOOP_CUSTOMER_PATTERN, tableName);
 
@@ -260,21 +278,41 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
         PublishToDynamoConfiguration.Alias alias = dynamoConfiguration.getAlias();
         if (alias != null) {
             switch (alias) {
-                case QA:
-                    dynamoConfiguration.setAwsAccessKeyEncrypted(qaAwsAccessKey);
-                    dynamoConfiguration.setAwsSecretKeyEncrypted(qaAwsSecretKey);
-                    break;
-                case Production:
-                    dynamoConfiguration.setAwsAccessKeyEncrypted(prodAwsAccessKey);
-                    dynamoConfiguration.setAwsSecretKeyEncrypted(prodAwsSecretKey);
-                    break;
-                default:
-                    break;
+            case QA:
+                dynamoConfiguration.setAwsAccessKeyEncrypted(qaAwsAccessKey);
+                dynamoConfiguration.setAwsSecretKeyEncrypted(qaAwsSecretKey);
+                dynamoConfiguration.setAwsRegion("us-east-1");
+                break;
+            case Production:
+                dynamoConfiguration.setAwsAccessKeyEncrypted(prodAwsAccessKey);
+                dynamoConfiguration.setAwsSecretKeyEncrypted(prodAwsSecretKey);
+                dynamoConfiguration.setAwsRegion("us-east-1");
+                break;
+            default:
+                break;
             }
         }
         return dynamoConfiguration;
     }
 
+    public DynamoService constructDynamoService(PublishToDynamoConfiguration dynamoConfiguration) {
+        String awsKeyEncrypted = dynamoConfiguration.getAwsAccessKeyEncrypted();
+        String awsSecretEncrypted = dynamoConfiguration.getAwsSecretKeyEncrypted();
+        String awsRegion = dynamoConfiguration.getAwsRegion();
+        if (StringUtils.isNotBlank(awsKeyEncrypted) && StringUtils.isNotBlank(awsKeyEncrypted)) {
+            if (StringUtils.isBlank(awsRegion)) {
+                awsRegion = defaultAwsRegion;
+            }
+            log.info(String.format("Creating dynamo service using aws creds %s:%s (encrypted) in %s", awsKeyEncrypted,
+                    awsSecretEncrypted, awsRegion));
+            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(CipherUtils.decrypt(awsKeyEncrypted),
+                    CipherUtils.decrypt(awsSecretEncrypted));
+            return applicationContext.getBean(DynamoServiceImpl.class, awsCredentials, null, awsRegion);
+        } else {
+            log.info("aws creds parameters are not set, using default dynamo service.");
+            return defaultDynamoSerivce;
+        }
+    }
 
     private DbCreds getDbCreds(PublishToSqlConfiguration sqlConfiguration) {
         DbCreds.Builder builder = new DbCreds.Builder() //

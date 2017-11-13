@@ -84,7 +84,7 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
         publicationEntityMgr.removePublication(PUBLICATION_NAME);
         publication = createPublication();
         DynamoService dynamoService = new TestDynamoSerivceImpl();
-        ((DynamoPublishService) publishService).setDynamoService(dynamoService);
+        ((DynamoPublishService) publishService).setOverridingDynamoService(dynamoService);
         ((DynamoPublishService) publishService).setEaiProxy(new TestEaiProxy(dynamoTables));
         ((DynamoPublishService) publishService).setJobService(mockJobService());
     }
