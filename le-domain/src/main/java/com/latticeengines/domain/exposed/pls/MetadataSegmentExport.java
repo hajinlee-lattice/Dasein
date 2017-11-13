@@ -119,7 +119,7 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     private Date cleanupBy;
 
     @JsonProperty("path")
-    @Column(name = "PATH", nullable = false)
+    @Column(name = "PATH", nullable = false, length = 2048)
     private String path;
 
     @JsonProperty("fileName")
