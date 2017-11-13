@@ -232,7 +232,14 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
-                if (!VdbMetadataUtils.isAcceptableDataType(srcAttrs.get(attr.getName()).getSourceLogicalDataType(),
+                Attribute srcAttr = srcAttrs.get(attr.getName());
+                if (StringUtils.isEmpty(attr.getSourceLogicalDataType())) {
+                    attr.setSourceLogicalDataType(attr.getPhysicalDataType());
+                }
+                if (StringUtils.isEmpty(srcAttr.getSourceLogicalDataType())) {
+                    srcAttr.setSourceLogicalDataType(srcAttr.getPhysicalDataType());
+                }
+                if (!VdbMetadataUtils.isAcceptableDataType(srcAttr.getSourceLogicalDataType(),
                         attr.getSourceLogicalDataType())) {
                     log.error(String.format("Field %s should have the type %s, not %s", attr.getName(),
                             srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
