@@ -28,7 +28,7 @@ public interface RedisMapService {
 
     Future<Object> getValueAsync(String mapName, Object key);
 
-    Object getValues(String mapName, Set<Object> keys);
+    Map<Object, Object> getValues(String mapName, Set<Object> keys);
 
     Future<Map<Object, Object>> getValuesAsync(String mapName, Set<Object> keys);
 

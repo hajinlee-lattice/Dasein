@@ -82,7 +82,7 @@ public class RedisMapServiceImpl implements RedisMapService {
     }
 
     @Override
-    public Object getValues(String mapName, Set<Object> keys) {
+    public Map<Object, Object> getValues(String mapName, Set<Object> keys) {
         return getMap(mapName).getAll(keys);
     }
 
