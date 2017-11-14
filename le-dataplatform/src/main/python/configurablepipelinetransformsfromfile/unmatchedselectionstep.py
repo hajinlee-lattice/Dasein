@@ -43,10 +43,7 @@ class UnmatchedSelectionStep(PipelineStep):
         logger.info("Total record count:" + str(recordCount) + " Matched count:" + str(matchedCount) + " Unmatched ratio:" + str(unmatchedRatio))
 
         unmatchedIndex = dataFrame[dataFrame[lidColName].isnull()].index
-        if matchedCount != 0:
-            selectedUnmatchedCount = matchedCount * self.unmatchedRatioThreshold * 1.0 / (1.0 - self.unmatchedRatioThreshold)
-        else:
-            selectedUnmatchedCount = recordCount * self.unmatchedRatioThreshold
+        selectedUnmatchedCount = matchedCount * self.unmatchedRatioThreshold * 1.0 / (1.0 - self.unmatchedRatioThreshold)
         selectedUnmatchedIndex = random.sample(unmatchedIndex, int(selectedUnmatchedCount))
         
         targetColumn = self.params["schema"]["target"]
