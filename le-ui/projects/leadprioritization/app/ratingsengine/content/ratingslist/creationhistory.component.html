@@ -1,4 +1,4 @@
-<section id="main-content" class="container">
+<section id="main-content" class="container creation-history">
 
     <table>
     	<thead>
@@ -11,18 +11,25 @@
     		</tr>
     	</thead>
     	<tbody>
-    		<tr ng-repeat="rating in vm.current.ratings">
+    		<tr 
+    			ng-repeat="
+    				rating in vm.current.ratings |
+    				startFrom: (current - 1) * pagesize |
+                    limitTo: pagesize |
+                    orderBy: 'rating.created':true">
     			<td>{{rating.displayName}}</td>
     			<td>{{rating.createdBy}}</td>
     			<td>{{rating.id}}</td>
     			<td>{{rating.created | date}}</td>
-    			<td>{{rating.status}}</td>
+    			<td><span ng-class="rating.status === 'ACTIVE' ? 'green-text' : 'red-text'">{{rating.status}}</span></td>
     		</tr>
     	</tbody>
     </table>
     
+
+
     <div class="pull-right" ng-init="pagesize = 10; current = 1" ng-show="max > 1">
-        <pd-pagination-controls current="current" max="vm.current.ratings.length / pagesize">
+        <pd-pagination-controls current="current" max="max = (vm.current.ratings.length / pagesize)">
         </pd-pagination-controls>
     </div>
 

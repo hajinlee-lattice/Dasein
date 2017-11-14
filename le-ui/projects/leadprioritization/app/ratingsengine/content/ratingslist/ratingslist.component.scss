@@ -188,3 +188,20 @@
 		}
 	}
 }
+
+
+.creation-history {
+	table td:nth-child(1), table td:nth-child(2) {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	table td:nth-child(1) {
+		width: 350px;
+	}
+	table td:nth-child(2) {
+		width: 250px;
+	}
+}
+
+

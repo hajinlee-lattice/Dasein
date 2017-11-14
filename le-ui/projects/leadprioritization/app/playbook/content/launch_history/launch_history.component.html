@@ -3,27 +3,14 @@
 <section class="playbook playbook-launch-history container">
     <div class="card-content" ng-class="{'has-footer': !vm.allPlaysHistory}">
 
-        <select 
-            name="category-group" 
-            id="categoryGroup" 
-            ng-if="vm.allPlaysHistory"
-            ng-model="play" 
-            ng-change="vm.playSelectChange(play)"
-            ng-options="play.displayName for play in vm.defaultPlayLaunchList"
-            ng-init="play=vm.defaultPlayLaunchList[0]">
-        </select>
-
-
+        <chips 
+            ng-show="vm.allPlaysHistory"
+            placeholder="All Launched Plays" 
+            datasource="vm.defaultPlayLaunchList" 
+            callback-function="vm.playSelectChange(args)"
+            single-selection="true">
+        </chips>
         
-
-        <!-- <input type="text" ng-model="searchLaunchedPlays" />
-        <ul>
-            <li 
-                ng-repeat="play in vm.launches.launchSummaries | unique:'playName'">{{play.playDisplayName}}</li>
-        </ul> -->
-
-
-
         <ul class="history-metadata">
         	<li>
         		<dl>

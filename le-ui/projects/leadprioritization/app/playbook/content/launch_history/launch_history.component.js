@@ -17,7 +17,7 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
     vm.init = function() {
 
-        console.log(vm.launches);
+        // console.log(vm.launches);
 
         if(vm.launches.launchSummaries.length > 10){
             vm.showPagination = true;
@@ -43,8 +43,21 @@ angular.module('lp.playbook.dashboard.launch_history', [])
     };
 
     vm.playSelectChange = function(play){
+
+        console.log(play);
+
+        var playName = null;
+
+        if(play === {}){
+            playName = null;
+        } else {
+            playName = play.undefined.name;
+        }
+
+        console.log(play);
+
         var params = {
-            playName: play.name
+            playName: playName
         }
 
         PlaybookWizardStore.getPlayLaunches(params).then(function(result){

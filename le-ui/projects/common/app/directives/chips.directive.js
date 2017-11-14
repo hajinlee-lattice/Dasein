@@ -16,10 +16,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.blur = true;
             scope.showQueryList = false;
 
-
             scope.isSelectionDone = function(){
-                console.log('Single Selection', scope.singleSelection);
-                console.log(Object.keys(scope.chips));
                 if(Object.keys(scope.chips).length > 0 && scope.singleSelection){
                     return true;
                 } else {
@@ -96,7 +93,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
 
             scope.callCallback = function () {
                 if (typeof (scope.callback) != undefined) {
-                    scope.callback({ args: scope.chips });
+                    scope.callback({args:scope.chips});
                 }
             }
 

@@ -38,6 +38,13 @@
 		}
 	}
 
+	.chips-query-container {
+		width: 300px;
+		.text-container .query {
+			margin-top: 0;
+		}
+	}
+
 	.table-metadata {
 		float: left;
 		margin-bottom: 8px;
