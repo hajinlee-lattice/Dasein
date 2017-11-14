@@ -10,6 +10,10 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
 
 public class SegmentExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
+    public static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
+    public static final String EXPORT_INPUT_PATH = "EXPORT_INPUT_PATH";
+    public static final String SEGMENT_EXPORT_ID = "SEGMENT_EXPORT_ID";
+
     public static class Builder {
         private SegmentExportWorkflowConfiguration configuration = new SegmentExportWorkflowConfiguration();
         private SegmentExportStepConfiguration initStepConf = new SegmentExportStepConfiguration();

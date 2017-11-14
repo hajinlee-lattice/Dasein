@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @Component("segmentExportWorkflowSubmitter")
 public class SegmentExportWorkflowSubmitter extends WorkflowSubmitter {
+
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SegmentExportWorkflowSubmitter.class);
 
@@ -34,8 +35,9 @@ public class SegmentExportWorkflowSubmitter extends WorkflowSubmitter {
         String path = metadataSegmentExport.getPath();
         String avroPath = metadataSegmentExport.getPath();
 
-        inputProperties.put("EXPORT_INPUT_PATH", avroPath);
-        inputProperties.put("EXPORT_OUTPUT_PATH", path);
+        inputProperties.put(SegmentExportWorkflowConfiguration.SEGMENT_EXPORT_ID, metadataSegmentExport.getExportId());
+        inputProperties.put(SegmentExportWorkflowConfiguration.EXPORT_INPUT_PATH, avroPath);
+        inputProperties.put(SegmentExportWorkflowConfiguration.EXPORT_OUTPUT_PATH, path);
         inputProperties.put(ExportProperty.TARGET_FILE_NAME, getTimestampFromPath(path));
 
         SegmentExportWorkflowConfiguration configuration = new SegmentExportWorkflowConfiguration.Builder()
