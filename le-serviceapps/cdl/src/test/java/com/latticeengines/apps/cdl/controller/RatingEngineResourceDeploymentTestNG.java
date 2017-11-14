@@ -97,8 +97,6 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         }
         Assert.assertNotNull(possibleRatingEngineSummary1);
         Assert.assertNotNull(possibleRatingEngineSummary2);
-        Assert.assertNotNull(possibleRatingEngineSummary1.getRatingModels());
-        Assert.assertNotNull(possibleRatingEngineSummary2.getRatingModels());
         Assert.assertEquals(possibleRatingEngineSummary1.getSegmentDisplayName(),
                 possibleRatingEngineSummary2.getSegmentDisplayName());
         Assert.assertEquals(possibleRatingEngineSummary1.getSegmentDisplayName(), SEGMENT_NAME);
