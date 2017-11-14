@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.latticeengines.query.exposed.translator.NewTransactionRestrictionTranslator;
+import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
 /**
@@ -102,10 +102,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("0802DD00110356F3289420FE46850008");
         QueryBuilder builder = Query.builder();
-        Restriction restriction = new NewTransactionRestrictionTranslator().convert(txRestriction,
-                                                                                    queryFactory, attrRepo,
-                                                                                    BusinessEntity.Account,
-                                                                                    builder);
+        Restriction restriction = new TransactionRestrictionTranslator().convert(txRestriction,
+                                                                                 queryFactory, attrRepo,
+                                                                                 BusinessEntity.Account,
+                                                                                 builder);
         Restriction cityRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
                 .eq("Richland").build();
         Restriction idRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
@@ -129,10 +129,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 ComparisonType.GREATER_THAN, Collections.singletonList(3000)));
 
         QueryBuilder builder = Query.builder();
-        Restriction restrictionSpentSum = new NewTransactionRestrictionTranslator().convert(txRestrictionSpentSum,
-                                                                                            queryFactory, attrRepo,
-                                                                                            BusinessEntity.Account,
-                                                                                            builder);
+        Restriction restrictionSpentSum = new TransactionRestrictionTranslator().convert(txRestrictionSpentSum,
+                                                                                         queryFactory, attrRepo,
+                                                                                         BusinessEntity.Account,
+                                                                                         builder);
         Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
                 .eq("0012400001DNJYKAA5").build();
         Restriction accountAndTxSpentSum = Restriction.builder().and(accountIdRestriction, restrictionSpentSum).build();
@@ -149,10 +149,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestrictionSpentEach.setTimeFilter(TimeFilter.ever());
         txRestrictionSpentEach.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
                 ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(200)));
-        Restriction restrictionSpentEach = new NewTransactionRestrictionTranslator().convert(txRestrictionSpentEach,
-                                                                                             queryFactory, attrRepo,
-                                                                                             BusinessEntity.Account,
-                                                                                             builder);
+        Restriction restrictionSpentEach = new TransactionRestrictionTranslator().convert(txRestrictionSpentEach,
+                                                                                          queryFactory, attrRepo,
+                                                                                          BusinessEntity.Account,
+                                                                                          builder);
         Restriction accountAndTxSpentEach = Restriction.builder().and(accountIdRestriction, restrictionSpentEach)
                 .build();
         Query querySpentEach = builder //
@@ -168,10 +168,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestrictionSpentOnce.setTimeFilter(TimeFilter.ever());
         txRestrictionSpentOnce.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT,
                 AggregationType.AT_LEAST_ONCE, ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(2900)));
-        Restriction restrictionSpentOnce = new NewTransactionRestrictionTranslator().convert(txRestrictionSpentOnce,
-                                                                                             queryFactory, attrRepo,
-                                                                                             BusinessEntity.Account,
-                                                                                             builder);
+        Restriction restrictionSpentOnce = new TransactionRestrictionTranslator().convert(txRestrictionSpentOnce,
+                                                                                          queryFactory, attrRepo,
+                                                                                          BusinessEntity.Account,
+                                                                                          builder);
         Restriction accountAndTxSpentOnce = Restriction.builder().and(accountIdRestriction, restrictionSpentOnce)
                 .build();
         Query querySpentOnce = builder //
@@ -187,10 +187,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestrictionUnitSum.setTimeFilter(TimeFilter.ever());
         txRestrictionUnitSum.setUnitFilter(new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM,
                 ComparisonType.GREATER_THAN, Collections.singletonList(20)));
-        Restriction restrictionUnitSum = new NewTransactionRestrictionTranslator().convert(txRestrictionUnitSum,
-                                                                                           queryFactory, attrRepo,
-                                                                                           BusinessEntity.Account,
-                                                                                           builder);
+        Restriction restrictionUnitSum = new TransactionRestrictionTranslator().convert(txRestrictionUnitSum,
+                                                                                        queryFactory, attrRepo,
+                                                                                        BusinessEntity.Account,
+                                                                                        builder);
         Restriction accountAndTxUnitSum = Restriction.builder().and(accountIdRestriction, restrictionUnitSum).build();
         Query queryUnitSum = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
@@ -205,10 +205,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestrictionUnitAvg.setTimeFilter(TimeFilter.ever());
         txRestrictionUnitAvg.setUnitFilter(new AggregationFilter(AggregationSelector.UNIT, AggregationType.AVG,
                 ComparisonType.EQUAL, Collections.singletonList(2)));
-        Restriction restrictionUnitAvg = new NewTransactionRestrictionTranslator().convert(txRestrictionUnitAvg,
-                                                                                           queryFactory, attrRepo,
-                                                                                           BusinessEntity.Account,
-                                                                                           builder);
+        Restriction restrictionUnitAvg = new TransactionRestrictionTranslator().convert(txRestrictionUnitAvg,
+                                                                                        queryFactory, attrRepo,
+                                                                                        BusinessEntity.Account,
+                                                                                        builder);
         Restriction accountAndTxUnitAvg = Restriction.builder().and(accountIdRestriction, restrictionUnitAvg).build();
         Query queryUnitAvg = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
@@ -247,10 +247,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 new TimeFilter(ComparisonType.PRIOR, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction = new NewTransactionRestrictionTranslator().convert(txRestriction,
-                                                                                    queryFactory, attrRepo,
-                                                                                    BusinessEntity.Account,
-                                                                                    builder);
+        Restriction restriction = new TransactionRestrictionTranslator().convert(txRestriction,
+                                                                                 queryFactory, attrRepo,
+                                                                                 BusinessEntity.Account,
+                                                                                 builder);
         Query query = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction).build();
@@ -265,10 +265,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 new TimeFilter(ComparisonType.WITHIN, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction1.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction1 = new NewTransactionRestrictionTranslator().convert(txRestriction1,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
+        Restriction restriction1 = new TransactionRestrictionTranslator().convert(txRestriction1,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
         Query query1 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction1).build();
@@ -284,10 +284,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 Arrays.asList(new Object[] { 0, periodOffset })));
         txRestriction2.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction2 = new NewTransactionRestrictionTranslator().convert(txRestriction2,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
+        Restriction restriction2 = new TransactionRestrictionTranslator().convert(txRestriction2,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
         Query query2 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction2).build();
@@ -302,10 +302,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, Period.Quarter, Arrays.asList(new Object[] { 0 })));
         txRestriction3.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction3 = new NewTransactionRestrictionTranslator().convert(txRestriction3,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
+        Restriction restriction3 = new TransactionRestrictionTranslator().convert(txRestriction3,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
         Query query3 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction3).build();
@@ -320,10 +320,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 new TimeFilter(ComparisonType.EQUAL, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction4.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction4 = new NewTransactionRestrictionTranslator().convert(txRestriction4,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
+        Restriction restriction4 = new TransactionRestrictionTranslator().convert(txRestriction4,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
         Query query4 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction4).build();
@@ -341,14 +341,14 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestriction6.setTimeFilter(
                 new TimeFilter(ComparisonType.WITHIN, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction6.setNegate(true);
-        Restriction restriction5 = new NewTransactionRestrictionTranslator().convert(txRestriction5,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
-        Restriction restriction6 = new NewTransactionRestrictionTranslator().convert(txRestriction6,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
+        Restriction restriction5 = new TransactionRestrictionTranslator().convert(txRestriction5,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
+        Restriction restriction6 = new TransactionRestrictionTranslator().convert(txRestriction6,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
         Restriction priorToLastRestriction = Restriction.builder().and(restriction5, restriction6).build();
         Query query5 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
@@ -362,10 +362,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestriction7.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction7.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter,
                                                     Arrays.asList(new Object[]{periodOffset})));
-        Restriction restriction7 = new NewTransactionRestrictionTranslator().convert(txRestriction7,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
+        Restriction restriction7 = new TransactionRestrictionTranslator().convert(txRestriction7,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
         Query query7 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction7).build();
@@ -378,10 +378,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestriction8.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter,
                                                     Arrays.asList(new Object[]{periodOffset})));
         txRestriction8.setNegate(true);
-        Restriction restriction8 = new NewTransactionRestrictionTranslator().convert(txRestriction8,
-                                                                                     queryFactory, attrRepo,
-                                                                                     BusinessEntity.Account,
-                                                                                     builder);
+        Restriction restriction8 = new TransactionRestrictionTranslator().convert(txRestriction8,
+                                                                                  queryFactory, attrRepo,
+                                                                                  BusinessEntity.Account,
+                                                                                  builder);
         Query query8 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .from(BusinessEntity.Account).where(restriction8).build();

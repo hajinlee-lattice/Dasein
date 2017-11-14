@@ -36,7 +36,7 @@ import com.querydsl.sql.WindowFunction;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 
-public class NewTransactionRestrictionTranslator {
+public class TransactionRestrictionTranslator {
     public static final int NUM_ADDITIONAL_PERIOD = 2;
     public static final int ONE_LEG_BEHIND_OFFSET = 1;
     public static final String ACCOUNT_ID = InterfaceName.AccountId.name();
