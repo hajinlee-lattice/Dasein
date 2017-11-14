@@ -4,7 +4,98 @@
             <h2>Refine what history the model will learn from</h2>
         </div>
     </div>
-    <div class="body-container">
+
+    <div class="options-container">
+        <div class="flex-grid">
+            <div class="col col-bordered">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Only use success where spend in the quarter was</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.spent">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.spent">
+                        <p>Spending</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Only use success where quantity bought in the quarter was</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.bought">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.bought">
+                        <p>Bought</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grid">
+            <div class="col col-bordered">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">When modeling, only use historical records for the last</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.historical">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.historical">
+                        Historical
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Let me model on a similar Product, but not exacly the one I want to sell into</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.similarProducts">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.similarProducts">
+                        <chips placeholder="Choose similar Products" datasource="vm.productsDataSource" callback-function="vm.productsCallback(args)"
+                            single-selection="false"></chips>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grid">
+            <div class="col">
+                <div class="option">
+                    <div class="option-header">
+                        <p class="option-title">Let me model on a similar Segment, but not exacly the one I want to sell into</p>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" ng-model="vm.similarSegments">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="option-body" ng-show="vm.similarSegments">
+                        <chips placeholder="Choose similar Segment" datasource="vm.datasource" callback-function="vm.callbackSegments(args)" single-selection="false"></chips>
+                    </div>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+    <!-- <div class="body-container">
         <div class="options-container">
             <div class="choises-container">
                 <div class="choises">
@@ -15,18 +106,8 @@
                     <div class="choise" ng-if="vm.spent">
                         <div class="selection">
                             <div class="choise">
-                                <label for="spend-ammount" class="lable-left">$</label>
-                                <input type="number" id="spend-ammount" min="1" class="multiple-selection">
-                                <select name="spent-group" 
-                                        id="spentGroup" 
-                                        class="multiple-selection" 
-                                        ng-model="vm.spentOption" 
-                                        ng-options="spentOption.name for spentOption in vm.spentOptions">
-                                </select>
-                                <!-- <select>
-                                    <option>At least</option>
-                                    <option>At most</option>
-                                </select> -->
+                                <option-spinner label="$" placeholder="Select numerical value" options="vm.options"></option-spinner>
+                             
                             </div>
 
                         </div>
@@ -71,10 +152,8 @@
                     <div class="choise" ng-if="vm.similarProducts">
                         <div class="selection">
                             <div class="choise">
-                                <chips placeholder="Choose similar Products"
-                                        datasource="vm.productsDataSource" 
-                                        callback-function="vm.productsCallback(args)"
-                                        single-selection="false"></chips>
+                                <chips placeholder="Choose similar Products" datasource="vm.productsDataSource" callback-function="vm.productsCallback(args)"
+                                    single-selection="false"></chips>
                             </div>
                         </div>
                     </div>
@@ -87,10 +166,7 @@
                     <div class="choise" ng-if="vm.similarSegments">
                         <div class="selection">
                             <div class="choise">
-                                <chips placeholder="Choose similar Segment" 
-                                        datasource="vm.datasource" 
-                                        callback-function="vm.callbackSegments(args)"
-                                        single-selection="false"></chips>
+                                <chips placeholder="Choose similar Segment" datasource="vm.datasource" callback-function="vm.callbackSegments(args)" single-selection="false"></chips>
                             </div>
                         </div>
                     </div>
@@ -98,5 +174,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </section>

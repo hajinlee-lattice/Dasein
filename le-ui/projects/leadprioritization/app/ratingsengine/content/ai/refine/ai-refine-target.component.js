@@ -43,6 +43,7 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             similarSegments: false,
             productDataSource: [],
             datasource: [],
+            options: [],
             spentOptions : [{'id': 1, 'name':'At least'}, {'id': 2, 'name':'At most'}]
 
         });
@@ -83,6 +84,21 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
                     { 'id': 11, 'name': 'San Jose' },
                     { 'id': 12, 'name': 'San Francisco' }
                 ];
+            options = function(){
+                var options = [{
+                    'id': 1,
+                    'name': 'Option 1'
+                },
+                {
+                    'id': 2,
+                    'name': 'Option 2'
+                },
+                {
+                    'id': 3,
+                    'name': 'Option 3'
+                }];
+                return options;
+            }
         }
 
         vm.callbackSegments = function (element) {
