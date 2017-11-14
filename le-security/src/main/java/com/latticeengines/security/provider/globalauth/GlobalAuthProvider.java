@@ -54,7 +54,7 @@ public class GlobalAuthProvider implements AuthenticationProvider {
                     .map(auth -> new SimpleGrantedAuthority(addRolePrefix(auth.getAuthority()))) //
                     .collect(Collectors.toList());
             TicketAuthenticationToken token = new TicketAuthenticationToken( //
-                    authentication.getPrincipal(), ticket, authoritiesWithPrefix);
+                    session.getEmailAddress(), ticket, authoritiesWithPrefix);
             token.setSession(session);
             token.setAuthenticated(true);
 
