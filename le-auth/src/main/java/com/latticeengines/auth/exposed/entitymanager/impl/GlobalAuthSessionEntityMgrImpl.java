@@ -32,13 +32,13 @@ public class GlobalAuthSessionEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuth
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthSession gaSession) {
-        super.create(gaSession);
+    		getDao().create(gaSession);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthSession gaSession) {
-        super.delete(gaSession);
+    		getDao().delete(gaSession);
     }
 
 }

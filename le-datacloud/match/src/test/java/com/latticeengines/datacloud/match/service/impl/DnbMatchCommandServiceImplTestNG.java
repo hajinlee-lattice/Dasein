@@ -43,7 +43,7 @@ public class DnbMatchCommandServiceImplTestNG extends DataCloudMatchFunctionalTe
     private Object[][] matchCommandDataProvider() {
         // RootOperationUID, rowsToDnb, rowsMatchedByDnb, duration,
         // dnbDurationAvg
-        return new Object[][] { { "TestRootOperationUid3", 14, 10, 0, 0 }, { "TestRootOperationUid4", 0, 0, 0, 0 } };
+        return new Object[][] { { "TestRootOperationUid5", 14, 10, 0, 0 }, { "TestRootOperationUid6", 0, 0, 0, 0 } };
     }
 
     @BeforeClass(groups = "functional")
@@ -65,13 +65,13 @@ public class DnbMatchCommandServiceImplTestNG extends DataCloudMatchFunctionalTe
         // RootOperationUID, BatchID, retryForBatchID, dnbCode, size,
         // successRecords, discardedRecords, updateToStatus
         return new Object[][] {
-                { "TestRootOperationUid3", "TestBatchId1", null, DnBReturnCode.SUBMITTED, 5, 4, 1, DnBReturnCode.OK },
+                { "TestRootOperationUid5", "TestBatchId1", null, DnBReturnCode.SUBMITTED, 5, 4, 1, DnBReturnCode.OK },
                 { "TestRootOperationUid2", "TestBatchId2", null, DnBReturnCode.SUBMITTED, 3, 2, 1,
                         DnBReturnCode.SERVICE_UNAVAILABLE },
-                { "TestRootOperationUid3", "TestBatchId3", null, DnBReturnCode.SUBMITTED, 4, 2, 2, DnBReturnCode.OK },
-                { "TestRootOperationUid4", "TestBatchId4", null, DnBReturnCode.SUBMITTED, 5, 3, 2,
+                { "TestRootOperationUid5", "TestBatchId3", null, DnBReturnCode.SUBMITTED, 4, 2, 2, DnBReturnCode.OK },
+                { "TestRootOperationUid6", "TestBatchId4", null, DnBReturnCode.SUBMITTED, 5, 3, 2,
                         DnBReturnCode.SUBMITTED },
-                { "TestRootOperationUid3", "TestBatchId5", "TestBatchId2", DnBReturnCode.SUBMITTED, 5, 4, 1,
+                { "TestRootOperationUid5", "TestBatchId5", "TestBatchId2", DnBReturnCode.SUBMITTED, 5, 4, 1,
                         DnBReturnCode.OK } };
     }
 

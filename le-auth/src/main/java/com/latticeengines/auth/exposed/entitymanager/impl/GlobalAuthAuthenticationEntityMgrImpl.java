@@ -54,20 +54,20 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthAuthentication gaAuthentication) {
-        super.create(gaAuthentication);
+    	    getDao().create(gaAuthentication);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthAuthentication gaAuthentication) {
-        super.delete(gaAuthentication);
+    	    getDao().delete(gaAuthentication);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void update(GlobalAuthAuthentication gaAuthentication) {
         gaAuthentication.setLastModificationDate(new Date(System.currentTimeMillis()));
-        super.update(gaAuthentication);
+        getDao().update(gaAuthentication);
     }
 
 }

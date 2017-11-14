@@ -2,7 +2,7 @@ package com.latticeengines.datacloud.etl.publication.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 
 import com.latticeengines.datacloud.etl.publication.dao.PublicationProgressDao;
@@ -34,11 +34,12 @@ public class PublicationProgressDaoImpl extends BaseDaoWithAssignedSessionFactor
     public List<PublicationProgress> getStatusForLatestVersion(Publication publication, String version) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(
-                "from %s p where p.publication.pid = :pid and sourceVersion = :sourceVersion order by pid desc limit 1",
+                "from %s p where p.publication.pid = :pid and sourceVersion = :sourceVersion order by pid desc",
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("pid", publication.getPid());
         query.setParameter("sourceVersion", version);
+        query.setMaxResults(1);
         return query.list();
     }
 }

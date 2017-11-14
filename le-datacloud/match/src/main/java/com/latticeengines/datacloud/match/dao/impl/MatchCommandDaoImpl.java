@@ -23,7 +23,10 @@ public class MatchCommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<M
 
     @Override
     public void deleteCommand(MatchCommand command) {
-        getSessionFactory().getCurrentSession().delete(command);
+        // This is needed as part of Hibernate and JPA integration for backward compatibility
+		// Refer to section 5.4 and 5.7 in https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html
+		Session currSession = getSessionFactory().getCurrentSession();
+		currSession.delete(currSession.contains(command) ? command: currSession.merge(command));
     }
 
     @Override

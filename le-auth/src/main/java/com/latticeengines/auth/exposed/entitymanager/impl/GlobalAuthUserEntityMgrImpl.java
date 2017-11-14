@@ -50,21 +50,21 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthUser gaUser) {
-        super.create(gaUser);
+    	    getDao().create(gaUser);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthUser gaUser) {
         log.info(String.format("Deleting user %s (%d)", gaUser.getEmail(), gaUser.getPid()));
-        super.delete(gaUser);
+        getDao().delete(gaUser);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void update(GlobalAuthUser gaUser) {
         gaUser.setLastModificationDate(new Date(System.currentTimeMillis()));
-        super.update(gaUser);
+        getDao().update(gaUser);
     }
 
     @Override

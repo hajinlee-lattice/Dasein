@@ -47,13 +47,13 @@ public class GlobalAuthTenantEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthTenant gaTenant) {
-        super.create(gaTenant);
+    		gaTenantDao.create(gaTenant);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthTenant gaTenant) {
-        super.delete(gaTenant);
+    		gaTenantDao.delete(gaTenant);
     }
 
     @Override

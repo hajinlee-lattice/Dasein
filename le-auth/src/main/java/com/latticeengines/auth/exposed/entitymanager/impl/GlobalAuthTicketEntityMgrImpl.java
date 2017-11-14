@@ -34,19 +34,19 @@ public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthTicket gaTicket) {
-        super.create(gaTicket);
+    	    getDao().create(gaTicket);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthTicket gaTicket) {
-        super.delete(gaTicket);
+    	    getDao().delete(gaTicket);
     }
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void update(GlobalAuthTicket gaTicket) {
         gaTicket.setLastModificationDate(new Date(System.currentTimeMillis()));
-        super.update(gaTicket);
+        getDao().update(gaTicket);
     }
 }

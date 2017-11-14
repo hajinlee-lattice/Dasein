@@ -112,6 +112,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         Thread.sleep(1000);
 
         MetadataSegment UPDATED_SEGMENT = new MetadataSegment();
+        UPDATED_SEGMENT.setPid(METADATA_SEGMENT.getPid());
         UPDATED_SEGMENT.setName(SEGMENT_NAME);
         UPDATED_SEGMENT.setDisplayName(UPDATED_DISPLAY_SEGMENT_NAME);
         UPDATED_SEGMENT.setDescription(UPDATED_SEGMENT_DESCRIPTION);
