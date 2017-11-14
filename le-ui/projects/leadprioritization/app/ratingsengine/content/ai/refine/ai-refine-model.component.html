@@ -19,7 +19,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.spent">
-                        <option-spinner label="$" options="vm.options" hide-options="false"></option-spinner>
+                        <option-spinner label="$" options="vm.getSpentOptions()" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.bought">
-                            <option-spinner label="Units" options="vm.options" hide-options="false"></option-spinner>
+                            <option-spinner label="Units" options="vm.getBoughtOptions()" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.historical">
-                            <option-spinner options="vm.options" hide-options="false"></option-spinner>
+                            <option-spinner options="vm.getHistoricalOptions()" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>

@@ -23,6 +23,9 @@ angular.module('mainApp.appCommon.directives.input.selection', [])
                 if(scope.hideOptions === true){
                     scope.showOptions = false;
                 }
+                if(!scope.options){
+                    scope.options = [];
+                }
             }
         }
     });

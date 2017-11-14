@@ -44,7 +44,9 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             productDataSource: [],
             datasource: [],
             options: [],
-            spentOptions : [{'id': 1, 'name':'At least'}, {'id': 2, 'name':'At most'}]
+            spentOptions : [{'id': 1, 'name':'At least'}, {'id': 2, 'name':'At most'}],
+            boughtOptions: [{'id': 1, 'name':'At least'}, {'id': 2, 'name':'At most'}],
+            historicalOptions: [{'id': 1, 'name':'Months'}, {'id': 2, 'name':'Years'}]
 
         });
 
@@ -84,21 +86,17 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
                     { 'id': 11, 'displayName': 'San Jose' },
                     { 'id': 12, 'displayName': 'San Francisco' }
                 ];
-            vm.options = function(){
-                var options = [{
-                    'id': 1,
-                    'name': 'Option 1'
-                },
-                {
-                    'id': 2,
-                    'name': 'Option 2'
-                },
-                {
-                    'id': 3,
-                    'name': 'Option 3'
-                }];
-                return options;
-            }
+
+        }
+        vm.getSpentOptions = function(){
+            return vm.spentOptions;
+        }
+        vm.getBoughtOptions = function(){
+            return vm.boughtOptions;
+        }
+
+        vm.getHistoricalOptions = function(){
+            return vm.historicalOptions;
         }
 
         vm.callbackSegments = function (element) {
