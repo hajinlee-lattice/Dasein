@@ -36,7 +36,7 @@ public class StringStandardizationUtils {
             return null;
         }
         duns = duns.replaceAll("[^\\d]", "");
-        if (duns.length() > 9) {
+        if (StringUtils.isEmpty(duns) || duns.length() > 9) {
             return null;
         }
         if (duns.length() < 9) {

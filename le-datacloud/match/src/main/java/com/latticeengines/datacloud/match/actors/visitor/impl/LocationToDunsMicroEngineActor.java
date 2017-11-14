@@ -41,13 +41,10 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     @Override
     protected boolean accept(Traveler traveler) {
         MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
-        Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
 
-        if (matchKeyTuple.getDuns() != null
-                || (MapUtils.isNotEmpty(dunsOriginMap) && (dunsOriginMap.containsKey(this.getClass().getName())
-                        || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName())))) {
-            // if DunsOriginMap has entry which was already made by this actor
-            // class or current DUNS is not null then reject it
+        // If already tried to get DUNS from LocationToCachedDunsActor or
+        // LocationToDunsActor
+        if (triedDunsFromLocation((MatchTraveler) traveler)) {
             return false;
         }
 
@@ -60,6 +57,18 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             return true;
         }
 
+        return false;
+    }
+
+    private boolean triedDunsFromLocation(MatchTraveler traveler) {
+        Map<String, String> dunsOriginMap = traveler.getDunsOriginMap();
+        if (MapUtils.isEmpty(dunsOriginMap)) {
+            return false;
+        }
+        if (dunsOriginMap.containsKey(this.getClass().getName())
+                || dunsOriginMap.containsKey(LocationToCachedDunsMicroEngineActor.class.getName())) {
+            return true;
+        }
         return false;
     }
 
@@ -94,8 +103,9 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", //
                     getClass().getSimpleName(), //
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
+        } else {
+            matchKeyTuple.setDuns(res.getDuns());
         }
-        matchKeyTuple.setDuns(res.getDuns());
         Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
         if (dunsOriginMap == null) {
             dunsOriginMap = new HashMap<String, String>();

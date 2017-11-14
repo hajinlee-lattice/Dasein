@@ -16,7 +16,6 @@ import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
@@ -46,11 +45,6 @@ public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
         nameLocationService.setDefaultCountry(context.getInputNameLocation());
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         boolean readyToReturn = false;
-        // Check country code
-        if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
-            context.setDnbCode(DnBReturnCode.UNMATCH);
-            readyToReturn = true;
-        }
 
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setDataCloudVersion(traveler.getDataCloudVersion());

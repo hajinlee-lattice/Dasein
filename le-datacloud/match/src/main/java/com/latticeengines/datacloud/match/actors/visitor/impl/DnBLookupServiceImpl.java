@@ -221,11 +221,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             context.setDnbCode(DnBReturnCode.UNMATCH_TIMEOUT);
             readyToReturn = true;
         }
-        // Check country code
-        if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
-            context.setDnbCode(DnBReturnCode.UNMATCH);
-            readyToReturn = true;
-        }
 
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setDataCloudVersion(traveler.getDataCloudVersion());
