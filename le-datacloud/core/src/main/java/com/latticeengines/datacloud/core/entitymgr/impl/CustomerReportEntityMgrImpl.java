@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -16,9 +18,67 @@ public class CustomerReportEntityMgrImpl extends BaseEntityMgrImpl<CustomerRepor
 
     @Autowired
     private CustomerReportDao customerReportDao;
+
     @Override
     public BaseDao<CustomerReport> getDao() {
         return customerReportDao;
+    }
+
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    @Override
+    public void create(CustomerReport entity) {
+        getDao().create(entity);
+    }
+
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    @Override
+    public void createOrUpdate(CustomerReport entity) {
+        getDao().createOrUpdate(entity);
+    }
+
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    @Override
+    public void update(CustomerReport entity) {
+        getDao().update(entity);
+    }
+
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    @Override
+    public void delete(CustomerReport entity) {
+        getDao().delete(entity);
+    }
+
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    @Override
+    public void deleteAll() {
+        getDao().deleteAll();
+    }
+
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    @Override
+    public boolean containInSession(CustomerReport entity) {
+        return getDao().containInSession(entity);
+    }
+
+    /**
+     * get object by key. entity.getPid() must NOT be empty.
+     */
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    @Override
+    public CustomerReport findByKey(CustomerReport entity) {
+        return getDao().findByKey(entity);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public CustomerReport findByField(String fieldName, Object value) {
+        return getDao().findByField(fieldName, value);
+    }
+
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    @Override
+    public List<CustomerReport> findAll() {
+        return getDao().findAll();
     }
 
     @Override
