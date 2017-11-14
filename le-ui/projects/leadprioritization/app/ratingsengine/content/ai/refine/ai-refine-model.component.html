@@ -19,7 +19,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.spent">
-                        <p>Spending</p>
+                        <option-spinner label="$" options="vm.options" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.bought">
-                        <p>Bought</p>
+                            <option-spinner label="Units" options="vm.options" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.historical">
-                        Historical
+                            <option-spinner options="vm.options" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>
@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="flex-grid">
-            <div class="col">
+            <div class="col col-bordered">
                 <div class="option">
                     <div class="option-header">
                         <p class="option-title">Let me model on a similar Segment, but not exacly the one I want to sell into</p>

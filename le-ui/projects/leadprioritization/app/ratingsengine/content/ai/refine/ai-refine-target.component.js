@@ -1,4 +1,4 @@
-angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chips'])
+angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chips', 'mainApp.appCommon.directives.input.selection'])
     .controller('RatingsEngineAIRefineTarget', function ($scope, RefineService) {
         var vm = this;
 
@@ -60,31 +60,31 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
                 }, true);
             vm.productsDataSource =
                 [
-                    { 'id': 1, 'name': 'iPhone6' },
-                    { 'id': 2, 'name': 'iPhone6+' },
-                    { 'id': 3, 'name': 'iPhone7' },
-                    { 'id': 4, 'name': 'iPhone7+' },
-                    { 'id': 5, 'name': 'iPhoneX' },
-                    { 'id': 6, 'name': 'Nokya' },
-                    { 'id': 7, 'name': 'Samsung7' },
-                    { 'id': 8, 'name': 'Google Phone' }
+                    { 'id': 1, 'displayName': 'iPhone6' },
+                    { 'id': 2, 'displayName': 'iPhone6+' },
+                    { 'id': 3, 'displayName': 'iPhone7' },
+                    { 'id': 4, 'displayName': 'iPhone7+' },
+                    { 'id': 5, 'displayName': 'iPhoneX' },
+                    { 'id': 6, 'displayName': 'Nokya' },
+                    { 'id': 7, 'displayName': 'Samsung7' },
+                    { 'id': 8, 'displayName': 'Google Phone' }
                 ];
             vm.datasource =
                 [
-                    { 'id': 1, 'name': 'New Yourk' },
-                    { 'id': 2, 'name': 'Russian' },
-                    { 'id': 3, 'name': 'Italy' },
-                    { 'id': 4, 'name': 'Florence' },
-                    { 'id': 5, 'name': 'Rome' },
-                    { 'id': 6, 'name': 'London' },
-                    { 'id': 7, 'name': 'Paris' },
-                    { 'id': 8, 'name': 'Madrid' },
-                    { 'id': 9, 'name': 'Instambul' },
-                    { 'id': 10, 'name': 'Tokyo' },
-                    { 'id': 11, 'name': 'San Jose' },
-                    { 'id': 12, 'name': 'San Francisco' }
+                    { 'id': 1, 'displayName': 'New Yourk' },
+                    { 'id': 2, 'displayName': 'Russian' },
+                    { 'id': 3, 'displayName': 'Italy' },
+                    { 'id': 4, 'displayName': 'Florence' },
+                    { 'id': 5, 'displayName': 'Rome' },
+                    { 'id': 6, 'displayName': 'London' },
+                    { 'id': 7, 'displayName': 'Paris' },
+                    { 'id': 8, 'displayName': 'Madrid' },
+                    { 'id': 9, 'displayName': 'Instambul' },
+                    { 'id': 10, 'displayName': 'Tokyo' },
+                    { 'id': 11, 'displayName': 'San Jose' },
+                    { 'id': 12, 'displayName': 'San Francisco' }
                 ];
-            options = function(){
+            vm.options = function(){
                 var options = [{
                     'id': 1,
                     'name': 'Option 1'

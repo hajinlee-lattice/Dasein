@@ -1,0 +1,11 @@
+<div class="field-selection-lable">
+    <div class="lable-container" ng-if="showTitle">
+        <p class="title">{{title}}</p>
+    </div>
+    <input type="number" min="1" class="field-numerical" value="1"
+            ng-if="showInput">
+    <select ng-if="showOptions" class="selection-field" 
+                ng-model="option" 
+                ng-options="option.name for option in options">
+    </select>
+</div>

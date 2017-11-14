@@ -1522,3 +1522,48 @@ ul.help-block > li > em {
         display: block;
     }
 }
+
+/* ==================Label Input Selection widget===========================*/
+
+.field-selection-lable{
+  /* border: 1px solid rgba(250, 249, 249, 0.186); */
+  display: flex;
+  flex-direction: row;
+  min-height: 36px;
+  max-height: 36px;
+
+  .lable-container {
+    border: 1px solid rgb(221, 218, 218);
+    width: 30%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    background-color: rgba(235, 231, 231, 0.618);
+    color: black;
+    border-radius: 4px;
+
+    .title {
+      margin: 0;
+    }
+  }
+
+  input[type=number] {
+    border: 1px solid #8080803b;
+    width: 20%;
+    text-align: center;
+  }
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button {  
+  
+     opacity: 1;
+  
+  }
+  
+  .selection-field {
+    padding-left: 10px;
+    width: 50%;
+
+    outline: none;
+  }    
+}
