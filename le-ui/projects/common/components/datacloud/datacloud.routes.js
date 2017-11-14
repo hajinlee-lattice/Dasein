@@ -6,6 +6,7 @@ angular
     'common.datacloud.analysistabs',
     'common.datacloud.targettabs',
     'common.datacloud.query',
+    'common.datacloud.explorer.export',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .run(function($rootScope, $state, DataCloudStore, DataCloudService) {
@@ -603,6 +604,21 @@ angular
         },
         abstract: {
             abstract: true
+        },
+        exportSegment: {            
+            url: '/export/:exportID',
+            params: {
+                pageTitle: 'Export Segment',
+                pageIcon: 'ico-analysis',
+                section: 'segment.analysis'               
+            },
+            views: {
+                "main@": {
+                    controller: 'SegmentExportController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/segmentexport/segmentexport.component.html'
+                }
+            }
         }
     };
 
@@ -668,5 +684,6 @@ angular
         .state('home.segment.explorer.builder', getState('builder'))
         .state('home.nodata', getState('nodata'))
         .state('home.segment.accounts', getState('accounts'))
-        .state('home.segment.contacts', getState('contacts'));
+        .state('home.segment.contacts', getState('contacts'))
+        .state('home.exportSegment', getState('exportSegment'));
 });
