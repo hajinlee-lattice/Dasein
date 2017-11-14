@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.CDLImportService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -27,6 +30,9 @@ public class CDLImportServiceImpl implements CDLImportService {
             String source, String entity, String feedType) {
         String metaData = generateImportConfigStr(customerSpace.toString(), templateFileName, dataFileName);
         String taskId = cdlProxy.createDataFeedTask(customerSpace.toString(), source, entity, feedType, metaData);
+        if (StringUtils.isEmpty(taskId)) {
+            throw new LedpException(LedpCode.LEDP_18162, new String[] {entity, source, feedType});
+        }
         return cdlProxy.submitImportJob(customerSpace.toString(), taskId, metaData);
     }
 
