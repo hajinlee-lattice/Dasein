@@ -908,6 +908,33 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+
+    @RequestMapping(value = "/emails/segmentexport/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after segment export")
+    public void sendSegmentExportEmail(@PathVariable("result") String result,
+            @PathVariable("tenantId") String tenantId, @RequestBody MetadataSegmentExport export,
+            HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        String exportID = export.getExportId();
+        if (exportID != null && !exportID.isEmpty()) {
+            for (User user : users) {
+                if (user.getEmail().equals(export.getCreatedBy())) {
+                    String tenantName = tenantService.findByTenantId(tenantId).getName();
+                    if (export != null) {
+                        String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/lp/"+ tenantName  + "/export/" + exportID;
+                        if (result.equals("COMPLETED")) {
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url);
+                        } else {
+                            emailService.sendPlsExportSegmentErrorEmail(user, url);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @RequestMapping(value = "/currentstack", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get current active stack")

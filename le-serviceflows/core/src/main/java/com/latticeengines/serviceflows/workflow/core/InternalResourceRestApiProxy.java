@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -239,6 +240,16 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             restTemplate.put(url, info);
         } catch (Exception e) {
             throw new RuntimeException("sendScoreEmail: Remote call failure", e);
+        }
+    }
+
+    public void sendMetadataSegmentExportEmail(String result, String tenantId, MetadataSegmentExport export) {
+        try {
+            String url = constructUrl("pls/internal/emails/segmentexport/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, export);
+        } catch (Exception e) {
+            throw new RuntimeException("sendMetadataSegmentExportEmail: Remote call failure", e);
         }
     }
 

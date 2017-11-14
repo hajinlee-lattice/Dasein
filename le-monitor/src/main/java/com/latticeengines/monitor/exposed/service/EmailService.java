@@ -2,6 +2,7 @@ package com.latticeengines.monitor.exposed.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Date;
 
 import javax.mail.Multipart;
 
@@ -66,4 +67,8 @@ public interface EmailService {
 
     void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
             String emailAddress, EmailSettings settings);
+
+    void sendPlsExportSegmentSuccessEmail(User user, String hostport);
+
+    void sendPlsExportSegmentErrorEmail(User user, String hostport);
 }

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -601,6 +603,44 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             log.error("Failed to send PLS enrich internal attribute (" + modelName + ") error email to "
                     + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsExportSegmentSuccessEmail(User user, String hostport) {
+        try {
+            log.info("Sending PLS import data complete email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_SUCCESS);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{downloadLink}}", hostport);
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Segment Export Success", mp,
+                    Collections.singleton(user.getEmail()));
+            log.info("Sending PLS segment export complete email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS export segment complete email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsExportSegmentErrorEmail(User user, String hostport) {
+        try {
+            log.info("Sending PLS import data complete email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_ERROR);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Segment Export Error", mp,
+                    Collections.singleton(user.getEmail()));
+            log.info("Sending PLS export segment error email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS export segment error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
