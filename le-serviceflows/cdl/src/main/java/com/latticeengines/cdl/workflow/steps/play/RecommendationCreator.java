@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
@@ -19,7 +18,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.service.RecommendationService;
-import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 
 @Component
 public class RecommendationCreator {
@@ -30,9 +28,6 @@ public class RecommendationCreator {
 
     @Autowired
     private RecommendationService recommendationService;
-
-    @Autowired
-    private DanteLeadProxy danteLeadProxy;
 
     public void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList) {
@@ -63,12 +58,6 @@ public class RecommendationCreator {
 
             // insert recommendation in table
             recommendationService.create(recommendation);
-
-            // insert recommendation in dante
-            danteLeadProxy.create(
-                    new DanteLeadDTO(recommendation, playLaunchContext.getPlay(), //
-                            playLaunchContext.getPlayLaunch()), //
-                    playLaunchContext.getCustomerSpace().toString());
 
             // update corresponding counters
             playLaunchContext.getCounter().getContactLaunched().addAndGet(
@@ -149,10 +138,5 @@ public class RecommendationCreator {
     @VisibleForTesting
     void setRecommendationService(RecommendationService recommendationService) {
         this.recommendationService = recommendationService;
-    }
-
-    @VisibleForTesting
-    void setDanteLeadProxy(DanteLeadProxy danteLeadProxy) {
-        this.danteLeadProxy = danteLeadProxy;
     }
 }

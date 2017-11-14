@@ -1,8 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
 import java.util.UUID;
@@ -23,7 +21,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -32,7 +29,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
-import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -58,9 +54,6 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
 
     @Mock
     RecommendationService partiallyBadRecommendationService;
-
-    @Mock
-    DanteLeadProxy danteLeadProxy;
 
     @Autowired
     TenantEntityMgr tenantEntityMgr;
@@ -96,8 +89,6 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
 
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
-        mockDanteLeadProxy();
-
         // setting partially bad recommendation service to simulate partial
         // failure during recommendation creation/saving which should not cause
         // play launch to go in FAILED state. Ensure that play launch state is
@@ -105,7 +96,7 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
         mockPartiallyBadRecommendationService();
 
         helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy,
-                partiallyBadRecommendationService, danteLeadProxy, pageSize);
+                partiallyBadRecommendationService, pageSize);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
@@ -147,12 +138,6 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
         config.setPlayLaunchId(playLaunchId);
         config.setPlayName(playName);
         return config;
-    }
-
-    private void mockDanteLeadProxy() {
-        doNothing() //
-                .when(danteLeadProxy) //
-                .create(any(DanteLeadDTO.class), anyString());
     }
 
     private void mockPartiallyBadRecommendationService() {

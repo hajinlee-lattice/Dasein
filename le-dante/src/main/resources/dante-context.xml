@@ -25,9 +25,5 @@
     <bean id="danteAccountDao" class="com.latticeengines.dante.dao.impl.DanteAccountDaoImpl">
         <property name="sessionFactory" ref="danteSessionFactory"/>
     </bean>
-
-    <bean id="danteLeadDao" class="com.latticeengines.dante.dao.impl.DanteLeadDaoImpl">
-        <property name="sessionFactory" ref="danteSessionFactory"/>
-    </bean>
 </beans>
 

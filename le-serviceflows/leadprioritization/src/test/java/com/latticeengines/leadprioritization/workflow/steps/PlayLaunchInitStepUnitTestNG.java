@@ -30,7 +30,6 @@
 // import
 // com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 // import com.latticeengines.playmakercore.service.RecommendationService;
-// import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 // import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 // import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 // import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -51,8 +50,6 @@
 // @Mock
 // RecommendationService recommendationService;
 //
-// @Mock
-// DanteLeadProxy danteLeadProxy;
 //
 // @Mock
 // TenantEntityMgr tenantEntityMgr;
@@ -127,11 +124,6 @@
 // .thenReturn(tenant);
 // }
 //
-// private void mockDanteLeadProxy() {
-// doNothing() //
-// .when(danteLeadProxy) //
-// .create(any(Recommendation.class), anyString());
-// }
 //
 // private void mockInternalResource(String playId, String playLaunchId) {
 //

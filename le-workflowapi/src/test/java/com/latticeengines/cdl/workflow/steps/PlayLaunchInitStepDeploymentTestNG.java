@@ -1,9 +1,5 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -29,7 +25,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dante.DanteLeadDTO;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -38,7 +33,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
-import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -66,9 +60,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @Autowired
     RecommendationService recommendationService;
-
-    @Mock
-    DanteLeadProxy danteLeadProxy;
 
     @Autowired
     TenantEntityMgr tenantEntityMgr;
@@ -104,10 +95,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
-        mockDanteLeadProxy();
-
         helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, recommendationService,
-                danteLeadProxy, pageSize);
+                pageSize);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
@@ -194,11 +183,5 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         config.setPlayLaunchId(playLaunchId);
         config.setPlayName(playName);
         return config;
-    }
-
-    private void mockDanteLeadProxy() {
-        doNothing() //
-                .when(danteLeadProxy) //
-                .create(any(DanteLeadDTO.class), anyString());
     }
 }

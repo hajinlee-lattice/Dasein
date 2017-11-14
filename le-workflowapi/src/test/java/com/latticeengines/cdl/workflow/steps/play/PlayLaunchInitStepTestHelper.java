@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
 import com.latticeengines.playmakercore.service.RecommendationService;
-import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
@@ -14,14 +13,12 @@ public class PlayLaunchInitStepTestHelper {
     private FrontEndQueryCreator frontEndQueryCreator;
 
     public PlayLaunchInitStepTestHelper(InternalResourceRestApiProxy internalResourceRestApiProxy,
-            EntityProxy entityProxy, RecommendationService recommendationService, DanteLeadProxy danteLeadProxy,
-            long pageSize) {
+            EntityProxy entityProxy, RecommendationService recommendationService, long pageSize) {
         frontEndQueryCreator = new FrontEndQueryCreator();
         frontEndQueryCreator.initLookupFieldsConfiguration();
 
         recommendationCreator = new RecommendationCreator();
         recommendationCreator.setRecommendationService(recommendationService);
-        recommendationCreator.setDanteLeadProxy(danteLeadProxy);
 
         accountFetcher = new AccountFetcher();
         accountFetcher.setPageSize(pageSize);
