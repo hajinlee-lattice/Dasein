@@ -247,14 +247,8 @@ public class Query implements GraphNode {
                 .map(e -> new JoinSpecification(entity, e, ObjectUsage.EXISTS)) //
                 .collect(Collectors.toSet());
 
-        List<JoinSpecification> subQueryJoinsList = commonTableQueryList.stream()
-                .map(sq -> new JoinSpecification(entity, sq.getQuery().getMainEntity(),
-                                                 entity.name(), sq.getAlias(), ObjectUsage.LOOKUP))
-                .collect(Collectors.toList());
-
         lookupJoins = new ArrayList<>(lookupJoinsSet);
         existsJoins = new ArrayList<>(existsJoinsSet);
-        commonTableJoins = new ArrayList<>(subQueryJoinsList);
     }
 
     public BusinessEntity getMainEntity() {

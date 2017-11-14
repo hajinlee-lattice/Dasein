@@ -24,6 +24,7 @@ public enum ComparisonType {
     BETWEEN, //
     PRIOR, //
     PRIOR_ONLY, //
+    FOLLOWING,  //
     WITHIN;
 
     public boolean isLikeTypeOfComparison() {

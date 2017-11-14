@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
@@ -32,7 +33,7 @@ import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
+import com.latticeengines.query.exposed.translator.NewTransactionRestrictionTranslator;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
 /**
@@ -100,14 +101,18 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     public void testTransactionSelect() throws ParseException {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("0802DD00110356F3289420FE46850008");
-        Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
+        QueryBuilder builder = Query.builder();
+        Restriction restriction = new NewTransactionRestrictionTranslator().convert(txRestriction,
+                                                                                    queryFactory, attrRepo,
+                                                                                    BusinessEntity.Account,
+                                                                                    builder);
         Restriction cityRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY)
                 .eq("Richland").build();
         Restriction idRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
                 .eq("0012400001DO2QKAA1").build();
         Restriction cityAndTx = Restriction.builder().and(cityRestriction, restriction).build();
         Restriction idOrCityAndTx = Restriction.builder().or(idRestriction, cityAndTx).build();
-        Query query = Query.builder() //
+        Query query = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(idOrCityAndTx).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
@@ -122,74 +127,90 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestrictionSpentSum.setTimeFilter(TimeFilter.ever());
         txRestrictionSpentSum.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM,
                 ComparisonType.GREATER_THAN, Collections.singletonList(3000)));
-        Restriction restrictionSpentSum = new TransactionRestrictionTranslator(txRestrictionSpentSum)
-                .convert(BusinessEntity.Account);
+
+        QueryBuilder builder = Query.builder();
+        Restriction restrictionSpentSum = new NewTransactionRestrictionTranslator().convert(txRestrictionSpentSum,
+                                                                                            queryFactory, attrRepo,
+                                                                                            BusinessEntity.Account,
+                                                                                            builder);
         Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
                 .eq("0012400001DNJYKAA5").build();
         Restriction accountAndTxSpentSum = Restriction.builder().and(accountIdRestriction, restrictionSpentSum).build();
-        Query querySpentSum = Query.builder() //
+        Query querySpentSum = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(accountAndTxSpentSum).build();
         List<Map<String, Object>> spentSumResults = queryEvaluatorService.getData(attrRepo, querySpentSum).getData();
         Assert.assertEquals(spentSumResults.size(), 0);
 
         // period spent >= 200 in each period
+        builder = Query.builder();
         TransactionRestriction txRestrictionSpentEach = new TransactionRestriction();
         txRestrictionSpentEach.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
         txRestrictionSpentEach.setTimeFilter(TimeFilter.ever());
         txRestrictionSpentEach.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
                 ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(200)));
-        Restriction restrictionSpentEach = new TransactionRestrictionTranslator(txRestrictionSpentEach)
-                .convert(BusinessEntity.Account);
+        Restriction restrictionSpentEach = new NewTransactionRestrictionTranslator().convert(txRestrictionSpentEach,
+                                                                                             queryFactory, attrRepo,
+                                                                                             BusinessEntity.Account,
+                                                                                             builder);
         Restriction accountAndTxSpentEach = Restriction.builder().and(accountIdRestriction, restrictionSpentEach)
                 .build();
-        Query querySpentEach = Query.builder() //
+        Query querySpentEach = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(accountAndTxSpentEach).build();
         List<Map<String, Object>> spentEachResults = queryEvaluatorService.getData(attrRepo, querySpentEach).getData();
         Assert.assertEquals(spentEachResults.size(), 0);
 
         // period spent >= 2900 at least once
+        builder = Query.builder();
         TransactionRestriction txRestrictionSpentOnce = new TransactionRestriction();
         txRestrictionSpentOnce.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
         txRestrictionSpentOnce.setTimeFilter(TimeFilter.ever());
         txRestrictionSpentOnce.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT,
                 AggregationType.AT_LEAST_ONCE, ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(2900)));
-        Restriction restrictionSpentOnce = new TransactionRestrictionTranslator(txRestrictionSpentOnce)
-                .convert(BusinessEntity.Account);
+        Restriction restrictionSpentOnce = new NewTransactionRestrictionTranslator().convert(txRestrictionSpentOnce,
+                                                                                             queryFactory, attrRepo,
+                                                                                             BusinessEntity.Account,
+                                                                                             builder);
         Restriction accountAndTxSpentOnce = Restriction.builder().and(accountIdRestriction, restrictionSpentOnce)
                 .build();
-        Query querySpentOnce = Query.builder() //
+        Query querySpentOnce = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(accountAndTxSpentOnce).build();
         List<Map<String, Object>> spentOnceResults = queryEvaluatorService.getData(attrRepo, querySpentOnce).getData();
         Assert.assertEquals(spentOnceResults.size(), 0);
 
         // total unit > 20 (sum total is 18)
+        builder = Query.builder();
         TransactionRestriction txRestrictionUnitSum = new TransactionRestriction();
         txRestrictionUnitSum.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
         txRestrictionUnitSum.setTimeFilter(TimeFilter.ever());
         txRestrictionUnitSum.setUnitFilter(new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM,
                 ComparisonType.GREATER_THAN, Collections.singletonList(20)));
-        Restriction restrictionUnitSum = new TransactionRestrictionTranslator(txRestrictionUnitSum)
-                .convert(BusinessEntity.Account);
+        Restriction restrictionUnitSum = new NewTransactionRestrictionTranslator().convert(txRestrictionUnitSum,
+                                                                                           queryFactory, attrRepo,
+                                                                                           BusinessEntity.Account,
+                                                                                           builder);
         Restriction accountAndTxUnitSum = Restriction.builder().and(accountIdRestriction, restrictionUnitSum).build();
-        Query queryUnitSum = Query.builder() //
+        Query queryUnitSum = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(accountAndTxUnitSum).build();
         List<Map<String, Object>> unitSumResults = queryEvaluatorService.getData(attrRepo, queryUnitSum).getData();
         Assert.assertEquals(unitSumResults.size(), 0);
 
         // avg unit = 2
+        builder = Query.builder();
         TransactionRestriction txRestrictionUnitAvg = new TransactionRestriction();
         txRestrictionUnitAvg.setProductId("E986FA1C1503DCB38A95CF92F3977E34");
         txRestrictionUnitAvg.setTimeFilter(TimeFilter.ever());
         txRestrictionUnitAvg.setUnitFilter(new AggregationFilter(AggregationSelector.UNIT, AggregationType.AVG,
                 ComparisonType.EQUAL, Collections.singletonList(2)));
-        Restriction restrictionUnitAvg = new TransactionRestrictionTranslator(txRestrictionUnitAvg)
-                .convert(BusinessEntity.Account);
+        Restriction restrictionUnitAvg = new NewTransactionRestrictionTranslator().convert(txRestrictionUnitAvg,
+                                                                                           queryFactory, attrRepo,
+                                                                                           BusinessEntity.Account,
+                                                                                           builder);
         Restriction accountAndTxUnitAvg = Restriction.builder().and(accountIdRestriction, restrictionUnitAvg).build();
-        Query queryUnitAvg = Query.builder() //
+        Query queryUnitAvg = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(accountAndTxUnitAvg).build();
         List<Map<String, Object>> unitAvgResults = queryEvaluatorService.getData(attrRepo, queryUnitAvg).getData();
@@ -219,28 +240,36 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         long periodOffset = diffInMonths / 3;
 
         // period spent > 200 each period prior to quarter of 2017/4/1
+        QueryBuilder builder = Query.builder();
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction.setTimeFilter(
                 new TimeFilter(ComparisonType.PRIOR, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction = new TransactionRestrictionTranslator(txRestriction).convert(BusinessEntity.Account);
-        Query query = Query.builder() //
+        Restriction restriction = new NewTransactionRestrictionTranslator().convert(txRestriction,
+                                                                                    queryFactory, attrRepo,
+                                                                                    BusinessEntity.Account,
+                                                                                    builder);
+        Query query = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), 1);
 
         // period spent > 200 at_least_once within quarter of 2017/4/1
+        builder = Query.builder();
         TransactionRestriction txRestriction1 = new TransactionRestriction();
         txRestriction1.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction1.setTimeFilter(
                 new TimeFilter(ComparisonType.WITHIN, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction1.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction1 = new TransactionRestrictionTranslator(txRestriction1).convert(BusinessEntity.Account);
-        Query query1 = Query.builder() //
+        Restriction restriction1 = new NewTransactionRestrictionTranslator().convert(txRestriction1,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
+        Query query1 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction1).build();
         List<Map<String, Object>> results1 = queryEvaluatorService.getData(attrRepo, query1).getData();
@@ -248,48 +277,61 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
         // period spent > 200 between [0, quarter of 2017/4/1], should get the same
         // result as above
+        builder = Query.builder();
         TransactionRestriction txRestriction2 = new TransactionRestriction();
         txRestriction2.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction2.setTimeFilter(new TimeFilter(ComparisonType.BETWEEN, Period.Quarter,
                 Arrays.asList(new Object[] { 0, periodOffset })));
         txRestriction2.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction2 = new TransactionRestrictionTranslator(txRestriction2).convert(BusinessEntity.Account);
-        Query query2 = Query.builder() //
+        Restriction restriction2 = new NewTransactionRestrictionTranslator().convert(txRestriction2,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
+        Query query2 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction2).build();
         List<Map<String, Object>> results2 = queryEvaluatorService.getData(attrRepo, query2).getData();
         Assert.assertEquals(results2.size(), 49);
 
         // no qualified account in current period
+        builder = Query.builder();
         TransactionRestriction txRestriction3 = new TransactionRestriction();
         txRestriction3.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction3.setTimeFilter(
                 new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, Period.Quarter, Arrays.asList(new Object[] { 0 })));
         txRestriction3.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction3 = new TransactionRestrictionTranslator(txRestriction3).convert(BusinessEntity.Account);
-        Query query3 = Query.builder() //
+        Restriction restriction3 = new NewTransactionRestrictionTranslator().convert(txRestriction3,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
+        Query query3 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction3).build();
         List<Map<String, Object>> results3 = queryEvaluatorService.getData(attrRepo, query3).getData();
         Assert.assertEquals(results3.size(), 0);
 
         // at_least_once period spent > 200 with period eq quarter of 4/1/2017
+        builder = Query.builder();
         TransactionRestriction txRestriction4 = new TransactionRestriction();
         txRestriction4.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction4.setTimeFilter(
                 new TimeFilter(ComparisonType.EQUAL, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction4.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
-        Restriction restriction4 = new TransactionRestrictionTranslator(txRestriction4).convert(BusinessEntity.Account);
-        Query query4 = Query.builder() //
+        Restriction restriction4 = new NewTransactionRestrictionTranslator().convert(txRestriction4,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
+        Query query4 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction4).build();
         List<Map<String, Object>> results4 = queryEvaluatorService.getData(attrRepo, query4).getData();
         Assert.assertEquals(results4.size(), 37);
 
         // has purchased prior to quarter of 4/1/2017, but not within
+        builder = Query.builder();
         TransactionRestriction txRestriction5 = new TransactionRestriction();
         txRestriction5.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction5.setTimeFilter(
@@ -299,34 +341,48 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         txRestriction6.setTimeFilter(
                 new TimeFilter(ComparisonType.WITHIN, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
         txRestriction6.setNegate(true);
-        Restriction restriction5 = new TransactionRestrictionTranslator(txRestriction5).convert(BusinessEntity.Account);
-        Restriction restriction6 = new TransactionRestrictionTranslator(txRestriction6).convert(BusinessEntity.Account);
+        Restriction restriction5 = new NewTransactionRestrictionTranslator().convert(txRestriction5,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
+        Restriction restriction6 = new NewTransactionRestrictionTranslator().convert(txRestriction6,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
         Restriction priorToLastRestriction = Restriction.builder().and(restriction5, restriction6).build();
-        Query query5 = Query.builder() //
+        Query query5 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(priorToLastRestriction).build();
         List<Map<String, Object>> results5 = queryEvaluatorService.getData(attrRepo, query5).getData();
         Assert.assertEquals(results5.size(), 171);
 
         // prior_to_last, should be the same as previous result
+        builder = Query.builder();
         TransactionRestriction txRestriction7 = new TransactionRestriction();
         txRestriction7.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction7.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter,
                                                     Arrays.asList(new Object[]{periodOffset})));
-        Restriction restriction7 = new TransactionRestrictionTranslator(txRestriction7).convert(BusinessEntity.Account);
-        Query query7 = Query.builder() //
+        Restriction restriction7 = new NewTransactionRestrictionTranslator().convert(txRestriction7,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
+        Query query7 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .where(restriction7).build();
         List<Map<String, Object>> results7 = queryEvaluatorService.getData(attrRepo, query7).getData();
         Assert.assertEquals(results7.size(), 171);
 
+        builder = Query.builder();
         TransactionRestriction txRestriction8 = new TransactionRestriction();
         txRestriction8.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction8.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter,
                                                     Arrays.asList(new Object[]{periodOffset})));
         txRestriction8.setNegate(true);
-        Restriction restriction8 = new TransactionRestrictionTranslator(txRestriction8).convert(BusinessEntity.Account);
-        Query query8 = Query.builder() //
+        Restriction restriction8 = new NewTransactionRestrictionTranslator().convert(txRestriction8,
+                                                                                     queryFactory, attrRepo,
+                                                                                     BusinessEntity.Account,
+                                                                                     builder);
+        Query query8 = builder //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_ID) //
                 .from(BusinessEntity.Account).where(restriction8).build();
         List<Map<String, Object>> results8 = queryEvaluatorService.getData(attrRepo, query8).getData();

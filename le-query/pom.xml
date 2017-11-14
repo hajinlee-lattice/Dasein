@@ -71,7 +71,7 @@
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql</artifactId>
             <version>${querydsl.version}</version>
-            <classifier>ledp1</classifier>
+            <classifier>ledp2</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>javax.validation</groupId>

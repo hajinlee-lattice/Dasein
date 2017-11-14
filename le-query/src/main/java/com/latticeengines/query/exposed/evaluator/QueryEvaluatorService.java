@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.sql.SQLQuery;
 
 @Component("queryEvaluatorService")
@@ -29,6 +30,17 @@ public class QueryEvaluatorService {
 
     @Autowired
     private QueryEvaluator queryEvaluator;
+
+    @Autowired
+    private QueryFactory queryFactory;
+
+    public AttributeRepository getAttributeRepository(String customerSpace) {
+        return dataCollectionProxy.getAttrRepo(customerSpace);
+    }
+
+    public QueryFactory getQueryFactory() {
+        return queryFactory;
+    }
 
     public long getCount(String customerSpace, Query query) {
         return getCount(dataCollectionProxy.getAttrRepo(customerSpace), query);

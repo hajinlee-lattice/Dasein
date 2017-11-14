@@ -3,6 +3,7 @@ package com.latticeengines.query.exposed.translator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.A
 
 public class EventQueryTranslator {
     public static final int NUM_ADDITIONAL_PERIOD = 2;
+    public static final int ONE_LEG_BEHIND_OFFSET = 1;
     public static final String ACCOUNT_ID = InterfaceName.AccountId.name();
     public static final String PERIOD_ID = InterfaceName.PeriodId.name();
     public static final String PRODUCT_ID = InterfaceName.ProductId.name();
@@ -86,11 +88,15 @@ public class EventQueryTranslator {
     private StringPath trxnVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
 
     public Query translateForScoring(QueryFactory queryFactory, AttributeRepository repository, Restriction restriction) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), true);
+        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), true, false);
     }
 
     public Query translateForTraining(QueryFactory queryFactory, AttributeRepository repository, Restriction restriction) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false);
+        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, false);
+    }
+
+    public Query translateForEvent(QueryFactory queryFactory, AttributeRepository repository, Restriction restriction) {
+        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, true);
     }
 
 
@@ -164,8 +170,16 @@ public class EventQueryTranslator {
 
     @SuppressWarnings("unchecked")
     private WindowFunction translateBetween(WindowFunction windowAgg,
-                                            int startOffset, int endOffset) {
-        return windowAgg.rows().between().preceding(startOffset).preceding(endOffset);
+                                            int startOffset, int endOffset,
+                                            boolean preceding) {
+        // for row preceding, SQL requires we start with the larger offset, order matters
+        int minOffset = Math.min(startOffset, endOffset);
+        int maxOffset = Math.max(startOffset, endOffset);
+        if (preceding) {
+            return windowAgg.rows().between().preceding(maxOffset).preceding(minOffset);
+        } else {
+            return windowAgg.rows().between().following(minOffset).following(maxOffset);
+        }
     }
 
     private BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
@@ -208,7 +222,8 @@ public class EventQueryTranslator {
                                                         StringPath keysPeriodId,
                                                         StringPath trxnVal,
                                                         TimeFilter timeFilter,
-                                                        AggregationFilter aggregationFilter) {
+                                                        AggregationFilter aggregationFilter,
+                                                        boolean ascendindPeriod) {
         NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
 
 
@@ -236,7 +251,11 @@ public class EventQueryTranslator {
             break;
         }
 
-        windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId);
+        if (ascendindPeriod) {
+            windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId);
+        } else {
+            windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId.desc());
+        }
 
         return translateTimeWindow(timeFilter, windowAgg);
     }
@@ -248,23 +267,35 @@ public class EventQueryTranslator {
         } else if (ComparisonType.BETWEEN == type) {
             return translateBetween(windowAgg,
                                     Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(1).toString()));
+                                    Integer.valueOf(timeFilter.getValues().get(1).toString()),
+                                    true);
         } else if (ComparisonType.WITHIN == type) {
             return translateBetween(windowAgg,
                                     Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    0);
+                                    0,
+                                    true);
         } else if (ComparisonType.PRIOR == type) {
             return translatePrior(windowAgg,
                                   Integer.valueOf(timeFilter.getValues().get(0).toString()));
+        } else if (ComparisonType.FOLLOWING == type) {
+            return translateBetween(windowAgg,
+                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
+                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
+                                    false);
         } else if (ComparisonType.IN_CURRENT_PERIOD == type) {
-            return translateBetween(windowAgg, 0, 0);
+            return translateBetween(windowAgg, 0, 0, true);
         } else if (ComparisonType.EQUAL == type) {
             return translateBetween(windowAgg,
                                     Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()));
+                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
+                                    true);
         } else {
             throw new UnsupportedOperationException("Unsupported time filter type " + type);
         }
+    }
+
+    private BooleanExpression translateProductId(String productIdStr) {
+        return productId.in(productIdStr.split(","));
     }
 
     @SuppressWarnings("unchecked")
@@ -286,9 +317,7 @@ public class EventQueryTranslator {
         TimeFilter timeFilter = txRestriction.getTimeFilter();
 
         if (txRestriction.getSpentFilter() == null && txRestriction.getUnitFilter() == null) {
-            return translateHasEngaged(queryFactory, repository, txRestriction.getProductId(),
-                                       timeFilter,
-                                       !txRestriction.isNegate(), isScoring);
+            return translateHasEngaged(queryFactory, repository, txRestriction, isScoring);
         }
 
         AggregationFilter spentFilter = txRestriction.getSpentFilter();
@@ -306,8 +335,8 @@ public class EventQueryTranslator {
 
         if (spentFilter != null) {
             productSelectList.add(amountVal.as(AMOUNT_VAL));
-            Expression spentWindowAgg = translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnAmountVal, timeFilter,
-                                                                     spentFilter).as(amountAggr);
+            Expression spentWindowAgg = translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnAmountVal,
+                                                                     timeFilter, spentFilter, true).as(amountAggr);
             apsSelectList.add(trxnAmountVal);
             apsSelectList.add(spentWindowAgg);
         }
@@ -315,7 +344,7 @@ public class EventQueryTranslator {
         if (unitFilter != null) {
             productSelectList.add(quantityVal.as(QUANTITY_VAL));
             Expression unitWindowAgg =
-                    translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnQuantityVal, timeFilter, unitFilter)
+                    translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnQuantityVal, timeFilter, unitFilter, true)
                             .as(quantityAggr);
             apsSelectList.add(trxnQuantityVal);
             apsSelectList.add(unitWindowAgg);
@@ -325,7 +354,7 @@ public class EventQueryTranslator {
         SQLQuery productQuery = factory.query()
                 .select(productSelectList.toArray(new Expression[0]))
                 .from(tablePath)
-                .where(productId.eq(txRestriction.getProductId()));
+                .where(translateProductId(txRestriction.getProductId()));
 
         SQLQuery apsQuery = factory.query()
                 .select(apsSelectList.toArray(new Expression[0]))
@@ -356,10 +385,12 @@ public class EventQueryTranslator {
     @SuppressWarnings("unchecked")
     private SQLQuery translateHasEngaged(QueryFactory queryFactory,
                                          AttributeRepository repository,
-                                         String productIdStr,
-                                         TimeFilter timeFilter,
-                                         boolean returnPositive,
+                                         TransactionRestriction txRestriction,
                                          boolean isScoring) {
+
+        TimeFilter timeFilter = txRestriction.getTimeFilter();
+        String productIdStr = txRestriction.getProductId();
+        boolean returnPositive = !txRestriction.isNegate();
 
         SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository);
         String txTableName = getTransactionTableName(repository);
@@ -373,7 +404,7 @@ public class EventQueryTranslator {
                 .partitionBy(keysAccountId).orderBy(keysPeriodId)).as(amountAggr);
 
         SQLQuery productQuery = factory.query().select(accountId, periodId, amountVal.as(AMOUNT_VAL)).from(tablePath)
-                .where(productId.eq(productIdStr));
+                .where(translateProductId(productIdStr));
 
         SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
                 .from(keysPath).leftJoin(productQuery, trxnPath)
@@ -390,52 +421,22 @@ public class EventQueryTranslator {
 
     }
 
-    @SuppressWarnings("unchecked")
-    public SQLQuery translateOneLegBehind(QueryFactory queryFactory,
-                                          AttributeRepository repository,
-                                          String productIdStr) {
-        /*
-        select accountid, periodid
-        from   (select  keys.accountid,
-                        keys.periodid,
-                        trxn.val,
-                        max (case when trxn.val >= 0 then 1 else 0 end)
-                        over (partition by keys.accountid
-                              order by keys.periodid
-                              rows between 1 following and 1 following) as agg
-                from    keys
-                left join (select  accountid, periodid, totalamount as val
-                           from    tftest_4_transaction_2017_10_31_19_44_08_utc
-                           where   productid in ('3872223C9BA06C649D68E415E23A9446') ) as trxn
-                on  keys.accountid = trxn.accountid and  keys.periodid = trxn.periodid) as aps
-         where  agg = 1;
-         */
-        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository);
-        int followingOffset = 1;
-        String txTableName = getTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
+    private TransactionRestriction translateOneLegBehindRestriction(TransactionRestriction original) {
+        TimeFilter timeFilter = new TimeFilter(original.getTimeFilter().getLhs(),
+                                               ComparisonType.FOLLOWING,
+                                               original.getTimeFilter().getPeriod(),
+                                               Collections.singletonList(ONE_LEG_BEHIND_OFFSET));
 
-        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnPath, AMOUNT_VAL);
-        CaseBuilder caseBuilder = new CaseBuilder();
-        NumberExpression trxnValExists = caseBuilder.when(trxnValNumber.goe(0)).then(1).otherwise(0);
-
-        Expression windowAgg = SQLExpressions.max(trxnValExists).over().partitionBy(keysAccountId).orderBy(keysPeriodId)
-                .rows().between().following(followingOffset).following(followingOffset).as(amountAggr);
-
-        SQLQuery productQuery = factory.query().select(accountId, periodId, amountVal.as(AMOUNT_VAL)).from(tablePath)
-                .where(productId.eq(productIdStr));
-
-        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
-                .from(keysPath).leftJoin(productQuery, trxnPath)
-                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
-
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, false, periodId);
-
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
-                .where(amountAggr.eq(String.valueOf(1)).and(periodIdPredicate));
-
-        return finalQuery;
+        TransactionRestriction oneLegBehind = new TransactionRestriction(original.getProductName(), //
+                                                                         original.getProductId(), //
+                                                                         timeFilter, //
+                                                                         false, //
+                                                                         null, //
+                                                                         null);
+        return oneLegBehind;
     }
+
+
 
     private SubQuery translateSelectAll(QueryFactory queryFactory,
                                         AttributeRepository repository,
@@ -453,12 +454,10 @@ public class EventQueryTranslator {
         return prefix + RandomStringUtils.randomAlphanumeric(8);
     }
 
-
     private SubQuery translateTransactionRestriction(QueryFactory queryFactory,
                                                      AttributeRepository repository,
                                                      TransactionRestriction txRestriction,
                                                      boolean isScoring) {
-        // todo, need to handle complex query such as engaged_prior or not_engaged_prior
         SQLQuery subQueryExpression = translateTransaction(queryFactory, repository, txRestriction, isScoring);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
@@ -469,8 +468,7 @@ public class EventQueryTranslator {
     private SubQuery translateConcreteRestriction(QueryFactory queryFactory,
                                                   AttributeRepository repository,
                                                   ConcreteRestriction restriction,
-                                                  boolean isTargetEvent) {
-        // todo, we don't have the entity yet, can we modify query to use table name directly?
+                                                  boolean isScoring) {
         BusinessEntity txAggregation = getPeriodTransaction();
 
         AttributeLookup accountId = new AttributeLookup(BusinessEntity.Account, ACCOUNT_ID);
@@ -491,7 +489,7 @@ public class EventQueryTranslator {
 
         // target or training
         Restriction periodIdRestriction = null;
-        if (isTargetEvent) {
+        if (isScoring) {
             Restriction.builder().let(txPeriodId).eq(maxPeriodId).build();
         } else {
             periodIdRestriction = Restriction.builder().let(txPeriodId).not().eq(maxPeriodId).build();
@@ -504,23 +502,123 @@ public class EventQueryTranslator {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
     }
 
+    private TransactionRestriction translateToPrior(TransactionRestriction priorOnly) {
+
+        TimeFilter timeFilter = new TimeFilter(
+                priorOnly.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+        TransactionRestriction prior = new TransactionRestriction(priorOnly.getProductName(), //
+                                                                  priorOnly.getProductId(), //
+                                                                  timeFilter, //
+                                                                  false, //
+                                                                  priorOnly.getSpentFilter(), //
+                                                                  priorOnly.getUnitFilter());
+        return prior;
+    }
+
+    private TransactionRestriction translateToNotEngagedWithin(TransactionRestriction priorOnly) {
+
+        TimeFilter timeFilter = new TimeFilter(
+                priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+
+        TransactionRestriction notWithin = new TransactionRestriction(priorOnly.getProductName(), //
+                                                                      priorOnly.getProductId(), //
+                                                                      timeFilter, //
+                                                                      true, //
+                                                                      null, //
+                                                                      null);
+        return notWithin;
+    }
+
+    private TransactionRestriction translateToEngagedWithin(TransactionRestriction priorOnly) {
+
+        TimeFilter timeFilter = new TimeFilter(
+                priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+
+        TransactionRestriction engagedWithin = new TransactionRestriction(priorOnly.getProductName(), //
+                                                                          priorOnly.getProductId(), //
+                                                                          timeFilter, //
+                                                                          false, //
+                                                                          null, //
+                                                                          null);
+        return engagedWithin;
+    }
+
+    private TransactionRestriction translateToNotEngagedEver(TransactionRestriction priorOnly) {
+
+        TimeFilter timeFilter = new TimeFilter(
+                priorOnly.getTimeFilter().getLhs(), ComparisonType.EVER, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+
+        TransactionRestriction notEver = new TransactionRestriction(priorOnly.getProductName(), //
+                                                                    priorOnly.getProductId(), //
+                                                                    timeFilter, //
+                                                                    true, //
+                                                                    null, //
+                                                                    null);
+        return notEver;
+    }
 
     private Query translateRestriction(QueryFactory queryFactory,
                                        AttributeRepository repository,
                                        Restriction restriction,
-                                       boolean isScoring) {
+                                       boolean isScoring,
+                                       boolean checkNextPeriod) {
 
         QueryBuilder builder = Query.builder();
         builder.with(translateAllKeys(queryFactory, repository));
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
-        LogicalRestriction rootRestriction = null;
+        Restriction rootRestriction = restriction;
 
-        // first pass, translate restrictions to individual sub queries
-        if (restriction instanceof LogicalRestriction) {
-            rootRestriction = (LogicalRestriction) restriction;
+        // combine one leg behind restriction for event query, this is not needed for scoring and training
+        if (!isScoring && checkNextPeriod) {
+            if (rootRestriction instanceof LogicalRestriction) {
+                BreadthFirstSearch bfs = new BreadthFirstSearch();
+                bfs.run(rootRestriction, (object, ctx) -> {
+                    if (object instanceof TransactionRestriction) {
+                        TransactionRestriction txRestriction = (TransactionRestriction) object;
+                        TransactionRestriction oneLegBehind = translateOneLegBehindRestriction(txRestriction);
+                        Restriction newRestriction = Restriction.builder().and(txRestriction, oneLegBehind).build();
+                        LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                        parent.getRestrictions().remove(txRestriction);
+                        parent.getRestrictions().add(newRestriction);
+                    }
+                });
+            } else if (rootRestriction instanceof TransactionRestriction) {
+                TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
+                TransactionRestriction oneLegBehind = translateOneLegBehindRestriction(txRestriction);
+                rootRestriction = Restriction.builder().and(txRestriction, oneLegBehind).build();
+            }
+        }
+
+        // special treatment for PRIOR_ONLY
+        if (rootRestriction instanceof LogicalRestriction) {
             BreadthFirstSearch bfs = new BreadthFirstSearch();
-            bfs.run(restriction, (object, ctx) -> {
+            bfs.run(rootRestriction, (object, ctx) -> {
+                if (object instanceof TransactionRestriction) {
+                    TransactionRestriction txRestriction = (TransactionRestriction) object;
+                    if (ComparisonType.PRIOR_ONLY == txRestriction.getTimeFilter().getRelation()) {
+                        Restriction newRestriction = translatePriorOnly(txRestriction);
+                        LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                        parent.getRestrictions().remove(txRestriction);
+                        parent.getRestrictions().add(newRestriction);
+                    }
+                }
+            });
+        } else if (rootRestriction instanceof TransactionRestriction) {
+            TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
+            if (ComparisonType.PRIOR_ONLY == txRestriction.getTimeFilter().getRelation()) {
+                rootRestriction = translatePriorOnly(txRestriction);
+            }
+        }
+
+        // translate restrictions to individual subqueries
+        if (rootRestriction instanceof LogicalRestriction) {
+            BreadthFirstSearch bfs = new BreadthFirstSearch();
+            bfs.run(rootRestriction, (object, ctx) -> {
                 if (object instanceof LogicalRestriction) {
                     LogicalRestriction logicalRestriction = (LogicalRestriction) object;
                     subQueryTableMap.put(logicalRestriction, new ArrayList<>());
@@ -529,22 +627,20 @@ public class EventQueryTranslator {
                     SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, isScoring);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
-                    List<String> parentDecorator = subQueryTableMap.get(parent);
-                    parentDecorator.add(subQuery.getAlias());
+                    List<String> childSubQueryList = subQueryTableMap.get(parent);
+                    childSubQueryList.add(subQuery.getAlias());
                 } else if (object instanceof ConcreteRestriction) {
                     ConcreteRestriction concreteRestriction = (ConcreteRestriction) object;
                     SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction, isScoring);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
-                    List<String> parentDecorator = subQueryTableMap.get(parent);
-                    parentDecorator.add(subQuery.getAlias());
+                    List<String> childSubQueryList = subQueryTableMap.get(parent);
+                    childSubQueryList.add(subQuery.getAlias());
                 }
             });
-        } else if (restriction instanceof TransactionRestriction) {
-            SubQuery subQuery = translateTransactionRestriction(queryFactory,
-                                                                repository,
-                                                                (TransactionRestriction) restriction,
-                                                                isScoring);
+        } else if (rootRestriction instanceof TransactionRestriction) {
+            TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
+            SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, isScoring);
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
             builder.from(selectAll);
@@ -552,8 +648,8 @@ public class EventQueryTranslator {
             SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
             builder.from(selectAll);
             builder.select(accountId, periodId);
-        } else if (restriction instanceof ConcreteRestriction) {
-            ConcreteRestriction concreteRestriction = (ConcreteRestriction) restriction;
+        } else if (rootRestriction instanceof ConcreteRestriction) {
+            ConcreteRestriction concreteRestriction = (ConcreteRestriction) rootRestriction;
             SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction, isScoring);
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
@@ -565,7 +661,7 @@ public class EventQueryTranslator {
             throw new UnsupportedOperationException("Cannot translate restriction " + restriction);
         }
 
-        // second pass, merge the sub queries to final query
+        // merge subqueries into final query
         if (!subQueryTableMap.isEmpty()) {
             Map<LogicalRestriction, UnionCollector> unionMap = new HashMap<>();
 
@@ -602,7 +698,8 @@ public class EventQueryTranslator {
                         merged = collector.asList().get(0);
                     }
 
-                    // with for intermediary tables
+                    // generate CTE for intermediary tables
+                    // todo: experiment with skipping intermediate tables to see if it improves performance
                     String mergedTableAlias = generateAlias("Logical");
                     SubQuery mergedQuery = new SubQuery();
                     mergedQuery.setSubQueryExpression(merged);
@@ -629,6 +726,20 @@ public class EventQueryTranslator {
         }
 
         return builder.build();
+    }
+
+    private Restriction translatePriorOnly(TransactionRestriction txRestriction) {
+        Restriction newRestriction;
+        if (!txRestriction.isNegate()) {
+            Restriction prior = translateToPrior(txRestriction);
+            Restriction notEngagedWithin = translateToNotEngagedWithin(txRestriction);
+            newRestriction = Restriction.builder().and(prior, notEngagedWithin).build();
+        } else {
+            Restriction notEngagedEver = translateToNotEngagedEver(txRestriction);
+            Restriction engagedWithin = translateToEngagedWithin(txRestriction);
+            newRestriction = Restriction.builder().or(notEngagedEver, engagedWithin).build();
+        }
+        return newRestriction;
     }
 
     // translate BucketRestriction

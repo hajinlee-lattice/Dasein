@@ -53,7 +53,10 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     @Override
     public long getCount(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
+        QueryTranslator queryTranslator = new QueryTranslator(
+                queryEvaluatorService.getQueryFactory(),
+                queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+        Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
         query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         return queryEvaluatorService.getCount(customerSpace.toString(), query);
     }
@@ -61,7 +64,10 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     @Override
     public DataPage getData(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
+        QueryTranslator queryTranslator = new QueryTranslator(
+                queryEvaluatorService.getQueryFactory(),
+                queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+        Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
@@ -123,7 +129,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     @Override
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = ratingCountQuery(frontEndQuery);
+        Query query = ratingCountQuery(customerSpace, frontEndQuery);
         List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), query).getData();
         RatingModel model = frontEndQuery.getRatingModels().get(0);
         Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
@@ -138,7 +144,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return counts;
     }
 
-    private Query ratingCountQuery(FrontEndQuery frontEndQuery) {
+    private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
         if (models != null && models.size() == 1) {
             Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
@@ -152,14 +158,17 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
                 frontEndQuery.setContactRestriction(null);
             }
-            Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
+            QueryTranslator queryTranslator = new QueryTranslator(
+                    queryEvaluatorService.getQueryFactory(),
+                    queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+            Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
             query.setPageFilter(null);
             query.setSort(null);
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-                Lookup ruleLookup = QueryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true);
+                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
+                                                                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, null);
                 AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
                 query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();

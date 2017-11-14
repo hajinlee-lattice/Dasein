@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 
-public class TransactionRestrictionTranslator {
+public class OldTransactionRestrictionTranslator {
     private TransactionRestriction txnRestriction;
 
     public final static String PERIOD_AMOUNT = "PeriodAmount";
@@ -38,7 +38,7 @@ public class TransactionRestrictionTranslator {
     public final static String MAX_PERIOD_OFFSET = "MaxPeriodOffset";
     public final static String PERIOD_COUNT = "PeriodCount";
 
-    public TransactionRestrictionTranslator(TransactionRestriction txnRestriction) {
+    public OldTransactionRestrictionTranslator(TransactionRestriction txnRestriction) {
         this.txnRestriction = txnRestriction;
     }
 
@@ -67,28 +67,28 @@ public class TransactionRestrictionTranslator {
 
     private FunctionLookup<Integer, Object, String> createPeriodOffsetLookup() {
         AttributeLookup transactionDate = new AttributeLookup(BusinessEntity.Transaction,
-                InterfaceName.TransactionDate.name());
+                                                              InterfaceName.TransactionDate.name());
         AttributeLookup periodOffset = AttributeLookup.fromString(PERIOD_OFFSET);
 
         Period p = txnRestriction.getTimeFilter().getPeriod();
         String source = ExpressionTemplateUtils.strAttrToDate(transactionDate.toString());
         String target = ExpressionTemplateUtils.getCurrentDate();
         FunctionLookup<Integer, Object, String> period = new FunctionLookup<Integer, Object, String>(Integer.class,
-                periodOffset).as(PERIOD_OFFSET);
+                                                                                                     periodOffset).as(PERIOD_OFFSET);
         period.setFunction(args -> ExpressionTemplateUtils.getDateDiffTemplate(p, source, target));
         return period;
     }
 
     private FunctionLookup<Integer, Object, String> createMaxPeriodOffsetLookup() {
         AttributeLookup transactionDate = new AttributeLookup(BusinessEntity.Transaction,
-                InterfaceName.TransactionDate.name());
+                                                              InterfaceName.TransactionDate.name());
         AttributeLookup periodOffset = AttributeLookup.fromString(PERIOD_OFFSET);
 
         Period p = txnRestriction.getTimeFilter().getPeriod();
         String source = ExpressionTemplateUtils.strAttrToDate(transactionDate.toString());
         String target = ExpressionTemplateUtils.getCurrentDate();
         FunctionLookup<Integer, Object, String> period = new FunctionLookup<Integer, Object, String>(Integer.class,
-                periodOffset).as(MAX_PERIOD_OFFSET);
+                                                                                                     periodOffset).as(MAX_PERIOD_OFFSET);
         period.setFunction(args -> ExpressionTemplateUtils.getMaxDateDiffTemplate(p, source, target));
 
         return period;
@@ -97,31 +97,31 @@ public class TransactionRestrictionTranslator {
     private Restriction translateToPrior(BusinessEntity businessEntity, TransactionRestriction res, boolean negate) {
 
         TimeFilter timeFilter = new TimeFilter(res.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
-                res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
+                                               res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
         TransactionRestriction prior = new TransactionRestriction(res.getProductName(), //
-                res.getProductId(), //
-                timeFilter, //
-                negate, //
-                res.getSpentFilter(), //
-                res.getUnitFilter());
+                                                                  res.getProductId(), //
+                                                                  timeFilter, //
+                                                                  negate, //
+                                                                  res.getSpentFilter(), //
+                                                                  res.getUnitFilter());
 
-        return new TransactionRestrictionTranslator(prior).translate(businessEntity);
+        return new OldTransactionRestrictionTranslator(prior).translate(businessEntity);
     }
 
     private Restriction translateToHasNotPurchasedWithin(BusinessEntity businessEntity, TransactionRestriction res, //
-            boolean negate) {
+                                                         boolean negate) {
 
         TimeFilter timeFilter = new TimeFilter(res.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
-                res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
+                                               res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
 
         TransactionRestriction notWithin = new TransactionRestriction(res.getProductName(), //
-                res.getProductId(), //
-                timeFilter, //
-                !negate, //
-                null, //
-                null);
+                                                                      res.getProductId(), //
+                                                                      timeFilter, //
+                                                                      !negate, //
+                                                                      null, //
+                                                                      null);
 
-        return new TransactionRestrictionTranslator(notWithin).translate(businessEntity);
+        return new OldTransactionRestrictionTranslator(notWithin).translate(businessEntity);
     }
 
     private Restriction translate(BusinessEntity entity) {
@@ -129,9 +129,9 @@ public class TransactionRestrictionTranslator {
         Restriction productRestriction = filterByProduct();
 
         AttributeLookup amountLookup = new AttributeLookup(BusinessEntity.Transaction,
-                InterfaceName.TotalAmount.name());
+                                                           InterfaceName.TotalAmount.name());
         AttributeLookup quantityLookup = new AttributeLookup(BusinessEntity.Transaction,
-                InterfaceName.TotalQuantity.name());
+                                                             InterfaceName.TotalQuantity.name());
         AttributeLookup accountId = new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name());
         FunctionLookup<Integer, Object, String> period = createPeriodOffsetLookup();
 
@@ -142,9 +142,9 @@ public class TransactionRestrictionTranslator {
         SubQueryAttrLookup subQueryAccountId = new SubQueryAttrLookup(innerSubQuery, InterfaceName.AccountId.name());
         SubQueryAttrLookup subQueryPeriodOffset = new SubQueryAttrLookup(innerSubQuery, PERIOD_OFFSET);
         SubQueryAttrLookup subQueryPeriodAmount = new SubQueryAttrLookup(innerSubQuery,
-                InterfaceName.TotalAmount.name());
+                                                                         InterfaceName.TotalAmount.name());
         SubQueryAttrLookup subQueryPeriodQuantity = new SubQueryAttrLookup(innerSubQuery,
-                InterfaceName.TotalQuantity.name());
+                                                                           InterfaceName.TotalQuantity.name());
 
         AggregateLookup periodAmount = AggregateLookup.sum(subQueryPeriodAmount).as(PERIOD_AMOUNT);
         AggregateLookup periodQuantity = AggregateLookup.sum(subQueryPeriodQuantity).as(PERIOD_QUANTITY);
@@ -176,7 +176,7 @@ public class TransactionRestrictionTranslator {
     }
 
     private Lookup[] groupByAccountAndPeriod(Lookup accountId, Lookup period) {
-        return new Lookup[] { accountId, period };
+        return new Lookup[]{accountId, period};
     }
 
     private Restriction filterByPeriodAmountQuantity(AggregateLookup aggrAmount, AggregateLookup aggrQuantity) {
@@ -199,7 +199,7 @@ public class TransactionRestrictionTranslator {
         Restriction restriction = null;
         if (EACH == filter.getAggregationType() || AT_LEAST_ONCE == filter.getAggregationType()) {
             restriction = RestrictionUtils.convertValueComparisons(lookup, filter.getComparisonType(),
-                    filter.getValues());
+                                                                   filter.getValues());
         }
         return restriction;
     }
@@ -232,11 +232,11 @@ public class TransactionRestrictionTranslator {
         switch (filter.getAggregationType()) {
         case AVG:
             restriction = RestrictionUtils.convertValueComparisons(AggregateLookup.avg(mixin),
-                    filter.getComparisonType(), filter.getValues());
+                                                                   filter.getComparisonType(), filter.getValues());
             break;
         case SUM:
             restriction = RestrictionUtils.convertValueComparisons(AggregateLookup.sum(mixin),
-                    filter.getComparisonType(), filter.getValues());
+                                                                   filter.getComparisonType(), filter.getValues());
             break;
         case AT_LEAST_ONCE:
             restriction = Restriction.builder().let(AggregateLookup.count()).gt(0).build();

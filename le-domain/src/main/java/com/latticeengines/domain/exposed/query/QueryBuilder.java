@@ -121,6 +121,10 @@ public class QueryBuilder {
         return this;
     }
 
+    public List getSubQueryList() {
+        return Collections.unmodifiableList(subQueryList);
+    }
+
     public Query build() {
         Query query = new Query();
         query.setLookups(lookups);

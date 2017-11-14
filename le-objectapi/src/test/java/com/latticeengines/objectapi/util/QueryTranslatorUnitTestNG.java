@@ -31,7 +31,8 @@ public class QueryTranslatorUnitTestNG {
         query.setAccountRestriction(accountRestriction);
         query.setMainEntity(BusinessEntity.Account);
 
-        Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
+        QueryTranslator queryTranslator = new QueryTranslator(null, null);
+        Query translated = queryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 6, 8, 0);
         validateTranslatedLookups(translated, 0);
@@ -45,7 +46,8 @@ public class QueryTranslatorUnitTestNG {
         query.setContactRestriction(contactRestriction);
         query.setMainEntity(BusinessEntity.Contact);
 
-        Query translated = QueryTranslator.translate(query, ContactQueryDecorator.WITHOUT_SELECTS);
+        QueryTranslator queryTranslator = new QueryTranslator(null, null);
+        Query translated = queryTranslator.translate(query, ContactQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 4, 6, 0);
         validateTranslatedLookups(translated, 0);
@@ -62,7 +64,8 @@ public class QueryTranslatorUnitTestNG {
         query.setContactRestriction(contactRestriction);
         query.setMainEntity(BusinessEntity.Account);
 
-        Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
+        QueryTranslator queryTranslator = new QueryTranslator(null, null);
+        Query translated = queryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 6, 10, 1);
     }
@@ -78,7 +81,8 @@ public class QueryTranslatorUnitTestNG {
         query.setContactRestriction(contactRestriction);
         query.setMainEntity(BusinessEntity.Contact);
 
-        Query translated = QueryTranslator.translate(query, ContactQueryDecorator.WITH_SELECTS);
+        QueryTranslator queryTranslator = new QueryTranslator(null, null);
+        Query translated = queryTranslator.translate(query, ContactQueryDecorator.WITH_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 4, 8, 1);
         validateTranslatedLookups(translated, 5);
@@ -119,7 +123,8 @@ public class QueryTranslatorUnitTestNG {
         query.setAccountRestriction(accountRestriction);
         query.setMainEntity(BusinessEntity.Account);
 
-        Query result = QueryTranslator.translate(query, AccountQueryDecorator.WITH_SELECTS);
+        QueryTranslator queryTranslator = new QueryTranslator(null, null);
+        Query result = queryTranslator.translate(query, AccountQueryDecorator.WITH_SELECTS);
         assertTrue(result.getLookups().size() > 0);
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }
