@@ -171,12 +171,11 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                     ACCOUNT_PREFIX + InterfaceName.PostalCode.name(), //
                     ACCOUNT_PREFIX + InterfaceName.Country.name(), //
                     ACCOUNT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.LatticeAccountId.name(), //
+                    ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name() //
 
             };
             fieldDisplayNames = new String[] { "Account Id", "Company Name", "Website", "Street", "City", "State",
-                    "Zip", "Country", "Phone", "Salesforce Id", "Lattice Id" };
+                    "Zip", "Country", "Phone", "Salesforce Id" };
         } else if (exportType == ExportType.CONTACT) {
             fields = new String[] { //
                     CONTACT_PREFIX + InterfaceName.ContactId.name(), //
@@ -201,13 +200,11 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                     ACCOUNT_PREFIX + InterfaceName.State.name(), //
                     ACCOUNT_PREFIX + InterfaceName.PostalCode.name(), //
                     ACCOUNT_PREFIX + InterfaceName.Country.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.LatticeAccountId.name(), //
+                    ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name() //
 
             };
             fieldDisplayNames = new String[] { "Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id",
-                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id",
-                    "Lattice Id" };
+                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id"};
         }
 
         int i = 0;
