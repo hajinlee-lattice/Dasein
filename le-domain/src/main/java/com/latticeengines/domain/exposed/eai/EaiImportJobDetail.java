@@ -227,6 +227,29 @@ public class EaiImportJobDetail implements HasPid, Serializable {
         return details.get(key);
     }
 
+
+    @Transient
+    @JsonIgnore
+    public void setReportURL(String url) { setDetailValue("ReportURL", url); }
+
+    @Transient
+    @JsonIgnore
+    public String getReportURL() {
+        return getDetailValue("ReportURL") != null ? getDetailValue("ReportURL").toString() : null;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setQueryHandle(String queryHandle) {
+        setDetailValue("QueryHandle", queryHandle);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getQueryHandle() {
+        return getDetailValue("QueryHandle") != null ? getDetailValue("QueryHandle").toString() : null;
+    }
+
     @Transient
     @JsonIgnore
     private void setListDetailFromString(String key, String value) {

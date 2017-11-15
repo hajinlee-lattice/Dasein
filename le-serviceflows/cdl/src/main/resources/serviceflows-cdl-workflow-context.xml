@@ -9,5 +9,6 @@
     <import resource="classpath:serviceflows-core-workflow-context.xml"/>
     <import resource="classpath:redshiftdb-context.xml" />
     <import resource="classpath:playmakercore-context.xml"/>
+    <import resource="classpath:remote-context.xml"/>
     
 </beans>

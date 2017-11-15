@@ -386,6 +386,8 @@ public class VdbTableImportServiceImpl extends ImportService {
                     throw new RuntimeException(vdbLoadTableStatus.getMessage());
                 }
                 importJobDetail.setStatus(ImportStatus.RUNNING);
+                importJobDetail.setReportURL(statusUrl);
+                importJobDetail.setQueryHandle(queryHandle);
                 eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
                 int processedLines = importJobDetail.getProcessedRecords();
                 int fileIndex = 0;
@@ -496,9 +498,6 @@ public class VdbTableImportServiceImpl extends ImportService {
                     vdbLoadTableStatus.setMessage(String.format("Load table failed with exception: %s", e.toString()));
                 }
                 if (!error) {
-                    vdbLoadTableStatus.setJobStatus("Succeed");
-                    vdbLoadTableStatus.setMessage("Load table complete!");
-                    reportStatus(statusUrl, vdbLoadTableStatus);
                     context.getProperty(ImportVdbProperty.PROCESSED_RECORDS, Map.class).put(table.getName(),
                             new Long(totalRows));
                     String fileName = generateAvroFileName(avroFileName, fileIndex);

@@ -43,6 +43,12 @@
             <version>${project.version}</version>
             <classifier>tests</classifier>
         </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

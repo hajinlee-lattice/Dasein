@@ -17,10 +17,12 @@ import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -38,6 +40,9 @@ public class DataFeedTaskImportListener extends LEJobListener {
     @Autowired
     private DataFeedProxy dataFeedProxy;
 
+    @Autowired
+    private DataLoaderService dataLoaderService;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
 
@@ -53,6 +58,15 @@ public class DataFeedTaskImportListener extends LEJobListener {
             log.warn(String.format("Cannot find the job detail for %s", importJobIdentifier));
             return;
         }
+
+        VdbLoadTableStatus vdbLoadTableStatus = null;
+        String statusUrl = eaiImportJobDetail.getReportURL();
+        String queryHandle = eaiImportJobDetail.getQueryHandle();
+        if(statusUrl != null && !statusUrl.isEmpty() && queryHandle != null && !queryHandle.isEmpty()) {
+            vdbLoadTableStatus = new VdbLoadTableStatus();
+            vdbLoadTableStatus.setVdbQueryHandle(queryHandle);
+        }
+
         if (jobExecution.getStatus().isUnsuccessful()) {
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
@@ -63,6 +77,13 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 if (pathList == null || processedRecordsList == null || pathList.size() != processedRecordsList.size()) {
                     log.error("Error in extract info, skip register extract.");
                     updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
+
+                    if(vdbLoadTableStatus!=null) {
+                        vdbLoadTableStatus.setJobStatus("Failed");
+                        vdbLoadTableStatus.setMessage("Error in extract info, skip register extract.");
+                        dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
+                    }
+
                     return;
                 }
                 List<Extract> extracts = new ArrayList<>();
@@ -80,14 +101,33 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.SUCCESS);
                 updateDataFeedStatus(customerSpace);
+
+                if(vdbLoadTableStatus!=null) {
+                    vdbLoadTableStatus.setJobStatus("Succeed");
+                    vdbLoadTableStatus.setMessage("Load table complete!");
+                    dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
+                }
             } catch (Exception e) {
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
+
+                if(vdbLoadTableStatus!=null) {
+                    vdbLoadTableStatus.setJobStatus("Failed");
+                    vdbLoadTableStatus.setMessage(String.format("Load table failed with exception: %s", e.toString()));
+                    dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
+                }
             }
 
         } else {
             log.error(String.format("DataFeedTask import job ends in unknown status: %s",
                     jobExecution.getStatus().name()));
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
+
+            if(vdbLoadTableStatus!=null) {
+                vdbLoadTableStatus.setJobStatus("Failed");
+                vdbLoadTableStatus.setMessage(String.format("DataFeedTask import job ends in unknown status: %s",
+                        jobExecution.getStatus().name()));
+                dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
+            }
         }
     }
 
