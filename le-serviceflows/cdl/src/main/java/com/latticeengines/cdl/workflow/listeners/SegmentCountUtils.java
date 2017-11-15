@@ -6,6 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -23,9 +24,10 @@ final class SegmentCountUtils {
         // because the concurrency level is limited on redshift side
         if (CollectionUtils.isNotEmpty(segments)) {
             segments.forEach(segment -> {
+                MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
                 for (BusinessEntity entity : BusinessEntity.COUNT_ENTITIES) {
                     try {
-                        Long count = getEntityCount(entityProxy, customerSpace, entity, segment);
+                        Long count = getEntityCount(entityProxy, customerSpace, entity, segmentCopy);
                         segment.setEntityCount(entity, count);
                         log.info("Set " + entity + " count of segment " + segment.getName() + " to " + count);
                     } catch (Exception e) {
