@@ -12,7 +12,9 @@ public interface MetadataSegmentExportService {
 
     MetadataSegmentExport getSegmentExportByExportId(String exportId);
 
-    MetadataSegmentExport createOrUpdateSegmentExportJob(MetadataSegmentExport segmentExport);
+    MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport segmentExport);
+
+    MetadataSegmentExport updateSegmentExportJob(MetadataSegmentExport segmentExport);
 
     void deleteSegmentExportByExportId(String exportId);
 

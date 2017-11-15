@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -553,6 +554,20 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             return restTemplate.getForObject(url, MetadataSegmentExport.class);
         } catch (Exception e) {
             throw new RuntimeException("getMetadataSegmentExport: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
+            String exportId, Status state) {
+        try {
+            String url = constructUrl("pls/internal/segment/export/" + exportId + "/" + customerSpace.toString());
+            url += "?" + "state=" + state;
+
+            log.debug("Update MetadataSegmentExport by exportId (" + exportId + ")" + url);
+            restTemplate.put(url, null);
+            return getMetadataSegmentExport(customerSpace, exportId);
+        } catch (Exception e) {
+            throw new RuntimeException("updateMetadataSegmentExport: Remote call failure: " + e.getMessage(), e);
         }
     }
 

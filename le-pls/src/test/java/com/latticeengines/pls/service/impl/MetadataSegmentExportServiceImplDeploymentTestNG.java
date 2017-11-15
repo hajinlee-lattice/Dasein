@@ -74,7 +74,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsFunctio
         metadataSegmentExport.setCreatedBy(CREATED_BY);
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
 
-        metadataSegmentExport = metadataSegmentExportService.createOrUpdateSegmentExportJob(metadataSegmentExport);
+        metadataSegmentExport = metadataSegmentExportService.createSegmentExportJob(metadataSegmentExport);
 
         Assert.assertNotNull(metadataSegmentExport.getPid());
         Assert.assertNotNull(metadataSegmentExport.getExportId());

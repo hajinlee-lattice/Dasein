@@ -78,10 +78,9 @@ public class MetadataSegmentResource {
 
     @RequestMapping(value = "/export", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create or update a segment export job")
-    public MetadataSegmentExport createOrUpdateSegmentExportJob(
-            @RequestBody MetadataSegmentExport metadataSegmentExportJob, HttpServletRequest request) {
-        return metadataSegmentExportService.createOrUpdateSegmentExportJob(metadataSegmentExportJob);
+    @ApiOperation(value = "Create a segment export job")
+    public MetadataSegmentExport createSegmentExportJob(@RequestBody MetadataSegmentExport metadataSegmentExportJob) {
+        return metadataSegmentExportService.createSegmentExportJob(metadataSegmentExportJob);
     }
 
     @RequestMapping(value = "/export", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -94,14 +93,14 @@ public class MetadataSegmentResource {
     @RequestMapping(value = "/export/{exportId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment export job")
-    public MetadataSegmentExport getSegmentExportJob(@PathVariable String exportId, HttpServletRequest request) {
+    public MetadataSegmentExport getSegmentExportJob(@PathVariable String exportId) {
         return metadataSegmentExportService.getSegmentExportByExportId(exportId);
     }
 
     @RequestMapping(value = "/export/cleanup", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Cleanup expired export jobs")
-    public void cleanupExpiredJobs(@PathVariable String name, HttpServletRequest request) {
+    public void cleanupExpiredJobs(@PathVariable String name) {
         Log.info("Received call for cleanup");
     }
 

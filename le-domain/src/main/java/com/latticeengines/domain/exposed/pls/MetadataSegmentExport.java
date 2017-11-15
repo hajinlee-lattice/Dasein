@@ -113,7 +113,7 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @Column(name = "UPDATED", nullable = false)
     private Date updated;
 
-    @JsonProperty("cleanupBy")
+    @JsonProperty("cleanup_by")
     @Index(name = "METADATA_SEGMENT_EXPORT_TTL")
     @Column(name = "CLEANUP_BY", nullable = false)
     private Date cleanupBy;
@@ -122,17 +122,21 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @Column(name = "PATH", nullable = false, length = 2048)
     private String path;
 
-    @JsonProperty("fileName")
+    @JsonProperty("file_name")
     @Column(name = "FILE_NAME", nullable = false)
     private String fileName;
 
-    @JsonProperty("tableName")
+    @JsonProperty("table_name")
     @Column(name = "TABLE_NAME", nullable = false)
     private String tableName;
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
     private Long tenantId;
+
+    @JsonProperty("export_prefix")
+    @Transient
+    private String exportPrefix;
 
     public Long getPid() {
         return pid;
@@ -273,6 +277,14 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getExportPrefix() {
+        return this.exportPrefix;
+    }
+
+    public void setExportPrefix(String exportPrefix) {
+        this.exportPrefix = exportPrefix;
     }
 
     public enum ExportType {

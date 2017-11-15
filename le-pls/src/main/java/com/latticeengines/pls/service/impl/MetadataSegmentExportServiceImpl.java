@@ -75,22 +75,25 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     }
 
     @Override
-    public MetadataSegmentExport createOrUpdateSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob) {
+    public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob) {
 
-        if (metadataSegmentExportJob.getPid() == null) {
-            setCreatedBy(metadataSegmentExportJob);
+        setCreatedBy(metadataSegmentExportJob);
 
-            String exportedFileName = createFileName(metadataSegmentExportJob);
-            metadataSegmentExportJob.setFileName(exportedFileName);
+        String exportedFileName = createFileName(metadataSegmentExportJob);
+        metadataSegmentExportJob.setFileName(exportedFileName);
 
-            metadataSegmentExportJob = registerTableForExport(metadataSegmentExportJob);
+        metadataSegmentExportJob = registerTableForExport(metadataSegmentExportJob);
 
-            metadataSegmentExportEntityMgr.create(metadataSegmentExportJob);
-            submitExportWorkflowJob(metadataSegmentExportJob);
+        metadataSegmentExportEntityMgr.create(metadataSegmentExportJob);
 
-        } else {
-            metadataSegmentExportEntityMgr.createOrUpdate(metadataSegmentExportJob);
-        }
+        submitExportWorkflowJob(metadataSegmentExportJob);
+
+        return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExportJob.getExportId());
+    }
+
+    @Override
+    public MetadataSegmentExport updateSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob) {
+        metadataSegmentExportEntityMgr.createOrUpdate(metadataSegmentExportJob);
         return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExportJob.getExportId());
     }
 
@@ -108,11 +111,19 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     }
 
     private String createFileName(MetadataSegmentExport metadataSegmentExportJob) {
-        String exportedFileName = "unknownsegment";
-        if (metadataSegmentExportJob.getSegment() != null
-                && StringUtils.isNoneBlank(metadataSegmentExportJob.getSegment().getDisplayName())) {
+        String exportedFileName = null;
+        if (StringUtils.isNotBlank(metadataSegmentExportJob.getExportPrefix())) {
+            exportedFileName = metadataSegmentExportJob.getExportPrefix();
+        } else if (metadataSegmentExportJob.getSegment() != null
+                && StringUtils.isNotBlank(metadataSegmentExportJob.getSegment().getDisplayName())) {
             exportedFileName = metadataSegmentExportJob.getSegment().getDisplayName();
         }
+
+        exportedFileName = exportedFileName.trim().replaceAll("[^a-zA-Z0-9]", "");
+        if (StringUtils.isBlank(exportedFileName)) {
+            exportedFileName = "unknownsegment";
+        }
+
         exportedFileName += "-" + metadataSegmentExportJob.getType() + "-" + dateFormat.format(new Date()) + "_UTC.csv";
         return exportedFileName;
     }
@@ -128,19 +139,29 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         if (metadataSegmentExport == null
                 || metadataSegmentExport.getCleanupBy().getTime() < System.currentTimeMillis()) {
             throw new LedpException(LedpCode.LEDP_18160, new Object[] { exportId });
-        } else {
+        }
+
+        switch (metadataSegmentExport.getStatus()) {
+        case RUNNING:
+            throw new LedpException(LedpCode.LEDP_18163, new Object[] { exportId });
+        case FAILED:
+            throw new LedpException(LedpCode.LEDP_18164, new Object[] { exportId });
+        case COMPLETED:
             try {
                 String filePath = metadataSegmentExport.getPath();
                 filePath = filePath.substring(0, filePath.length() - 1);
                 filePath = filePath + "_" + metadataSegmentExport.getFileName();
                 response.setHeader("Content-Encoding", "gzip");
                 CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(
-                        MediaType.APPLICATION_OCTET_STREAM, filePath, null);
+                        MediaType.APPLICATION_OCTET_STREAM, filePath, metadataSegmentExport.getFileName());
                 downloader.downloadFile(request, response);
             } catch (Exception ex) {
                 log.error("Could not download result of export job: " + exportId, ex);
                 throw new LedpException(LedpCode.LEDP_18161, new Object[] { exportId });
             }
+            break;
+        default:
+            throw new LedpException(LedpCode.LEDP_18160, new Object[] { exportId });
         }
     }
 
@@ -204,7 +225,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
             };
             fieldDisplayNames = new String[] { "Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id",
-                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id"};
+                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id" };
         }
 
         int i = 0;
@@ -237,7 +258,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private MetadataSegmentExport submitExportWorkflowJob(MetadataSegmentExport metadataSegmentExportJob) {
         ApplicationId applicationId = segmentExportWorkflowSubmitter.submit(metadataSegmentExportJob);
         metadataSegmentExportJob.setApplicationId(applicationId.toString());
-        return createOrUpdateSegmentExportJob(metadataSegmentExportJob);
+        return updateSegmentExportJob(metadataSegmentExportJob);
     }
 
 }

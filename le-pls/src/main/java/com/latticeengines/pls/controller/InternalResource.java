@@ -71,6 +71,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -908,14 +909,12 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-
     @RequestMapping(value = "/emails/segmentexport/result/{result}/"
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
-    public void sendSegmentExportEmail(@PathVariable("result") String result,
-            @PathVariable("tenantId") String tenantId, @RequestBody MetadataSegmentExport export,
-            HttpServletRequest request) {
+    public void sendSegmentExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
+            @RequestBody MetadataSegmentExport export, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
         if (exportID != null && !exportID.isEmpty()) {
@@ -923,7 +922,8 @@ public class InternalResource extends InternalResourceBase {
                 if (user.getEmail().equals(export.getCreatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     if (export != null) {
-                        String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/lp/"+ tenantName  + "/export/" + exportID;
+                        String url = request.getScheme() + "://" + request.getServerName() + ":"
+                                + request.getServerPort() + "/lp/" + tenantName + "/export/" + exportID;
                         if (result.equals("COMPLETED")) {
                             emailService.sendPlsExportSegmentSuccessEmail(user, url);
                         } else {
@@ -1155,6 +1155,158 @@ public class InternalResource extends InternalResourceBase {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @RequestMapping(value = "/modelnotes/{modelSummaryId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Insert one note for certain model summary.")
+    public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams,
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("ModelSummary %s's ModelNote created by %s", modelSummaryId, noteParams.getUserName()));
+        modelNoteService.create(modelSummaryId, noteParams);
+        return true;
+    }
+
+    @RequestMapping(value = "/modelnotes/{fromModelSummaryId}/{toModelSummaryId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Insert one note for certain model summary.")
+    public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId,
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNote", fromModelSummaryId,
+                toModelSummaryId));
+        modelNoteService.copyNotes(fromModelSummaryId, toModelSummaryId);
+        return true;
+    }
+
+    @RequestMapping(value = "/plays/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get plays.")
+    public List<Play> getPlayLaunch(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug("Get plays");
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return playService.getAllPlays();
+    }
+
+    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get play launch.")
+    public PlayLaunch getPlayLaunch(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Get play launch %s playName %s launchId", playName, launchId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return playLaunchService.findByLaunchId(launchId);
+    }
+
+    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PUT)
+    @ResponseBody
+    @ApiOperation(value = "Update play launch state.")
+    public PlayLaunch updatePlayLaunch(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestParam("state") LaunchState state, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Update play launch state for %s playName %s launchId", playName, launchId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        playLaunch.setLaunchState(state);
+        return playLaunchService.update(playLaunch);
+    }
+
+    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PATCH)
+    @ResponseBody
+    @ApiOperation(value = "Update play launch state.")
+    public PlayLaunch updatePlayLaunchProgress(@PathVariable("tenantId") String tenantId,
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestParam("launchCompletionPercent") double launchCompletionPercent, //
+            @RequestParam("accountsSelected") long accountsSelected, //
+            @RequestParam("accountsLaunched") long accountsLaunched, //
+            @RequestParam("contactsLaunched") long contactsLaunched, //
+            @RequestParam("accountsErrored") long accountsErrored, //
+            @RequestParam("accountsSuppressed") long accountsSuppressed, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Record play launch progress for %s launchId", launchId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        playLaunch.setAccountsSelected(accountsSelected);
+        playLaunch.setAccountsLaunched(accountsLaunched);
+        playLaunch.setAccountsErrored(accountsErrored);
+        playLaunch.setContactsLaunched(contactsLaunched);
+        playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
+        playLaunch.setAccountsSuppressed(accountsSuppressed);
+        return playLaunchService.update(playLaunch);
+    }
+
+    @RequestMapping(value = "/play/{playName}/customerspace/{customerSpace:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get play for a specific tenant based on playName")
+    public Play getPlay(@PathVariable String playName, @PathVariable String customerSpace, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(customerSpace);
+        log.debug(String.format("Get play with %s playName.", playName));
+        return playService.getFullPlayByName(playName);
+    }
+
+    @RequestMapping(value = "/segment/{segmentName}/restriction/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get segment restriction.")
+    public Restriction getSegmentRestriction(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("segmentName") String segmentName, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Getting restriction from %s segment", segmentName));
+        manufactureSecurityContextForInternalAccess(tenantId);
+        MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentName, false);
+        if (segment != null) {
+            return segment.getAccountRestriction();
+        } else {
+            return null;
+        }
+    }
+
+    @RequestMapping(value = "/segment/export/{exportId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get Segment export job info.")
+    public MetadataSegmentExport getMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("exportId") String exportId, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Getting MetadataSegmentExport from %s exportId", exportId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+        return metadataSegmentExportService.getSegmentExportByExportId(exportId);
+    }
+
+    @RequestMapping(value = "/segment/export/{exportId}/" + TENANT_ID_PATH, method = RequestMethod.PUT)
+    @ResponseBody
+    @ApiOperation(value = "Update segment export job info.")
+    public MetadataSegmentExport updateMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("exportId") String exportId, //
+            @RequestParam("state") Status state, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Updating MetadataSegmentExport from %s exportId", exportId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+        MetadataSegmentExport metadataSegmentExport = metadataSegmentExportService.getSegmentExportByExportId(exportId);
+        metadataSegmentExport.setStatus(state);
+        return metadataSegmentExportService.updateSegmentExportJob(metadataSegmentExport);
+    }
+
+    @RequestMapping(value = "/plays/{playName}/talkingpoints/publish/" + TENANT_ID_PATH, method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Publish given play's Talking Points to dante.")
+    public void publishTalkinPoints(@PathVariable("playName") String playName, //
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Publish talking points for play: %s", playName));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        playService.publishTalkingPoints(playName, tenantId);
+    }
+
     public List<String> getTestTenantIds() {
         String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
         String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
@@ -1293,132 +1445,6 @@ public class InternalResource extends InternalResourceBase {
             }
         }
         return false;
-    }
-
-    @RequestMapping(value = "/modelnotes/{modelSummaryId}", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Insert one note for certain model summary.")
-    public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams) {
-        log.debug(String.format("ModelSummary %s's ModelNote created by %s", modelSummaryId, noteParams.getUserName()));
-        modelNoteService.create(modelSummaryId, noteParams);
-        return true;
-    }
-
-    @RequestMapping(value = "/modelnotes/{fromModelSummaryId}/{toModelSummaryId}", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Insert one note for certain model summary.")
-    public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId) {
-        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNote", fromModelSummaryId,
-                toModelSummaryId));
-        modelNoteService.copyNotes(fromModelSummaryId, toModelSummaryId);
-        return true;
-    }
-
-    @RequestMapping(value = "/plays/" + TENANT_ID_PATH, method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Get plays.")
-    public List<Play> getPlayLaunch(@PathVariable("tenantId") String tenantId) {
-        log.debug("Get plays");
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        return playService.getAllPlays();
-    }
-
-    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Get play launch.")
-    public PlayLaunch getPlayLaunch(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId) {
-        log.debug(String.format("Get play launch %s playName %s launchId", playName, launchId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        return playLaunchService.findByLaunchId(launchId);
-    }
-
-    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PUT)
-    @ResponseBody
-    @ApiOperation(value = "Update play launch state.")
-    public PlayLaunch updatePlayLaunch(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId, //
-            @RequestParam("state") LaunchState state) {
-        log.debug(String.format("Update play launch state for %s playName %s launchId", playName, launchId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
-        playLaunch.setLaunchState(state);
-        return playLaunchService.update(playLaunch);
-    }
-
-    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PATCH)
-    @ResponseBody
-    @ApiOperation(value = "Update play launch state.")
-    public PlayLaunch updatePlayLaunchProgress(@PathVariable("tenantId") String tenantId,
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId, //
-            @RequestParam("launchCompletionPercent") double launchCompletionPercent, //
-            @RequestParam("accountsSelected") long accountsSelected, //
-            @RequestParam("accountsLaunched") long accountsLaunched, //
-            @RequestParam("contactsLaunched") long contactsLaunched, //
-            @RequestParam("accountsErrored") long accountsErrored, //
-            @RequestParam("accountsSuppressed") long accountsSuppressed) {
-        log.debug(String.format("Record play launch progress for %s launchId", launchId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
-        playLaunch.setAccountsSelected(accountsSelected);
-        playLaunch.setAccountsLaunched(accountsLaunched);
-        playLaunch.setAccountsErrored(accountsErrored);
-        playLaunch.setContactsLaunched(contactsLaunched);
-        playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
-        playLaunch.setAccountsSuppressed(accountsSuppressed);
-        return playLaunchService.update(playLaunch);
-    }
-
-    @RequestMapping(value = "/play/{playName}/customerspace/{customerSpace:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get play for a specific tenant based on playName")
-    public Play getPlay(@PathVariable String playName, @PathVariable String customerSpace) {
-        manufactureSecurityContextForInternalAccess(customerSpace);
-        log.debug(String.format("Get play with %s playName.", playName));
-        return playService.getFullPlayByName(playName);
-    }
-
-    @RequestMapping(value = "/segment/{segmentName}/restriction/" + TENANT_ID_PATH, method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Update play launch state.")
-    public Restriction getSegmentRestriction(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("segmentName") String segmentName) {
-        log.debug(String.format("Getting restriction from %s segment", segmentName));
-        manufactureSecurityContextForInternalAccess(tenantId);
-        MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentName, false);
-        if (segment != null) {
-            return segment.getAccountRestriction();
-        } else {
-            return null;
-        }
-    }
-
-    @RequestMapping(value = "/segment/export/{exportId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Get Segment export job info.")
-    public MetadataSegmentExport getMetadataSegmentExport(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("exportId") String exportId) {
-        log.debug(String.format("Getting MetadataSegmentExport from %s exportId", exportId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return metadataSegmentExportService.getSegmentExportByExportId(exportId);
-    }
-
-    @RequestMapping(value = "/plays/{playName}/talkingpoints/publish/" + TENANT_ID_PATH, method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Publish given play's Talking Points to dante.")
-    public void publishTalkinPoints(@PathVariable("playName") String playName, //
-            @PathVariable("tenantId") String tenantId) {
-        log.debug(String.format("Publish talking points for play: %s", playName));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        playService.publishTalkingPoints(playName, tenantId);
     }
 
 }

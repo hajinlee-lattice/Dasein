@@ -275,7 +275,9 @@ public enum LedpCode {
             + "{1} accounts errors were encountered"), //
     LEDP_18160("Could not download result of export job {0} as it is not valid anymore."), //
     LEDP_18161("Could not download result of export job {0}."), //
-    LEDP_18162("Cannot create data feed task for entity: {0}, source: {1}, feedType: {2}"),
+    LEDP_18162("Cannot create data feed task for entity: {0}, source: {1}, feedType: {2}"), //
+    LEDP_18163("Could not download result of export job {0} as it is still in progress."), //
+    LEDP_18164("Could not download result of export job {0} as this export job failed."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
