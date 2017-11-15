@@ -21,10 +21,6 @@ angular
         })
         .state('home.playbook.plays', {
             url: '/plays',
-            params: {
-                pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
-            },
             views: {
                 "summary@": {
                     controller: 'PlayListTabsController',
@@ -36,6 +32,10 @@ angular
         })
         .state('home.playbook.plays.list', {
             url: '/list',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
+            },
             resolve: {
                 PlayList: function($q, PlaybookWizardService) {
                     var deferred = $q.defer();

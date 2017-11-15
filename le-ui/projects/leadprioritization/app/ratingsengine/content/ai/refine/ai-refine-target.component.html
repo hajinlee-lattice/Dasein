@@ -12,58 +12,58 @@
             <span class="action-description">Refine Modeling</span>
         </div>
     </div>
-    <div class="body-container">
-        <div class="sell-charts-container">
-            L
+
+    <div class="results-target">
+        <div class="customer-rate" title="Customers">
+            <i class="fa fa-users fa-2x" aria-hidden="true"></i>
+            <spa class="result-target-value">1111</spa>
         </div>
+        <div class="learn-from" title="Successes">
+            <i class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i>
+            <spa class="result-target-value">222222</spa>
+        </div>
+        <div class="historical-records" title="Historical">
+            <i class="fa fa-history fa-2x" aria-hidden="true" title="Historical"></i>
+            <spa class="result-target-value">222222</spa>
+        </div>
+    </div>
+
+    <div class="body-container">
+        <!-- <div class="sell-charts-container">
+            L
+        </div> -->
         <div class="options-container">
             <div class="choises-container">
                 <div class="choises">
                     <div class="choise">
-                        <input type="radio" id="not-yet" name="type-sell" value="notyet" ng-model="vm.notyet">
+                        <input type="radio" id="not-yet" name="type-notyet" value="notyet" ng-model="vm.sellType" 
+                                ng-change="vm.sellTypeChosen('notyet')">
                         <label for="not-yet">Sell to "Not yet" group for the first time</label>
                     </div>
                     <div class="choise">
-                        <input type="radio" id="resell" name="type-sell" value="resell" ng-model="vm.resell">
+                        <input type="radio" id="resell" name="type-resell" value="resell" ng-model="vm.sellType" 
+                                ng-change="vm.sellTypeChosen('resell')">
                         <label for="resell">Resell to customers who already bought</label>
                     </div>
-                    <div class="choise">
+                    <div class="choise" ng-show="vm.sellType === 'resell'">
                         <div class="selection">
                             <label for="customers-no-bought">Choose customers who haven't bought in last</label>
-                            <!-- <select>
-                                <option>6 months</option>
-                                <option>12 months</option>
-                                <option>18 months</option>
-                            </select> -->
-
-                            <select name="resell-group" 
-                                    id="resellGroup" 
-                                    class="multiple-selection"
-                                    ng-model="vm.resellOption"
-                                    ng-options="resellOption.name for resellOption in vm.resellOptions">
+                            <select name="resell-group" id="resellGroup" class="multiple-selection" ng-model="vm.resellOption" 
+                                    ng-options="resellOption.name for resellOption in vm.resellOptions"
+                                    ng-change="vm.sellTypeChosen('resell')">
                             </select>
                         </div>
                     </div>
                 </div>
-                <div class="results">
-                    <div class="result">
-                        <span class="counter-text">You will rate</span>
-                        <div class="counter">200,956</div>
-                        <span class="counter-text">Customers</span>
-                    </div>
-                    <div class="result">
-                        <span class="counter-text">Your model will learn from</span>
-                        <div class="counter">5</div>
-                        <span class="counter-text">past successes</span>
-                    </div>
-                </div>
                 <div class="choises">
                     <div class="choise">
-                        <input type="radio" id="buy" name="buy" value="buy">
+                        <input type="radio" id="buy" name="prioritize" value="buy" ng-model="vm.prioritizeOption"
+                                ng-change="vm.prioritizeOptionChosen('buy')">
                         <label for="buy">Prioritize by likelihood to buy</label>
                     </div>
                     <div class="choise">
-                        <input type="radio" id="spend" name="spend" value="spend">
+                        <input type="radio" id="spend" name="prioritize" value="spend" ng-model="vm.prioritizeOption"
+                                ng-change="vm.prioritizeOptionChosen('spend')">
                         <label for="spend">Prioritize by likely amount to spend</label>
                     </div>
                 </div>

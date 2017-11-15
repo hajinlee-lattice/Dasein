@@ -20,7 +20,8 @@ angular.module('lp.ratingsengine')
             summary: true,
             prospect: false,
             products: false,
-            refine: false
+            refine: false,
+            model: true
         }
 
         this.segment_form = {

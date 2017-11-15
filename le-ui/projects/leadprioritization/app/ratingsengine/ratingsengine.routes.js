@@ -503,6 +503,18 @@ angular
             })
             .state('home.ratingsengine.ai.segment.prospect.products.refine', {
                 url: '/refinetarget',
+                resolve: {
+                    RefineSellOptions: function ($q, RatingsEngineAIService) {
+                        var deferred = $q.defer();
+                        // var segment_id = 15;
+
+                        RatingsEngineAIService.getSellOptions().then(function (data) {
+                            deferred.resolve(data);
+                        });
+
+                        return deferred.promise;
+                    }
+                },
                 views: {
 
                     'wizard_content@home.ratingsengine.ai': {

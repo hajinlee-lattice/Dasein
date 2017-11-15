@@ -5,6 +5,22 @@
         </div>
     </div>
 
+    <div class="results-target">
+        <div class="customer-rate" title="Customers">
+            <i class="fa fa-users fa-2x" aria-hidden="true"></i>
+            <spa class="result-target-value">1111</spa>
+        </div>
+        <div class="learn-from" title="Successes">
+            <i class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i>
+            <spa class="result-target-value">222222</spa>
+        </div>
+        <div class="historical-records" title="Historical">
+            <i class="fa fa-history fa-2x" aria-hidden="true" title="Historical"></i>
+            <spa class="result-target-value">222222</spa>
+        </div>
+    </div>
+
+
     <div class="options-container">
         <div class="flex-grid">
             <div class="col col-bordered">
@@ -35,7 +51,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.bought">
-                            <option-spinner label="Units" options="vm.getBoughtOptions()" hide-options="false"></option-spinner>
+                        <option-spinner label="Units" options="vm.getBoughtOptions()" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>
@@ -53,7 +69,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.historical">
-                            <option-spinner options="vm.getHistoricalOptions()" hide-options="false"></option-spinner>
+                        <option-spinner options="vm.getHistoricalOptions()" hide-options="false"></option-spinner>
                     </div>
                 </div>
             </div>
@@ -88,7 +104,7 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.similarSegments">
-                        <chips placeholder="Choose similar Segment" datasource="vm.datasource" callback-function="vm.callbackSegments(args)" single-selection="false"></chips>
+                        <chips placeholder="Choose similar Segment" datasource="vm.datasource" callback-function="vm.callbackSegments(args)" single-selection="true"></chips>
                     </div>
                 </div>
             </div>

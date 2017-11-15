@@ -10,12 +10,18 @@ angular.module('lp.ratingsengine.ai', [])
     ) {
 
         this.buildOptions = [];
-        
+
         this.productsSelected = {};
+
+        /************* Refine variables *************/
+        this.sellOption = {};
+        this.prioritizeOption = {};
+        /*******************************************/
+
 
 
         this.init = function () {
-            this.prospect = {'prospect':0, 'customers':0}; 
+            this.prospect = { 'prospect': 0, 'customers': 0 };
             this.settings = {};
 
             this.buildOptions = RatingsEngineAIService.getBuildOptions();
@@ -27,38 +33,69 @@ angular.module('lp.ratingsengine.ai', [])
             this.init();
         }
 
-        this.getNumberOfProducts = function() {
-            RatingsEngineAIService.getProductsCount(segment_id).then(function(data) {
+        this.getNumberOfProducts = function () {
+            RatingsEngineAIService.getProductsCount(segment_id).then(function (data) {
                 deferred.resolve(data);
             });
 
             return deferred.promise;
         }
-        
-        this.clearSelection = function() {
+
+        this.clearSelection = function () {
             this.productsSelected = {};
         }
 
-        this.selectProduct = function(id, name) {
-            if(this.productsSelected[id]){
+        this.selectProduct = function (id, name) {
+            if (this.productsSelected[id]) {
                 delete this.productsSelected[id];
-            }else {
+            } else {
                 this.productsSelected[id] = name;
             }
         }
-        this.getProductsSelected = function(){
+        this.getProductsSelected = function () {
             return this.productsSelected;
         }
-        this.isProductSelected = function(id){
-            if(this.productsSelected[id]){
+        this.isProductSelected = function (id) {
+            if (this.productsSelected[id]) {
                 return true;
-            }else {
+            } else {
                 return false;
             }
         }
-        this.getProductsSelectedCount = function(){
+        this.getProductsSelectedCount = function () {
             return Object.keys(this.productsSelected).length;
         }
+
+
+
+        /**
+         * Reset the option for the refine
+         */
+        this.resetRefineOptions = function () {
+            this.sellOption = {};
+            this.prioritizeOption = {};
+        }
+        /**
+         * 
+         * @param value @type Object
+         * {'sellValue': '', sellOptions: {'name': ''}}
+         * Store the value choosen for the refine the target
+         *  
+         */
+        this.setSellOption = function (sellValue, options) {
+            this.sellOption['sellValue'] = sellValue;
+            this.sellOption['sellOptions'] = options;
+        }
+        /**
+         * 
+         * @param value @type string
+         * Store the option to prioritize the target refine 
+         */
+        this.setPrioritizeOption = function (value) {
+            this.prioritizeOption[value] = value;
+        }
+
+
 
     })
     .service('RatingsEngineAIService', function ($q, $http, $state) {
@@ -74,23 +111,35 @@ angular.module('lp.ratingsengine.ai', [])
             return buildOptions;
         }
 
+        this.getSellOptions = function () {
+            var deferred = $q.defer();
+            var data = [
+                { 'id': 1, 'name': '6 months' },
+                { 'id': 2, 'name': '12 months' },
+                { 'id': 3, 'name': '18 months' }
+            ];
+            deferred.resolve(data);
+
+
+            return deferred.promise;
+        }
         /**
          * Fetch the prospect count and the customers cound given a segment id
          */
-        this.getProspect = function(id) {
+        this.getProspect = function (id) {
             var deferred = $q.defer();
-            var data = {'prospect':500, 'customers':150};
+            var data = { 'prospect': 500, 'customers': 150 };
             deferred.resolve(data);
-            
-    
+
+
             return deferred.promise;
         }
         /**
          * Return the number of product
          */
-        this.getProductsCount = function() {
+        this.getProductsCount = function () {
             var deferred = $q.defer();
-            var data = {'count': 100};
+            var data = { 'count': 100 };
             deferred.resolve(data);
             return deferred.promise;
         }
@@ -98,15 +147,15 @@ angular.module('lp.ratingsengine.ai', [])
         /**
          * Load the products by page number
          */
-        this.getProducts = function(from, to){
+        this.getProducts = function (from, to) {
             var deferred = $q.defer();
             var data = [];
-            for(var i=from; i< to; i++){
-                data.push({'selected':false, 'id':i, 'name': "Product Name "+i});
+            for (var i = from; i < to; i++) {
+                data.push({ 'selected': false, 'id': i, 'name': "Product Name " + i });
             }
             deferred.resolve(data);
-            
-    
+
+
             return deferred.promise;
         }
     });

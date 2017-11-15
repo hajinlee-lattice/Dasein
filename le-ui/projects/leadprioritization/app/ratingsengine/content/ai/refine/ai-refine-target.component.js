@@ -1,38 +1,69 @@
 angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chips', 'mainApp.appCommon.directives.input.selection'])
-    .controller('RatingsEngineAIRefineTarget', function ($scope, RefineService) {
+    .controller('RatingsEngineAIRefineTarget', function ($scope, RefineService, RatingsEngineStore, RatingsEngineAIStore, RefineSellOptions) {
         var vm = this;
 
         angular.extend(vm, {
             refine: RefineService.refineModel,
-            sellOption: '',
-            notyet: false,
-            resell: false,
-            resellOptions : [{'id': 1, 'name':'6 months'}, {'id': 2, 'name':'12 months'}, {'id': 3, 'name':'18 months'}]
-
+            sellType: '',
+            resellOptions : RefineSellOptions,
+            resellOption: {},
+            prioritizeOption: ''
         });
 
         vm.init = function () {
             RefineService.reset();
+            RatingsEngineAIStore.resetRefineOptions();
             console.log('Init refine Target');
             $scope.$watch(function () {
                 return RefineService.refineModel;
             },
                 function (newVal, oldVal) {
-                    // alert("Inside watch");
                     vm.refine = newVal;
-                    console.log('NEW ' + newVal + ' - OLD ' + oldVal);
                 }, true);
-
+            vm.resellOption = vm.resellOptions[0];
 
         }
 
+        /**
+         * 
+         * @param value 
+         * Set the type of sell chosen
+         */
+        vm.sellTypeChosen = function(value){
+            console.log('Changed ' + value);
+            if('sell' === value) {
+                RatingsEngineAIStore.setSellOption(value, {});
+            } else {
+                RatingsEngineAIStore.setSellOption(value, vm.resellOption);
+            }
+        }
+
+        /**
+         * 
+         * @param value 
+         * Set the type of prioritization chosen
+         */
+        vm.prioritizeOptionChosen = function(value){
+            console.log('Prioritize', value);
+            RatingsEngineAIStore.setPrioritizeOption(value);
+        }
+
+        
+        vm.setValidation = function (type, validated) {
+            console.log(type, validated);
+            RatingsEngineStore.setValidation(type, validated);
+        }
+
+        /**
+         * Switch for the refine model view
+         */
         vm.showRefineModel = function () {
             console.log('Change view');
             RefineService.changeValue();
         }
         vm.init();
     })
-    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService) {
+    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineAIStore) {
         var vm = this;
         angular.extend(vm, {
             refine: RefineService.refineModel,
@@ -106,6 +137,8 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
         vm.productsCallback = function (elements) {
             console.log(elements);
         }
+
+        
 
         vm.init();
     })
