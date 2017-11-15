@@ -146,7 +146,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     private void updateEntityCounts(MetadataSegment segment) {
-        Map<BusinessEntity, Long> counts = getEntityCounts(segment);
+        MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
+        Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
         counts.forEach(segment::setEntityCount);
     }
 
