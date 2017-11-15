@@ -4,10 +4,12 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -82,7 +84,8 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
         for (String jobId : jobIds) {
             sb.append(String.format("jobIds=%s&", jobId));
         }
-        String url = constructUrl(String.format("/jobs?%s", sb.substring(0, sb.length() - 1).toString()));
+        sb.setLength(sb.length() - 1);
+        String url = constructUrl(String.format("/jobs?%s", sb.toString()));
         return JsonUtils.convertList(get("getWorkflowExecutionsByJobIds", url, List.class), Job.class);
     }
 
@@ -98,4 +101,63 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
                 shortenCustomerSpace(customerSpace), workflowId);
         post("stopWorkflow", url, null, Void.class);
     }
+
+    @Override
+    public List<Job> getWorkflowJobs(String customerSpace, List<String> jobIds, List<String> types,
+            Boolean includeDetails, Boolean hasParentId) {
+        String url = generateGetWorkflowUrls(customerSpace, jobIds, types, includeDetails, hasParentId);
+        return JsonUtils.convertList(get("getWorkflowJobs", url, List.class), Job.class);
+    }
+
+    @VisibleForTesting
+    String generateGetWorkflowUrls(String customerSpace, List<String> jobIds, List<String> types,
+            Boolean includeDetails, Boolean hasParentId) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append("/customerspaces/{customerspaces}/jobs");
+        StringBuilder sb = new StringBuilder();
+        if (CollectionUtils.isNotEmpty(jobIds)) {
+            for (String jobId : jobIds) {
+                sb.append(String.format("jobIds=%s&", jobId));
+            }
+        }
+        if (CollectionUtils.isNotEmpty(types)) {
+            for (String type : types) {
+                sb.append(String.format("types=%s&", type));
+            }
+        }
+        if (includeDetails != null) {
+            sb.append(String.format("includeDetails=%s&", Boolean.valueOf(includeDetails)));
+        }
+        if (hasParentId != null) {
+            sb.append(String.format("hasParentId=%s", Boolean.valueOf(hasParentId)));
+        }
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '&') {
+            sb.setLength(sb.length() - 1);
+        }
+        if (sb.length() > 0) {
+            urlStr.append("?");
+        }
+        urlStr.append(sb);
+        String url = constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
+        return url;
+    }
+
+    @Override
+    public Job updateParentJobId(String customerSpace, List<String> jobIds, String parentJobId) {
+        String url = generateUpdateParentJobIdUrl(customerSpace, jobIds, parentJobId);
+        return post("updateParentJobId", url, null, Job.class);
+    }
+
+    @VisibleForTesting
+    String generateUpdateParentJobIdUrl(String customerSpace, List<String> jobIds, String parentJobId) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append("/customerspaces/{customerspaces}/jobs?");
+        for (String jobId : jobIds) {
+            urlStr.append(String.format("jobIds=%s&", jobId));
+        }
+        urlStr.append(String.format("parentJobId=%s", parentJobId));
+        String url = constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
+        return url;
+    }
+
 }

@@ -149,6 +149,15 @@ CREATE PROCEDURE `UpdateSegmentAndRatingEngine`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateWorkflowJob`()
+    BEGIN
+        ALTER TABLE `WORKFLOW_JOB`
+            ADD COLUMN `PARENT_JOB_ID` BIGINT,
+            ADD COLUMN `TYPE` varchar(255);
+    END;
+//
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
     BEGIN
@@ -158,6 +167,7 @@ CREATE PROCEDURE `UpdateSchema`()
         CALL `UpdateNoteTables`();
         CALL `UpdateMetadataAttribute`();
         CALL `UpdateSegmentAndRatingEngine`();
+        CALL `UpdateWorkflowJob`();
         COMMIT;
     END;
 //

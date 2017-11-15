@@ -37,11 +37,30 @@ public class JobResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve all jobs")
-    public List<Job> findAll(@RequestParam(value = "jobIds", required = false) List<String> jobIds) {
-        if (jobIds == null) {
+    public List<Job> findAll( //
+            @RequestParam(value = "jobIds", required = false) List<String> jobIds, //
+            @RequestParam(value = "types", required = false) List<String> types, //
+            @RequestParam(value = "includeDetails", required = false) Boolean includeDetails, //
+            @RequestParam(value = "hasParentId", required = false) Boolean hasParentId //
+    ) {
+        if (jobIds == null && types == null && includeDetails == null && hasParentId == null) {
             return workflowJobService.findAll();
         }
-        return workflowJobService.findByJobIds(jobIds);
+        // TODO ygao this if statement will be removed when le-workflow work
+        // service layer is completed
+        if (jobIds != null && types == null && includeDetails == null && hasParentId == null) {
+            return workflowJobService.findByJobIds(jobIds);
+        }
+        return workflowJobService.findJobs(jobIds, types, includeDetails, hasParentId);
+    }
+
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update workflow jobs' parent job Id")
+    public void updateParentJobId( //
+            @RequestParam(value = "jobIds", required = true) List<String> jobIds, //
+            @RequestParam(value = "parentId", required = true) String parentJobId) {
+        workflowJobService.updateParentJobId(jobIds, parentJobId);
     }
 
     @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

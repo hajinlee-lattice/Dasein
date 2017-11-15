@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -112,7 +115,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (jobs == null) {
             return Collections.emptyList();
         }
-        updateAllJobsAndStepsWithModelModelSummaries(jobs);
         return jobs;
     }
 
@@ -126,7 +128,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         jobs.removeIf(job -> NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
-        updateAllJobsAndStepsWithModelModelSummaries(jobs);
+        updateAllJobsAndStepsWithModelSummaries(jobs);
         return jobs;
     }
 
@@ -163,9 +165,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         job.setDescription(job.getJobType());
     }
 
-    private void updateAllJobsAndStepsWithModelModelSummaries(List<Job> jobs) {
+    private void updateAllJobsAndStepsWithModelSummaries(List<Job> jobs) {
         Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
-        for (ModelSummary modelSummary : modelSummaryService.getModelSummaries("all")) {
+        List<ModelSummary> modelSummaries = modelSummaryService.getModelSummaries("all");
+        for (ModelSummary modelSummary : modelSummaries) {
             modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
         }
 
@@ -262,6 +265,29 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Job> findJobs(List<String> jobIds, List<String> types, Boolean includeDetails, Boolean hasParentId) {
+        Tenant tenantWithPid = getTenant();
+        List<Job> jobs = workflowProxy.getWorkflowJobs(CustomerSpace.parse(tenantWithPid.getId()).toString(), jobIds,
+                types, includeDetails, hasParentId);
+        if (jobs == null) {
+            return Collections.emptyList();
+        }
+        return jobs;
+    }
+
+    @Override
+    public void updateParentJobId(List<String> jobIds, String parentJobId) {
+        Tenant tenantWithPid = getTenant();
+        if (CollectionUtils.isEmpty(jobIds)) {
+            throw new LedpException(LedpCode.LEDP_18165);
+        }
+        if (parentJobId == null) {
+            throw new LedpException(LedpCode.LEDP_18166);
+        }
+        workflowProxy.updateParentJobId(CustomerSpace.parse(tenantWithPid.getId()).toString(), jobIds, parentJobId);
     }
 
 }

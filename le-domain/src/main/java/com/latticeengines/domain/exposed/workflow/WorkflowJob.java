@@ -87,6 +87,12 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "OUTPUT_CONTEXT", length = 4000)
     private String outputContextString;
 
+    @Column(name = "PARENT_JOB_ID", nullable = true)
+    private Long parentJobId;
+
+    @Column(name = "TYPE")
+    private String type;
+
     @Override
     public Long getPid() {
         return pid;
@@ -291,6 +297,22 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
             return;
         }
         errorDetailsString = JsonUtils.serialize(details);
+    }
+
+    public Long getParentJobId() {
+        return this.parentJobId;
+    }
+
+    public void setParentJobId(Long parentJobId) {
+        this.parentJobId = parentJobId;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override

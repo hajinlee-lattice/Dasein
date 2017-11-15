@@ -278,6 +278,8 @@ public enum LedpCode {
     LEDP_18162("Cannot create data feed task for entity: {0}, source: {1}, feedType: {2}"), //
     LEDP_18163("Could not download result of export job {0} as it is still in progress."), //
     LEDP_18164("Could not download result of export job {0} as this export job failed."), //
+    LEDP_18165("Workflow Ids cannot not be empty."), //
+    LEDP_18166("Parent Job Id must be specified."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
