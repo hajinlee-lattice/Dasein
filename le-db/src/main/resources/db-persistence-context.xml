@@ -7,7 +7,7 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-    <bean id="dataSource" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
+    <bean id="dataSource" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
         <property name="jndiName" value="java:comp/env/jdbc/PLS_MultiTenant"/>
         <property name="driverClass" value="${db.datasource.driver}" />
         <property name="jdbcUrl" value="${db.datasource.url}"/>
