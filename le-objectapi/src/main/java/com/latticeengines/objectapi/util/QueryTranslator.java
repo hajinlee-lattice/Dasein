@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.util;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -37,6 +40,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
 
 public class QueryTranslator {
@@ -51,6 +55,48 @@ public class QueryTranslator {
     public QueryTranslator(QueryFactory queryFactory, AttributeRepository repository) {
         this.queryFactory = queryFactory;
         this.repository = repository;
+    }
+
+    public Query translateModelingEvent(FrontEndQuery frontEndQuery, EventType eventType) {
+        FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
+
+        if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
+            throw new IllegalArgumentException("No restriction specified for event query");
+        }
+
+        Restriction restriction = frontEndRestriction.getRestriction();
+        QueryBuilder queryBuilder = Query.builder();
+        EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
+
+        switch (eventType) {
+        case Scoring:
+            queryBuilder = eventQueryTranslator.translateForScoring(queryFactory, repository, restriction,
+                                                                    queryBuilder);
+            break;
+        case Training:
+            queryBuilder = eventQueryTranslator.translateForTraining(queryFactory, repository, restriction,
+                                                                     queryBuilder);
+            break;
+        case Event:
+            queryBuilder = eventQueryTranslator.translateForEvent(queryFactory, repository, restriction, queryBuilder);
+            break;
+        }
+
+        PageFilter pageFilter = DEFAULT_PAGE_FILTER;
+
+        if (frontEndQuery.getPageFilter() != null) {
+            pageFilter = frontEndQuery.getPageFilter();
+
+            if (pageFilter.getNumRows() > MAX_ROWS) {
+                log.warn(String.format("Refusing to accept a query requesting more than %s rows."
+                                       + " Currently specified page filter: %s", MAX_ROWS, pageFilter));
+                pageFilter.setNumRows(MAX_ROWS);
+            }
+        }
+
+        queryBuilder.page(pageFilter);
+
+        return queryBuilder.build();
     }
 
     public Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {

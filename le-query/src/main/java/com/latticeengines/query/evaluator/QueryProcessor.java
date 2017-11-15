@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
 import com.latticeengines.query.evaluator.restriction.RestrictionResolver;
@@ -204,9 +205,9 @@ public class QueryProcessor {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private SQLQuery<?> addSort(SQLQuery<?> sqlQuery, Sort sort, LookupResolverFactory resolverFactory) {
         if (sort != null) {
-            LookupResolver resolver = resolverFactory.getLookupResolver(AttributeLookup.class);
             for (Lookup lookup : sort.getLookups()) {
-                if (lookup instanceof AttributeLookup) {
+                LookupResolver resolver = resolverFactory.getLookupResolver(lookup.getClass());
+                if (lookup instanceof AttributeLookup || lookup instanceof SubQueryAttrLookup) {
                     ComparableExpression<String> resolved = Expressions
                             .asComparable(resolver.resolveForSelect(lookup, false));
                     if (sort.getDescending()) {

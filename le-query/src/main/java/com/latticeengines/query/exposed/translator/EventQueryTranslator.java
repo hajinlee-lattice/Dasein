@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -87,16 +88,28 @@ public class EventQueryTranslator {
     private StringPath trxnQuantityVal = Expressions.stringPath(trxnPath, QUANTITY_VAL);
     private StringPath trxnVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
 
-    public Query translateForScoring(QueryFactory queryFactory, AttributeRepository repository, Restriction restriction) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), true, false);
+    public QueryBuilder translateForScoring(QueryFactory queryFactory,
+                                            AttributeRepository repository,
+                                            Restriction restriction,
+                                            QueryBuilder queryBuilder) {
+        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), true, false,
+                                    queryBuilder);
     }
 
-    public Query translateForTraining(QueryFactory queryFactory, AttributeRepository repository, Restriction restriction) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, false);
+    public QueryBuilder translateForTraining(QueryFactory queryFactory,
+                                             AttributeRepository repository,
+                                             Restriction restriction,
+                                             QueryBuilder queryBuilder) {
+        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, false,
+                                    queryBuilder);
     }
 
-    public Query translateForEvent(QueryFactory queryFactory, AttributeRepository repository, Restriction restriction) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, true);
+    public QueryBuilder translateForEvent(QueryFactory queryFactory,
+                                          AttributeRepository repository,
+                                          Restriction restriction,
+                                          QueryBuilder queryBuilder) {
+        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, true,
+                                    queryBuilder);
     }
 
 
@@ -104,8 +117,8 @@ public class EventQueryTranslator {
         return queryFactory.getSQLQueryFactory(repository);
     }
 
-    // todo, need to change this when new period transaction is defined
-    protected String getTransactionTableName(AttributeRepository repository) {
+    protected String getPeriodTransactionTableName(AttributeRepository repository) {
+        // todo, need to change this when new period transaction is defined
         return repository.getTableName(AggregatedTransaction);
     }
 
@@ -118,7 +131,7 @@ public class EventQueryTranslator {
     private SubQuery translateAllKeys(QueryFactory queryFactory, AttributeRepository repository) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
-        String txTableName = getTransactionTableName(repository);
+        String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath accountId = Expressions.stringPath("accountid");
         StringPath periodId = Expressions.stringPath("periodid");
@@ -149,7 +162,7 @@ public class EventQueryTranslator {
     private SQLQuery translateMaxPeriodId(QueryFactory queryFactory,
                                           AttributeRepository repository) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
-        String txTableName = getTransactionTableName(repository);
+        String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath periodId = Expressions.stringPath(PERIOD_ID);
 
@@ -325,7 +338,7 @@ public class EventQueryTranslator {
 
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
-        String txTableName = getTransactionTableName(repository);
+        String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
 
         List<Expression> productSelectList = new ArrayList<>();
@@ -393,7 +406,7 @@ public class EventQueryTranslator {
         boolean returnPositive = !txRestriction.isNegate();
 
         SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository);
-        String txTableName = getTransactionTableName(repository);
+        String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
 
         NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
@@ -561,17 +574,18 @@ public class EventQueryTranslator {
         return notEver;
     }
 
-    private Query translateRestriction(QueryFactory queryFactory,
-                                       AttributeRepository repository,
-                                       Restriction restriction,
-                                       boolean isScoring,
-                                       boolean checkNextPeriod) {
+    private QueryBuilder translateRestriction(QueryFactory queryFactory,
+                                              AttributeRepository repository,
+                                              Restriction restriction,
+                                              boolean isScoring,
+                                              boolean checkNextPeriod,
+                                              QueryBuilder builder) {
 
-        QueryBuilder builder = Query.builder();
         builder.with(translateAllKeys(queryFactory, repository));
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
+        Sort sort = new Sort();
 
         // combine one leg behind restriction for event query, this is not needed for scoring and training
         if (!isScoring && checkNextPeriod) {
@@ -643,11 +657,11 @@ public class EventQueryTranslator {
             SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, isScoring);
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
-            builder.from(selectAll);
             SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
             SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
             builder.from(selectAll);
             builder.select(accountId, periodId);
+            sort.setLookups(Arrays.asList(accountId, periodId));
         } else if (rootRestriction instanceof ConcreteRestriction) {
             ConcreteRestriction concreteRestriction = (ConcreteRestriction) rootRestriction;
             SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction, isScoring);
@@ -657,6 +671,7 @@ public class EventQueryTranslator {
             SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
             builder.from(selectAll);
             builder.select(accountId, periodId);
+            sort.setLookups(Arrays.asList(accountId, periodId));
         } else {
             throw new UnsupportedOperationException("Cannot translate restriction " + restriction);
         }
@@ -720,12 +735,13 @@ public class EventQueryTranslator {
                         SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
                         builder.from(selectAll);
                         builder.select(accountId, periodId);
+                        sort.setLookups(Arrays.asList(accountId, periodId));
                     }
                 }
             }, true);
         }
 
-        return builder.build();
+        return builder.orderBy(sort);
     }
 
     private Restriction translatePriorOnly(TransactionRestriction txRestriction) {
