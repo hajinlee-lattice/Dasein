@@ -133,6 +133,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         var toReturn = null;
         var lowerValue;
         var upperValue;
+
         if (bucket.Values != null && bucket.Values.length > 0) {
             // This is the Null bucket
             if (bucket.Values[0] == null) {
@@ -161,6 +162,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                 } else {
                     toReturn = discreteValueString;
                 }
+                
             }
         } else if (bucket.LowerInclusive != null && bucket.UpperExclusive != null) {
 
@@ -170,7 +172,6 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                     toReturn = this.FormatIntegerBucket(bucket.LowerInclusive, bucket.UpperExclusive, attributeMetadata);
                 } else {
                     upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
-
                     toReturn = ResourceUtility.getString('ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL', [upperValue]);
 
                 }
@@ -188,6 +189,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
             upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
             toReturn = ResourceUtility.getString('ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL', [upperValue]);
         }
+
         return String(toReturn);
     };
 

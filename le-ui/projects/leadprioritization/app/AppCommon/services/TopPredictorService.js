@@ -532,6 +532,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var bucket = predictor.Elements[i];
             var matchingBuckets = [];
 
+
             var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor),
                 foundMax = false;
 
@@ -567,9 +568,10 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     bucketToDisplay.SortProperty = parseFloat(removedLessThanCharacter.replace(/,/g, ''));
                 } else if (bucketToDisplay.name.indexOf("-") > -1) {
                     var values = bucketToDisplay.name.split('-'),
+                        minValue = parseInt(values[0]),
                         maxValue = parseInt(values[1]);
 
-                    bucketToDisplay.SortProperty = maxValue;
+                    bucketToDisplay.SortProperty = minValue;
                 }
             } else {
                 bucketToDisplay.SortProperty = bucketToDisplay.lift;
@@ -604,16 +606,30 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         // sort the list of buckets
         toReturn.elementList.sort(function (a, b)  {
-            if (a.SortProperty < b.SortProperty) {
-                return isContinuous ? -1 : 1;
+
+            if (toReturn.name === 'Employee Range' || toReturn.name === 'Revenue Range'){
+                if (a.SortProperty < b.SortProperty) {
+                    return -1;
+                }
+                if (a.SortProperty == b.SortProperty) {
+                    return 0;
+                }
+                if (a.SortProperty > b.SortProperty) {
+                    return 1;
+                }
+            } else {
+
+                if (a.SortProperty < b.SortProperty) {
+                    return isContinuous ? -1 : 1;
+                }
+                if (a.SortProperty == b.SortProperty) {
+                    return 0;
+                }
+                if (a.SortProperty > b.SortProperty) {
+                    return isContinuous ? 1 : -1;
+                }
+                    return 0;
             }
-            if (a.SortProperty == b.SortProperty) {
-                return 0;
-            }
-            if (a.SortProperty > b.SortProperty) {
-                return isContinuous ? 1 : -1;
-            }
-                return 0;
         });
 
         // Always sort NULL bucket to the bottom
@@ -632,7 +648,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         //
         //
         // Duplicate code exampkles here need to be made more efficient
-        // I'll look into this weekend (Nov 11)
+        //
         // - Jon
         //
         //
@@ -842,7 +858,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
 
             otherBucket = {
-                name: "Other",
+                name: "Other, Less Popular",
                 lift: averagedLift / otherBucketTotalPercentage,
                 percentTotal: (otherBucketTotalPercentage * 100).toFixed(0)
             };
