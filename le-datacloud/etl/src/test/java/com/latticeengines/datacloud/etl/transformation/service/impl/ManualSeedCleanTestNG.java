@@ -139,7 +139,12 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
                 { "6", "$9.92", "15098", "netapp.com", "456456" }, { "7", "$9.86", "23172", "netflix.com", "123123" },
                 { "8", "$31.39", "", "payless.com", "898989" }, { "9", "$10.86", "80,000", "target.com", "689383" },
                 { "10", "$22.76", "18,200", "macys.com", "783921" }, { "11", "", "", "nordstorm.com", "891824" },
-                { "12", null, null, "netflix.com", "123123" } };
+                { "12", null, null, "netflix.com", "123123" },
+                { "13", "$0.010999999", "6203", "craigslist.com", "324211" },
+                { "14", "$0.050999999", "6000", "openstack.com", "324212" },
+                { "15", "$0.100999999", "7000", "karlx.com", "424254" },
+                { "16", "$0.250999998", "8000", "pearlx.com", "242455" },
+                { "17", "$0.500999999", "9000", "oracle.com", "435256" } };
         uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data);
     }
 
@@ -151,7 +156,12 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
             { "8", 31390000000L, null, null, ">10B", "payless.com", "898989" },
             { "9", 10860000000L, 80000, ">10,000", ">10B", "target.com", "689383" },
             { "10", 22760000000L, 18200, ">10,000", ">10B", "macys.com", "783921" },
-            { "11", null, null, null, null, "nordstorm.com", "891824" } };
+            { "11", null, null, null, null, "nordstorm.com", "891824" },
+            { "13", 10999999L, 6203, "5001-10,000", "1-10M", "craigslist.com", "324211" },
+            { "14", 50999999L, 6000, "5001-10,000", "11-50M", "openstack.com", "324212" },
+            { "15", 100999999L, 7000, "5001-10,000", "51-100M", "karlx.com", "424254" },
+            { "16", 250999998L, 8000, "5001-10,000", "101-250M", "pearlx.com", "242455" },
+            { "17", 500999999L, 9000, "5001-10,000", "251-500M", "oracle.com", "435256" } };
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
@@ -172,6 +182,6 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
             Assert.assertTrue(isObjEquals(record.get("Manual_Duns"), expected[6]));
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 9);
+        Assert.assertEquals(rowCount, 14);
     }
 }
