@@ -15,7 +15,13 @@ public interface ModelingFileMetadataService {
     FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
             SchemaInterpretation schemaInterpretation, ModelingParameters parameters);
 
+    FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
+            String entity, String source, String feedType);
+
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument);
+
+    void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument,
+                         String entity, String source, String feedType);
 
     InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser,
             String fileName);
@@ -24,4 +30,6 @@ public interface ModelingFileMetadataService {
             boolean excludeLatticeDataAttributes);
 
     List<LatticeSchemaField> getSchemaToLatticeSchemaFields(SchemaInterpretation schemaInterpretation);
+
+    List<LatticeSchemaField> getSchemaToLatticeSchemaFields(String entity, String source, String feedType);
 }

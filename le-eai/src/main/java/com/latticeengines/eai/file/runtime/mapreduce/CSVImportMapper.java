@@ -239,11 +239,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         GenericRecord avroRecord = new GenericData.Record(schema);
         for (Attribute attr : table.getAttributes()) {
             Object avroFieldValue = null;
-            if (headers.contains(attr.getDisplayName())) {
+            String csvColumnName = attr.getDisplayName();
+            if (headers.contains(csvColumnName)) {
                 Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
                 String csvFieldValue = null;
                 try {
-                    csvFieldValue = String.valueOf(csvRecord.get(attr.getDisplayName()));
+                    csvFieldValue = String.valueOf(csvRecord.get(csvColumnName));
                 } catch (Exception e) { // This catch is for the row error
                     rowError = true;
                     LOG.warn(e.getMessage(), e);

@@ -119,21 +119,36 @@ public class ModelingFileUploadResource {
             @PathVariable String sourceFileName,
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation,
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
+            @RequestParam(value = "source", required = false, defaultValue = "") String source,
+            @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,
             @RequestBody(required = false) ModelingParameters parameters) {
         if (!StringUtils.isEmpty(entity)) {
             schemaInterpretation = SchemaInterpretation.getByName(entity);
         }
-        return ResponseDocument.successResponse(
-                modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFileName,
-                        schemaInterpretation, parameters));
+        if (StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
+            return ResponseDocument.successResponse(
+                    modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFileName,
+                            schemaInterpretation, parameters));
+        } else {
+            return ResponseDocument.successResponse(
+                    modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFileName, entity, source,
+                            feedType));
+        }
     }
 
     @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //
-            @RequestParam(value = "displayName", required = true) String csvFileName,
-            @RequestBody FieldMappingDocument fieldMappingDocument) {
-        modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument);
+              @RequestParam(value = "displayName", required = true) String csvFileName,
+              @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
+              @RequestParam(value = "source", required = false, defaultValue = "") String source,
+              @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,
+              @RequestBody FieldMappingDocument fieldMappingDocument) {
+        if (StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
+            modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument);
+        } else {
+            modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument, entity, source, feedType);
+        }
     }
 
     @RequestMapping(value = "latticeschema", method = RequestMethod.GET)
@@ -142,14 +157,16 @@ public class ModelingFileUploadResource {
     public ResponseDocument<Map<SchemaInterpretation, List<LatticeSchemaField>>> getLatticeSchemaFieldMap(
             @RequestParam(value = "excludeLatticeDataAttributes", required = false, defaultValue = "false") boolean
                     excludeLatticeDataAttributes,
-            @RequestParam(value = "entity", required = false, defaultValue = "") String entity) {
+            @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
+            @RequestParam(value = "source", required = false, defaultValue = "") String source,
+            @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType) {
         if (StringUtils.isEmpty(entity)) {
             return ResponseDocument.successResponse(modelingFileMetadataService
                     .getSchemaToLatticeSchemaFields(excludeLatticeDataAttributes));
         } else {
             SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
             return ResponseDocument.successResponse(ImmutableMap.of(schemaInterpretation, modelingFileMetadataService
-                    .getSchemaToLatticeSchemaFields(schemaInterpretation)));
+                    .getSchemaToLatticeSchemaFields(entity, source, feedType)));
         }
     }
 }

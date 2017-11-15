@@ -18,11 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
@@ -39,6 +41,7 @@ import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -58,6 +61,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Autowired
     private PlsFeatureFlagService plsFeatureFlagService;
 
+    @Autowired
+    private DataFeedProxy dataFeedProxy;
+
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
             SchemaInterpretation schemaInterpretation, ModelingParameters parameters) {
@@ -69,6 +75,28 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         MetadataResolver resolver = getMetadataResolver(sourceFile, null);
         Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
+        return resolver.getFieldMappingsDocumentBestEffort(table);
+    }
+
+    @Override
+    public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
+            String entity, String source, String feedType) {
+        SourceFile sourceFile = getSourceFile(sourceFileName);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        log.info(String.format("Customer Space: %s, entity: %s, source: %s, datafeed: %s", customerSpace.toString(),
+                entity, source, feedType));
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        if (dataFeedTask == null) {
+            SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+            return getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, null);
+        } else {
+            Table templateTable = dataFeedTask.getImportTemplate();
+            return getFieldMappingBaseOnTable(sourceFile, templateTable);
+        }
+    }
+
+    private FieldMappingDocument getFieldMappingBaseOnTable(SourceFile sourceFile, Table table) {
+        MetadataResolver resolver = getMetadataResolver(sourceFile, null);
         return resolver.getFieldMappingsDocumentBestEffort(table);
     }
 
@@ -89,13 +117,32 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
+        resolveMetadata(sourceFile, fieldMappingDocument, table);
+    }
+
+    @Override
+    public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument,
+                                String entity, String source, String feedType) {
+        SourceFile sourceFile = getSourceFile(sourceFileName);
+        Table table;
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        if (dataFeedTask == null) {
+            table = getTableFromParameters(sourceFile.getSchemaInterpretation());
+        } else {
+            table = dataFeedTask.getImportTemplate();
+        }
+        resolveMetadata(sourceFile, fieldMappingDocument, table);
+    }
+
+    private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table) {
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
-            throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
+            throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFile.getName()));
         }
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
         resolver.calculateBasedOnFieldMappingDocument(table);
 
         String customerSpace = MultiTenantContext.getTenant().getId().toString();
@@ -105,7 +152,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         Table newTable = resolver.getMetadata();
-        newTable.setName("SourceFile_" + sourceFileName.replace(".", "_"));
+        newTable.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
         metadataProxy.createTable(customerSpace, newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
@@ -167,6 +214,23 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             latticeSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
         }
         return latticeSchemaFields;
+    }
+
+    @Override
+    public List<LatticeSchemaField> getSchemaToLatticeSchemaFields(String entity, String source, String feedType) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        if (dataFeedTask == null) {
+            SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+            return getSchemaToLatticeSchemaFields(schemaInterpretation);
+        } else {
+            List<LatticeSchemaField> templateSchemaFields = new ArrayList<>();
+            List<Attribute> attributes = dataFeedTask.getImportTemplate().getAttributes();
+            for (Attribute accountAttribute : attributes) {
+                templateSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
+            }
+            return templateSchemaFields;
+        }
     }
 
     private LatticeSchemaField getLatticeFieldFromTableAttribute(Attribute attribute) {

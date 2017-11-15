@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
+import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
@@ -58,6 +59,11 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         if (srcTable == null || targetTable == null) {
             return result;
         }
+        if (needSameType) {
+            if (!validateAttribute(srcTable, targetTable)) {
+                throw new RuntimeException("Template table attribute type should not be changed!");
+            }
+        }
         if (!StringUtils.equals(srcTable.getName(), targetTable.getName())) {
             return result;
         }
@@ -70,21 +76,30 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             srcAttrs.put(attr.getName(), attr);
         }
         for (Attribute attr : targetTable.getAttributes()) {
-            if (srcAttrs.containsKey(attr.getName())) {
-                if (!StringUtils.equalsIgnoreCase(srcAttrs.get(attr.getName()).getPhysicalDataType(),
-                        attr.getPhysicalDataType())) {
-                    if (needSameType) {
-                        throw new RuntimeException("Template table attribute type should not be changed!");
-                    }
-                    result = false;
-                    break;
-                }
-            } else {
+            if (!srcAttrs.containsKey(attr.getName())) {
                 result = false;
                 break;
             }
         }
         return result;
+    }
+
+    private boolean validateAttribute(Table srcTable, Table targetTable) {
+        HashMap<String, Attribute> srcAttrs = new HashMap<>();
+        for (Attribute attr : srcTable.getAttributes()) {
+            srcAttrs.put(attr.getName(), attr);
+        }
+        for (Attribute attr : targetTable.getAttributes()) {
+            if (srcAttrs.containsKey(attr.getName())) {
+                if (!StringUtils.equalsIgnoreCase(srcAttrs.get(attr.getName()).getPhysicalDataType(),
+                        attr.getPhysicalDataType())) {
+                    log.error(String.format("Field %s should have the type %s, not %s", attr.getName(),
+                            srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override

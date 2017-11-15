@@ -134,7 +134,9 @@ angular.module('lp.import')
 
 	this.GetSchemaToLatticeFields = function(csvFileName) {
 	        var deferred = $q.defer();
-	        var params = { 'entity':  'Account' };
+	        var params = { 'entity':  'Account',
+                    'source': 'File',
+	            'feedType': 'AccountSchema' };
 
 	        $http({
 	            method: 'GET',
@@ -151,7 +153,9 @@ angular.module('lp.import')
 	    this.GetFieldDocument = function(FileName) {
 	        var deferred = $q.defer();
 	        var entity = "account";
-	        var params =  { 'entity': entity };
+	        var params =  { 'entity': entity,
+                    'source': 'File',
+	            'feedType': 'AccountSchema' };
 
 	        $http({
 	            method: 'POST',
@@ -195,7 +199,10 @@ angular.module('lp.import')
 	    this.SaveFieldDocuments = function(FileName, FieldDocument) {
 	        var deferred = $q.defer();
 	        var result;
-	        var params = { 'displayName': FileName };
+	        var params = { 'displayName': FileName,
+                               'source': 'File',
+	                       'entity': 'Account',
+	                       'feedType': 'AccountSchema' };
 
 	        $http({
 	            method: 'POST',
