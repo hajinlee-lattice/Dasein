@@ -137,33 +137,50 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         count2 = countTxnBkt(txn2);
         count3 = countTxnBkt(txn3);
         Assert.assertEquals(count1 + count2 + count3, totalCount);
+    }
 
-//        // Last Quarter Amount
-//        TimeFilter lastQuarter = new TimeFilter(ComparisonType.EQUAL, TimeFilter.Period.Quarter, Collections.singletonList(1));
-//        AggregationFilter spentFilter = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(15, 700));
-//        txn = new Bucket.Transaction(prodId, lastQuarter, spentFilter, null, false);
-//        count = countTxnBkt(txn);
-//        Assert.assertEquals(count, new Long(115L));
-//
-//        // Last Quarter Quantity
-//        AggregationFilter unitFilter = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(2));
-//        txn = new Bucket.Transaction(prodId, lastQuarter, null, unitFilter, false);
-//        count = countTxnBkt(txn);
-//        Assert.assertEquals(count, new Long(105017L));
+    @Test(groups = "functional", enabled = false)
+    public void testAccountContactWithTxn() {
+        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        // Check add up
+        AggregationFilter filter = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1000));
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), filter, null, false);
+        Restriction txnRestriction = getTxnRestriction(txn);
+        Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name()).eq("Buyer").build();
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+
+        FrontEndRestriction accountFERestriction = new FrontEndRestriction();
+        accountFERestriction.setRestriction(Restriction.builder().and(txnRestriction, accRestriction).build());
+        frontEndQuery.setAccountRestriction(accountFERestriction);
+
+        FrontEndRestriction contactFERestriction = new FrontEndRestriction();
+        contactFERestriction.setRestriction(cntRestriction);
+        frontEndQuery.setContactRestriction(contactFERestriction);
+
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        Long count = entityQueryService.getCount(frontEndQuery);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(100));
     }
 
     private long countTxnBkt(Bucket.Transaction txn) {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Bucket bucket = Bucket.txnBkt(txn);
-        Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        Restriction restriction = getTxnRestriction(txn);
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
         return count;
+    }
+
+    private Restriction getTxnRestriction(Bucket.Transaction txn) {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        Bucket bucket = Bucket.txnBkt(txn);
+        return new BucketRestriction(attrLookup, bucket);
     }
 
     @Test(groups = "functional")
