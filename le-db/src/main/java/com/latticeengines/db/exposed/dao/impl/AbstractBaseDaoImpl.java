@@ -160,6 +160,9 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public void delete(T entity) {
     		// This is needed as part of Hibernate and JPA integration for backward compatibility
     		// Refer to section 5.4 and 5.7 in https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html
+    		if (entity == null) {
+    			return;
+    		}
     		Session currSession = getSessionFactory().getCurrentSession();
     		currSession.delete(currSession.contains(entity) ? entity: currSession.merge(entity));
     }

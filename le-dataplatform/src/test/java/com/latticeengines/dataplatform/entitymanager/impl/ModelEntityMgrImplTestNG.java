@@ -67,6 +67,9 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @AfterClass(groups = {"functional", "functional.production"})
     public void tearDown(){
+    		if (modelDef.getModels() != null) {
+    			modelDef.getModels().remove(model);
+    		}
         modelDefinitionEntityMgr.delete(modelDef);
     }
 
