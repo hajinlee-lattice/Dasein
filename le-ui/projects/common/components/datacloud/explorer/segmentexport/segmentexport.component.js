@@ -25,10 +25,17 @@ angular
         vm.downloadSegmentExport = function() {
             if (vm.exportId && vm.exportId !== null) {
                 SegmentService.DownloadExportedSegment(vm.exportId).then(function (result) {
+                    var contentDisposition = result.headers('Content-Disposition');
+                    var element = document.createElement("a");
+                    var file = new Blob([result.data], {type: 'application/octect-stream'});
+                    var fileURL = window.URL.createObjectURL(file);
+                    element.href = fileURL;
+                    var fileName = contentDisposition.match(/filename="(.+)"/)[1];
+                    element.download = fileName;
+                    element.click();
                     vm.showDownloadMessage = true;
-                    console.log(result);
                 });
-            }
+            } 
 
         }
 

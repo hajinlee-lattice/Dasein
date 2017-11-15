@@ -28,6 +28,7 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.monitor.util.EmailTemplateBuilder;
 import com.latticeengines.monitor.util.EmailTemplateBuilder.Template;
 import com.latticeengines.monitor.util.EmailUtils;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 
 @Component
 public class EmailServiceImpl implements EmailService {
@@ -607,18 +608,21 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsExportSegmentSuccessEmail(User user, String hostport) {
+    public void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String type, Date cleanupBy) {
         try {
-            log.info("Sending PLS import data complete email to " + user.getEmail() + " started.");
+            log.info("Sending segment export complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_SUCCESS);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{downloadLink}}", hostport);
+            builder.replaceToken("{{exportID}}", exportID);
+            builder.replaceToken("{{exportType}}", type);
+            builder.replaceToken("{{date}}", DateTimeUtils.convertToStringUTCISO8601(cleanupBy));
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
-            sendMultiPartEmail("Segment Export Success", mp,
+            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS segment export complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
@@ -627,16 +631,16 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsExportSegmentErrorEmail(User user, String hostport) {
+    public void sendPlsExportSegmentErrorEmail(User user, String hostport, String exportID, String type) {
         try {
-            log.info("Sending PLS import data complete email to " + user.getEmail() + " started.");
+            log.info("Sending PLS export segment error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
 
             Multipart mp = builder.buildMultipart();
-            sendMultiPartEmail("Segment Export Error", mp,
+            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {

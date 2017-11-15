@@ -68,7 +68,7 @@ public interface EmailService {
     void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
             String emailAddress, EmailSettings settings);
 
-    void sendPlsExportSegmentSuccessEmail(User user, String hostport);
+    void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String type, Date cleanupBy);
 
-    void sendPlsExportSegmentErrorEmail(User user, String hostport);
+    void sendPlsExportSegmentErrorEmail(User user, String hostport, String exportID, String type);
 }

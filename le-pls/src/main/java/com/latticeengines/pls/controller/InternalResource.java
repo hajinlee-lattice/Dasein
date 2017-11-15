@@ -917,6 +917,18 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody MetadataSegmentExport export, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
+        String exportType = export.getType().toString();
+        switch (exportType) {
+            case "ACCOUNT": 
+                exportType = "Account";
+                break;
+            case "CONTACT": 
+                exportType = "Contact";
+                break;
+            case "ACCOUNT_AND_CONTACT": 
+                exportType = "Account and Contact";
+                break;
+        }
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {
                 if (user.getEmail().equals(export.getCreatedBy())) {
@@ -925,9 +937,9 @@ public class InternalResource extends InternalResourceBase {
                         String url = request.getScheme() + "://" + request.getServerName() + ":"
                                 + request.getServerPort() + "/lp/" + tenantName + "/export/" + exportID;
                         if (result.equals("COMPLETED")) {
-                            emailService.sendPlsExportSegmentSuccessEmail(user, url);
-                        } else {
-                            emailService.sendPlsExportSegmentErrorEmail(user, url);
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType, export.getCleanupBy());
+                        } else if (result.equals("FAILED")) {
+                            emailService.sendPlsExportSegmentErrorEmail(user, url, exportID, exportType);
                         }
                     }
                 }

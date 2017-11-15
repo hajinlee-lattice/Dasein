@@ -25,17 +25,17 @@
                 </div>
                 <div ng-show="vm.showExportDropdown">
                     <ul class="model-menu button-dropdown">
-                        <li data-ng-click="vm.exportAccounts()">
+                        <li data-ng-click="vm.exportSegment('ACCOUNT')">
                             <a href="javascript:void(0)"> Accounts
                                 <i class="fa fa-building-o"></i> 
                             </a>
                         </li>
-                        <li data-ng-click="vm.exportContacts()">
+                        <li data-ng-click="vm.exportSegment('CONTACT')">
                             <a href="javascript:void(0)"> Contacts
                                 <i class="fa fa-users"></i>
                             </a>
                         </li>
-                        <li class="ng-binding" data-ng-click="vm.exportAccountsAndContacts()">
+                        <li data-ng-click="vm.exportSegment('ACCOUNT_AND_CONTACT')">
                             <a href="javascript:void(0)"> Accounts and Contacts 
                                 <i class="fa fa-briefcase"></i>
                             </a>
