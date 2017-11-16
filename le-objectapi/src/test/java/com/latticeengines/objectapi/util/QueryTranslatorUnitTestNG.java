@@ -67,7 +67,7 @@ public class QueryTranslatorUnitTestNG {
         QueryTranslator queryTranslator = new QueryTranslator(null, null);
         Query translated = queryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
-        validateTranslated(translated.getRestriction(), 6, 10, 1);
+        validateTranslated(translated.getRestriction(), 7, 10, 0);
     }
 
     @Test(groups = "unit")
@@ -84,7 +84,7 @@ public class QueryTranslatorUnitTestNG {
         QueryTranslator queryTranslator = new QueryTranslator(null, null);
         Query translated = queryTranslator.translate(query, ContactQueryDecorator.WITH_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
-        validateTranslated(translated.getRestriction(), 4, 8, 1);
+        validateTranslated(translated.getRestriction(), 5, 8, 0);
         validateTranslatedLookups(translated, 5);
     }
 
