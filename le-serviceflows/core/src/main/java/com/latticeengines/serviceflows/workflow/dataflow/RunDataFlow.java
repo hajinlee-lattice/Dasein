@@ -60,6 +60,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setDataFlowBeanName(configuration.getBeanName());
         dataFlowConfig.setDataSources(createDataFlowSources(configuration.getDataFlowParams()));
         dataFlowConfig.setDataFlowParameters(configuration.getDataFlowParams());
+        dataFlowConfig.setApplyTableProperties(configuration.isApplyTableProperties());
 
         return dataFlowConfig;
     }
@@ -99,7 +100,8 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         }
 
         for (DataFlowSource source : sources) {
-            log.info(String.format("Providing source %s to data flow %s", source.getName(), configuration.getBeanName()));
+            log.info(String.format("Providing source %s to data flow %s", source.getName(),
+                    configuration.getBeanName()));
         }
         return sources;
     }

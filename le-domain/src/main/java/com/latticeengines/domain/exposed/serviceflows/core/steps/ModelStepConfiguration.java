@@ -52,6 +52,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean v2ProfilingEnabled;
 
+    private boolean isCdlModel = false;
+
     private String notesContent;
 
     private String userName;
@@ -216,6 +218,15 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setV2ProfilingEnabled(boolean v2ProfilingEnabled) {
         this.v2ProfilingEnabled = v2ProfilingEnabled;
+    }
+
+    @JsonProperty
+    public boolean isCdlModel() {
+        return isCdlModel;
+    }
+
+    public void setCdlModel(boolean isCdlModel) {
+        this.isCdlModel = isCdlModel;
     }
 
     @JsonProperty

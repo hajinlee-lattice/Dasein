@@ -13,9 +13,9 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
@@ -57,14 +57,31 @@ public abstract class DataFlowBuilder {
     }
 
     @SuppressWarnings("deprecation")
-    private AbstractMap.SimpleEntry<Type, Map<String, String>> getRequiredProperties(FieldMetadata fm) {
+    private AbstractMap.SimpleEntry<Type, Map<String, String>> getRequiredProperties(FieldMetadata fm,
+            DataFlowContext dataFlowCtx) {
         Map<String, String> map = null;
         Field avroField = fm.getField();
-
-        if (avroField != null) {
-            map = avroField.props();
+        if (dataFlowCtx != null
+                && dataFlowCtx.getProperty(DataFlowProperty.APPLYTABLEPROPERTIES, Boolean.class) != null) {
+            if (avroField != null) {
+                map = avroField.props();
+            }
+            Map<String, String> tableProperties = fm.getProperties();
+            if (map == null) {
+                map = tableProperties;
+            } else {
+                for (Map.Entry<String, String> entry : tableProperties.entrySet()) {
+                    if (entry.getValue() != null) {
+                        map.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
         } else {
-            map = fm.getProperties();
+            if (avroField != null) {
+                map = avroField.props();
+            } else {
+                map = fm.getProperties();
+            }
         }
         return new AbstractMap.SimpleEntry<>(fm.getAvroType(), map);
     }
@@ -105,7 +122,7 @@ public abstract class DataFlowBuilder {
 
         for (FieldMetadata fm : fieldMetadata) {
             FieldBuilder<Schema> fieldBuilder = fieldAssembler.name(fm.getFieldName());
-            AbstractMap.SimpleEntry<Type, Map<String, String>> requiredProps = getRequiredProperties(fm);
+            AbstractMap.SimpleEntry<Type, Map<String, String>> requiredProps = getRequiredProperties(fm, dataFlowCtx);
 
             Map<String, String> props = requiredProps.getValue();
 
@@ -272,7 +289,7 @@ public abstract class DataFlowBuilder {
         extract.setPath(targetPath);
         extract.setExtractionTimestamp(DateTime.now().getMillis());
         table.addExtract(extract);
-        
+
         StorageMechanism mechanism = new HdfsStorage();
         mechanism.setTableNameInStorage(table.getName());
         table.setStorageMechanism(mechanism);

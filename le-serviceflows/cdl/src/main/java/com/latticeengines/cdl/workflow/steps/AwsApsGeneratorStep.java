@@ -16,7 +16,9 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
+import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.core.BaseAwsPythonBatchStep;
 
 @Component("awsApsGeneratorStep")
@@ -29,6 +31,9 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
+
+    @Autowired
+    protected MetadataProxy metadataProxy;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -92,6 +97,10 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                 } else {
                     HdfsUtils.rename(yarnConfiguration, newHdfsPath, hdfsPath);
                 }
+
+                Table apsTable = MetaDataTableUtils.createTable(yarnConfiguration, APS, hdfsPath);
+                apsTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
+                metadataProxy.updateTable(configuration.getCustomerSpace().toString(), APS, apsTable);
             } else {
                 throw new RuntimeException("There's no new APS file created!");
             }

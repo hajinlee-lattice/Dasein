@@ -49,7 +49,9 @@ public class TableUtils {
             if (attr.getNullable() != null) {
                 fieldBuilder = fieldBuilder.prop("Nullable", attr.getNullable().toString());
             }
-            fieldBuilder = fieldBuilder.prop("sourceLogicalType", attr.getSourceLogicalDataType());
+            if (attr.getSourceLogicalDataType() != null) {
+                fieldBuilder = fieldBuilder.prop("sourceLogicalType", attr.getSourceLogicalDataType());
+            }
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
 
             for (Map.Entry<String, Object> entry : attr.getEntries()) {

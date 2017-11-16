@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.exposed.builder.common;
 public class DataFlowProperty {
     public static final String RECORDNAME = "RECORDNAME";
     public static final String APPLYMETADATAPRUNING = "APPLYMETADATAPRUNING";
+    public static final String APPLYTABLEPROPERTIES = "APPLYTABLEPROPERTIES";
     public static final String SOURCETABLES = "SOURCETABLES";
     public static final String CUSTOMER = "CUSTOMER";
     public static final String TARGETPATH = "TARGETPATH";

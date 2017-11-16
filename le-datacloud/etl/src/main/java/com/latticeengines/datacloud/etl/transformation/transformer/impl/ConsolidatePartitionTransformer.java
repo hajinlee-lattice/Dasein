@@ -28,7 +28,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.core.util.TableUtils;
 import com.latticeengines.datacloud.dataflow.transformation.Profile;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidatePartitionParameters;
@@ -37,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 
 @Component(TRANSFORMER_NAME)
 public class ConsolidatePartitionTransformer
@@ -241,7 +241,7 @@ public class ConsolidatePartitionTransformer
         String localAggrDir = getLocalAggrDir(workflowDir);
         HdfsUtils.moveGlobToDir(yarnConfiguration, localAggrDir + "/*.avro", workflowDir);
         HdfsUtils.rmdir(yarnConfiguration, localAggrDir);
-        Table newTable = TableUtils.createTable(yarnConfiguration, targetTableName, workflowDir);
+        Table newTable = MetaDataTableUtils.createTable(yarnConfiguration, targetTableName, workflowDir);
         table.setExtracts(newTable.getExtracts());
 
         return table;

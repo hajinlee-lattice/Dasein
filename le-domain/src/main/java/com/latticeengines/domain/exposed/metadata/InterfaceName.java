@@ -15,6 +15,9 @@ public enum InterfaceName {
     ProductId, //
     TransactionId, //
     PeriodId, //
+    Target, //
+    AnalyticPurchaseState_ID, //
+    Train, //
 
     LastModifiedDate, //
     CreatedDate, //

@@ -16,20 +16,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateStagingTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ResolveStagingAndRuntimeTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineMatchDebugWithScoreParameters;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CreateCdlEventTableFilterParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CreateCdlEventTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.PivotScoreAndEventParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.QuotaFlowParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateStagingTableParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ResolveStagingAndRuntimeTableParameters;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
@@ -40,6 +42,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ResolveStagin
         @JsonSubTypes.Type(value = CreateAttributeLevelSummaryParameters.class, name = "createAttributeLevelSummaryParameters"), //
         @JsonSubTypes.Type(value = DedupEventTableParameters.class, name = "dedupEventTableParameters"), //
         @JsonSubTypes.Type(value = AddStandardAttributesParameters.class, name = "addStandardAttributesParameters"), //
+        @JsonSubTypes.Type(value = CreateCdlEventTableParameters.class, name = "createCdlEventTableParameters"), //
+        @JsonSubTypes.Type(value = CreateCdlEventTableFilterParameters.class, name = "createCdlEventTableFilterParameters"), //
         @JsonSubTypes.Type(value = CreateReportParameters.class, name = "createReportParameters"), //
         @JsonSubTypes.Type(value = ParseMatchResultParameters.class, name = "parseMatchResultParameters"), //
         @JsonSubTypes.Type(value = CascadingBulkMatchDataflowParameters.class, name = "cascadingBulkMatchDataflowParameters"), //

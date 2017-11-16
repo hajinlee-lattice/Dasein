@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.PipelineFactory;
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
@@ -226,8 +228,11 @@ public class ModelingServiceExecutor {
     }
 
     public String model() throws Exception {
-        Algorithm algorithm = getAlgorithm();
+        if (builder.isCdlModel) {
+            return cdlModel();
+        }
 
+        Algorithm algorithm = getAlgorithm();
         setPipelineProperties(algorithm);
 
         ModelDefinition modelDef = new ModelDefinition();
@@ -245,6 +250,77 @@ public class ModelingServiceExecutor {
         model.setCustomer(builder.getCustomer());
         model.setKeyCols(Arrays.asList(builder.getKeyColumn()));
         model.setDataFormat("avro");
+
+        setProvenanceProperties(model, null);
+        return submitModel(model);
+    }
+
+    public String cdlModel() throws Exception {
+        Algorithm algorithm = getCdlAlgorithm();
+        ModelDefinition modelDef = new ModelDefinition();
+        modelDef.setName("Random Forest against all");
+        modelDef.addAlgorithms(Collections.singletonList(algorithm));
+
+        Model model = new Model();
+        model.setModelDefinition(modelDef);
+        model.setName(builder.getModelName());
+        if (builder.getDisplayName() != null) {
+            model.setDisplayName(builder.getDisplayName());
+        }
+        model.setTable(builder.getTable());
+        model.setMetadataTable(builder.getMetadataTable());
+        model.setCustomer(builder.getCustomer());
+        model.setKeyCols(Arrays.asList(InterfaceName.AnalyticPurchaseState_ID.name()));
+        model.setDataFormat("avro");
+        model.setParallelEnabled(true);
+        model.setFeaturesThreshold(50);
+        String extraProperties = "DataLoader_Query=x DataLoader_TenantName=" + builder.getCustomer()
+                + " DataLoader_Instance=z";
+        setProvenanceProperties(model, extraProperties);
+        return submitModel(model);
+    }
+
+    private Algorithm getCdlAlgorithm() {
+        Algorithm algorithm = new RandomForestAlgorithm();
+        algorithm.setSampleName("all");
+        algorithm.setScript("/app/dataplatform/scripts/algorithm/parallel_rf_train.py");
+        algorithm.setPriority(2);
+        List<String> properties = new ArrayList<>();
+        properties.add("criterion=gini");
+        properties.add("n_estimators=100");
+        properties.add("n_jobs=5");
+        properties.add("min_samples_split=25");
+        properties.add("min_samples_leaf=10");
+        properties.add("max_depth=8");
+        properties.add("bootstrap=True");
+        properties.add("calibration_width=4");
+        algorithm.setAlgorithmProperties(String.join(" ", properties));
+        return algorithm;
+    }
+
+    private String submitModel(Model model) throws Exception, InterruptedException {
+        AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
+        model.setTargetsList(targetAndFeatures.getKey());
+        model.setFeaturesList(targetAndFeatures.getValue());
+
+        AppSubmission submission = modelProxy.submit(model);
+        String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for modeling: %s", appId));
+        JobStatus status = waitForModelingAppId(appId);
+        // Wait for 30 seconds before retrieving the result directory
+        Thread.sleep(30 * 1000L);
+        String resultDir = status.getResultDirectory();
+
+        if (resultDir != null) {
+            return appId;
+        } else {
+            log.warn(String.format("No result directory for modeling job %s", appId));
+            System.out.println(String.format("No result directory for modeling job %s", appId));
+            throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
+        }
+    }
+
+    private void setProvenanceProperties(Model model, String extraProperties) {
         List<String> props = new ArrayList<>();
         if (builder.getEventTableTable() != null) {
             props.add("Event_Table_Name=" + builder.getEventTableTable());
@@ -277,29 +353,11 @@ public class ModelingServiceExecutor {
         if (builder.getJobId() != null) {
             provenanceProperties += " Workflow_Job_Id=" + Long.toString(builder.getJobId());
         }
+        if (extraProperties != null)
+            provenanceProperties += " " + extraProperties;
         log.info("The model provenance property is: " + provenanceProperties);
 
         model.setProvenanceProperties(provenanceProperties);
-
-        AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
-        model.setTargetsList(targetAndFeatures.getKey());
-        model.setFeaturesList(targetAndFeatures.getValue());
-
-        AppSubmission submission = modelProxy.submit(model);
-        String appId = submission.getApplicationIds().get(0);
-        log.info(String.format("App id for modeling: %s", appId));
-        JobStatus status = waitForModelingAppId(appId);
-        // Wait for 30 seconds before retrieving the result directory
-        Thread.sleep(30 * 1000L);
-        String resultDir = status.getResultDirectory();
-
-        if (resultDir != null) {
-            return appId;
-        } else {
-            log.warn(String.format("No result directory for modeling job %s", appId));
-            System.out.println(String.format("No result directory for modeling job %s", appId));
-            throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
-        }
     }
 
     private Algorithm getAlgorithm() {
@@ -383,6 +441,7 @@ public class ModelingServiceExecutor {
         private String productType;
         private String transformationGroupName;
         private boolean v2ProfilingEnabled;
+        private boolean isCdlModel;
         private Predefined predefinedColumnSelection;
         private String predefinedSelectionVersion;
         private ColumnSelection customizedColumnSelection;
@@ -411,6 +470,11 @@ public class ModelingServiceExecutor {
 
         public Builder enableV2Profiling(boolean v2ProfilingEnabled) {
             this.setV2ProfilingEnabled(v2ProfilingEnabled);
+            return this;
+        }
+
+        public Builder cdlModel(boolean isCdlModel) {
+            this.setCdlModel(isCdlModel);
             return this;
         }
 
@@ -935,6 +999,14 @@ public class ModelingServiceExecutor {
 
         public void setV2ProfilingEnabled(boolean v2ProfilingEnabled) {
             this.v2ProfilingEnabled = v2ProfilingEnabled;
+        }
+
+        public boolean isCdlModel() {
+            return isCdlModel;
+        }
+
+        public void setCdlModel(boolean isCdlModel) {
+            this.isCdlModel = isCdlModel;
         }
 
         public void setProductType(String productType) {

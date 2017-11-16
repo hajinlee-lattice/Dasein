@@ -182,7 +182,8 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         if (dataFlowConfig.getJobProperties() != null) {
             ctx.setProperty(DataFlowProperty.JOBPROPERTIES, dataFlowConfig.getJobProperties());
         }
-
+        if (dataFlowConfig.isApplyTableProperties())
+            ctx.setProperty(DataFlowProperty.APPLYTABLEPROPERTIES, Boolean.TRUE);
         return ctx;
     }
 

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
@@ -43,6 +44,7 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
+import com.latticeengines.pls.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -59,6 +61,9 @@ public class ModelResource {
 
     @Autowired
     private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
+
+    @Autowired
+    private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
 
     @Autowired
     private MatchAndModelWorkflowSubmitter modelWorkflowSubmitter;
@@ -102,8 +107,7 @@ public class ModelResource {
     public ResponseDocument<String> model(@PathVariable String modelName, //
             @RequestBody ModelingParameters parameters) {
         if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format(
-                    "Not qualified modelName %s contains unsupported characters.", modelName);
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
             throw new RuntimeException(message);
         }
@@ -112,7 +116,23 @@ public class ModelResource {
         log.info(String.format("model called with parameters %s", parameters.toString()));
         return ResponseDocument.successResponse( //
                 importMatchAndModelWorkflowSubmitter.submit(parameters).toString());
+    }
 
+    @RequestMapping(value = "/rating/{modelName}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Generate a Rating Engine model from the table name(or query) and parameters. Returns the job id.")
+    public ResponseDocument<String> ratingEngineModel(@PathVariable String modelName, //
+            @RequestBody RatingEngineModelingParameters parameters) {
+        if (!NameValidationUtils.validateModelName(modelName)) {
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
+            log.error(message);
+            throw new RuntimeException(message);
+        }
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
+        parameters.setUserId(MultiTenantContext.getEmailAddress());
+        log.info(String.format("Rating Engine model called with parameters %s", parameters.toString()));
+        return ResponseDocument.successResponse( //
+                ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters).toString());
     }
 
     @RequestMapping(value = "/{modelName}/clone", method = RequestMethod.POST)
@@ -122,20 +142,18 @@ public class ModelResource {
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
         if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format(
-                    "Not qualified modelName %s contains unsupported characters.", modelName);
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
             throw new RuntimeException(message);
         }
-        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s",
-                parameters.toString(), parameters.getDeduplicationType()));
+        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
+                parameters.getDeduplicationType()));
         Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());
 
         ModelSummary modelSummary = modelSummaryService
                 .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
 
-        SourceFile sourceFile = sourceFileService
-                .findByTableName(modelSummary.getTrainingTableName());
+        SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
             sourceFileService.copySourceFile(clone.getName(), sourceFile,
                     tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId()));
@@ -145,13 +163,12 @@ public class ModelResource {
 
         Table parentModelEventTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(),
                 modelSummary.getEventTableName());
-        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(
-                parentModelEventTable.getAttributes(), parameters.getAttributes());
+        List<Attribute> userRefinedAttributes = modelMetadataService
+                .getAttributesFromFields(parentModelEventTable.getAttributes(), parameters.getAttributes());
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         parameters.setUserId(MultiTenantContext.getEmailAddress());
         return ResponseDocument.successResponse( //
-                modelWorkflowSubmitter
-                        .submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
+                modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
     }
 
@@ -165,14 +182,14 @@ public class ModelResource {
             @RequestParam(value = "pmmlfile") String pmmlFileName,
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format(
-                    "Not qualified modelName %s contains unsupported characters.", modelName);
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
             throw new RuntimeException(message);
         }
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
-        String appId = pmmlModelWorkflowSubmitter.submit(modelName, modelDisplayName, moduleName,
-                pivotFileName, pmmlFileName, schemaInterpretation).toString();
+        String appId = pmmlModelWorkflowSubmitter
+                .submit(modelName, modelDisplayName, moduleName, pivotFileName, pmmlFileName, schemaInterpretation)
+                .toString();
         return ResponseDocument.successResponse(appId);
 
     }
@@ -204,53 +221,45 @@ public class ModelResource {
     public ResponseDocument<ModelReviewData> getModelReviewData(@PathVariable String modelName,
             @PathVariable String eventTableName) throws IOException {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ResponseDocument.successResponse(
-                metadataProxy.getReviewData(tenant.getId(), modelName, eventTableName));
+        return ResponseDocument.successResponse(metadataProxy.getReviewData(tenant.getId(), modelName, eventTableName));
     }
 
     @RequestMapping(value = "/modelreview/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the data rules for model")
-    public ResponseDocument<List<DataRule>> getDataRules(@PathVariable String modelId)
-            throws IOException {
-        return ResponseDocument.successResponse(
-                modelMetadataService.getEventTableFromModelId(modelId).getDataRules());
+    public ResponseDocument<List<DataRule>> getDataRules(@PathVariable String modelId) throws IOException {
+        return ResponseDocument.successResponse(modelMetadataService.getEventTableFromModelId(modelId).getDataRules());
     }
 
     @RequestMapping(value = "/modelreview/attributes/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get customer provided attributes for model")
-    public ResponseDocument<List<VdbMetadataField>> getModelAttributes(
-            @PathVariable String modelId) {
+    public ResponseDocument<List<VdbMetadataField>> getModelAttributes(@PathVariable String modelId) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
 
-        return ResponseDocument.successResponse(filterAttributesForModelReview(
-                modelMetadataService.getMetadata(modelId),
-                SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation())));
+        return ResponseDocument
+                .successResponse(filterAttributesForModelReview(modelMetadataService.getMetadata(modelId),
+                        SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation())));
     }
 
     @RequestMapping(value = "/reviewmodel/column", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Create the column results")
-    public ResponseDocument<Boolean> createModelColumnResults(
-            @RequestBody List<ColumnRuleResult> columnRuleResults) {
-        return ResponseDocument
-                .successResponse(metadataProxy.createColumnResults(columnRuleResults));
+    public ResponseDocument<Boolean> createModelColumnResults(@RequestBody List<ColumnRuleResult> columnRuleResults) {
+        return ResponseDocument.successResponse(metadataProxy.createColumnResults(columnRuleResults));
     }
 
     @RequestMapping(value = "/reviewmodel/row", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Create the row results")
-    public ResponseDocument<Boolean> createModelRowResults(
-            @RequestBody List<RowRuleResult> rowRuleResults) {
+    public ResponseDocument<Boolean> createModelRowResults(@RequestBody List<RowRuleResult> rowRuleResults) {
         return ResponseDocument.successResponse(metadataProxy.createRowResults(rowRuleResults));
     }
 
     @RequestMapping(value = "/reviewmodel/column/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the column results")
-    public ResponseDocument<List<ColumnRuleResult>> getColumnRuleResults(
-            @PathVariable String modelId) {
+    public ResponseDocument<List<ColumnRuleResult>> getColumnRuleResults(@PathVariable String modelId) {
         return ResponseDocument.successResponse(metadataProxy.getColumnResults(modelId));
     }
 
@@ -269,19 +278,18 @@ public class ModelResource {
         return ResponseDocument.successResponse(modelCleanUpService.cleanUpModel(modelId));
     }
 
-    private List<VdbMetadataField> filterAttributesForModelReview(
-            List<VdbMetadataField> metadataFields, SchemaInterpretation schemaInterpretation) {
+    private List<VdbMetadataField> filterAttributesForModelReview(List<VdbMetadataField> metadataFields,
+            SchemaInterpretation schemaInterpretation) {
         List<VdbMetadataField> filteredMetadataFields = new ArrayList<>();
         Table schemaTable = SchemaRepository.instance().getSchema(schemaInterpretation);
 
         for (VdbMetadataField metadataField : metadataFields) {
             if (metadataField.getTags() != null && metadataField.getTags().contains("Internal")) {
-                if ((metadataField.getApprovedUsage() == null
-                        || metadataField.getApprovedUsage().equals("None"))
+                if ((metadataField.getApprovedUsage() == null || metadataField.getApprovedUsage().equals("None"))
                         && (metadataField.getAssociatedRules().isEmpty()
                                 || (schemaTable.getAttribute(metadataField.getColumnName()) != null
-                                        && schemaTable.getAttribute(metadataField.getColumnName())
-                                                .getApprovedUsage().contains("None")))) {
+                                        && schemaTable.getAttribute(metadataField.getColumnName()).getApprovedUsage()
+                                                .contains("None")))) {
                     continue;
                 }
                 filteredMetadataFields.add(metadataField);

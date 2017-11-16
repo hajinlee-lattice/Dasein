@@ -38,10 +38,10 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("engine")
     private String engine;
-    
+
     @JsonProperty("queue")
     private String queue;
-    
+
     @JsonProperty("namespace")
     private String namespace;
 
@@ -51,7 +51,9 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("swlib")
     private String swlib;
 
-    
+    @JsonProperty("apply_table_properties")
+    private boolean applyTableProperties;
+
     public Map<String, String> getExtraSources() {
         return extraSources;
     }
@@ -60,7 +62,6 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
         this.extraSources = extraSources;
     }
 
-    
     public String getBeanName() {
         return beanName;
     }
@@ -68,7 +69,6 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     public void setBeanName(String beanName) {
         this.beanName = beanName;
     }
-
 
     public String getTargetTableName() {
         return targetTableName;
@@ -78,7 +78,6 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
         this.targetTableName = targetTableName;
     }
 
-    
     public String getTargetPath() {
         return targetPath;
     }
@@ -95,7 +94,6 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
         this.partitions = partitions;
     }
 
-    
     public Properties getJobProperties() {
         return jobProperties;
     }
@@ -150,5 +148,13 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setSwlib(String swlib) {
         this.swlib = swlib;
+    }
+
+    public boolean isApplyTableProperties() {
+        return applyTableProperties;
+    }
+
+    public void setApplyTableProperties(boolean applyTableProperties) {
+        this.applyTableProperties = applyTableProperties;
     }
 }

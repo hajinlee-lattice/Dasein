@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.core.util;
+package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,9 +11,8 @@ import org.apache.hadoop.conf.Configuration;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.util.MetadataConverter;
 
-public class TableUtils {
+public class MetaDataTableUtils {
 
     public static Table createTable(Configuration yarnConfiguration, String tableName, String avroPath) {
         return createTable(yarnConfiguration, tableName, avroPath, false);

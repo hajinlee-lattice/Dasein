@@ -177,6 +177,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .trainingTableName(getConfiguration().getTrainingTableName()) //
                 .transformationGroupName(getTransformationGroupName()) //
                 .enableV2Profiling(configuration.isV2ProfilingEnabled()) //
+                .cdlModel(configuration.isCdlModel()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .moduleName(configuration.getModuleName()) //
                 .productType(configuration.getProductType()) //

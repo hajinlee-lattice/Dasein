@@ -25,10 +25,10 @@ import com.latticeengines.datacloud.core.source.TransformedToAvroSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.core.util.TableUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 
 @Component("hdfsSourceEntityMgr")
@@ -183,7 +183,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         if (source instanceof HasSqlPresence) {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
-            return TableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
+            return MetaDataTableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         } else {
             String path = null;
@@ -194,7 +194,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             } else {
                 path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             }
-            return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
+            return MetaDataTableUtils.createTable(yarnConfiguration, source.getSourceName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         }
 
@@ -221,10 +221,10 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             }
         }
         if (source instanceof HasSqlPresence) {
-            return TableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
+            return MetaDataTableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     paths.toArray(new String[paths.size()]), source.getPrimaryKey(), true);
         } else {
-            return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
+            return MetaDataTableUtils.createTable(yarnConfiguration, source.getSourceName(),
                     paths.toArray(new String[paths.size()]), source.getPrimaryKey(), true);
         }
     }
@@ -383,7 +383,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } catch (Exception e) {
             throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
         }
-        return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
+        return MetaDataTableUtils.createTable(yarnConfiguration, source.getSourceName(),
                 avroPaths.toArray(new String[avroPaths.size()]), source.getPrimaryKey());
     }
 

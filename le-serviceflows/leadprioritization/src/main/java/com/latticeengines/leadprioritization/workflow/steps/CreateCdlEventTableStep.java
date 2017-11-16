@@ -1,0 +1,161 @@
+package com.latticeengines.leadprioritization.workflow.steps;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CreateCdlEventTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreateCdlEventTableConfiguration;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+
+@Component("createCdlEventTableStep")
+public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConfiguration> {
+
+    private static Logger log = LoggerFactory.getLogger(CreateCdlEventTableStep.class);
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Override
+    public void onConfigurationInitialized() {
+        CreateCdlEventTableConfiguration configuration = getConfiguration();
+        configuration.setApplyTableProperties(true);
+        configuration.setDataFlowParams(createDataFlowParameters());
+    }
+
+    private DataFlowParameters createDataFlowParameters() {
+        configuration.setTargetTableName(configuration.getOutputTableName());
+        Table inputTable = getAndSetInputTable();
+        Table apsTable = getAndSetApsTable();
+        Table accountTable = getAndSetAccountTable();
+        CreateCdlEventTableParameters parameters = new CreateCdlEventTableParameters(inputTable.getName(),
+                apsTable.getName(), accountTable.getName());
+        return parameters;
+    }
+
+    private Table getAndSetAccountTable() {
+        Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
+                TableRoleInCollection.ConsolidatedAccount);
+        if (accountTable == null) {
+            throw new RuntimeException("There's no Account table!");
+        }
+        int changedCount = 0;
+        List<Attribute> attributes = accountTable.getAttributes();
+        List<String> internal = Arrays.asList(ModelingMetadata.INTERNAL_TAG);
+        for (Attribute attribute : attributes) {
+            if (CollectionUtils.isEmpty(attribute.getTags()) || attribute.getTags().get(0).equals("")) {
+                attribute.setTags(internal);
+                changedCount++;
+            }
+        }
+        if (changedCount > 0)
+            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), accountTable.getName(),
+                    accountTable);
+        log.info("The number of attributes having no Tags is=" + changedCount);
+        return accountTable;
+    }
+
+    private Table getAndSetApsTable() {
+        Table apsTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), "AnalyticPurchaseState");
+        if (apsTable == null) {
+            throw new RuntimeException("There's no AnalyticPurchaseState table!");
+        }
+        List<Attribute> attributes = apsTable.getAttributes();
+        for (Attribute attribute : attributes) {
+            String name = attribute.getName();
+            if ("LEAccount_ID".equalsIgnoreCase(name) || "Period_ID".equalsIgnoreCase(name)
+                    || InterfaceName.AnalyticPurchaseState_ID.name().equalsIgnoreCase(name)) {
+                attribute.setApprovedUsage(ApprovedUsage.NONE);
+                attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
+                if (InterfaceName.AnalyticPurchaseState_ID.name().equalsIgnoreCase(name)) {
+                    attribute.setLogicalDataType(LogicalDataType.InternalId);
+                }
+            } else {
+                attribute.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS);
+                attribute.setDisplayDiscretizationStrategy("{\"unified\": {}}");
+                attribute.setTags(ModelingMetadata.INTERNAL_TAG);
+                setDisplayNameAndOthers(attribute, name);
+            }
+        }
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), "AnalyticPurchaseState", apsTable);
+        return apsTable;
+
+    }
+
+    private Table getAndSetInputTable() {
+        Table inputTable = getObjectFromContext(FILTER_EVENT_TABLE, Table.class);
+        if (inputTable == null) {
+            throw new RuntimeException("There's no input table found!");
+        }
+        List<Attribute> attributes = inputTable.getAttributes();
+        for (Attribute attribute : attributes) {
+            attribute.setApprovedUsage(ApprovedUsage.NONE);
+            attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
+            String name = attribute.getName();
+            if (InterfaceName.Target.name().equalsIgnoreCase(name)
+                    || InterfaceName.Event.name().equalsIgnoreCase(name)) {
+                attribute.setLogicalDataType(LogicalDataType.Event);
+            }
+        }
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), inputTable.getName(), inputTable);
+        return inputTable;
+    }
+
+    protected void setDisplayNameAndOthers(Attribute attribute, String name) {
+        if (name.matches("Product_.*_Revenue")) {
+            attribute.setDisplayName("Last Period Spend");
+            attribute.setDescription("Product spend in last period");
+            attribute.setFundamentalType(FundamentalType.CURRENCY);
+            return;
+        }
+        if (name.matches("Product_.*_RevenueRollingSum6")) {
+            attribute.setDisplayName("6-Period Spend");
+            attribute.setDescription("Product spend for last 6 periods");
+            attribute.setFundamentalType(FundamentalType.CURRENCY);
+            return;
+        }
+        if (name.matches("Product_.*_RevenueMomentum3")) {
+            attribute.setDisplayName("Rate of Change of 3-Period Spend");
+            attribute.setDescription(
+                    "Percent change in the 3 period spend, where values > 0 show increasing spend and < 0 indicate decreasing spend");
+            return;
+        }
+        if (name.matches("Product_.*_Units")) {
+            attribute.setDisplayName("Last Period Units");
+            attribute.setDescription("Units purchased in last period");
+            return;
+        }
+        if (name.matches("Product_.*_Span")) {
+            attribute.setDisplayName("Purchase Recency");
+            attribute.setDescription(
+                    "Indicator of how recently a customer purchased, where higher values indicate more recent purchase (e.g. 1 = Last Period  and 0 = Never)");
+            return;
+        }
+    }
+
+    @Override
+    public void onExecutionCompleted() {
+        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                configuration.getTargetTableName());
+        putObjectInContext(configuration.getOutputTableName(), eventTable);
+    }
+
+}

@@ -63,7 +63,7 @@ public class FieldMetadata {
     public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Schema.Field avroField,
             Map<String, String> properties, Schema avroSchema) {
         this(avroType, javaType, fieldName, avroField, avroSchema);
-        if (avroField == null && properties != null) {
+        if (properties != null) {
             this.properties.putAll(properties);
         }
     }

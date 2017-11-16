@@ -44,6 +44,9 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("skip_registering_table")
     private boolean skipRegisteringTable = false;
 
+    @JsonProperty("apply_table_properties")
+    private boolean applyTableProperties = false;
+
     public String getDataFlowBeanName() {
         return dataFlowBeanName;
     }
@@ -139,4 +142,13 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     public void setSwlib(String swlib) {
         this.swlib = swlib;
     }
+
+    public boolean isApplyTableProperties() {
+        return applyTableProperties;
+    }
+
+    public void setApplyTableProperties(boolean applyTableProperties) {
+        this.applyTableProperties = applyTableProperties;
+    }
+
 }
