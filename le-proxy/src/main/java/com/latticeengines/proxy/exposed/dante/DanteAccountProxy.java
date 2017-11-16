@@ -9,6 +9,11 @@ import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.network.exposed.dante.DanteAccountInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
+/**
+ * Retrieves Accounts for Talking Point UI from Dante database. Starting from
+ * M16 we should not use this. Objectapi should be used instead
+ */
+@Deprecated
 @Component("danteAccountProxy")
 public class DanteAccountProxy extends MicroserviceRestApiProxy implements DanteAccountInterface {
 

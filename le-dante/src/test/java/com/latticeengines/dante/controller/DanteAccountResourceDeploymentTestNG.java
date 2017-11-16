@@ -23,6 +23,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.proxy.exposed.dante.DanteAccountProxy;
 
+/**
+ * Retrieves Accounts for Talking Point UI from Dante database. Starting from
+ * M16 we should not use this. Objectapi should be used instead
+ */
+@Deprecated
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
 public class DanteAccountResourceDeploymentTestNG extends AbstractTestNGSpringContextTests {

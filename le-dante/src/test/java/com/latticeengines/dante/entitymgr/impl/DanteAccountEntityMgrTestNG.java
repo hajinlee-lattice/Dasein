@@ -13,6 +13,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.dante.entitymgr.DanteAccountEntityMgr;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 
+/**
+ * Retrieves Accounts for Talking Point UI from Dante database. Starting from
+ * M16 we should not use this. Objectapi should be used instead
+ */
+@Deprecated
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
 public class DanteAccountEntityMgrTestNG extends AbstractTestNGSpringContextTests {

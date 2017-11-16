@@ -15,6 +15,11 @@ import com.latticeengines.dantedb.exposed.dao.BaseDanteDao;
 import com.latticeengines.dantedb.exposed.entitymgr.impl.BaseDanteEntityMgrImpl;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 
+/**
+ * Retrieves Accounts for Talking Point UI from Dante database. Starting from
+ * M16 we should not use this. Objectapi should be used instead
+ */
+@Deprecated
 @Component("danteAccountEntityMgr")
 public class DanteAccountEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteAccount> implements DanteAccountEntityMgr {
     private static final Logger log = LoggerFactory.getLogger(DanteAccountEntityMgrImpl.class);

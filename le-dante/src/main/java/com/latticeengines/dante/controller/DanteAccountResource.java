@@ -17,6 +17,11 @@ import com.latticeengines.network.exposed.dante.DanteAccountInterface;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * Retrieves Accounts for Talking Point UI from Dante database. Starting from
+ * M16 we should not use this. Objectapi should be used instead
+ */
+@Deprecated
 @Api(value = "dante", description = "REST resource for Dante Account operations")
 @RestController
 @RequestMapping("/accounts")

@@ -12,6 +12,11 @@ import com.latticeengines.dante.dao.DanteAccountDao;
 import com.latticeengines.dantedb.exposed.dao.impl.BaseDanteDaoImpl;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 
+/**
+ * Retrieves Accounts for Talking Point UI from Dante database. Starting from
+ * M16 we should not use this. Objectapi should be used instead
+ */
+@Deprecated
 @Component("danteAccountDao")
 public class DanteAccountDaoImpl extends BaseDanteDaoImpl<DanteAccount> implements DanteAccountDao {
 

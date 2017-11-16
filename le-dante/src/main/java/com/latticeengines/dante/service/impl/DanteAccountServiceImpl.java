@@ -14,6 +14,11 @@ import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
+/**
+ * Retrieves Accounts for Talking Point UI from Dante database. Starting from
+ * M16 we should not use this. Objectapi should be used instead
+ */
+@Deprecated
 @Component("danteAccountService")
 public class DanteAccountServiceImpl implements DanteAccountService {
     private static final Logger log = LoggerFactory.getLogger(DanteAccountServiceImpl.class);
