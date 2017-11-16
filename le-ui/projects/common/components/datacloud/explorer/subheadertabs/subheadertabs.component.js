@@ -137,11 +137,11 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
         if (segmentName === 'Create') {
             var accountRestriction = QueryStore.getAccountRestriction(),
                 contactRestriction = QueryStore.getContactRestriction(),
-                segmentExport = {
+                segmentExport = SegmentStore.sanitizeSegment({
                     'account_restriction': accountRestriction,
                     'contact_restriction': contactRestriction,
                     'type': exportType
-                };
+                });
 
             console.log('saveMetadataSegmentExport new', segmentName, ts, segmentExport);
 
@@ -155,12 +155,12 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                 var segmentData = result,
                     accountRestriction = QueryStore.getAccountRestriction(),
                     contactRestriction = QueryStore.getContactRestriction(),
-                    segmentExport = {
+                    segmentExport = SegmentStore.sanitizeSegment({
                         'export_prefix': segmentData.display_name, 
                         'account_restriction': accountRestriction,
                         'contact_restriction': contactRestriction,
                         'type': exportType
-                    };
+                    });
                 console.log('saveSegment existing', segmentData, segmentExport);
 
                 SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(function(result) {

@@ -329,34 +329,6 @@ angular
         return deferred.promise;
     }
 
-    this.GetSegmentExportByName = function(name) {
-        var deferred = $q.defer(),
-            result,
-            url = '/pls/datacollection/segments/export/' + name;
-
-        $http({
-            method: 'GET',
-            url: url,
-            headers: {
-                'Accept': 'application/json'
-            }
-        }).then(
-            function onSuccess(response) {
-                result = response.data;
-                deferred.resolve(result);
-
-            }, function onError(response) {
-                if (!response.data) {
-                    response.data = {};
-                }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
-            }
-        );
-        return deferred.promise;
-    }
-
     this.CreateOrUpdateSegmentExport = function(segment) {
         var deferred = $q.defer(),
             result = {}, 
