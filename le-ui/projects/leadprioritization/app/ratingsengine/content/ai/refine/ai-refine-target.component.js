@@ -79,7 +79,7 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
         }
         vm.init();
     })
-    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineAIStore, RatingsEngineAIService, Products) {
+    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineAIStore, RatingsEngineAIService, Products, Segments) {
         var vm = this;
         console.log('PRODUCTS',Products);
         angular.extend(vm, {
@@ -99,11 +99,20 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
                 var max = Products.length;
                 var ret = [];
                 for(var i=0; i<max; i++){
-                    ret.push({'id': i, 'displayName': Products[i].ProductName});
+                    ret.push({'id': Products[i].ProductId, 'displayName': Products[i].ProductName});
                 }
                 return ret;
             })(),
-            
+            segmentsDatasource: (function(){
+                var max = Segments.length;
+                var ret = [];
+                for(var i=0; i<max; i++){
+                    if(''!== Segments[i].name) {
+                        ret.push({'id': Segments[i].name, 'displayName': Segments[i].display_name});
+                    }
+                }
+                return ret;
+            })(),
             datasource: [],
             options: [],
             spentOptions: [{ 'id': 1, 'name': 'At least' }, { 'id': 2, 'name': 'At most' }],

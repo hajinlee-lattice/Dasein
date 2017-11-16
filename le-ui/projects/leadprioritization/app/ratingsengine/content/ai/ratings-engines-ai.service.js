@@ -6,7 +6,7 @@ angular.module('lp.ratingsengine.ai', [])
     ])
     .service('RatingsEngineAIStore', function (
         $q, $state, $stateParams, RatingsEngineService, RatingsEngineAIService, DataCloudStore,
-        BrowserStorageUtility, SegmentStore, $timeout
+        BrowserStorageUtility, $timeout, SegmentService
     ) {
 
         this.buildOptions = [];
@@ -76,6 +76,14 @@ angular.module('lp.ratingsengine.ai', [])
             });
             return deferred.promise;
 
+        }
+
+        this.getSegments = function(){
+            var deferred = $q.defer();
+            SegmentService.GetSegments().then(function (data) {
+                deferred.resolve(data);
+            });
+            return deferred.promise;
         }
 
 

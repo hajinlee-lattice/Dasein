@@ -84,6 +84,9 @@ angular.module('mainApp.appCommon.directives.chips', [])
                         scope.query = '';   
                     }
                     scope.callCallback();
+                    if(scope.singleSelection === true){
+                        scope.setListVisibility(false);
+                    }
                 }
             }
             scope.removeItem = function (id) {

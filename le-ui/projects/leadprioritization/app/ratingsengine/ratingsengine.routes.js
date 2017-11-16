@@ -511,7 +511,7 @@ angular
                 url: '/refinetarget',
                 resolve: {
                     Products: function($q, RatingsEngineAIStore) {
-                        console.log('REFINE PRODUCT RESOLVE');
+                        // console.log('REFINE PRODUCT RESOLVE');
                         var deferred = $q.defer();
                         var params = {
                             max: 1000,
@@ -526,7 +526,11 @@ angular
                         return deferred.promise;
                     },
                     Segments: function($q, RatingsEngineAIStore){
-                        
+                        var deferred = $q.defer();
+                        RatingsEngineAIStore.getSegments().then(function(result){
+                            deferred.resolve(result);
+                        });
+                        return deferred.promise;
                     },
                     RefineSellOptions: function ($q, RatingsEngineAIService) {
                         var deferred = $q.defer();
