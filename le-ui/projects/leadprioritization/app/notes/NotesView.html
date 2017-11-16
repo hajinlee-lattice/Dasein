@@ -39,7 +39,7 @@
 
 
                     <!-- If the note was a clone from another model -->
-                    <h4 ng-if="note.ParentModelId != null">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{vm.referModelName}}</h4>
+                    <h4 ng-if="note.ParentModelId != null && !vm.isRating">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{vm.referModelName}}</h4>
 
                     <!-- Note content -->
                     <div class="note-header">

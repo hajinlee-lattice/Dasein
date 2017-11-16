@@ -250,7 +250,7 @@ angular.module('lp.ratingsengine')
 
     this.hasRules = function(rating) {
         try {
-            if (Object.keys(rating.ratingModels[0].rule.ratingRule.bucketToRuleMap).length) {
+            if (Object.keys(rating.coverage).length) {
                 return true;
             } else {
                 return false;

@@ -1,12 +1,14 @@
 angular
-.module('lp.models.notes')
-.service('NotesService', function($http, $q, $state) {
-    
+.module('lp.notes')
+.service('NotesService', function($http, $q, $state, $stateParams) {
+
     this.GetNotes = function(id) {
-        var deferred = $q.defer();
-        var result;
-        var id = id || '';
-        var url =  '/pls/modelnotes/' + id;
+
+        var deferred = $q.defer(),
+            result,
+            id = id || '';
+            isRating = $stateParams.rating_id,
+            url =  isRating ? '/pls/ratingengines/' + id + '/notes' : '/pls/modelnotes/' + id;
 
         $http({
             method: 'GET',
@@ -36,9 +38,11 @@ angular
         return deferred.promise;
     }
 
-    this.CreateNote = function(modelId, newNote) {
+    this.CreateNote = function(id, newNote) {
         var deferred = $q.defer(),
-            id = modelId || '',
+            id = id || '',
+            isRating = $stateParams.rating_id,
+            url =  isRating ? '/pls/ratingengines/' + id + '/notes' : '/pls/modelnotes/' + id,
             data = {
                 origin: newNote.Origin,
                 user_name: newNote.CreatedByUser,
@@ -47,7 +51,7 @@ angular
 
         $http({
             method: 'POST',
-            url: '/pls/modelnotes/' + id,
+            url: url,
             data: data,
             headers: { 'Content-Type': 'application/json' }
         }).then(
@@ -72,12 +76,13 @@ angular
         return deferred.promise;
     }
 
-    this.UpdateNote = function(modelId, userName, note) {
+    this.UpdateNote = function(id, userName, note) {
         var deferred = $q.defer(),
-            modelId = modelId || '',
+            id = id || '',
             noteId = note.Id || '',
             userName = userName || '',
-            url = '/pls/modelnotes/' + modelId + '/' + noteId,
+            isRating = $stateParams.rating_id,
+            url = isRating ? '/pls/ratingengines/' + id + '/notes/' + noteId : '/pls/modelnotes/' + id + '/' + noteId,
             data = {
                 origin: note.Origin,
                 user_name: userName,
@@ -112,12 +117,13 @@ angular
     }
 
 
-    this.DeleteNote = function(modelId, noteId) {
+    this.DeleteNote = function(id, noteId) {
         var deferred = $q.defer(),
             result = {},
-            modelId = modelId || '',
+            id = id || '',
             noteId = noteId || '',
-            url = '/pls/modelnotes/' + modelId + '/' + noteId;
+            isRating = $stateParams.rating_id,
+            url = isRating ? '/pls/ratingengines/' + id + '/notes/' + noteId : '/pls/modelnotes/' + id + '/' + noteId;
 
         $http({
             method: 'DELETE',

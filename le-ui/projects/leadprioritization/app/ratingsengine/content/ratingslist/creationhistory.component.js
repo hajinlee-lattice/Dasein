@@ -6,7 +6,10 @@ $stateParams, RatingsEngineStore, RatingsEngineService) {
     angular.extend(vm, {
         current: RatingsEngineStore.current,
         currentPage: 1,
-        pageSize: 10
+        pageSize: 10,
+        sortBy: 'created',
+        sortDesc: true
+
     });
 
     vm.init = function() {

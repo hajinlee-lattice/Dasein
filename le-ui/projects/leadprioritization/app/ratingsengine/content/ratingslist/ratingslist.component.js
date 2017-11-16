@@ -38,7 +38,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.displayNames = {};
     vm.init = function($q, $filter) {
 
-        console.log(vm.current.ratings);
+        // console.log(vm.current.ratings);
 
         RatingsEngineStore.clear();
 
@@ -111,7 +111,6 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
-
         // go to dashboard if there are rules in ratingModels
         var url = RatingsEngineStore.hasRules(rating) 
             ? 'home.ratingsengine.dashboard'

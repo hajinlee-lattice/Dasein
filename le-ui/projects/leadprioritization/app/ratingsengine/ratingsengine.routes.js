@@ -8,6 +8,7 @@ angular
         'lp.ratingsengine.creationhistory',
         'lp.ratingsengine.ratingsenginetype',
         'lp.ratingsengine.dashboard',
+        'lp.notes',
         'lp.ratingsengine.wizard.segment',
         'lp.ratingsengine.wizard.attributes',
         'lp.ratingsengine.wizard.summary',
@@ -130,6 +131,40 @@ angular
                         controller: 'RatingsEngineDashboard',
                         controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/dashboard/dashboard.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.dashboard.notes', {
+                url: '/notes',
+                resolve: {
+                    Notes: function($q, $stateParams, NotesService) {
+                        var deferred = $q.defer(),
+                            id = $stateParams.rating_id;
+
+                        NotesService.GetNotes(id).then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    },
+                    Model: [function() {
+                        return null;
+                    }]
+                },
+                params: {
+                    pageIcon: 'ico-notes',
+                    pageTitle: 'Notes',
+                    section: 'dashboard.notes'
+                },
+                views: {
+                    "summary@": {
+                        controller: '',
+                        template: ''
+                    },
+                    "main@": {
+                        controller: 'NotesController',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/notes/NotesView.html'
                     }
                 }
             })

@@ -1,7 +1,7 @@
-angular.module('lp.models.notes', [
+angular.module('lp.notes', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.models.notes.DeleteNoteModal',
+    'mainApp.notes.DeleteNoteModal',
     'mainApp.models.services.ModelService'
 ])
 .controller('NotesController', function ($scope, $state, $stateParams, $timeout, BrowserStorageUtility, ResourceUtility, Notes, NotesService, DeleteNoteModal, Model, ModelService) {
@@ -10,11 +10,12 @@ angular.module('lp.models.notes', [
         ClientSession = BrowserStorageUtility.getClientSession();
 
     angular.extend(vm, {
-        modelId: $stateParams.modelId,
+        isRating: $stateParams.rating_id,
+        id: '',
         userName: ClientSession.DisplayName,
         ResourceUtility: ResourceUtility,
         notes: Notes.data,
-        referModelName: Model.ModelDetails.Name.slice(0, -7),
+        referModelName: '',
         editingNote: false,
         showAddNoteError: false,
         saveInProgress: false
@@ -22,6 +23,10 @@ angular.module('lp.models.notes', [
 
     vm.init = function($q) {
         console.log(vm.notes);
+
+        vm.id = vm.isRating ? $stateParams.rating_id : $stateParams.modelId;
+        vm.referModelName = vm.isRating ? '' : Model.ModelDetails.Name.slice(0, -7)
+
     }
     vm.init();
 
@@ -33,9 +38,15 @@ angular.module('lp.models.notes', [
             NotesContents: note
 		};
 
-        NotesService.CreateNote(vm.modelId, newNote).then(function(result){
+        NotesService.CreateNote(vm.id, newNote).then(function(result){
             if (result != null && result.success === true) {
-                $state.go('home.model.notes', {}, { reload: true });
+                
+                if (vm.isRating) {
+                    $state.go('home.ratingsengine.dashboard.notes', {}, { reload: true });
+                } else {
+                    $state.go('home.model.notes', {}, { reload: true });
+                }
+
             } else {
                 vm.saveInProgress = false;
                 vm.addNoteErrorMessage = result;
@@ -47,9 +58,15 @@ angular.module('lp.models.notes', [
 
     vm.updateNote = function(note) {
 
-        NotesService.UpdateNote(vm.modelId, vm.userName, note).then(function(result){
+        NotesService.UpdateNote(vm.id, vm.userName, note).then(function(result){
             if (result != null && result.success === true) {
-                $state.go('home.model.notes', {}, { reload: true });
+
+                if (vm.isRating) {
+                    $state.go('home.ratingsengine.dashboard.notes', {}, { reload: true });
+                } else {
+                    $state.go('home.model.notes', {}, { reload: true });
+                }
+
             } else {
                 vm.saveInProgress = false;
                 vm.addNoteErrorMessage = result;
@@ -60,7 +77,7 @@ angular.module('lp.models.notes', [
 
     vm.deleteNote = function($event, noteId) {
         console.log(noteId);
-        DeleteNoteModal.show(vm.modelId, noteId);
+        DeleteNoteModal.show(vm.id, noteId);
 	}
 
 

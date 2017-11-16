@@ -674,9 +674,9 @@ angular
             resolve: {
                 Notes: function($q, $stateParams, NotesService) {
                     var deferred = $q.defer(),
-                        modelId = $stateParams.modelId;
+                        id = $stateParams.modelId;
 
-                    NotesService.GetNotes(modelId).then(function(result) {
+                    NotesService.GetNotes(id).then(function(result) {
                         deferred.resolve(result);
                     });
 
@@ -695,7 +695,7 @@ angular
                 "main@": {
                     controller: 'NotesController',
                     controllerAs: 'vm',
-                    templateUrl: 'app/models/notes/NotesView.html'
+                    templateUrl: 'app/notes/NotesView.html'
                 }
             }
         })

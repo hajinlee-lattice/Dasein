@@ -1,16 +1,16 @@
-angular.module('mainApp.models.notes.DeleteNoteModal', [
+angular.module('mainApp.notes.DeleteNoteModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.utilities.NavUtility'
 ])
 .service('DeleteNoteModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, NotesService) {
     var self = this;
-    this.show = function (modelId, noteId) {
-        $http.get('app/models/notes/DeleteNoteConfirmView.html', { cache: $templateCache }).success(function (html) {
+    this.show = function (id, noteId) {
+        $http.get('app/notes/DeleteNoteConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.noteId = noteId;
-            scope.modelId = modelId;
+            scope.id = id;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -30,7 +30,7 @@ angular.module('mainApp.models.notes.DeleteNoteModal', [
         });
     };
 })
-.controller('DeleteNoteController', function ($scope, $rootScope, $state, ResourceUtility, NavUtility, NotesService) {
+.controller('DeleteNoteController', function ($scope, $rootScope, $state, $stateParams, ResourceUtility, NavUtility, NotesService) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.deleteNoteClick = function ($event) {
@@ -38,17 +38,21 @@ angular.module('mainApp.models.notes.DeleteNoteModal', [
             $event.preventDefault();
         }
 
-        deleteNote($scope.modelId, $scope.noteId);
+        deleteNote($scope.id, $scope.noteId);
     };
 
-    function deleteNote(modelId, noteId) {
+    function deleteNote(id, noteId) {
         $scope.hasDeleteError = false;
 
-        NotesService.DeleteNote(modelId, noteId).then(function(result) {
+        NotesService.DeleteNote(id, noteId).then(function(result) {
             if (result != null && result.success === true) {
                 $("#modalContainer").modal('hide');
                 
-                $state.go('home.model.notes', {}, { reload: true } );
+                if ($stateParams.rating_id) {
+                    $state.go('home.ratingsengine.dashboard.notes', {}, { reload: true } );
+                } else {
+                    $state.go('home.model.notes', {}, { reload: true } );
+                }
                 
             } else {
                 $scope.deleteNoteErrorMessage = result.ResultErrors;

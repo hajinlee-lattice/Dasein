@@ -38,7 +38,10 @@ angular.module('common.datacloud.analysistabs', [])
         var all = [];
 
         ['accountRestriction','contactRestriction'].forEach(function(source) {
+
+            // console.log(source);
             if (QueryStore[source].restriction) {
+                // console.log(QueryStore[source].restriction);
                 buckets = QueryStore.getAllBuckets(QueryStore[source].restriction.logicalRestriction.restrictions)
                 all = [].concat(all, buckets);
             }

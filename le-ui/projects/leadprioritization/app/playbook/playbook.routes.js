@@ -64,9 +64,6 @@ angular
                     var params = {
                         playName: $stateParams.play_name
                     };
-
-                    console.log(params.playName);
-
                     PlaybookWizardStore.getPlayLaunches(params).then(function(result){
                         deferred.resolve(result);
                     });

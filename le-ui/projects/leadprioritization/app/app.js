@@ -25,7 +25,7 @@ var mainApp = angular.module('mainApp', [
     'lp.models.segments',
     'lp.models.review',
     'lp.models.ratings',
-    'lp.models.notes',
+    'lp.notes',
     'lp.playbook',
     'lp.ratingsengine',
     'lp.import',

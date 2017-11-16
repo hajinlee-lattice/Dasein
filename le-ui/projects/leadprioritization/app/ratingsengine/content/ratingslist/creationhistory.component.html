@@ -3,20 +3,48 @@
     <table>
     	<thead>
     		<tr>
-    			<th>Rating Engine</th>
-    			<th>Created By</th>
+    			<th class="sortable" ng-click="vm.sortBy = 'displayName'; vm.sortDesc = !vm.sortDesc">
+                    Rating Engine
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'displayName',
+                            'fa fa-sort-desc': vm.sortBy === 'displayName' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'displayName' && !vm.sortDesc}"></i>
+                </th>
+    			<th class="sortable" ng-click="vm.sortBy = 'createdBy'; vm.sortDesc = !vm.sortDesc">
+                    Created By
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'createdBy',
+                            'fa fa-sort-desc': vm.sortBy === 'createdBy' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'createdBy' && !vm.sortDesc}"></i>
+                </th>
     			<th>Internal ID</th>
-    			<th>Created On</th>
-    			<th>Status</th>
+    			<th class="sortable" ng-click="vm.sortBy = 'created'; vm.sortDesc = !vm.sortDesc">
+                    Created On
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'created',
+                            'fa fa-sort-desc': vm.sortBy === 'created' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'created' && !vm.sortDesc}"></i>
+                </th>
+    			<th class="sortable" ng-click="vm.sortBy = 'status'; vm.sortDesc = !vm.sortDesc">
+                    Status
+                    <i  aria-hidden="true" 
+                        ng-class="{
+                            'fa fa-sort': vm.sortBy != 'status',
+                            'fa fa-sort-desc': vm.sortBy === 'status' && vm.sortDesc, 
+                            'fa fa-sort-asc': vm.sortBy === 'status' && !vm.sortDesc}"></i>
+                </th>
     		</tr>
     	</thead>
     	<tbody>
     		<tr 
     			ng-repeat="
     				rating in vm.current.ratings |
+                    orderBy:vm.sortBy:vm.sortDesc |
     				startFrom: (current - 1) * pagesize |
-                    limitTo: pagesize |
-                    orderBy: 'rating.created':true">
+                    limitTo: pagesize">
     			<td>{{rating.displayName}}</td>
     			<td>{{rating.createdBy}}</td>
     			<td>{{rating.id}}</td>
