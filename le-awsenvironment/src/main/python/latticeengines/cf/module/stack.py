@@ -105,7 +105,7 @@ class Stack(Template):
             print 'uploading template to %s' % (os.path.join("https://", AwsEnvironment(environment).s3_endpoint(), bucket, prefix, 'template.json') + ' ..')
             client = boto3.client('s3')
             transfer = S3Transfer(client)
-            transfer.upload_file(temp_file, bucket, os.path.join(prefix, 'template.json'))
+            transfer.upload_file(temp_file, bucket, os.path.join(prefix, 'template.json'), extra_args={'ServerSideEncryption': 'AES256'})
             print 'done.'
         finally:
             os.unlink(temp_file)
