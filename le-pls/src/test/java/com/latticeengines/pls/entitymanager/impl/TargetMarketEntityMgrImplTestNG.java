@@ -47,7 +47,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
     @Autowired
     private KeyValueEntityMgr keyValueEntityMgr;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "functional" }, enabled = false)
     public void setup() throws Exception {
         TARGET_MARKET.setName(TEST_TARGET_MARKET_NAME);
         TARGET_MARKET.setCreationTimestampObject(CREATION_DATE);
@@ -75,7 +75,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         cleanupTargetMarketDB();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional" }, enabled = false)
     public void testCreate() {
         setupSecurityContext(mainTestTenant);
         assertNull(targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
@@ -110,7 +110,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
                 MAX_PROSPECTS_PER_ACCOUNT.intValue());
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "testCreate" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testCreate" }, enabled = false)
     public void testNotVisibleInAlternateTenant() {
         setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
 
@@ -119,7 +119,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         assertNull(targetMarket);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "testNotVisibleInAlternateTenant" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testNotVisibleInAlternateTenant" }, enabled = false)
     public void testFindAllInAlternativeTenantReturnsEmpty() {
         setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
 
@@ -128,7 +128,8 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         assertTrue(targetMarkets.isEmpty());
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "testFindAllInAlternativeTenantReturnsEmpty" })
+    @Test(groups = { "functional" }, dependsOnMethods = {
+            "testFindAllInAlternativeTenantReturnsEmpty" }, enabled = false)
     public void testUpdate() {
         setupSecurityContext(mainTestTenant);
 
@@ -141,7 +142,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "testUpdate" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testUpdate" }, enabled = false)
     public void testRegisterReport() {
         Report report = new Report();
         report.setIsOutOfDate(false);
@@ -159,7 +160,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         assertNotNull(reportName);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "testRegisterReport" })
+    @Test(groups = { "functional" }, dependsOnMethods = { "testRegisterReport" }, enabled = false)
     public void testDelete() {
         setupSecurityContext(mainTestTenant);
         TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);

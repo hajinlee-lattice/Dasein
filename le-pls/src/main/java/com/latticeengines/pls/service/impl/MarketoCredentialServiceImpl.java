@@ -3,7 +3,6 @@ package com.latticeengines.pls.service.impl;
 import java.util.List;
 import java.util.Set;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,13 +89,7 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
     @Override
     public void updateMarketoCredentialById(String credentialId, MarketoCredential marketoCredential) {
         validateRESTAndSOAPCredentials(marketoCredential);
-        try {
-            marketoCredentialEntityMgr.updateMarketoCredentialById(credentialId, marketoCredential);
-        } catch (Exception e) {
-            if (e.getCause() instanceof ConstraintViolationException) {
-                throw new LedpException(LedpCode.LEDP_18119, new String[] { marketoCredential.getName() });
-            }
-        }
+        marketoCredentialEntityMgr.updateMarketoCredentialById(credentialId, marketoCredential);
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,18 +40,20 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(MarketoCredential marketoCredential) {
-        populateMarketoCredentialWithTenant(marketoCredential);
-        marketoCredential.setEnrichment(enrichmentEntityMgr.createEnrichment());
-        try {
-            marketoCredentialDao.create(marketoCredential);
-        } catch (ConstraintViolationException e) {
+        if (marketoCredentialDao.findByField("NAME", marketoCredential.getName()) != null) {
             throw new LedpException(LedpCode.LEDP_18119, new String[] { marketoCredential.getName() });
         }
+        populateMarketoCredentialWithTenant(marketoCredential);
+        marketoCredential.setEnrichment(enrichmentEntityMgr.createEnrichment());
+        marketoCredentialDao.create(marketoCredential);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateMarketoCredentialById(String credentialId, MarketoCredential marketoCredential) {
+        if (marketoCredentialDao.findByField("NAME", marketoCredential.getName()) != null) {
+            throw new LedpException(LedpCode.LEDP_18119, new String[] { marketoCredential.getName() });
+        }
         MarketoCredential marketoCredential1 = marketoCredentialDao.findMarketoCredentialById(credentialId);
 
         marketoCredential1.setName(marketoCredential.getName());
@@ -65,6 +66,7 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
         marketoCredential1.setSoapEncryptionKey(marketoCredential.getSoapEncryptionKey());
 
         marketoCredentialDao.update(marketoCredential1);
+
     }
 
     @Override
