@@ -29,6 +29,8 @@ public class FlinkExecutionEngine extends ExecutionEngine {
                 ExecutionEnvironment.class);
         if (environment == null) {
             Configuration flinkConf = dataFlowCtx.getProperty(DataFlowProperty.FLINKCONF, Configuration.class);
+            flinkConf.setString("akka.ask.timeout", "1 m");
+            flinkConf.setString("akka.framesize", "100m");
             environment = ExecutionEnvironment.createLocalEnvironment(flinkConf);
             environment.setParallelism(getPartitions(dataFlowCtx));
         }

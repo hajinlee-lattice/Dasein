@@ -17,8 +17,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -256,7 +256,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @SuppressWarnings("rawtypes")
     private void testDeleteUser(AccessLevel accessLevel, boolean expected) {
         User user = createTestUser(accessLevel);
-        String url = usersApi+ user.getUsername();
+        String url = usersApi+ user.getUsername() + "/";
 
         if (expected) {
             ResponseDocument response = sendHttpDeleteForObject(restTemplate, url, ResponseDocument.class);
@@ -290,7 +290,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         UserUpdateData data = new UserUpdateData();
         data.setAccessLevel(accessLevel.name());
 
-        String url = usersApi + user.getUsername();
+        String url = usersApi + user.getUsername() + "/";
         ResponseDocument response = sendHttpPutForObject(restTemplate, url, data, ResponseDocument.class);
         assertTrue(response.isSuccess());
 
@@ -302,7 +302,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         UserUpdateData data = new UserUpdateData();
         data.setAccessLevel(accessLevel.name());
 
-        String url = usersApi + user.getUsername();
+        String url = usersApi + user.getUsername() + "/";
         boolean exception = false;
         try {
             sendHttpPutForObject(restTemplate, url, data, ResponseDocument.class);

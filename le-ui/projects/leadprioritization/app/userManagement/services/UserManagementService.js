@@ -17,7 +17,7 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
         };
         $http({
             method: 'PUT',
-            url: '/pls/users/' + JSON.stringify(username),
+            url: '/pls/users/' + JSON.stringify(username) + '/',
             data: {
                 AccessLevel: accessLevel
             },
@@ -141,7 +141,7 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
 
         $http({
             method: 'DELETE',
-            url: '/pls/users/' + JSON.stringify(user.Username),
+            url: '/pls/users/' + JSON.stringify(user.Username) + '/',
             headers: {
                 'Content-Type': "application/json"
             }
