@@ -481,14 +481,20 @@ angular
             .state('home.ratingsengine.ai.segment.prospect.products', {
                 url: '/products',
                 resolve: {
-                    ProductsCount: function ($q, RatingsEngineAIService) {
+                    Products: function($q, $stateParams, RatingsEngineAIStore) {
+                        console.log('PRODUCT RESOLVE');
                         var deferred = $q.defer();
-                        var segment_id = 15;
-
-                        RatingsEngineAIService.getProductsCount(segment_id).then(function (data) {
-                            deferred.resolve(data);
+    
+                        var params = {
+                            max: 1000,
+                            offset: 0
+                        };
+    
+                        // console.log(params.playName);
+    
+                        RatingsEngineAIStore.getProducts(params).then(function(result){
+                            deferred.resolve(result);
                         });
-
                         return deferred.promise;
                     }
                 },
@@ -504,6 +510,24 @@ angular
             .state('home.ratingsengine.ai.segment.prospect.products.refine', {
                 url: '/refinetarget',
                 resolve: {
+                    Products: function($q, RatingsEngineAIStore) {
+                        console.log('REFINE PRODUCT RESOLVE');
+                        var deferred = $q.defer();
+                        var params = {
+                            max: 1000,
+                            offset: 0
+                        };
+    
+                        // console.log(params.playName);
+    
+                        RatingsEngineAIStore.getProducts(params).then(function(result){
+                            deferred.resolve(result);
+                        });
+                        return deferred.promise;
+                    },
+                    Segments: function($q, RatingsEngineAIStore){
+                        
+                    },
                     RefineSellOptions: function ($q, RatingsEngineAIService) {
                         var deferred = $q.defer();
                         // var segment_id = 15;

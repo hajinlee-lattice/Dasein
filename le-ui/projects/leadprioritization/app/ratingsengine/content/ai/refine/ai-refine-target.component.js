@@ -4,10 +4,16 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
 
         angular.extend(vm, {
             refine: RefineService.refineModel,
+
+            customers: '',
+            prospects: '',
+            historical: '',
+
             sellType: '',
-            resellOptions : RefineSellOptions,
+            resellOptions: RefineSellOptions,
             resellOption: {},
             prioritizeOption: ''
+
         });
 
         vm.init = function () {
@@ -29,12 +35,14 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
          * @param value 
          * Set the type of sell chosen
          */
-        vm.sellTypeChosen = function(value){
+        vm.sellTypeChosen = function (value) {
             console.log('Changed ' + value);
-            if('sell' === value) {
+            if ('sell' === value) {
                 RatingsEngineAIStore.setSellOption(value, {});
+                vm.getProspectCustomers();
             } else {
                 RatingsEngineAIStore.setSellOption(value, vm.resellOption);
+                vm.getProspectCustomers();
             }
         }
 
@@ -43,12 +51,20 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
          * @param value 
          * Set the type of prioritization chosen
          */
-        vm.prioritizeOptionChosen = function(value){
+        vm.prioritizeOptionChosen = function (value) {
             console.log('Prioritize', value);
             RatingsEngineAIStore.setPrioritizeOption(value);
+            vm.getProspectCustomers();
         }
 
-        
+        vm.getProspectCustomers = function () {
+
+            RatingsEngineAIStore.getProspectCustomers().then(function (result) {
+                vm.customers = result.customers;
+                vm.prospects = result.prospects;
+            });
+        }
+
         vm.setValidation = function (type, validated) {
             console.log(type, validated);
             RatingsEngineStore.setValidation(type, validated);
@@ -63,21 +79,36 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
         }
         vm.init();
     })
-    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineAIStore) {
+    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineAIStore, RatingsEngineAIService, Products) {
         var vm = this;
+        console.log('PRODUCTS',Products);
         angular.extend(vm, {
             refine: RefineService.refineModel,
+
+            customersCount: '',
+            prospectsCount: '',
+            historicalCount: '',
+
+
             spent: false,
             bought: false,
             historical: false,
             similarProducts: false,
             similarSegments: false,
-            productDataSource: [],
+            productsDataSource: (function(){
+                var max = Products.length;
+                var ret = [];
+                for(var i=0; i<max; i++){
+                    ret.push({'id': i, 'displayName': Products[i].ProductName});
+                }
+                return ret;
+            })(),
+            
             datasource: [],
             options: [],
-            spentOptions : [{'id': 1, 'name':'At least'}, {'id': 2, 'name':'At most'}],
-            boughtOptions: [{'id': 1, 'name':'At least'}, {'id': 2, 'name':'At most'}],
-            historicalOptions: [{'id': 1, 'name':'Months'}, {'id': 2, 'name':'Years'}]
+            spentOptions: [{ 'id': 1, 'name': 'At least' }, { 'id': 2, 'name': 'At most' }],
+            boughtOptions: [{ 'id': 1, 'name': 'At least' }, { 'id': 2, 'name': 'At most' }],
+            historicalOptions: [{ 'id': 1, 'name': 'Months' }, { 'id': 2, 'name': 'Years' }]
 
         });
 
@@ -87,58 +118,43 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
                 return RefineService.refineModel;
             },
                 function (newVal, oldVal) {
-                    // alert("Inside watch");
                     vm.refine = newVal;
                     console.log('NEW ' + newVal + ' - OLD ' + oldVal);
                 }, true);
-            vm.productsDataSource =
-                [
-                    { 'id': 1, 'displayName': 'iPhone6' },
-                    { 'id': 2, 'displayName': 'iPhone6+' },
-                    { 'id': 3, 'displayName': 'iPhone7' },
-                    { 'id': 4, 'displayName': 'iPhone7+' },
-                    { 'id': 5, 'displayName': 'iPhoneX' },
-                    { 'id': 6, 'displayName': 'Nokya' },
-                    { 'id': 7, 'displayName': 'Samsung7' },
-                    { 'id': 8, 'displayName': 'Google Phone' }
-                ];
-            vm.datasource =
-                [
-                    { 'id': 1, 'displayName': 'New Yourk' },
-                    { 'id': 2, 'displayName': 'Russian' },
-                    { 'id': 3, 'displayName': 'Italy' },
-                    { 'id': 4, 'displayName': 'Florence' },
-                    { 'id': 5, 'displayName': 'Rome' },
-                    { 'id': 6, 'displayName': 'London' },
-                    { 'id': 7, 'displayName': 'Paris' },
-                    { 'id': 8, 'displayName': 'Madrid' },
-                    { 'id': 9, 'displayName': 'Instambul' },
-                    { 'id': 10, 'displayName': 'Tokyo' },
-                    { 'id': 11, 'displayName': 'San Jose' },
-                    { 'id': 12, 'displayName': 'San Francisco' }
-                ];
+
+         
+            vm.datasource = [];
+
+            vm.getProspectCustomers();
 
         }
-        vm.getSpentOptions = function(){
+        vm.getSpentOptions = function () {
             return vm.spentOptions;
         }
-        vm.getBoughtOptions = function(){
+        vm.getBoughtOptions = function () {
             return vm.boughtOptions;
         }
 
-        vm.getHistoricalOptions = function(){
+        vm.getHistoricalOptions = function () {
             return vm.historicalOptions;
         }
 
         vm.callbackSegments = function (element) {
             console.log(element);
-            // console.log(element.args);
         }
         vm.productsCallback = function (elements) {
             console.log(elements);
         }
 
-        
+        vm.getProspectCustomers = function () {
+
+            RatingsEngineAIStore.getProspectCustomers().then(function (result) {
+                vm.customersCount = result.customers;
+                vm.prospectsCount = result.prospects;
+            });
+        }
+
+
 
         vm.init();
     })

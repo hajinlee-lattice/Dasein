@@ -1,11 +1,20 @@
 angular.module('lp.ratingsengine.ai.products', [])
-    .controller('RatingsEngineAIProducts', function ($q, $timeout, $state, $stateParams, $scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore, ProductsCount) {
+    .controller('RatingsEngineAIProducts', function ($q, $timeout, $state, $stateParams, $scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore, Products) {
         var vm = this;
-
+        console.log('Products component ----> ', Products);
         angular.extend(vm, {
+            totalProducts: (function () {
+                // console.log('Products component ', Products);
+                var max = Products.length;
+                var ret = [];
+                for (var i = 0; i < max; i++) {
+                    ret.push({ 'id': Products[i].ProductId, 'displayName': Products[i].ProductName });
+                }
+                return ret;
+            })(),
             products: [],
-            rowsPerPage: 10,
-            productsCount: ProductsCount,
+            rowsPerPage: 5,
+            productsCount: 0,
             page: 0,
             maxpages: 0,
             productsSelected: {}
@@ -14,6 +23,7 @@ angular.module('lp.ratingsengine.ai.products', [])
 
         vm.init = function () {
             console.log('Products initialized');
+            vm.productsCount = vm.totalProducts.length;
             vm.calculateMaxPages();
             vm.loadNextPage();
             vm.validateNextStep();
@@ -24,14 +34,14 @@ angular.module('lp.ratingsengine.ai.products', [])
          * the number of product and the number of rows per page
          */
         vm.calculateMaxPages = function () {
-            if (vm.productsCount.count > 0) {
-                if (vm.productsCount.count == vm.rowsPerPage) {
+            if (vm.productsCount > 0) {
+                if (vm.productsCount == vm.rowsPerPage) {
                     vm.maxpages = 1;
                 } else {
-                    vm.maxpages = Math.ceil(vm.productsCount.count / vm.rowsPerPage);
+                    vm.maxpages = Math.ceil(vm.productsCount / vm.rowsPerPage);
                 }
             }
-
+            console.log('Max page', vm.maxpages);
         }
         /**
          * Fetch product for next page
@@ -57,20 +67,20 @@ angular.module('lp.ratingsengine.ai.products', [])
         vm.loadProducts = function (page) {
             var from = (page - 1) * vm.rowsPerPage;
             var to = page * vm.rowsPerPage;
-            if (to > vm.productsCount.count) {
-                to = vm.productsCount.count;
+            if (to > vm.productsCount) {
+                to = vm.productsCount;
             }
-            RatingsEngineAIService.getProducts(from, to).then(function (data) {
-                vm.products = [];
-                vm.products = data;
-                for (var i = 0; i < vm.products.length; i++) {
-                    vm.products[i]['selected'] = RatingsEngineAIStore.isProductSelected(vm.products[i].id);
-                }
-            });
+
+            vm.products = [];
+            var j = 0;
+            for (var i = from, j = 0; i < to; i++, j++) {
+                vm.products[j] = angular.copy(vm.totalProducts[i]);
+                vm.products[j]['selected'] = RatingsEngineAIStore.isProductSelected(vm.products[j].id);
+            }
         }
 
-        vm.getTotalProductsCount = function(){
-            return vm.productsCount.count;
+        vm.getTotalProductsCount = function () {
+            return vm.productsCount;
         }
 
         /**
@@ -79,7 +89,7 @@ angular.module('lp.ratingsengine.ai.products', [])
         vm.selectProduct = function (index) {
             vm.products[index]['selected'] = (vm.products[index]['selected'] == undefined ? true : !vm.products[index]['selected']);
             var productId = vm.products[index].id;
-            RatingsEngineAIStore.selectProduct(productId, vm.products[index].name);
+            RatingsEngineAIStore.selectProduct(productId, vm.products[index].displayName);
             vm.validateNextStep();
         }
         /**

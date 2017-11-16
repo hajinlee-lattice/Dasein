@@ -14,6 +14,9 @@ angular.module('lp.ratingsengine.ai', [])
         this.productsSelected = {};
 
         /************* Refine variables *************/
+        this.customers = '',
+        this.successes = '',
+
         this.sellOption = {};
         this.prioritizeOption = {};
         /*******************************************/
@@ -66,6 +69,15 @@ angular.module('lp.ratingsengine.ai', [])
             return Object.keys(this.productsSelected).length;
         }
 
+        this.getProducts = function (params) {
+            var deferred = $q.defer();
+            RatingsEngineAIService.getProductsAPI(params).then(function (data) {
+                deferred.resolve(data.data);
+            });
+            return deferred.promise;
+
+        }
+
 
 
         /**
@@ -86,6 +98,24 @@ angular.module('lp.ratingsengine.ai', [])
             this.sellOption['sellValue'] = sellValue;
             this.sellOption['sellOptions'] = options;
         }
+
+
+
+        this.getProspectCustomers = function () {
+            var deferred = $q.defer();
+            if (!angular.equals(this.sellOption, {}) && !angular.equals(this.prioritizeOption, {})) {
+               
+
+                RatingsEngineAIService.getProspectsCustomers(this.sellOption, this.prioritizeOption).then(function (response) {
+                    deferred.resolve(response);
+                });
+
+                return deferred.promise;
+            }else{
+                return deferred.promise;
+            }
+        };
+
         /**
          * 
          * @param value @type string
@@ -144,6 +174,34 @@ angular.module('lp.ratingsengine.ai', [])
             return deferred.promise;
         }
 
+
+        /**
+       * Load the products by page number
+       */
+        this.getProductsAPI = function (params) {
+            var deferred = $q.defer();
+            var max = params.max;
+            var offset = params.offset;
+            var data = [];
+            url = '/pls/products/data';
+            $http({
+                method: 'GET',
+                url: url,
+                params: {
+                    max: params.max || 1000,
+                    offset: params.offset || 0,
+                    max: 10
+                },
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(function (response) {
+                deferred.resolve(response.data);
+            }, function (response) {
+                deferred.resolve(response.data);
+            });
+            return deferred.promise;
+        }
         /**
          * Load the products by page number
          */
@@ -153,6 +211,17 @@ angular.module('lp.ratingsengine.ai', [])
             for (var i = from; i < to; i++) {
                 data.push({ 'selected': false, 'id': i, 'name': "Product Name " + i });
             }
+            deferred.resolve(data);
+
+
+            return deferred.promise;
+        }
+
+        this.getProspectsCustomers = function (sellOption, prioritizeOption) {
+            console.log('API CALL');
+            var deferred = $q.defer();
+            var data = { 'prospects': Math.floor(Math.random() * 10000), 'customers': Math.floor(Math.random() * 10000) };
+
             deferred.resolve(data);
 
 

@@ -23,7 +23,6 @@
                         <th class="product-selection">
                             <span>Selected <a>{{vm.getProductsSelectedCount()}}</a></span><span>/{{vm.getTotalProductsCount()}}</span>
                         </th>
-                        <th>Id</th>
                         <th>Product Name</th>
                     </tr>
                 </thead>
@@ -32,8 +31,7 @@
                         <td class="table-selection">
                             <input type="checkbox" ng-click="vm.selectProduct($index)" ng-checked="{{product.selected}}">
                         </td>
-                        <td>{{product.id}}</td>
-                        <td>{{product.name}}</td>
+                        <td>{{product.displayName}}</td>
                     </tr>
                 </tbody>
             </table>
