@@ -13,6 +13,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
+/**
+ * If only one input, directly return
+ * Otherwise find the new rows in first input compared to the second.
+ * Used by mergeNew step
+ */
 @Component("consolidateDeltaNewDataFlow")
 public class ConsolidateDeltaNewFlow extends ConsolidateBaseFlow<ConsolidateDataTransformerConfig> {
 

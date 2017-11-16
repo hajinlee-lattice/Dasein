@@ -146,6 +146,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     private void updateEntityCounts(MetadataSegment segment) {
+        // use a deep copy to avoid changing restriction format to break UI
         MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
         Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
         counts.forEach(segment::setEntityCount);

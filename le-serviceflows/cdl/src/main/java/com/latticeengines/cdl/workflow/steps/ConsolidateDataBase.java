@@ -122,6 +122,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         if (BusinessEntity.Account.equals(getBusinessEntity())) {
             Table newRecordsTable = metadataProxy.getTable(customerSpace.toString(),
                     TableUtils.getFullTableName(newRecordsTablePrefix, pipelineVersion));
+            log.info(JsonUtils.pprint(newRecordsTable));
             ObjectNode json = JsonUtils.createObjectNode();
             json.put(getBusinessEntity().getBatchStore().name() + "_New",
                     newRecordsTable.getExtracts().get(0).getProcessedRecords());
@@ -195,7 +196,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         }
         step.setBaseTables(baseTables);
         step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(true));
+        step.setConfiguration(getConsolidateDataConfig(true, true));
         if (useTargetTable) {
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
@@ -211,7 +212,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         setupMasterTable(step);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(false));
+        step.setConfiguration(getConsolidateDataConfig(false, false));
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -329,12 +330,13 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         return configuration.isBucketing();
     }
 
-    protected String getConsolidateDataConfig(boolean isDedupeSource) {
+    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimestamps) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(batchStorePrimaryKey);
         setupConfig(config);
         config.setDedupeSource(isDedupeSource);
+        config.setAddTimestamps(addTimestamps);
         return appendEngineConf(config, lightEngineConfig());
     }
 

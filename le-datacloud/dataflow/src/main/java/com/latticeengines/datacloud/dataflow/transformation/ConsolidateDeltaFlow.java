@@ -14,6 +14,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
+/**
+ * Used by diff step
+ */
 @Component("consolidateDeltaDataFlow")
 public class ConsolidateDeltaFlow extends ConsolidateBaseFlow<ConsolidateDataTransformerConfig> {
 

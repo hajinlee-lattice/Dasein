@@ -1,18 +1,26 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class ConsolidateDataHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateDataHelper.class);
 
     void preProcessSources(List<String> sourceNames, List<Node> sources, Map<String, Map<String, String>> dupeFieldMap,
             List<String> fieldToRetain, Set<String> commonFields) {
@@ -74,6 +82,30 @@ public class ConsolidateDataHelper {
             fieldLists.add(new FieldList(keyAttributes));
         }
         return fieldLists;
+    }
+
+    Node addTimestampColumns(Node input) {
+        Date now = new Date();
+        Node output = dropReservedColumns(input);
+        output = input.addTimestamp(InterfaceName.CDLCreatedTime.name(), now);
+        output = output.addTimestamp(InterfaceName.CDLUpdatedTime.name(), now);
+        return output;
+    }
+
+    private Node dropReservedColumns(Node input) {
+        List<String> inputFields = input.getFieldNames().stream().map(String::toLowerCase).collect(Collectors.toList());
+        List<String> fieldsToDrop = new ArrayList<>();
+        for (String reserved: Arrays.asList(InterfaceName.CDLCreatedTime.name(), InterfaceName.CDLUpdatedTime.name())) {
+            if (inputFields.contains(reserved.toLowerCase())) {
+                fieldsToDrop.add(reserved);
+            }
+        }
+        if (!fieldsToDrop.isEmpty()) {
+            log.info("Dropping reserved columns: " + StringUtils.join(fieldsToDrop, ", "));
+            return input.discard(new FieldList(fieldsToDrop));
+        } else {
+            return input;
+        }
     }
 
 }

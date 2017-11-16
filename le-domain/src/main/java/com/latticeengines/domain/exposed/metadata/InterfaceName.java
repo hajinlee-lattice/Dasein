@@ -67,6 +67,9 @@ public enum InterfaceName {
     SalesforceAccountID, // salesforce account ID
     SalesforceContactID, // salesforce contact ID
 
+    CDLCreatedTime, // creation timestamp of CDL entities
+    CDLUpdatedTime, // update timestamp of CDL entities
+
     // Data Cloud
     LatticeAccountId, // Id in AccountMaster
     LDC_Name,

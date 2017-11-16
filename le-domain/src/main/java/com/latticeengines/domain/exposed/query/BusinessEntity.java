@@ -3,10 +3,10 @@ package com.latticeengines.domain.exposed.query;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedProduct;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedProduct;
 
@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -65,7 +65,7 @@ public enum BusinessEntity implements GraphNode {
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
-        Contact.addRelationship(Account, Cardinality.MANY_TO_MANY, InterfaceName.AccountId);
+        Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         Transaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         PurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);

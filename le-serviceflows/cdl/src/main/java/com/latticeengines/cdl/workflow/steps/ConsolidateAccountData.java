@@ -117,11 +117,12 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         setupMasterTable(step2);
         step2.setInputSteps(Collections.singletonList(mergeStep));
         step2.setTransformer("consolidateDeltaNewTransformer");
-        step2.setConfiguration(getConsolidateDataConfig(false));
+        step2.setConfiguration(getConsolidateDataConfig(false, false));
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(newRecordsTablePrefix);
         targetTable.setPrimaryKey(batchStorePrimaryKey);
+        targetTable.setLastModifiedKey(InterfaceName.CDLUpdatedTime.name());
         step2.setTargetTable(targetTable);
         return step2;
 
@@ -147,6 +148,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(batchStoreTablePrefix);
         targetTable.setPrimaryKey(batchStorePrimaryKey);
+        targetTable.setLastModifiedKey(InterfaceName.CDLUpdatedTime.name());
         step4.setTargetTable(targetTable);
         return step4;
     }
@@ -190,7 +192,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
-        config.setColumnsFromRight(Collections.singleton(CREATION_DATE));
+        config.setColumnsFromRight(Collections.singleton(InterfaceName.CDLCreatedTime.name()));
         return appendEngineConf(config, heavyEngineConfig());
     }
 

@@ -23,6 +23,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import cascading.operation.Function;
 import cascading.tuple.Fields;
 
+/**
+ * Used by mergeInputs and mergeMaster steps
+ */
 @Component("consolidateDataFlow")
 public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTransformerConfig> {
 
@@ -30,6 +33,7 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
     public Node construct(TransformationFlowParameters parameters) {
 
         ConsolidateDataTransformerConfig config = getTransformerConfig(parameters);
+        Node result;
 
         List<Node> sources = new ArrayList<>();
         List<Table> sourceTables = new ArrayList<>();
@@ -41,30 +45,33 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         if (CollectionUtils.isNotEmpty(config.getCompositeKeys())) {
             groupByKey = buildNewIdColumn(config, sources);
         }
+        ConsolidateDataHelper consolidateHelper = new ConsolidateDataHelper();
         dedupeSource(config, sources, groupByKey);
         if (sources.size() <= 1) {
-            return sources.get(0);
+            result = sources.get(0);
+        } else {
+            Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
+            List<String> fieldToRetain = new ArrayList<>();
+            Set<String> commonFields = new HashSet<>();
+            consolidateHelper.preProcessSources(sourceNames, sources, dupeFieldMap, fieldToRetain, commonFields);
+
+            List<FieldList> groupFieldLists = consolidateHelper.getGroupFieldList(sourceNames, sourceTables, dupeFieldMap,
+                    groupByKey);
+
+            result = sources.get(0).coGroup(groupFieldLists.get(0), sources.subList(1, sources.size()),
+                    groupFieldLists.subList(1, groupFieldLists.size()), JoinType.OUTER);
+
+            List<String> allFieldNames = result.getFieldNames();
+            Function<?> function = new ConsolidateDataFuction(allFieldNames, commonFields, dupeFieldMap,
+                    config.getColumnsFromRight());
+            result = result.apply(function, new FieldList(allFieldNames), getMetadata(result.getIdentifier()),
+                    new FieldList(allFieldNames), Fields.REPLACE);
+
+            result = result.retain(new FieldList(fieldToRetain));
         }
-
-        Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
-        List<String> fieldToRetain = new ArrayList<>();
-        Set<String> commonFields = new HashSet<>();
-        ConsolidateDataHelper consolidateHelper = new ConsolidateDataHelper();
-        consolidateHelper.preProcessSources(sourceNames, sources, dupeFieldMap, fieldToRetain, commonFields);
-
-        List<FieldList> groupFieldLists = consolidateHelper.getGroupFieldList(sourceNames, sourceTables, dupeFieldMap,
-                groupByKey);
-
-        Node result = sources.get(0).coGroup(groupFieldLists.get(0), sources.subList(1, sources.size()),
-                groupFieldLists.subList(1, groupFieldLists.size()), JoinType.OUTER);
-
-        List<String> allFieldNames = result.getFieldNames();
-        Function<?> function = new ConsolidateDataFuction(allFieldNames, commonFields, dupeFieldMap,
-                config.getColumnsFromRight());
-        result = result.apply(function, new FieldList(allFieldNames), getMetadata(result.getIdentifier()),
-                new FieldList(allFieldNames), Fields.REPLACE);
-
-        result = result.retain(new FieldList(fieldToRetain));
+        if (config.isAddTimestamps()) {
+            result = consolidateHelper.addTimestampColumns(result);
+        }
         return result;
     }
 

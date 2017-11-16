@@ -636,7 +636,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
         final MetadataSegment segment1 = segment;
         expectedCounts.forEach((entity, count) -> {
-            Assert.assertNotNull(segment1.getEntityCount(entity));
+            Assert.assertNotNull(segment1.getEntityCount(entity), "Cannot find count of " + entity);
             Assert.assertEquals(segment1.getEntityCount(entity), count);
         });
     }

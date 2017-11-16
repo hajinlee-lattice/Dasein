@@ -24,6 +24,7 @@ final class SegmentCountUtils {
         // because the concurrency level is limited on redshift side
         if (CollectionUtils.isNotEmpty(segments)) {
             segments.forEach(segment -> {
+                // use a deep copy to avoid changing restriction format to break UI
                 MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
                 for (BusinessEntity entity : BusinessEntity.COUNT_ENTITIES) {
                     try {

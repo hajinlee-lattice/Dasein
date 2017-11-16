@@ -91,7 +91,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         config.setAggrNamePrefix(TableRoleInCollection.AggregatedTransaction.name());
         config.setTimeField(InterfaceName.TransactionTime.name());
         config.setTrxDateField(InterfaceName.TransactionDate.name());
-        config.setConsolidateDateConfig(getConsolidateDataConfig(false));
+        config.setConsolidateDateConfig(getConsolidateDataConfig(false, false));
         config.setAggregateConfig(getAggregateConfig());
         return appendEngineConf(config, lightEngineConfig());
     }
@@ -110,7 +110,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     }
 
     @Override
-    protected String getConsolidateDataConfig(boolean isDedupeSource) {
+    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimestamp) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         setupConfig(config);
@@ -120,6 +120,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionTime.name()));
         config.setDedupeSource(isDedupeSource);
+        config.setAddTimestamps(addTimestamp);
         return JsonUtils.serialize(config);
     }
 
