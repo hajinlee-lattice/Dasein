@@ -10,16 +10,18 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.jpmml.evaluator.CacheUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
+import com.google.common.cache.CacheBuilderSpec;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PrecisionUtils;
@@ -64,6 +66,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     private void init() {
         defaultFieldSchemaForMatch = new HashMap<>();
         populateDefaultFieldSchemas();
+        CacheUtil.setCacheBuilderSpec(CacheBuilderSpec.parse("weakKeys,weakValues"));
     }
 
     private void populateDefaultFieldSchemas() {
