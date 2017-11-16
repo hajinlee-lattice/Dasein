@@ -340,6 +340,8 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration>
 			if (localCluster == null) {
 				org.apache.flink.configuration.Configuration configuration = new org.apache.flink.configuration.Configuration();
 				configuration.setInteger(ConfigConstants.TASK_MANAGER_NUM_TASK_SLOTS, env.getParallelism() * 2);
+				configuration.setString(ConfigConstants.AKKA_ASK_TIMEOUT, "60s");
+				LOG.info("Creating a new LocalFlinkMiniCluster.");
 				localCluster = new LocalFlinkMiniCluster(configuration, false);
 				localCluster.start();
 			}

@@ -3,11 +3,11 @@ package com.latticeengines.dataflow.exposed.builder.engine;
 import java.util.Properties;
 
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 
 import com.dataartisans.flink.cascading.FlinkConnector;
 import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 import cascading.flow.FlowConnector;
@@ -25,18 +25,10 @@ public class FlinkExecutionEngine extends ExecutionEngine {
     public FlowConnector createFlowConnector(DataFlowContext dataFlowCtx, Properties properties) {
         properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(getPartitions(dataFlowCtx))
                 .buildProperties(properties);
-        ExecutionEnvironment environment = dataFlowCtx.getProperty(DataFlowProperty.FLINKENV,
-                ExecutionEnvironment.class);
-        if (environment == null) {
-            Configuration flinkConf = dataFlowCtx.getProperty(DataFlowProperty.FLINKCONF, Configuration.class);
-            if (flinkConf == null) {
-                flinkConf = new Configuration();
-            }
-            flinkConf.setString("akka.ask.timeout", "1 m");
-            flinkConf.setString("akka.framesize", "100m");
-            environment = ExecutionEnvironment.createLocalEnvironment(flinkConf);
-            environment.setParallelism(getPartitions(dataFlowCtx));
-        }
+        Configuration flinkConf = new Configuration();
+        flinkConf.setString(ConfigConstants.AKKA_ASK_TIMEOUT, "60s");
+        ExecutionEnvironment environment = ExecutionEnvironment.createLocalEnvironment();
+        environment.setParallelism(getPartitions(dataFlowCtx));
         return new FlinkConnector(environment, properties);
     }
 
