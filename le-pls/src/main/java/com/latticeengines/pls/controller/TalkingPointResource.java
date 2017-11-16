@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
+import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
+import com.latticeengines.proxy.exposed.dante.TalkingPointsAttributesProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -35,6 +37,9 @@ public class TalkingPointResource {
 
     @Autowired
     private TalkingPointProxy talkingPointProxy;
+
+    @Autowired
+    private TalkingPointsAttributesProxy talkingPointsAttributesProxy;
 
     @Autowired
     private PlayService playService;
@@ -125,5 +130,17 @@ public class TalkingPointResource {
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public void delete(@PathVariable String talkingPointName) {
         talkingPointProxy.delete(talkingPointName);
+    }
+
+    @RequestMapping(value = "/attributes", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Get attributes for given notions")
+    @PreAuthorize("hasRole('Edit_PLS_Plays')")
+    public TalkingPointNotionAttributes getAttributesByNotions(@RequestBody List<String> notions) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_38008);
+        }
+        return talkingPointsAttributesProxy.getAttributesByNotions(notions, customerSpace.toString());
     }
 }

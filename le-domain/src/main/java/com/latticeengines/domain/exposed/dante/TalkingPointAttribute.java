@@ -2,18 +2,18 @@ package com.latticeengines.domain.exposed.dante;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DanteAttribute {
+public class TalkingPointAttribute {
     @JsonProperty(value = "name")
     private String name;
 
     @JsonProperty(value = "value")
     private String value;
 
-    public DanteAttribute() {
+    public TalkingPointAttribute() {
 
     }
 
-    public DanteAttribute(String name, String value) {
+    public TalkingPointAttribute(String name, String value) {
         this.name = name;
         this.value = value;
     }

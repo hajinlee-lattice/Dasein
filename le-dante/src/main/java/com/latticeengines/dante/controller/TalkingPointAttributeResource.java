@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dante.service.DanteAttributeService;
-import com.latticeengines.domain.exposed.dante.DanteAttribute;
-import com.latticeengines.domain.exposed.dante.DanteNotionAttributes;
-import com.latticeengines.network.exposed.dante.DanteAttributesInterface;
+import com.latticeengines.dante.service.TalkingPointAttributeService;
+import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
+import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
+import com.latticeengines.network.exposed.dante.TalkingPointAttributesInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,31 +23,32 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "dante", description = "REST resource for attributes related to Dante notions")
 @RestController
 @RequestMapping("/attributes")
-public class DanteAttributeResource implements DanteAttributesInterface {
-    private static final Logger log = LoggerFactory.getLogger(DanteAttributeResource.class);
+public class TalkingPointAttributeResource implements TalkingPointAttributesInterface {
+    private static final Logger log = LoggerFactory.getLogger(TalkingPointAttributeResource.class);
 
     @Autowired
-    private DanteAttributeService danteAttributeService;
+    private TalkingPointAttributeService talkingPointAttributeService;
 
     @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get account attributes for this tenant")
-    public List<DanteAttribute> getAccountAttributes(@RequestParam("customerSpace") String customerSpace) {
-        return danteAttributeService.getAccountAttributes(customerSpace);
+    public List<TalkingPointAttribute> getAccountAttributes(@RequestParam("customerSpace") String customerSpace) {
+        return talkingPointAttributeService.getAccountAttributes(customerSpace);
     }
 
     @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get recommendation attributes")
-    public List<DanteAttribute> getRecommendationAttributes(@RequestParam("customerSpace") String customerSpace) {
-        return danteAttributeService.getRecommendationAttributes(customerSpace);
+    public List<TalkingPointAttribute> getRecommendationAttributes(
+            @RequestParam("customerSpace") String customerSpace) {
+        return talkingPointAttributeService.getRecommendationAttributes(customerSpace);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Get attributes for given notions")
-    public DanteNotionAttributes getAttributesByNotions(@RequestBody List<String> notions,
+    public TalkingPointNotionAttributes getAttributesByNotions(@RequestBody List<String> notions,
             @RequestParam("customerSpace") String customerSpace) {
-        return danteAttributeService.getAttributesForNotions(notions, customerSpace);
+        return talkingPointAttributeService.getAttributesForNotions(notions, customerSpace);
     }
 }

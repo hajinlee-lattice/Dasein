@@ -644,6 +644,7 @@ public enum LedpCode {
     LEDP_38020("Unable to create lead in Dante for the recommendation {0}, play {1} ,CustomerSpace {2}"), //
     LEDP_38021("Empty or null recommendation, Failed to create lead in dante for CustomerSpace {0}"), //
     LEDP_38022("Empty or null play, Failed to create lead in dante for CustomerSpace {0}"), //
+    LEDP_38023("No account attributes found for tenant {0}"), //
 
     // le-ulysses
     LEDP_39001("No account with id {0} found for CustomerSpace {0}") //

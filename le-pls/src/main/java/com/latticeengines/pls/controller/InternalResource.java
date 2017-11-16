@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.controller.LatticeInsightsResource;
 import com.latticeengines.app.exposed.service.AttributeService;
+import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -58,6 +59,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -78,9 +80,9 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -206,6 +208,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private MetadataSegmentExportService metadataSegmentExportService;
+
+    @Autowired
+    private DataLakeService dataLakeService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -422,7 +427,7 @@ public class InternalResource extends InternalResourceBase {
     private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries, boolean dropPredictors) {
         for (ModelSummary summary : summaries) {
             if (dropPredictors) {
-                summary.setPredictors(new ArrayList<Predictor>());
+                summary.setPredictors(new ArrayList<>());
             }
             summary.setDetails(null);
         }
@@ -488,8 +493,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
-        List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getModelSummariesByApplicationId(applicationId);
-        return modelSummaries;
+        return modelSummaryEntityMgr.getModelSummariesByApplicationId(applicationId);
     }
 
     @RequestMapping(value = "/modelsummaries/modelid/{modelId}/"
@@ -577,14 +581,14 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId, //
             @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
-        Set<String> subcategories = new HashSet<String>();
+        Set<String> subcategories = new HashSet<>();
         List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, category,
                 null, false, null, null, Boolean.FALSE);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
             subcategories.add(attr.getSubcategory());
         }
-        return new ArrayList<String>(subcategories);
+        return new ArrayList<>(subcategories);
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/"
@@ -919,15 +923,15 @@ public class InternalResource extends InternalResourceBase {
         String exportID = export.getExportId();
         String exportType = export.getType().toString();
         switch (exportType) {
-            case "ACCOUNT": 
-                exportType = "Account";
-                break;
-            case "CONTACT": 
-                exportType = "Contact";
-                break;
-            case "ACCOUNT_AND_CONTACT": 
-                exportType = "Account and Contact";
-                break;
+        case "ACCOUNT":
+            exportType = "Account";
+            break;
+        case "CONTACT":
+            exportType = "Contact";
+            break;
+        case "ACCOUNT_AND_CONTACT":
+            exportType = "Account and Contact";
+            break;
         }
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {
@@ -937,7 +941,8 @@ public class InternalResource extends InternalResourceBase {
                         String url = request.getScheme() + "://" + request.getServerName() + ":"
                                 + request.getServerPort() + "/lp/" + tenantName + "/export/" + exportID;
                         if (result.equals("COMPLETED")) {
-                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType, export.getCleanupBy());
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType,
+                                    export.getCleanupBy());
                         } else if (result.equals("FAILED")) {
                             emailService.sendPlsExportSegmentErrorEmail(user, url, exportID, exportType);
                         }
@@ -1457,6 +1462,19 @@ public class InternalResource extends InternalResourceBase {
             }
         }
         return false;
+    }
+
+    @RequestMapping(value = "/datacollection/attributes/{predefined}/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get attributes within a predefined group for a tenant")
+    public List<ColumnMetadata> getAttributesInPredefinedGroup(
+            @PathVariable("predefined") ColumnSelection.Predefined predefined,
+            @PathVariable("tenantId") String customerSpace) {
+        log.debug(String.format("Retrieve Account attributes for attribute group: %s", predefined.getName()));
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).getTenantId());
+        // return dataLakeService.getAttributesInPredefinedGroup(predefined);
+        // Todo: jlm Uncomment when attribute groups are supported
+        return dataLakeService.getAttributes(0, 50);
     }
 
 }

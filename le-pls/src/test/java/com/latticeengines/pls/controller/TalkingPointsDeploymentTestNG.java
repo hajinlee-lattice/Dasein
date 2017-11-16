@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dante.DanteAttribute;
+import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -86,10 +86,10 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" })
     public void testGetRecommendationAttributes() {
-        List<DanteAttribute> rawResponse = restTemplate.getForObject( //
+        List<TalkingPointAttribute> rawResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/attributes/recommendationattributes", //
                 List.class);
-        List<DanteAttribute> recResponse = JsonUtils.convertList(rawResponse, DanteAttribute.class);
+        List<TalkingPointAttribute> recResponse = JsonUtils.convertList(rawResponse, TalkingPointAttribute.class);
         Assert.assertNotNull(recResponse);
     }
 

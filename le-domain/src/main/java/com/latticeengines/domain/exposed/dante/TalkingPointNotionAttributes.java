@@ -5,16 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DanteNotionAttributes {
-    Map<String, List<DanteAttribute>> notionAttributes;
+public class TalkingPointNotionAttributes {
+    Map<String, List<TalkingPointAttribute>> notionAttributes;
 
     List<String> invalidNotions;
 
-    public Map<String, List<DanteAttribute>> getNotionAttributes() {
+    public Map<String, List<TalkingPointAttribute>> getNotionAttributes() {
         return notionAttributes;
     }
 
-    public void setNotionAttributes(Map<String, List<DanteAttribute>> notionAttributes) {
+    public void setNotionAttributes(Map<String, List<TalkingPointAttribute>> notionAttributes) {
         this.notionAttributes = notionAttributes;
     }
 
@@ -26,7 +26,7 @@ public class DanteNotionAttributes {
         this.invalidNotions = invalidNotions;
     }
 
-    public void addNotion(String notion, List<DanteAttribute> attributes) {
+    public void addNotion(String notion, List<TalkingPointAttribute> attributes) {
         if (notionAttributes == null) {
             notionAttributes = new HashMap<>();
         }
