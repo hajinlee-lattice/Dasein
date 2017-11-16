@@ -43,6 +43,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentExportServiceImpl.class);
 
+    private static final String DEFAULT_EXPORT_FILE_PREFIX = "unknownsegment";
     private static final String ACCOUNT_PREFIX = BusinessEntity.Account + "_";
     private static final String CONTACT_PREFIX = BusinessEntity.Contact + "_";
 
@@ -119,10 +120,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             exportedFileName = metadataSegmentExportJob.getSegment().getDisplayName();
         }
 
-        exportedFileName = exportedFileName.trim().replaceAll("[^a-zA-Z0-9]", "");
         if (StringUtils.isBlank(exportedFileName)) {
-            exportedFileName = "unknownsegment";
+            exportedFileName = DEFAULT_EXPORT_FILE_PREFIX;
         }
+        exportedFileName = exportedFileName.trim().replaceAll("[^a-zA-Z0-9]", "");
 
         exportedFileName += "-" + metadataSegmentExportJob.getType() + "-" + dateFormat.format(new Date()) + "_UTC.csv";
         return exportedFileName;
