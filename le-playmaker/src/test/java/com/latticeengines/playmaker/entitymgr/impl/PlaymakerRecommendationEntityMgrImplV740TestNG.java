@@ -11,7 +11,7 @@ public class PlaymakerRecommendationEntityMgrImplV740TestNG extends PlaymakerRec
         tenant.setJdbcDriver("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.118;instanceName=SQL2012STD;databaseName=PlayMakerDB740");
         tenant.setJdbcUserName("playmaker");
-        tenant.setJdbcPassword("playmaker");
+        tenant.setJdbcPasswordEncrypt("playmaker");
         tenant.setTenantName(getTenantName());
         return tenant;
     }

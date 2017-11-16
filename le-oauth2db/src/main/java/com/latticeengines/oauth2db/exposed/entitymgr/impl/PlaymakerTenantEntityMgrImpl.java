@@ -1,5 +1,7 @@
 package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
@@ -36,7 +39,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     @Override
     @Transactional(value = "oauth2")
     public PlaymakerTenant create(PlaymakerTenant tenant) {
-
+        tenant.setJdbcPasswordEncrypt(CipherUtils.encrypt(tenant.getJdbcPasswordEncrypt()));
         PlaymakerTenant tenantInDb = tenantDao.findByTenantName(tenant.getTenantName());
         if (tenantInDb == null) {
             tenantDao.create(tenant);
@@ -81,7 +84,11 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     @Override
     @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlaymakerTenant findByKey(PlaymakerTenant tenant) {
-        return tenantDao.findByKey(tenant);
+        PlaymakerTenant obj = tenantDao.findByKey(tenant);
+        if (obj != null) {
+            obj.setJdbcPasswordEncrypt(CipherUtils.decrypt(obj.getJdbcPasswordEncrypt()));
+        }
+        return obj;
     }
 
     @Override
@@ -89,6 +96,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     public PlaymakerTenant findByTenantName(String tenantName) {
         PlaymakerTenant tenant = tenantDao.findByTenantName(tenantName);
         if (tenant != null) {
+            tenant.setJdbcPasswordEncrypt(CipherUtils.decrypt(tenant.getJdbcPasswordEncrypt()));
             OAuthUser user = null;
             try {
                 user = userEngityMgr.get(tenantName);
@@ -115,8 +123,13 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     @Override
     @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void updateByTenantName(PlaymakerTenant tenant) {
+        tenant.setJdbcPasswordEncrypt(CipherUtils.encrypt(tenant.getJdbcPasswordEncrypt()));
         tenantDao.updateByTenantName(tenant);
         log.info("Updated the following tenantName=" + tenant.getTenantName());
     }
 
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlaymakerTenant> findAll() {
+        return tenantDao.findAll();
+    }
 }

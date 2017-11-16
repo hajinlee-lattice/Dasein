@@ -56,10 +56,9 @@ public class PlaymakerTenantDaoImpl extends BaseDaoImpl<PlaymakerTenant> impleme
         }
         origTenant.setExternalId(tenant.getExternalId());
         origTenant.setJdbcDriver(tenant.getJdbcDriver());
-        origTenant.setJdbcPassword(tenant.getJdbcPassword());
         origTenant.setJdbcUrl(tenant.getJdbcUrl());
         origTenant.setJdbcUserName(tenant.getJdbcUserName());
-
+        origTenant.setJdbcPasswordEncrypt(tenant.getJdbcPasswordEncrypt());
         update(origTenant);
 
     }

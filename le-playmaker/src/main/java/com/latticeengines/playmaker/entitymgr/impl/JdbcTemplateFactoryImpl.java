@@ -110,10 +110,10 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
             } else {
                 cpds.setUser(tenant.getJdbcUserName());
             }
-            if (StringUtils.isBlank(tenant.getJdbcPassword())) {
+            if (StringUtils.isBlank(tenant.getJdbcPasswordEncrypt())) {
                 cpds.setPassword(dataSoucePassword);
             } else {
-                cpds.setPassword(tenant.getJdbcPassword());
+                cpds.setPassword(tenant.getJdbcPasswordEncrypt());
             }
             cpds.setJdbcUrl(tenant.getJdbcUrl());
 
@@ -135,7 +135,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
 
     private byte[] getHash(PlaymakerTenant tenant) {
         String hashStr = tenant.getJdbcDriver() + tenant.getJdbcUrl() + tenant.getJdbcUserName()
-                + tenant.getJdbcPassword();
+                + tenant.getJdbcPasswordEncrypt();
         return DigestUtils.md5(hashStr);
     }
 

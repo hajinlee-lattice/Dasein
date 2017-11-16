@@ -1,0 +1,5 @@
+USE `oauth2DB`;
+
+ALTER TABLE `oauth2DB`.`TENANT`
+    ADD COLUMN `JDBC_PASSWORD_ENCRYPT` varchar(256) NULL;
+

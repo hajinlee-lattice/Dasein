@@ -28,6 +28,7 @@ public class PlaymakerTenant implements HasPid {
     private String jdbcUrl;
     private String jdbcUserName;
     private String jdbcPassword;
+    private String jdbcPasswordEncrypt;
 
     public PlaymakerTenant() {
         super();
@@ -39,7 +40,7 @@ public class PlaymakerTenant implements HasPid {
         this.jdbcDriver = tenant.jdbcDriver;
         this.jdbcUrl = tenant.jdbcUrl;
         this.jdbcUserName = tenant.jdbcUserName;
-        this.jdbcPassword = tenant.jdbcPassword;
+        this.jdbcPasswordEncrypt = tenant.jdbcPasswordEncrypt;
     }
 
     @Id
@@ -125,7 +126,7 @@ public class PlaymakerTenant implements HasPid {
     }
 
     @JsonProperty("JdbcPassword")
-    @Column(name = "JDBC_PASSWORD", nullable = false)
+    @Column(name = "JDBC_PASSWORD")
     public String getJdbcPassword() {
         return jdbcPassword;
     }
@@ -135,6 +136,17 @@ public class PlaymakerTenant implements HasPid {
         this.jdbcPassword = jdbcPassword;
     }
 
+    @JsonProperty("JdbcPasswordEncrypt")
+    @Column(name = "JDBC_PASSWORD_ENCRYPT", nullable = false)
+    public String getJdbcPasswordEncrypt() {
+        return jdbcPasswordEncrypt;
+    }
+
+    @JsonProperty("JdbcPasswordEncrypt")
+    public void setJdbcPasswordEncrypt(String jdbcPasswordEncrypt) {
+        this.jdbcPasswordEncrypt = jdbcPasswordEncrypt;
+    }
+
     public void copyFrom(PlaymakerTenant tenant) {
         if (tenant != null) {
             this.tenantName = tenant.getTenantName();
@@ -142,7 +154,7 @@ public class PlaymakerTenant implements HasPid {
             this.jdbcDriver = tenant.getJdbcDriver();
             this.jdbcUrl = tenant.getJdbcUrl();
             this.jdbcUserName = tenant.getJdbcUserName();
-            this.jdbcPassword = tenant.getJdbcPassword();
+            this.jdbcPasswordEncrypt = tenant.getJdbcPasswordEncrypt();
         }
     }
 }
