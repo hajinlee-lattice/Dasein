@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -34,7 +32,6 @@ import com.latticeengines.security.exposed.service.TenantService;
 
 public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MarketoCredentialServiceImplTestNG.class);
     private static final String TENANT1 = "TENANT1";
     private static final String NAME = "TEST MARKETO CREDENTIAL";
     private static final String NAME_1 = "TEST MARKETO CREDENTIAL 1";
