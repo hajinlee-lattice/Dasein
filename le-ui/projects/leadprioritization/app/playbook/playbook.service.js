@@ -25,9 +25,9 @@ angular.module('lp.playbook')
 
         this.validation = {
             settings: false,
-            rating: false,
-            targets: true,
-            insights: true,
+            rating: true,
+            targets: false,
+            insights: false,
             preview: true,
             launch: true
         }

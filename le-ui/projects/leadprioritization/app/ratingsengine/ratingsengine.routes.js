@@ -518,16 +518,12 @@ angular
                 url: '/products',
                 resolve: {
                     Products: function ($q, $stateParams, RatingsEngineAIStore) {
-                        console.log('PRODUCT RESOLVE');
                         var deferred = $q.defer();
 
                         var params = {
                             max: 1000,
                             offset: 0
                         };
-
-                        // console.log(params.playName);
-
                         RatingsEngineAIStore.getProducts(params).then(function (result) {
                             deferred.resolve(result);
                         });
@@ -547,14 +543,11 @@ angular
                 url: '/refinetarget',
                 resolve: {
                     Products: function ($q, RatingsEngineAIStore) {
-                        // console.log('REFINE PRODUCT RESOLVE');
                         var deferred = $q.defer();
                         var params = {
                             max: 1000,
                             offset: 0
                         };
-
-                        // console.log(params.playName);
 
                         RatingsEngineAIStore.getProducts(params).then(function (result) {
                             deferred.resolve(result);
