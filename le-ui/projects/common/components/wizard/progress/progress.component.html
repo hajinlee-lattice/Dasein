@@ -1,7 +1,7 @@
 <ul class="import-wizard-progress">
     <li     ng-repeat="item in vm.items" 
             ng-click="vm.click(item.state, $event)"
-            ui-sref="home.{{ vm.context }}.wizard.{{ item.state }}" 
+            ui-sref="home.{{ vm.context }}{{vm.wizard}}{{ item.state }}" 
             ui-sref-active="previous" 
             ui-sref-active-eq="current">
         {{ item.label }}

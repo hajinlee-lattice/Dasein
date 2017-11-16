@@ -402,6 +402,7 @@ angular
 
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps || 'ai', rating_id);
                     }
+
                 },
                 views: {
                     'summary@': {
@@ -481,18 +482,18 @@ angular
             .state('home.ratingsengine.ai.segment.prospect.products', {
                 url: '/products',
                 resolve: {
-                    Products: function($q, $stateParams, RatingsEngineAIStore) {
+                    Products: function ($q, $stateParams, RatingsEngineAIStore) {
                         console.log('PRODUCT RESOLVE');
                         var deferred = $q.defer();
-    
+
                         var params = {
                             max: 1000,
                             offset: 0
                         };
-    
+
                         // console.log(params.playName);
-    
-                        RatingsEngineAIStore.getProducts(params).then(function(result){
+
+                        RatingsEngineAIStore.getProducts(params).then(function (result) {
                             deferred.resolve(result);
                         });
                         return deferred.promise;
@@ -510,24 +511,24 @@ angular
             .state('home.ratingsengine.ai.segment.prospect.products.refine', {
                 url: '/refinetarget',
                 resolve: {
-                    Products: function($q, RatingsEngineAIStore) {
+                    Products: function ($q, RatingsEngineAIStore) {
                         // console.log('REFINE PRODUCT RESOLVE');
                         var deferred = $q.defer();
                         var params = {
                             max: 1000,
                             offset: 0
                         };
-    
+
                         // console.log(params.playName);
-    
-                        RatingsEngineAIStore.getProducts(params).then(function(result){
+
+                        RatingsEngineAIStore.getProducts(params).then(function (result) {
                             deferred.resolve(result);
                         });
                         return deferred.promise;
                     },
-                    Segments: function($q, RatingsEngineAIStore){
+                    Segments: function ($q, RatingsEngineAIStore) {
                         var deferred = $q.defer();
-                        RatingsEngineAIStore.getSegments().then(function(result){
+                        RatingsEngineAIStore.getSegments().then(function (result) {
                             deferred.resolve(result);
                         });
                         return deferred.promise;
@@ -598,8 +599,9 @@ angular
                 views: {
                     'wizard_content@home.ratingsengine.ai': {
 
-                        controller: function ($state) {
+                        controller: function ($state, RatingsEngineStore) {
                             var vm = this;
+                            RatingsEngineStore.setValidation('segment', true);
                             vm.goToCreateSegment = function () {
                                 $state.go('home.segment.explorer.attributes');
                             }

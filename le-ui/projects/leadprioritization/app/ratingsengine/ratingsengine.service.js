@@ -21,7 +21,7 @@ angular.module('lp.ratingsengine')
             prospect: false,
             products: false,
             refine: false,
-            model: true
+            model: false
         }
 
         this.segment_form = {
@@ -101,7 +101,7 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Model', 
                     state: 'segment.prospect.products.refine.model', 
-                    nextLabel: '?'
+                    nextLabel: 'Rating Engines'
                     // nextFn: function(nextState) {
                     //     RatingsEngineStore.nextSaveRatingEngine(nextState);
                     // } 

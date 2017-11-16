@@ -13,6 +13,7 @@ angular.module('lp.ratingsengine.ai.prospect', [])
         });
 
         vm.init = function () {
+            RatingsEngineAIStore.clearSelection();
             vm.prospect = Prospect.prospect;
             vm.customers = Prospect.customers;
             $scope.$watch('vm.buildOption', function () {

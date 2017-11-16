@@ -25,12 +25,12 @@ angular.module('common.wizard.controls', [])
 
     vm.init = function() {
         vm.rootState = vm.next + '.';
-        console.log($state);
+        // console.log($state);
         vm.setButtons();
 
         vm.items.forEach(function(item) {
             var key = vm.rootState + item.state;
-            console.log(key);
+            // console.log(key);
             vm.itemMap[key] = item;
         });
         vm.item = vm.itemMap[vm.toState.name];

@@ -19,7 +19,8 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
         vm.init = function () {
             RefineService.reset();
             RatingsEngineAIStore.resetRefineOptions();
-            console.log('Init refine Target');
+            vm.validateNextStep();
+            // console.log('Init refine Target');
             $scope.$watch(function () {
                 return RefineService.refineModel;
             },
@@ -36,7 +37,7 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
          * Set the type of sell chosen
          */
         vm.sellTypeChosen = function (value) {
-            console.log('Changed ' + value);
+            // console.log('Changed ' + value);
             if ('sell' === value) {
                 RatingsEngineAIStore.setSellOption(value, {});
                 vm.getProspectCustomers();
@@ -44,6 +45,7 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
                 RatingsEngineAIStore.setSellOption(value, vm.resellOption);
                 vm.getProspectCustomers();
             }
+            vm.validateNextStep();
         }
 
         /**
@@ -52,9 +54,10 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
          * Set the type of prioritization chosen
          */
         vm.prioritizeOptionChosen = function (value) {
-            console.log('Prioritize', value);
+            // console.log('Prioritize', value);
             RatingsEngineAIStore.setPrioritizeOption(value);
             vm.getProspectCustomers();
+            vm.validateNextStep();
         }
 
         vm.getProspectCustomers = function () {
@@ -65,23 +68,43 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             });
         }
 
-        vm.setValidation = function (type, validated) {
-            console.log(type, validated);
-            RatingsEngineStore.setValidation(type, validated);
-        }
-
         /**
          * Switch for the refine model view
          */
         vm.showRefineModel = function () {
-            console.log('Change view');
+            // console.log('Change view');
             RefineService.changeValue();
         }
+
+
+
+         /**
+         * Method used to validate the next step for the wizard
+         */
+        vm.validateNextStep = function () {
+            if (!angular.equals(RatingsEngineAIStore.sellOption, {}) && !angular.equals(RatingsEngineAIStore.prioritizeOption, {})) {
+                vm.setValidation('refine', true);
+            } else {
+                vm.setValidation('refine', false);
+            }
+        }
+
+         /**
+         * Enable/Disable the next step of the wizard
+         * @argument type @type string This value has to be equal to the value which is inside the RatingsEngineStore.validation
+         * @argument validated @type boolean Enable or disable the next step
+         * 
+         */
+        vm.setValidation = function (type, validated) {
+            RatingsEngineStore.setValidation(type, validated);
+        }
+
+
         vm.init();
     })
     .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineAIStore, RatingsEngineAIService, Products, Segments) {
         var vm = this;
-        console.log('PRODUCTS',Products);
+        // console.log('PRODUCTS',Products);
         angular.extend(vm, {
             refine: RefineService.refineModel,
 
@@ -122,13 +145,13 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
         });
 
         vm.init = function () {
-            console.info('Init refine Model');
+            // console.info('Init refine Model');
             $scope.$watch(function () {
                 return RefineService.refineModel;
             },
                 function (newVal, oldVal) {
                     vm.refine = newVal;
-                    console.log('NEW ' + newVal + ' - OLD ' + oldVal);
+                    // console.log('NEW ' + newVal + ' - OLD ' + oldVal);
                 }, true);
 
          
@@ -149,10 +172,10 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
         }
 
         vm.callbackSegments = function (element) {
-            console.log(element);
+            // console.log(element);
         }
         vm.productsCallback = function (elements) {
-            console.log(elements);
+            // console.log(elements);
         }
 
         vm.getProspectCustomers = function () {

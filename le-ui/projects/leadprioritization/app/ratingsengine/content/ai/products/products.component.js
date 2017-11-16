@@ -1,10 +1,8 @@
 angular.module('lp.ratingsengine.ai.products', [])
     .controller('RatingsEngineAIProducts', function ($q, $timeout, $state, $stateParams, $scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore, Products) {
         var vm = this;
-        console.log('Products component ----> ', Products);
         angular.extend(vm, {
             totalProducts: (function () {
-                // console.log('Products component ', Products);
                 var max = Products.length;
                 var ret = [];
                 for (var i = 0; i < max; i++) {
@@ -22,7 +20,6 @@ angular.module('lp.ratingsengine.ai.products', [])
         });
 
         vm.init = function () {
-            console.log('Products initialized');
             vm.productsCount = vm.totalProducts.length;
             vm.calculateMaxPages();
             vm.loadNextPage();
@@ -41,7 +38,6 @@ angular.module('lp.ratingsengine.ai.products', [])
                     vm.maxpages = Math.ceil(vm.productsCount / vm.rowsPerPage);
                 }
             }
-            console.log('Max page', vm.maxpages);
         }
         /**
          * Fetch product for next page
