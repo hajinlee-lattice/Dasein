@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -31,7 +32,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
 @Component("globalAuthenticationService")
-@CacheConfig(cacheNames = "SessionCache")
+@CacheConfig(cacheNames = CacheNames.Constants.SessionCacheName)
 public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationServiceBaseImpl
         implements GlobalAuthenticationService {
 

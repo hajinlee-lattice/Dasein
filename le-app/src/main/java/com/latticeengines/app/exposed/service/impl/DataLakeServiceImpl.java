@@ -249,7 +249,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
     }
 
-    @Cacheable(cacheNames = "DataLakeStatsCache", key = "T(java.lang.String).format(\"%s|stats\", "
+    @Cacheable(cacheNames = CacheNames.Constants.DataLakeStatsCacheName, key = "T(java.lang.String).format(\"%s|stats\", "
             + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public Statistics getStatistics() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
@@ -289,7 +289,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         return subcatStats;
     }
 
-    @Cacheable(cacheNames = "DataLakeCMCache", key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
+    @Cacheable(cacheNames = CacheNames.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
             + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id, #role)")
     public List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role) {
         if (role == null) {
