@@ -1471,7 +1471,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("predefined") ColumnSelection.Predefined predefined,
             @PathVariable("tenantId") String customerSpace) {
         log.debug(String.format("Retrieve Account attributes for attribute group: %s", predefined.getName()));
-        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).getTenantId());
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         // return dataLakeService.getAttributesInPredefinedGroup(predefined);
         // Todo: jlm Uncomment when attribute groups are supported
         return dataLakeService.getAttributes(0, 50);
