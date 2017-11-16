@@ -15,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -23,7 +24,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -33,8 +33,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_TASK", uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE",
-        "ENTITY", "FEED_TYPE", "`FK_FEED_ID`" }))
+@javax.persistence.Table(name = "DATAFEED_TASK", //
+        indexes = { @Index(name = "IX_UNIQUE_ID", columnList = "UNIQUE_ID") }, //
+        uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE", "ENTITY", "FEED_TYPE", "`FK_FEED_ID`" }))
 public class DataFeedTask implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -53,7 +54,6 @@ public class DataFeedTask implements HasPid, Serializable {
 
     @Column(name = "UNIQUE_ID", unique = true, nullable = false)
     @JsonProperty("unique_id")
-    @Index(name = "IX_UNIQUE_ID")
     private String uniqueId;
 
     @Column(name = "SOURCE", nullable = false)

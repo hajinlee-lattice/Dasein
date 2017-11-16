@@ -98,14 +98,4 @@ public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements Re
     public List<Report> getAll() {
         return findAll();
     }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(Report report) {
-        KeyValue kv = report.getJson();
-        super.delete(report);
-        keyValueDao.delete(kv);
-
-    }
-
 }

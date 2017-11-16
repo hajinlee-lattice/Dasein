@@ -8,13 +8,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
-@Table(name = "KEY_VALUE")
+@Table(name = "KEY_VALUE", //
+        indexes = { @Index(name = "KEY_VALUE_TENANT_ID_IDX", columnList = "TENANT_ID") })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class KeyValue implements HasTenantId, HasPid {
@@ -60,7 +61,6 @@ public class KeyValue implements HasTenantId, HasPid {
     @Override
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
-    @Index(name = "KEY_VALUE_TENANT_ID_IDX")
     public Long getTenantId() {
         return tenantId;
     }

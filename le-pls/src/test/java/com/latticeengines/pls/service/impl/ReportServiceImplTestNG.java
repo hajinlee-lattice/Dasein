@@ -59,7 +59,7 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @DataProvider(name = "tenants")
     public Object[][] getTenants() {
         return new Object[][] { //
-        new Object[] { TENANT1, "SomeReport" }, //
+                new Object[] { TENANT1, "SomeReport" }, //
                 new Object[] { TENANT2, "SomeReport" } //
         };
     }

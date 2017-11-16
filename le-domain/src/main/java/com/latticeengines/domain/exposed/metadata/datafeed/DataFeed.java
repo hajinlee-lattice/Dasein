@@ -17,6 +17,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -29,7 +30,6 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -45,7 +45,9 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "DATAFEED", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }))
+@Table(name = "DATAFEED", //
+        indexes = { @Index(name = "IX_FEED_NAME", columnList = "NAME") }, //
+        uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serializable {
@@ -77,7 +79,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @Column(name = "NAME", nullable = false)
     @JsonProperty("name")
-    @Index(name = "IX_FEED_NAME")
     private String name;
 
     @Column(name = "STATUS", nullable = false)
