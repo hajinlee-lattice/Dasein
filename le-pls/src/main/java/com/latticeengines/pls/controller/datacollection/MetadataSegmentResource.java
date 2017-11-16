@@ -97,13 +97,6 @@ public class MetadataSegmentResource {
         return metadataSegmentExportService.getSegmentExportByExportId(exportId);
     }
 
-    @RequestMapping(value = "/export/cleanup", method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Cleanup expired export jobs")
-    public void cleanupExpiredJobs(@PathVariable String name) {
-        Log.info("Received call for cleanup");
-    }
-
     @RequestMapping(value = "/export/{exportId}/download", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Download result of export job")

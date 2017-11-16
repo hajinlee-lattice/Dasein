@@ -19,4 +19,6 @@ public interface MetadataSegmentExportService {
     void deleteSegmentExportByExportId(String exportId);
 
     void downloadSegmentExportResult(String exportId, HttpServletRequest request, HttpServletResponse response);
+
+    String getExportedFilePath(MetadataSegmentExport metadataSegmentExport);
 }

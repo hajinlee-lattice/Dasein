@@ -148,9 +148,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             throw new LedpException(LedpCode.LEDP_18164, new Object[] { exportId });
         case COMPLETED:
             try {
-                String filePath = metadataSegmentExport.getPath();
-                filePath = filePath.substring(0, filePath.length() - 1);
-                filePath = filePath + "_" + metadataSegmentExport.getFileName();
+                String filePath = getExportedFilePath(metadataSegmentExport);
                 response.setHeader("Content-Encoding", "gzip");
                 CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(
                         MediaType.APPLICATION_OCTET_STREAM, filePath, metadataSegmentExport.getFileName());
@@ -163,6 +161,13 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         default:
             throw new LedpException(LedpCode.LEDP_18160, new Object[] { exportId });
         }
+    }
+
+    @Override
+    public String getExportedFilePath(MetadataSegmentExport metadataSegmentExport) {
+        String filePath = metadataSegmentExport.getPath();
+        filePath = filePath.substring(0, filePath.length() - 1);
+        return filePath + "_" + metadataSegmentExport.getFileName();
     }
 
     private CustomerSpaceHdfsFileDownloader getCustomerSpaceDownloader(String mimeType, String filePath,
