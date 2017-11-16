@@ -161,13 +161,13 @@
                                 type="text"
                                 id="display_name"
                                 name="display_name"
-                                data-ng-model="rating.displayName"
+                                data-ng-model="vm.displayNames[rating.id]"
                                 ng-change="vm.nameChanged(rating)"
                                 maxlength="50"
                                 ng-trim="false"
                                 class="form-control" />
                             </label>
-                            <span>{{50 - rating.displayName.length}} characters remaining</span>
+                            <span>{{50 - vm.displayNames[rating.id].length}} characters remaining</span>
 
                         </div>
                         <div class="actions">

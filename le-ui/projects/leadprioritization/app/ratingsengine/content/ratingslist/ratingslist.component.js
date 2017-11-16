@@ -35,7 +35,7 @@ angular.module('lp.ratingsengine.ratingslist', [
             }
         }
     });
-
+    vm.displayNames = {};
     vm.init = function($q, $filter) {
 
         console.log(vm.current.ratings);
@@ -126,12 +126,12 @@ angular.module('lp.ratingsengine.ratingslist', [
         var tileState = vm.tileStates[rating.id];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editRating = !tileState.editRating;
+        vm.displayNames[rating.id] = rating.displayName; // remember prior display name in case user cancels
     };
 
     vm.nameChanged = function(rating) {
         var tileState = vm.tileStates[rating.id];
-        
-        tileState.saveEnabled = !!(rating.displayName.length > 0);
+        tileState.saveEnabled = vm.displayNames[rating.id].length > 0;
     };
 
     vm.cancelEditRatingClicked = function($event, rating) {
@@ -139,6 +139,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 
         var tileState = vm.tileStates[rating.id];
         tileState.editRating = !tileState.editRating;
+        delete vm.displayNames[rating.id]; //discard updated name
     };
 
     vm.editStatusClick = function($event, rating, disable){
@@ -164,10 +165,14 @@ angular.module('lp.ratingsengine.ratingslist', [
         $event.stopPropagation();
 
         var tileState = vm.tileStates[rating.id];
+        var updatedRatingName = vm.displayNames[rating.id];
         var updatedRating = {
             id: rating.id,
-            displayName: rating.displayName
+            displayName: updatedRatingName //save updated rating name
         }
+
+        rating.displayName = updatedRatingName; //updates display name of rating; otherwise displays old name
+        delete vm.displayNames[rating.id];
 
         vm.saveInProgress = true;
         tileState.editRating = false;
