@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.db.IsUserModifiable;
 
 @MappedSuperclass
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT, property = "property")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.PROPERTY, property = "property")
 @JsonSubTypes({ //
         @Type(value = ModelNote.class, name = "modelNote"), //
         @Type(value = RatingEngineNote.class, name = "ratingEngineNote") })
