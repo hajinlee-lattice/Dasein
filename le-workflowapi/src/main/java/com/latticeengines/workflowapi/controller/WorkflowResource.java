@@ -44,8 +44,8 @@ public class WorkflowResource implements WorkflowInterface {
     @Override
     public List<Job> getWorkflowJobs( //
             @PathVariable String customerSpace, //
-            @RequestParam(value = "jobIds", required = false) List<String> jobIds, //
-            @RequestParam(value = "types", required = false) List<String> types, //
+            @RequestParam(value = "jobId", required = false) List<String> jobIds, //
+            @RequestParam(value = "type", required = false) List<String> types, //
             @RequestParam(value = "includeDetails", required = false) Boolean includeDetails, //
             @RequestParam(value = "hasParentId", required = false) Boolean hasParentId) {
         return null;
@@ -57,7 +57,7 @@ public class WorkflowResource implements WorkflowInterface {
     @Override
     public Job updateParentJobId( //
             @PathVariable String customerSpace, //
-            @RequestParam(value = "jobIds", required = true) List<String> jobIds, //
+            @RequestParam(value = "jobId", required = true) List<String> jobIds, //
             @RequestParam(value = "parentId", required = true) String parentJobId) {
         return null;
     }

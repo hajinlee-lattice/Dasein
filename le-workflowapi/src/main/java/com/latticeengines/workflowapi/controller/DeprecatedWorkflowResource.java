@@ -151,7 +151,7 @@ public class DeprecatedWorkflowResource implements DeprecatedWorkflowInterface {
     @ResponseBody
     @ApiOperation(value = "Get list of workflow executions given list of job Ids")
     @Override
-    public List<Job> getWorkflowExecutionsByJobIds(@RequestParam(value = "jobIds") List<String> jobIds) {
+    public List<Job> getWorkflowExecutionsByJobIds(@RequestParam(value = "jobId") List<String> jobIds) {
         List<WorkflowExecutionId> workflowExecutionIds = jobIds.stream()
                 .map(jobId -> new WorkflowExecutionId((Long.valueOf(jobId)))).collect(Collectors.toList());
         return workflowService.getJobs(workflowExecutionIds);

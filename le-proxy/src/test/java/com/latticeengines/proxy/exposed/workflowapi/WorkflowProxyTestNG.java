@@ -32,22 +32,22 @@ public class WorkflowProxyTestNG extends BaseRestApiProxyTestNG {
                 + "/workflowapi/workflows/customerspaces/tenant/jobs");
         url = workflowProxy.generateGetWorkflowUrls(customerSpace.toString(), jobIds, null, null, null);
         Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")
-                + "/workflowapi/workflows/customerspaces/tenant/jobs?jobIds=12345&jobIds=12346");
+                + "/workflowapi/workflows/customerspaces/tenant/jobs?jobId=12345&jobId=12346");
         url = workflowProxy.generateGetWorkflowUrls(customerSpace.toString(), null, types, null, null);
         Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")
-                + "/workflowapi/workflows/customerspaces/tenant/jobs?types=consolidateandpublishworkflow&types=profileandpublishworkflow");
+                + "/workflowapi/workflows/customerspaces/tenant/jobs?type=consolidateandpublishworkflow&type=profileandpublishworkflow");
         url = workflowProxy.generateGetWorkflowUrls(customerSpace.toString(), jobIds, types, null, null);
         Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")
-                + "/workflowapi/workflows/customerspaces/tenant/jobs?jobIds=12345&jobIds=12346&types=consolidateandpublishworkflow&types=profileandpublishworkflow");
+                + "/workflowapi/workflows/customerspaces/tenant/jobs?jobId=12345&jobId=12346&type=consolidateandpublishworkflow&type=profileandpublishworkflow");
         url = workflowProxy.generateGetWorkflowUrls(customerSpace.toString(), null, types, null, false);
         Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")
-                + "/workflowapi/workflows/customerspaces/tenant/jobs?types=consolidateandpublishworkflow&types=profileandpublishworkflow&hasParentId=false");
+                + "/workflowapi/workflows/customerspaces/tenant/jobs?type=consolidateandpublishworkflow&type=profileandpublishworkflow&hasParentId=false");
     }
 
     @Test(groups = "functional")
     public void testGenerateUpdateParentJobIdUrl() {
         String url = workflowProxy.generateUpdateParentJobIdUrl(customerSpace.toString(), jobIds, parentId);
         Assert.assertEquals(url, PropertyUtils.getProperty("common.microservice.url")
-                + "/workflowapi/workflows/customerspaces/tenant/jobs?jobIds=12345&jobIds=12346&parentJobId=12347");
+                + "/workflowapi/workflows/customerspaces/tenant/jobs?jobId=12345&jobId=12346&parentJobId=12347");
     }
 }

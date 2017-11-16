@@ -28,8 +28,6 @@ public interface WorkflowJobService {
 
     List<Job> findJobs(List<String> jobIds, List<String> types, Boolean includeDetails, Boolean hasParentId);
 
-    void updateParentJobId(List<String> jobIds, String parentJobId);
-
     List<Job> findAll();
 
 }

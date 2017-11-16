@@ -82,7 +82,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
     public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds) {
         StringBuilder sb = new StringBuilder();
         for (String jobId : jobIds) {
-            sb.append(String.format("jobIds=%s&", jobId));
+            sb.append(String.format("jobId=%s&", jobId));
         }
         sb.setLength(sb.length() - 1);
         String url = constructUrl(String.format("/jobs?%s", sb.toString()));
@@ -117,12 +117,12 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
         StringBuilder sb = new StringBuilder();
         if (CollectionUtils.isNotEmpty(jobIds)) {
             for (String jobId : jobIds) {
-                sb.append(String.format("jobIds=%s&", jobId));
+                sb.append(String.format("jobId=%s&", jobId));
             }
         }
         if (CollectionUtils.isNotEmpty(types)) {
             for (String type : types) {
-                sb.append(String.format("types=%s&", type));
+                sb.append(String.format("type=%s&", type));
             }
         }
         if (includeDetails != null) {
@@ -153,7 +153,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
         StringBuilder urlStr = new StringBuilder();
         urlStr.append("/customerspaces/{customerspaces}/jobs?");
         for (String jobId : jobIds) {
-            urlStr.append(String.format("jobIds=%s&", jobId));
+            urlStr.append(String.format("jobId=%s&", jobId));
         }
         urlStr.append(String.format("parentJobId=%s", parentJobId));
         String url = constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));

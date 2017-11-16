@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -276,18 +273,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return Collections.emptyList();
         }
         return jobs;
-    }
-
-    @Override
-    public void updateParentJobId(List<String> jobIds, String parentJobId) {
-        Tenant tenantWithPid = getTenant();
-        if (CollectionUtils.isEmpty(jobIds)) {
-            throw new LedpException(LedpCode.LEDP_18165);
-        }
-        if (parentJobId == null) {
-            throw new LedpException(LedpCode.LEDP_18166);
-        }
-        workflowProxy.updateParentJobId(CustomerSpace.parse(tenantWithPid.getId()).toString(), jobIds, parentJobId);
     }
 
 }

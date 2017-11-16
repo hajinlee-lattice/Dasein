@@ -728,7 +728,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         StringBuilder sb = new StringBuilder();
         sb.append("?");
         for (String jobId : workflowIds) {
-            sb.append(String.format("jobIds=%s&", jobId));
+            sb.append(String.format("jobId=%s&", jobId));
         }
         String urlSuffix = sb.substring(0, sb.length() - 1).toString();
         rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs%s", getRestAPIHostPort(), urlSuffix),
