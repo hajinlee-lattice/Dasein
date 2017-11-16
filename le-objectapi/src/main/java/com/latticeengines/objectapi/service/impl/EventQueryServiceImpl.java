@@ -24,17 +24,17 @@ public class EventQueryServiceImpl implements EventQueryService {
     }
 
     @Override
-    public DataPage getSegmentTuple(FrontEndQuery frontEndQuery) {
+    public DataPage getScoringTuples(FrontEndQuery frontEndQuery) {
         return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring);
     }
 
     @Override
-    public DataPage getTrainingTuple(FrontEndQuery frontEndQuery) {
+    public DataPage getTrainingTuples(FrontEndQuery frontEndQuery) {
         return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training);
     }
 
     @Override
-    public DataPage getEventTuple(FrontEndQuery frontEndQuery) {
+    public DataPage getEventTuples(FrontEndQuery frontEndQuery) {
         return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event);
     }
 

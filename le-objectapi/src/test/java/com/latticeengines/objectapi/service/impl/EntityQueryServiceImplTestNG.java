@@ -1,6 +1,7 @@
 package com.latticeengines.objectapi.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.python.icu.impl.coll.CollationRoot.getData;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -139,7 +140,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertEquals(count1 + count2 + count3, totalCount);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testAccountContactWithTxn() {
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
         // Check add up
@@ -162,7 +163,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(100));
+        Assert.assertEquals(count, new Long(43));
     }
 
     private long countTxnBkt(Bucket.Transaction txn) {
@@ -181,6 +182,34 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         return new BucketRestriction(attrLookup, bucket);
+    }
+
+    @Test(groups = "functional")
+    public void testContactAccountWithTxn() {
+        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction1 = new FrontEndRestriction();
+        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
+                .build();
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        Bucket bucket = Bucket.txnBkt(txn);
+        Restriction txRestriction = new BucketRestriction(attrLookup, bucket);
+        Restriction logicalRestriction = Restriction.builder().and(restriction1, txRestriction).build();
+        frontEndRestriction1.setRestriction(logicalRestriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction1);
+
+        FrontEndRestriction frontEndRestriction2 = new FrontEndRestriction();
+        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).gte("VP")
+                .build();
+        frontEndRestriction2.setRestriction(restriction2);
+        frontEndQuery.setContactRestriction(frontEndRestriction2);
+
+        frontEndQuery.setMainEntity(BusinessEntity.Contact);
+        Long count = entityQueryService.getCount(frontEndQuery);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(15L));
+
     }
 
     @Test(groups = "functional")

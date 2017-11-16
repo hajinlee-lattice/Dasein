@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -50,6 +48,8 @@ import com.querydsl.sql.Union;
 import com.querydsl.sql.WindowFunction;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
 
 public class EventQueryTranslator {
     public static final int NUM_ADDITIONAL_PERIOD = 2;
@@ -198,13 +198,13 @@ public class EventQueryTranslator {
     private BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
-        Object value = aggregationFilter.getValues().get(0);
+        List<Object> values = aggregationFilter.getValues();
 
         BooleanExpression aggrPredicate = null;
         switch (aggregateType) {
         case SUM:
         case AVG:
-            aggrPredicate = toBooleanExpression(aggr, cmp, value);
+            aggrPredicate = toBooleanExpression(aggr, cmp, values);
             break;
         case AT_LEAST_ONCE:
         case EACH:
@@ -213,21 +213,6 @@ public class EventQueryTranslator {
         }
 
         return aggrPredicate;
-    }
-
-    private BooleanExpression toBooleanExpression(StringPath numberPath, ComparisonType cmp, Object value) {
-        switch (cmp) {
-        case GREATER_OR_EQUAL:
-            return numberPath.goe(value.toString());
-        case GREATER_THAN:
-            return numberPath.gt(value.toString());
-        case LESS_THAN:
-            return numberPath.lt(value.toString());
-        case LESS_OR_EQUAL:
-            return numberPath.loe(value.toString());
-        default:
-            throw new UnsupportedOperationException("Unsupported comparison type " + cmp);
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -242,7 +227,7 @@ public class EventQueryTranslator {
 
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
-        Object value = aggregationFilter.getValues().get(0);
+        List<Object> values = aggregationFilter.getValues();
 
         WindowFunction windowAgg = null;
         switch (aggregateType) {
@@ -253,12 +238,12 @@ public class EventQueryTranslator {
             windowAgg = SQLExpressions.avg(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
             break;
         case AT_LEAST_ONCE:
-            BooleanExpression condition = toBooleanExpression(trxnVal, cmp, value);
+            BooleanExpression condition = toBooleanExpression(trxnVal, cmp, values);
             NumberExpression trxnValExists = new CaseBuilder().when(condition).then(1).otherwise(0);
             windowAgg = SQLExpressions.max(trxnValExists).over();
             break;
         case EACH:
-            BooleanExpression each = toBooleanExpression(trxnVal, cmp, value);
+            BooleanExpression each = toBooleanExpression(trxnVal, cmp, values);
             NumberExpression trxnValExistsOrNull = new CaseBuilder().when(each).then(1).otherwise(0);
             windowAgg = SQLExpressions.min(trxnValExistsOrNull).over();
             break;
@@ -461,10 +446,6 @@ public class EventQueryTranslator {
         query.setSubQueryExpression(selectAll);
         query.setAlias(tableName);
         return query;
-    }
-
-    private String generateAlias(String prefix) {
-        return prefix + RandomStringUtils.randomAlphanumeric(8);
     }
 
     private SubQuery translateTransactionRestriction(QueryFactory queryFactory,

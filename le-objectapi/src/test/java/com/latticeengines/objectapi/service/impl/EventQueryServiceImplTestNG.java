@@ -1,6 +1,5 @@
 package com.latticeengines.objectapi.service.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.mockito.Mockito;
@@ -23,7 +22,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
-import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -45,7 +43,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         MultiTenantContext.setTenant(new Tenant("LocalTest"));
     }
 
-    @Test(groups = "functional", enabled=false)
+    @Test(groups = "functional", enabled = false)
     public void testScoring() {
         String prodId = "A78DF03BAC196BE9A08508FFDB433A31";
 
@@ -71,7 +69,37 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        DataPage dataPage = eventQueryService.getSegmentTuple(frontEndQuery);
+        DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery);
+        Assert.assertNotNull(dataPage.getData());
+        return dataPage.getData().size();
+    }
+
+    private long countTxnBktForTraining(Bucket.Transaction txn) {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Bucket bucket = Bucket.txnBkt(txn);
+        Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setPageFilter(new PageFilter(0, 0));
+        DataPage dataPage = eventQueryService.getTrainingTuples(frontEndQuery);
+        Assert.assertNotNull(dataPage.getData());
+        return dataPage.getData().size();
+    }
+
+    private long countTxnBktForEvent(Bucket.Transaction txn) {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Bucket bucket = Bucket.txnBkt(txn);
+        Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setPageFilter(new PageFilter(0, 0));
+        DataPage dataPage = eventQueryService.getEventTuples(frontEndQuery);
         Assert.assertNotNull(dataPage.getData());
         return dataPage.getData().size();
     }

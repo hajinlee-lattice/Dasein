@@ -5,9 +5,9 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
 public interface EventQueryService {
 
-    DataPage getSegmentTuple(FrontEndQuery frontEndQuery);
+    DataPage getScoringTuples(FrontEndQuery frontEndQuery);
 
-    DataPage getTrainingTuple(FrontEndQuery frontEndQuery);
+    DataPage getTrainingTuples(FrontEndQuery frontEndQuery);
 
-    DataPage getEventTuple(FrontEndQuery frontEndQuery);
+    DataPage getEventTuples(FrontEndQuery frontEndQuery);
 }

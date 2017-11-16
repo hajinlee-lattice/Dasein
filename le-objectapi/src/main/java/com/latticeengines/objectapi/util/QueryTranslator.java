@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
+import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
@@ -42,6 +43,8 @@ import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
+
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
 
 public class QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
@@ -218,12 +221,15 @@ public class QueryTranslator {
     private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
                                                   Restriction outerRestriction, Map<String, Lookup> ruleBasedModels, QueryBuilder queryBuilder) {
         BusinessEntity innerEntity = null;
+        String joinEntityKey = null;
         switch (outerEntity) {
         case Contact:
             innerEntity = BusinessEntity.Account;
+            joinEntityKey = InterfaceName.AccountId.name();
             break;
         case Account:
             innerEntity = BusinessEntity.Contact;
+            joinEntityKey = InterfaceName.AccountId.name();
             break;
         default:
             break;
@@ -231,7 +237,7 @@ public class QueryTranslator {
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
         Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction,
                                                                     ruleBasedModels, queryBuilder);
-        return addExistsRestriction(outerRestriction, innerEntity, innerRestriction);
+        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction, joinEntityKey);
     }
 
     private Restriction joinRestrictions(Restriction outerRestriction, Restriction innerRestriction) {
@@ -328,6 +334,22 @@ public class QueryTranslator {
                 }
             }
         }
+    }
+
+    private Restriction addSubselectRestriction(BusinessEntity outerEntity,
+                                                Restriction outerRestriction,
+                                                BusinessEntity innerEntity,
+                                                Restriction innerRestriction,
+                                                String joinEntityKey) {
+        if (innerRestriction != null) {
+            Query innerQuery = Query.builder().from(innerEntity)
+                    .where(innerRestriction)
+                    .select(innerEntity, joinEntityKey).build();
+            SubQuery subQuery = new SubQuery(innerQuery, generateAlias(innerEntity.name()));
+            innerRestriction = Restriction.builder().let(outerEntity, joinEntityKey)
+                    .inCollection(subQuery, joinEntityKey).build();
+        }
+        return joinRestrictions(outerRestriction, innerRestriction);
     }
 
     private Restriction addExistsRestriction(Restriction outerRestriction, BusinessEntity innerEntity,
