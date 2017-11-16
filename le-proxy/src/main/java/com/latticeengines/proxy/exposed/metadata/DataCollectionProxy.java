@@ -3,28 +3,18 @@ package com.latticeengines.proxy.exposed.metadata;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.support.CompositeCacheManager;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.cache.CacheNames;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -34,33 +24,14 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataCollectionProxy")
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-@CacheConfig(cacheNames = "AttributeRepoCache")
 public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionProxy.class);
 
-    private final CacheManager cacheManager;
+    private LoadingCache<String, AttributeRepository> attrRepoCache = null;
 
-    private LocalCacheManager<String, AttributeRepository> attrRepoCache;
-
-    @Inject
-    protected DataCollectionProxy(CacheManager cacheManager) {
+    protected DataCollectionProxy() {
         super("metadata");
-        this.cacheManager = cacheManager;
-        attrRepoCache = new LocalCacheManager<>(CacheNames.AttributeRepoCache, o -> {
-            String str = (String) o;
-            String[] tokens = str.split("\\|");
-            return getAttrRepoViaRestCall(tokens[0]);
-        }, 100); //
-    }
-
-    @PostConstruct
-    public void addCacheManager() {
-        if (cacheManager instanceof CompositeCacheManager) {
-            log.info("adding local entity cache manager to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Collections.singletonList(attrRepoCache));
-        }
     }
 
     public DataCollection getDefaultDataCollection(String customerSpace) {
@@ -75,9 +46,11 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("get default dataCollection", url, ResponseDocument.class);
     }
 
-    @Cacheable(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
     public AttributeRepository getAttrRepo(String customerSpace) {
-        return getAttrRepoViaRestCall(customerSpace);
+        if (attrRepoCache == null) {
+            initializeAttrRepoCache();
+        }
+        return attrRepoCache.get(customerSpace);
     }
 
     public StatisticsContainer getStats(String customerSpace) {
@@ -143,11 +116,24 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("upsertTable", url, null, DataCollection.class);
     }
 
-    @CacheEvict(key = "T(java.lang.String).format(\"%s|attrrepo\", #customerSpace)")
     public void upsertStats(String customerSpace, StatisticsContainer container) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
                 shortenCustomerSpace(customerSpace));
+        evictAttrRepoCache(customerSpace);
         post("upsertStats", url, container, SimpleBooleanResponse.class);
+    }
+
+    private void initializeAttrRepoCache() {
+        attrRepoCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(5, TimeUnit.MINUTES)
+                .refreshAfterWrite(1, TimeUnit.MINUTES).build(this::getAttrRepoViaRestCall);
+        log.info("Initialized loading cache attrRepoCache.");
+    }
+
+    private void evictAttrRepoCache(String customerSpace) {
+        if (attrRepoCache != null) {
+            attrRepoCache.invalidate(customerSpace);
+            log.info("Invalidated attr repo cache for customer " + shortenCustomerSpace(customerSpace));
+        }
     }
 
     private AttributeRepository getAttrRepoViaRestCall(String customerSpace) {

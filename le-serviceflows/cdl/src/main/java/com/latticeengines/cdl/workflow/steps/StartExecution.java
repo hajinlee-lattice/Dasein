@@ -60,7 +60,7 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
         }
 
         List<Job> importJobs = getJobs(configuration.getImportJobIds());
-        // createReport(importJobs);
+        createReport(importJobs);
         // updating import job logic starts here
     }
 
@@ -89,6 +89,9 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
     }
 
     private List<Job> getJobs(List<Long> importJobIds) {
+        if (importJobIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         return importJobIds.stream().map(id -> workflowProxy.getWorkflowExecution(String.valueOf(id)))
                 .collect(Collectors.toList());
     }

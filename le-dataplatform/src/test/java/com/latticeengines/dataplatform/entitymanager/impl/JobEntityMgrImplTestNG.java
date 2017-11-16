@@ -122,7 +122,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void tearDown() {
         modelEntityMgr.delete(model);
         if (modelDef.getModels() != null) {
-        		modelDef.getModels().remove(model);
+            modelDef.getModels().remove(model);
         }
         modelDefinitionEntityMgr.delete(modelDef);
     }

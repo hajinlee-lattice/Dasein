@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -142,6 +143,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         });
         log.info("imports for consolidates are: " + imports);
 
+        Collections.sort(imports, (a, b) -> Long.compare(a.getDataTable().getPid(), b.getDataTable().getPid()));
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Started);

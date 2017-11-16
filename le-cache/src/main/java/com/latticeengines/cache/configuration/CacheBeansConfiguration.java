@@ -18,6 +18,7 @@ import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import com.latticeengines.domain.exposed.cache.CacheNames;
 
@@ -32,6 +33,7 @@ public class CacheBeansConfiguration {
     private RedissonClient redisson;
 
     @Bean
+    @DependsOn("redisson")
     public CacheManager cacheManager(@Value("${cache.type}") String cacheType) {
         switch (cacheType) {
         case "redis":
@@ -46,8 +48,6 @@ public class CacheBeansConfiguration {
 
     private CacheManager redisCacheManager() {
         long maxIdleTime = 5 * 24 * 60 * 60 * 1000;
-        CacheConfig attributeRepoCacheConfig = new CacheConfig(0, maxIdleTime);
-        attributeRepoCacheConfig.setMaxSize(100 * 2);
 
         CacheConfig dataLakeCMCacheConfig = new CacheConfig(0, maxIdleTime);
         dataLakeCMCacheConfig.setMaxSize(100 * 2);
@@ -66,7 +66,6 @@ public class CacheBeansConfiguration {
         CacheConfig sessionCacheConfig = new CacheConfig(5 * 60 * 1000, 15 * 60 * 1000);
 
         Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
-        config.put(CacheNames.AttributeRepoCache.name(), attributeRepoCacheConfig);
         config.put(CacheNames.DataLakeCMCache.name(), dataLakeCMCacheConfig);
         config.put(CacheNames.DataLakeStatsCache.name(), dataLakeStatsCacheConfig);
 
