@@ -308,8 +308,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     long importCsv(BusinessEntity entity, int fileId) throws Exception {
         String csvPath = String.format("end2end/csv/%s%d.csv", entity.name(), fileId);
         Resource csvResource = new ClassPathResource(csvPath, Thread.currentThread().getContextClassLoader());
-        String templateName = String.format("%s_template.csv", entity);
-        String dataName = String.format("%s_data.csv", entity);
+        String templateName = String.format("%s%d_template.csv", entity, fileId);
+        String dataName = String.format("%s%d_data.csv", entity, fileId);
         SourceFile template = fileUploadProxy.uploadFile(templateName, false, templateName, entity.name(), csvResource);
         SourceFile data = fileUploadProxy.uploadFile(dataName, false, dataName, entity.name(), csvResource);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
