@@ -1,4 +1,4 @@
-<div class="lattice-fields container" ng-if="vm.initialized">
+<div class="lattice-fields container">
     
     <div class="header">
         <h2>Lattice Fields</h2>
@@ -7,58 +7,40 @@
 
     <h3 class="{{vm.importType}}-matching">{{vm.importType}} Matching Fields</h3>
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
-    <ul>
-
-    	<li ng-repeat="field in vm.matchingFieldsList"
-    	ng-init="fieldMapping = vm.matchingFieldMappings[field]">
+    <ul ng-init="fieldMapping = {}">
+    	<li ng-repeat="field in vm.matchingFieldsList">
     		<label>{{field}}</label>
     		<select class="form-control"
-    		    ng-model="fieldMapping.userField"
+    		    ng-model="fieldMapping[field].userField"
 			    ng-change="vm.changeLatticeField(fieldMapping)"
-			    ng-class="{'required': true}" >
-			    <option value="{{::vm.ignoredFieldLabel }}"
-						ng-if="fieldMapping.userField && fieldMapping.userField !== vm.ignoredFieldLabel">
-					{{ ::vm.ignoredFieldLabel }}
+			    ng-class="{'required': true}">
+
+                <option value="" hidden disabled>-- Unmapped Field --</option>
+    			<option ng-repeat="availableField in vm.availableFields" value="{{field}}:{{availableField}}" ng-disabled="vm.unavailableFields.indexOf(availableField) !== -1">
+					{{availableField}}
 				</option>
-				<option value="{{ fieldMapping.userField }}"
-						ng-selected="true">
-					{{ (vm.AvailableFields.length === 0 && fieldMapping.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : fieldMapping.userField }}
-				</option>
-    			<option value="{{ AvailableField }}"
-						ng-repeat="AvailableField in vm.AvailableFields"
-						ng-if="fieldMapping.userField !== AvailableField">
-					{{ AvailableField }}
-				</option>
+
     		</select>
     	</li>
     </ul>
 
-
     <h3 class="analysis">Analysis Fields</h3>
     <p>These optional fields are used for analysis and are useful if you can provide them.</p>
     <ul>
-    	<li ng-repeat="field in vm.analysisFieldsList"
-    	ng-init="fieldMapping = vm.analysisFieldMappings[field]">
-    		<label>{{field}}</label>
-    		<select class="form-control"
-    		    ng-model="fieldMapping.userField"
-			    ng-change="vm.changeLatticeField(fieldMapping)"
-			    ng-class="{'required': true}" >
-			    <option value="{{::vm.ignoredFieldLabel }}"
-						ng-if="fieldMapping.userField && fieldMapping.userField !== vm.ignoredFieldLabel">
-					{{ ::vm.ignoredFieldLabel }}
-				</option>
-				<option value="{{ fieldMapping.userField }}"
-						ng-selected="true">
-					{{ (vm.AvailableFields.length === 0 && fieldMapping.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : fieldMapping.userField }}
-				</option>
-    			<option value="{{ AvailableField }}"
-						ng-repeat="AvailableField in vm.AvailableFields"
-						ng-if="fieldMapping.userField !== AvailableField">
-					{{ AvailableField }}
-				</option>
-    		</select>
-    	</li>
+        <li ng-repeat="field in vm.analysisFieldsList">
+            <label>{{field}}</label>
+            <select class="form-control"
+                ng-model="fieldMapping[field].userField"
+                ng-change="vm.changeLatticeField(fieldMapping)"
+                ng-class="{'required': true}">
+
+                <option value="" hidden disabled>-- Unmapped Field --</option>
+                <option ng-repeat="availableField in vm.availableFields" value="{{field}}:{{availableField}}" ng-disabled="vm.unavailableFields.indexOf(availableField) !== -1">
+                    {{availableField}}
+                </option>
+
+            </select>
+        </li>
     </ul>
 
 </div>

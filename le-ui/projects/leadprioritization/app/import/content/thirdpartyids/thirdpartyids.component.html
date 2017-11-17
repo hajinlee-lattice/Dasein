@@ -3,35 +3,50 @@
     <div class="header">
         <h2>3rd Party Identifiers</h2>
     </div>
+
     <p>3rd Party Identifiers are used to lookup accounts in other applications, such as SalesForce, Marketo and Eloqua. Please map the relevant lookup fields and, if possible, make sure your CSV file has columns with data for each account. If you are uploading an existing account, you do not need to provide it again (as it is already stored in the system).</p>
 
-    		<div ng-init="fieldMapping = vm.idFieldMapping">
-                <label for="dedupeField">CRM ID</label>
-               <!--  <select id="dedupeField" class="form-control"
-                    ng-model="vm.state.selectedField"
-                    ng-disabled="vm.state.dedupeType !== 'custom'"
-                    ng-options="f as f for f in vm.state.fields">
-                    <option ng-if="!vm.state.selectedField" ng-selected="!vm.state.accountDedupeField" value="">Select an Unique Identifier</option>
-                </select> -->
-                <select class="form-control"
-    		    ng-model="fieldMapping.userField"
-    		    ng-change="vm.changeLatticeField(fieldMapping)"
-			    ng-class="{'required': true}" >
-			    <option value="{{ fieldMapping.userField }}"
-						ng-selected="true">
-					{{ vm.AvailableFields.length === 0  ? '-- No Fields Available --' : fieldMapping.userField }}
-				</option>
-    			<option value="{{ AvailableField }}"
-						ng-repeat="AvailableField in vm.AvailableFields"
-						>
-					{{ AvailableField }}
-				</option>
-    		</select>
-            </div>
-</br>
-	<button 
+    <ul class="field-mapping" ng-if="vm.fields" ng-init="fieldMapping = []">
+        <li class="header">
+            <ul>
+                <li>External System Name</li>
+                <li>External System Type</li>
+                <li>Fields in the uploaded file</li>
+            </ul>
+        </li>
+        <li class="field" ng-repeat="field in vm.fields track by $index" ng-init="fieldMapping[$index] = {}">
+            <ul>
+                <li>
+                    <input type="text" ng-model="fieldMapping[$index].userName" ng-blur="vm.changeLatticeField(fieldMapping)" />
+                </li>
+                <li>
+                    <select
+                        ng-model="fieldMapping[$index].mappedField"
+                        ng-change="vm.changeLatticeField(fieldMapping)">
+                        <option value="" hidden disabled>--</option>
+                        <option ng-repeat="type in field.types" value="{{type}}">
+                            {{type}}
+                        </option>
+                    </select>
+                </li>
+                <li>
+                    <select
+                        ng-model="fieldMapping[$index].userField"
+                        ng-change="vm.changeLatticeField(fieldMapping)">
+                        <option value="" hidden disabled>--</option>
+                        <option ng-repeat="availableField in vm.availableFields" ng-value="availableField" >
+                            {{availableField}}
+                        </option>
+                    </select>
+                </li>
+            </ul>
+        </li>
+    </ul>
+ 	<button 
 		class="button white-button" 
 		type="button"
-		ng-click="vm.addIdentifier($event)">Add Another Identifier</button>
+		ng-click="vm.addIdentifier($event)" ng-disabled="vm.fields.length === vm.availableFields.length">
+            Add An{{vm.fields.length ? 'other' : ''}} Identifier
+    </button>
 
 </div>

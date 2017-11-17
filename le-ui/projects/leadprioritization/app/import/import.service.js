@@ -2,37 +2,48 @@ angular.module('lp.import')
 .service('ImportWizardStore', function($q, $state, ImportWizardService){
     var ImportWizardStore = this;
 
-    this.csvFileName = null;
-    this.fieldDocument = null;
-    this.unmappedFields = null;
-    this.accountIdState = {
-        accountDedupeField: null,
-        dedupeType: 'custom',
-        selectedField: null,
-        fields: ['Id']
-    };
+    this.init = function() {
+        
+        this.csvFileName = null;
+        this.fieldDocument = null;
+        this.unmappedFields = null;
+        this.accountIdState = {
+            accountDedupeField: null,
+            dedupeType: 'custom',
+            selectedField: null,
+            fields: ['Id']
+        };
 
-    this.validation = {
-        one: true,
-        two: true,
-        three: true,
-        four: true,
-        five: true
+        this.validation = {
+            one: true,
+            two: true,
+            three: true,
+            four: true,
+            five: true
+        }
+
+        this.saveObjects = [];
     }
+
+    this.init();
 
     this.wizardProgressItems = {
         "all": [
             { 
                 label: 'Account ID', 
                 state: 'accounts.one', 
+                backState: 'home.segment.explorer.attributes',
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
+                    ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Other IDs', 
                 state: 'accounts.one.two', 
-                nextLabel: 'Next'
+                nextLabel: 'Next',
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                } 
             },{ 
                 label: 'Lattice Fields', 
                 state: 'accounts.one.two.three', 
@@ -43,7 +54,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Custom Fields', 
                 state: 'accounts.one.two.three.four', 
-                nextLabel: 'Next', 
+                nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument() );
                     $state.go(nextState); 
@@ -51,7 +62,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Import Data', 
                 state: 'accounts.one.two.three.four.five', 
-                nextLabel: 'Next', 
+                nextLabel: 'Done', 
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
                     $state.go(nextState); 
@@ -76,6 +87,13 @@ angular.module('lp.import')
         $state.go(nextState);
     }
 
+    this.nextSaveMapping = function(nextState) {
+        this.saveObjects.forEach(function(item, index) {
+            ImportWizardStore.remap(item.userField, item.mappedField);
+        });
+        $state.go(nextState);
+    }
+
     this.getAccountIdState = function() {
         return this.accountIdState;
     };
@@ -89,6 +107,7 @@ angular.module('lp.import')
     this.getCsvFileName = function() {
         return this.csvFileName;
     };
+
     this.setCsvFileName = function(fileName) {
         this.csvFileName = fileName;
     };
@@ -104,6 +123,7 @@ angular.module('lp.import')
             return this.fieldDocument.ignoredFields;
         }
     };
+
     this.setFieldDocument = function(data) {
         this.fieldDocument = data;
     };
@@ -111,6 +131,7 @@ angular.module('lp.import')
     this.getUnmappedFields = function() {
         return this.unmappedFields;
     };
+
     this.setUnmappedFields = function(data) {
         this.unmappedFields = data;
     };
@@ -128,6 +149,39 @@ angular.module('lp.import')
             data.push(tmp);
         }
         return data;
+    }
+
+    this.setSaveObjects = function(object) {
+        this.saveObjects = object;
+    }
+
+    this.getSaveObjects = function() {
+        return this.saveObjects;
+    }
+
+    var findIndexes = function(object, property, value) {
+        var indexes = [];
+        object.forEach(function(item, index) {
+            if(item[property] === value) {
+                indexes.push(index);
+            }
+        });
+        return indexes;
+    }
+
+    this.remap = function(userField, mappedField) {
+        var mappedIndexes = findIndexes(this.fieldDocument.fieldMappings, 'mappedField', mappedField),
+            userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField);
+
+        mappedIndexes.forEach(function(index) {
+            ImportWizardStore.fieldDocument.fieldMappings[index].mappedField = null;
+            ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = false;
+        });
+
+        userIndexes.forEach(function(index) {
+            ImportWizardStore.fieldDocument.fieldMappings[index].mappedField = mappedField;
+            ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = true;
+        });
     }
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility) {

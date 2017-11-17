@@ -7,37 +7,25 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     angular.extend(vm, {
         identifiers: Identifiers,
         fieldMappings: FieldDocument.fieldMappings,
-        fieldMappingsMap: {},
-        AvailableFields: [],
-        idFieldMapping: {"userField":"CRMId","mappedField":"CRMId","fieldType":"TEXT","mappedToLatticeField":true},
-        Id: 'CRMId',
-     });
+        availableFields: [],
+        fields: [],
+        field: {name: '', types: ['MAP','CRM','ERP','Other'], field: ''}
+    });
 
-     vm.init = function() {
-         vm.fieldMappings.forEach(function(fieldMapping) {
-             vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
-         });
+    vm.init = function() {
+        console.log(vm.fieldMappings);
+        vm.fieldMappings.forEach(function(fieldMapping) {
+            var userField = fieldMapping.userField;
+            vm.availableFields.push(userField);
+        });
+    };
 
-         vm.fieldMappings.forEach(function(fieldMapping) {
-             var userField = fieldMapping.userField;
-             if (fieldMapping.mappedField != 'Id') {
-                 vm.AvailableFields.push(userField);
-             }
-         });
-
-     };
-
-     vm.changeLatticeField = function(mapping) {
-         if(vm.fieldMappingsMap[vm.Id]) {
-	         vm.fieldMappingsMap[vm.Id].userField = mapping.userField;
-	         vm.fieldMappingsMap[vm.Id].mappedToLatticeField = true;
-    	 }
-         ImportWizardStore.setFieldDocument(FieldDocument);
-     };
-
+    vm.changeLatticeField = function(mapping) {
+        ImportWizardStore.setSaveObjects(mapping);
+    };
 
     vm.addIdentifier = function(){
-    	console.log("Add Identifier");
+        vm.fields.push(vm.field);
     };
 
     vm.init();

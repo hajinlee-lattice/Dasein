@@ -16,7 +16,9 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.init = function() {
         vm.UnmappedFields = UnmappedFields;
+
         ImportWizardStore.setUnmappedFields(UnmappedFields);
+
         vm.UnmappedFields.forEach(function(field) {
             vm.UnmappedFieldsMappingsMap[field.name] = field;
         });
@@ -25,18 +27,17 @@ angular.module('lp.import.wizard.accountids', [])
             vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
         });
 
-        vm.fieldMappings.forEach(function(fieldMapping) {
+        vm.fieldMappings.forEach(function(fieldMapping, index) {
             var userField = fieldMapping.userField;
+            if(fieldMapping.mappedField != null) {
+                vm.selectedIndex = index;
+            }
             vm.AvailableFields.push(userField);
         });
     };
 
     vm.changeLatticeField = function(mapping) {
-        if (vm.fieldMappingsMap[vm.Id]) {
-	        vm.fieldMappingsMap[vm.Id].userField = mapping.userField;
-	        vm.fieldMappingsMap[vm.Id].mappedToLatticeField = true;
-        }
-        ImportWizardStore.setFieldDocument(FieldDocument);
+        ImportWizardStore.setSaveObjects([{userField: mapping.userField, mappedField: vm.Id}]);
     };
 
     vm.init();
