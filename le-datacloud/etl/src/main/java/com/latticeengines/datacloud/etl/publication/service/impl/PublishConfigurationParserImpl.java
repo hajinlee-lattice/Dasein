@@ -307,7 +307,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
                     awsSecretEncrypted, awsRegion));
             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(CipherUtils.decrypt(awsKeyEncrypted),
                     CipherUtils.decrypt(awsSecretEncrypted));
-            return applicationContext.getBean(DynamoServiceImpl.class, awsCredentials, null, awsRegion);
+            return new DynamoServiceImpl(awsCredentials, null, awsRegion);
         } else {
             log.info("aws creds parameters are not set, using default dynamo service.");
             return defaultDynamoSerivce;
