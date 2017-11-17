@@ -21,6 +21,7 @@ public class Job implements HasId<Long>, HasName {
 
     private Long id;
     private String name;
+    private Long parentId;
     private String description;
     private String applicationId;
     private Date startTimestamp;
@@ -58,6 +59,16 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setName(String name) {
         this.name = name;
+    }
+
+    @JsonProperty
+    public Long getParentId() {
+        return parentId;
+    }
+
+    @JsonProperty
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     @JsonProperty

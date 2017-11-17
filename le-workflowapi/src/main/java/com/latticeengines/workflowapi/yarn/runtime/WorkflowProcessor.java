@@ -91,6 +91,8 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             workflowJob.setStatus(FinalApplicationStatus.FAILED);
             workflowJobEntityMgr.update(workflowJob);
             throw new RuntimeException(e);
+        } finally {
+            // TODO: add some logic to update WORKFLOW_JOB table
         }
         return null;
     }

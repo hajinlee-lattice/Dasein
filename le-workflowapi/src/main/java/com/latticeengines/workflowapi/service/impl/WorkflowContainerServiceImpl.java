@@ -235,6 +235,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
         job.setInputs(inputProperties);
         job.setId(workflowJob.getWorkflowId());
+        job.setParentId(workflowJob.getParentJobId());
         job.setApplicationId(workflowJob.getApplicationId());
         job.setUser(workflowJob.getUserId());
         job.setOutputs(workflowJob.getOutputContext());

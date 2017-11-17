@@ -3,7 +3,6 @@ package com.latticeengines.workflow.service.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -90,7 +89,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public List<String> getNames() {
-        return new ArrayList<String>(jobRegistry.getJobNames());
+        return new ArrayList<>(jobRegistry.getJobNames());
     }
 
     @Override
@@ -135,8 +134,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 parmsBuilder.addString(CUSTOMER_SPACE, workflowConfiguration.getCustomerSpace().toString());
             }
             if (workflowConfiguration.getInternalResourceHostPort() != null) {
-                parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT,
-                        workflowConfiguration.getInternalResourceHostPort().toString());
+                parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT, workflowConfiguration.getInternalResourceHostPort());
             }
             if (workflowConfiguration.getUserId() != null) {
                 parmsBuilder.addString(USER_ID, workflowConfiguration.getUserId());
@@ -149,8 +147,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             }
         }
 
-        JobParameters parms = parmsBuilder.toJobParameters();
-        return parms;
+        return parmsBuilder.toJobParameters();
     }
 
     @Override
@@ -298,12 +295,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         try {
             jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
             if (type != null) {
-                Iterator<com.latticeengines.domain.exposed.workflow.Job> iter = jobs.iterator();
-                while (iter.hasNext()) {
-                    if (!iter.next().getJobType().equals(type)) {
-                        iter.remove();
-                    }
-                }
+                jobs.removeIf(job -> !job.getJobType().equals(type));
             }
         } catch (Exception e) {
             log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
@@ -332,7 +324,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         Collection<String> stepNames = CollectionUtils.collect(jobExecution.getStepExecutions(),
                 TransformerUtils.invokerTransformer("getStepName"));
 
-        return new ArrayList<String>(stepNames);
+        return new ArrayList<>(stepNames);
     }
 
     @Override

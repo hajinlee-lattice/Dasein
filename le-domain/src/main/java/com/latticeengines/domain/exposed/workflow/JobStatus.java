@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum JobStatus {
@@ -17,7 +17,7 @@ public enum JobStatus {
     CANCELLED(4, "Cancelled", true), //
     SKIPPED(5, "Skipped", true); //
 
-    private JobStatus(int statusId, String status, boolean terminated) {
+    JobStatus(int statusId, String status, boolean terminated) {
         this.statusId = statusId;
         this.statusCode = status;
         this.terminated = terminated;
@@ -58,5 +58,18 @@ public enum JobStatus {
 
     public static JobStatus getByStatusCode(String statusCode) {
         return statusCodeMap.get(statusCode);
+    }
+
+    public static JobStatus getMappedStatus(FinalApplicationStatus status) {
+        switch (status) {
+            case SUCCEEDED:
+                return COMPLETED;
+            case FAILED:
+            case KILLED:
+                return FAILED;
+            case UNDEFINED:
+            default:
+                return PENDING;
+        }
     }
 }

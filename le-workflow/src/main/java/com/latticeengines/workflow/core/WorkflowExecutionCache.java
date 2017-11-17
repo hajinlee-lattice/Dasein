@@ -143,31 +143,30 @@ public class WorkflowExecutionCache {
             job.setJobType(jobInstance.getJobName());
             job.setSteps(getJobSteps(jobExecution));
 
-            if (workflowJob != null) {
-                if (workflowJob.getStartTimeInMillis() != null) {
-                    job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
-                }
-                job.setReports(getReports(workflowJob));
-                job.setOutputs(getOutputs(workflowJob));
-                job.setInputs(workflowJob.getInputContext());
-                job.setApplicationId(workflowJob.getApplicationId());
-                job.setUser(workflowJob.getUserId());
-                ErrorDetails errorDetails = workflowJob.getErrorDetails();
-                if (errorDetails != null) {
-                    job.setErrorCode(errorDetails.getErrorCode());
-                    job.setErrorMsg(errorDetails.getErrorMsg());
-                }
+            if (workflowJob.getStartTimeInMillis() != null) {
+                job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
+            }
+            job.setReports(getReports(workflowJob));
+            job.setOutputs(getOutputs(workflowJob));
+            job.setParentId(workflowJob.getParentJobId());
+            job.setInputs(workflowJob.getInputContext());
+            job.setApplicationId(workflowJob.getApplicationId());
+            job.setUser(workflowJob.getUserId());
+            ErrorDetails errorDetails = workflowJob.getErrorDetails();
+            if (errorDetails != null) {
+                job.setErrorCode(errorDetails.getErrorCode());
+                job.setErrorMsg(errorDetails.getErrorMsg());
             }
 
             if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
                 job.setEndTimestamp(workflowStatus.getEndTime());
                 cache.put(job.getId(), job);
             }
-            log.info(String.format("Got job status for workflow %d%s: Status=%s, Tenant=%s, ApplicationId=%s",
+            log.info(String.format("Got job status for workflow %d %s: Status=%s, Tenant=%s, ApplicationId=%s",
                     workflowId.getId(),
                     Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus()) ? "(loaded into cache)" : "",
-                    job.getJobStatus(), workflowJob != null ? workflowJob.getTenant().getName() : null,
-                    workflowJob != null ? workflowJob.getApplicationId() : null));
+                    job.getJobStatus(), workflowJob.getTenant().getName(),
+                    workflowJob.getApplicationId()));
             return job;
         } catch (Exception e) {
             log.error(String.format("Getting job status for workflow: %d failed", workflowId.getId()), e);
