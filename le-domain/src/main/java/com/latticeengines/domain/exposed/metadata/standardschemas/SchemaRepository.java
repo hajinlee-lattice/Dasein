@@ -231,6 +231,15 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
 
+        table.addAttribute(attr(InterfaceName.CompanyName.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME", "DISPLAY NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+
         table.addAttribute(attr("Industry") //
                 .allowedDisplayNames(Sets.newHashSet("INDUSTRY")) //
                 .type(Schema.Type.STRING) //
@@ -330,6 +339,15 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
+                .build());
+
+        table.addAttribute(attr(InterfaceName.CompanyName.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
 
         table.addAttribute(attr("CreatedDate") //
@@ -453,6 +471,14 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
+        table.addAttribute(attr(InterfaceName.CompanyName.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME", "DISPLAY NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
         table.addAttribute(attr(InterfaceName.AnnualRevenue.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ANNUALREVENUE", "ANNUAL REVENUE")) //
                 .type(Schema.Type.DOUBLE) //
@@ -532,6 +558,14 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.CompanyName.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(
@@ -902,15 +936,6 @@ public class SchemaRepository {
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build();
-
-        Attribute companyName = attr("CompanyName") //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.CompanyName) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-                .build();
         Attribute city = attr("City") //
                 .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING CITY")) //
                 .type(Schema.Type.STRING) //
@@ -967,7 +992,7 @@ public class SchemaRepository {
         } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead) {
             attrs.add(email);
         }
-        attrs.addAll(Arrays.asList(companyName, city, state, country, postalCode, phoneNumber, duns));
+        attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
         return attrs;
     }
 
