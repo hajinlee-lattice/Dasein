@@ -14,7 +14,8 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         public: QueryStore.getPublic(),
         builderClicked: false,
-        attribuesClicked: false
+        attribuesClicked: false,
+        isSaving: false
     });
 
     vm.init = function() {
@@ -98,7 +99,9 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                     num_rows: 10
                 }
             });
-
+            // vm.public.enableSaveSegmentButton = false;
+            QueryStore.setPublicProperty('enableSaveSegmentButton', false);
+            vm.isSaving = true;
             SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                 QueryStore.setPublicProperty('enableSaveSegmentButton', false);
                 
@@ -109,6 +112,7 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                 }
 
                 vm.saved = true;
+                vm.isSaving = false;
             });
         }
 

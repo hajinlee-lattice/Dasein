@@ -1,5 +1,5 @@
 angular.module('lp.ratingsengine.ai.products', [])
-    .controller('RatingsEngineAIProducts', function ($q, $timeout, $state, $stateParams, $scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore, Products) {
+    .controller('RatingsEngineAIProducts', function ($scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore, Products) {
         var vm = this;
         angular.extend(vm, {
             totalProducts: (function () {

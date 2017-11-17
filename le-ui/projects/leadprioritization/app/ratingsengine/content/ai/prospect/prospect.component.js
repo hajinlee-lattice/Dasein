@@ -1,5 +1,5 @@
 angular.module('lp.ratingsengine.ai.prospect', [])
-    .controller('RatingsEngineAIProspect', function ($q, $timeout, $state, $stateParams, $scope, RatingsEngineAIStore, RatingsEngineAIService, RatingsEngineStore, Prospect) {
+    .controller('RatingsEngineAIProspect', function ($timeout, $scope, RatingsEngineAIStore, RatingsEngineStore, Prospect) {
         var vm = this;
 
         angular.extend(vm, {
