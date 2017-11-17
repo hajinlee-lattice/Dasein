@@ -14,6 +14,7 @@
                     ng-model="fieldMapping.userField"
                     ng-change="vm.changeLatticeField(fieldMapping)"
                     ng-class="{'required': true}">
+                    <option value="" hidden disabled>--</option>
                     <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField}}">
                         {{AvailableField}}
 				    </option>

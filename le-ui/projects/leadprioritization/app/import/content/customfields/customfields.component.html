@@ -64,7 +64,10 @@
 						<option value="DATE">Date</option>
 					</select>
                 </li>
-                <li class="ignore"><input type="checkbox" ng-model="fieldMapping.ignored" ng-click="vm.changeIgnore(fieldMapping)"/> <label for="customFieldsIgnore[{{field.CustomField}}]">Ignore</label></li>
+                <li class="ignore">
+                    <input type="checkbox" ng-model="fieldMapping.ignored" ng-click="vm.changeIgnore(fieldMapping)"/> 
+                    <label for="customFieldsIgnore[{{field.CustomField}}]">Ignore</label>
+                </li>
             </ul>
         </li>
     </ul>

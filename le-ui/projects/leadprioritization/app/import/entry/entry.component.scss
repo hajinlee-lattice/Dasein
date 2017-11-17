@@ -3,18 +3,22 @@
         margin: 2em 0;
     }
     .button-tabs {
-        display: flex;
-        justify-content: space-between;
+        @include flex-container;
         .button {
-            width: 19%;
+            @include flex-item(1 1 auto);
+            width: calc(100% / 5);
+            align-self: stretch;
             padding: 68px 6px 6px;
-            display: inline-flex;
-            justify-content: center;
-            align-items: baseline;
+            margin-right: 10px;
+            &:last-child {
+               margin-right: 0; 
+            }
             background-repeat: no-repeat;
             background-position: center 22px;
             text-transform: none;
             color: #333;
+            height: auto;
+            line-height: normal;
             &.account {
                 background-image: url('/assets/images/ico-accounts-dark.png');
             }

@@ -1,6 +1,7 @@
 <div>
     <div class="pull-left">
         <button 
+            ng-if="!vm.item.hideBack"
             type="button" 
             class="button white-button block-button"
             ng-click="vm.click(true)">
@@ -10,6 +11,7 @@
     
     <div class="pull-right">
         <button 
+            ng-if="!vm.item.hideNext"
             type="button" 
             class="button blue-button"
             ng-click="vm.click()"

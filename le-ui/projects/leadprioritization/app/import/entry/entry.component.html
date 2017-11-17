@@ -8,19 +8,19 @@
       <div class="section-body with-padding">
 
         <div class="button-tabs">
-          <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accounts';" ui-sref="home.import.entry.accounts">
+          <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('accounts');" ui-sref="home.import.entry.accounts">
             <span>Accounts</span>
           </div>
-          <div class="button account {{ vm.goState == 'accountfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accountfields';" ui-sref="home.import.entry.accountfields">
+          <div class="button account {{ vm.goState == 'accountfields' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('accountfields');" ui-sref="home.import.entry.accountfields">
             <span>Account <br/>Custom Fields</span>
           </div>
-          <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contacts';" ui-sref="home.import.entry.contacts">
+          <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('contacts');" ui-sref="home.import.entry.contacts">
             <span>Contacts</span>
           </div>
-          <div class="button contact {{ vm.goState == 'contactfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contactfields';" ui-sref="home.import.entry.contactfields">
+          <div class="button contact {{ vm.goState == 'contactfields' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('contactfields');" ui-sref="home.import.entry.contactfields">
             <span>Contact <br/>Custom Fields</span>
           </div>
-          <div class="button eloqua {{ vm.goState == 'eloquoa' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'eloquoa';" ui-sref="home.import.entry.eloquoa">
+          <div class="button eloqua {{ vm.goState == 'eloquoa' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('eloquoa');" ui-sref="home.import.entry.eloquoa">
             <span>Product Data</span>
           </div>
         </div>
@@ -47,7 +47,7 @@
             <button 
                 type="button" 
                 class="button white-button block-button"
-                ui-sref="home.import.entry">
+                ui-sref="home.segment.explorer.attributes({segment:'Create'})">
               Back
             </button>
         </div>

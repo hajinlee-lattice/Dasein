@@ -40,6 +40,7 @@ angular.module('lp.import.wizard.customfields', [])
     };
 
     vm.changeIgnore = function(fieldMapping) {
+        console.log(fieldMapping);
          vm.fieldMappings.forEach(function(fieldMapping) {
              if (fieldMapping.ignored) {
                  vm.ignoredFields.push(fieldMapping.userField);

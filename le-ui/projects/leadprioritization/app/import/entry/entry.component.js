@@ -27,12 +27,17 @@ angular.module('lp.import.entry', [
     vm.init = function() {
         var state = $state.current.name;
         switch (state) {
-            case 'home.import.entry.accounts': vm.goState = 'accounts'; break;
-            case 'home.import.entry.accountfields': vm.goState = 'accountfields'; break;
-            case 'home.import.entry.contacts': vm.goState = 'contacts'; break;
-            case 'home.import.entry.contactfields': vm.goState = 'contactfields'; break;
-            case 'home.import.entry.eloquoa': vm.goState = 'eloquoa'; break;
+            case 'home.import.entry.accounts': vm.changeEntityType('accounts'); break;
+            case 'home.import.entry.accountfields': vm.changeEntityType('accountfields'); break;
+            case 'home.import.entry.contacts': vm.changeEntityType('contacts'); break;
+            case 'home.import.entry.contactfields': vm.changeEntityType('contactfields'); break;
+            case 'home.import.entry.eloquoa': vm.changeEntityType('eloquoa'); break;
         }
+    }
+
+    vm.changeEntityType = function(type) {
+        vm.goState = type;
+        ImportWizardStore.setEntityType(type);
     }
 
     vm.fileLoad = function(headers) {

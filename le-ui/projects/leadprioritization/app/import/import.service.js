@@ -23,6 +23,8 @@ angular.module('lp.import')
         }
 
         this.saveObjects = [];
+
+        this.entityType = null;
     }
 
     this.init();
@@ -56,13 +58,125 @@ angular.module('lp.import')
                 state: 'accounts.one.two.three.four', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument() );
-                    $state.go(nextState); 
+                    ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 
                 state: 'accounts.one.two.three.four.five', 
                 nextLabel: 'Done', 
+                hideBack: true,
+                nextFn: function(nextState) {
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+                    $state.go(nextState); 
+                }
+            }
+        ],
+        "accountfields": [
+            { 
+                label: 'Account ID', 
+                state: 'accountfields.one', 
+                backState: 'home.segment.explorer.attributes',
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                } 
+            },{ 
+                label: 'Other IDs', 
+                state: 'accountfields.one.two', 
+                nextLabel: 'Next',
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                } 
+            },{ 
+                label: 'Custom Fields', 
+                state: 'accountfields.one.two.three', 
+                nextLabel: 'Import File', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                }
+            },{ 
+                label: 'Import Data', 
+                state: 'accountfields.one.two.three.four', 
+                nextLabel: 'Done', 
+                hideBack: true,
+                nextFn: function(nextState) {
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+                    $state.go(nextState); 
+                }
+            }
+        ],
+        "contacts": [
+            { 
+                label: 'Lattice Fields', 
+                state: 'contacts.one', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveGeneric(nextState);
+                } 
+            },{ 
+                label: 'Custom Fields', 
+                state: 'contacts.one.two', 
+                nextLabel: 'Import File', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                }
+            },{ 
+                label: 'Import Data', 
+                state: 'contacts.one.two.three', 
+                nextLabel: 'Done', 
+                hideBack: true,
+                nextFn: function(nextState) {
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+                    $state.go(nextState); 
+                }
+            }
+        ],
+        "contactfields": [
+            { 
+                label: 'Lattice Fields', 
+                state: 'contactfields.one', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveGeneric(nextState);
+                } 
+            },{ 
+                label: 'Custom Fields', 
+                state: 'contactfields.one.two', 
+                nextLabel: 'Import File', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                }
+            },{ 
+                label: 'Import Data', 
+                state: 'contactfields.one.two.three', 
+                nextLabel: 'Done', 
+                hideBack: true,
+                nextFn: function(nextState) {
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
+                    $state.go(nextState); 
+                }
+            }
+        ],
+        "eloquoa": [
+            { 
+                label: 'Lattice Fields', 
+                state: 'eloquoa.one', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveGeneric(nextState);
+                } 
+            },{ 
+                label: 'Custom Fields', 
+                state: 'eloquoa.one.two', 
+                nextLabel: 'Import File', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                }
+            },{ 
+                label: 'Import Data', 
+                state: 'eloquoa.one.two.three', 
+                nextLabel: 'Done', 
+                hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
                     $state.go(nextState); 
@@ -92,6 +206,13 @@ angular.module('lp.import')
             ImportWizardStore.remap(item.userField, item.mappedField);
         });
         $state.go(nextState);
+    }
+
+    this.nextSaveFieldDocuments = function(nextState) {
+        ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {
+            entity: ImportWizardStore.getEntityType()
+        });
+        $state.go(nextState); 
     }
 
     this.getAccountIdState = function() {
@@ -134,6 +255,14 @@ angular.module('lp.import')
 
     this.setUnmappedFields = function(data) {
         this.unmappedFields = data;
+    };
+
+    this.getEntityType = function() {
+        return this.entityType;
+    };
+
+    this.setEntityType = function(type) {
+        this.entityType = type;
     };
 
     this.getCustomFields = function(type) {
@@ -188,9 +317,11 @@ angular.module('lp.import')
 
 	this.GetSchemaToLatticeFields = function(csvFileName) {
 	        var deferred = $q.defer();
-	        var params = { 'entity':  'Account',
-                    'source': 'File',
-	            'feedType': 'AccountSchema' };
+	        var params = { 
+                'entity':  'Account',
+                'source': 'File',
+	            'feedType': 'AccountSchema' 
+            };
 
 	        $http({
 	            method: 'GET',
@@ -207,9 +338,11 @@ angular.module('lp.import')
 	    this.GetFieldDocument = function(FileName) {
 	        var deferred = $q.defer();
 	        var entity = "account";
-	        var params =  { 'entity': entity,
-                    'source': 'File',
-	            'feedType': 'AccountSchema' };
+	        var params =  {
+                'entity': entity,
+                'source': 'File',
+	            'feedType': 'AccountSchema'
+            };
 
 	        $http({
 	            method: 'POST',
@@ -250,13 +383,15 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-	    this.SaveFieldDocuments = function(FileName, FieldDocument) {
-	        var deferred = $q.defer();
-	        var result;
-	        var params = { 'displayName': FileName,
-                               'source': 'File',
-	                       'entity': 'Account',
-	                       'feedType': 'AccountSchema' };
+	    this.SaveFieldDocuments = function(FileName, FieldDocument, params) {
+            var deferred = $q.defer(),
+                result,
+                params = params || {};
+
+            params.displayName = params.displayName || 'FileName',
+            params.source = params.source || 'File',
+            params.entity = params.entity || 'Account',
+            params.feedType = params.feedType || 'AccountSchema';
 
 	        $http({
 	            method: 'POST',

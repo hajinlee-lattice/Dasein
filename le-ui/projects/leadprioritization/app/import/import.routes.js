@@ -93,7 +93,6 @@ angular
                 },
                 WizardProgressItems: function($stateParams, ImportWizardStore) {
                     var wizard_steps = $stateParams.wizard_steps;
-
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'all');
                 }
             },
@@ -241,13 +240,9 @@ angular
                 WizardProgressContext: function() {
                     return 'import';
                 },
-                WizardProgressItems: function() {
-                    return [
-                        { label: 'Account IDs', state: 'accountfields.one' },
-                        { label: '3rd Party IDs', state: 'accountfields.one.two' },
-                        { label: 'Custom Fields', state: 'accountfields.one.two.three' },
-                        { label: 'Import Data', state: 'accountfields.one.two.three.four' }
-                    ];
+                WizardProgressItems: function($stateParams, ImportWizardStore) {
+                    var wizard_steps = $stateParams.wizard_steps;
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'accountfields');
                 }
             },
             views: {
@@ -335,12 +330,9 @@ angular
                 WizardProgressContext: function() {
                     return 'import';
                 },
-                WizardProgressItems: function() {
-                    return [
-                        { label: 'Lattice Fields', state: 'contacts.one' },
-                        { label: 'Custom Fields', state: 'contacts.one.two' },
-                        { label: 'Import Data', state: 'contacts.one.two.three' }
-                    ]
+                WizardProgressItems: function($stateParams, ImportWizardStore) {
+                    var wizard_steps = $stateParams.wizard_steps;
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contacts');
                 }
             },
             views: {
@@ -447,12 +439,9 @@ angular
                 WizardProgressContext: function() {
                     return 'import';
                 },
-                WizardProgressItems: function() {
-                    return [
-                        { label: 'Lattice Fields', state: 'contactfields.one' },
-                        { label: 'Custom Fields', state: 'contactfields.one.two' },
-                        { label: 'Import Data', state: 'contactfields.one.two.three' }
-                    ]
+                WizardProgressItems: function($stateParams, ImportWizardStore) {
+                    var wizard_steps = $stateParams.wizard_steps;
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contactfields');
                 }
             },
             views: {
@@ -510,12 +499,9 @@ angular
                 WizardProgressContext: function() {
                     return 'import';
                 },
-                WizardProgressItems: function() {
-                    return [
-                        { label: 'Lattice Fields', state: 'eloquoa.one' },
-                        { label: 'Custom Fields', state: 'eloquoa.one.two' },
-                        { label: 'Import Data', state: 'eloquoa.one.two.three' }
-                    ]
+                WizardProgressItems: function($stateParams, ImportWizardStore) {
+                    var wizard_steps = $stateParams.wizard_steps;
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'eloquoa');
                 }
             },
             views: {
