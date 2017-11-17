@@ -51,6 +51,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
     @SuppressWarnings("unused")
     private int sortStep;
     private int retainStep;
+    private int reportStep;
 
     @Override
     protected void initializeConfiguration() {
@@ -74,6 +75,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             bucketStep = 6;
             retainStep = 7;
             sortStep = 8;
+            reportStep = 9;
 
             TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig mergeNew = mergeNew();
@@ -84,19 +86,21 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             TransformationStepConfig bucket = bucket(matchDiffStep, true);
             TransformationStepConfig retainFields = retainFields(bucketStep, false);
             TransformationStepConfig sort = sortDiff(retainStep, 200);
+            TransformationStepConfig report = reportDiff(diffStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
             steps.add(mergeNew);
             steps.add(match);
             steps.add(upsertMaster);
+            steps.add(diff);
             if (isBucketing()) {
-                steps.add(diff);
                 steps.add(matchDiff);
                 steps.add(bucket);
                 steps.add(retainFields);
                 steps.add(sort);
             }
+            steps.add(report);
             request.setSteps(steps);
             return request;
 

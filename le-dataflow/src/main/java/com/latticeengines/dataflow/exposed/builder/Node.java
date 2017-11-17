@@ -11,6 +11,7 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
@@ -42,6 +43,7 @@ import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddUUIDStrategy;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AddRandomIntFunction;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -521,6 +523,30 @@ public class Node {
     // insert/replace literal values to every row, not insert a new row
     public Node insert(FieldList targetFields, Object... values) {
         return new Node(builder.register(new InsertOperation(opInput(identifier), targetFields, values)), builder);
+    }
+
+    // Result node only has one tuple with one field naming as outputFieldName
+    public Node count(String outputFieldName) {
+        Node node = addColumnWithFixedValue(outputFieldName, 1, Integer.class);
+        return node.multiTierAggregate(AggregationType.SUM_LONG, outputFieldName);
+    }
+
+    private Node multiTierAggregate(AggregationType type, String targetFieldName) {
+        return multiTierAggregate(type, targetFieldName, 2);
+    }
+
+    private Node multiTierAggregate(AggregationType type, String targetFieldName, Integer tiers) {
+        Node node = null;
+        String dummpGroup = "__DUMMY_GROUP__";
+        for (int i = tiers - 1; i >= 0; i--) {
+            int groups = (int) Math.pow(10000, i);
+            node = apply(new AddRandomIntFunction(dummpGroup, 1, groups, null), new FieldList(getFieldNames()),
+                    new FieldMetadata(dummpGroup, Integer.class));
+            List<Aggregation> aggregations = new ArrayList<>();
+            aggregations.add(new Aggregation(targetFieldName, targetFieldName, type));
+            node = node.groupBy(new FieldList(dummpGroup), aggregations).retain(new FieldList(targetFieldName));
+        }
+        return node;
     }
 
     public Table getSourceSchema() {

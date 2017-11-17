@@ -73,6 +73,8 @@ public enum InterfaceName {
     CDLCreatedTime, // creation timestamp of CDL entities
     CDLUpdatedTime, // update timestamp of CDL entities
 
+    ConsolidateReport, //
+
     // Data Cloud
     LatticeAccountId, // Id in AccountMaster
     LDC_Name,

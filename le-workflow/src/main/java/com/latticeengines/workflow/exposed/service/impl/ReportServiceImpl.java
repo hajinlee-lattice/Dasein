@@ -19,7 +19,7 @@ public class ReportServiceImpl implements ReportService {
     public void createOrUpdateReport(Report report) {
         Report existing = reportEntityMgr.findByName(report.getName());
         if (existing != null) {
-            reportEntityMgr.delete(report);
+            reportEntityMgr.delete(existing);
         }
         reportEntityMgr.create(report);
 

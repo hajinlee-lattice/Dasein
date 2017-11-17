@@ -36,6 +36,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -85,6 +87,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -519,8 +522,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     void verifyConsolidateReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 2);
-        Report publishReport = reports.get(1);
+        Report publishReport = reports.get(0);
         verifyExportToRedshiftReport(publishReport, expectedCounts);
+        Report summaryReport = reports.get(1);
+        verifyConsolidateSummaryReport(summaryReport);
     }
 
     void verifyProfileReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
@@ -528,6 +533,41 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         assertEquals(reports.size(), 1);
         Report publishReport = reports.get(0);
         verifyExportToRedshiftReport(publishReport, expectedCounts);
+    }
+
+    private void verifyConsolidateSummaryReport(Report summaryReport) {
+        Assert.assertNotNull(summaryReport);
+        Assert.assertNotNull(summaryReport.getJson());
+        Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
+
+        logger.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
+        try {
+            ObjectMapper om = JsonUtils.getObjectMapper();
+            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            Assert.assertTrue(report.has(ReportPurpose.IMPORT_SUMMARY.getKey()));
+            Assert.assertTrue(report.has(BusinessEntity.Account.name()));
+            Assert.assertTrue(report.has(BusinessEntity.Contact.name()));
+            Assert.assertTrue(report.has(BusinessEntity.Product.name()));
+            Assert.assertTrue(report.has(BusinessEntity.Transaction.name()));
+            ObjectNode accountReport = (ObjectNode)report.get(BusinessEntity.Account.name());
+            Assert.assertNotNull(accountReport);
+            Assert.assertTrue(accountReport.has("NEW"));
+            Assert.assertTrue(accountReport.has("UPDATE"));
+            Assert.assertTrue(accountReport.has("MATCH"));
+            ObjectNode contactReport = (ObjectNode) report.get(BusinessEntity.Contact.name());
+            Assert.assertNotNull(contactReport);
+            Assert.assertTrue(contactReport.has("NEW"));
+            Assert.assertTrue(contactReport.has("UPDATE"));
+            ObjectNode productReport = (ObjectNode) report.get(BusinessEntity.Product.name());
+            Assert.assertNotNull(productReport);
+            Assert.assertTrue(productReport.has("NEW"));
+            Assert.assertTrue(productReport.has("UPDATE"));
+            ObjectNode transactionReport = (ObjectNode) report.get(BusinessEntity.Transaction.name());
+            Assert.assertNotNull(transactionReport);
+            Assert.assertTrue(transactionReport.has("TOTAL"));
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+        }
     }
 
     private void verifyExportToRedshiftReport(Report publishReport, Map<TableRoleInCollection, Long> expectedCounts) {

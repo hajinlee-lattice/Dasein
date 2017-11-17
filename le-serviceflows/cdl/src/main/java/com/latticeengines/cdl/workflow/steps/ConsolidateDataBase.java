@@ -9,28 +9,33 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateReportConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateRetainFieldConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
@@ -38,6 +43,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataBaseConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -120,14 +126,37 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         }
 
         if (BusinessEntity.Account.equals(getBusinessEntity())) {
-            Table newRecordsTable = metadataProxy.getTable(customerSpace.toString(),
+            metadataProxy.deleteTable(customerSpace.toString(),
                     TableUtils.getFullTableName(newRecordsTablePrefix, pipelineVersion));
-            log.info(JsonUtils.pprint(newRecordsTable));
-            ObjectNode json = JsonUtils.createObjectNode();
-            json.put(getBusinessEntity().getBatchStore().name() + "_New",
-                    newRecordsTable.getExtracts().get(0).getProcessedRecords());
-            report(ReportPurpose.CONSOLIDATE_NEW_RECORDS_COUNT_SUMMARY, UUID.randomUUID().toString(), json.toString());
-            metadataProxy.deleteTable(customerSpace.toString(), newRecordsTable.getName());
+        }
+
+        Table diffReport = metadataProxy.getTable(customerSpace.toString(),
+                TableUtils.getFullTableName(getReportTablePrefix(), pipelineVersion));
+        if (diffReport != null) {
+            Report report = retrieveReport(customerSpace, ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY);
+            String reportName = report != null ? report.getName() : UUID.randomUUID().toString();
+            String reportPayload = updateReportPayload(report, diffReport);
+            report(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY, reportName, reportPayload);
+            metadataProxy.deleteTable(customerSpace.toString(), diffReport.getName());
+        } else {
+            log.warn("Didn'd find ConsolidationSummaryReport table for entity " + getBusinessEntity());
+        }
+    }
+
+    private String updateReportPayload(Report report, Table diffReport) {
+        try {
+            ObjectMapper om = JsonUtils.getObjectMapper();
+            ObjectNode json = report != null && StringUtils.isNotBlank(report.getJson().getPayload())
+                    ? (ObjectNode) om.readTree(report.getJson().getPayload())
+                    : om.createObjectNode();
+            String path = diffReport.getExtracts().get(0).getPath();
+            Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path);
+            ObjectNode newItem = (ObjectNode) om
+                    .readTree(records.next().get(InterfaceName.ConsolidateReport.name()).toString());
+            json.setAll(newItem);
+            return json.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to update report payload", e);
         }
     }
 
@@ -223,9 +252,6 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     }
 
     protected TransformationStepConfig diff(int mergeStep, int upsertMasterStep) {
-        if (!isBucketing()) {
-            return null;
-        }
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(mergeStep, upsertMasterStep));
         step.setTransformer("consolidateDeltaTransformer");
@@ -308,6 +334,26 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         String confStr = heavyEngine ? emptyStepConfig(heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
+    }
+
+    protected TransformationStepConfig reportDiff(int inputStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(inputStep));
+        step.setTransformer("ConsolidateReporter");
+        ConsolidateReportConfig config = new ConsolidateReportConfig();
+        config.setEntity(getBusinessEntity());
+        String configStr = appendEngineConf(config, lightEngineConfig());
+        step.setConfiguration(configStr);
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(getReportTablePrefix());
+        step.setTargetTable(targetTable);
+        return step;
+
+    }
+
+    private String getReportTablePrefix() {
+        return getBusinessEntity().name() + "ReportTablePrefix";
     }
 
     protected void setupMasterTable(TransformationStepConfig step) {

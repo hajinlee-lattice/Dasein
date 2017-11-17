@@ -43,6 +43,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     TransactionTableBuilder transactionTableBuilder;
     private int inputMergeStep;
     private int partitionAndAggregateStep;
+    private int retainStep;
 
     @Override
     protected void initializeConfiguration() {
@@ -58,14 +59,18 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
             inputMergeStep = 0;
             partitionAndAggregateStep = 1;
+            retainStep = 2;
+
             TransformationStepConfig inputMerge = mergeInputs(true);
             TransformationStepConfig partitionAggr = partitionAndAggregate();
             TransformationStepConfig retainFields = retainFields(partitionAndAggregateStep, true);
+            TransformationStepConfig report = reportDiff(retainStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(inputMerge);
             steps.add(partitionAggr);
             steps.add(retainFields);
+            steps.add(report);
             request.setSteps(steps);
             return request;
 

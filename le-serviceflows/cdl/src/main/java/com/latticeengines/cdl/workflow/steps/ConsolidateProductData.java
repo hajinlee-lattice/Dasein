@@ -18,7 +18,7 @@ public class ConsolidateProductData extends ConsolidateDataBase<ConsolidateProdu
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateProductData.class);
 
-    private int mergeStep, upsertMasterStep, diffStep, sortStep, retainStep;
+    private int mergeStep, upsertMasterStep, diffStep, sortStep, retainStep, reportStep;
 
     @Override
     protected void initializeConfiguration() {
@@ -37,20 +37,24 @@ public class ConsolidateProductData extends ConsolidateDataBase<ConsolidateProdu
             diffStep = 2;
             retainStep = 3;
             sortStep = 4;
+            reportStep = 5;
+
             TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig retainFields = retainFields(diffStep, false);
             TransformationStepConfig sort = sortDiff(retainStep, 20);
+            TransformationStepConfig report = reportDiff(diffStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
             steps.add(upsertMaster);
+            steps.add(diff);
             if (isBucketing()) {
-                steps.add(diff);
                 steps.add(retainFields);
                 steps.add(sort);
             }
+            steps.add(report);
             request.setSteps(steps);
             return request;
 

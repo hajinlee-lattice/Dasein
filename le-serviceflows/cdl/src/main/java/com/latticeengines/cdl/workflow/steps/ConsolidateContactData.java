@@ -19,7 +19,7 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateContactData.class);
 
-    private int mergeStep, upsertMasterStep, diffStep, bucketDiffStep, sortStep, retainStep;
+    private int mergeStep, upsertMasterStep, diffStep, bucketDiffStep, sortStep, retainStep, reportStep;
 
     @Override
     protected void initializeConfiguration() {
@@ -39,22 +39,26 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
             bucketDiffStep = 3;
             retainStep = 4;
             sortStep = 5;
+            reportStep = isBucketing() ? 6 : 3;
+
             TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig bucketDiff = bucket(diffStep, false);
             TransformationStepConfig retainFields = retainFields(bucketDiffStep, false);
             TransformationStepConfig sort = sortDiff(retainStep, 50);
+            TransformationStepConfig report = reportDiff(diffStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
             steps.add(upsertMaster);
+            steps.add(diff);
             if (isBucketing()) {
-                steps.add(diff);
                 steps.add(bucketDiff);
                 steps.add(retainFields);
                 steps.add(sort);
             }
+            steps.add(report);
             request.setSteps(steps);
             return request;
 
