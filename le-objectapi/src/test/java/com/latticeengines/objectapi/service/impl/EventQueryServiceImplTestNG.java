@@ -9,6 +9,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -69,6 +70,13 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
+
+        FrontEndRestriction contactFERestriction = new FrontEndRestriction();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact,
+                                                               InterfaceName.Title.name()).eq("Buyer").build();
+        contactFERestriction.setRestriction(cntRestriction);
+        frontEndQuery.setContactRestriction(contactFERestriction);
+
         DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery);
         Assert.assertNotNull(dataPage.getData());
         return dataPage.getData().size();

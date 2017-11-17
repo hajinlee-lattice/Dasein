@@ -484,7 +484,7 @@ public class EventQueryTranslator {
         // target or training
         Restriction periodIdRestriction = null;
         if (isScoring) {
-            Restriction.builder().let(txPeriodId).eq(maxPeriodId).build();
+            periodIdRestriction = Restriction.builder().let(txPeriodId).eq(maxPeriodId).build();
         } else {
             periodIdRestriction = Restriction.builder().let(txPeriodId).not().eq(maxPeriodId).build();
         }
@@ -566,7 +566,6 @@ public class EventQueryTranslator {
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
-        Sort sort = new Sort();
 
         // combine one leg behind restriction for event query, this is not needed for scoring and training
         if (!isScoring && checkNextPeriod) {
@@ -642,7 +641,6 @@ public class EventQueryTranslator {
             SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
             builder.from(selectAll);
             builder.select(accountId, periodId);
-            sort.setLookups(Arrays.asList(accountId, periodId));
         } else if (rootRestriction instanceof ConcreteRestriction) {
             ConcreteRestriction concreteRestriction = (ConcreteRestriction) rootRestriction;
             SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction, isScoring);
@@ -652,7 +650,6 @@ public class EventQueryTranslator {
             SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
             builder.from(selectAll);
             builder.select(accountId, periodId);
-            sort.setLookups(Arrays.asList(accountId, periodId));
         } else {
             throw new UnsupportedOperationException("Cannot translate restriction " + restriction);
         }
@@ -716,13 +713,11 @@ public class EventQueryTranslator {
                         SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
                         builder.from(selectAll);
                         builder.select(accountId, periodId);
-                        sort.setLookups(Arrays.asList(accountId, periodId));
                     }
                 }
             }, true);
         }
-
-        return builder.orderBy(sort);
+        return builder;
     }
 
     private Restriction translatePriorOnly(TransactionRestriction txRestriction) {

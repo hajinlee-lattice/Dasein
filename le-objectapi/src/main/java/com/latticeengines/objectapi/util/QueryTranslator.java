@@ -67,8 +67,11 @@ public class QueryTranslator {
             throw new IllegalArgumentException("No restriction specified for event query");
         }
 
-        Restriction restriction = frontEndRestriction.getRestriction();
+
         QueryBuilder queryBuilder = Query.builder();
+        Restriction restriction = frontEndRestriction.getRestriction();
+        restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction, null, //
+                                                queryBuilder);
         EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
 
         switch (eventType) {
@@ -98,6 +101,13 @@ public class QueryTranslator {
         }
 
         queryBuilder.page(pageFilter);
+
+        if (pageFilter.getRowOffset() > 0 || pageFilter.getNumRows() > 0) {
+            // set sort order, or pagination will return different result each time
+            Sort sort = new Sort();
+            sort.setLookups(queryBuilder.getLookups());
+            queryBuilder.orderBy(sort);
+        }
 
         return queryBuilder.build();
     }
