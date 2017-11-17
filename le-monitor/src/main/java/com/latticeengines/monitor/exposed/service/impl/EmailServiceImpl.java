@@ -638,6 +638,8 @@ public class EmailServiceImpl implements EmailService {
                     EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_ERROR);
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{exportID}}", exportID);
+            builder.replaceToken("{{exportType}}", type);
 
             Multipart mp = builder.buildMultipart();
             sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT, exportID), mp,
