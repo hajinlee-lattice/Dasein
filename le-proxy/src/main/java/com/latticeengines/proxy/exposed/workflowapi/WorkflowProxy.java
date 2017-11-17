@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
@@ -143,13 +145,19 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
     }
 
     @Override
-    public Job updateParentJobId(String customerSpace, List<String> jobIds, String parentJobId) {
+    public List<Job> updateParentJobId(String customerSpace, List<String> jobIds, String parentJobId) {
         String url = generateUpdateParentJobIdUrl(customerSpace, jobIds, parentJobId);
-        return post("updateParentJobId", url, null, Job.class);
+        return JsonUtils.convertList(post("updateParentJobId", url, null, List.class), Job.class);
     }
 
     @VisibleForTesting
     String generateUpdateParentJobIdUrl(String customerSpace, List<String> jobIds, String parentJobId) {
+        if (CollectionUtils.isEmpty(jobIds)) {
+            throw new LedpException(LedpCode.LEDP_18165);
+        }
+        if (parentJobId == null) {
+            throw new LedpException(LedpCode.LEDP_18166);
+        }
         StringBuilder urlStr = new StringBuilder();
         urlStr.append("/customerspaces/{customerspaces}/jobs?");
         for (String jobId : jobIds) {

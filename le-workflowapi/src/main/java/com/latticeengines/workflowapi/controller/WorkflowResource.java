@@ -1,5 +1,6 @@
 package com.latticeengines.workflowapi.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -48,18 +49,18 @@ public class WorkflowResource implements WorkflowInterface {
             @RequestParam(value = "type", required = false) List<String> types, //
             @RequestParam(value = "includeDetails", required = false) Boolean includeDetails, //
             @RequestParam(value = "hasParentId", required = false) Boolean hasParentId) {
-        return null;
+        return Collections.emptyList();
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update workflow jobs' parent job Id")
     @Override
-    public Job updateParentJobId( //
+    public List<Job> updateParentJobId( //
             @PathVariable String customerSpace, //
             @RequestParam(value = "jobId", required = true) List<String> jobIds, //
             @RequestParam(value = "parentId", required = true) String parentJobId) {
-        return null;
+        return Collections.emptyList();
     }
 
 }

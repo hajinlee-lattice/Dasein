@@ -115,6 +115,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder importJobIds(List<Long> importJobIds) {
+            startExecutionConfiguration.setImportJobIds(importJobIds);
+            return this;
+        }
+
         public ConsolidateAndPublishWorkflowConfiguration build() {
             configuration.add(startExecutionConfiguration);
             configuration.add(consolidateDataConfigurationBuilder.build());

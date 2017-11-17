@@ -1,13 +1,20 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.period.PeriodStrategy;
@@ -84,8 +91,25 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         }
         execution = dataFeedProxy.startExecution(customerSpace);
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
-        WorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus);
+        List<Long> importJobIds = getImportJobIds(customerSpace);
+        log.info(String.format("importJobIdsStr=%s", importJobIds));
+        WorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus, importJobIds);
         return workflowJobService.submit(configuration);
+    }
+
+    @VisibleForTesting
+    List<Long> getImportJobIds(String customerSpace) {
+        List<Job> importJobs = workflowProxy.getWorkflowJobs(customerSpace, null,
+                Arrays.asList("cdlDataFeedImportWorkflow"), null, Boolean.FALSE);
+        List<Long> importJobIds = Collections.emptyList();
+        if (CollectionUtils.isEmpty(importJobs)) {
+            log.warn("No import jobs are associated with the current consolidate job");
+        } else {
+            importJobIds = importJobs.stream().map(job -> job.getId()).collect(Collectors.toList());
+            log.info(String.format("Import jobs that associated with the current consolidate job are: %s",
+                    importJobIds));
+        }
+        return importJobIds;
     }
 
     public ApplicationId retryLatestFailed(String customerSpace) {
@@ -120,15 +144,18 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         return workflowJobService.restart(execution.getWorkflowId());
     }
 
-    private WorkflowConfiguration generateConfiguration(String customerSpace, Status initialDataFeedStatus) {
+    private WorkflowConfiguration generateConfiguration(String customerSpace, Status initialDataFeedStatus,
+            List<Long> importJobIds) {
         return new ConsolidateAndPublishWorkflowConfiguration.Builder() //
                 .initialDataFeedStatus(initialDataFeedStatus) //
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .microServiceHostPort(microserviceHostPort) //
                 .internalResourceHostPort(internalResourceHostPort)
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
+                .importJobIds(importJobIds) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
+                        .put(WorkflowContextConstants.Inputs.CHILDREN_WORKFLOW_JOB_IDS, importJobIds.toString()) //
                         .build()) //
                 .accountIdField(InterfaceName.Id.name()) //
                 .bucketAccount(dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile) != null) //

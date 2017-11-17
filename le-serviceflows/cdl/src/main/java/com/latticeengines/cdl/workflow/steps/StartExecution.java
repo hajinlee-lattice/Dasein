@@ -61,7 +61,7 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
         List<Job> importJobs = getJobs(configuration.getImportJobIds());
         createReport(importJobs);
-        // updating import job logic starts here
+        updateImportJobs();
     }
 
     private void setConsolidateInputImports(DataFeedExecution execution) {
@@ -92,8 +92,17 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
         if (importJobIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return importJobIds.stream().map(id -> workflowProxy.getWorkflowExecution(String.valueOf(id)))
+        return workflowProxy.getWorkflowExecutionsByJobIds(
+                importJobIds.stream().map(jobId -> jobId.toString()).collect(Collectors.toList()));
+    }
+
+    private void updateImportJobs() {
+        List<String> importJobIds = configuration.getImportJobIds().stream().map(jobId -> jobId.toString())
                 .collect(Collectors.toList());
+        if (importJobIds.isEmpty()) {
+            return;
+        }
+        workflowProxy.updateParentJobId(configuration.getCustomerSpace().toString(), importJobIds, jobId.toString());
     }
 
     private void createReport(List<Job> jobs) {

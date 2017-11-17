@@ -11,5 +11,5 @@ public interface WorkflowInterface {
     List<Job> getWorkflowJobs(String customerSpace, List<String> jobIds, List<String> types, Boolean includeDetails,
             Boolean hasParentId);
 
-    Job updateParentJobId(String customerSpace, List<String> jobIds, String parentJobId);
+    List<Job> updateParentJobId(String customerSpace, List<String> jobIds, String parentJobId);
 }
