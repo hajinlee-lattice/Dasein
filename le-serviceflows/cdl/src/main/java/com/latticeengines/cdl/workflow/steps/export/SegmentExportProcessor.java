@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.ExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -58,9 +58,6 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 public class SegmentExportProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportProcessor.class);
-
-    private static final String ACCOUNT_PREFIX = BusinessEntity.Account + "_";
-    private static final String CONTACT_PREFIX = BusinessEntity.Contact + "_";
 
     @Autowired
     private ExportAccountFetcher accountFetcher;
@@ -106,7 +103,7 @@ public class SegmentExportProcessor {
 
             File localFile = new File(tenant.getName() + "_" + currentTimeMillis + "_" + avroFileName);
 
-            if (segmentExportContext.getMetadataSegmentExport().getType() == ExportType.CONTACT) {
+            if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.CONTACT) {
                 long segmentContactsCount = contactFetcher.getCount(segmentExportContext);
                 log.info("contactCount = ", segmentContactsCount);
 
@@ -205,7 +202,7 @@ public class SegmentExportProcessor {
 
         if (CollectionUtils.isNotEmpty(accountList)) {
 
-            if (segmentExportContext.getMetadataSegmentExport().getType() == ExportType.ACCOUNT_AND_CONTACT) {
+            if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
                 List<Object> accountIds = getAccountsIds(accountList);
 
                 // make sure to clear list of account Ids in contact query and
@@ -228,12 +225,14 @@ public class SegmentExportProcessor {
                             for (Map<String, String> contact : matchingContacts) {
                                 for (Field field : schema.getFields()) {
                                     String fieldNameInAccountLookupResult = field.name();
-                                    if (fieldNameInAccountLookupResult.startsWith(ACCOUNT_PREFIX)) {
+                                    if (fieldNameInAccountLookupResult
+                                            .startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
                                         fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                                .substring(ACCOUNT_PREFIX.length());
-                                    } else if (fieldNameInAccountLookupResult.startsWith(CONTACT_PREFIX)) {
+                                                .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
+                                    } else if (fieldNameInAccountLookupResult
+                                            .startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
                                         fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                                .substring(CONTACT_PREFIX.length());
+                                                .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
                                     }
 
                                     if (contact.get(fieldNameInAccountLookupResult) != null) {
@@ -248,35 +247,35 @@ public class SegmentExportProcessor {
                         }
                     }
                 }
-            } else if (segmentExportContext.getMetadataSegmentExport().getType() == ExportType.ACCOUNT) {
+            } else if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT) {
                 for (Map<String, Object> account : accountList) {
                     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 
                     for (Field field : schema.getFields()) {
                         String fieldNameInAccountLookupResult = field.name();
-                        if (fieldNameInAccountLookupResult.startsWith(ACCOUNT_PREFIX)) {
+                        if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
                             fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(ACCOUNT_PREFIX.length());
-                        } else if (fieldNameInAccountLookupResult.startsWith(CONTACT_PREFIX)) {
+                                    .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
+                        } else if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
                             fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(CONTACT_PREFIX.length());
+                                    .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
                         }
                         builder.set(field.name(), account.get(fieldNameInAccountLookupResult));
                     }
                     records.add(builder.build());
                 }
-            } else if (segmentExportContext.getMetadataSegmentExport().getType() == ExportType.CONTACT) {
+            } else if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.CONTACT) {
                 for (Map<String, Object> account : accountList) {
                     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 
                     for (Field field : schema.getFields()) {
                         String fieldNameInAccountLookupResult = field.name();
-                        if (fieldNameInAccountLookupResult.startsWith(ACCOUNT_PREFIX)) {
+                        if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
                             fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(ACCOUNT_PREFIX.length());
-                        } else if (fieldNameInAccountLookupResult.startsWith(CONTACT_PREFIX)) {
+                                    .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
+                        } else if (fieldNameInAccountLookupResult.startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
                             fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
-                                    .substring(CONTACT_PREFIX.length());
+                                    .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
                         }
                         builder.set(field.name(), account.get(fieldNameInAccountLookupResult));
                     }
@@ -319,12 +318,12 @@ public class SegmentExportProcessor {
 
                 for (Field field : schema.getFields()) {
                     String fieldNameInContactLookupResult = field.name();
-                    if (fieldNameInContactLookupResult.startsWith(ACCOUNT_PREFIX)) {
+                    if (fieldNameInContactLookupResult.startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
                         fieldNameInContactLookupResult = fieldNameInContactLookupResult
-                                .substring(ACCOUNT_PREFIX.length());
-                    } else if (fieldNameInContactLookupResult.startsWith(CONTACT_PREFIX)) {
+                                .substring(MetadataSegmentExport.ACCOUNT_PREFIX.length());
+                    } else if (fieldNameInContactLookupResult.startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
                         fieldNameInContactLookupResult = fieldNameInContactLookupResult
-                                .substring(CONTACT_PREFIX.length());
+                                .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
                     }
                     builder.set(field.name(), contact.get(fieldNameInContactLookupResult));
                 }
@@ -372,7 +371,7 @@ public class SegmentExportProcessor {
         List<Object> modifiableAccountIdCollectionForContacts = new ArrayList<>();
 
         FrontEndQuery contactFrontEndQuery = new FrontEndQuery();
-        if (metadataSegmentExport.getType() == ExportType.ACCOUNT_AND_CONTACT) {
+        if (metadataSegmentExport.getType() == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
             FrontEndRestriction contactRestrictionWithAccountIdList = prepareContactRestriction(
                     metadataSegmentExport.getContactFrontEndRestriction().getRestriction(),
                     modifiableAccountIdCollectionForContacts);
@@ -393,12 +392,12 @@ public class SegmentExportProcessor {
 
         for (int i = 0; i < schema.getFields().size(); i++) {
             String fullFieldName = schema.getFields().get(i).name();
-            if (fullFieldName.startsWith(ACCOUNT_PREFIX)) {
+            if (fullFieldName.startsWith(MetadataSegmentExport.ACCOUNT_PREFIX)) {
                 addFieldsEntityType.add(BusinessEntity.Account);
-                addFieldsAccounts.add(fullFieldName.substring(ACCOUNT_PREFIX.length()));
-            } else if (fullFieldName.startsWith(CONTACT_PREFIX)) {
+                addFieldsAccounts.add(fullFieldName.substring(MetadataSegmentExport.ACCOUNT_PREFIX.length()));
+            } else if (fullFieldName.startsWith(MetadataSegmentExport.CONTACT_PREFIX)) {
                 addFieldsEntityType.add(BusinessEntity.Contact);
-                addFieldsContacts.add(fullFieldName.substring(CONTACT_PREFIX.length()));
+                addFieldsContacts.add(fullFieldName.substring(MetadataSegmentExport.CONTACT_PREFIX.length()));
             }
             addFieldsWithFullName.add(fullFieldName);
         }

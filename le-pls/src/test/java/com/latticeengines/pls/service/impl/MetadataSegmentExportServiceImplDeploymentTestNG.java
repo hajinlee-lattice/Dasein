@@ -11,8 +11,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.ExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
@@ -67,7 +67,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsFunctio
     public void testBasicOperations() {
         MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
         metadataSegmentExport.setTenant(tenant);
-        metadataSegmentExport.setType(ExportType.ACCOUNT);
+        metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT);
         metadataSegmentExport.setSegment(segment);
         metadataSegmentExport.setStatus(Status.RUNNING);
         metadataSegmentExport.setPath("some/path");

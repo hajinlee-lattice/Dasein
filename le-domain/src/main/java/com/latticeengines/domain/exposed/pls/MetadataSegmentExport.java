@@ -31,6 +31,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -43,6 +44,9 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFields {
+
+    public static final String ACCOUNT_PREFIX = BusinessEntity.Account + "_";
+    public static final String CONTACT_PREFIX = BusinessEntity.Contact + "_";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -98,7 +102,7 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @JsonProperty("type")
     @Column(name = "TYPE", nullable = false)
     @Enumerated(EnumType.STRING)
-    private ExportType type;
+    private MetadataSegmentExportType type;
 
     @JsonProperty("status")
     @Column(name = "STATUS", nullable = false)
@@ -255,11 +259,11 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
         this.tenantId = tenantId;
     }
 
-    public ExportType getType() {
+    public MetadataSegmentExportType getType() {
         return type;
     }
 
-    public void setType(ExportType type) {
+    public void setType(MetadataSegmentExportType type) {
         this.type = type;
     }
 
@@ -285,12 +289,6 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     public void setExportPrefix(String exportPrefix) {
         this.exportPrefix = exportPrefix;
-    }
-
-    public enum ExportType {
-        ACCOUNT, //
-        CONTACT, //
-        ACCOUNT_AND_CONTACT;
     }
 
     public enum Status {

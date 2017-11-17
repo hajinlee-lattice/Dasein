@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,13 +26,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.ExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.workflow.SegmentExportWorkflowSubmitter;
@@ -44,8 +43,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentExportServiceImpl.class);
 
     private static final String DEFAULT_EXPORT_FILE_PREFIX = "unknownsegment";
-    private static final String ACCOUNT_PREFIX = BusinessEntity.Account + "_";
-    private static final String CONTACT_PREFIX = BusinessEntity.Contact + "_";
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -182,67 +179,22 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private MetadataSegmentExport registerTableForExport(MetadataSegmentExport metadataSegmentExportJob) {
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
 
+        MetadataSegmentExportType exportType = metadataSegmentExportJob.getType();
+
+        List<Attribute> attributes = //
+                exportType.getFieldNamePairs().stream() //
+                        .map(fieldNamePair -> {
+                            Attribute attribute = new Attribute();
+                            attribute.setName(fieldNamePair.getKey());
+                            attribute.setDisplayName(fieldNamePair.getValue());
+                            attribute.setSourceLogicalDataType("");
+                            attribute.setPhysicalDataType(Type.STRING.name());
+                            return attribute;
+                        }) //
+                        .collect(Collectors.toList());
+
         Table segmentExportTable = new Table();
-        ExportType exportType = metadataSegmentExportJob.getType();
-
-        String[] fields = null;
-        String[] fieldDisplayNames = null;
-        if (exportType == ExportType.ACCOUNT) {
-            fields = new String[] { //
-                    ACCOUNT_PREFIX + InterfaceName.AccountId.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.LDC_Name.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.Website.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.Address_Street_1.name().toLowerCase(), //
-                    ACCOUNT_PREFIX + InterfaceName.City.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.State.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.PostalCode.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.Country.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name() //
-
-            };
-            fieldDisplayNames = new String[] { "Account Id", "Company Name", "Website", "Street", "City", "State",
-                    "Zip", "Country", "Phone", "Salesforce Id" };
-        } else if (exportType == ExportType.CONTACT) {
-            fields = new String[] { //
-                    CONTACT_PREFIX + InterfaceName.ContactId.name(), //
-                    CONTACT_PREFIX + InterfaceName.ContactName.name(), //
-                    CONTACT_PREFIX + InterfaceName.Email.name(), //
-                    CONTACT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    CONTACT_PREFIX + InterfaceName.AccountId.name(), //
-            };
-            fieldDisplayNames = new String[] { "Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id" };
-        } else if (exportType == ExportType.ACCOUNT_AND_CONTACT) {
-            fields = new String[] { //
-                    CONTACT_PREFIX + InterfaceName.ContactId.name(), //
-                    CONTACT_PREFIX + InterfaceName.ContactName.name(), //
-                    CONTACT_PREFIX + InterfaceName.Email.name(), //
-                    CONTACT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    CONTACT_PREFIX + InterfaceName.AccountId.name(), //
-                    //
-                    ACCOUNT_PREFIX + InterfaceName.LDC_Name.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.Website.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.Address_Street_1.name().toLowerCase(), //
-                    ACCOUNT_PREFIX + InterfaceName.City.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.State.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.PostalCode.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.Country.name(), //
-                    ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name() //
-
-            };
-            fieldDisplayNames = new String[] { "Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id",
-                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id" };
-        }
-
-        int i = 0;
-        for (String field : fields) {
-            Attribute attribute = new Attribute();
-            attribute.setName(field);
-            attribute.setDisplayName(fieldDisplayNames[i++]);
-            attribute.setSourceLogicalDataType("");
-            attribute.setPhysicalDataType(Type.STRING.name());
-            segmentExportTable.addAttribute(attribute);
-        }
+        segmentExportTable.addAttributes(attributes);
 
         String tableName = UUID.randomUUID().toString();
         segmentExportTable.setName(tableName);
@@ -254,6 +206,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         segmentExportTable.setTenantId(MultiTenantContext.getTenant().getPid());
         segmentExportTable.setMarkedForPurge(false);
         metadataProxy.createTable(customerSpace.toString(), tableName, segmentExportTable);
+
         segmentExportTable = metadataProxy.getTable(customerSpace.toString(), tableName);
 
         metadataSegmentExportJob.setTableName(segmentExportTable.getName());

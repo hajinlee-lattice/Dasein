@@ -13,8 +13,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.ExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
@@ -79,7 +79,7 @@ public class MetadataSegmentExportEntityMgrImplTestNG extends PlsFunctionalTestN
         metadataSegmentExport.setTableName("someTable");
         metadataSegmentExport.setCreatedBy(CREATED_BY);
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
-        metadataSegmentExport.setType(ExportType.ACCOUNT);
+        metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT);
 
         metadataSegmentExportEntityMgr.create(metadataSegmentExport);
 
