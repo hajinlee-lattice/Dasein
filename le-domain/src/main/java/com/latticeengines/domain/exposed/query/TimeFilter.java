@@ -26,13 +26,13 @@ public class TimeFilter {
     @JsonProperty("Vals")
     private List<Object> values = Collections.emptyList();
 
-    @JsonIgnore
-    private Period period;
+    @JsonProperty("Period")
+    private String period;
 
     public static TimeFilter ever() {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.EVER;
-        filter.period = Period.Day;
+        filter.period = Period.Month.name();
         filter.values = Collections.singletonList(-1);
         return filter;
     }
@@ -45,11 +45,11 @@ public class TimeFilter {
         this.values = values;
     }
 
-    public TimeFilter(ComparisonType relation, Period p, List<Object> values) {
+    public TimeFilter(ComparisonType relation, String p, List<Object> values) {
         this(null, relation, p, values);
     }
 
-    public TimeFilter(Lookup lhs, ComparisonType relation, Period period, List<Object> values) {
+    public TimeFilter(Lookup lhs, ComparisonType relation, String period, List<Object> values) {
         this.lhs = lhs;
         this.relation = relation;
         this.period = period;
@@ -72,22 +72,12 @@ public class TimeFilter {
         this.lhs = lhs;
     }
 
-    public Period getPeriod() {
+    public String getPeriod() {
         return period;
     }
 
-    public void setPeriod(Period period) {
+    public void setPeriod(String period) {
         this.period = period;
-    }
-
-    @JsonProperty("Period")
-    private String getPeriodName() {
-        return period.name;
-    }
-
-    @JsonProperty("Period")
-    private void setPeriodName(String periodName) {
-        this.period = new Period(periodName);
     }
 
     public static class Period {
@@ -111,7 +101,7 @@ public class TimeFilter {
 
         @Override
         public boolean equals(Object object) {
-            return EqualsBuilder.reflectionEquals(this, object);
+            return !(object == null || !(object instanceof Period)) && EqualsBuilder.reflectionEquals(this, object);
         }
 
         @Override

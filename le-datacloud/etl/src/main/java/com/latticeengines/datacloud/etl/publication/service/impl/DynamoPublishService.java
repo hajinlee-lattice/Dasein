@@ -209,7 +209,6 @@ public class DynamoPublishService extends AbstractPublishService
     }
 
     private DynamoService getDynamoService(PublishToDynamoConfiguration configuration) {
-        DynamoService constructed = configurationParser.constructDynamoService(configuration);
         if (overridingDynamoService != null) {
             // for test mock
             log.info("Using an overriding mock service, instead of the one constructed from configuration.");

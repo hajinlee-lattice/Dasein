@@ -1,5 +1,9 @@
 package com.latticeengines.query.exposed.translator;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,10 +50,6 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.Union;
 import com.querydsl.sql.WindowFunction;
-
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
 
 public class EventQueryTranslator {
     public static final int NUM_ADDITIONAL_PERIOD = 2;

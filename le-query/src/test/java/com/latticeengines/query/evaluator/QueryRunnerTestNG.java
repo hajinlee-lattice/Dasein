@@ -222,7 +222,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         // This query actually returns all accounts so it doesn't change over time
         Restriction restriction = Restriction.builder() //
                 .let(BusinessEntity.Transaction, TRS_TRANSACTION_DATE)//
-                .prior(Period.Quarter, 1) //
+                .prior(Period.Quarter.name(), 1) //
                 .build();
         Query query = Query.builder() //
                 .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
@@ -244,7 +244,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction.setTimeFilter(
-                new TimeFilter(ComparisonType.PRIOR, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
+                new TimeFilter(ComparisonType.PRIOR, Period.Quarter.name(), Arrays.asList(new Object[] { periodOffset })));
         txRestriction.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
         Restriction restriction = new TransactionRestrictionTranslator().convert(txRestriction,
@@ -262,7 +262,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction1 = new TransactionRestriction();
         txRestriction1.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction1.setTimeFilter(
-                new TimeFilter(ComparisonType.WITHIN, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
+                new TimeFilter(ComparisonType.WITHIN, Period.Quarter.name(), Arrays.asList(new Object[] { periodOffset })));
         txRestriction1.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
         Restriction restriction1 = new TransactionRestrictionTranslator().convert(txRestriction1,
@@ -280,7 +280,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         builder = Query.builder();
         TransactionRestriction txRestriction2 = new TransactionRestriction();
         txRestriction2.setProductId("0720FE59CDE6B915173E381A517876B7");
-        txRestriction2.setTimeFilter(new TimeFilter(ComparisonType.BETWEEN, Period.Quarter,
+        txRestriction2.setTimeFilter(new TimeFilter(ComparisonType.BETWEEN, Period.Quarter.name(),
                 Arrays.asList(new Object[] { 0, periodOffset })));
         txRestriction2.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
@@ -299,7 +299,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction3 = new TransactionRestriction();
         txRestriction3.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction3.setTimeFilter(
-                new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, Period.Quarter, Arrays.asList(new Object[] { 0 })));
+                new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, Period.Quarter.name(), Arrays.asList(new Object[] { 0 })));
         txRestriction3.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
         Restriction restriction3 = new TransactionRestrictionTranslator().convert(txRestriction3,
@@ -317,7 +317,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction4 = new TransactionRestriction();
         txRestriction4.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction4.setTimeFilter(
-                new TimeFilter(ComparisonType.EQUAL, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
+                new TimeFilter(ComparisonType.EQUAL, Period.Quarter.name(), Arrays.asList(new Object[] { periodOffset })));
         txRestriction4.setSpentFilter(new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
                 ComparisonType.GREATER_THAN, Collections.singletonList(200)));
         Restriction restriction4 = new TransactionRestrictionTranslator().convert(txRestriction4,
@@ -335,11 +335,11 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction5 = new TransactionRestriction();
         txRestriction5.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction5.setTimeFilter(
-                new TimeFilter(ComparisonType.PRIOR, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
+                new TimeFilter(ComparisonType.PRIOR, Period.Quarter.name(), Arrays.asList(new Object[] { periodOffset })));
         TransactionRestriction txRestriction6 = new TransactionRestriction();
         txRestriction6.setProductId("0720FE59CDE6B915173E381A517876B7");
         txRestriction6.setTimeFilter(
-                new TimeFilter(ComparisonType.WITHIN, Period.Quarter, Arrays.asList(new Object[] { periodOffset })));
+                new TimeFilter(ComparisonType.WITHIN, Period.Quarter.name(), Arrays.asList(new Object[] { periodOffset })));
         txRestriction6.setNegate(true);
         Restriction restriction5 = new TransactionRestrictionTranslator().convert(txRestriction5,
                                                                                   queryFactory, attrRepo,
@@ -360,7 +360,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         builder = Query.builder();
         TransactionRestriction txRestriction7 = new TransactionRestriction();
         txRestriction7.setProductId("0720FE59CDE6B915173E381A517876B7");
-        txRestriction7.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter,
+        txRestriction7.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter.name(),
                                                     Arrays.asList(new Object[]{periodOffset})));
         Restriction restriction7 = new TransactionRestrictionTranslator().convert(txRestriction7,
                                                                                   queryFactory, attrRepo,
@@ -375,7 +375,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         builder = Query.builder();
         TransactionRestriction txRestriction8 = new TransactionRestriction();
         txRestriction8.setProductId("0720FE59CDE6B915173E381A517876B7");
-        txRestriction8.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter,
+        txRestriction8.setTimeFilter(new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Quarter.name(),
                                                     Arrays.asList(new Object[]{periodOffset})));
         txRestriction8.setNegate(true);
         Restriction restriction8 = new TransactionRestrictionTranslator().convert(txRestriction8,

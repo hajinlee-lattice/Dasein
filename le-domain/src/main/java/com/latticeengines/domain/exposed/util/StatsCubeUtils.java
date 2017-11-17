@@ -289,7 +289,7 @@ public class StatsCubeUtils {
         TimeFilter timeFilter = null;
         AggregationFilter spentFilter = null, unitFilter = null;
 
-        TimeFilter.Period period = null;
+        String period = null;
         ComparisonType comparator = null;
         List<Object> values = null;
         switch (namedPeriod) {
@@ -297,7 +297,7 @@ public class StatsCubeUtils {
             timeFilter = TimeFilter.ever();
             break;
         case LASTQUARTER:
-            period = TimeFilter.Period.Quarter;
+            period = TimeFilter.Period.Quarter.name();
             comparator = ComparisonType.EQUAL;
             values = Collections.singletonList(1);
             timeFilter = new TimeFilter(comparator, period, values);

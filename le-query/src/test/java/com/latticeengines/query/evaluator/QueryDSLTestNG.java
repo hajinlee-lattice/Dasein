@@ -1,41 +1,30 @@
 package com.latticeengines.query.evaluator;
 
-import static com.querydsl.core.group.GroupBy.groupBy;
 import static org.testng.Assert.assertEquals;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 
 import javax.sql.DataSource;
 
-import org.hibernate.criterion.SubqueryExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
-import com.querydsl.core.QueryException;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.core.types.dsl.SimpleTemplate;
-import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.Configuration;
-import com.querydsl.sql.DatePart;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
@@ -356,8 +345,8 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         System.out.println(maxPeriodIdSubQuery.toString());
     }
 
-    public static String getDateDiffTemplate(TimeFilter.Period p) {
-        return String.format("DATEDIFF('%s', date(%s), current_date)", p.name(), "transactiondate");
+    private static String getDateDiffTemplate(String p) {
+        return String.format("DATEDIFF('%s', date(%s), current_date)", p, "transactiondate");
     }
 
     @Test(groups = "functional")
@@ -369,7 +358,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath periodId = Expressions.stringPath("periodid");
         Expression<?> maxPeriodOffset =
-                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(TimeFilter.Period.Quarter)).max().add(1);
+                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(TimeFilter.Period.Quarter.name())).max().add(1);
         StringPath numberPath = Expressions.stringPath("number");
         StringPath allPeriods = Expressions.stringPath("allperiods");
         NumberPath number = Expressions.numberPath(BigDecimal.class, "n");
@@ -410,7 +399,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         Expression<?> totalAmountSum = Expressions.numberPath(BigDecimal.class, "totalAmount").sum();
         Expression<?> totalQuantitySum = Expressions.numberPath(BigDecimal.class, "totalQuantity").sum();
         Expression<?> periodOffset =
-                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(TimeFilter.Period.Quarter));
+                Expressions.numberTemplate(BigDecimal.class, getDateDiffTemplate(TimeFilter.Period.Quarter.name()));
         StringPath trxnPeriodPath = Expressions.stringPath("trxnbyperiod");
 
 

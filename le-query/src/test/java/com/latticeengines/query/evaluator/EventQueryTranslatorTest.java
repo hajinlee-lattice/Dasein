@@ -53,7 +53,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         // 3872223C9BA06C649D68E415E23A9446
         txRestriction.setProductId("A78DF03BAC196BE9A08508FFDB433A31");
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               TimeFilter.Period.Custom,  //
+                                               TimeFilter.Period.Custom.name(),  //
                                                Collections.singletonList(7));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
@@ -79,7 +79,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         // 3872223C9BA06C649D68E415E23A9446
         txRestriction.setProductId("A78DF03BAC196BE9A08508FFDB433A31");
         TimeFilter timeFilter = new TimeFilter(ComparisonType.PRIOR_ONLY, //
-                                               TimeFilter.Period.Custom,  //
+                                               TimeFilter.Period.Custom.name(),  //
                                                Collections.singletonList(7));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;

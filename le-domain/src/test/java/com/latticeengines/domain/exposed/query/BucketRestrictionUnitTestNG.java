@@ -157,7 +157,7 @@ public class BucketRestrictionUnitTestNG {
     @Test(groups = "unit")
     public void testGenericPurchaseHistory() {
         // last quarter
-        TimeFilter lastQuarter = new TimeFilter(ComparisonType.EQUAL, TimeFilter.Period.Quarter,
+        TimeFilter lastQuarter = new TimeFilter(ComparisonType.EQUAL, TimeFilter.Period.Quarter.name(),
                 Collections.singletonList(1));
         // amount > 1000
         AggregationFilter amtFilter = new AggregationFilter(ComparisonType.GREATER_THAN,
@@ -180,7 +180,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertNotNull(deserializedTxn);
         Assert.assertNotNull(deserializedTxn.getTimeFilter());
         Assert.assertEquals(deserializedTxn.getTimeFilter().getRelation(), ComparisonType.EQUAL);
-        Assert.assertEquals(deserializedTxn.getTimeFilter().getPeriod(), TimeFilter.Period.Quarter);
+        Assert.assertEquals(deserializedTxn.getTimeFilter().getPeriod(), "Quarter");
         Assert.assertNotNull(deserializedTxn.getSpentFilter());
         Assert.assertNotNull(deserializedTxn.getUnitFilter());
 
@@ -192,7 +192,7 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertEquals(transactionRestriction.getProductId(), "Product1");
         Assert.assertNotNull(transactionRestriction.getTimeFilter());
         Assert.assertEquals(transactionRestriction.getTimeFilter().getRelation(), ComparisonType.EQUAL);
-        Assert.assertEquals(transactionRestriction.getTimeFilter().getPeriod(), TimeFilter.Period.Quarter);
+        Assert.assertEquals(transactionRestriction.getTimeFilter().getPeriod(), "Quarter");
         Assert.assertNotNull(transactionRestriction.getSpentFilter());
         Assert.assertEquals(transactionRestriction.getSpentFilter().getSelector(), AggregationSelector.SPENT);
         Assert.assertNotNull(transactionRestriction.getUnitFilter());

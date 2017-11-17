@@ -162,8 +162,8 @@ public class TransactionRestrictionTranslator {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
     }
 
-    private static String getDateDiffTemplate(TimeFilter.Period p) {
-        return String.format("DATEDIFF('%s', date(%s), %s)", p.name(), "transactiondate", currentDate);
+    private static String getDateDiffTemplate(String p) {
+        return String.format("DATEDIFF('%s', date(%s), %s)", p, "transactiondate", currentDate);
     }
 
     @SuppressWarnings("unchecked")
@@ -188,7 +188,7 @@ public class TransactionRestrictionTranslator {
     @SuppressWarnings("unchecked")
     public SubQuery translateAllPeriods(QueryFactory queryFactory,
                                         AttributeRepository repository,
-                                        TimeFilter.Period period) {
+                                        String period) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
         String txTableName = getTransactionTableName(repository);
@@ -214,7 +214,7 @@ public class TransactionRestrictionTranslator {
     @SuppressWarnings("unchecked")
     public SubQuery translatePeriodTransaction(QueryFactory queryFactory,
                                                AttributeRepository repository,
-                                               TimeFilter.Period period) {
+                                               String period) {
 
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
@@ -569,8 +569,9 @@ public class TransactionRestrictionTranslator {
             SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction);
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
-            ConcreteRestriction accountInRestriction = (ConcreteRestriction) Restriction.builder()
-                    .let(entity, InterfaceName.AccountId.name()).inCollection(selectAll, InterfaceName.AccountId.name())
+            ConcreteRestriction accountInRestriction = (ConcreteRestriction) Restriction.builder() //
+                    .let(entity, InterfaceName.AccountId.name()) //
+                    .inCollection(selectAll, InterfaceName.AccountId.name()) //
                     .build();
 
             translated = txRestriction.isNegate() ? Restriction.builder().not(accountInRestriction).build()

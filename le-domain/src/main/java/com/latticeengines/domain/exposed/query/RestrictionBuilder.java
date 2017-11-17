@@ -269,7 +269,7 @@ public class RestrictionBuilder {
         return this;
     }
 
-    public RestrictionBuilder prior(Period period, Object value) {
+    public RestrictionBuilder prior(String period, Object value) {
         operator = ComparisonType.PRIOR;
         restriction = new TimeRestriction(new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
                 Arrays.asList(new Object[] { value })));
@@ -277,7 +277,7 @@ public class RestrictionBuilder {
         return this;
     }
 
-    public RestrictionBuilder inCurrentPeriod(Period period) {
+    public RestrictionBuilder inCurrentPeriod(String period) {
         operator = ComparisonType.IN_CURRENT_PERIOD;
         restriction = new TimeRestriction(new TimeFilter(new DateAttributeLookup((AttributeLookup) attrLookup, period), operator, period,
                 Arrays.asList(new Object[] { 0 })));

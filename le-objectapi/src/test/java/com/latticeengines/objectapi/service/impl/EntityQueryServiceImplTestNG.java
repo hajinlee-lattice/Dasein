@@ -150,11 +150,11 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     public Object[][] timefilterProvider() {
         TimeFilter currentMonth = new TimeFilter( //
                 ComparisonType.IN_CURRENT_PERIOD, //
-                TimeFilter.Period.Month, //
+                TimeFilter.Period.Month.name(), //
                 Collections.emptyList());
         TimeFilter lastMonth = new TimeFilter( //
                 ComparisonType.EQUAL, //
-                TimeFilter.Period.Month, //
+                TimeFilter.Period.Month.name(), //
                 Collections.singletonList(1));
         return new Object[][] {
                 { TimeFilter.ever(), 832L }, //

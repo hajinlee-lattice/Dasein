@@ -294,7 +294,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         // time restriction
         Restriction inner = Restriction.builder() //
                 .let(BusinessEntity.Transaction, TRS_TRANSACTION_DATE)//
-                .inCurrentPeriod(Period.Quarter) //
+                .inCurrentPeriod(Period.Quarter.name()) //
                 .build();
 
         Restriction restriction = Restriction.builder() //
@@ -303,9 +303,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("DATE_TRUNC('%s', TO_DATE(%s.%s, 'YYYY-MM-DD')) = ", Period.Quarter,
+        sqlContains(sqlQuery, String.format("DATE_TRUNC('%s', TO_DATE(%s.%s, 'YYYY-MM-DD')) = ", Period.Quarter.name(),
                 TRANSACTION, TRS_TRANSACTION_DATE));
-        sqlContains(sqlQuery, String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", Period.Quarter, 0));
+        sqlContains(sqlQuery, String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", Period.Quarter.name(), 0));
     }
 
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)

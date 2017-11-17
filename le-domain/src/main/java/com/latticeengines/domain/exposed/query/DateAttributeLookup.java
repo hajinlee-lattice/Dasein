@@ -1,28 +1,22 @@
 package com.latticeengines.domain.exposed.query;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 
 public class DateAttributeLookup extends AttributeLookup {
 
     @JsonProperty("Period")
-    private Period period;
+    private String period;
 
-    public DateAttributeLookup(BusinessEntity entity, String attrName, Period period) {
-        super(entity, attrName);
-        this.period = period;
-    }
-
-    public DateAttributeLookup(AttributeLookup attrLookup, Period period) {
+    public DateAttributeLookup(AttributeLookup attrLookup, String period) {
         super(attrLookup.getEntity(), attrLookup.getAttribute());
         this.period = period;
     }
 
-    public Period getPeriod() {
+    public String getPeriod() {
         return period;
     }
 
-    public void setPeriod(Period period) {
+    public void setPeriod(String period) {
         this.period = period;
     }
 }
