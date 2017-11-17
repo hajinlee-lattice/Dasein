@@ -3,6 +3,9 @@ package com.latticeengines.domain.exposed.query;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,7 +26,7 @@ public class TimeFilter {
     @JsonProperty("Vals")
     private List<Object> values = Collections.emptyList();
 
-    @JsonProperty("Period")
+    @JsonIgnore
     private Period period;
 
     public static TimeFilter ever() {
@@ -77,6 +80,16 @@ public class TimeFilter {
         this.period = period;
     }
 
+    @JsonProperty("Period")
+    private String getPeriodName() {
+        return period.name;
+    }
+
+    @JsonProperty("Period")
+    private void setPeriodName(String periodName) {
+        this.period = new Period(periodName);
+    }
+
     public static class Period {
 
         public static final Period Day = new Period("Day");
@@ -94,6 +107,16 @@ public class TimeFilter {
 
         public String name() {
             return name;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            return EqualsBuilder.reflectionEquals(this, object);
+        }
+
+        @Override
+        public int hashCode() {
+            return HashCodeBuilder.reflectionHashCode(this);
         }
     }
 }
