@@ -232,7 +232,7 @@ public class EventQueryTranslator {
         WindowFunction windowAgg = null;
         switch (aggregateType) {
         case SUM:
-            windowAgg = SQLExpressions.sum(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            windowAgg = SQLExpressions.sum(trxnValNumber).over();
             break;
         case AVG:
             windowAgg = SQLExpressions.avg(trxnValNumber.coalesce(BigDecimal.ZERO)).over();

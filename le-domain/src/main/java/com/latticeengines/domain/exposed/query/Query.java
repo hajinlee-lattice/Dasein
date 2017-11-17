@@ -72,10 +72,6 @@ public class Query implements GraphNode {
     @JsonProperty("free_form_text_search_attributes")
     private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
 
-    // used to generate "from", currently only support 1
-    @JsonIgnore
-    private UnionLookup unionLookup;
-
     @JsonIgnore
     private Set<BusinessEntity> entitiesForJoin;
 
@@ -289,14 +285,6 @@ public class Query implements GraphNode {
 
     public List<JoinSpecification> getCommonTableJoins() {
         return commonTableJoins;
-    }
-
-    public UnionLookup getUnionLookup() {
-        return unionLookup;
-    }
-
-    public void setUnionLookup(UnionLookup unionLookup) {
-        this.unionLookup = unionLookup;
     }
 
     @Override

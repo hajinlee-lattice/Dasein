@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.SelectAllLookup;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
-import com.latticeengines.domain.exposed.query.UnionLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.domain.exposed.query.WindowFunctionLookup;
 import com.latticeengines.query.evaluator.QueryProcessor;
@@ -96,10 +95,6 @@ public final class LookupResolverFactory {
         if (lookupType.isAssignableFrom(SelectAllLookup.class)) {
             resolvers.put(lookupType.getSimpleName(),
                     new SelectAllResolver(attrRepo, queryProcessor.getQueryFactory()));
-            return;
-        }
-        if (lookupType.isAssignableFrom(UnionLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new UnionResolver(attrRepo, this));
             return;
         }
 
