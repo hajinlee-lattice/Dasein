@@ -1,10 +1,15 @@
 package com.latticeengines.query.exposed.translator;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -31,10 +36,6 @@ import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.WindowFunction;
-
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
 
 public class TransactionRestrictionTranslator {
     public static final int NUM_ADDITIONAL_PERIOD = 2;
@@ -86,6 +87,9 @@ public class TransactionRestrictionTranslator {
     private StringPath trxnAmountVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
     private StringPath trxnQuantityVal = Expressions.stringPath(trxnPath, QUANTITY_VAL);
     private StringPath trxnVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
+
+    // for testing purpose
+    private static String currentDate = "current_date";
 
     private SQLQueryFactory getSQLQueryFactory(QueryFactory queryFactory, AttributeRepository repository) {
         return queryFactory.getSQLQueryFactory(repository);
@@ -159,7 +163,7 @@ public class TransactionRestrictionTranslator {
     }
 
     private static String getDateDiffTemplate(TimeFilter.Period p) {
-        return String.format("DATEDIFF('%s', date(%s), current_date)", p.name(), "transactiondate");
+        return String.format("DATEDIFF('%s', date(%s), %s)", p.name(), "transactiondate", currentDate);
     }
 
     @SuppressWarnings("unchecked")
@@ -579,5 +583,9 @@ public class TransactionRestrictionTranslator {
         return translated;
     }
 
+    @VisibleForTesting
+    public static void setCurrentDate(String currentDate) {
+        TransactionRestrictionTranslator.currentDate = currentDate;
+    }
 }
 

@@ -1,7 +1,6 @@
 package com.latticeengines.objectapi.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.python.icu.impl.coll.CollationRoot.getData;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.UuidUtils;
@@ -38,11 +38,13 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
+import com.latticeengines.domain.exposed.query.util.ExpressionTemplateUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
@@ -60,6 +62,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     public void setup() {
         mockDataCollectionProxy();
         MultiTenantContext.setTenant(new Tenant("LocalTest"));
+        String maxTransactionDate = getMaxTransactionDate();
+        ExpressionTemplateUtils.setCurrentDate(String.format("'%s'", maxTransactionDate));
+        TransactionRestrictionTranslator.setCurrentDate(String.format("'%s'", maxTransactionDate));
     }
 
     @Test(groups = "functional")
@@ -101,18 +106,19 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertEquals(count, new Long(1329L));
     }
 
-    @Test(groups = "functional")
-    public void testAccountWithTxn() {
+    @Test(groups = "functional", dataProvider = "timefilterProvider")
+    public void testAccountWithTxn(TimeFilter timeFilter, long expectedTotal) {
+        MultiTenantContext.setTenant(new Tenant("LocalTest"));
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
 
         // Ever Purchased
-        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, timeFilter, null, null, false);
         long totalCount = countTxnBkt(txn);
-        Assert.assertEquals(totalCount, 832L);
+        Assert.assertEquals(totalCount, expectedTotal);
 
         // Ever, Amount > 0, Quantity > 0
         AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN, Collections.singletonList(0));
-        txn = new Bucket.Transaction(prodId, TimeFilter.ever(), greaterThan0, greaterThan0, false);
+        txn = new Bucket.Transaction(prodId, timeFilter, greaterThan0, greaterThan0, false);
         long count = countTxnBkt(txn);
         Assert.assertEquals(count, totalCount);
 
@@ -120,9 +126,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         AggregationFilter filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1000));
         AggregationFilter filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1000, 3000));
         AggregationFilter filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(3000));
-        Bucket.Transaction txn1 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter1, null, false);
-        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter2, null, false);
-        Bucket.Transaction txn3 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter3, null, false);
+        Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
+        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter, filter2, null, false);
+        Bucket.Transaction txn3 = new Bucket.Transaction(prodId, timeFilter, filter3, null, false);
         long count1 = countTxnBkt(txn1);
         long count2 = countTxnBkt(txn2);
         long count3 = countTxnBkt(txn3);
@@ -131,13 +137,42 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1));
         filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1, 10));
         filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(10));
-        txn1 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter1, null, false);
-        txn2 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter2, null, false);
-        txn3 = new Bucket.Transaction(prodId, TimeFilter.ever(), filter3, null, false);
+        txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
+        txn2 = new Bucket.Transaction(prodId, timeFilter, filter2, null, false);
+        txn3 = new Bucket.Transaction(prodId, timeFilter, filter3, null, false);
         count1 = countTxnBkt(txn1);
         count2 = countTxnBkt(txn2);
         count3 = countTxnBkt(txn3);
         Assert.assertEquals(count1 + count2 + count3, totalCount);
+    }
+
+    @DataProvider(name = "timefilterProvider", parallel = true)
+    public Object[][] timefilterProvider() {
+        TimeFilter currentMonth = new TimeFilter( //
+                ComparisonType.IN_CURRENT_PERIOD, //
+                TimeFilter.Period.Month, //
+                Collections.emptyList());
+        TimeFilter lastMonth = new TimeFilter( //
+                ComparisonType.EQUAL, //
+                TimeFilter.Period.Month, //
+                Collections.singletonList(1));
+        return new Object[][] {
+                { TimeFilter.ever(), 832L }, //
+                { currentMonth, 223L }, //
+                { lastMonth, 218L },
+        };
+    }
+
+    private String getMaxTransactionDate() {
+        AttributeLookup lookup = new AttributeLookup(BusinessEntity.Transaction, InterfaceName.TransactionDate.name());
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setLookups(Collections.singletonList(lookup));
+        frontEndQuery.setSort(new FrontEndSort(Collections.singletonList(lookup), true));
+        frontEndQuery.setPageFilter(new PageFilter(0, 1));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        DataPage dataPage = entityQueryService.getData(frontEndQuery);
+        Assert.assertNotNull(dataPage);
+        return (String) dataPage.getData().get(0).get(InterfaceName.TransactionDate.name());
     }
 
     @Test(groups = "functional")

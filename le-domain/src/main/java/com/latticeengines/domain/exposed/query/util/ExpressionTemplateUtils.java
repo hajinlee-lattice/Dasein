@@ -1,8 +1,16 @@
 package com.latticeengines.domain.exposed.query.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 
 public class ExpressionTemplateUtils {
+
+    private static String currentDate = "GETDATE()";
+
+    @VisibleForTesting
+    public static void setCurrentDate(String currentDate) {
+        ExpressionTemplateUtils.currentDate = currentDate;
+    }
 
     public static String strAttrToDate(String attrName) {
         return String.format("TO_DATE(%s, %s)", attrName, "'YYYY-MM-DD'");
@@ -17,7 +25,7 @@ public class ExpressionTemplateUtils {
     }
 
     public static String getCurrentDate() {
-        return "GETDATE()";
+        return currentDate;
     }
 
     public static String getDateDiffTemplate(Period p, String source, String target) {

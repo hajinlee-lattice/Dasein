@@ -77,7 +77,23 @@ public class TimeFilter {
         this.period = period;
     }
 
-    public enum Period {
-        Day, Week, Month, Quarter, Year, Custom;
+    public static class Period {
+
+        public static final Period Day = new Period("Day");
+        public static final Period Week = new Period("Week");
+        public static final Period Month = new Period("Month");
+        public static final Period Quarter = new Period("Quarter");
+        public static final Period Year = new Period("Year");
+        public static final Period Custom = new Period("Custom");
+
+        private final String name;
+
+        public Period(String name) {
+            this.name = name;
+        }
+
+        public String name() {
+            return name;
+        }
     }
 }
