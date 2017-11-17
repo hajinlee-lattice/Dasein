@@ -79,7 +79,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.PLSCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheNames.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
