@@ -1,6 +1,6 @@
 .rating-list {
 	.tiles > li {
-		padding: 13px 0;
+		padding: 13px 0 55px;
 		&.no-style {
 			padding: 0;
 		}
@@ -145,7 +145,10 @@
 			padding: 0 13px 13px;
 		}
 		.tile-footer {
-			padding-top: 13px;	
+			padding-top: 13px;
+			padding-bottom: 13px;
+			position: absolute;
+			bottom: 0;
 			.button {
 				font-size: 12px;
 				padding: 6px 10px;

@@ -17,9 +17,9 @@ $pad-sides: 51px;
     }
 
     .remodel-table-title {
-        font-size: 22px;
+        font-size: 18px;
         font-weight: bold;
-        padding: 1em $pad-sides 0;
+        padding: 1em $pad-sides;
     }
 
     .section-body.attribute-table  {
@@ -46,8 +46,7 @@ $pad-sides: 51px;
         }
 
         tr>td:nth-child(1) {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 12px;
         }
 
         tr>td:nth-child(2) {
@@ -149,7 +148,7 @@ $pad-sides: 51px;
     }
 
     form label {
-        font-size: 24px;
+        font-size: 18px;
     }
 
     .header-count {

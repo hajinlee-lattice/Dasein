@@ -310,7 +310,7 @@ angular
             },
             views: {
                 "summary@": {
-                    template: ''
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     resolve: {

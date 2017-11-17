@@ -133,31 +133,28 @@ Chunky Interior Tabs (My Data, Play List, etc...)
     &:hover {
         z-index: 6;
     }
-    border-top: 1px solid #d0d1d0;
-    border-bottom: 1px solid #d0d1d0;
-    background: #efefef;
+    background: #E2E3E5;
     margin-top: 0;
     margin-bottom: 2em;
     & > ul {
         @include flex-container;
         @include flex-item(1 1 auto);
-        border-left: 1px solid #d0d1d0;
+        border-left: 3px solid #F9F9F9;
         width: 100%;
         max-width: 1200px;
         margin: 0 auto;
         & > li {
             @include flex-item(1 1 auto);
-            border-right: 1px solid #d0d1d0;
+            border-right: 3px solid #F9F9F9;
             font-size: 9px;
             position: relative;
-            height: 73px;
-            min-width: 237px;
-            max-width: 320px;
+            height: 60px;
+            max-width: 34%;
             cursor: pointer;
             .tab-container {
                 margin: 0;
-                padding: 14px 20px;
-                border-top: 5px solid transparent;
+                padding: 11px 20px;
+                border-top: 3px solid transparent;
                 border-bottom: 1px solid transparent;
                 height: calc(100% + 1px);
                 position: absolute;
@@ -169,7 +166,7 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 cursor: pointer;
             }
             &:last-child {
-                border-right: 1px solid #d0d1d0;
+                border-right: 3px solid #F9F9F9;
             }
             &.active {
                 background: #fafafa;
@@ -179,7 +176,7 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                     z-index: 999;
                 }
                 .tab-container {
-                    border-top-color: orange;
+                    border-top-color: #ef6a30;
                     border-bottom-color: transparent;
                     background: #fafafa;
                     z-index: 1;
@@ -187,8 +184,8 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 }
             }
             .count {
-                color: #26649b;
-                font-size: 18px;
+                color: #222;
+                font-size: 15px;
             }
             &.disabled {
                 display: none;
@@ -196,17 +193,22 @@ Chunky Interior Tabs (My Data, Play List, etc...)
             .enrichmentCounts {
                     white-space: nowrap;
                     text-transform: uppercase;
+                    color: #222;
                     .count {
                         margin-right: 5px;
                         &:not(:first-child) {
                             margin-left: 5px;
                             padding-left: 5px;
-                            border-left: 1px solid #d0d1d0;
+                            border-left: 1px solid #999;
                         }
                     }
                 }
             & > .tab-container > h2 {
                 position: relative;
+                text-transform: uppercase;
+                font-size: 11px;
+                color: #222;
+
                 &:after {
                     content: '';
                     display: block;
@@ -266,19 +268,21 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 font-weight: normal;
             }
             h2 {
-                font-size: 14px;
+                font-size: 13px;
             }
             h3 {
                 font-size: 18px;
                 color: white;
             }
             .more-info {
-                padding: 1px;
+                padding: 2px;
                 text-align: center;
-                width: 12px;
-                height: 12px;
+                width: 11px;
+                height: 11px;
                 position: relative;
                 top: -1px;
+                font-size: 8px;
+                margin-left: 1em;
                 .tooltip_ {
                     text-align: left;
                     h3 {

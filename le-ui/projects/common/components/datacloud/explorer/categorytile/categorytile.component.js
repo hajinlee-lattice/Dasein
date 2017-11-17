@@ -10,7 +10,7 @@ angular
         },
         controllerAs: 'vm',
         templateUrl: '/components/datacloud/explorer/categorytile/categorytile.component.html',
-        controller: function ($scope, $document, $timeout, $interval, DataCloudStore) {
+        controller: function ($scope, $document, $timeout, $interval, DataCloudStore, QueryStore) {
             var vm = $scope.vm;
 
             angular.extend(vm, { });

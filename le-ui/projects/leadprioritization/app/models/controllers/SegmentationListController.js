@@ -19,9 +19,11 @@ angular.module('lp.models.segments', [
                 label: 'Sort By',
                 icon: 'numeric',
                 order: '-',
-                property: 'created',
+                property: 'updated',
                 items: [
                     { label: 'Creation Date', icon: 'numeric', property: 'created' },
+                    { label: 'Modified Date', icon: 'numeric', property: 'updated' },
+                    { label: 'Author Name', icon: 'alpha', property: 'created_by' },
                     { label: 'Segment Name', icon: 'alpha', property: 'display_name' }
                 ]
             }
@@ -44,7 +46,11 @@ angular.module('lp.models.segments', [
         }
     }
 
-    vm.customMenuClick = function ($event, segment) {
+    vm.onInputFocus = function($event) {
+        $event.target.select();
+    };
+
+    vm.customMenuClick = function($event, segment) {
         if ($event != null) {
             $event.stopPropagation();
         }

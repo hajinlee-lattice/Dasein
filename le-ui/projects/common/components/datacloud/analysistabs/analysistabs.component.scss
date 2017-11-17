@@ -5,9 +5,12 @@ section.analysis-tabs.tabs.interior {
                 span:not(:first-child) {
                     margin-left: 8px;
                     padding-left: 10px;
-                    border-left: 1px solid #d0d1d0;
+                    border-left: 1px solid #222;
                     margin-right: 0px;
                     padding-right: .1em;
+                    padding-top: 1px;
+                    line-height: .7em;
+                    display: inline-block;
                 }
                 span:first-child {
                     margin: 0;

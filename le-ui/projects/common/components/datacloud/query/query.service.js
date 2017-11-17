@@ -457,12 +457,26 @@ angular.module('common.datacloud.query.service',[
             }
 
             if (branch && branch.logicalRestriction) {
-                QueryStore.recursiveGetBucketRestrictions(branch.logicalRestriction.restrictions, restrictions);
+                QueryStore.getAllBuckets(branch.logicalRestriction.restrictions, restrictions);
             }
         });
 
         return restrictions;
     };
+
+    this.getDataCloudAttributes = function(ignoreCache) {
+        //if (ignoreCache) {
+            var restrictions = [];
+            var ar = QueryStore.getAccountRestriction();
+            var cr = QueryStore.getContactRestriction();
+
+            this.getAllBuckets(ar.restriction.logicalRestriction.restrictions, restrictions);
+            this.getAllBuckets(cr.restriction.logicalRestriction.restrictions, restrictions);
+
+        //}
+
+        return restrictions;
+    }
 
     this.init();
 })

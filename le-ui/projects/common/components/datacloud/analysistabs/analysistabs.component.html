@@ -1,6 +1,6 @@
 <section class="analysis-tabs tabs interior containerx">
     <ul>
-        <li class="tab-browse"
+        <li class=""
             ui-sref="{{ vm.attributes }}"
             ui-sref-active="active" 
             ng-class="{'active':vm.checkState('builder')}">
@@ -23,11 +23,11 @@
                 <div class="enrichmentCounts">
                     <span class="count">{{(vm.DataCloudStore.metadata.enrichmentsTotal || 0) | number}}</span>
                     <span class="count">{{ vm.getRuleCount() }}</span>
-                    SELECTIONS
+                    SELECTED
                 </div>
             </div>
         </li>
-        <li class="tab-edit info noselect-children" ui-sref="{{ vm.accounts }}" ui-sref-active="active">
+        <li class="info noselect-children" ui-sref="{{ vm.accounts }}" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Accounts</h2>
                 <div class="enrichmentCounts">
@@ -36,7 +36,7 @@
                 </div>
             </div>
         </li>
-        <li class="tab-team" ui-sref="{{ vm.contacts }}" ui-sref-active="active">
+        <li class="" ui-sref="{{ vm.contacts }}" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Contacts</h2>
                 <div class="enrichmentCounts">

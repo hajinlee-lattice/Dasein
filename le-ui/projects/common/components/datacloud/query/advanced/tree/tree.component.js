@@ -200,8 +200,8 @@ angular
 
                 var map = {
                     "Yes": "is",
-                    "No": "is not",
-                    "": "is empty",
+                    "No": "is",
+                    "": "is",
                     "is": "is",
                     "empty": "is empty",
                     "between": "is between",

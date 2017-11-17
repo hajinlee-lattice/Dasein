@@ -21,7 +21,7 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
                 label: 'Sort By',
                 icon: 'numeric',
                 order: '-',
-                property: 'created',
+                property: 'updated',
                 items: [
                     { label: 'Modified Date',   icon: 'numeric',    property: 'updated' },
                     { label: 'Creation Date',   icon: 'numeric',    property: 'created' },

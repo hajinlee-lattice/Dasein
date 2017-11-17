@@ -12,7 +12,7 @@
 //START: Style overrides (NOTE: This should only be done in extreme cases because it will make maintaining the css more difficult going forward)
 
 body {
-  background-color: #fafafa;
+  background-color: #f9f9f9;
   &.not-initialized,
   &.initialized {
     transition: opacity 333ms ease 0ms;

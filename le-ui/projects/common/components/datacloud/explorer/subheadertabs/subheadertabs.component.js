@@ -103,7 +103,6 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             QueryStore.setPublicProperty('enableSaveSegmentButton', false);
             vm.isSaving = true;
             SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-                QueryStore.setPublicProperty('enableSaveSegmentButton', false);
                 
                 if (isNewSegment) { 
                     vm.clickSegmentButton({
@@ -116,6 +115,8 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             });
         }
 
+        QueryStore.setPublicProperty('enableSaveSegmentButton', false);
+        
         var xhrGetSegmentResult = function(result) {
             xhrSaveSegment(result);
         }

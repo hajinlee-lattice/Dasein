@@ -345,12 +345,12 @@ Model List
   border-top-left-radius: 6px;
   font-family:'ProximaNova-Regular','Open Sans',sans-serif;
   li {
-    display: block;
     list-style: none;
     padding: 0.3em 1em;
     text-align: right;
     color: #eee;
     white-space: nowrap;
+    font-size: 12px;
     &:hover {
       background: #444;
       transition: none;

@@ -1,6 +1,6 @@
 div.explorer-subheader-tabs {
     position: relative;
-    height: 2.5em;
+    height: 3em;
     line-height: 3em;
     
     ul.subheader-tabs-links {
@@ -8,8 +8,8 @@ div.explorer-subheader-tabs {
         
         li {
             display: inline-block;
-            font-size: 1.4em;
-            color: #ccc;
+            font-size: 18px;
+            color: #222;
             padding: 0 0.2em;
             cursor: pointer;
             -webkit-transition: none;
@@ -22,7 +22,7 @@ div.explorer-subheader-tabs {
             }
 
             &.active {
-                color: #333;
+                color: #ef6a30;
                 cursor: default;
             } 
         }

@@ -65,20 +65,22 @@
                             'no-highlights': highlightAttributes.length == 0 || !vm.showHighlighting(),
                             'ignore-ngclick': vm.section !== 'segment.analysis'
                         }"
-                        ng-click="vm.selectSegmentAttribute(attribute)">
+                        ng-click="vm.selectSegmentAttribute(attribute)"
+                        ng-style="{'pointer-events': (vm.section == 'segment.analysis' ? 'all' : 'none')}">
 
                     <!--input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" /-->
-                    <div class="column checkspace" >
-                        <input  type="checkbox" 
+                    <div class="column checkspace" ng-if="vm.section == 'segment.analysis'">
+                        <!--input  type="checkbox" 
                                 ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]"
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
                                 name="{{attribute.Attribute || attribute.ColumnId}}" 
                                 id="{{attribute.Attribute || attribute.ColumnId}}"
                                 ng-show="false"
-                                ng-if="vm.section == 'segment.analysis' && attribute.TopBkt" />
+                                ng-if="vm.section == 'segment.analysis' && attribute.TopBkt" /-->
                         <i class="plus fa fa-plus" ng-if="!(vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked)"></i>
-                        <i class="plus fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
-                        <i class="fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
+                        <i class="plus fa fa-check" ng-if="(vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked)"></i>
+                        <i class="fa fa-check" ng-if="vm.getAttributeUseCount(attribute) == 1"></i>
+                        <i class="attribute-use-count" ng-if="vm.getAttributeUseCount(attribute) > 1">{{ vm.getAttributeUseCount(attribute) }}</i>
                     </div>
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>

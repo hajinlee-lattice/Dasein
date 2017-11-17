@@ -4,7 +4,6 @@ pd-pagination-controls .pd-pagination {
     font-size: 1em;
     
     span {
-        font-weight: bold;
     }
     
     span.pd-pagination-center {
@@ -12,7 +11,7 @@ pd-pagination-controls .pd-pagination {
     }
 
     button.white-button {
-        padding: .4em .8em;
+        padding: 0em .8em;
         color: #467dba;
         -webkit-transition: all 0s linear;
         -moz-transition: all 0s linear;
@@ -22,16 +21,15 @@ pd-pagination-controls .pd-pagination {
     
     button[disabled],
     button.active {
-        color: #467dba;
         pointer-events: none;
         cursor: default;
         outline: 0;
     }
     
     button[disabled] {
-        border-color: #dadada;
-        color: #ccc;
-        background-color: #f0f0f0;
+        //border-color: #dadada;
+        //color: #ccc;
+        //background-color: #f0f0f0;
     }
 
     .active {

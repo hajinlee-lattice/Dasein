@@ -1,92 +1,96 @@
 
 <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
      ng-class="{active: vm.subcategory == subcategory}">
+    <span>
 
-    <h2 class="noselect-children">
-        <div class="category-icon">
-            <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" fallback-src="{{vm.categoryIcon(vm.category)}}" onerror="this.style.display='none'" />
-        </div>
-        <div class="category-label">{{subcategory}}</div>
-    </h2>
+        <h2 class="noselect-children">
+            <div class="category-icon">
+                <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" fallback-src="{{vm.categoryIcon(vm.category)}}" onerror="this.style.display='none'" />
+            </div>
+            <div class="category-label">{{subcategory}}</div>
+        </h2>
 
-    <span class="count noselect-children">
-        <strong>{{ count|number }}</strong>
-    </span>
+        <span class="count noselect-children">
+            <strong>{{ count|number }}</strong>
+        </span>
 
-    <div class="attributes-container">
-        <ul class="attributes noselect-children">
-            <li class="header" ng-show="subcategoryAttributes.length > 0">
-                <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(subcategoryAttributes) }}</div>
-                <div class="column data" ng-if="vm.section == 'segment.analysis'">Value</div>
-                <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
-            </li>
+        <div class="attributes-container">
+            <ul class="attributes noselect-children">
+                <li class="header" ng-show="subcategoryAttributes.length > 0">
+                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(subcategoryAttributes) }}</div>
+                    <div class="column data" ng-if="vm.section == 'segment.analysis'">Value</div>
+                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
+                </li>
 
-            <!-- | filter: vm.enrichmentsFilter() -->
-            <li     class="attribute"
-                    ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
-                        | filter: vm.enrichmentsFilter()
-                        | filter: vm.filterHideTrue
-                        | orderBy: vm.categoryOrderBy()
-                        | limitTo: 5))"
-                    ng-class="{'ignore-ngclick': vm.section !== 'segment.analysis'}"
-                    ng-click="vm.selectSegmentAttribute(attribute)">
+                <!-- | filter: vm.enrichmentsFilter() -->
+                <li     class="attribute"
+                        ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
+                            | filter: vm.enrichmentsFilter()
+                            | filter: vm.filterHideTrue
+                            | orderBy: vm.categoryOrderBy()
+                            | limitTo: 5))"
+                        ng-class="{'ignore-ngclick': vm.section !== 'segment.analysis'}"
+                        ng-click="vm.selectSegmentAttribute(attribute)"
+                        ng-style="{'pointer-events': (vm.section == 'segment.analysis' ? 'all' : 'none')}">
 
-                <div class="column checkspace">
-                    <input  type="checkbox" 
-                            id="{{attribute.Attribute || attribute.ColumnId}}" 
-                            name="{{attribute.Attribute || attribute.ColumnId}}" 
-                            ng-show="false"
-                            ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" 
-                            ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
-                            ng-if="vm.section == 'segment.analysis'" />
-                    <i class="plus fa fa-plus" ng-if="!(vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked)"></i>
-                    <i class="plus fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
-                    <i class="fa fa-check" ng-if="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked"></i>
-                </div>
-                <div class="column label" title="{{attribute.DisplayName}}">
-                    <strong ng-if="attribute.DisplayName">{{ attribute.DisplayName }}</strong>
-                    <strong ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</strong>
-                </div>
-                <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode || vm.section == 'segment.analysis'">
-                    <div class="attribute-feedback-container">
-                        <attribute-feedback-button 
-                            button-type="'infodot'" 
-                            attribute="attribute" 
-                            value="vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType)" 
-                            icon-image="vm.categoryIcon(vm.category)"
-                            category-class="vm.categoryClass(vm.category)"
-                            ng-if="vm.lookupMode && vm.hasCompanyInfo" />
-
-                        <strong ng-if="attribute.Value">{{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}</strong>
-                        <strong ng-if="!attribute.Value && attribute.TopBkt.Lbl">{{attribute.TopBkt.Lbl}}</strong>
-
+                    <div class="column checkspace" ng-if="vm.section == 'segment.analysis'">
+                        <!--input  type="checkbox" 
+                                id="{{attribute.Attribute || attribute.ColumnId}}" 
+                                name="{{attribute.Attribute || attribute.ColumnId}}" 
+                                ng-show="false"
+                                ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" 
+                                ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
+                                ng-if="vm.section == 'segment.analysis'" /-->
+                        <i class="plus fa fa-plus" ng-if="!(vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked)"></i>
+                        <i class="plus fa fa-check" ng-if="(vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked)"></i>
+                        <i class="fa fa-check" ng-if="vm.getAttributeUseCount(attribute) == 1"></i>
+                        <i class="attribute-use-count" ng-if="vm.getAttributeUseCount(attribute) > 1">{{ vm.getAttributeUseCount(attribute) }}</i>
                     </div>
-                </div>
+                    <div class="column label" title="{{attribute.DisplayName}}">
+                        <strong ng-if="attribute.DisplayName">{{ attribute.DisplayName }}</strong>
+                        <strong ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</strong>
+                    </div>
+                    <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode || vm.section == 'segment.analysis'">
+                        <div class="attribute-feedback-container">
+                            <attribute-feedback-button 
+                                button-type="'infodot'" 
+                                attribute="attribute" 
+                                value="vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType)" 
+                                icon-image="vm.categoryIcon(vm.category)"
+                                category-class="vm.categoryClass(vm.category)"
+                                ng-if="vm.lookupMode && vm.hasCompanyInfo" />
 
-                <div class="column data records" ng-if="!vm.lookupMode">
-                    <strong ng-if="vm.section != 'segment.analysis'">{{ attribute.Count | number }}</strong>
-                    <strong ng-if="vm.section == 'segment.analysis'">{{ attribute.TopBkt.Cnt | number }}</strong>
-                </div>
+                            <strong ng-if="attribute.Value">{{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}</strong>
+                            <strong ng-if="!attribute.Value && attribute.TopBkt.Lbl">{{attribute.TopBkt.Lbl}}</strong>
 
+                        </div>
+                    </div>
+
+                    <div class="column data records" ng-if="!vm.lookupMode">
+                        <strong ng-if="vm.section != 'segment.analysis'">{{ attribute.Count | number }}</strong>
+                        <strong ng-if="vm.section == 'segment.analysis'">{{ attribute.TopBkt.Cnt | number }}</strong>
+                    </div>
+
+                </li>
+            </ul>
+
+            <div class="attributes-more noselect" ng-if="count > 5">More</div>
+        </div>
+        <ul class="controls noselect" ng-if="!vm.lookupMode">
+            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
+                <!-- this can't be a <button> element because IE and FF don't like it -->
+                <div class="button"
+                        ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'dirty'}"
+                        ng-click="vm.closeHighlighterButtons(vm.category + subcategory); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
+                    <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
+                        {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
+                    </span>
+                    <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
+                        <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-class="{'disable-enable-all': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == type}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
+                    </ul>
+
+                </div>
             </li>
         </ul>
-
-        <div class="attributes-more noselect" ng-if="count > 5">More</div>
-    </div>
-    <ul class="controls noselect" ng-if="!vm.lookupMode">
-        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
-            <!-- this can't be a <button> element because IE and FF don't like it -->
-            <div class="button"
-                    ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'dirty'}"
-                    ng-click="vm.closeHighlighterButtons(vm.category + subcategory); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
-                <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
-                    {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
-                </span>
-                <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
-                    <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-class="{'disable-enable-all': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == type}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
-                </ul>
-
-            </div>
-        </li>
-    </ul>
+    </span>
 </div>

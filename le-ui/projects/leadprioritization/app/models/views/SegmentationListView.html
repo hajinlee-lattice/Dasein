@@ -10,7 +10,7 @@
             </div>
             <div class="pull-right">
                 <a
-                    class="button orange-button"
+                    class="button blue-button"
                     ng-click="vm.addSegment()">
                     Add Segment
                 </a>
@@ -94,6 +94,7 @@
                                 name="display_name"
                                 data-ng-model="segment.display_name"
                                 ng-change="vm.nameChanged(segment)"
+                                ng-focus="vm.onInputFocus($event)"
                                 maxlength="50"
                                 ng-trim="false"
                                 class="form-control" />
@@ -120,7 +121,7 @@
                                 Cancel</button>
                             <button
                                 type="button"
-                                class="button orange-button pull-right"
+                                class="button blue-button pull-right"
                                 ng-disabled="vm.saveInProgress"
                                 ng-click="vm.saveSegmentClicked($event, segment)">
                                 {{vm.saveInProgress ? 'Saving...' : 'Save'}}</button>

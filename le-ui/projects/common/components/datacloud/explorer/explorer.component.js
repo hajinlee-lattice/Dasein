@@ -1456,7 +1456,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-        if(!vm.cube.data.Stats) {
+        if (!vm.cube.data.Stats) {
             return false;
         }
 
@@ -1477,27 +1477,18 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
 
-        if(attributeRangeKey) {
+        if (attributeRangeKey) {
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
 
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
         
-        if(entity === 'Account') {
-            if (vm.segmentAttributeInput[attributeKey] === true) {
-                QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
-            } else {
-                QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
-            }
-        } else {
-            if (vm.segmentAttributeInput[attributeKey] === true) {
-                QueryStore.addContactRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
-            } else {
-                QueryStore.removeContactRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
-            }
-        }
-
+        QueryStore['add' + entity + 'Restriction']({
+            columnName: attributeKey, 
+            resourceType: entity, 
+            bkt: topBkt
+        });
 
         vm.checkSaveButtonState();
 
@@ -1518,17 +1509,17 @@ angular.module('common.datacloud.explorer', [
             //     var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
             // }
 
-        if(disable) {
+        if (disable) {
             return false;
         }
-        if(entity === 'Transaction'){
+        if (entity === 'Transaction'){
             var entity = 'Account';
         }
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
 
-        if(entity === 'Account') {
+        if (entity === 'Account' || entity === 'PurchaseHistory') {
             if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
                 QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
             } else {
@@ -1543,7 +1534,7 @@ angular.module('common.datacloud.explorer', [
         }
 
         vm.TileTableItems = {};
-        if(vm.metadataSegments || QueryRestriction) {
+        if (vm.metadataSegments || QueryRestriction) {
             getExplorerSegments(vm.enrichments);
         }
 
@@ -1618,6 +1609,16 @@ angular.module('common.datacloud.explorer', [
             }
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
         });
+    }
+
+    vm.getAttributeUseCount = function(attribute) {
+        var attributes = QueryStore.getDataCloudAttributes(true);
+
+        attributes = attributes.filter(function(item) {
+            return item.bucketRestriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId);
+        });
+
+        return attributes.length;
     }
 
     vm.init();

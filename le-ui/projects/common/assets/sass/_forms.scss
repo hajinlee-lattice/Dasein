@@ -120,9 +120,9 @@ output {
 .form-control {
   display: block;
   width: 100%;
-  padding: 6px 6px;
-  font-size: 16px;
-  line-height: 1.42857143;
+  padding: 0px 6px;
+  font-size: 12px;
+  line-height: 28px;
   color: #555555;
   background-image: none;
   border: 1px solid #aaaaaa;
@@ -314,16 +314,18 @@ input[type="search"] {
   border-color: #d0d0d0;
   border-width: 1px;
   border-style: solid;
-  border-radius: 6px;
+  border-radius: 3px;
   display: inline-block;
   vertical-align: middle;
+  height: 30px;
+  overflow: hidden;
   
   .form-control {
     display: inline-block;
     border: none;
     width: 260px;
-    padding: 0.55em 0em 0.55em 0.7em;
-    border-radius: 6px;
+    padding: 0em 0em 0em 0.7em;
+    border-radius: 3px;
     outline-style:none;
     box-shadow:none;
 
@@ -337,7 +339,7 @@ input[type="search"] {
     border-width: 0;
     border-radius: 10px;
     position: relative;
-    padding: 0.75em 1em;
+    padding: 0em 1em;
     float: left;
   }
   &.open-absolute {
@@ -821,7 +823,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 
     span {
       display: block;
-      margin-top: 2px;
+      margin-top: 0px;
       position: absolute;
       right: 2em;
       left: 0.4em;

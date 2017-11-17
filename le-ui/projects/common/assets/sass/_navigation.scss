@@ -49,6 +49,14 @@ section.main-content {
         padding-left: 70px;
     }
 }
+section.summary-blank-line {
+    border-top: 4px solid #E2E3E5;
+
+    &, &:last-child {
+        margin: 0;
+        padding: 0;
+    }
+}
 
 span.ico-container {
     display: inline-block;
@@ -547,16 +555,16 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
     .header-back-name,
     .model-name {
         display: inline-block;
-        /*font-family: 'ProximaNova-Bold','Open Sans',sans-serif;*/
-        color: #333;
-        font-size: 22px;
-        margin-top: 17px;
+        color: #222;
+        font-size: 18px;
+        margin-top: 16px;
         margin-left: .5em;
         vertical-align: middle;
         transition: none;
         animation: none;
         text-transform: uppercase;
         letter-spacing: 2px;
+        padding-top: 5px;
     }
     &.model-details-page {
         .page-icon,
@@ -566,7 +574,6 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
             font-size: 18px;
         }
         .page-name {
-            margin-top: 21px;
         }
     }
     .page-icon {
@@ -595,7 +602,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
         border-right: 1px solid #ededed;
         padding-left: 25px;
         margin-left: 20px;
-        margin-top: 20px;
+        margin-top: 16px;
         font-size: 16px;
         &:before {
             @include font-awesome-inline("\f053");
@@ -603,6 +610,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
             top: 50%;
             left: 0;
             transform: translateY(-50%);
+            margin-top: 3px;
         }
     }
     .header-tenant-name {

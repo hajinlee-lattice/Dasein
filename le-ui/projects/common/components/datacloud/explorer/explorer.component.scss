@@ -14,7 +14,6 @@
 }
 .enrichment-wizard-container {
     position: relative;
-    margin-top: 1.5em;
     $box-width: calc(99.99%/3); //99.99 is because of IE and rounding errors at 100%/3 (or any odd number)
     @mixin box-shadow($r,$g,$b) {
         box-shadow: 0px 0px 11px 2px rgba($r,$g,$b,0.33);
@@ -48,7 +47,7 @@
             left: -1em;
             right: -1em;
             margin-top: 3.75em;
-            z-index: 1;
+            z-index: 2;
         }
         .pd-pagination-prev {
             position: absolute;
@@ -59,7 +58,7 @@
             right: 1px;
         }
         .button {
-            padding: 0.25em 0.75em;
+            padding: 0em 0.75em;
         }
     }
     .carousel-container {
@@ -118,7 +117,8 @@
     }
     .filters {
         @include flex-container;
-        padding-bottom: 10px;
+        margin-top: 10px;
+        margin-bottom: 15px;
         // margin-right: 14px;
         input[type="radio"], input[type="checkbox"] {
             margin: 0;
@@ -263,7 +263,6 @@
                 }
                 .box-inner {
                     position: relative;
-                    background-color: white;
                     h2 {
                         margin-top: 8px;
                         font-size: 20px;
@@ -330,8 +329,10 @@
                     }
                 }
                 .box-inner {
-                    padding: 5px 7px 3px;
                     margin: 0 -2px 0 0px;
+                    &> span {
+                        padding: 5px 7px 3px;
+                    }
                 }
             }
         }
@@ -345,44 +346,38 @@
                 cursor: default;
             }
             .box-inner {
-                padding: 10px;
                 text-align: center;
-                background-color: white;
+                & > span {
+                    padding: 10px;
+                }
                 &.active {
                     & > span {
                         position: relative;
                         z-index: 1;
                     }
                     position: relative;
-                    &:before {
-                        box-shadow: inherit;
-                        content: '';
-                        display: block;
-                        position: absolute;
-                        left: calc(50% - 10px);
-                        bottom: -11px;
-                        height: 20px;
-                        width: 20px;
-                        background: inherit;
-                        transform: rotate(45deg);
-                        z-index: -1;
+                    & > span {
+                        padding: 5px 7px 3px;
+                        border-width: 1px;
+                        border-style: solid;
+                        border-top: none;
                     }
                     &:after {
                         content: '';
                         display: block;
                         position: absolute;
                         left: calc(50% - 10px);
-                        bottom: -11px;
+                        bottom: -10px;
                         height: 20px;
                         width: 20px;
-                        background: inherit;
+                        background: white;
                         transform: rotate(45deg);
                         border-bottom-width: 1px;
                         border-bottom-style: solid;
                         border-right-width: 1px;
                         border-right-style: solid;
                         border-color: inherit;
-                        z-index: 0;
+                        z-index: 1;
                     }
                 }
                 h2 {
@@ -695,10 +690,12 @@
             }
             .box-inner {
                 position: relative;
-                padding: 10px;
                 text-align: center;
                 height: 100%;
                 background-color: white;
+                & > span {
+                    padding: 10px;
+                }
                 h2 {
                     text-align: center;
                     font-size: 16px;
@@ -749,7 +746,6 @@
         .enrichments {
             .box {
                 .box-inner {
-                    padding-bottom: 1em;
                     height: auto;
                     width: 100%;
                 }
@@ -783,10 +779,11 @@
             .box-inner {
                 position: relative;
                 text-align: center;
-                padding: 1em;
                 //padding-bottom: 3.5em;
-                background-color: white;
                 //height: 200px;
+                & > span {
+                    padding: 10px 10px 2em 10px;
+                }
                 .header {
                     h2 {
                         padding: 0;
@@ -919,11 +916,11 @@
                                         div {
                                             height: 100%;
                                             border-left: 1px solid #d0d1d0;
+                                            padding-top: 4px;
                                             span {
                                                 display: block;
                                                 height: 10px;
                                                 position: relative;
-                                                margin-top: 5px;
                                                 // top: 50%;
                                                 // transform: translateY(-50%);
                                             }
@@ -990,14 +987,26 @@
 
     .round-box {
         background: #fafafa;
-        border-style: solid;
-        border-width: 1px;
-        border-top-width: 5px;
-        border-radius: 0 0 4px 4px;
-        border-color: #d0d1d0;
+        border: none;
+        border-top: 5px solid #ccc;
+        border-radius: 0 0 5px 5px;
 
-        &:active {
+        &>span {
+            position: relative;
+            display: block;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            background-color: white;
+            height: 100%;
+        }
+
+        &>span:active {
             border-style: inset;
+            border-top: none;
         }
     }
 
@@ -1036,7 +1045,7 @@
                 }
 
                 &:nth-child(even) {
-                    background-color: rgba(0,0,0,.06);
+                    background-color: #F0F0F0;
                 }
                 &:first-child {
                     font-size: 9px;
@@ -1078,6 +1087,11 @@
                             display: none;
                             width: 1.5em;
                             color: #fff;
+                        }
+                        
+                        i.attribute-use-count {
+                            font-weight: bold;
+                            margin-left: 2px;
                         }
                     }
                     &.label {
@@ -1176,7 +1190,7 @@
             position: absolute;
             left: 0;
             right: 0;
-            bottom: 1.2em;
+            bottom: .5em;
             .control {
                 @include flex-item(1 0 auto);
                 @include flex-container;
@@ -1191,7 +1205,7 @@
                     min-width: 170px;
 
                     position: relative;
-                    padding: 3px 9px;
+                    padding: 0px 9px;
                     font-size: 10px;
                     font-weight: bold;
                     color: #1a1a1a;
@@ -1215,7 +1229,7 @@
                         left: auto;
                         right: 0;
                         background-color: #fff;
-                        padding: 3px 5px;
+                        padding: 0px 5px;
                     }
                     &.selected {
                         background-color: #fafafa;
@@ -1430,6 +1444,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(0,255,224);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #33bdb7;
         }
         &.background-color {
@@ -1457,6 +1474,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(0,177,255);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #65b7e6;
         }
         &.background-color {
@@ -1484,6 +1504,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(255,100,100);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #f15a5a;
         }
         &.background-color {
@@ -1511,6 +1534,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(160,100,255);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #8e71b2;
         }
         &.background-color {
@@ -1538,6 +1564,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(115,255,34);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #70bf4a;
         }
         &.background-color {
@@ -1565,6 +1594,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(253,188,73);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #fdbc49;
         }
         &.background-color {
@@ -1592,6 +1624,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(50,179,255);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #26649b;
         }
         &.background-color {
@@ -1619,6 +1654,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(255,158,100);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #ff9e64;
         }
         &.background-color {
@@ -1633,7 +1671,7 @@
             }
         }
     }
-    .category-product {
+    .category-product, .category-product-spend {
         &.color {
             color: #cd80bc;
         }
@@ -1646,6 +1684,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(205,128,188);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #cd80bc;
         }
         &.background-color {
@@ -1673,6 +1714,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(170,196,59);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #aac43b;
         }
         &.background-color {
@@ -1700,6 +1744,9 @@
         &.background:not(.active):hover,
         &.active.active-glow {
             @include box-shadow(69,126,186);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
             border-color: #457EBA;
         }
         &.background-color {
@@ -1724,9 +1771,12 @@
         .border-top {
             border-top-color: gray;
         }
-        .background:not(.active):hover,
-        .active.active-glow {
+        &.background:not(.active):hover,
+        &.active.active-glow {
             border-color: gray;
+        }
+        .background:not(.active):hover > span,
+        .active.active-glow > span {
         }
         .background-color {
             background-color: gray;

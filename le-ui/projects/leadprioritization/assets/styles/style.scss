@@ -58,7 +58,7 @@ Header
 header {
     background-color: #fff;
     position: relative;
-    box-shadow: 0px 0px 0px 1px rgb(180,180,180);
+    //box-shadow: 0px 0px 0px 1px rgb(180,180,180);
 }
     .header-wrap {
         background: #477cba url(/lp/assets/images/bg_header.jpg) no-repeat bottom right; 
@@ -1621,6 +1621,8 @@ i.num-count {
 }
 .tiles {
     margin:0 0 24px 0;
+    display: flex;
+    flex-wrap: wrap;
 }
 .tile-play {
 }

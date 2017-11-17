@@ -21,12 +21,13 @@ Buttons
 .button, button.button,
 a.button, .button a:link, .button a:focus, .button a:visited {
 	display: inline-block;
-	padding: 0.5em 1.2em;
+	padding: 0em 1.2em;
+	height: 30px;
 	margin-bottom: 0;
 	font-family: 'ProximaNova-Regular',Arial,sans-serif;
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: 400;
-	line-height: 1.42857143;
+	line-height: 28px;
 	text-align: center;
 	white-space: nowrap;
 	vertical-align: middle;
@@ -40,7 +41,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 	background-image: none;
 	border: 1px solid transparent;
 	color: $pearl-white;
-	text-transform: uppercase;
+	//text-transform: uppercase;
 	border-radius: 3px;
 	font-weight: normal;
 	transition: all 200ms ease;
@@ -131,13 +132,13 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 		}
 	}
   &.gray-button {
-		color: $black;
-		background-color: $white-gold;
-		border-color: $silver;
+		color: #000;
+		background-color: #E2E3E5;
+		border-color: #E2E3E5;
 		border-size: 1px;
 		border-style: solid;
 		&:hover {
-			background-color: $palladium;
+			background-color: $silver;
 		}
 		&:active {
 			background-color: $palladium;
@@ -207,7 +208,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 		display: inline-block;
 		//padding: 9px 15px;
 		&.icon-button {
-			padding: 0.75em 1em;
+			padding: 0em 1em;
 		}
 		&.dropdown-toggle {
 			padding: 0.75em;
@@ -228,8 +229,8 @@ html input[disabled] {
   &.white-button, &.gray-button {
     cursor: default;
     border: #dadada solid 1px;
-    color: #bbb;
-    background-color: #f0f0f0;
+	color: #999;
+    background-color: #E2E3E5;
     box-shadow: none;
     pointer-events: none;
     &:hover {
@@ -360,7 +361,7 @@ Use this structure for angled buttons:
     }
     a, .angled-link {
         display: inline-block;
-        padding: 14px 24px 10px 0;
+        padding: 0px 24px 0px 0;
         position: relative;
         transition: none;
         transform: skewX(-20deg);
