@@ -57,12 +57,13 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     public List<TalkingPointAttribute> getAccountAttributes(String customerSpace) {
         log.info("Attempting to find Account attributes for customer space : " + customerSpace);
         try {
-            List<ColumnMetadata> attrs = internalResourceRestApiProxy.getAttributesInPredefinedGroup(
+            List<ColumnMetadata> rawAttrs = internalResourceRestApiProxy.getAttributesInPredefinedGroup(
                     TalkingPointAttributeGroup, CustomerSpace.parse(customerSpace).toString());
-            if (attrs == null) {
+            if (rawAttrs == null) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
             }
-            return attrs.stream().map(attr -> new TalkingPointAttribute(attr.getDisplayName(), attr.getColumnId()))
+            return JsonUtils.convertList(rawAttrs, ColumnMetadata.class).stream()
+                    .map(attr -> new TalkingPointAttribute(attr.getDisplayName(), attr.getColumnId()))
                     .collect(Collectors.toList());
         } catch (LedpException e) {
             throw e;
