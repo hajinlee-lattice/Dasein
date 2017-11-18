@@ -47,11 +47,13 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         Assert.assertNotNull(version);
         Assert.assertEquals(version.getMajorVersion(), "98.0");
         Assert.assertEquals(version.getVersion(), "98.0.1");
+        Assert.assertEquals(version.getMode(), DataCloudVersion.Mode.FULL);
 
         version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("98.0");
         Assert.assertNotNull(version);
         Assert.assertEquals(version.getMajorVersion(), "98.0");
         Assert.assertEquals(version.getVersion(), "98.0.1");
+        Assert.assertEquals(version.getMode(), DataCloudVersion.Mode.FULL);
     }
 
     private List<DataCloudVersion> prepareVersions() {
@@ -63,6 +65,7 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         version1.setMajorVersion("98.0");
         version1.setStatus(DataCloudVersion.Status.APPROVED);
         version1.setMetadataRefreshDate(new Date());
+        version1.setMode(DataCloudVersion.Mode.MINI);
 
         DataCloudVersion version2 = new DataCloudVersion();
         version2.setVersion("98.0.1");
@@ -72,6 +75,7 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         version2.setMajorVersion("98.0");
         version2.setStatus(DataCloudVersion.Status.APPROVED);
         version2.setMetadataRefreshDate(new Date());
+        version2.setMode(DataCloudVersion.Mode.FULL);
 
         return Arrays.asList(version1, version2);
     }

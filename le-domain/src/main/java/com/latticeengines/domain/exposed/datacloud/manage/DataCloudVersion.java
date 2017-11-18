@@ -75,6 +75,11 @@ public class DataCloudVersion implements HasPid, Serializable {
     @Column(name = "Status", nullable = false)
     private Status status;
 
+    @JsonProperty("Mode")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Mode", nullable = false)
+    private Mode mode;
+
     @JsonProperty("MetadataRefreshDate")
     @Column(name = "MetadataRefreshDate", nullable = false)
     private Date metadataRefreshDate;
@@ -169,7 +174,19 @@ public class DataCloudVersion implements HasPid, Serializable {
         this.metadataRefreshDate = metadataRefreshDate;
     }
 
+    public Mode getMode() {
+        return mode;
+    }
+
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
+
     public enum Status {
         NEW, APPROVED, DEPRECATED
+    }
+
+    public enum Mode {
+        FULL, MINI
     }
 }

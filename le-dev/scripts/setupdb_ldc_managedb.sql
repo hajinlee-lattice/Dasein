@@ -73,6 +73,15 @@ IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3)
 SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn208.csv' INTO TABLE `AccountMasterColumn`
+CHARACTER SET UTF8
+FIELDS TERMINATED BY '\t'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
+
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
@@ -187,16 +196,17 @@ SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
 WHERE Groups LIKE '%Segment%'
 AND (AMColumnID LIKE 'Bmbr30%' OR AMColumnID LIKE 'Feature%');
 
-INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, Status, MetadataRefreshDate)
+INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, Status, Mode, MetadataRefreshDate)
 VALUES
-  ('2.0.0', '2016-08-28', '2.0', 'APPROVED', NOW()),
-  ('2.0.1', '2016-11-19', '2.0', 'APPROVED', NOW()),
-  ('2.0.2', '2016-12-15', '2.0', 'APPROVED', NOW()),
-  ('2.0.3', '2017-02-14', '2.0', 'APPROVED', NOW()),
-  ('2.0.4', '2017-05-22', '2.0', 'APPROVED', NOW()),
-  ('2.0.5', '2017-06-29', '2.0', 'APPROVED', NOW()),
-  ('2.0.6', '2017-09-01', '2.0', 'APPROVED', NOW()),
-  ('2.0.7', '2017-10-09', '2.0', 'APPROVED', NOW());
+  ('2.0.0', '2016-08-28', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.1', '2016-11-19', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.2', '2016-12-15', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.3', '2017-02-14', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.4', '2017-05-22', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.5', '2017-06-29', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.6', '2017-09-01', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.7', '2017-10-09', '2.0', 'APPROVED', 'FULL', NOW()),
+  ('2.0.8', '2017-11-17', '2.0', 'APPROVED', 'FULL', NOW());
 
 UPDATE `DataCloudVersion`
 SET
@@ -259,5 +269,12 @@ SET
   `AccountLookupHdfsVersion` = '2017-10-08_20-01-11_UTC',
   `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
 WHERE `Version` = '2.0.7';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2017-11-16_05-41-36_UTC',
+  `AccountLookupHdfsVersion` = '2017-11-16_05-41-36_UTC',
+  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
+WHERE `Version` = '2.0.8';
 
 SET SQL_SAFE_UPDATES = 1;
