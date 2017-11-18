@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
@@ -51,6 +52,14 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 public class StatsCubeUtils {
 
     private static final Logger log = LoggerFactory.getLogger(StatsCubeUtils.class);
+    private static final List<String> TOP_FIRMOGRAPHIC_ATTRS = Arrays.asList( //
+            DataCloudConstants.ATTR_IS_PRIMARY_LOCATION, //
+            DataCloudConstants.ATTR_COUNTRY, //
+            DataCloudConstants.ATTR_REV_RANGE, //
+            DataCloudConstants.ATTR_NUM_EMP_RANGE, //
+            DataCloudConstants.ATTR_LDC_INDUSTRY //
+    );
+    static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s", NamedPeriod.HASEVER.getName(), "Purchased");
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
@@ -390,42 +399,197 @@ public class StatsCubeUtils {
         TopNTree topNTree = new TopNTree();
         Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
         for (Map.Entry<Category, CategoryStatistics> entry : statistics.getCategories().entrySet()) {
-            catTrees.put(entry.getKey(), toCatTopTree(entry.getValue(), includeTopBkt));
+            catTrees.put(entry.getKey(), toCatTopTree(entry.getKey(), entry.getValue(), includeTopBkt));
         }
         topNTree.setCategories(catTrees);
         return topNTree;
     }
 
-    private static CategoryTopNTree toCatTopTree(CategoryStatistics catStats, boolean includeTopBkt) {
+    private static CategoryTopNTree toCatTopTree(Category category, CategoryStatistics catStats, boolean includeTopBkt) {
         CategoryTopNTree topNTree = new CategoryTopNTree();
         Map<String, List<TopAttribute>> subCatTrees = new HashMap<>();
         for (Map.Entry<String, SubcategoryStatistics> entry : catStats.getSubcategories().entrySet()) {
-            subCatTrees.put(entry.getKey(), toSubcatTopTree(entry.getValue(), includeTopBkt));
+            subCatTrees.put(entry.getKey(), toSubcatTopTree(category, entry.getValue(), includeTopBkt));
         }
         topNTree.setSubcategories(subCatTrees);
         return topNTree;
     }
 
-    private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats, boolean includeTopBkt) {
+    private static List<TopAttribute> toSubcatTopTree(Category category, SubcategoryStatistics catStats, boolean includeTopBkt) {
+        Comparator<Map.Entry<AttributeLookup, AttributeStats>> comparator = getAttrComparatorForCategory(category);
         return catStats.getAttributes().entrySet().stream() //
-                .sorted(Comparator.comparing(entry -> -entry.getValue().getNonNullCount())) //
-                .map(entry -> toTopAttr(entry, includeTopBkt)) //
+                .sorted(comparator) //
+                .map(entry -> toTopAttr(category, entry, includeTopBkt)) //
                 .collect(Collectors.toList());
     }
 
-    private static TopAttribute toTopAttr(Map.Entry<AttributeLookup, AttributeStats> entry, boolean includeTopBkt) {
+    private static TopAttribute toTopAttr(Category category, Map.Entry<AttributeLookup, AttributeStats> entry, boolean includeTopBkt) {
         AttributeStats stats = entry.getValue();
         TopAttribute topAttribute = new TopAttribute(entry.getKey(), stats.getNonNullCount());
         if (includeTopBkt && stats.getBuckets() != null) {
-            Bucket topBkt = stats.getBuckets().getBucketList().stream() //
-                    .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0) //
-                    .sorted(Comparator.comparing(bkt -> -bkt.getCount())) //
-                    .findFirst().orElse(null);
+            Comparator<Bucket> comparator = getBktComparatorForCategory(category);
+            Bucket topBkt = getTopBkt(stats, comparator);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
             }
         }
         return topAttribute;
+    }
+
+    private static Bucket getTopBkt(AttributeStats attributeStats, Comparator<Bucket> comparator) {
+        if (attributeStats.getBuckets() != null) {
+            return attributeStats.getBuckets().getBucketList().stream() //
+                    .filter(bkt -> bkt.getCount() != null && bkt.getCount() > 0) //
+                    .sorted(comparator) //
+                    .findFirst().orElse(null);
+        } else {
+            return null;
+        }
+    }
+
+    static Comparator<Bucket> getBktComparatorForCategory(Category category) {
+        switch (category) {
+            case INTENT:
+                return intentBktComparator();
+            case WEBSITE_PROFILE:
+            case TECHNOLOGY_PROFILE:
+                return techBktComparator();
+            case PRODUCT_SPEND:
+                return productBktComparator();
+            default:
+                return Comparator.comparing(Bucket::getCount).reversed();
+        }
+    }
+
+    private static Comparator<Bucket> intentBktComparator() {
+        return Comparator.comparing(Bucket::getId).reversed();
+    }
+
+    private static Comparator<Bucket> techBktComparator() {
+        return Comparator.comparing(Bucket::getId);
+    }
+
+    private static Comparator<Bucket> productBktComparator() {
+        return (o1, o2) -> {
+            if (isBooleanBkt(o1) || isBooleanBkt(o2)) {
+                return Comparator.comparing(Bucket::getId).compare(o1, o2);
+            } else {
+                return Comparator.comparing(Bucket::getCount).reversed().compare(o1, o2);
+            }
+        };
+    }
+
+    private static boolean isBooleanBkt(Bucket bkt) {
+        return bkt != null && bkt.getLabel().equalsIgnoreCase("Yes") || bkt.getLabel().equalsIgnoreCase("No");
+    }
+
+    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> defaultAttrComparator() {
+        return Comparator.comparing(entry -> -entry.getValue().getNonNullCount());
+    }
+
+    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> getAttrComparatorForCategory(Category category) {
+        switch (category) {
+            case FIRMOGRAPHICS:
+                return firmographicAttrComparator();
+            case INTENT:
+                return intentAttrComparator();
+            case WEBSITE_PROFILE:
+            case TECHNOLOGY_PROFILE:
+                return techAttrComparator();
+            case PRODUCT_SPEND:
+                return productAttrComparator();
+            default:
+                return defaultAttrComparator();
+        }
+    }
+
+    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> firmographicAttrComparator() {
+        return (o1, o2) -> {
+            String attr1 = o1.getKey().getAttribute();
+            String attr2 = o2.getKey().getAttribute();
+            int topIdx1 = TOP_FIRMOGRAPHIC_ATTRS.indexOf(attr1);
+            int topIdx2 = TOP_FIRMOGRAPHIC_ATTRS.indexOf(attr2);
+            if (topIdx1 == topIdx2) {
+                return attr1.compareTo(attr2);
+            } else {
+                return topIdx2 - topIdx1;
+            }
+        };
+    }
+
+    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> intentAttrComparator() {
+        Comparator<Bucket> comparator = intentBktComparator();
+        return (o1, o2) -> {
+            Bucket topBkt1 = getTopBkt(o1.getValue(), comparator);
+            Bucket topBkt2 = getTopBkt(o2.getValue(), comparator);
+            Integer bktId1 = topBkt1 != null ? topBkt1.getId().intValue() : 0;
+            Integer bktId2 = topBkt2 != null ? topBkt2.getId().intValue() : 0;
+            if (bktId1.equals(bktId2)) {
+                Long count1 = topBkt1 != null ? topBkt1.getCount() : 0;
+                Long count2 = topBkt2 != null ? topBkt2.getCount() : 0;
+                if (count1.equals(count2)) {
+                    String attr1 = o1.getKey().getAttribute();
+                    String attr2 = o2.getKey().getAttribute();
+                    return attr1.compareTo(attr2);
+                } else {
+                    return count2.compareTo(count1);
+                }
+            } else {
+                return bktId2.compareTo(bktId1);
+            }
+        };
+    }
+
+    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> techAttrComparator() {
+        Comparator<Bucket> comparator = techBktComparator();
+        return (o1, o2) -> {
+            Bucket topBkt1 = getTopBkt(o1.getValue(), comparator);
+            Bucket topBkt2 = getTopBkt(o2.getValue(), comparator);
+            Integer bktId1 = topBkt1 != null ? topBkt1.getId().intValue() : Integer.MAX_VALUE;
+            Integer bktId2 = topBkt2 != null ? topBkt2.getId().intValue() : Integer.MAX_VALUE;
+            if (bktId1.equals(bktId2)) {
+                Long count1 = topBkt1 != null ? topBkt1.getCount() : 0;
+                Long count2 = topBkt2 != null ? topBkt2.getCount() : 0;
+                if (count1.equals(count2)) {
+                    String attr1 = o1.getKey().getAttribute();
+                    String attr2 = o2.getKey().getAttribute();
+                    return attr1.compareTo(attr2);
+                } else {
+                    return count2.compareTo(count1);
+                }
+            } else {
+                return bktId1.compareTo(bktId2);
+            }
+        };
+    }
+
+    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> productAttrComparator() {
+        return (o1, o2) -> {
+            String attr1 = o1.getKey().getAttribute();
+            String attr2 = o2.getKey().getAttribute();
+            int rank1 = productAttrSuffixRank(attr1);
+            int rank2 = productAttrSuffixRank(attr2);
+            if (rank1 == rank2) {
+                return attr1.compareTo(attr2);
+            } else {
+                return rank1 - rank2;
+            }
+        };
+    }
+
+    private static int productAttrSuffixRank(String attr) {
+        if (attr.endsWith(HASEVER_PURCHASED_SUFFIX)) {
+            return  0;
+        }
+        if (attr.endsWith("LastQuarter_Amount")) {
+            return 1;
+        }
+        if (attr.endsWith("LastQuarter_Quantity")) {
+            return 2;
+        }
+        else {
+            return Integer.MAX_VALUE;
+        }
     }
 
 }
