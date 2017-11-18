@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflo
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("createCdlEventTableFilterStep")
@@ -41,7 +41,7 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
     private MetadataProxy metadataProxy;
 
     @Autowired
-    private EntityProxy entityProxy;
+    private EventProxy eventProxy;
 
     private Table trainFilterTable;
     private Table targetFilterTable;
@@ -104,7 +104,18 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
         long total = 0;
         while (true) {
             query.setPageFilter(new PageFilter(rowNumber, pageSize));
-            DataPage dataPage = entityProxy.getData(configuration.getCustomerSpace().toString(), query);
+            DataPage dataPage = null;
+            switch (type) {
+            case "Train":
+                dataPage = eventProxy.getTrainingTuples(configuration.getCustomerSpace().toString(), query);
+                break;
+            case "Target":
+                dataPage = eventProxy.getEventTuples(configuration.getCustomerSpace().toString(), query);
+                break;
+            default:
+                dataPage = eventProxy.getScoringTuples(configuration.getCustomerSpace().toString(), query);
+            }
+
             List<Map<String, Object>> rows = dataPage.getData();
             if (CollectionUtils.isEmpty(rows)) {
                 break;

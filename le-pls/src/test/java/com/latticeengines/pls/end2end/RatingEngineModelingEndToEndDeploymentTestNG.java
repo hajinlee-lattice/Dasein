@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -46,6 +47,14 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.PageFilter;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -115,9 +124,28 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     }
 
     @Test(groups = { "deployment.lp" }, enabled = true)
-    public void setupTables() throws IOException {
+    public void testWithTables() throws Exception {
         log.info("setting up tables for modeling...");
+        setupTables();
+        createModel();
+        retrieveModelSummary();
+    }
 
+    @Test(groups = { "deployment.lp" }, enabled = false)
+    public void testWithQueries() throws Exception {
+        String prodId = "A78DF03BAC196BE9A08508FFDB433A31";
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
+        FrontEndQuery query = getQuery(txn);
+        parameters.setTrainFilterQuery(query);
+        parameters.setTargetFilterQuery(query);
+        parameters.setTrainFilterTableName(null);
+        parameters.setTargetFilterTableName(null);
+        createModel();
+        retrieveModelSummary();
+
+    }
+
+    private void setupTables() throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(firstTenant.getName());
         setupTable(customerSpace, trainFilterFileName, trainFilterTableName);
         setupTable(customerSpace, targetFilterFileName, targetFilterTableName);
@@ -127,6 +155,19 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace.toString());
         dataCollectionProxy.upsertTable(customerSpace.toString(), accountTable.getName(),
                 TableRoleInCollection.ConsolidatedAccount, version);
+    }
+
+    private FrontEndQuery getQuery(Bucket.Transaction txn) {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Bucket bucket = Bucket.txnBkt(txn);
+        Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setPageFilter(new PageFilter(0, 0));
+        return frontEndQuery;
     }
 
     private Table setupTable(CustomerSpace customerSpace, String fileName, String tableName) throws IOException {
@@ -147,7 +188,6 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         return table;
     }
 
-    @Test(groups = { "deployment.lp" }, enabled = true, dependsOnMethods = "setupTables")
     public void createModel() {
         modelName = parameters.getName();
         model(parameters);
@@ -163,13 +203,11 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
-        waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, true);
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.lp" }, dependsOnMethods = "createModel", timeOut = 1200000, enabled = true)
     public void retrieveModelSummary() throws InterruptedException {
         log.info("Retrieving model summary for modeling ...");
         originalModelSummary = waitToDownloadModelSummary(modelName);
