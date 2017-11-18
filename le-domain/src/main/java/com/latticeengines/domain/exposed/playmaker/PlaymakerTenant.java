@@ -27,7 +27,6 @@ public class PlaymakerTenant implements HasPid {
     private String jdbcDriver;
     private String jdbcUrl;
     private String jdbcUserName;
-    private String jdbcPassword;
     private String jdbcPasswordEncrypt;
 
     public PlaymakerTenant() {
@@ -126,14 +125,14 @@ public class PlaymakerTenant implements HasPid {
     }
 
     @JsonProperty("JdbcPassword")
-    @Column(name = "JDBC_PASSWORD")
+    @Transient
     public String getJdbcPassword() {
-        return jdbcPassword;
+        return jdbcPasswordEncrypt;
     }
 
     @JsonProperty("JdbcPassword")
     public void setJdbcPassword(String jdbcPassword) {
-        this.jdbcPassword = jdbcPassword;
+        this.jdbcPasswordEncrypt = jdbcPassword;
     }
 
     @JsonProperty("JdbcPasswordEncrypt")
