@@ -2,15 +2,15 @@ angular.module('lp.playbook.plays', [
     'mainApp.playbook.content.playList.deletePlayModal'
 ])
 .controller('PlayListController', function ($scope, $timeout, $element, $state, 
-$stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal) {
+$stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal) {
 
     var vm = this,
         onpage = true,
         checkLaunchState;
+
     angular.extend(vm, {
-        plays: PlayList || [],
-        filteredItems: [],
-        totalLength: PlayList.length,
+        current: PlaybookWizardStore.current,
+        totalLength: PlaybookWizardStore.current.plays.length,
         tileStates: {},
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility,
@@ -30,8 +30,8 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
             },
             filter: {
                 label: 'Filter By',
-                unfiltered: PlayList,
-                filtered: PlayList,
+                unfiltered: PlaybookWizardStore.current.plays,
+                filtered: PlaybookWizardStore.current.plays,
                 items: [
                     { label: "All", action: { }, total: vm.totalLength },
                     { 
@@ -96,7 +96,7 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
 
         // console.log(vm.plays);
 
-        angular.forEach(vm.plays, function(play) {
+        angular.forEach(vm.current.plays, function(play) {
 
             vm.tileStates[play.name] = {
                 showCustomMenu: false,

@@ -1,4 +1,4 @@
-<section id="JobsTabsView" class="containerx" ng-if="vm.cdlEnabled">
+<section class="tabs interior" ng-if="vm.cdlEnabled">
     <ul>
         <li
             ui-sref="home.jobs.status"
@@ -22,3 +22,4 @@
         </li>
     </ul>
 </section>
+<section class="summary-blank-line" ng-if="!vm.cdlEnabled"></section>

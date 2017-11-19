@@ -1,29 +1,27 @@
-<div class="summary blue-fire">
-
-	<div class="nav" ng-if="!isCreateForm">
-		<div class="button angled-button" ui-sref-active="active">
+<section class="tabs navigation">
+	<ul class="nav" ng-if="!isCreateForm">
+		<li ui-sref-active="active">
 	        <a ui-sref="home.marketosettings.edit({id:id})"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_CREDENTIALS')}}</span></a>
-	    </div>
-		<div class="button angled-button" ui-sref-active="active">
+	    </li>
+		<li ui-sref-active="active">
             <a ui-sref="home.marketosettings.enrichment({id:id})"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_ENRICHMENT')}}</span></a>
 
-	    </div>
-		<div class="button angled-button" ui-sref-active="active">
+	    </li>
+		<li ui-sref-active="active">
             <a ui-sref="home.marketosettings.models({id:id})"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span></a>
-	    </div>
-	</div>
+	    </li>
+	</ul>
 
-
-	<div class="nav" ng-if="isCreateForm">
-		<div class="button angled-button active">
+	<ul class="nav" ng-if="isCreateForm">
+		<li class="active">
 			<a ui-sref="home.marketosettings.apikey"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_CREDENTIALS')}}</span></a>	        
-	    </div>
-		<div class="button angled-button" ui-sref-active="active">
+	    </li>
+		<li ui-sref-active="active">
             <span class="angled-link"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_ENRICHMENT')}}</span></span>
 
-	    </div>
-		<div class="button angled-button" ui-sref-active="active">
+	    </li>
+		<li ui-sref-active="active">
             <span class="angled-link"><span>{{ResourceUtility.getString('MARKETO_CREDENTIAL_NAVIGATION_SCORING')}}</span></span>
-	    </div>
-	</div>
-</div>
+	    </li>
+	</ul>
+</section>

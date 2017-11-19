@@ -80,7 +80,7 @@
             </ul>
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
-                <div class="twelve columns">
+                <div class="twelve columns pd-pagination-container-margin-top">
                     <pd-pagination-controls
                             current="vm.metadata.current"
                             max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
@@ -130,7 +130,7 @@
             </ul>
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="filteredList.length > vm.pagesize">
-                <div class="twelve columns">
+                <div class="twelve columns pd-pagination-container-margin-top">
                     <pd-pagination-controls
                             current="vm.metadata.current"
                             max="vm.max = filteredList.length / vm.pagesize">

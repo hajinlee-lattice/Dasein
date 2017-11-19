@@ -1,5 +1,16 @@
 @import "tabs/jobstabs.component.scss";
-
+.jobs-page {
+    .table-header {
+        width: 100%;
+        padding: 0;
+        
+    }
+    pd-pagination-controls,
+    .jobs-pagination-controls {
+        float: right;
+        margin-left: .5em;
+    }
+}
 .jobs-summary {
     &.summary.blue-fire .black-summary-list.stats h3.summary-title {
         text-align: center;

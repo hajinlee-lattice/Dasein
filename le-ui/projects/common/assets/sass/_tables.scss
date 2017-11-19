@@ -1,5 +1,4 @@
 .table-header {
-    padding: 3em 0 0em;
     h2 {
         font-size: 110%;
         margin-bottom: 0.25em;
@@ -28,7 +27,8 @@ table {
     thead {
         border-color: #D0D1D0;
         border-style: solid;
-        border-width: 1px 0 1px 0;
+        // careful how table borders look elsewhere in the app (Model CSV Import -> Field Mapping)
+        border-width: 0px 0 1px 0;
     }
     tbody {
         border-top: #F3F3F3 solid 1px;

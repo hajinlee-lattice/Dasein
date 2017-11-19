@@ -36,7 +36,7 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             'home.segment.contacts':'contacts'
         };
 
-        return map[state] == type || ((type == 'builder' && vm.builderClicked) || (type == 'attributes' && vm.attribuesClicked));
+        return map[state] == type;
     }
 
     vm.clickBuilder = function() {

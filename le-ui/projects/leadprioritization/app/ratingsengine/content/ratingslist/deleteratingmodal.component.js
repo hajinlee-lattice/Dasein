@@ -39,10 +39,9 @@ angular.module('mainApp.ratingsengine.deleteratingmodal', [
 
     function deleteRating(ratingId) {
         $("#deleteRatingError").hide();
-
-        RatingsEngineStore.deleteRating(ratingId).then(function(result) {
-            $("#modalContainer").modal('hide');
-        });
+        $("#modalContainer").modal('hide');
+        
+        RatingsEngineStore.deleteRating(ratingId);//.then(function(result) {});
     }
 
     $scope.cancelClick = function () {

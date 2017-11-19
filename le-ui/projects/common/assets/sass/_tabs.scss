@@ -121,7 +121,47 @@ Link Tabs
   }
 }
 
+/*
+Standard Navigation Tabs
+================================================== */
+section.tabs.navigation:last-child,
+.tabs.navigation {
+    position: relative;
+    background: #E2E3E5;
+    margin: 0;
+    
+    & > ul {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        border-left: 3px solid #F9F9F9;
+        display: flex;
+        
+        & > li {
+            display: inline-block;
+            cursor: pointer;
+            border-right: 3px solid #F9F9F9;
+            
+            & > a {
+                display: inline-block;
+                border-top: 3px solid transparent;
+                padding: 1em 3em;
+                font-size: 12px;
+                color: #222;
+            }
 
+            &:hover > a {
+                background-color: #ffffff;
+                border-top-color: #457EBA;
+            }
+            
+            &.active > a {
+                background-color: #fafafa;
+                border-top-color: #ef6a30;
+            }
+        }
+    }
+}
 
 /*
 Chunky Interior Tabs (My Data, Play List, etc...)
@@ -136,6 +176,13 @@ Chunky Interior Tabs (My Data, Play List, etc...)
     background: #E2E3E5;
     margin-top: 0;
     margin-bottom: 2em;
+    &.stretched > ul > li {
+            @include flex-item(1 1 auto);
+            max-width: 100%;
+    }
+    &:not(.stretched) > ul > li > div {
+        position: relative;
+    }
     & > ul {
         @include flex-container;
         @include flex-item(1 1 auto);
@@ -144,12 +191,10 @@ Chunky Interior Tabs (My Data, Play List, etc...)
         max-width: 1200px;
         margin: 0 auto;
         & > li {
-            @include flex-item(1 1 auto);
             border-right: 3px solid #F9F9F9;
             font-size: 9px;
             position: relative;
             height: 60px;
-            max-width: 34%;
             cursor: pointer;
             .tab-container {
                 margin: 0;
@@ -168,6 +213,15 @@ Chunky Interior Tabs (My Data, Play List, etc...)
             &:last-child {
                 border-right: 3px solid #F9F9F9;
             }
+            &:hover {
+                background: #fff;
+                .tab-container {
+                    border-top-color: #457EBA;
+                    border-bottom-color: transparent;
+                    background: #fff;
+                    z-index: 1;
+                }
+            }
             &.active {
                 background: #fafafa;
                 pointer-events: none;
@@ -178,7 +232,7 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 .tab-container {
                     border-top-color: #ef6a30;
                     border-bottom-color: transparent;
-                    background: #fafafa;
+                    background: #f9f9f9;
                     z-index: 1;
                     //cursor: default;
                 }
@@ -197,8 +251,8 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                     .count {
                         margin-right: 5px;
                         &:not(:first-child) {
-                            margin-left: 5px;
-                            padding-left: 5px;
+                            margin-left: 8px;
+                            padding-left: 9px;
                             border-left: 1px solid #999;
                         }
                     }

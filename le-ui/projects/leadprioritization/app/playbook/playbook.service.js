@@ -1,6 +1,10 @@
 angular.module('lp.playbook')
 .service('PlaybookWizardStore', function($q, $state, $stateParams, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
     var PlaybookWizardStore = this;
+    
+    this.current = {
+        plays: []
+    };
 
     this.init = function() {
         this.settings = {};
@@ -39,6 +43,29 @@ angular.module('lp.playbook')
         this.init();
         this.currentPlay = null;
         CgTalkingPointStore.clear();
+    }
+
+    this.getPlays = function(cacheOnly) {
+        var deferred = $q.defer();
+
+        if (this.current.plays.length > 0) {
+            deferred.resolve(this.current.plays);
+
+            if (cacheOnly) {
+                return this.current;
+            }
+        }
+
+        PlaybookWizardService.getPlays().then(function(result) {
+            PlaybookWizardStore.setPlays(result);
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    }
+
+    this.setPlays = function(plays) {
+        this.current.plays = plays;
     }
 
     this.setSettings = function(obj) {

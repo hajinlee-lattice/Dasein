@@ -8,7 +8,6 @@ angular.module('lp.ratingsengine.ratingslist', [
     var vm = this;
     angular.extend(vm, {
         current: RatingsEngineStore.current,
-        filteredItems: [],
         tileStates: {},
         query: '',
         ceil: window.Math.ceil,

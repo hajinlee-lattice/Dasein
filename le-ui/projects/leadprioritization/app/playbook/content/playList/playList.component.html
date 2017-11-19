@@ -32,7 +32,7 @@
                     data="play"
                     ng-click="vm.tileClick($event, play)"
                     ng-mouseleave="vm.tileStates[play.name].showCustomMenu ? vm.customMenuClick($event, play) : null"
-                    ng-if="vm.plays.length > 0"
+                    ng-if="vm.current.plays.length > 0"
                     ng-class="{editing: vm.tileStates[play.name].editPlay}">
                     
 
@@ -187,7 +187,7 @@
                     </form>
 
                 </li>
-                <li class="create-tile" ng-if="vm.plays.length < 12">
+                <li class="create-tile" ng-if="vm.current.plays.length < 12">
                     <a
                         class="button new-tile-button"
                         ui-sref="home.playbook.wizard">

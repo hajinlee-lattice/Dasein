@@ -64,10 +64,12 @@
                     </ul>
                 </li>
             </ul>
-            <pd-pagination-controls
-                current="vm.currentPage"
-                max="filteredList.length / vm.pageSize">
-            </pd-pagination-controls>
+            <div class="pd-pagination-container-margin-top">
+                <pd-pagination-controls
+                    current="vm.currentPage"
+                    max="filteredList.length / vm.pageSize">
+                </pd-pagination-controls>
+            </div>
         </div>
     </form>
 </div>

@@ -1,7 +1,7 @@
 angular.module('lp.ratingsengine.ratingsenginetabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.controller('RatingsEngineTabsController', function ($filter, RatingsEngineStore, ResourceUtility) {
+.controller('RatingsEngineTabsController', function ($filter, ResourceUtility, RatingsEngineStore) {
     var vm = this;
 
     angular.extend(vm, {
@@ -10,7 +10,6 @@ angular.module('lp.ratingsengine.ratingsenginetabs', [
     });
 
     vm.count = function(type) {
-        // true makes this $filter match strict strings, instead of contains
         return $filter('filter')(vm.current.ratings, { status: type }, true).length;
     }
 });

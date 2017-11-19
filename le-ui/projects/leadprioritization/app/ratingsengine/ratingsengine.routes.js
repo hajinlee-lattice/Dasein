@@ -81,8 +81,8 @@ angular
                     pageTitle: 'Rating Engines'
                 },
                 views: {
-                    'summary@': {
-                        template: ''
+                    "summary@": {
+                        templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     "main@": {
                         controller: 'RatingsEngineType',
@@ -111,7 +111,7 @@ angular
                 },
                 views: {
                     "summary@": {
-                        template: ''
+                        templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     "navigation@": {
                         controller: function ($scope, $stateParams, $state, $rootScope, Rating) {
@@ -158,8 +158,7 @@ angular
                 },
                 views: {
                     "summary@": {
-                        controller: '',
-                        template: ''
+                        templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     "main@": {
                         controller: 'NotesController',
@@ -193,7 +192,8 @@ angular
                             $scope.$on('$destroy', function () {
                                 RatingsEngineStore.clear();
                             });
-                        }
+                        },
+                        templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     'main@': {
                         resolve: {
@@ -445,7 +445,8 @@ angular
                             $scope.$on('$destroy', function () {
                                 RatingsEngineStore.clear();
                             });
-                        }
+                        },
+                        templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     'main@': {
                         resolve: {

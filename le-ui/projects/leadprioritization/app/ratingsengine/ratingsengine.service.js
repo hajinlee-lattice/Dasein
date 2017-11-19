@@ -317,16 +317,18 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
     
-    this.setRatings = function(ratings) {
+    this.setRatings = function(ratings, ignoreGetCoverage) {
         this.current.ratings = ratings;
 
-        var ids = [];
+        if (!ignoreGetCoverage) {
+            var ids = [];
 
-        angular.forEach(ratings, function(rating) {
-            ids.push(rating.id);
-        });
+            angular.forEach(ratings, function(rating) {
+                ids.push(rating.id);
+            });
 
-        RatingsEngineStore.getChartDataConcurrently(ids.reverse());
+            RatingsEngineStore.getChartDataConcurrently(ids.reverse());
+        }
     }
     
     this.getRatings = function(active, cacheOnly) {
@@ -543,7 +545,7 @@ angular.module('lp.ratingsengine')
         // immediately remove deleted rating from ratinglist
         this.setRatings(this.current.ratings.filter(function(rating) { 
             return rating.id != ratingId;
-        }));
+        }), true);
 
         return deferred.promise;
     }

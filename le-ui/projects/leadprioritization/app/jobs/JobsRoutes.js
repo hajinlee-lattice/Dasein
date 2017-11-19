@@ -61,15 +61,6 @@ angular
                 jobCreationSuccess: null
             },
             views: {
-                "subsummary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_JOBS_STATUS';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneTabView.html'
-                },
                 "main@": {
                     templateUrl: 'app/jobs/views/ListView.html'
                 }

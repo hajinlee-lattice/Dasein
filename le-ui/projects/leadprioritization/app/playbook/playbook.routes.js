@@ -37,10 +37,10 @@ angular
                 pageTitle: 'Playbook'
             },
             resolve: {
-                PlayList: function($q, PlaybookWizardService) {
+                PlayList: function($q, PlaybookWizardStore) {
                     var deferred = $q.defer();
 
-                    PlaybookWizardService.getPlays().then(function(result) {
+                    PlaybookWizardStore.getPlays().then(function(result) {
                         deferred.resolve(result);
                     });
 
@@ -296,6 +296,9 @@ angular
                 }],
             },
             views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
                 'main@': {
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
@@ -348,6 +351,9 @@ angular
                 }],
             },
             views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
                 'main@': {
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
@@ -375,6 +381,9 @@ angular
                 }
             },
             views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
                 'main@': {
                     controller: 'PlaybookDashboardLaunchHistory',
                     controllerAs: 'vm',
@@ -406,6 +415,9 @@ angular
                 }
             },
             views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
                 "main@": {
                     controller: 'ImportJobController',
                     templateUrl: 'app/create/buildprogress/BuildProgressView.html'
@@ -441,7 +453,8 @@ angular
                         $scope.$on('$destroy', function () {
                             PlaybookWizardStore.clear();
                         });
-                    }
+                    },
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 'main@': {
                     resolve: {

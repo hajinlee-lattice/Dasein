@@ -21,6 +21,7 @@ div.explorer-subheader-tabs {
                 color: #aaa;
             }
 
+            &:active,
             &.active {
                 color: #ef6a30;
                 cursor: default;

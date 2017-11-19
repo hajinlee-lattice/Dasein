@@ -1,10 +1,14 @@
-<div class="summary blue-fire" ng-controller="SidebarRootController">
-    <div class="nav">
-        <div class="button angled-button active" ui-sref-active-eq="active">
-            <a ui-sref="home.models"><span>Models</span></a>
-        </div>
-        <div class="button angled-button" ui-sref-active="active" ng-if="showModelCreationHistory">
-            <a ui-sref="home.models.history"><span>{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</span></a>
-        </div>
-    </div>
-</div>
+<section class="tabs navigation" ng-controller="SidebarRootController">
+    <ul>
+        <li class="active" ui-sref-active-eq="active">
+            <a ui-sref="home.models">
+                {{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}
+            </a>
+        </li>
+        <li ui-sref-active="active" ng-if="showModelCreationHistory">
+            <a ui-sref="home.models.history">
+                {{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}
+            </a>
+        </li>
+    </ul>
+</section>

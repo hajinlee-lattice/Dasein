@@ -50,10 +50,12 @@
                 </ul>
             </li>
         </ul>
-        <pd-pagination-controls
-            current="vm.currentPage"
-            max="filteredList.length / vm.pageSize">
-        </pd-pagination-controls>
+        <div class="pd-pagination-container-margin-top">
+            <pd-pagination-controls
+                current="vm.currentPage"
+                max="filteredList.length / vm.pageSize">
+            </pd-pagination-controls>
+        </div>
 
         </div>
         <button class="button blue-button" ng-if="vm.stateParams.section === 'dashboard.segment'" ng-click="vm.savePlay()" ng-disabled="!vm.stored.segment_selection">Save</button>

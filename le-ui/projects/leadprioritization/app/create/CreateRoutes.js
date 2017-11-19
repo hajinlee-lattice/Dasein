@@ -75,7 +75,7 @@ angular
             redirectto: 'model.scoring.import',
             views: {
                 "summary@": {
-                    template: ''
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     /*
@@ -109,7 +109,7 @@ angular
             },
             views: {
                 "summary@": {
-                    template: ''
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     resolve: {

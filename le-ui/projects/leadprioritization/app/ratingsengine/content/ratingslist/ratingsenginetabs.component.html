@@ -1,6 +1,5 @@
 <section class="tabs interior containerx">
     <ul>
-        
         <li
             ui-sref="home.ratingsengine.list.ratings"
             ui-sref-active="active">
@@ -15,8 +14,10 @@
         <li ui-sref="home.ratingsengine.list.history" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Creation History</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">{{vm.current.ratings.length}}</span> total
+                </div>
             </div>
         </li>
-
     </ul>
 </section>

@@ -116,6 +116,9 @@ angular
                     controller: 'HeaderController',
                     templateUrl: 'app/navigation/header/views/MainHeaderView.html'
                 },
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
                 "navigation": {
                     controller: function($scope, $rootScope, $stateParams, $state, Tenant, FeatureFlagService) {
                         var tenantName = $stateParams.tenantName;
@@ -420,10 +423,6 @@ angular
                 pageTitle: 'Ratings'
             },
             views: {
-                "summary@": {
-                    controller: '',
-                    template: ''
-                },
                 "main@": {
                     controller: 'ModelRatingsController',
                     controllerAs: 'vm',
@@ -660,7 +659,8 @@ angular
                 "summary@": {
                     controller: function ($rootScope, Model) {
                         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-                    }
+                    },
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     controller: 'RemodelController',
@@ -689,8 +689,7 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: '',
-                    template: ''
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     controller: 'NotesController',
@@ -807,6 +806,9 @@ angular
                         });
                     },
                     templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     resolve: {
@@ -1278,16 +1280,6 @@ angular
             },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_ELOQUA_ENRICHMENTS';
-                        }
-                    },
-                    /*
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                    -- ben::bookmark
-                    */
                     templateUrl: 'app/navigation/summary/EloquaTabs.html'
                 },
                 "main@": {
@@ -1335,13 +1327,7 @@ angular
             },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SFDC_ACCESS_TOKEN';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneTabView.html'
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     controller: 'sfdcCredentialsController',
@@ -1356,6 +1342,9 @@ angular
                 pageTitle: 'API Console'
             },
             views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
                 "main@": {
                     templateUrl: 'app/apiConsole/views/APIConsoleView.html'
                 }
@@ -1365,13 +1354,7 @@ angular
             url: '/signout',
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_SIGNOUT';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneTabView.html'
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     controller: function(LoginService) {
@@ -1381,73 +1364,70 @@ angular
                 }
             }
         })
-        .state('home.updatepassword', {
-            url: '/updatepassword',
-            params: {
-                pageIcon: 'ico-user',
-                pageTitle: 'User Settings'
-            },
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    template: ''
-                },
-                "main@": {
-                    templateUrl: 'app/login/views/UpdatePasswordView.html'
-                }
-            }
-        })
-        .state('passwordsuccess', {
-            url: '/passwordsuccess',
-            views: {
-                "main@": {
-                    templateUrl: 'app/login/views/UpdatePasswordSuccessView.html'
-                }
-            }
-        })
-        .state('home.deploymentwizard', {
-            url: '/deploymentwizard',
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return '';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    controller: 'DeploymentWizardController',
-                    templateUrl: 'app/setup/views/DeploymentWizardView.html'
-                }
-            }
-        })
-        .state('home.activate', {
-            url: '/activate',
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'ACTIVATE_MODEL_TITLE';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/models/views/ActivateModelView.html'
-                }
-            }
-        })
+        // .state('home.updatepassword', {
+        //     url: '/updatepassword',
+        //     params: {
+        //         pageIcon: 'ico-user',
+        //         pageTitle: 'User Settings'
+        //     },
+        //     views: {
+        //         "navigation@": {
+        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         },
+        //         "summary@": {
+        //             templateUrl: 'app/navigation/summary/BlankLine.html'
+        //         },
+        //         "main@": {
+        //             templateUrl: 'app/login/views/UpdatePasswordView.html'
+        //         }
+        //     }
+        // })
+        // .state('passwordsuccess', {
+        //     url: '/passwordsuccess',
+        //     views: {
+        //         "summary@": {
+        //             templateUrl: 'app/navigation/summary/BlankLine.html'
+        //         },
+        //         "main@": {
+        //             templateUrl: 'app/login/views/UpdatePasswordSuccessView.html'
+        //         }
+        //     }
+        // })
+        // .state('home.deploymentwizard', {
+        //     url: '/deploymentwizard',
+        //     views: {
+        //         "navigation@": {
+        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         },
+        //         "summary@": {
+        //             templateUrl: 'app/navigation/summary/BlankLine.html'
+        //         },
+        //         "main@": {
+        //             controller: 'DeploymentWizardController',
+        //             templateUrl: 'app/setup/views/DeploymentWizardView.html'
+        //         }
+        //     }
+        // })
+        // .state('home.activate', {
+        //     url: '/activate',
+        //     views: {
+        //         "navigation@": {
+        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         },
+        //         "summary@": {
+        //             resolve: {
+        //                 ResourceString: function() {
+        //                     return 'ACTIVATE_MODEL_TITLE';
+        //                 }
+        //             },
+        //             controller: 'OneLineController',
+        //             templateUrl: 'app/navigation/summary/OneLineView.html'
+        //         },
+        //         "main@": {
+        //             templateUrl: 'app/models/views/ActivateModelView.html'
+        //         }
+        //     }
+        // })
         .state('home.users', {
             url: '/users',
             params: {
@@ -1459,13 +1439,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'USER_MANAGEMENT_TITLE';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneTabView.html'
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
                     resolve: {
@@ -1489,47 +1463,47 @@ angular
                 }
             }
         })
-        .state('home.setup', {
-            url: '/setup',
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SYSTEM_SETUP_TITLE';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/config/views/ManageCredentialsView.html'
-                }
-            }
-        })
-        .state('home.fields', {
-            url: '/fields',
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SETUP_NAV_NODE_MANAGE_FIELDS';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    controller: 'SetupController',
-                    templateUrl: 'app/setup/views/SetupView.html'
-                }
-            }
-        })
+        // .state('home.setup', {
+        //     url: '/setup',
+        //     views: {
+        //         "navigation@": {
+        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         },
+        //         "summary@": {
+        //             resolve: {
+        //                 ResourceString: function() {
+        //                     return 'SYSTEM_SETUP_TITLE';
+        //                 }
+        //             },
+        //             controller: 'OneLineController',
+        //             templateUrl: 'app/navigation/summary/OneLineView.html'
+        //         },
+        //         "main@": {
+        //             templateUrl: 'app/config/views/ManageCredentialsView.html'
+        //         }
+        //     }
+        // })
+        // .state('home.fields', {
+        //     url: '/fields',
+        //     views: {
+        //         "navigation@": {
+        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         },
+        //         "summary@": {
+        //             resolve: {
+        //                 ResourceString: function() {
+        //                     return 'SETUP_NAV_NODE_MANAGE_FIELDS';
+        //                 }
+        //             },
+        //             controller: 'OneLineController',
+        //             templateUrl: 'app/navigation/summary/OneLineView.html'
+        //         },
+        //         "main@": {
+        //             controller: 'SetupController',
+        //             templateUrl: 'app/setup/views/SetupView.html'
+        //         }
+        //     }
+        // })
         .state('home.insights', {
             url: '/insights',
             params: {
