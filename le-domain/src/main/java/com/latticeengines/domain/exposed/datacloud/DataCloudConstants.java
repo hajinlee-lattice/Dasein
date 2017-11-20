@@ -37,6 +37,13 @@ public final class DataCloudConstants {
     public static final String PROFILE_ATTR_NUMBITS = "NumBits";
     public static final String PROFILE_ATTR_BKTALGO = "BktAlgo";
 
+    public static final String CHK_ATTR_CHK_CODE = "CheckCode";
+    public static final String CHK_ATTR_ROW_ID = "RowId";
+    public static final String CHK_ATTR_GROUP_ID = "GroupId";
+    public static final String CHK_ATTR_CHK_FIELD = "CheckField";
+    public static final String CHK_ATTR_CHK_VALUE = "CheckValue";
+    public static final String CHK_ATTR_CHK_MSG = "CheckMessage";
+
     public static final String CEAttr = "CEAttr";
     public static final String EAttr = "EAttr";
 
