@@ -362,7 +362,7 @@ angular.module('lp.ratingsengine')
 
     this.getChartDataConcurrently = function(all){
         var deferred = $q.defer();
-        var chunks = [], size = Math.floor(all.length / 5);
+        var chunks = [], size = Math.max(1, Math.floor(all.length / 5));
 
         while (all.length > 0) {
             chunks.push(all.splice(0, size));
