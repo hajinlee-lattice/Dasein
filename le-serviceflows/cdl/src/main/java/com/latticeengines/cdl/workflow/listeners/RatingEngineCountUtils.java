@@ -19,9 +19,13 @@ final class RatingEngineCountUtils {
         List<String> ratingEngineIds = ratingEngineProxy.getRatingEngineIds(customerSpace);
         if (CollectionUtils.isNotEmpty(ratingEngineIds)) {
             ratingEngineIds.forEach(engineId -> {
-                Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace, engineId);
-                log.info("Updated the counts of rating engine " + engineId + " to "
-                        + (MapUtils.isNotEmpty(counts) ? JsonUtils.pprint(counts) : null));
+                try {
+                    Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace, engineId);
+                    log.info("Updated the counts of rating engine " + engineId + " to "
+                            + (MapUtils.isNotEmpty(counts) ? JsonUtils.pprint(counts) : null));
+                } catch (Exception e) {
+                    log.error("Failed to update the counts of rating engine " + engineId, e);
+                }
             });
         }
     }
