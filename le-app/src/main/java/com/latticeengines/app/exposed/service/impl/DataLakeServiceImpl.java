@@ -151,7 +151,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         // Only return attributes for account now
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, BusinessEntity.Account);
-        return cms.stream().filter(cm -> cm.getGroups().contains(predefined)).collect(Collectors.toList());
+        return cms.stream().filter(cm -> cm.getGroups() != null && cm.getGroups().contains(predefined)) //
+                .collect(Collectors.toList());
     }
 
     @Override
