@@ -108,29 +108,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             if (!StringUtils.isEmpty(appId)) {
                 Job job = workflowProxy.getWorkflowJobFromApplicationId(appId);
                 if (job != null && !job.isRunning()) {
-                    JobStatus jobStatus = job.getJobStatus();
-                    DataFeed dataFeed = dataFeedProxy.getDataFeed(cdlJobDetail.getTenant().getId());
-                    if (jobStatus == JobStatus.COMPLETED) {
-                        cdlJobDetail.setCdlJobStatus(CDLJobStatus.COMPLETE);
-                        cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
-                        if (dataFeed.getDrainingStatus() == DrainingStatus.DRAINING_CONSOLIDATE) {
-                            dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(),
-                                    DrainingStatus.DRAINING_PROFILE.name());
-                        } else if (dataFeed.getDrainingStatus() == DrainingStatus.DRAINING_PROFILE) {
-                            dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(),
-                                    DrainingStatus.NONE.name());
-                        }
-                    } else {
-                        cdlJobDetail.setCdlJobStatus(CDLJobStatus.FAIL);
-                        cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
-                        if (reachRetryLimit(cdlJobType, cdlJobDetail.getRetryCount())) {
-                            if (dataFeed.getDrainingStatus() != DrainingStatus.NONE) {
-                                dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(),
-                                        DrainingStatus.NONE.name());
-                            }
-                        }
-
-                    }
+                    updateOneJobStatus(cdlJobType, cdlJobDetail, job);
                     runningJobs--;
                 }
             }
@@ -290,5 +268,81 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private void submitImportJob(String jobArguments) {
 
+    }
+
+    @Override
+    public ApplicationId createConsolidateJob(String customerSpace) {
+        updateJobStatus(CDLJobType.CONSOLIDATE);
+        updateJobStatus(CDLJobType.PROFILE);
+        Tenant tenant = MultiTenantContext.getTenant();
+        CDLJobDetail consolidate = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.CONSOLIDATE);
+        CDLJobDetail profile = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROFILE);
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        if (dataFeed == null || (dataFeed != null && !dataFeed.getStatus().isAllowConsolidation())
+                || (consolidate != null && consolidate.isRunning())
+                || (profile != null && profile.isRunning())) {
+            throw new RuntimeException("Current consolidate or profile job is running");
+        }
+        ApplicationId id = cdlProxy.consolidateManually(customerSpace);
+        CDLJobDetail entity = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.CONSOLIDATE, tenant);
+        entity.setApplicationId(id.toString());
+        cdlJobDetailEntityMgr.update(entity);
+        return id;
+    }
+
+    @Override
+    public ApplicationId createProfileJob(String customerSpace) {
+        updateJobStatus(CDLJobType.PROFILE);
+        Tenant tenant = MultiTenantContext.getTenant();
+        CDLJobDetail profile = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROFILE);
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        if (dataFeed == null || (dataFeed != null && !dataFeed.getStatus().isAllowProfile())
+                || (profile != null && profile.isRunning())) {
+            throw new RuntimeException("Current consolidate or profile job is running");
+        }
+        ApplicationId id = cdlProxy.profile(customerSpace);
+        CDLJobDetail entity = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROFILE, tenant);
+        entity.setApplicationId(id.toString());
+        cdlJobDetailEntityMgr.update(entity);
+        return id;
+    }
+
+    private void updateJobStatus(CDLJobType cdlJobType) {
+        CDLJobDetail cdlJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(cdlJobType);
+        if (cdlJobDetail == null) {
+            return;
+        }
+        String appId = cdlJobDetail.getApplicationId();
+        if (!StringUtils.isEmpty(appId)) {
+            Job job = workflowProxy.getWorkflowJobFromApplicationId(appId);
+            if (job != null && !job.isRunning()) {
+                updateOneJobStatus(cdlJobType, cdlJobDetail, job);
+            }
+        }
+    }
+
+    private void updateOneJobStatus(CDLJobType cdlJobType, CDLJobDetail cdlJobDetail, Job job) {
+        JobStatus jobStatus = job.getJobStatus();
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(cdlJobDetail.getTenant().getId());
+        if (jobStatus == JobStatus.COMPLETED) {
+            cdlJobDetail.setCdlJobStatus(CDLJobStatus.COMPLETE);
+            cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
+            if (dataFeed.getDrainingStatus() == DrainingStatus.DRAINING_CONSOLIDATE) {
+                dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(),
+                        DrainingStatus.DRAINING_PROFILE.name());
+            } else if (dataFeed.getDrainingStatus() == DrainingStatus.DRAINING_PROFILE) {
+                dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(),
+                        DrainingStatus.NONE.name());
+            }
+        } else {
+            cdlJobDetail.setCdlJobStatus(CDLJobStatus.FAIL);
+            cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
+            if (reachRetryLimit(cdlJobType, cdlJobDetail.getRetryCount())) {
+                if (dataFeed.getDrainingStatus() != DrainingStatus.NONE) {
+                    dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(),
+                            DrainingStatus.NONE.name());
+                }
+            }
+        }
     }
 }

@@ -61,7 +61,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         this.workflowProxy = workflowProxy;
     }
 
-    public ApplicationId submit(String customerSpace) {
+    public ApplicationId submit(String customerSpace, boolean draining) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeed.getStatus()));
         DataFeedExecution execution = datafeed.getActiveExecution();
@@ -93,7 +93,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
         List<Long> importJobIds = getImportJobIds(customerSpace);
         log.info(String.format("importJobIdsStr=%s", importJobIds));
-        WorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus, importJobIds);
+        WorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus, importJobIds, draining);
         return workflowJobService.submit(configuration);
     }
 
@@ -145,7 +145,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private WorkflowConfiguration generateConfiguration(String customerSpace, Status initialDataFeedStatus,
-            List<Long> importJobIds) {
+            List<Long> importJobIds, boolean draining) {
         return new ConsolidateAndPublishWorkflowConfiguration.Builder() //
                 .initialDataFeedStatus(initialDataFeedStatus) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -155,6 +155,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .importJobIds(importJobIds) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
+                        .put(WorkflowContextConstants.Inputs.DRAINING, String.valueOf(draining))
                         .put(WorkflowContextConstants.Inputs.CHILDREN_WORKFLOW_JOB_IDS, importJobIds.toString()) //
                         .build()) //
                 .accountIdField(InterfaceName.Id.name()) //

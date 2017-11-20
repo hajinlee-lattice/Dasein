@@ -7,6 +7,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,9 +39,10 @@ public class DataFeedController {
     @RequestMapping(value = "/consolidate", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke data feed consolidate workflow. Returns the job id.")
-    public ResponseDocument<String> consolidate(@PathVariable String customerSpace) {
+    public ResponseDocument<String> consolidate(@PathVariable String customerSpace,
+            @RequestParam(value = "draining", required = false, defaultValue = "false") boolean draining) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        ApplicationId appId = consolidateAndPublishWorkflowSubmitter.submit(customerSpace);
+        ApplicationId appId = consolidateAndPublishWorkflowSubmitter.submit(customerSpace, draining);
         return ResponseDocument.successResponse(appId.toString());
     }
 

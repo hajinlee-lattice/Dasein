@@ -80,4 +80,18 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
     }
 
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId consolidateManually(String customerSpace) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/consolidate?" + "draining={draining}",
+                shortenCustomerSpace(customerSpace), "true");
+        ResponseDocument<String> responseDoc = post("consolidate", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        String appIdStr = responseDoc.getResult();
+        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+    }
+
 }
