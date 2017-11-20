@@ -16,11 +16,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
+import com.latticeengines.dante.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.dante.testFramework.DanteTestNGBase;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 
@@ -29,7 +29,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
     private TalkingPointProxy talkingPointProxy;
 
     @Autowired
-    private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
+    private PublishedTalkingPointEntityMgr publishedTalkingPointEntityMgr;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -111,11 +111,11 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         // publish
         talkingPointProxy.publish(testPlay.getName(), mainTestCustomerSpace.toString());
 
-        List<DanteTalkingPoint> dtps = danteTalkingPointEntityMgr.findAllByPlayID(testPlay.getName());
+        List<PublishedTalkingPoint> dtps = publishedTalkingPointEntityMgr.findAllByPlayName(testPlay.getName());
         Assert.assertEquals(dtps.size(), 2);
 
-        Assert.assertEquals(dtps.get(0).getExternalID(), tps.get(0).getName());
-        Assert.assertEquals(dtps.get(1).getExternalID(), tps.get(1).getName());
+        Assert.assertEquals(dtps.get(0).getName(), tps.get(0).getName());
+        Assert.assertEquals(dtps.get(1).getName(), tps.get(1).getName());
 
         // delete
         talkingPointProxy.delete(tps.get(0).getName());
@@ -129,8 +129,8 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         raw = talkingPointProxy.revert(testPlay.getName(), mainTestCustomerSpace.toString());
         tps = JsonUtils.convertList(raw, TalkingPointDTO.class);
         Assert.assertEquals(tps.size(), 2);
-        Assert.assertEquals(dtps.get(0).getExternalID(), tps.get(0).getName());
-        Assert.assertEquals(dtps.get(1).getExternalID(), tps.get(1).getName());
+        Assert.assertEquals(dtps.get(0).getName(), tps.get(0).getName());
+        Assert.assertEquals(dtps.get(1).getName(), tps.get(1).getName());
 
         // delete
         talkingPointProxy.delete(tps.get(0).getName());
@@ -148,7 +148,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         // publish
         talkingPointProxy.publish(testPlay.getName(), mainTestCustomerSpace.toString());
 
-        dtps = danteTalkingPointEntityMgr.findAllByPlayID(testPlay.getName());
+        dtps = publishedTalkingPointEntityMgr.findAllByPlayName(testPlay.getName());
         Assert.assertEquals(dtps.size(), 0);
     }
 
