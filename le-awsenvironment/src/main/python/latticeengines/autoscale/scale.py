@@ -1,11 +1,14 @@
 import argparse
 import boto3
+import logging
 
 from ..ecs.manage import find_cluster_name, find_service_name
 
 AS_CLIENT=None
 AAS_CLIENT=None
 CW_CLIENT=None
+
+LOG=logging.getLogger(__name__)
 
 def main():
     args = parse_args()
@@ -24,11 +27,11 @@ def hookgroup_internal(app, stack):
         if 'ScaleUp' in policy_name:
             alarm = alarms[group + '-high-latency']
             put_alarm_actions(alarm, policy['PolicyARN'])
-            print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
+            LOG.info("hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"]))
         elif 'ScaleBack' in policy_name:
             alarm = alarms[group + '-low-latency']
             put_alarm_actions(alarm, policy['PolicyARN'])
-            print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
+            LOG.info("hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"]))
 
 def hookecs(args):
     hookecs_internal(args.app, args.stack)
@@ -60,8 +63,18 @@ def find_full_group_name(prefix):
     for group in response["AutoScalingGroups"]:
         grpname = group["AutoScalingGroupName"]
         if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
-            print "Found auto scaling group: " + grpname
+            LOG.info("Found auto scaling group: " + grpname)
             return grpname
+    next_token = response["NextToken"]
+    while next_token:
+        LOG.info("Getting next page using NextToken=" + next_token)
+        response = AS_CLIENT.describe_auto_scaling_groups()
+        for group in response["AutoScalingGroups"]:
+            grpname = group["AutoScalingGroupName"]
+            if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
+                LOG.info("Found auto scaling group: " + grpname)
+                return grpname
+        next_token = response["NextToken"]
     raise Exception("Cannot find auto scaling group with prefix " + prefix)
 
 def get_all_policies(group):
