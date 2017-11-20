@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -92,7 +91,7 @@ public class EventQueryTranslator {
                                             AttributeRepository repository,
                                             Restriction restriction,
                                             QueryBuilder queryBuilder) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), true, false,
+        return translateRestriction(queryFactory, repository, restriction, true, false,
                                     queryBuilder);
     }
 
@@ -100,7 +99,7 @@ public class EventQueryTranslator {
                                              AttributeRepository repository,
                                              Restriction restriction,
                                              QueryBuilder queryBuilder) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, false,
+        return translateRestriction(queryFactory, repository, restriction, false, false,
                                     queryBuilder);
     }
 
@@ -108,7 +107,7 @@ public class EventQueryTranslator {
                                           AttributeRepository repository,
                                           Restriction restriction,
                                           QueryBuilder queryBuilder) {
-        return translateRestriction(queryFactory, repository, translateFrontendRestriction(restriction), false, true,
+        return translateRestriction(queryFactory, repository, restriction, false, true,
                                     queryBuilder);
     }
 
@@ -435,7 +434,6 @@ public class EventQueryTranslator {
     }
 
 
-
     private SubQuery translateSelectAll(QueryFactory queryFactory,
                                         AttributeRepository repository,
                                         String tableName) {
@@ -732,31 +730,6 @@ public class EventQueryTranslator {
             newRestriction = Restriction.builder().or(notEngagedEver, engagedWithin).build();
         }
         return newRestriction;
-    }
-
-    // translate BucketRestriction
-    private Restriction translateFrontendRestriction(Restriction restriction) {
-        Restriction translated;
-        if (restriction instanceof LogicalRestriction) {
-            BreadthFirstSearch search = new BreadthFirstSearch();
-            search.run(restriction, (object, ctx) -> {
-                if (object instanceof BucketRestriction) {
-                    BucketRestriction bucket = (BucketRestriction) object;
-                    Restriction converted = RestrictionUtils.convertBucketRestriction(bucket);
-                    LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
-                    parent.getRestrictions().remove(bucket);
-                    parent.getRestrictions().add(converted);
-                }
-            });
-            translated = restriction;
-        } else if (restriction instanceof BucketRestriction) {
-            BucketRestriction bucket = (BucketRestriction) restriction;
-            translated = RestrictionUtils.convertBucketRestriction(bucket);
-        } else {
-            translated = restriction;
-        }
-
-        return translated;
     }
 
     private static class UnionCollector {

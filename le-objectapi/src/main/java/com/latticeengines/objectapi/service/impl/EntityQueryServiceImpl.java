@@ -168,7 +168,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
                 Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                                                                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, null);
+                                                                        ruleBasedModel.getRatingRule(),
+                                                                        QueryEvaluator.SCORE, true, null, false);
                 AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
                 query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();
