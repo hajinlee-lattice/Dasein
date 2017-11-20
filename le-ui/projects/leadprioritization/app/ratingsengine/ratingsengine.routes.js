@@ -160,6 +160,20 @@ angular
                     "summary@": {
                         templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
+                    "navigation@": {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Rating) {
+                            $scope.rating_id = $stateParams.rating_id || '';
+                            $scope.stateName = function () {
+                                return $state.current.name;
+                            }
+                            $rootScope.$broadcast('header-back', {
+                                path: '^home.rating.dashboard',
+                                displayName: Rating.summary.displayName,
+                                sref: 'home.ratingsengine'
+                            });
+                        },
+                        templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
+                    },
                     "main@": {
                         controller: 'NotesController',
                         controllerAs: 'vm',

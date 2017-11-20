@@ -13,7 +13,18 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}</span>
             </a>
         </li>
-        <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.wizard.segment.attributes.rules'}" ng-disabled="menuDisabled || dashboardDisabled">
+        <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.dashboard'}" ng-disabled="menuDisabled || dashboardDisabled">
+            <a ui-sref="home.ratingsengine.dashboard">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
+                    <span class="ico ico-model ico-light-gray"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}</span>
+            </a>
+        </li>
+        
+
+
+        <!-- <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.wizard.segment.attributes.rules'}" ng-disabled="menuDisabled || dashboardDisabled">
             <a ui-sref="home.ratingsengine.wizard.segment.attributes.rules({rating_id: stateParams.rating_id, wizard_steps: 'rules'})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}">
                     <span class="ico ico-performance ico-light-gray"></span>
@@ -21,6 +32,9 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}</span>
             </a>
         </li>
+        -->
+
+
         <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.ratingsengine.dashboard.notes" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">

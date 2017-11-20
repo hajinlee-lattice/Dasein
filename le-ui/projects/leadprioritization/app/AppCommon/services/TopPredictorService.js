@@ -559,7 +559,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             if (isContinuous) {
                 bucketToDisplay.SortProperty = bucket.LowerInclusive != null ? bucket.LowerInclusive : bucket.UpperExclusive;
                 // Only when the attribute is continuous, sorting is increasing order
-            } else if (toReturn.name === "Employee Range") {
+            } else if (toReturn.name === "Employee Range" || toReturn.name === 'Revenue Range') {
 
                 if (bucketToDisplay.name.indexOf(">") > -1) {
                     var lessThanBucketName = bucketToDisplay.name,
@@ -686,9 +686,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             // Push new bucket back to list
             toReturn.elementList.push(newCombinedBucket);    
         }
-
-        console.log(toReturn.elementList);
-
         return toReturn;
     };
 

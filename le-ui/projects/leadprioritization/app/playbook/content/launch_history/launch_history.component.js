@@ -12,12 +12,14 @@ angular.module('lp.playbook.dashboard.launch_history', [])
         launching: false,
         current: 1,
         pagesize: 10,
-        showPagination: false
+        showPagination: false,
+        sortBy: 'launchTime',
+        sortDesc: false
     });
 
     vm.init = function() {
 
-        // console.log(vm.launches);
+        console.log(vm.launches);
 
         if(vm.launches.launchSummaries.length > 10){
             vm.showPagination = true;
@@ -31,6 +33,15 @@ angular.module('lp.playbook.dashboard.launch_history', [])
         } else {
             vm.allPlaysHistory = false;
         }
+
+
+        for(var i = 0; i < vm.launches.launchSummaries.length; i++) {
+            if (vm.launches.launchSummaries[i].launchState == 'Launching') {
+                vm.launching = true;
+                break;
+            }
+        }
+
 
         vm.summaryData = {
             selectedTargets: vm.cumulativeStats.selectedTargets,
@@ -53,8 +64,6 @@ angular.module('lp.playbook.dashboard.launch_history', [])
         } else {
             playName = play.undefined.name;
         }
-
-        console.log(play);
 
         var params = {
             playName: playName

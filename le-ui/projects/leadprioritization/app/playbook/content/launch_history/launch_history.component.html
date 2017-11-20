@@ -51,14 +51,70 @@
     	<table>
     		<thead>
     			<tr>
-    				<th>Launch Date</th>
-                    <th ng-if="vm.allPlaysHistory">Play Name</th>
-    				<th>Selected Targets</th>
-    				<th>Suppressed</th>
-                    <th>Errors</th>
-    				<th>Recommendation <br/>Launched</th>
-    				<th>Contacts within <br/>Recommendation</th>
-                    <th>Status</th>
+    				<th>
+                        Launch Date
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'launchTime',
+                                'fa fa-sort-desc': vm.sortBy === 'launchTime' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'launchTime' && !vm.sortDesc}"></i>
+                    </th>
+                    <th ng-if="vm.allPlaysHistory">
+                        Play Name
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'playDisplayName',
+                                'fa fa-sort-desc': vm.sortBy === 'playDisplayName' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'playDisplayName' && !vm.sortDesc}"></i>
+                    </th>
+    				<th>
+                        Selected Targets
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'stats.selectedTargets',
+                                'fa fa-sort-desc': vm.sortBy === 'stats.selectedTargets' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'stats.selectedTargets' && !vm.sortDesc}"></i>
+                   </th>
+    				<th>
+                        Suppressed
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'stats.suppressed',
+                                'fa fa-sort-desc': vm.sortBy === 'stats.suppressed' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'stats.suppressed' && !vm.sortDesc}"></i>
+                   </th>
+                    <th>
+                        Errors
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'stats.errors',
+                                'fa fa-sort-desc': vm.sortBy === 'stats.errors' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'stats.errors' && !vm.sortDesc}"></i>
+                   </th>
+    				<th>
+                        Recommendation <br/>Launched
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'stats.recommendationsLaunched',
+                                'fa fa-sort-desc': vm.sortBy === 'stats.recommendationsLaunched' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'stats.recommendationsLaunched' && !vm.sortDesc}"></i>
+                   </th>
+    				<th>
+                        Contacts within <br/>Recommendation
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'stats.contactsWithinRecommendations',
+                                'fa fa-sort-desc': vm.sortBy === 'stats.contactsWithinRecommendations' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'stats.contactsWithinRecommendations' && !vm.sortDesc}"></i>
+                   </th>
+                    <th>
+                        Status
+                        <i  aria-hidden="true" 
+                            ng-class="{
+                                'fa fa-sort': vm.sortBy != 'launchState',
+                                'fa fa-sort-desc': vm.sortBy === 'launchState' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'launchState' && !vm.sortDesc}"></i>
+                   </th>
     			</tr>
     		</thead>
     		<tbody>
@@ -92,16 +148,10 @@
         <button 
             type="button"
             class="button blue-button pull-right"
-            ng-if="!vm.launching"
+            ng-disabled="vm.launching"
             ng-click="vm.relaunchPlay()">
-            Re-Launch
-        </button>
-        <button 
-            type="button"
-            class="button blue-button pull-right"
-            ng-if="vm.launching"
-            disabled>
-            <span class="fa fa-spinner fa-pulse fw"></span> Launching...
+            <span ng-show="!vm.launching">Re-Launch</span>
+            <span ng-show="vm.launching">Launching...</span>
         </button>
     </div><!-- End .footer -->
 </section>
