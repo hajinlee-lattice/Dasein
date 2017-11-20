@@ -30,7 +30,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends MetadataFunctio
 
     private static final String LOCALTEST_TENANT = "LocalTest";
     private static final String S3_DIR = "le-dev/LocalTest";
-    private static final String S3_VERSION = "1";
+    private static final String S3_VERSION = "2";
 
     @Inject
     private MetadataService mdService;
