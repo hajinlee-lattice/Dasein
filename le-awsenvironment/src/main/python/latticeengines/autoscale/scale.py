@@ -68,7 +68,7 @@ def find_full_group_name(prefix):
     next_token = response["NextToken"]
     while next_token:
         LOG.info("Getting next page using NextToken=" + next_token)
-        response = AS_CLIENT.describe_auto_scaling_groups()
+        response = AS_CLIENT.describe_auto_scaling_groups(NextToken=next_token)
         for group in response["AutoScalingGroups"]:
             grpname = group["AutoScalingGroupName"]
             if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
