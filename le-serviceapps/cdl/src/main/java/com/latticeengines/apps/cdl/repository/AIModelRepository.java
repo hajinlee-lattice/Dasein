@@ -11,10 +11,10 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 
 public interface AIModelRepository extends BaseJpaRepository<AIModel, Long>{
 	
-	@EntityGraph(attributePaths = { "ratingEngine" })
+	@EntityGraph(attributePaths = { "ratingEngine", "trainingSegment" })
 	public AIModel findById(String id);
 	
-	@EntityGraph(value = "RatingModel.ratingEngine", type = EntityGraphType.LOAD)
+	@EntityGraph(value = "AIModel.details", type = EntityGraphType.LOAD)
 	public AIModel findTopByRatingEngineIdOrderByCreatedDesc(String ratingEngineId);
 	
 	public List<AIModel> findByRatingEngineId(String ratingEngineId);

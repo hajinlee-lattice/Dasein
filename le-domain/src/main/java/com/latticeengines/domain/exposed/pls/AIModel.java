@@ -11,6 +11,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OnDelete(action = OnDeleteAction.CASCADE)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@NamedEntityGraph(name = "AIModel.details", attributeNodes = {@NamedAttributeNode("ratingEngine"), @NamedAttributeNode("trainingSegment")})
 public class AIModel extends RatingModel {
 
     public static final String AI_MODEL_PREFIX = "ai_model";
