@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.controller;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,6 +26,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks")
 public class DataFeedTaskController {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskController.class);
 
     private final DataFeedTaskManagerService dataFeedTaskManagerService;
 
@@ -42,10 +47,12 @@ public class DataFeedTaskController {
                                                                  @RequestBody String metadata) {
         try {
             customerSpace = CustomerSpace.parse(customerSpace).toString();
+            entity = BusinessEntity.getByName(entity).name();
             String taskId = dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source,
                     metadata);
             return ResponseDocument.successResponse(taskId);
         } catch (Exception e) {
+            log.error("Failed to create data feed task: " + e.getMessage());
             return ResponseDocument.failedResponse(e);
         }
 
