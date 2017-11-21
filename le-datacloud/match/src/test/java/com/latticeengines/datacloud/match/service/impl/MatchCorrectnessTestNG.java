@@ -27,21 +27,18 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
     // expectedEmp, expectedRev
     private static final Object[][] TEST_DATA = new Object[][] {
             // domain only easy cases
-            //TODO: disable this test to unblock trunk health
-            // { "google.com", null, null, null, null, null, null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
+            { "google.com", null, null, null, null, null, null, "google.com", "Google Inc.", "California", "USA", ">10,000", ">10B" },
             { "microsoft.com", null, null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { "apple.com", null, null, null, null, null, null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
             { "chevron.com", null, null, null, null, null, null, "chevron.com", "Chevron Corporation", "California", "USA", ">10,000", ">10B" },
             // ge.com, bk.com
 
             // name location only easy cases
-            //TODO: disable this test to unblock trunk health
-            // { null, "Alphabet Inc.", "Mountain View", "California", null, "USA", null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
+            { null, "Alphabet Inc.", "Mountain View", "California", null, "USA", null, "abc.xyz", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
             { null, "Chevron Corporation", "San Ramon", "California", null, "USA", null, "chevron.com", "Chevron Corporation", "California", "USA", ">10,000", ">10B" },
 
             // short location, accurate spelling
-            // DnB changed match behavior: Alphabet+USA no longer matches to Google headquarter
-            //{ null, "Alphabet", null, null, null, null, null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },    
+            { null, "Alphabet", null, null, null, null, null, "abc.xyz", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
             { null, "Google", null, null, null, null, null, "google.com", "Google Inc.", "California", "USA", ">10,000", ">10B" },
             { null, "Microsoft", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
 
@@ -53,9 +50,9 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { null, "Johnson Johnson", null, "NJ", null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey",
                     "USA", ">10,000", ">10B" },
 
-            //{ null, "Johnson & Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
-            //{ null, "Johnson and Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
-            //{ null, "Johnson Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            { null, "Johnson & Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            { null, "Johnson and Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            { null, "Johnson Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
 
             { null, "Microsoft Corporation", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { null, "Microsoft Corp.", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
@@ -77,7 +74,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
             { null, "Eversource Energy", "Springfield", "MA", "273608923", "US", "3368895000", "eversource.com",
                     "EVERSOURCE ENERGY", "MASSACHUSETTS", "USA", "5001-10,000", "5B-10B" },
-            //{ null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },
+            { null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },
             { null, "Edison47", "Port Orchard", "WA", "98367", "US", "3608746772", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
             // { null, "SS&C Advent", "San Francisco", "CA", "950142083", "US", "4089961010", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
     };
@@ -117,7 +114,8 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
         Assert.assertTrue(record.isMatched(), "This row is not matched: " + StringUtils.join(row, ","));
         List<Object> matchedRow = record.getOutput();
         for (int j = 0; j < idxMap.length; j++) {
-            Assert.assertEquals(String.valueOf(matchedRow.get(j)).toUpperCase(), String.valueOf(row[idxMap[j]]).toUpperCase(), "Testing Data: " + StringUtils.join(row, ","));
+            Assert.assertEquals(String.valueOf(matchedRow.get(j)).toUpperCase(),
+                    String.valueOf(row[idxMap[j]]).toUpperCase(), "Testing Data: " + StringUtils.join(row, ","));
         }
     }
 
