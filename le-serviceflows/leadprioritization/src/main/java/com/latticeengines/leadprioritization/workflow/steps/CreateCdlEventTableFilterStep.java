@@ -74,8 +74,7 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
                 .buildDataTablePath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace()).toString();
         String tableName = configuration.getTargetTableName() + "_train_filter";
         filePath += "/" + tableName + "/" + "/part-00000.avro";
-        return convertToTable(schema, tableName, filePath, InterfaceName.Train.name(), configuration.getTrainQuery(),
-                "Train");
+        return convertToTable(schema, tableName, filePath, configuration.getTrainQuery(), InterfaceName.Train);
     }
 
     private Table getTargetFilterTable() {
@@ -92,24 +91,24 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
                 .buildDataTablePath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace()).toString();
         String tableName = configuration.getTargetTableName() + "_target_filter";
         filePath += "/" + tableName + "/" + "/part-00000.avro";
-        targetFilterTable = convertToTable(schema, tableName, filePath, InterfaceName.Target.name(),
-                configuration.getTargetQuery(), "Target");
+        targetFilterTable = convertToTable(schema, tableName, filePath, configuration.getTargetQuery(),
+                InterfaceName.Target);
         return targetFilterTable;
     }
 
-    private Table convertToTable(Schema schema, String tableName, String filePath, String extraColumn,
-            FrontEndQuery query, String type) {
+    private Table convertToTable(Schema schema, String tableName, String filePath, FrontEndQuery query,
+            InterfaceName type) {
 
-        int rowNumber = 0, pageSize = 100;
+        int rowNumber = 0, pageSize = 10000;
         long total = 0;
         while (true) {
             query.setPageFilter(new PageFilter(rowNumber, pageSize));
             DataPage dataPage = null;
             switch (type) {
-            case "Train":
+            case Train:
                 dataPage = eventProxy.getTrainingTuples(configuration.getCustomerSpace().toString(), query);
                 break;
-            case "Target":
+            case Target:
                 dataPage = eventProxy.getEventTuples(configuration.getCustomerSpace().toString(), query);
                 break;
             default:
@@ -126,7 +125,6 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
                 record.put(InterfaceName.AccountId.name(), row.get(InterfaceName.AccountId.name()));
                 record.put(InterfaceName.PeriodId.name(),
                         Long.valueOf(row.get(InterfaceName.PeriodId.name()).toString()));
-                record.put(extraColumn, Long.valueOf(row.get(extraColumn).toString()));
                 records.add(record);
             }
             writeRecords(schema, filePath, records);
@@ -155,8 +153,8 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
     private Schema getTrainSchema() {
         String schemaString = "{\"namespace\": \"RatingEngineModel\", \"type\": \"record\", "
                 + "\"name\": \"RatingEngineModelTrainFilter\"," + "\"fields\": ["
-                + "{\"name\": \"AccountId\", \"type\": \"string\"}, {\"name\": \"PeriodId\", \"type\": \"long\"},"
-                + "{\"name\": \"Train\", \"type\": \"long\"}" + "]}";
+                + "{\"name\": \"AccountId\", \"type\": \"string\"}, {\"name\": \"PeriodId\", \"type\": \"long\"}"
+                + "]}";
         Schema.Parser parser = new Schema.Parser();
         return parser.parse(schemaString);
     }
@@ -164,8 +162,8 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
     private Schema getTargetSchema() {
         String schemaString = "{\"namespace\": \"RatingEngineModel\", \"type\": \"record\", "
                 + "\"name\": \"RatingEngineModelTargetFilter\"," + "\"fields\": ["
-                + "{\"name\": \"AccountId\", \"type\": \"string\"}, {\"name\": \"PeriodId\", \"type\": \"long\"},"
-                + "{\"name\": \"Target\", \"type\": \"long\"}" + "]}";
+                + "{\"name\": \"AccountId\", \"type\": \"string\"}, {\"name\": \"PeriodId\", \"type\": \"long\"}"
+                + "]}";
         Schema.Parser parser = new Schema.Parser();
         return parser.parse(schemaString);
     }

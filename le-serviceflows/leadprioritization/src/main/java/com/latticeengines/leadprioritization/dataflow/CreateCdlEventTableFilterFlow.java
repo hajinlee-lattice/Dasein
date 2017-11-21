@@ -24,17 +24,19 @@ public class CreateCdlEventTableFilterFlow extends TypesafeDataFlowBuilder<Creat
         List<String> retainFields = new ArrayList<>();
         Node trainFilterTable = addSource(parameters.trainFilterTable);
         Node targetFilterTable = addSource(parameters.targetFilterTable);
-        retainFields.addAll(trainFilterTable.getFieldNames());
+        retainFields.addAll(targetFilterTable.getFieldNames());
         String target = InterfaceName.Target.name();
+        retainFields.add(InterfaceName.Train.name());
         retainFields.add(target);
 
-        trainFilterTable = trainFilterTable.filter(InterfaceName.Train.name() + " == 1",
-                new FieldList(InterfaceName.Train.name()));
+        trainFilterTable = trainFilterTable.addColumnWithFixedValue(InterfaceName.Train.toString(), 1, Integer.class);
+        targetFilterTable = targetFilterTable.addColumnWithFixedValue(InterfaceName.Target.toString(), 1,
+                Integer.class);
         FieldList joinFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
         Node result = trainFilterTable.leftJoin(joinFields, targetFilterTable, joinFields);
 
-        result = result.apply(target + " == null ? new Long(0) : " + target, new FieldList(target),
-                new FieldMetadata(target, Long.class));
+        result = result.apply(target + " == null ? new Integer(0) : " + target, new FieldList(target),
+                new FieldMetadata(target, Integer.class));
         result = result.retain(new FieldList(retainFields));
         log.info("Cdl event table filter's columns=", retainFields);
         return result;
