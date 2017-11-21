@@ -67,11 +67,17 @@ public class QueryTranslator {
         }
 
 
-        QueryBuilder queryBuilder = Query.builder();
-        Restriction restriction = translateBucketRestriction(frontEndRestriction.getRestriction());
-        restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction, null, //
-                                                queryBuilder);
         EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
+        QueryBuilder queryBuilder = Query.builder();
+        Map<String, Lookup> ruleBasedModels = ruleBasedModels(BusinessEntity.Account, //
+                                                              frontEndQuery.getRatingModels(), //
+                                                              queryBuilder, true);
+        Restriction restriction = translateFrontEndRestriction(BusinessEntity.Account,
+                                                               frontEndRestriction,
+                                                               ruleBasedModels, queryBuilder, true);
+        restriction = translateSalesforceIdRestriction(frontEndQuery, BusinessEntity.Account, restriction);
+        restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction, null, //
+                                                queryBuilder, true);
 
         switch (eventType) {
         case Scoring:
@@ -87,7 +93,7 @@ public class QueryTranslator {
             break;
         }
 
-        PageFilter pageFilter = DEFAULT_PAGE_FILTER;
+        PageFilter pageFilter = new PageFilter(0, 0);
 
         if (frontEndQuery.getPageFilter() != null) {
             pageFilter = frontEndQuery.getPageFilter();
@@ -130,7 +136,7 @@ public class QueryTranslator {
                                                        ruleBasedModels, queryBuilder, false);
             restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
             restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, ruleBasedModels, //
-                                                    queryBuilder);
+                                                    queryBuilder, false);
             restriction = addHasTransactionRestriction(frontEndQuery, restriction);
 
             if (frontEndQuery.getPageFilter() == null) {
@@ -229,7 +235,8 @@ public class QueryTranslator {
     }
 
     private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-                                                  Restriction outerRestriction, Map<String, Lookup> ruleBasedModels, QueryBuilder queryBuilder) {
+                                                  Restriction outerRestriction, Map<String, Lookup> ruleBasedModels,
+                                                  QueryBuilder queryBuilder, boolean ignoreTransaction) {
         BusinessEntity innerEntity = null;
         String joinEntityKey = null;
         switch (outerEntity) {
@@ -246,7 +253,7 @@ public class QueryTranslator {
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
         Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction,
-                                                                    ruleBasedModels, queryBuilder, false);
+                                                                    ruleBasedModels, queryBuilder, ignoreTransaction);
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction, joinEntityKey);
     }
 
@@ -398,7 +405,7 @@ public class QueryTranslator {
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
             // do not support nested ratings for now
             Restriction accountRestriction = translateFrontEndRestriction(BusinessEntity.Account, frontEndRestriction,
-                                                                          null, queryBuilder, false);
+                                                                          null, queryBuilder, ignoreTransaction);
 
             frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.CONTACT_RESTRICTION));

@@ -9,7 +9,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -50,14 +49,38 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
         // Ever Purchased
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
-        long totalCount = countTxnBktForScoring(txn);
+        long totalCount = countTxnBktForScoringFromDataPage(txn);
         Assert.assertEquals(totalCount, 21199L);
+        long scoringCount = countTxnBktForScoring(txn);
+        Assert.assertEquals(totalCount, scoringCount);
 
         // Ever, Amount > 0 and Quantity > 0
         AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN, Collections.singletonList(0));
         txn = new Bucket.Transaction(prodId, TimeFilter.ever(), greaterThan0, greaterThan0, false);
-        long count = countTxnBktForScoring(txn);
+        long count = countTxnBktForScoringFromDataPage(txn);
         Assert.assertEquals(count, 21197L);
+    }
+
+    private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Bucket bucket = Bucket.txnBkt(txn);
+        Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setPageFilter(new PageFilter(0, 0));
+
+        //FrontEndRestriction contactFERestriction = new FrontEndRestriction();
+        //Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact,
+        //                                                      InterfaceName.Title.name()).eq("Buyer").build();
+        //contactFERestriction.setRestriction(cntRestriction);
+        //frontEndQuery.setContactRestriction(contactFERestriction);
+
+        DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery);
+        Assert.assertNotNull(dataPage.getData());
+        return dataPage.getData().size();
     }
 
     private long countTxnBktForScoring(Bucket.Transaction txn) {
@@ -71,15 +94,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
 
-        FrontEndRestriction contactFERestriction = new FrontEndRestriction();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact,
-                                                               InterfaceName.Title.name()).eq("Buyer").build();
-        contactFERestriction.setRestriction(cntRestriction);
-        frontEndQuery.setContactRestriction(contactFERestriction);
-
-        DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery);
-        Assert.assertNotNull(dataPage.getData());
-        return dataPage.getData().size();
+        return eventQueryService.getScoringCount(frontEndQuery);
     }
 
     private long countTxnBktForTraining(Bucket.Transaction txn) {

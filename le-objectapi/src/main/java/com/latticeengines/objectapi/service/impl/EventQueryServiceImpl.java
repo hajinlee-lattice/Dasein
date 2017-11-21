@@ -38,6 +38,29 @@ public class EventQueryServiceImpl implements EventQueryService {
         return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event);
     }
 
+    @Override
+    public long getScoringCount(FrontEndQuery frontEndQuery) {
+        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring);
+    }
+
+    @Override
+    public long getTrainingCount(FrontEndQuery frontEndQuery) {
+        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training);
+    }
+
+    @Override
+    public long getEventCount(FrontEndQuery frontEndQuery) {
+        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event);
+    }
+
+    private long getCount(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, EventType eventType) {
+        QueryTranslator queryTranslator = new QueryTranslator(
+                queryEvaluatorService.getQueryFactory(),
+                queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+        Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
+        return queryEvaluatorService.getCount(customerSpace.toString(), query);
+    }
+
     private DataPage getData(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, EventType eventType) {
         QueryTranslator queryTranslator = new QueryTranslator(
                 queryEvaluatorService.getQueryFactory(),

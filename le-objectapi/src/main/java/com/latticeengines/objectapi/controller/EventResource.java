@@ -25,6 +25,27 @@ public class EventResource {
         this.eventQueryService = eventQueryService;
     }
 
+    @RequestMapping(value = "/count/scoring", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the number of rows for the specified query")
+    public long getScoringCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+        return eventQueryService.getScoringCount(frontEndQuery);
+    }
+
+    @RequestMapping(value = "/count/training", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the number of rows for the specified query")
+    public long getTrainingCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+        return eventQueryService.getTrainingCount(frontEndQuery);
+    }
+
+    @RequestMapping(value = "/count/event", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the number of rows for the specified query")
+    public long getEventCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+        return eventQueryService.getEventCount(frontEndQuery);
+    }
+
     @RequestMapping(value = "/data/scoring", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")

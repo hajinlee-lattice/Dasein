@@ -17,6 +17,24 @@ public class EventProxy extends MicroserviceRestApiProxy implements EventInterfa
     }
 
     @Override
+    public long getScoringCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/event/count/scoring", shortenCustomerSpace(customerSpace));
+        return post("getScoringCount", url, frontEndQuery, Long.class);
+    }
+
+    @Override
+    public long getTrainingCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/event/count/training", shortenCustomerSpace(customerSpace));
+        return post("getTrainingCount", url, frontEndQuery, Long.class);
+    }
+
+    @Override
+    public long getEventCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/event/count/event", shortenCustomerSpace(customerSpace));
+        return post("getEventCount", url, frontEndQuery, Long.class);
+    }
+
+    @Override
     public DataPage getScoringTuples(String customerSpace, FrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/event/data/scoring", shortenCustomerSpace(customerSpace));
         return post("getScoringTuples", url, frontEndQuery, DataPage.class);
