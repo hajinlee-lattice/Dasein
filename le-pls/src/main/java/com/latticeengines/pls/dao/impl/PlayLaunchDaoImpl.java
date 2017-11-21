@@ -27,6 +27,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     protected Class<PlayLaunch> getEntityClass() {
         return PlayLaunch.class;
     }
+
     @SuppressWarnings("rawtypes")
     @Override
     public PlayLaunch findByLaunchId(String launchId) {
@@ -48,7 +49,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
         return (PlayLaunch) list.get(0);
     }
-	
+
     @SuppressWarnings("rawtypes")
     @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date created) {
@@ -72,7 +73,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
         return (PlayLaunch) list.get(0);
     }
-     
+
     @SuppressWarnings("unchecked")
     @Override
     public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
@@ -133,7 +134,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
         return null;
     }
-	
+
     @Override
     @SuppressWarnings("unchecked")
     public List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
@@ -241,15 +242,13 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
 
         if (sortNeeded) {
-            if (StringUtils.isBlank(sortby)) {
-                sortby = CREATED_COL;
-            } else if (sortby.trim().equalsIgnoreCase(CREATED_COL)) {
-                sortby = String.format("%s, %s ", sortby, CREATED_COL);
-            }
+            String sortDirection = descending ? "DESC" : "ASC";
 
-            queryStr += String.format( //
-                    " ORDER BY %s %s ", //
-                    sortby, descending ? "DESC" : "ASC");
+            if (StringUtils.isBlank(sortby) || sortby.trim().equalsIgnoreCase(CREATED_COL)) {
+                queryStr += String.format(" ORDER BY %s %s ", CREATED_COL, sortDirection);
+            } else {
+                queryStr += String.format(" ORDER BY %s %s, %s %s ", sortby, sortDirection, CREATED_COL, sortDirection);
+            }
         }
 
         if (StringUtils.isNotBlank(closingQueryStr)) {

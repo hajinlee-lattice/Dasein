@@ -351,8 +351,24 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, Long endTimestamp, long expectedCount) {
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "created",
+                true, expectedCount);
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "created",
+                false, expectedCount);
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, null, true,
+                expectedCount);
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, null, false,
+                expectedCount);
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "launchState",
+                true, expectedCount);
+        checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "launchState",
+                false, expectedCount);
+    }
+
+    private void checkForEntriesDashboardWithSortOrder(Long playId, List<LaunchState> states, Long startTimestamp,
+            Long offset, Long max, Long endTimestamp, String sortBy, boolean descending, long expectedCount) {
         List<LaunchSummary> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
-                offset, max, null, true, endTimestamp);
+                offset, max, sortBy, descending, endTimestamp);
         Assert.assertNotNull(dashboardEntries);
         Assert.assertEquals(dashboardEntries.size(), expectedCount);
 
@@ -371,6 +387,24 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                         Assert.assertNotNull(entry.getPlayName());
                         Assert.assertNotNull(entry.getSelectedBuckets());
                     });
+
+            if (descending) {
+                if (dashboardEntries.size() > 0) {
+                    Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
+                            offset == 0 ? playLaunch2.getId() : playLaunch1.getId());
+                }
+                if (dashboardEntries.size() > 1) {
+                    Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch1.getId());
+                }
+            } else {
+                if (dashboardEntries.size() > 0) {
+                    Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
+                            offset == 0 ? playLaunch1.getId() : playLaunch2.getId());
+                }
+                if (dashboardEntries.size() > 1) {
+                    Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch2.getId());
+                }
+            }
         }
     }
 
