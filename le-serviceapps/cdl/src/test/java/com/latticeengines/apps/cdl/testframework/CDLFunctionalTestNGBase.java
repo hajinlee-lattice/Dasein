@@ -40,15 +40,20 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected void setupTestEnvironmentWithDummySegment() {
         setupTestEnvironment();
-        testSegment = new MetadataSegment();
-        testSegment.setDisplayName(SEGMENT_NAME);
-        MetadataSegment createdSegment = segmentService
-                .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), testSegment);
-        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                createdSegment.getName());
-        Assert.assertNotNull(retrievedSegment);
-        log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
+        testSegment = createMetadataSegment(SEGMENT_NAME);
+        log.info(String.format("Created metadata segment with name %s", testSegment.getName()));
     }
+
+	protected MetadataSegment createMetadataSegment(String segmentName) {
+		MetadataSegment metadataSegment = new MetadataSegment();
+		metadataSegment.setDisplayName(segmentName);
+        metadataSegment = segmentService
+                .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), metadataSegment);
+        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+        		metadataSegment.getName());
+        Assert.assertNotNull(retrievedSegment);
+		return retrievedSegment;
+	}
 
     private void setupTestEnvironment() {
         testBed.bootstrap(1);

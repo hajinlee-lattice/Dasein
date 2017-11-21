@@ -13,11 +13,15 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -36,7 +40,8 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
         @Type(value = RuleBasedModel.class, name = "rule"), //
-        @Type(value = AImodel.class, name = "AI") })
+        @Type(value = AIModel.class, name = "AI") })
+@NamedEntityGraph(name = "RatingModel.ratingEngine", attributeNodes = @NamedAttributeNode("ratingEngine"))
 public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingFields {
 
     @Id
@@ -56,11 +61,13 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
     private Date created;
 
     @JsonProperty("updated")
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
     private Date updated;
 
     @JsonIgnore

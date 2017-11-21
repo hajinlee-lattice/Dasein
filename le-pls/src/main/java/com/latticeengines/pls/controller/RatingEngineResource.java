@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,8 +35,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.pls.service.RatingEngineNoteService;
-import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -49,9 +50,9 @@ public class RatingEngineResource {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineResource.class);
 
-    @Autowired
-    private RatingEngineService ratingEngineService;
-
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
+    
     @Autowired
     private RatingEngineDashboardService ratingEngineDashboardService;
 
@@ -70,14 +71,15 @@ public class RatingEngineResource {
     public List<RatingEngineSummary> getRatingEngineSummaries( //
             @RequestParam(value = "status", required = false) String status, //
             @RequestParam(value = "type", required = false) String type) {
-        return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(type, status);
+    	    Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type);
     }
 
     @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get types for Rating Engines")
     public List<RatingEngineType> getRatingEngineTypes() {
-        return Arrays.asList(RatingEngineType.values());
+    	    return Arrays.asList(RatingEngineType.values());
     }
 
     @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -87,7 +89,8 @@ public class RatingEngineResource {
             @PathVariable String ratingEngineId, //
             HttpServletRequest request, //
             HttpServletResponse response) {
-        return ratingEngineService.getRatingEngineById(ratingEngineId, true);
+    	    Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/entitypreview", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -105,7 +108,8 @@ public class RatingEngineResource {
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
             @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
-        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
+        RatingEngine ratingEngine = getRatingEngine(ratingEngineId, null, null);
+        
         descending = descending == null ? false : descending;
         restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
         return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
@@ -126,14 +130,7 @@ public class RatingEngineResource {
     @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
     public RatingEngine createRatingEngine(@RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            log.warn("Tenant is null for the request.");
-            return null;
-        }
-        if (ratingEngine == null) {
-            throw new NullPointerException("Rating Engine is null.");
-        }
-        return ratingEngineService.createOrUpdate(ratingEngine, tenant.getId());
+        return ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine);
     }
 
     @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -141,7 +138,8 @@ public class RatingEngineResource {
     @ApiOperation(value = "Delete a Rating Engine given its id")
     @PreAuthorize("hasRole('Edit_PLS_RatingEngines')")
     public Boolean deleteRatingEngine(@PathVariable String ratingEngineId) {
-        ratingEngineService.deleteById(ratingEngineId);
+    	    Tenant tenant = MultiTenantContext.getTenant();
+    	    ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId);
         return true;
     }
 
@@ -156,14 +154,16 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
     public Set<RatingModel> getRatingModels(@PathVariable String ratingEngineId) {
-        return ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
+    	    Tenant tenant = MultiTenantContext.getTenant();
+    	    return ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngineId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
     public RatingModel getRatingModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
-        return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
+    	    Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getRatingModel(tenant.getId(), ratingEngineId, ratingModelId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -171,7 +171,8 @@ public class RatingEngineResource {
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
     public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
-        return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
+    	    Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.GET)

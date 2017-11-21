@@ -38,7 +38,7 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.AImodelEntityMgrImpl.find*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.AIModelEntityMgrImpl.find*(..))")
     public void findAIModelMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }

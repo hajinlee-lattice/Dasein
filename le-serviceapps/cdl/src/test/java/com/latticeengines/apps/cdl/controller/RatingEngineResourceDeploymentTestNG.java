@@ -55,7 +55,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     public void setup() throws Exception {
         setupTestEnvironment();
 
-        MetadataSegment segment = constructSegment();
+        MetadataSegment segment = constructSegment(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
         Assert.assertNotNull(createdSegment);
         MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());

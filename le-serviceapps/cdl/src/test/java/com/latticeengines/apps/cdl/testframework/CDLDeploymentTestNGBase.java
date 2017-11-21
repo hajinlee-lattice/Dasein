@@ -71,7 +71,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         logger.info("Attached the proxy " + proxy.getClass().getSimpleName() + " to GA testbed.");
     }
 
-    protected MetadataSegment constructSegment() {
+    protected MetadataSegment constructSegment(String segmentName) {
         MetadataSegment segment = new MetadataSegment();
         Restriction accountRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "LDC_Name"),
                 Bucket.notNullBkt());
@@ -80,7 +80,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         Restriction contactRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
         segment.setContactRestriction(contactRestriction);
-        segment.setDisplayName(SEGMENT_NAME);
+        segment.setDisplayName(segmentName);
         return segment;
     }
 

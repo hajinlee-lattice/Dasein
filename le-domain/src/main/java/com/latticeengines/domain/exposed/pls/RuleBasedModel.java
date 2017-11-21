@@ -73,6 +73,6 @@ public class RuleBasedModel extends RatingModel {
     }
 
     public static String generateIdStr() {
-        return UuidUtils.shortenUuid(UUID.randomUUID());
+    	    return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
     }
 }

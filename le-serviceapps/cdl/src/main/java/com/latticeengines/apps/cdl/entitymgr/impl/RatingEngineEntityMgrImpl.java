@@ -26,6 +26,7 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -177,6 +178,16 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             ratingEngineDao.create(ratingEngine);
             break;
         case AI_BASED:
+        		
+        		AIModel aiModel = new AIModel();
+        		aiModel.setId(AIModel.generateIdStr());
+        		aiModel.setCreated(new Date());
+        		aiModel.setUpdated(new Date());
+        		ratingEngine.addRatingModel(aiModel);
+        		if (ratingEngine.getStatus() == null) {
+                ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
+            }
+            ratingEngineDao.create(ratingEngine);
             break;
         default:
             break;
@@ -188,14 +199,14 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         Set<String> usedAttributesSetInSegment = new HashSet<>();
 
         if (segment != null) {
-            traverseAndRastriction(usedAttributesSetInSegment, segment.getAccountRestriction());
-            traverseAndRastriction(usedAttributesSetInSegment, segment.getContactRestriction());
+            traverseAndRestriction(usedAttributesSetInSegment, segment.getAccountRestriction());
+            traverseAndRestriction(usedAttributesSetInSegment, segment.getContactRestriction());
         }
 
         return new ArrayList<>(usedAttributesSetInSegment);
     }
 
-    private void traverseAndRastriction(Set<String> usedAttributesInSegment, Restriction restriction) {
+    private void traverseAndRestriction(Set<String> usedAttributesInSegment, Restriction restriction) {
         if (restriction != null) {
             DepthFirstSearch search = new DepthFirstSearch();
             search.run(restriction, (object, ctx) -> {
