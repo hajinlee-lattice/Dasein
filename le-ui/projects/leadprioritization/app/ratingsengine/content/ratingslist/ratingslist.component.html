@@ -32,20 +32,20 @@
                         limitTo: pagesize"
                     data="rating"
                     ng-click="vm.tileClick($event, rating)"
-                    ng-mouseleave="vm.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
+                    ng-mouseleave="vm.current.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
                     ng-if="vm.current.ratings.length > 0"
-                    ng-class="{editing: vm.tileStates[rating.id].editRating}">
+                    ng-class="{editing: vm.current.tileStates[rating.id].editRating}">
 
-                    <div class="tile-header" ng-if="!vm.tileStates[rating.id].editRating">
+                    <div class="tile-header" ng-if="!vm.current.tileStates[rating.id].editRating">
                         <h2 title="{{rating.displayName}}">{{rating.displayName | limitTo: 27 }}{{rating.displayName.length > 27 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button
                                     type="button"
                                     ng-click="vm.customMenuClick($event, rating)"
-                                    ng-class="{ 'open': vm.tileStates[rating.id].showCustomMenu }">
-                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.tileStates[rating.id].showCustomMenu }"></span>
+                                    ng-class="{ 'open': vm.current.tileStates[rating.id].showCustomMenu }">
+                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.current.tileStates[rating.id].showCustomMenu }"></span>
                             </button>
-                            <ul class="model-menu" ng-show="vm.tileStates[rating.id].showCustomMenu">
+                            <ul class="model-menu" ng-show="vm.current.tileStates[rating.id].showCustomMenu">
                                 <li data-ng-click="vm.editStatusClick($event, rating, !vm.hasRules(rating))" ng-disabled="!vm.hasRules(rating)">
                                     <a href="javascript:void(0)">
                                         <span ng-if="rating.status === 'INACTIVE' && vm.hasRules(rating)">Activate</span>
@@ -70,7 +70,7 @@
                     </div><!-- End .tile-header -->
                     <div 
                         class="tile-metadata"
-                        ng-if="!vm.tileStates[rating.id].editRating">
+                        ng-if="!vm.current.tileStates[rating.id].editRating">
                         
                         <ul>
                             <li>Created by <span class="blue-text">{{rating.createdBy}}</span> on <span class="blue-text">{{rating.created | date}}</span></li>
@@ -88,7 +88,7 @@
                         </ul>
 
                     </div><!-- End .tile-metadata -->
-                    <div class="tile-body" ng-if="!vm.tileStates[rating.id].editRating">
+                    <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
 
                         <div ng-class="{'inactive': rating.status === 'INACTIVE'}">
                             <h4>Account Ratings</h4>
@@ -151,7 +151,7 @@
                     <form
                         class="edit-form"
                         name="editRatingForm"
-                        ng-if="vm.tileStates[rating.id].editRating"
+                        ng-if="vm.current.tileStates[rating.id].editRating"
                         ng-click="$event.stopPropagation()">
                         <div class="form-group">
                             
@@ -181,7 +181,7 @@
                             <button
                                 type="button"
                                 class="button blue-button pull-right"
-                                ng-disabled="vm.tileStates[rating.id].saveEnabled === false"
+                                ng-disabled="vm.current.tileStates[rating.id].saveEnabled === false"
                                 ng-click="vm.saveRatingClicked($event, rating)"
                                 ng-if="!vm.saveInProgress">
                                 Save</button>

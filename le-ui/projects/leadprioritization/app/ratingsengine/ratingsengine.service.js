@@ -7,6 +7,7 @@ angular.module('lp.ratingsengine')
     
     this.current = {
         ratings: [],
+        tileStates: {},
         bucketCountMap: {}
     };
 
@@ -318,13 +319,20 @@ angular.module('lp.ratingsengine')
     }
     
     this.setRatings = function(ratings, ignoreGetCoverage) {
+        
         this.current.ratings = ratings;
 
         if (!ignoreGetCoverage) {
             var ids = [];
-
+            RatingsEngineStore.current.tileStates = {};
             angular.forEach(ratings, function(rating) {
-                ids.push(rating.id);
+                var id = rating.id;
+                ids.push(id);
+                RatingsEngineStore.current.tileStates[id] = {
+                    showCustomMenu: false,
+                    editRating: false,
+                    saveEnabled: false
+                };
             });
 
             RatingsEngineStore.getChartDataConcurrently(ids.reverse());
