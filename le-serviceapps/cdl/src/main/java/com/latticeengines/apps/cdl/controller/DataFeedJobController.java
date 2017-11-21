@@ -34,7 +34,7 @@ public class DataFeedJobController {
 
     @RequestMapping(value = "/createprofilejob", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create a CDLJobDetail")
+    @ApiOperation(value = "Create a CDLJobDetail and launch profile workflow.")
     public ResponseDocument<String> createProfileJob(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId id = cdlJobService.createProfileJob(customerSpace);

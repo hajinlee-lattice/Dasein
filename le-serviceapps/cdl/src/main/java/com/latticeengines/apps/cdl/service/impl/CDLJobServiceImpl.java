@@ -278,13 +278,22 @@ public class CDLJobServiceImpl implements CDLJobService {
         CDLJobDetail consolidate = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.CONSOLIDATE);
         CDLJobDetail profile = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROFILE);
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
-        if (dataFeed == null || (dataFeed != null && !dataFeed.getStatus().isAllowConsolidation())
-                || (consolidate != null && consolidate.isRunning())
-                || (profile != null && profile.isRunning())) {
-            throw new RuntimeException("Current consolidate or profile job is running");
+        if (dataFeed == null) {
+            throw new RuntimeException("DataFeed is null!");
+        } else if (dataFeed != null && !dataFeed.getStatus().isAllowConsolidation()) {
+            throw new RuntimeException("Datafeed status is not allow to consolidate!");
+        } else if (consolidate != null && consolidate.isRunning()) {
+            throw new RuntimeException("Consolidate job is running!");
+        } else if (profile != null && profile.isRunning()) {
+            throw new RuntimeException("Profile job is running!");
         }
-        ApplicationId id = cdlProxy.consolidateManually(customerSpace);
         CDLJobDetail entity = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.CONSOLIDATE, tenant);
+        ApplicationId id = null;
+        try {
+            id = cdlProxy.consolidateManually(customerSpace);
+        } catch (Exception e) {
+            cdlJobDetailEntityMgr.delete(entity);
+        }
         entity.setApplicationId(id.toString());
         cdlJobDetailEntityMgr.update(entity);
         return id;
@@ -296,12 +305,20 @@ public class CDLJobServiceImpl implements CDLJobService {
         Tenant tenant = MultiTenantContext.getTenant();
         CDLJobDetail profile = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROFILE);
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
-        if (dataFeed == null || (dataFeed != null && !dataFeed.getStatus().isAllowProfile())
-                || (profile != null && profile.isRunning())) {
-            throw new RuntimeException("Current consolidate or profile job is running");
+        if (dataFeed == null) {
+            throw new RuntimeException("DataFeed is null!");
+        } else if (dataFeed != null && !dataFeed.getStatus().isAllowProfile()) {
+            throw new RuntimeException("Datafeed status is not allow to profile!");
+        } else if (profile != null && profile.isRunning()) {
+            throw new RuntimeException("Profile job is running!");
         }
-        ApplicationId id = cdlProxy.profile(customerSpace);
         CDLJobDetail entity = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROFILE, tenant);
+        ApplicationId id = null;
+        try {
+            id = cdlProxy.profile(customerSpace);
+        } catch (Exception e) {
+            cdlJobDetailEntityMgr.delete(entity);
+        }
         entity.setApplicationId(id.toString());
         cdlJobDetailEntityMgr.update(entity);
         return id;

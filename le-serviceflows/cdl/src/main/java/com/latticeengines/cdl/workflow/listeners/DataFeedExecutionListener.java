@@ -76,7 +76,7 @@ public class DataFeedExecutionListener extends LEJobListener {
                 try {
                     cdlJobProxy.createProfileJob(customerSpace);
                 } catch (Exception e) {
-                    log.error("profile error!");
+                    log.error("profile error: " + e.getMessage());
                 }
             }
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
