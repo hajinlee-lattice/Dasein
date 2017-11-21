@@ -178,9 +178,9 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
                 notNullLdcDomain++;
             }
         }
-        Assert.assertTrue(notNullLdcDomain.doubleValue() / count.doubleValue() > 0.9, String.format(
+        Assert.assertTrue(notNullLdcDomain.doubleValue() / count.doubleValue() > 0.70, String.format(
                 "Only %.2f %% records has LDC_Domain", 100 * notNullLdcDomain.doubleValue() / count.doubleValue()));
-        Assert.assertTrue(notNullLdcName.doubleValue() / count.doubleValue() > 0.9, String
+        Assert.assertTrue(notNullLdcName.doubleValue() / count.doubleValue() > 0.70, String
                 .format("Only %.2f %% records has LDC_Name", 100 * notNullLdcName.doubleValue() / count.doubleValue()));
     }
 
