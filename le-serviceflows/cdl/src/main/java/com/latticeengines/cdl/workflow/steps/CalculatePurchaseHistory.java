@@ -420,10 +420,11 @@ public class CalculatePurchaseHistory extends ProfileStepBase<CalculatePurchaseH
 
         periods.add(NamedPeriod.HASEVER.getName());
         metrics.add(TransactionMetrics.PURCHASED.getName());
-        periods.add(NamedPeriod.LASTQUARTER.getName());
-        metrics.add(TransactionMetrics.QUANTITY.getName());
-        periods.add(NamedPeriod.LASTQUARTER.getName());
-        metrics.add(TransactionMetrics.AMOUNT.getName());
+        // TODO: do not support quarter in M16
+//        periods.add(NamedPeriod.LASTQUARTER.getName());
+//        metrics.add(TransactionMetrics.QUANTITY.getName());
+//        periods.add(NamedPeriod.LASTQUARTER.getName());
+//        metrics.add(TransactionMetrics.AMOUNT.getName());
         conf.setPeriods(periods);
         conf.setMetrics(metrics);
 
