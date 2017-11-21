@@ -254,11 +254,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                         if (testTime > 0 && (System.currentTimeMillis() - testTime) > redshiftCleanupThreshold) {
                             log.info("Dropping redshift table " + table);
                             redshiftService.dropTable(table);
-                        } else if (testTime <= 0) {
-                            log.warn("Cannot parse timestamp from tenant name " + tenant);
                         }
-                    } else {
-                        log.warn("Tenant name " + tenant + " does not match test tenant format");
                     }
                 }
             }

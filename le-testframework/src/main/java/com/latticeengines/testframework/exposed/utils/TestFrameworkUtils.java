@@ -3,7 +3,6 @@ package com.latticeengines.testframework.exposed.utils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +38,7 @@ public class TestFrameworkUtils {
     public static final String LP3_TENANT_REG_PREFIX = "lp3";
 
     public static final String TENANTID_PREFIX = "LETest";
-    public static final Set<String> TENANTID_PREFIXES = new HashSet<>(Arrays.asList("LETest", "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG"));
+    public static final Set<String> TENANTID_PREFIXES = new HashSet<>(Arrays.asList("LETest", "letest", "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG"));
     public static final String MODEL_PREFIX = "LETestModel";
 
     public static String usernameForAccessLevel(AccessLevel accessLevel) {
