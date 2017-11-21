@@ -1,10 +1,13 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, $stateParams, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
+.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
     var PlaybookWizardStore = this;
     
     this.current = {
-        plays: []
+        plays: [],
+        tileStates: {}
+
     };
+    this.checkLaunchState = {};
 
     this.init = function() {
         this.settings = {};
@@ -66,6 +69,48 @@ angular.module('lp.playbook')
 
     this.setPlays = function(plays) {
         this.current.plays = plays;
+        PlaybookWizardStore.current.tileStates = {};
+        angular.forEach(plays, function(play) {
+            var name = play.name;
+            PlaybookWizardStore.current.tileStates[name] = {
+                showCustomMenu: false,
+                editRating: false,
+                saveEnabled: false
+            };
+
+            if(play.launchHistory.mostRecentLaunch != null && play.launchHistory.mostRecentLaunch.launchState === 'Launching'){
+                PlaybookWizardStore.current.tileStates[play.name].launching = true;
+                PlaybookWizardStore.checkLaunchStateInterval(play);
+            }
+
+            if(play.segment != null) {
+                play.hasSegment = true;
+            };
+        });
+    }
+
+    this.checkLaunchStateInterval = function(play){
+        PlaybookWizardStore.checkLaunchState[play.name] = $interval(function() {
+            PlaybookWizardStore.getPlayLaunches(play.name).then(function(result) {
+                if(result.errorCode) {
+                    $interval.cancel(checkLaunchState[play.name]);
+                } else if(result && result[0]) {
+                    if(result[0].launchState === 'Launched' || result[0].launchState === 'Failed') {
+                        $interval.cancel(checkLaunchState[play.name]);
+                        play.launchHistory.mostRecentLaunch.launchState = result[0].launchState;
+                        PlaybookWizardStore.current.tileStates[play.name].launching == false;
+                    }
+                } 
+            });
+        }, 10 * 1000);
+    }
+    
+    this.cancelCheckLunch = function(){
+        for(var i in PlaybookWizardStore.checkLaunchState) {
+            $interval.cancel(PlaybookWizardStore.checkLaunchState[i]);
+        }
+        PlaybookWizardStore.checkLaunchState = {};
+
     }
 
     this.setSettings = function(obj) {
@@ -76,6 +121,9 @@ angular.module('lp.playbook')
             this.settings[key] = value;
         }
     }
+    
+    
+
 
     this.nextSaveGeneric = function(nextState) {
         var changed = false,
@@ -236,12 +284,24 @@ angular.module('lp.playbook')
         var ClientSession = BrowserStorageUtility.getClientSession();
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
         PlaybookWizardService.savePlay(opts).then(function(data){
-            deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
+            deferred.resolve(data);
         });
         return deferred.promise;
     }
 
+    this.deletePlay = function(playName){
+        var deferred = $q.defer();
+
+        PlaybookWizardService.deletePlay(playName).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        this.setPlays(this.current.plays.filter(function(play) { 
+            return play.name != playName;
+        }));
+        return deferred.promise;
+    }
     this.getPlayLaunches = function(params) {
         var deferred = $q.defer();
         if(this.playLaunches) {

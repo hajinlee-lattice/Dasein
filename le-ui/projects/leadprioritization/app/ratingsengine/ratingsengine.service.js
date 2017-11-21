@@ -72,7 +72,7 @@ angular.module('lp.ratingsengine')
                     state: 'segment', 
                     nextLabel: 'Next', 
                     nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveRatingEngine(nextState);
+                        RatingsEngineStore.nextSaveRatingEngineAI(nextState);
                     } 
                 },
                 { 
@@ -209,6 +209,19 @@ angular.module('lp.ratingsengine')
             opts = RatingsEngineStore.settings;
         
         $state.go(nextState, { rating_id: $stateParams.rating_id });
+    }
+
+    this.nextSaveRatingEngineAI = function(nextState){
+        var currentRating = RatingsEngineStore.getCurrentRating();
+        var opts =  {
+            type: currentRating.type || 'AI_BASED',
+           
+        };
+        console.log("save engine", opts);
+        RatingsEngineStore.saveRating(opts).then(function(rating) {
+            $state.go(nextState, { rating_id: currentRating.id });
+        });
+       
     }
 
     this.nextSaveRatingEngine = function(nextState) {

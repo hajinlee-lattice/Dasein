@@ -10,8 +10,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
     angular.extend(vm, {
         current: PlaybookWizardStore.current,
-        totalLength: PlaybookWizardStore.current.plays.length,
-        tileStates: {},
+        inEditing: {},
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility,
         lockLaunching: false,
@@ -31,9 +30,10 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
             filter: {
                 label: 'Filter By',
                 unfiltered: PlaybookWizardStore.current.plays,
-                filtered: PlaybookWizardStore.current.plays,
+                filtered: PlaybookWizardStore.current,
                 items: [
-                    { label: "All", action: { }, total: vm.totalLength },
+                    { label: "All", action: { }, total: PlaybookWizardStore.current.plays.length
+                    },
                     { 
                         label: "Draft", 
                         action: { 
@@ -62,58 +62,8 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         }
     });
 
-    var checkLaunchState = {};
-    vm.checkLaunchStateInterval = function(play){
-        checkLaunchState[play.name] = $interval(function() {
-            PlaybookWizardStore.getPlayLaunches(play.name).then(function(result) {
-                if(result.errorCode) {
-                    $interval.cancel(checkLaunchState[play.name]);
-                } else if(result && result[0]) {
-                    if(result[0].launchState === 'Launched' || result[0].launchState === 'Failed') {
-                        $interval.cancel(checkLaunchState[play.name]);
-                        play.launchHistory.mostRecentLaunch.launchState = result[0].launchState;
-                        vm.tileStates[play.name].launching == false;
-                    }
-                } 
-
-                // var result = results[0];
-                // vm.launchHistory = results;
-                // vm.launchedState = (result && result.launchState ? result.launchState : null);
-
-                // vm.launchButton = PlaybookWizardStore.launchButton(play, vm.launchedState);
-                // if(vm.launchedState === 'Launched' || vm.launchedState === 'Failed') {
-                //     $interval.cancel(checkLaunchState);
-                //     vm.showLaunchSpinner = false;
-                // }
-
-            });
-        }, 10 * 1000);
-
-    };
 
     vm.init = function($q) {
-
-
-        // console.log(vm.plays);
-
-        angular.forEach(vm.current.plays, function(play) {
-
-            vm.tileStates[play.name] = {
-                showCustomMenu: false,
-                editPlay: false,
-                launching: false,
-                saveEnabled: false
-            };
-
-            if(play.launchHistory.mostRecentLaunch != null && play.launchHistory.mostRecentLaunch.launchState === 'Launching'){
-                vm.tileStates[play.name].launching = true;
-                vm.checkLaunchStateInterval(play);
-            }
-
-            if(play.segment != null) {
-                play.hasSegment = true;
-            };
-        });
         PlaybookWizardStore.clear();
     }
 
@@ -125,7 +75,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
             $event.stopPropagation();
         }
 
-        var tileState = vm.tileStates[play.name];
+        var tileState = vm.current.tileStates[play.name];
         tileState.showCustomMenu = !tileState.showCustomMenu
 
         if (tileState.showCustomMenu) {
@@ -158,14 +108,14 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
     var oldPlayDisplayName = '';
     vm.editPlayClick = function($event, play){
         $event.stopPropagation();
-
-        var tileState = vm.tileStates[play.name];
+        vm.inEditing = angular.copy(play);
+        var tileState = vm.current.tileStates[play.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editPlay = !tileState.editPlay;
     };
 
     vm.nameChanged = function(play){
-        var tileState = vm.tileStates[play.name];
+        var tileState = vm.current.tileStates[play.name];
         if(play.displayName.length > 0) {
             tileState.saveEnabled = true;
         } else {
@@ -176,20 +126,21 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
     vm.cancelEditPlayClicked = function($event, play) {
         $event.stopPropagation();
 
-        var tileState = vm.tileStates[play.name];
+        var tileState = vm.current.tileStates[play.name];
         tileState.editPlay = !tileState.editPlay;
+        play.displayName = vm.inEditing.displayName || play.displayName;
+        vm.inEditing = {};
     };
 
     vm.savePlayClicked = function($event, play) {
-        $event.stopPropagation();
-
-        vm.saveInProgress = true;
-
+     
+        var updatedPlayName = play.displayName;
         var updatedPlay = {
             name: play.name,
-            displayName: play.displayName
+            displayName: updatedPlayName //save updated rating name
         }
 
+        vm.saveInProgress = true;
         updatePlay(updatedPlay);
     };
 
@@ -197,13 +148,11 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         vm.lockLaunching = false;
         $event.stopPropagation();
 
-        var tileState = vm.tileStates[play.name];
+        var tileState = vm.current.tileStates[play.name];
         tileState.launching = !tileState.launching;
 
         PlaybookWizardStore.launchPlay(play).then(function(data) {
             vm.lockLaunching = false;
-            //PlaybookWizardStore.clear();
-            //$state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
 
     }
@@ -218,22 +167,24 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
     };
 
     function updatePlay(updatedPlay) {
-
         PlaybookWizardService.savePlay(updatedPlay).then(function(result) {
-            vm.saveInProgress = true;
-            $timeout( function(){
-                $state.go('home.playbook.plays', {}, { reload: true} );
-            }, 100 );
+            vm.saveInProgress = false;
+            vm.current.tileStates[updatedPlay.name].editPlay = false;
+            vm.inEditing = {};
         });
+
+        // PlaybookWizardService.savePlay(updatedPlay).then(function(result) {
+        //     vm.saveInProgress = true;
+        //     $timeout( function(){
+        //         $state.go('home.playbook.plays', {}, { reload: true} );
+        //     }, 100 );
+        // });
 
     }
 
     $scope.$on('$destroy', function() {
         onpage = false;
-        for(var i in checkLaunchState) {
-            $interval.cancel(checkLaunchState[i]);
-        }
-        checkLaunchState = {};
+        PlaybookWizardStore.cancelCheckLunch();
     });
 
     

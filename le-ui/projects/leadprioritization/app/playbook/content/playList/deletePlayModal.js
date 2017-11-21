@@ -28,7 +28,7 @@ angular.module('mainApp.playbook.content.playList.deletePlayModal', [
         });
     };
 })
-.controller('DeletePlayController', function ($scope, $rootScope, $timeout, $state, ResourceUtility, NavUtility, PlaybookWizardService) {
+.controller('DeletePlayController', function ($scope, $rootScope, $timeout, $state, ResourceUtility, NavUtility, PlaybookWizardStore) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.deletePlayClick = function ($event) {
@@ -42,13 +42,8 @@ angular.module('mainApp.playbook.content.playList.deletePlayModal', [
     function deletePlay(playName) {
         $("#deletePlayError").hide();
 
-        PlaybookWizardService.deletePlay(playName).then(function(result) {
-            
-            $timeout( function(){
-                $("#modalContainer").modal('hide');
-                $state.go('home.playbook.plays', {}, { reload: true } );
-            }, 100 );
-
+        PlaybookWizardStore.deletePlay(playName).then(function(result) {
+            $("#modalContainer").modal('hide');
         });
     }
 
