@@ -5,8 +5,8 @@ import java.util.Map;
 
 public enum ModelWorkflowType {
 
-	ADEFAULT("List"), 
-	CROSS_SELL("Corss-Sell"),
+	ADEFAULT("ListBased"), 
+	CROSS_SELL("Cross-Sell"),
 	UP_SELL("Up-Sell"),
 	PROSPECTING("Prospecting"),
 	RENEWAL("Renewal");

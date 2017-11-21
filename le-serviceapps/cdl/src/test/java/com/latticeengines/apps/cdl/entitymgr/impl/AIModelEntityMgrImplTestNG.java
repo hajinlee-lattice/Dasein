@@ -83,7 +83,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         
         // update aiModel by updating its selected attributes and rules
         aiModel.setWorkflowType(ModelWorkflowType.CROSS_SELL);
-        aiModel.setSelectedProducts(generateSeletedProducts());
+        aiModel.setTargetProducts(generateSeletedProducts());
         aiModelEntityMgr.createOrUpdate(aiModel);
         aiModelList = aiModelEntityMgr.findByRatingEngineId(ratingEngineId, null);
         Assert.assertNotNull(aiModelList);
@@ -128,9 +128,9 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(aiModel.getRatingEngine());
         Assert.assertEquals(aiModel.getRatingEngine().getId(), ratingEngineId);
 
-        Assert.assertNotNull(aiModel.getSelectedProducts());
-        Assert.assertTrue(aiModel.getSelectedProducts().contains(PRODUCT_ID1));
-        Assert.assertTrue(aiModel.getSelectedProducts().contains(PRODUCT_ID2));
+        Assert.assertNotNull(aiModel.getTargetProducts());
+        Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID1));
+        Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID2));
     }
     
     private void assertUpdatedModelWithTrainingData(AIModel aiModel) {
@@ -148,7 +148,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(1, aiModel.getIteration());
         Assert.assertNotNull(aiModel.getRatingEngine());
         
-        Assert.assertNull(aiModel.getSelectedProducts());
+        Assert.assertNull(aiModel.getTargetProducts());
     }
     
     private List<String> generateSeletedProducts() {

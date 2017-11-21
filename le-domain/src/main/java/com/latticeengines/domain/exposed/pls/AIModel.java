@@ -37,9 +37,9 @@ public class AIModel extends RatingModel {
     public static final String AI_MODEL_FORMAT = "%s__%s";
 
     @JsonIgnore
-    @Column(name = "SELECTED_PRODUCTS")
+    @Column(name = "TARGET_PRODUCTS", length=10000)
     @Type(type = "text")
-    private String selectedProducts;
+    private String targetProducts;
     
     @Column(name = "MODELING_METHOD")
     @Enumerated(EnumType.STRING)
@@ -66,19 +66,19 @@ public class AIModel extends RatingModel {
     private ModelSummary modelSummary;
 
 
-    @JsonProperty("selectedProducts")
-	public List<String> getSelectedProducts() {
+    @JsonProperty("targetProducts")
+	public List<String> getTargetProducts() {
     		List<String> productList = null;
-        if (StringUtils.isNotBlank(this.selectedProducts)) {
-            List<?> attrListIntermediate = JsonUtils.deserialize(this.selectedProducts, List.class);
+        if (StringUtils.isNotBlank(this.targetProducts)) {
+            List<?> attrListIntermediate = JsonUtils.deserialize(this.targetProducts, List.class);
             productList = JsonUtils.convertList(attrListIntermediate, String.class);
         }
         return productList;
 	}
 
-    @JsonProperty("selectedProducts")
-	public void setSelectedProducts(List<String> selectedProducts) {
-		this.selectedProducts = JsonUtils.serialize(selectedProducts);;
+    @JsonProperty("targetProducts")
+	public void setTargetProducts(List<String> targetProducts) {
+		this.targetProducts = JsonUtils.serialize(targetProducts);;
 	}
 	
     public void setModel(ModelSummary modelSummary) {
