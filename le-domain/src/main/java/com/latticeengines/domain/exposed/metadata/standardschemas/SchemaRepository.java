@@ -11,6 +11,7 @@ import org.joda.time.DateTime;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -1020,7 +1021,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Website) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .build();
 
@@ -1032,7 +1032,6 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_EMAIL) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build();
         Attribute city = attr("City") //
                 .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING CITY")) //
@@ -1040,7 +1039,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.City) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
         Attribute state = attr("State") //
                 .allowedDisplayNames(Sets.newHashSet("STATE", "STATE PROVINCE", "BILLING STATE", "BILLING PROVINCE")) //
@@ -1048,7 +1046,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
         Attribute country = attr("Country") //
                 .allowedDisplayNames(Sets.newHashSet("COUNTRY", "BILLING COUNTRY")) //
@@ -1056,7 +1053,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Country) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
         Attribute postalCode = attr("PostalCode") //
                 .allowedDisplayNames(Sets.newHashSet("POSTALCODE", "BILLING ZIP", "POSTAL CODE")) //
@@ -1064,7 +1060,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
 
         Attribute contactCompanyName = attr(InterfaceName.CompanyName.name()) //
@@ -1073,7 +1068,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
 
         Attribute accountCompanyName = attr(InterfaceName.CompanyName.name()) //
@@ -1082,7 +1076,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
 
         Attribute phoneNumber = attr("PhoneNumber") //
@@ -1091,7 +1084,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
 
         Attribute duns = attr("DUNS") //
@@ -1100,17 +1092,19 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.DUNS) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build();
         List<Attribute> attrs = new ArrayList<>();
         if (schema == SchemaInterpretation.Account || schema == SchemaInterpretation.SalesforceAccount) {
             attrs.add(website);
             attrs.add(accountCompanyName);
+            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
+            attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
         } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead) {
             attrs.add(email);
             attrs.add(contactCompanyName);
+            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
+            attrs.forEach(a -> a.setCategory(Category.LEAD_INFORMATION));
         }
-        attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
         return attrs;
     }
 

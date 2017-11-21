@@ -97,10 +97,14 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
         SchemaInterpretation schemaInterpretation = getSchemaInterpretation(modelId);
+        List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
+        List<Attribute> matchingAttributes = SchemaRepository.instance()
+                .getMatchingAttributes(getSchemaInterpretation(modelId));
 
-        FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
-        fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
-        fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
+        Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
+
+        FieldMappingDocument fieldMappingDocument = getFieldMapping(scoringHeaderFields, requiredAttributes,
+                matchingAttributes);
 
         fieldMappingDocument.getRequiredFields().add(InterfaceName.Id.name());
         if (!modelSummary.getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.ExcludePropdataColumns)
@@ -110,10 +114,15 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             schemaInterpretation.apply(function);
         }
 
-        Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
-        List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
-        List<Attribute> matchingAttributes = SchemaRepository.instance()
-                .getMatchingAttributes(getSchemaInterpretation(modelId));
+        return fieldMappingDocument;
+    }
+
+    @VisibleForTesting
+    FieldMappingDocument getFieldMapping(Set<String> scoringHeaderFields, List<Attribute> requiredAttributes,
+            List<Attribute> matchingAttributes) {
+        FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
+        fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
+        fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
         matchingAttributes.removeIf(matchingAttr -> requiredAttributes.stream()
                 .anyMatch(requiredAttr -> requiredAttr.getInterfaceName() == matchingAttr.getInterfaceName()));
         requiredAttributes.addAll(matchingAttributes);
@@ -153,7 +162,6 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             fieldMapping.setFieldType(UserDefinedType.TEXT);
             fieldMappingDocument.getFieldMappings().add(fieldMapping);
         }
-
         return fieldMappingDocument;
     }
 

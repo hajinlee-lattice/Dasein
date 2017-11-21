@@ -70,7 +70,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             "rtsBulkScoreWorkflow", //
             "scoreWorkflow");
 
-    private static Set<ReportPurpose> reports = Sets.newHashSet( //
+    private static Set<ReportPurpose> reportsPurposes = Sets.newHashSet( //
             ReportPurpose.IMPORT_DATA_SUMMARY, //
             ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY, //
             ReportPurpose.PUBLISH_DATA_SUMMARY);
@@ -269,7 +269,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
                 fieldMap.put(step.getJobStepType() + "Sec", elapsedSec);
             }
             List<Report> reports = job.getReports();
-            reports.stream().filter(reports::contains)
+            reports.stream().filter(r -> reportsPurposes.contains(r.getPurpose()))
                     .map(r -> JsonUtils.deserialize(r.getJson().getPayload(), new TypeReference<Map<String, Object>>() {
                     })).filter(Objects::nonNull).forEach(fieldMap::putAll);
         }
