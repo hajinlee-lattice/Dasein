@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -35,6 +36,7 @@ import com.latticeengines.objectapi.util.AccountQueryDecorator;
 import com.latticeengines.objectapi.util.ContactQueryDecorator;
 import com.latticeengines.objectapi.util.ProductQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
+import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -53,9 +55,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     @Override
     public long getCount(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        QueryTranslator queryTranslator = new QueryTranslator(
-                queryEvaluatorService.getQueryFactory(),
-                queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
+        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
         query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         return queryEvaluatorService.getCount(customerSpace.toString(), query);
@@ -64,9 +65,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     @Override
     public DataPage getData(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        QueryTranslator queryTranslator = new QueryTranslator(
-                queryEvaluatorService.getQueryFactory(),
-                queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
+        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));

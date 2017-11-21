@@ -4,11 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.objectapi.service.EventQueryService;
+import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -53,18 +55,17 @@ public class EventQueryServiceImpl implements EventQueryService {
         return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event);
     }
 
+
     private long getCount(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, EventType eventType) {
-        QueryTranslator queryTranslator = new QueryTranslator(
-                queryEvaluatorService.getQueryFactory(),
-                queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
+        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
         return queryEvaluatorService.getCount(customerSpace.toString(), query);
     }
 
     private DataPage getData(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, EventType eventType) {
-        QueryTranslator queryTranslator = new QueryTranslator(
-                queryEvaluatorService.getQueryFactory(),
-                queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
+        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
         return queryEvaluatorService.getData(customerSpace.toString(), query);
     }

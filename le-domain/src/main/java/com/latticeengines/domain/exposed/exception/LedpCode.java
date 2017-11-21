@@ -620,6 +620,7 @@ public enum LedpCode {
     LEDP_37012("Failed to retrieve data from {0}"), //
     LEDP_37013("Could not find data collection of type {0}"), //
     LEDP_37014("Could not find the default data collection"), //
+    LEDP_37015("Could not find the attribute repository for tenant {0}. Make sure data profiling is done for the tenant."), //
 
     // le-dante
     LEDP_38001("Could not find Talking point with name {0}"), //

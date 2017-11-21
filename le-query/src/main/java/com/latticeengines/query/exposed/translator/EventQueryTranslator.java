@@ -1,5 +1,6 @@
 package com.latticeengines.query.exposed.translator;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
@@ -117,13 +118,11 @@ public class EventQueryTranslator {
     }
 
     protected String getPeriodTransactionTableName(AttributeRepository repository) {
-        // todo, need to change this when new period transaction is defined
-        return repository.getTableName(AggregatedTransaction);
+        return repository.getTableName(AggregatedPeriodTransaction);
     }
 
-    // todo, need to change this when new period transaction is defined
-    private BusinessEntity getPeriodTransaction() {
-        return BusinessEntity.Transaction;
+    protected BusinessEntity getPeriodTransaction() {
+        return BusinessEntity.PeriodTransaction;
     }
 
     @SuppressWarnings({"unchecked", "rawtype"})
@@ -623,7 +622,8 @@ public class EventQueryTranslator {
                     childSubQueryList.add(subQuery.getAlias());
                 } else if (object instanceof ConcreteRestriction) {
                     ConcreteRestriction concreteRestriction = (ConcreteRestriction) object;
-                    SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction, isScoring);
+                    SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction,
+                                                                     isScoring);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     List<String> childSubQueryList = subQueryTableMap.get(parent);

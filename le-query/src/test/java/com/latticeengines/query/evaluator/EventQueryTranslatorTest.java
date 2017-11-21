@@ -27,6 +27,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         protected String getPeriodTransactionTableName(AttributeRepository repository) {
             return "tftest_4_transaction_2017_10_31_19_44_08_utc";
         }
+
+        @Override
+        protected BusinessEntity getPeriodTransaction() {
+            return BusinessEntity.Transaction;
+        }
     }
 
     private EventQueryTranslator getEventQueryTranslator() {
