@@ -65,7 +65,12 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         if (responseDoc == null) {
             return null;
         }
-        return responseDoc.getResult();
+        if (responseDoc.isSuccess()) {
+            return responseDoc.getResult();
+        } else {
+            throw new RuntimeException("Failed to create data feed task: " +
+                    StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -76,8 +81,13 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException("Failed to submit import job: " +
+                    StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 
 

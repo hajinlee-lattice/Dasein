@@ -41,6 +41,9 @@ public class CDLImportServiceImpl implements CDLImportService {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         SourceFile templateSourceFile = getSourceFile(templateFileName);
         SourceFile dataSourceFile = getSourceFile(dataFileName);
+        if (StringUtils.isEmpty(templateSourceFile.getTableName())) {
+            throw new RuntimeException(String.format("Source file %s doesn't have a table template!", templateFileName));
+        }
         importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         importConfig.setTemplateName(templateSourceFile.getTableName());
         importConfig.setFilePath(dataSourceFile.getPath());
