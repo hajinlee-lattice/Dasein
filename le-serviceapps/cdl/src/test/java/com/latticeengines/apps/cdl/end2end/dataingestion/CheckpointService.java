@@ -65,7 +65,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "6";
+    private static final String S3_CHECKPOINTS_VERSION = "7";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 300;
@@ -167,10 +167,11 @@ public class CheckpointService {
         unzipCheckpoint(checkpoint);
 
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
+        String[] tenantNames = new String[1];
 
         for (DataCollection.Version version : DataCollection.Version.values()) {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                Table table = parseCheckpointTable(checkpoint, role.name(), version);
+                Table table = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
                 if (table != null) {
                     metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                     dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
@@ -185,7 +186,6 @@ public class CheckpointService {
         uploadCheckpointHdfs(checkpoint);
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
-
         resumeDbState();
 
         DataCollection.Version activeVersion = getCheckpointVersion(checkpoint);
@@ -213,6 +213,7 @@ public class CheckpointService {
         if (table == null) {
             Assert.fail("Cannot find table in role " + role);
         }
+        logger.info("countRole " + role.name() + " Table " + table.getName() + " Path " + table.getExtracts().get(0).getPath());
         return table.getExtracts().get(0).getProcessedRecords();
     }
 
@@ -278,10 +279,13 @@ public class CheckpointService {
         return DataCollection.Version.valueOf(version);
     }
 
-    private Table parseCheckpointTable(String checkpoint, String tableName, DataCollection.Version version)
+    private Table parseCheckpointTable(String checkpoint, String tableName, DataCollection.Version version, String[] tenantNames)
             throws IOException {
+
+        logger.info("Parse check point " + checkpoint + " table " + tableName + "version" + version.name());
         String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
                 tableName);
+        logger.info("Parse check point file path" + jsonFilePath);
         File jsonFile = new File(jsonFilePath);
         if (!jsonFile.exists()) {
             return null;
@@ -289,19 +293,21 @@ public class CheckpointService {
 
         JsonNode json = om.readTree(jsonFile);
         String hdfsPath = json.get("extracts_directory").asText();
+        logger.info("Parse extract path" + hdfsPath);
         Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
         Matcher matcher = pattern.matcher(hdfsPath);
-        String tenantName;
-        if (matcher.find()) {
-            tenantName = matcher.group(1);
-            logger.info("Found tenant name " + tenantName + " in json.");
-        } else {
-            throw new IOException("Cannot parse a tenant name from json");
-        }
-
         String str = JsonUtils.serialize(json);
         str = str.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
-        str = str.replaceAll(tenantName, CustomerSpace.parse(mainTestTenant.getId()).getTenantId());
+        if (matcher.find()) {
+            tenantNames[0] = matcher.group(1);
+            logger.info("Found tenant name " + tenantNames[0] + " in json.");
+        } else {
+            logger.info("Cannot find tenant for " + tenantNames[0]);
+        }
+
+        if (tenantNames[0] != null) {
+            str = str.replaceAll(tenantNames[0], CustomerSpace.parse(mainTestTenant.getId()).getTenantId());
+        }
 
         return JsonUtils.deserialize(str, Table.class);
     }

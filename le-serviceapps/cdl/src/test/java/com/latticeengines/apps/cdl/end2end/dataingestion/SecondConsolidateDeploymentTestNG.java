@@ -17,7 +17,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -25,15 +27,24 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
 public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(SecondConsolidateDeploymentTestNG.class);
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private YarnConfiguration yarnConfiguration;
 
     private StatisticsContainer preConsolidateStats;
     private RatingEngine ratingEngine;
@@ -69,6 +80,10 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
 
         preConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
+        dataFeedProxy.rebuildTransaction(mainTestTenant.getId(), Boolean.FALSE);
+        Table rawTable = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.ConsolidatedRawTransaction);
+        Integer earliestDayPeriod = TimeSeriesUtils.getEarliestPeriod(yarnConfiguration, rawTable);
+        dataFeedProxy.updateEarliestTransaction(mainTestTenant.getId(), earliestDayPeriod);
 
         importData();
         consolidate();

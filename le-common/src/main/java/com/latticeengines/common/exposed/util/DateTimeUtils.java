@@ -62,4 +62,26 @@ public class DateTimeUtils {
         return result;
     }
 
+    public static Integer dateToDayPeriod(String dateString) {
+        String[] dateUnits = dateString.split("-");
+        try {
+            int year = Integer.parseInt(dateUnits[0]);
+            int month = Integer.parseInt(dateUnits[1]);
+            int day = Integer.parseInt(dateUnits[2]);
+            int dayPeriod = (year - 1900) * 12 * 31 + month * 31 + day;
+            return new Integer(dayPeriod);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static String dayPeriodToDate(Integer dayPeriod) {
+        int year = dayPeriod / (12 * 31);
+        int month = (dayPeriod / 31) % 12;
+        int day = dayPeriod % 31;
+        String monthStr = (month < 10) ? "0" + month : month + "";
+        String dayStr = (day < 10) ? "0" + day : day + "";
+        String result = (year + 1900) + "-" + monthStr + "-" + dayStr;
+        return result;
+    }
 }

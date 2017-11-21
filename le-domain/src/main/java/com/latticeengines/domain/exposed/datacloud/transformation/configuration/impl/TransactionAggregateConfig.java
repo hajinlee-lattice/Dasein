@@ -5,10 +5,12 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
+
 public class TransactionAggregateConfig extends TransformerConfig {
 
     @JsonProperty("ProductMap")
-    private Map<String, String> productMap;
+    private Map<String, Product> productMap;
 
     @JsonProperty("TransactionType")
     private String transactionType;
@@ -40,11 +42,11 @@ public class TransactionAggregateConfig extends TransformerConfig {
     @JsonProperty("Metrics")
     private List<String> metrics;
 
-    public Map<String, String> getProductMap() {
+    public Map<String, Product> getProductMap() {
         return productMap;
     }
 
-    public void setProductMap(Map<String, String> productMap) {
+    public void setProductMap(Map<String, Product> productMap) {
         this.productMap = productMap;
     }
 

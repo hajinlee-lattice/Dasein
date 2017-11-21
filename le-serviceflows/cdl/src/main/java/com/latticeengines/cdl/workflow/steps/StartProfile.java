@@ -45,10 +45,10 @@ public class StartProfile extends BaseWorkflowStep<CalculateStatsStepConfigurati
             putObjectInContext(SortContactStepConfiguration.class.getName(), sortContactStepConfig);
         }
 
-        Table transactionTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
-                TableRoleInCollection.AggregatedTransaction);
         Table productTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
                 TableRoleInCollection.ConsolidatedProduct);
+        Table rawTransactionTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
+                TableRoleInCollection.ConsolidatedRawTransaction);
         if (productTable == null) {
             log.info("Skip sort product since product table does not exist");
             SortProductStepConfiguration sortProductStepConfiguration = getConfigurationFromJobParameters(
@@ -56,7 +56,7 @@ public class StartProfile extends BaseWorkflowStep<CalculateStatsStepConfigurati
             sortProductStepConfiguration.setSkipStep(true);
             putObjectInContext(SortProductStepConfiguration.class.getName(), sortProductStepConfiguration);
         }
-        if ((transactionTable == null) || (productTable == null)) {
+        if ((productTable == null) || (rawTransactionTable == null)) {
             log.info("Skip profile purchase history since either product or transaction table does not exist");
             CalculatePurchaseHistoryConfiguration calculatePurchaseHistoryConfig = getConfigurationFromJobParameters(
                     CalculatePurchaseHistoryConfiguration.class);

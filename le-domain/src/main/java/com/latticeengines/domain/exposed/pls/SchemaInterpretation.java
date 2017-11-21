@@ -14,7 +14,9 @@ public enum SchemaInterpretation {
     Category, //
     Profile, //
     AccountMaster, //
-    TransactionDailyAggregation;
+    TransactionRaw, //
+    TransactionDailyAggregation, //
+    TransactionPeriodAggregation;
 
     public void apply(SchemaInterpretationFunctionalInterface function) {
         InterfaceName name = null;

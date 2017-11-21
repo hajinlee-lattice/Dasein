@@ -92,17 +92,24 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
 
     @Override
     protected void onPostTransformationCompleted() {
+        onPostTransformationCompleted(true);
+    }
+
+    protected void onPostTransformationCompleted(boolean isPublish) {
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
-        if (entity.getBatchStore() != null) {
-            if (newMasterTable == null) {
-                throw new IllegalStateException("Did not generate new master table for " + entity);
+        if (isPublish) {
+            if (entity.getBatchStore() != null) {
+                if (newMasterTable == null) {
+                    throw new IllegalStateException("Did not generate new master table for " + entity);
+                }
+                dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore,
+                        activeVersion);
             }
-            dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore,
-                    activeVersion);
         }
-        if (isBucketing()) {
+
+        if (isBucketing() && isPublish) {
             String redshiftTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
             Table redshiftTable = metadataProxy.getTable(customerSpace.toString(), redshiftTableName);
             if (redshiftTable == null) {
@@ -291,6 +298,11 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     }
 
     protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable) {
+        return retainFields(previousStep, useTargetTable, servingStore);
+    }
+
+    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable, TableRoleInCollection role) {
+
         if (!isBucketing()) {
             return null;
         }
@@ -307,7 +319,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             step.setTargetTable(targetTable);
         }
         ConsolidateRetainFieldConfig config = new ConsolidateRetainFieldConfig();
-        Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), servingStore);
+        Table servingTable = dataCollectionProxy.getTable(customerSpace.toString(), role);
         if (servingTable != null) {
             List<String> fieldsToRetain = AvroUtils.getSchemaFields(yarnConfiguration,
                     servingTable.getExtracts().get(0).getPath());

@@ -168,6 +168,20 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return post("finishProfile", url, null, DataFeedExecution.class);
     }
 
+    public DataFeed updateEarliestTransaction(String customerSpace, Integer transactionDayPeriod) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/earliesttransaction/{transactionDayPeriod}",
+                shortenCustomerSpace(customerSpace), transactionDayPeriod.toString());
+        return post("updateEarliestTransaction", url, null, DataFeed.class);
+    }
+
+    public DataFeed rebuildTransaction(String customerSpace, Boolean isRebuild) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/rebuildtransaction/{status}",
+                shortenCustomerSpace(customerSpace), isRebuild.toString());
+        return post("updateEarliestTransaction", url, null, DataFeed.class);
+    }
+
     public DataFeedProfile updateProfileWorkflowId(String customerSpace, Long workflowId) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/profile/workflow/{workflowId}",
                 shortenCustomerSpace(customerSpace), workflowId);

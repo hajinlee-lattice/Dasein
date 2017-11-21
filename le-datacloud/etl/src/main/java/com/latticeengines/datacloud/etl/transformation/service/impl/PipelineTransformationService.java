@@ -243,6 +243,7 @@ public class PipelineTransformationService extends AbstractTransformationService
 
             if (inputSteps != null) {
                 for (Integer inputStep : inputSteps) {
+                    System.out.println("total steps " + steps.length + "stepidx " + stepIdx + " basesourcnt " + baseSourceCount + " input step " + inputStep);
                     baseSources[baseSourceIdx] = steps[inputStep].getTarget();
                     baseTemplates[baseSourceIdx] = steps[inputStep].getTargetTemplate();
                     baseVersions.add(steps[inputStep].getTargetVersion());

@@ -13,6 +13,7 @@ public enum InterfaceName {
     CategoryId, //
     SubcategoryId, //
     ProductId, //
+    BundleId, //
     TransactionId, //
     PeriodId, //
     Target, //
@@ -53,6 +54,7 @@ public enum InterfaceName {
     TransactionType, //
     TransactionTime, //
     TransactionDate, //
+    TransactionDayPeriod, //
     ProductName, //
     Quantity, //
     TotalQuantity, //

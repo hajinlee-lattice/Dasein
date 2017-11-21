@@ -51,7 +51,7 @@ public class RedissonBeanFactory implements FactoryBean<RedissonClient> {
         config.setCodec(codec);
         ReplicatedServersConfig serverConfig = config.useReplicatedServers()  //
                 .setTimeout(40000) //
-                .setRetryInterval(2500).setScanInterval(2000) //
+                .setRetryInterval(40000).setScanInterval(2000) //
                 .setMasterConnectionPoolSize(masterPoolSize).setMasterConnectionMinimumIdleSize(masterIdle) //
                 .setSlaveConnectionPoolSize(slavePoolSize).setSlaveConnectionMinimumIdleSize(slaveIdle);
         elastiCacheService.getNodeAddresses().forEach(serverConfig::addNodeAddress);

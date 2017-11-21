@@ -14,8 +14,8 @@ import cascading.tuple.TupleEntry;
 public class ConsolidateAddDateColumnFuction extends BaseOperation implements Function {
     private String trxTimeColumn;
 
-    public ConsolidateAddDateColumnFuction(String trxTimeColumn, String targetField) {
-        super(new Fields(targetField));
+    public ConsolidateAddDateColumnFuction(String trxTimeColumn, String dateField, String datePeriodField) {
+        super(new Fields(dateField, datePeriodField));
         this.trxTimeColumn = trxTimeColumn;
     }
 
@@ -23,8 +23,9 @@ public class ConsolidateAddDateColumnFuction extends BaseOperation implements Fu
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         String trxTime = arguments.getString(trxTimeColumn).toString();
-        String result = DateTimeUtils.toDateOnlyFromMillis(trxTime);
-        functionCall.getOutputCollector().add(new Tuple(result));
+        String date = DateTimeUtils.toDateOnlyFromMillis(trxTime);
+        Integer datePeriod = DateTimeUtils.dateToDayPeriod(date);
+        functionCall.getOutputCollector().add(new Tuple(date, datePeriod));
     }
 
 }

@@ -55,6 +55,9 @@ public class SchemaRepository {
         case Transaction:
             table = getTransactionSchema();
             break;
+        case PeriodTransaction:
+            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation);
+            break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
@@ -89,8 +92,14 @@ public class SchemaRepository {
         case Transaction:
             table = getTransactionSchema();
             break;
+        case TransactionRaw:
+            table = getRawTransactionSchema();
+            break;
         case TransactionDailyAggregation:
-            table = getTransactionDailyAggregationSchema();
+            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionDailyAggregation);
+            break;
+        case TransactionPeriodAggregation:
+            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation);
             break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
@@ -681,13 +690,10 @@ public class SchemaRepository {
 
     private Table getTransactionSchema() {
         Table table = createTable(SchemaInterpretation.Transaction);
-        table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "TRANSACTION_ID", "TRANSACTION ID")) //
                 .type(Schema.Type.STRING) //
-                .notNull() //
-                .required() //
                 .interfaceName(InterfaceName.TransactionId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -780,8 +786,121 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getTransactionDailyAggregationSchema() {
-        Table table = createTable(SchemaInterpretation.TransactionDailyAggregation);
+    private Table getRawTransactionSchema() {
+        Table table = createTable(SchemaInterpretation.TransactionRaw);
+
+        table.addAttribute(attr(InterfaceName.Id.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ID", "TRANSACTION_ID", "TRANSACTION ID")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.AccountId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                .type(Schema.Type.STRING) //
+                .defaultValueStr("")
+                .interfaceName(InterfaceName.ContactId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.ProductId.name()) //
+                .allowedDisplayNames(Sets
+                        .newHashSet("PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .required() //
+                .interfaceName(InterfaceName.ProductId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.OrderId.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ORDER_ID", "ORDERID", "ORDER ID")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.OrderId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
+                .allowedDisplayNames(
+                        Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.LastModifiedDate) //
+                .logicalType(LogicalDataType.Timestamp) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_YEAR) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Quantity.name()) //
+                .allowedDisplayNames(Sets.newHashSet("QUANTITY")) //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.Quantity) //
+                .logicalType(LogicalDataType.Metric) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Amount.name()) //
+                .allowedDisplayNames(Sets.newHashSet( "AMOUNT")) //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.Amount) //
+                .logicalType(LogicalDataType.Metric) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
+                .allowedDisplayNames(Sets
+                        .newHashSet("TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME", "TRANSACTION TIME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionTime) //
+                .logicalType(LogicalDataType.Timestamp) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionType.name()) //
+                .allowedDisplayNames(Sets.newHashSet("TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionType) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DATE", "TRANSACTION_DATE", "TRANSACTION DATE" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionDate) //
+                .logicalType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionDayPeriod.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DAYPERIOD", "TRANSACTION_DAY_PERIOD", "TRANSACTION DAY PERIOD" })) //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.TransactionDayPeriod) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        return table;
+    }
+
+    private Table getAggregatedTransactionSchema(SchemaInterpretation schema) {
+        Table table = createTable(schema);
         table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(Sets.newHashSet(
                         "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
@@ -820,6 +939,21 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("DATE", "TRANSACTION_DATE", "TRANSACTION DATE")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionDate) //
+                .logicalType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionDayPeriod.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DAYPERIOD", "TRANSACTION_DAY_PERIOD", "TRANSACTION DAY PERIOD" })) //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.TransactionDayPeriod) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.PeriodId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DATE", "TRANSACTION_DATE", "TRANSACTION DATE" })) //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.PeriodId) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //

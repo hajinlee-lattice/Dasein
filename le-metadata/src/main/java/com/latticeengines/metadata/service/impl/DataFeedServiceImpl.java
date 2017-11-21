@@ -204,6 +204,30 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
+    public DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod) {
+        DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
+        if (datafeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot update status.");
+        } else {
+            datafeed.setEarliestTransaction(transactionDayPeriod);
+            datafeedEntityMgr.update(datafeed);
+        }
+        return datafeed;
+    }
+
+    @Override
+    public DataFeed rebuildTransaction(String customerSpace, String datafeedName, Boolean isRebuild) {
+        DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
+        if (datafeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot update status.");
+        } else {
+            datafeed.setRebuildTransaction(isRebuild);
+            datafeedEntityMgr.update(datafeed);
+        }
+        return datafeed;
+    }
+
+    @Override
     public List<DataFeed> getAllDataFeeds() {
         return datafeedEntityMgr.getAllDataFeeds();
     }

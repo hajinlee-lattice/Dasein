@@ -1,7 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -119,6 +117,22 @@ public class DefaultDataFeedController {
     public DataFeed finishProfile(@PathVariable String customerSpace, @PathVariable String initialDataFeedStatus) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.finishProfile(customerSpace, "", initialDataFeedStatus);
+    }
+
+    @RequestMapping(value = "/rebuildtransaction/{isRebuild}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "rebuild transaction store")
+    public DataFeed rebuildTransaction(@PathVariable String customerSpace, @PathVariable Boolean isRebuild) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return datafeedService.rebuildTransaction(customerSpace, "", isRebuild);
+    }
+
+    @RequestMapping(value = "/earliesttransaction/{transactionDayPeriod}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "rebuild transaction store")
+    public DataFeed updateEarliestTransaction(@PathVariable String customerSpace, @PathVariable  Integer transactionDayPeriod) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return datafeedService.updateEarliestTransaction(customerSpace, "", transactionDayPeriod);
     }
 
     @RequestMapping(value = "/profile/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -38,6 +38,9 @@ public interface DataFeedService {
 
     DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr);
 
+    DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod);
+    DataFeed rebuildTransaction(String customerSpace, String datafeedName, Boolean isRebuild);
+
     List<DataFeed> getAllDataFeeds();
 
 }

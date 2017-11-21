@@ -8,23 +8,40 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_2;
 
 import java.util.Map;
+import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
 public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private YarnConfiguration yarnConfiguration;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint("consolidate2");
         verifySecondConsolidateCheckpoint();
+
+        dataFeedProxy.rebuildTransaction(mainTestTenant.getId(), Boolean.FALSE);
+        dataFeedProxy.updateEarliestTransaction(mainTestTenant.getId(), new Integer(42967));
+        Table rawTable = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.ConsolidatedRawTransaction);
+        Integer earliestDayPeriod = TimeSeriesUtils.getEarliestPeriod(yarnConfiguration, rawTable);
+        dataFeedProxy.updateEarliestTransaction(mainTestTenant.getId(), earliestDayPeriod);
 
         importData();
         profile();

@@ -102,6 +102,15 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("active_profile")
     private DataFeedProfile activeProfile;
 
+    @Column(name = "EARLIEST_TRANSACTION", nullable = true)
+    @JsonProperty("earliest_transaction")
+    private Integer earliestTransaction;
+
+    @Column(name = "REBUILD_TRANSACTION", nullable = true)
+    @JsonProperty("rebuildTransaction")
+    private Boolean rebuildTransaction;
+
+
     @JsonIgnore
     @Transient
     private List<DataFeedExecution> executions = new ArrayList<>();
@@ -309,6 +318,22 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setAutoScheduling(boolean autoScheduling) {
         this.autoScheduling = autoScheduling;
+    }
+
+    public Integer getEarliestTransaction() {
+        return earliestTransaction;
+    }
+
+    public void setEarliestTransaction(Integer earliestTransaction) {
+        this.earliestTransaction = earliestTransaction;
+    }
+
+    public Boolean getRebuildTransaction() {
+        return rebuildTransaction;
+    }
+
+    public void setRebuildTransaction(Boolean rebuildTransaction) {
+        this.rebuildTransaction = rebuildTransaction;
     }
 
     public enum Status {

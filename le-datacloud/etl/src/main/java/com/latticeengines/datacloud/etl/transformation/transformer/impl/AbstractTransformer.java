@@ -7,12 +7,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.ProgressHelper;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class AbstractTransformer<T extends TransformerConfig> implements Transformer {
 
@@ -23,6 +27,9 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     @Autowired
     private ProgressHelper progressHelper;
+
+    @Autowired
+    protected HdfsPathBuilder hdfsPathBuilder;
 
     abstract public String getName();
 
@@ -65,6 +72,26 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     protected void initBaseSources(T config, List<String> sourceNames) {
 
+    }
+
+    protected String getSourceHdfsDir(TransformStep step, int sourceIdx) {
+        Source source = step.getBaseSources()[sourceIdx];
+
+        List<String> baseSourceVersions = step.getBaseVersions();
+        String confStr = step.getConfig();
+        String sourceDirInHdfs = null;
+        if (!(source instanceof TableSource)) {
+            sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(source,
+                    baseSourceVersions.get(sourceIdx)).toString();
+        } else {
+            Table table = ((TableSource)source).getTable();
+            if (table.getExtracts().size() > 1) {
+                throw new IllegalArgumentException("Can only handle single extract table.");
+            }
+            sourceDirInHdfs = table.getExtracts().get(0).getPath();
+        }
+
+        return sourceDirInHdfs;
     }
 
     @SuppressWarnings("unchecked")

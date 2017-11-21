@@ -21,6 +21,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunctio
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
 
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
@@ -36,7 +37,7 @@ public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggreg
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
-        Map<String, String> productMap = config.getProductMap();
+        Map<String, Product> productMap = config.getProductMap();
         String idField = config.getIdField();
         String accountField = config.getAccountField();
         String productField = config.getProductField();
