@@ -87,7 +87,6 @@ public class TimeFilter {
         public static final Period Month = new Period("Month");
         public static final Period Quarter = new Period("Quarter");
         public static final Period Year = new Period("Year");
-        public static final Period Custom = new Period("Custom");
 
         private final String name;
 
