@@ -1,7 +1,6 @@
 import logging
-import os
-import shutil
 
+from pandas import DataFrame
 from pandas import Series
 
 from leframework.codestyle import overrides
@@ -85,7 +84,7 @@ class AggregationExecutor(Executor):
 
     @overrides(Executor)
     def loadData(self):
-        return False, True
+        return True, True
 
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):
@@ -96,20 +95,32 @@ class AggregationExecutor(Executor):
     def writeToHdfs(self, hdfs, params):
         super(AggregationExecutor, self).writeToHdfs(hdfs, params)
 
+    
+    @overrides(Executor)
+    def preTransformData(self, training, test, params):
+        schema = params["schema"]
+        if schema["reserved"] is not None:
+            training[schema["reserved"]["training"]].update(Series([True] * training.shape[0]))
+            test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
+        params["allDataPreTransform"] = DataFrame.append(training, test)
+        return (training, test)
+
+    @overrides(Executor)
+    def postTransformData(self, training, test, params):
+        params["allDataPostTransform"] = DataFrame.append(training, test)
+        return (training, test)
+
     @overrides(Executor)
     def transformData(self, params):
+        training = params["training"]
         test = params["test"]
-        schema = params["schema"]
-        test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
-        params["allDataPreTransform"] = test
-
         pipeline, metadata, pipelineParams = self.createDataPipeline(params)
 
+        training = pipeline.predict(training, None, False)
         test = pipeline.predict(test, None, True)
         if "testDataRemediated" in pipelineParams:
             params["allDataPreTransform"] = pipelineParams["testDataRemediated"]
-        params["allDataPostTransform"] = test
-        return (None, test, metadata)
+        return (training, test, metadata)
 
     @overrides(Executor)
     def postProcessClassifier(self, clf, params):
