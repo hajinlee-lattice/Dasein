@@ -194,10 +194,17 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     var makeDanteAccountsObj = function(obj) {
         var accounts = [];
         obj.forEach(function(value, key){
-            value.value = (typeof value.value === 'string' ? JSON.parse(value.value) : value.value);
+            // console.log(value);
+            // console.log(key);
+            // value.value = (typeof value.value === 'string' ? JSON.parse(value.value) : value.value);
+            // var tmpObj = {
+            //     name: value.value.DisplayName,
+            //     id: value.value.BaseExternalID
+            // };
+            // accounts.push(tmpObj);
             var tmpObj = {
-                name: value.value.DisplayName,
-                id: value.value.BaseExternalID
+                name: value.LDC_Name,
+                id: value.AccountId
             };
             accounts.push(tmpObj);
         });
@@ -212,7 +219,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         } else {
             var self = this;
             CgTalkingPointService.getDanteAccounts().then(function(response) {
-                self.danteAccounts = makeDanteAccountsObj(response);
+                self.danteAccounts = makeDanteAccountsObj(response.data);
                 deferred.resolve(self.danteAccounts);
             });
         }
@@ -413,8 +420,30 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var deferred = $q.defer(),
             count = count || 20;
         $http({
-            method: 'GET',
-            url: this.host + '/dante/accounts/' + count
+            // method: 'GET',
+            // url: this.host + '/dante/accounts/' + count
+            method: 'POST',
+            url: this.host + '/accounts/data',
+            data: {
+                "lookups": 
+                [{
+                    "attribute": { 
+                        "entity": "Account", 
+                        "attribute": "AccountId" 
+                    } 
+                }, 
+                { 
+                    "attribute": { 
+                        "entity": "Account", 
+                        "attribute": "LDC_Name" 
+                    } 
+                }], 
+                "page_filter": { 
+                    "num_rows": count, 
+                    "row_offset": 0 
+                }, 
+                "restrict_with_sfdcid": true 
+            }
         }).then(function(response){
             deferred.resolve(response.data);
         });

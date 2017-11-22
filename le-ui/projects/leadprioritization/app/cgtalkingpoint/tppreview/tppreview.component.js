@@ -37,8 +37,7 @@ angular.module('lp.cg.talkingpoint.preview', [])
         CgTalkingPointStore.generateLeadPreviewObject({playName: $stateParams.play_name}).then(function(leadPreviewObject){
             vm.leadPreviewObject = leadPreviewObject;
             CgTalkingPointStore.getDanteAccounts({no_cache: true}).then(function(accounts) {
-                vm.accounts = accounts;
-
+                vm.accounts = filterInvalidAccounts(accounts);
                 return CgTalkingPointStore.getDanteUrl({no_cache: true});
             }).then(function(danteUrl) {
                 vm.sceIframeSrc = $sce.trustAsResourceUrl(danteUrl);
@@ -51,6 +50,16 @@ angular.module('lp.cg.talkingpoint.preview', [])
             });
         });
     };
+
+    function filterInvalidAccounts(accounts) {
+        result = []
+        for (var i = 0; i < accounts.length; i++) {
+            if (accounts[i].name !== undefined && accounts[i].name !== null) {
+                result.push(accounts[i]);
+            }
+        }
+        return result;
+    }
 
     function handleLpiPreviewInit(evt) {
         if (evt.data === 'initLpiPreview') {
