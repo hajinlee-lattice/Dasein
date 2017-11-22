@@ -173,6 +173,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         dest.setTags(source.getTags());
         dest.setDisplayDiscretizationStrategy(source.getDisplayDiscretizationStrategy());
         dest.setDataQuality(source.getDataQuality());
+        dest.setGroupsViaList(source.getGroupsAsList());
     }
 
     @Override
