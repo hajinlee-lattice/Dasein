@@ -28,10 +28,6 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
             return "tftest_4_transaction_2017_10_31_19_44_08_utc";
         }
 
-        @Override
-        protected BusinessEntity getPeriodTransaction() {
-            return BusinessEntity.Transaction;
-        }
     }
 
     private EventQueryTranslator getEventQueryTranslator() {
@@ -361,7 +357,10 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, acctRestriction,
                                                           Query.builder()).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        //System.out.println("sqlQuery = " + sqlQuery);
+        System.out.println("sqlQuery = " + sqlQuery);
+        // todo, change count once we got the real data
+        long count = sqlQuery.fetchCount();
+        Assert.assertEquals(count, 0);
 
     }
 

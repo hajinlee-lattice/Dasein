@@ -1,7 +1,6 @@
 package com.latticeengines.query.exposed.translator;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
 
@@ -20,7 +19,6 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -33,7 +31,6 @@ import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -119,10 +116,6 @@ public class EventQueryTranslator {
 
     protected String getPeriodTransactionTableName(AttributeRepository repository) {
         return repository.getTableName(AggregatedPeriodTransaction);
-    }
-
-    protected BusinessEntity getPeriodTransaction() {
-        return BusinessEntity.PeriodTransaction;
     }
 
     @SuppressWarnings({"unchecked", "rawtype"})
@@ -305,6 +298,25 @@ public class EventQueryTranslator {
     }
 
     @SuppressWarnings("unchecked")
+    private SQLQuery joinAccountWithPeriods(QueryFactory queryFactory,
+                                            AttributeRepository repository,
+                                            String accountViewAlias,
+                                            boolean isScoring) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
+
+        EntityPath<String> accountViewPath = new PathBuilder<>(String.class, accountViewAlias);
+        StringPath qualifiedAccountId = Expressions.stringPath(accountViewPath, ACCOUNT_ID);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId);
+        SQLQuery accountQuery = factory.query().select(keysAccountId, keysPeriodId)
+                .from(keysPath)
+                .join(accountViewPath)
+                .on(keysAccountId.eq(qualifiedAccountId))
+                .where(periodIdPredicate);
+
+        return accountQuery;
+    }
+
+    @SuppressWarnings("unchecked")
     private SQLQuery translateTransaction(QueryFactory queryFactory,
                                           AttributeRepository repository,
                                           TransactionRestriction txRestriction,
@@ -456,42 +468,27 @@ public class EventQueryTranslator {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
     }
 
-    private SubQuery translateConcreteRestriction(QueryFactory queryFactory,
-                                                  AttributeRepository repository,
-                                                  ConcreteRestriction restriction,
-                                                  boolean isScoring) {
-        BusinessEntity txAggregation = getPeriodTransaction();
-
-        AttributeLookup accountId = new AttributeLookup(BusinessEntity.Account, ACCOUNT_ID);
-        AttributeLookup txAccountId = new AttributeLookup(txAggregation, ACCOUNT_ID);
-        AttributeLookup txPeriodId = new AttributeLookup(txAggregation, PERIOD_ID);
-
-
-        Query accountQuery = Query.builder().select(accountId).from(BusinessEntity.Account).where(restriction).build();
-        SubQuery inAccountSubQuery = new SubQuery(accountQuery, generateAlias(BusinessEntity.Account.name()));
-        ConcreteRestriction accountInRestriction = (ConcreteRestriction) Restriction.builder()
-                .let(txAggregation, InterfaceName.AccountId.name())
-                .inCollection(inAccountSubQuery, ACCOUNT_ID).build();
-
-        SubQuery periodIdSubQuery = new SubQuery();
-        periodIdSubQuery.setSubQueryExpression(translateMaxPeriodId(queryFactory, repository));
-        periodIdSubQuery.setAlias(MAX_PERIOD);
-        SubQueryAttrLookup maxPeriodId = new SubQueryAttrLookup(periodIdSubQuery, MAX_PERIOD_ID);
-
-        // target or training
-        Restriction periodIdRestriction = null;
-        if (isScoring) {
-            periodIdRestriction = Restriction.builder().let(txPeriodId).eq(maxPeriodId).build();
-        } else {
-            periodIdRestriction = Restriction.builder().let(txPeriodId).not().eq(maxPeriodId).build();
-        }
-
-        Restriction accountInPeriod = Restriction.builder().and(accountInRestriction, periodIdRestriction).build();
-        Query txQuery = Query.builder().select(txAccountId, txPeriodId)
-                .from(txAggregation).where(accountInPeriod).build();
-        SubQuery subQuery = new SubQuery(txQuery, generateAlias(BusinessEntity.Account.name()));
+    private SubQuery translateAccountViewWithJoinedPeriods(QueryFactory queryFactory,
+                                                           AttributeRepository repository,
+                                                           String accountViewAlias,
+                                                           boolean isScoring) {
+        SQLQuery subQueryExpression = joinAccountWithPeriods(queryFactory, repository, accountViewAlias, isScoring);
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(subQueryExpression);
+        subQuery.setAlias(generateAlias(BusinessEntity.Account.name()));
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
     }
+
+    private SubQuery translateAccountView(ConcreteRestriction restriction) {
+
+        AttributeLookup accountId = new AttributeLookup(BusinessEntity.Account, ACCOUNT_ID);
+
+        Query accountQuery = Query.builder().select(accountId).from(BusinessEntity.Account).where(restriction).build();
+
+        SubQuery subQuery = new SubQuery(accountQuery, generateAlias(BusinessEntity.Account.name()));
+        return subQuery.withProjection(ACCOUNT_ID);
+    }
+
 
     private TransactionRestriction translateToPrior(TransactionRestriction priorOnly) {
 
@@ -622,9 +619,10 @@ public class EventQueryTranslator {
                     childSubQueryList.add(subQuery.getAlias());
                 } else if (object instanceof ConcreteRestriction) {
                     ConcreteRestriction concreteRestriction = (ConcreteRestriction) object;
-                    SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction,
-                                                                     isScoring);
-                    builder.with(subQuery);
+                    SubQuery accountViewSubquery = translateAccountView(concreteRestriction);
+                    builder.with(accountViewSubquery);
+                    SubQuery subQuery = translateAccountViewWithJoinedPeriods(queryFactory, repository,
+                                                                              accountViewSubquery.getAlias(), isScoring);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     List<String> childSubQueryList = subQueryTableMap.get(parent);
                     childSubQueryList.add(subQuery.getAlias());
@@ -641,7 +639,10 @@ public class EventQueryTranslator {
             builder.select(accountId, periodId);
         } else if (rootRestriction instanceof ConcreteRestriction) {
             ConcreteRestriction concreteRestriction = (ConcreteRestriction) rootRestriction;
-            SubQuery subQuery = translateConcreteRestriction(queryFactory, repository, concreteRestriction, isScoring);
+            SubQuery accountViewSubquery = translateAccountView(concreteRestriction);
+            builder.with(accountViewSubquery);
+            SubQuery subQuery = translateAccountViewWithJoinedPeriods(queryFactory, repository,
+                                                                      accountViewSubquery.getAlias(), isScoring);
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
             SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
