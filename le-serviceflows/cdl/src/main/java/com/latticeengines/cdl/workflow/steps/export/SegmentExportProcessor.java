@@ -92,7 +92,7 @@ public class SegmentExportProcessor {
         long currentTimeMillis = System.currentTimeMillis();
         log.info("segmentExportTable = : " + JsonUtils.serialize(segmentExportTable));
 
-        Schema schema = TableUtils.createSchema("SomeSchema", segmentExportTable);
+        Schema schema = TableUtils.createSchema(metadataSegmentExport.getTableName(), segmentExportTable);
 
         SegmentExportContext segmentExportContext = initSegmentExportContext(tenant, config, metadataSegmentExport,
                 schema);
@@ -202,7 +202,8 @@ public class SegmentExportProcessor {
 
         if (CollectionUtils.isNotEmpty(accountList)) {
 
-            if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
+            if (segmentExportContext.getMetadataSegmentExport()
+                    .getType() == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
                 List<Object> accountIds = getAccountsIds(accountList);
 
                 // make sure to clear list of account Ids in contact query and

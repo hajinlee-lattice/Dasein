@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.playmakercore;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,7 @@ import javax.persistence.Lob;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.avro.Schema;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 
@@ -24,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -290,5 +294,72 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     @Override
     public void setId(String id) {
         this.recommendationId = id;
+    }
+
+    public static List<Attribute> getSchemaAttributes() {
+        List<Attribute> schema = new ArrayList<Attribute>();
+        int index = 0;
+
+        setAttribute(schema, index++, "PID", Schema.Type.LONG);
+        setAttribute(schema, index++, "EXTERNAL_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "ACCOUNT_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "LE_ACCOUNT_EXTERNAL_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "PLAY_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "LAUNCH_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "DESCRIPTION", Schema.Type.STRING);
+        setAttribute(schema, index++, "LAUNCH_DATE", Schema.Type.LONG);
+        setAttribute(schema, index++, "LAST_UPDATED_TIMESTAMP", Schema.Type.LONG);
+        setAttribute(schema, index++, "MONETARY_VALUE", Schema.Type.DOUBLE);
+        setAttribute(schema, index++, "LIKELIHOOD", Schema.Type.DOUBLE);
+        setAttribute(schema, index++, "COMPANY_NAME", Schema.Type.STRING);
+        setAttribute(schema, index++, "SFDC_ACCOUNT_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "PRIORITY_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "PRIORITY_DISPLAY_NAME", Schema.Type.STRING);
+        setAttribute(schema, index++, "MONETARY_VALUE_ISO4217_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "CONTACTS", Schema.Type.STRING);
+        setAttribute(schema, index++, "SYNC_DESTINATION", Schema.Type.STRING);
+        setAttribute(schema, index++, "TENANT_ID", Schema.Type.LONG);
+
+        return schema;
+    }
+
+    public static Map<String, Object> convertToMap(Recommendation rec) {
+        Map<String, Object> recMap = null;
+        if (rec != null) {
+            Long launchTimestamp = rec.getLaunchDate() == null //
+                    ? null : rec.getLaunchDate().getTime();
+            Long lastUpdatedTimestamp = rec.getLastUpdatedTimestamp() == null //
+                    ? launchTimestamp : rec.getLastUpdatedTimestamp().getTime();
+
+            recMap = new HashMap<>();
+            recMap.put("PID", rec.getPid());
+            recMap.put("EXTERNAL_ID", rec.getId());
+            recMap.put("ACCOUNT_ID", rec.getAccountId());
+            recMap.put("LE_ACCOUNT_EXTERNAL_ID", rec.getLeAccountExternalID());
+            recMap.put("PLAY_ID", rec.getPlayId());
+            recMap.put("LAUNCH_ID", rec.getLaunchId());
+            recMap.put("DESCRIPTION", rec.getDescription());
+            recMap.put("LAUNCH_DATE", launchTimestamp);
+            recMap.put("LAST_UPDATED_TIMESTAMP", lastUpdatedTimestamp);
+            recMap.put("MONETARY_VALUE", rec.getMonetaryValue());
+            recMap.put("LIKELIHOOD", rec.getLikelihood());
+            recMap.put("COMPANY_NAME", rec.getCompanyName());
+            recMap.put("SFDC_ACCOUNT_ID", rec.getSfdcAccountID());
+            recMap.put("PRIORITY_ID", rec.getPriorityID().name());
+            recMap.put("PRIORITY_DISPLAY_NAME", rec.getPriorityDisplayName());
+            recMap.put("MONETARY_VALUE_ISO4217_ID", rec.getMonetaryValueIso4217ID());
+            recMap.put("CONTACTS", rec.getContacts());
+            recMap.put("SYNC_DESTINATION", rec.getSynchronizationDestination());
+            recMap.put("TENANT_ID", rec.getTenantId());
+        }
+
+        return recMap;
+    }
+
+    private static void setAttribute(List<Attribute> schema, int index, String attrName, Schema.Type physicalType) {
+        Attribute attr = new Attribute(attrName);
+        attr.setDisplayName(attrName);
+        attr.setPhysicalDataType(physicalType.name());
+        schema.add(index, attr);
     }
 }

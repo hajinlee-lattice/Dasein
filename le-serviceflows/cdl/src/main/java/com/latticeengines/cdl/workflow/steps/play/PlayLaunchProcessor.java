@@ -1,14 +1,24 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +26,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -30,9 +47,14 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
+import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.service.JobService;
 
-@Component
+@Component("playLaunchProcessor")
 public class PlayLaunchProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
@@ -49,6 +71,36 @@ public class PlayLaunchProcessor {
     @Autowired
     private FrontEndQueryCreator frontEndQueryCreator;
 
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    @Autowired
+    private SqoopProxy sqoopProxy;
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Autowired
+    private JobService jobService;
+
+    @Value("${datadb.datasource.driver}")
+    private String dataDbDriver;
+
+    @Value("${datadb.datasource.url}")
+    private String dataDbUrl;
+
+    @Value("${datadb.datasource.user}")
+    private String dataDbUser;
+
+    @Value("${datadb.datasource.password.encrypted}")
+    private String dataDbPassword;
+
+    @Value("${datadb.datasource.dialect}")
+    private String dataDbDialect;
+
+    @Value("${datadb.datasource.type}")
+    private String dataDbType;
+
     @Value("${playmaker.workflow.segment.pagesize:100}")
     private long pageSize;
 
@@ -62,7 +114,7 @@ public class PlayLaunchProcessor {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
-    public void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) {
+    public void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
         // initialize play launch context
         PlayLaunchContext playLaunchContext = initPlayLaunchContext(tenant, config);
 
@@ -76,6 +128,12 @@ public class PlayLaunchProcessor {
         // do initial handling of SFDC id based suppression
         handleSFDCIdBasedSuppression(playLaunchContext, segmentAccountsCount);
 
+        Long currentTimeMillis = System.currentTimeMillis();
+
+        String avroFileName = playLaunchContext.getPlayLaunchId() + ".avro";
+
+        File localFile = new File(tenant.getName() + "_" + currentTimeMillis + "_" + avroFileName);
+
         if (segmentAccountsCount > 0) {
             // process accounts that exists in segment
             long processedSegmentAccountsCount = 0;
@@ -83,12 +141,18 @@ public class PlayLaunchProcessor {
             int pages = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
             log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
-            // loop over to required number of pages
-            for (int pageNo = 0; pageNo < pages; pageNo++) {
-                // fetch and process a single page
-                processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, segmentAccountsCount,
-                        processedSegmentAccountsCount, pageNo);
+            try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
+                    new GenericDatumWriter<GenericRecord>(playLaunchContext.getSchema()))) {
+                dataFileWriter.create(playLaunchContext.getSchema(), localFile);
+
+                // loop over to required number of pages
+                for (int pageNo = 0; pageNo < pages; pageNo++) {
+                    // fetch and process a single page
+                    processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, segmentAccountsCount,
+                            processedSegmentAccountsCount, pageNo, dataFileWriter);
+                }
             }
+
         }
 
         // as per PM requirement, we need to fail play launch if 0
@@ -99,7 +163,79 @@ public class PlayLaunchProcessor {
             throw new LedpException(LedpCode.LEDP_18159,
                     new Object[] { playLaunchContext.getPlayLaunch().getAccountsLaunched(),
                             playLaunchContext.getPlayLaunch().getAccountsErrored() });
+        } else {
+            runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis, avroFileName, localFile);
         }
+    }
+
+    private void runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
+            Long currentTimeMillis, String avroFileName, File localFile) throws IOException {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+        String path = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString();
+        path = path.endsWith("/") ? path : path + "/";
+        path += currentTimeMillis + "/";
+
+        String avroPath = path + "avro/";
+
+        try {
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), avroPath + avroFileName);
+        } finally {
+            FileUtils.deleteQuietly(localFile);
+        }
+
+        Extract extract = new Extract();
+        extract.setExtractionTimestamp(currentTimeMillis);
+        extract.setName("recommendationGeneration");
+        extract.setPath(avroPath + "*.avro");
+        extract.setTable(playLaunchContext.getRecommendationTable());
+        extract.setTenant(tenant);
+        playLaunchContext.getRecommendationTable().addExtract(extract);
+        metadataProxy.updateTable(tenant.getId(), playLaunchContext.getPlayLaunch().getTableName(),
+                playLaunchContext.getRecommendationTable());
+
+        if (!export(playLaunchContext, avroPath)) {
+            throw new LedpException(LedpCode.LEDP_18168);
+        }
+
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, //
+                    avroPath.substring(0, avroPath.lastIndexOf("/avro")));
+        } catch (Exception ex) {
+            log.error(
+                    "Ignoring error while deleting dir: " //
+                            + avroPath.substring(0, avroPath.lastIndexOf("/avro")), //
+                    ex);
+        }
+    }
+
+    private boolean export(PlayLaunchContext playLaunchContext, String avroPath) {
+        String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
+        String tenant = playLaunchContext.getTenant().getId();
+
+        log.info("Trying to submit sqoop job for exporting recommendations from " + avroPath);
+        DbCreds.Builder credsBldr = new DbCreds.Builder();
+        credsBldr.user(dataDbUser).dbType(dataDbType).driverClass(dataDbDriver)
+                .jdbcUrl(dataDbUrl + "?user=" + dataDbUser + "&password=" + dataDbPassword);
+
+        DbCreds dataDbCreds = new DbCreds(credsBldr);
+
+        SqoopExporter exporter = new SqoopExporter.Builder() //
+                .setQueue(queue)//
+                .setTable("Recommendation") //
+                .setSourceDir(avroPath) //
+                .setDbCreds(dataDbCreds) //
+                .setCustomer(tenant) //
+                .build();
+
+        String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
+        log.info("Submitted sqoop jobs: " + appId);
+
+        FinalApplicationStatus sqoopJobStatus = jobService
+                .waitFinalJobStatus(appId, (new Long(TimeUnit.MINUTES.toSeconds(60L))).intValue()).getStatus();
+
+        log.info("Sqoop job final status: " + sqoopJobStatus.name());
+
+        return sqoopJobStatus == FinalApplicationStatus.SUCCEEDED;
     }
 
     private void handleSFDCIdBasedSuppression(PlayLaunchContext playLaunchContext, long segmentAccountsCount) {
@@ -117,7 +253,7 @@ public class PlayLaunchProcessor {
     }
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,
-            long processedSegmentAccountsCount, int pageNo) {
+            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter) {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch accounts in current page
@@ -126,7 +262,7 @@ public class PlayLaunchProcessor {
                         playLaunchContext, segmentAccountsCount, processedSegmentAccountsCount);
 
         // process accounts in current page
-        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage);
+        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage, dataFileWriter);
 
         // update launch progress
         updateLaunchProgress(playLaunchContext, processedSegmentAccountsCount, segmentAccountsCount);
@@ -155,6 +291,10 @@ public class PlayLaunchProcessor {
                     String.format("Segment for Rating Engine %s cannot be null", ratingEngine.getId()));
         }
 
+        Table recommendationTable = metadataProxy.getTable(tenant.getId(), playLaunch.getTableName());
+
+        Schema schema = TableUtils.createSchema(playLaunch.getTableName(), recommendationTable);
+
         String modelId = ratingEngine.getActiveModel().getId();
         String segmentName = segment.getName();
         log.info(String.format("Processing segment: %s", segmentName));
@@ -174,7 +314,9 @@ public class PlayLaunchProcessor {
                 .contactFrontEndQuery(new FrontEndQuery()) //
                 .modelId(modelId) //
                 .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
-                .counter(new Counter());
+                .counter(new Counter()) //
+                .recommendationTable(recommendationTable) //
+                .schema(schema);
 
         return playLaunchContextBuilder.build();
     }
@@ -192,7 +334,8 @@ public class PlayLaunchProcessor {
         log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
     }
 
-    private long processAccountsPage(PlayLaunchContext playLaunchContext, DataPage accountsPage) {
+    private long processAccountsPage(PlayLaunchContext playLaunchContext, DataPage accountsPage,
+            DataFileWriter<GenericRecord> dataFileWriter) {
         List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
                 .getModifiableAccountIdCollectionForContacts();
 
@@ -215,7 +358,7 @@ public class PlayLaunchProcessor {
             // generate recommendations using list of accounts in page and
             // corresponding account/contacts map
             recommendationCreator.generateRecommendations(playLaunchContext, //
-                    accountList, mapForAccountAndContactList);
+                    accountList, mapForAccountAndContactList, dataFileWriter);
         }
         return accountList.size();
     }
@@ -277,4 +420,55 @@ public class PlayLaunchProcessor {
     void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
         this.internalResourceRestApiProxy = internalResourceRestApiProxy;
     }
+
+    @VisibleForTesting
+    void setMetadataProxy(MetadataProxy metadataProxy) {
+        this.metadataProxy = metadataProxy;
+    }
+
+    @VisibleForTesting
+    void setSqoopProxy(SqoopProxy sqoopProxy) {
+        this.sqoopProxy = sqoopProxy;
+    }
+
+    @VisibleForTesting
+    void setYarnConfiguration(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
+    }
+
+    @VisibleForTesting
+    void setJobService(JobService jobService) {
+        this.jobService = jobService;
+    }
+
+    @VisibleForTesting
+    void setDataDbDriver(String dataDbDriver) {
+        this.dataDbDriver = dataDbDriver;
+    }
+
+    @VisibleForTesting
+    void setDataDbUrl(String dataDbUrl) {
+        this.dataDbUrl = dataDbUrl;
+    }
+
+    @VisibleForTesting
+    void setDataDbUser(String dataDbUser) {
+        this.dataDbUser = dataDbUser;
+    }
+
+    @VisibleForTesting
+    void setDataDbPassword(String dataDbPassword) {
+        this.dataDbPassword = dataDbPassword;
+    }
+
+    @VisibleForTesting
+    void setDataDbDialect(String dataDbDialect) {
+        this.dataDbDialect = dataDbDialect;
+    }
+
+    @VisibleForTesting
+    void setDataDbType(String dataDbType) {
+        this.dataDbType = dataDbType;
+    }
+
 }

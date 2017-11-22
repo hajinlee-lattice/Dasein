@@ -3,9 +3,12 @@ package com.latticeengines.cdl.workflow.steps.play;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.avro.Schema;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -44,11 +47,15 @@ public class PlayLaunchContext {
 
     private Counter counter;
 
+    private Table recommendationTable;
+
+    private Schema schema;
+
     public PlayLaunchContext(CustomerSpace customerSpace, Tenant tenant, String playName, String playLaunchId,
             PlayLaunch playLaunch, Play play, long launchTimestampMillis, RatingEngine ratingEngine,
             MetadataSegment segment, String segmentName, String modelId, FrontEndQuery accountFrontEndQuery,
-            FrontEndQuery contactFrontEndQuery, List<Object> modifiableAccountIdCollectionForContacts,
-            Counter counter) {
+            FrontEndQuery contactFrontEndQuery, List<Object> modifiableAccountIdCollectionForContacts, Counter counter,
+            Table recommendationTable, Schema schema) {
         super();
         this.customerSpace = customerSpace;
         this.tenant = tenant;
@@ -65,6 +72,8 @@ public class PlayLaunchContext {
         this.contactFrontEndQuery = contactFrontEndQuery;
         this.modifiableAccountIdCollectionForContacts = modifiableAccountIdCollectionForContacts;
         this.counter = counter;
+        this.recommendationTable = recommendationTable;
+        this.schema = schema;
     }
 
     public CustomerSpace getCustomerSpace() {
@@ -135,6 +144,14 @@ public class PlayLaunchContext {
         return counter;
     }
 
+    public Table getRecommendationTable() {
+        return recommendationTable;
+    }
+
+    public Schema getSchema() {
+        return schema;
+    }
+
     public static class PlayLaunchContextBuilder {
         private CustomerSpace customerSpace;
 
@@ -165,6 +182,10 @@ public class PlayLaunchContext {
         private List<Object> modifiableAccountIdCollectionForContacts;
 
         private Counter counter;
+
+        private Table recommendationTable;
+
+        private Schema schema;
 
         public PlayLaunchContextBuilder() {
         }
@@ -245,10 +266,21 @@ public class PlayLaunchContext {
             return this;
         }
 
+        public PlayLaunchContextBuilder recommendationTable(Table recommendationTable) {
+            this.recommendationTable = recommendationTable;
+            return this;
+        }
+
+        public PlayLaunchContextBuilder schema(Schema schema) {
+            this.schema = schema;
+            return this;
+        }
+
         public PlayLaunchContext build() {
             return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
                     launchTimestampMillis, ratingEngine, segment, segmentName, modelId, accountFrontEndQuery,
-                    contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter);
+                    contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter, recommendationTable,
+                    schema);
         }
     }
 

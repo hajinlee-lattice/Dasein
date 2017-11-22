@@ -196,7 +196,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         Table segmentExportTable = new Table();
         segmentExportTable.addAttributes(attributes);
 
-        String tableName = UUID.randomUUID().toString();
+        String tableName = "segment_export_" + UUID.randomUUID().toString().replaceAll("-", "_");
         segmentExportTable.setName(tableName);
         segmentExportTable.setTableType(TableType.DATATABLE);
 

@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +28,18 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
-        "classpath:test-playlaunch-properties-context.xml" })
+        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml" })
 public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private PlayLaunchInitStep playLaunchInitStep;
@@ -49,6 +53,36 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    @Autowired
+    private SqoopProxy sqoopProxy;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
+
+    @Autowired
+    private JobService jobService;
+
+    @Value("${datadb.datasource.driver}")
+    private String dataDbDriver;
+
+    @Value("${datadb.datasource.url}")
+    private String dataDbUrl;
+
+    @Value("${datadb.datasource.user}")
+    private String dataDbUser;
+
+    @Value("${datadb.datasource.password.encrypted}")
+    private String dataDbPassword;
+
+    @Value("${datadb.datasource.dialect}")
+    private String dataDbDialect;
+
+    @Value("${datadb.datasource.type}")
+    private String dataDbType;
 
     @Autowired
     RecommendationService recommendationService;
@@ -95,7 +129,8 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
         badRecommendationService = null;
 
         helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, badRecommendationService,
-                pageSize);
+                pageSize, metadataProxy, sqoopProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser, dataDbPassword,
+                dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());

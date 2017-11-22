@@ -1,8 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
+import org.apache.hadoop.conf.Configuration;
+
 import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 public class PlayLaunchInitStepTestHelper {
 
@@ -13,12 +18,14 @@ public class PlayLaunchInitStepTestHelper {
     private FrontEndQueryCreator frontEndQueryCreator;
 
     public PlayLaunchInitStepTestHelper(InternalResourceRestApiProxy internalResourceRestApiProxy,
-            EntityProxy entityProxy, RecommendationService recommendationService, long pageSize) {
+            EntityProxy entityProxy, RecommendationService recommendationService, long pageSize,
+            MetadataProxy metadataProxy, SqoopProxy sqoopProxy, JobService jobService, String dataDbDriver,
+            String dataDbUrl, String dataDbUser, String dataDbPassword, String dataDbDialect, String dataDbType,
+            Configuration yarnConfiguration) {
         frontEndQueryCreator = new FrontEndQueryCreator();
         frontEndQueryCreator.initLookupFieldsConfiguration();
 
         recommendationCreator = new RecommendationCreator();
-        recommendationCreator.setRecommendationService(recommendationService);
 
         accountFetcher = new AccountFetcher();
         accountFetcher.setPageSize(pageSize);
@@ -35,6 +42,16 @@ public class PlayLaunchInitStepTestHelper {
         playLaunchProcessor.setFrontEndQueryCreator(frontEndQueryCreator);
         playLaunchProcessor.setRecommendationCreator(recommendationCreator);
         playLaunchProcessor.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
+        playLaunchProcessor.setMetadataProxy(metadataProxy);
+        playLaunchProcessor.setSqoopProxy(sqoopProxy);
+        playLaunchProcessor.setJobService(jobService);
+        playLaunchProcessor.setDataDbDriver(dataDbDriver);
+        playLaunchProcessor.setDataDbUrl(dataDbUrl);
+        playLaunchProcessor.setDataDbUser(dataDbUser);
+        playLaunchProcessor.setDataDbPassword(dataDbPassword);
+        playLaunchProcessor.setDataDbDialect(dataDbDialect);
+        playLaunchProcessor.setDataDbType(dataDbType);
+        playLaunchProcessor.setYarnConfiguration(yarnConfiguration);
     }
 
     public RecommendationCreator getRecommendationCreator() {

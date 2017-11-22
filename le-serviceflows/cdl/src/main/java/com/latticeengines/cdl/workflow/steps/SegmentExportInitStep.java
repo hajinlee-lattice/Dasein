@@ -68,11 +68,11 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
             log.info(String.format("Processing accountRestriction: %s", JsonUtils.serialize(accountRestriction)));
             log.info(String.format("Processing contactRestriction: %s", JsonUtils.serialize(contactRestriction)));
             segmentExportProcessor.executeExportActivity(tenant, config, yarnConfiguration);
-            
+
             internalResourceRestApiProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.COMPLETED);
         } catch (Exception ex) {
             internalResourceRestApiProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.FAILED);
-            throw new LedpException(LedpCode.LEDP_18157, ex);
+            throw new LedpException(LedpCode.LEDP_18167, ex);
         }
     }
 

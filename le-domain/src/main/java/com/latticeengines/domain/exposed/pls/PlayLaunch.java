@@ -127,6 +127,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Type(type = "text")
     private String bucketsToLaunch;
 
+    @JsonProperty("table_name")
+    @Column(name = "TABLE_NAME", nullable = true)
+    private String tableName;
+
     @Override
     public Long getPid() {
         return pid;
@@ -266,6 +270,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAccountsErrored(Long accountsErrored) {
         this.accountsErrored = accountsErrored;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public Set<RuleBucketName> getBucketsToLaunch() {

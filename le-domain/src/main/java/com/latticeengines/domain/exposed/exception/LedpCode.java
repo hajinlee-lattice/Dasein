@@ -280,6 +280,8 @@ public enum LedpCode {
     LEDP_18164("Could not download result of export job {0} as this export job failed."), //
     LEDP_18165("Workflow Ids cannot not be empty."), //
     LEDP_18166("Parent Job Id must be specified."), //
+    LEDP_18167("SegmentExport workflow failed."), //
+    LEDP_18168("Sqoop export for recommendations failed."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

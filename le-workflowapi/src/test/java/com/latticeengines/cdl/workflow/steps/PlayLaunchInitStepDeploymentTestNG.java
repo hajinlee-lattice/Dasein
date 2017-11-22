@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
@@ -33,15 +34,18 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
-        "classpath:test-playlaunch-properties-context.xml" })
+        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml" })
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStepDeploymentTestNG.class);
@@ -60,6 +64,36 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @Autowired
     RecommendationService recommendationService;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    @Autowired
+    private SqoopProxy sqoopProxy;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
+
+    @Autowired
+    private JobService jobService;
+
+    @Value("${datadb.datasource.driver}")
+    private String dataDbDriver;
+
+    @Value("${datadb.datasource.url}")
+    private String dataDbUrl;
+
+    @Value("${datadb.datasource.user}")
+    private String dataDbUser;
+
+    @Value("${datadb.datasource.password.encrypted}")
+    private String dataDbPassword;
+
+    @Value("${datadb.datasource.dialect}")
+    private String dataDbDialect;
+
+    @Value("${datadb.datasource.type}")
+    private String dataDbType;
 
     @Autowired
     TenantEntityMgr tenantEntityMgr;
@@ -96,7 +130,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
         helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, recommendationService,
-                pageSize);
+                pageSize, metadataProxy, sqoopProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser, dataDbPassword,
+                dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());

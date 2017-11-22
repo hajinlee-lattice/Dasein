@@ -1,15 +1,23 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
@@ -17,47 +25,75 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.playmakercore.service.RecommendationService;
 
 @Component
 public class RecommendationCreator {
 
-    private static final double DEFAULT_LIKELIHOOD = 50.0D;
-
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
 
-    @Autowired
-    private RecommendationService recommendationService;
+    private static final double DEFAULT_LIKELIHOOD = 50.0D;
 
     public void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList) {
-        accountList//
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
+            DataFileWriter<GenericRecord> dataFileWriter) {
+
+        List<Recommendation> recommendations = accountList//
                 .stream().parallel() //
-                .forEach( //
+                .map( //
                         account -> {
                             try {
-                                processSingleAccount(playLaunchContext, //
+                                return processSingleAccount(playLaunchContext, //
                                         mapForAccountAndContactList, account);
                             } catch (Throwable th) {
                                 log.error(th.getMessage(), th);
                                 playLaunchContext.getCounter().getAccountErrored().addAndGet(1);
+                                return null;
                             }
-                        });
+                        }) //
+                .filter(rec -> rec != null) //
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(recommendations)) {
+            List<GenericRecord> records = //
+                    recommendations.stream() //
+                            .map(rec -> createRecommendationRecord(dataFileWriter, playLaunchContext.getSchema(), rec)) //
+                            .collect(Collectors.toList());
+
+            records.stream() //
+                    .forEach(datum -> {
+                        try {
+                            dataFileWriter.append(datum);
+                        } catch (IOException e) {
+                            log.error(String.format("Error while writing recommendation record (%s) to avro file",
+                                    JsonUtils.serialize(datum)), e);
+                        }
+                    });
+        }
     }
 
-    private void processSingleAccount(PlayLaunchContext playLaunchContext,
+    private GenericRecord createRecommendationRecord(DataFileWriter<GenericRecord> dataFileWriter, Schema schema,
+            Recommendation recommendation) {
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        Map<String, Object> recMap = Recommendation.convertToMap(recommendation);
+
+        for (Field field : schema.getFields()) {
+            String fieldName = field.name();
+            builder.set(fieldName, recMap.get(fieldName));
+        }
+        return builder.build();
+    }
+
+    private Recommendation processSingleAccount(PlayLaunchContext playLaunchContext,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
         RuleBucketName bucket = getBucketInfo(playLaunchContext, account);
+        Recommendation recommendation = null;
 
         // Generate recommendation only when bucket is selected for launch
         if (playLaunchContext.getPlayLaunch().getBucketsToLaunch().contains(bucket)) {
 
             // prepare recommendation
-            Recommendation recommendation = //
+            recommendation = //
                     prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList, bucket);
-
-            // insert recommendation in table
-            recommendationService.create(recommendation);
 
             // update corresponding counters
             playLaunchContext.getCounter().getContactLaunched().addAndGet(
@@ -66,6 +102,8 @@ public class RecommendationCreator {
         } else {
             playLaunchContext.getCounter().getAccountSuppressed().addAndGet(1);
         }
+
+        return recommendation;
     }
 
     private RuleBucketName getBucketInfo(PlayLaunchContext playLaunchContext, Map<String, Object> account) {
@@ -92,6 +130,7 @@ public class RecommendationCreator {
         }
 
         Recommendation recommendation = new Recommendation();
+        recommendation.setRecommendationId(UUID.randomUUID().toString());
         recommendation.setDescription(playLaunch.getPlay().getDescription());
         recommendation.setLaunchId(playLaunchId);
         recommendation.setPlayId(playName);
@@ -133,10 +172,5 @@ public class RecommendationCreator {
 
     private String checkAndGet(Map<String, Object> account, String columnName) {
         return account.get(columnName) != null ? account.get(columnName).toString() : null;
-    }
-
-    @VisibleForTesting
-    void setRecommendationService(RecommendationService recommendationService) {
-        this.recommendationService = recommendationService;
     }
 }

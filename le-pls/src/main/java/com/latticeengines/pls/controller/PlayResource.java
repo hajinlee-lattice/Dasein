@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,8 +23,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -34,6 +39,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.workflow.PlayLaunchWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -53,6 +59,9 @@ public class PlayResource {
 
     @Autowired
     private PlayLaunchService playLaunchService;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Autowired
     private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
@@ -159,6 +168,7 @@ public class PlayResource {
         if (play != null) {
             playLaunch.setLaunchState(LaunchState.Launching);
             playLaunch.setPlay(play);
+            playLaunch.setTableName(createTable(playLaunch));
             playLaunchService.create(playLaunch);
             String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
             playLaunch.setApplicationId(appId);
@@ -168,6 +178,27 @@ public class PlayResource {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         return playLaunch;
+    }
+
+    private String createTable(PlayLaunch playLaunch) {
+        CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
+
+        Table generatedRecommendationTable = new Table();
+        generatedRecommendationTable.addAttributes(Recommendation.getSchemaAttributes());
+
+        String tableName = "play_launch_"+UUID.randomUUID().toString().replaceAll("-", "_");
+        generatedRecommendationTable.setName(tableName);
+        generatedRecommendationTable.setTableType(TableType.DATATABLE);
+
+        generatedRecommendationTable.setDisplayName("Play Launch recommendation");
+        generatedRecommendationTable.setTenant(MultiTenantContext.getTenant());
+        generatedRecommendationTable.setTenantId(MultiTenantContext.getTenant().getPid());
+        generatedRecommendationTable.setMarkedForPurge(false);
+        metadataProxy.createTable(customerSpace.toString(), tableName, generatedRecommendationTable);
+
+        generatedRecommendationTable = metadataProxy.getTable(customerSpace.toString(), tableName);
+
+        return generatedRecommendationTable.getName();
     }
 
     private void validatePlayBeforeLaunch(Play play) {
