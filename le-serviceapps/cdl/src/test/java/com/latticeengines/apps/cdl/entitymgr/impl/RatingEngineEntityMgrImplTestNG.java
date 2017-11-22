@@ -18,11 +18,13 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.RatingEngineNoteEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -44,6 +46,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
+    @Inject
+    private RatingEngineNoteEntityMgr ratingEngineNoteEntityMgr;
+
     private RatingEngine ratingEngine;
 
     @BeforeClass(groups = "functional")
@@ -53,6 +58,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
+        ratingEngine.setNote(RATING_ENGINE_NOTE);
     }
 
     @Test(groups = "functional")
@@ -80,6 +86,13 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.INACTIVE);
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
+
+        // test rating engine note creation
+        List<RatingEngineNote> ratingEngineNotes = ratingEngineNoteEntityMgr.getAllByRatingEngine(createdRatingEngine);
+        Assert.assertNotNull(ratingEngineNotes);
+        Assert.assertEquals(ratingEngineNotes.size(), 1);
+        Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE);
+        log.info(String.format("Rating Engine Note is %s", ratingEngineNotes.get(0)));
 
         String createdRatingEngineStr = createdRatingEngine.toString();
         log.info("createdRatingEngineStr is " + createdRatingEngineStr);
@@ -144,7 +157,6 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // test update
         RatingEngine re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
-        re.setNote(RATING_ENGINE_NOTE);
         re.setStatus(RatingEngineStatus.ACTIVE);
         re.setId(ratingEngine.getId());
         re.setCountsByMap(ImmutableMap.of( //
@@ -159,7 +171,6 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
         Assert.assertNotNull(createdRatingEngine.getSegment());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
-        Assert.assertEquals(RATING_ENGINE_NOTE, createdRatingEngine.getNote());
         System.out.println("update date is " + updatedDate);
         System.out.println("The update date for the newly updated one is "
                 + ratingEngineEntityMgr.findById(ratingEngine.getId()).getUpdated());
@@ -176,7 +187,6 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(counts.get(RuleBucketName.A.getName()), new Long(1));
         Assert.assertEquals(counts.get(RuleBucketName.B.getName()), new Long(2));
         Assert.assertEquals(counts.get(RuleBucketName.C.getName()), new Long(3));
-
 
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
                 RatingEngineStatus.ACTIVE.name());

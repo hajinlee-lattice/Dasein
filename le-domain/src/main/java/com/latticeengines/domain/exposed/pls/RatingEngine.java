@@ -1,9 +1,11 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -26,13 +28,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -84,8 +85,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private String displayName;
 
     @JsonProperty("note")
-    @Column(name = "note", nullable = true)
-    @Type(type = "text")
+    @Transient
     private String note;
 
     @JsonProperty("type")
@@ -123,6 +123,12 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RatingModel> ratingModels = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE,
+            CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<RatingEngineNote> ratingEngineNotes;
 
     @Column(name = "COUNTS", length = 1000)
     @JsonIgnore
@@ -254,6 +260,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.lastRefreshedDate = lastRefreshedDate;
     }
 
+    @SuppressWarnings("unused")
     private String getCounts() {
         return counts;
     }
@@ -278,6 +285,22 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         } else {
             counts = JsonUtils.serialize(countMap);
         }
+    }
+
+    public List<RatingEngineNote> getRatingEngineNotes() {
+        return this.ratingEngineNotes;
+    }
+
+    public void setRatingEngineNotes(List<RatingEngineNote> ratingEngineNotes) {
+        this.ratingEngineNotes = ratingEngineNotes;
+    }
+
+    public void addRatingEngineNote(RatingEngineNote ratingEngineNote) {
+        if (this.ratingEngineNotes == null) {
+            this.ratingEngineNotes = new ArrayList<>();
+        }
+        ratingEngineNote.setRatingEngine(this);
+        this.ratingEngineNotes.add(ratingEngineNote);
     }
 
     @Override

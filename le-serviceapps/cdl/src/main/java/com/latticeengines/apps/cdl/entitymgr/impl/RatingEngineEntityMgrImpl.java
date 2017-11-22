@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -27,7 +28,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -130,9 +133,6 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         if (ratingEngine.getDisplayName() != null) {
             retrievedRatingEngine.setDisplayName(ratingEngine.getDisplayName());
         }
-        if (ratingEngine.getNote() != null) {
-            retrievedRatingEngine.setNote(ratingEngine.getNote());
-        }
         if (ratingEngine.getSegment() != null) {
             retrievedRatingEngine.setSegment(ratingEngine.getSegment());
         }
@@ -175,16 +175,30 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             if (ratingEngine.getStatus() == null) {
                 ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
             }
+            if (ratingEngine.getNote() != null) {
+                RatingEngineNote ratingEngineNote = new RatingEngineNote();
+                ratingEngineNote.setNotesContents(ratingEngine.getNote());
+                ratingEngineNote.setCreatedByUser(ratingEngine.getCreatedBy());
+                ratingEngineNote.setLastModifiedByUser(ratingEngine.getCreatedBy());
+
+                Long nowTimestamp = (new Date()).getTime();
+                ratingEngineNote.setCreationTimestamp(nowTimestamp);
+                ratingEngineNote.setLastModificationTimestamp(nowTimestamp);
+                ratingEngineNote.setRatingEngine(ratingEngine);
+                ratingEngineNote.setOrigin(NoteOrigin.NOTE.name());
+                ratingEngineNote.setId(UUID.randomUUID().toString());
+                ratingEngine.addRatingEngineNote(ratingEngineNote);
+            }
             ratingEngineDao.create(ratingEngine);
             break;
         case AI_BASED:
-        		
-        		AIModel aiModel = new AIModel();
-        		aiModel.setId(AIModel.generateIdStr());
-        		aiModel.setCreated(new Date());
-        		aiModel.setUpdated(new Date());
-        		ratingEngine.addRatingModel(aiModel);
-        		if (ratingEngine.getStatus() == null) {
+
+            AIModel aiModel = new AIModel();
+            aiModel.setId(AIModel.generateIdStr());
+            aiModel.setCreated(new Date());
+            aiModel.setUpdated(new Date());
+            ratingEngine.addRatingModel(aiModel);
+            if (ratingEngine.getStatus() == null) {
                 ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
             }
             ratingEngineDao.create(ratingEngine);

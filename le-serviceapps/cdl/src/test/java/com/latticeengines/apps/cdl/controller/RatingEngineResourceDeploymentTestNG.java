@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -16,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -34,8 +36,6 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     private static final String RATING_ENGINE_NOTE_1 = "This is a Rating Engine that covers North America market";
     @SuppressWarnings("unused")
     private static final String RATING_ENGINE_NAME_2 = "Rating Engine 1";
-    @SuppressWarnings("unused")
-    private static final String RATING_ENGINE_NOTE_2 = "This is a Rating Engine that covers East Asia market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
     private static final String ATTR1 = "Employ Number";
@@ -58,13 +58,15 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         MetadataSegment segment = constructSegment(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
         Assert.assertNotNull(createdSegment);
-        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
+                createdSegment.getName());
         log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
 
         re1 = new RatingEngine();
         re1.setSegment(retrievedSegment);
         re1.setCreatedBy(CREATED_BY);
         re1.setType(RatingEngineType.RULE_BASED);
+        re1.setNote(RATING_ENGINE_NOTE_1);
         re2 = new RatingEngine();
         re2.setSegment(retrievedSegment);
         re2.setCreatedBy(CREATED_BY);
@@ -74,13 +76,16 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Test(groups = "deployment")
     public void testCreate() {
         testCreate(re1);
+        testRatingEngineNoteCreation(re1, true);
         testCreate(re2);
+        testRatingEngineNoteCreation(re2, false);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
     public void testGet() {
         // test get all rating engine summary list
-        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId());
+        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
+                .getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 2);
         log.info("ratingEngineSummaries is " + ratingEngineSummaries);
@@ -106,9 +111,11 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummaries.size(), 2);
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "ACTIVE", null);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
-        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE", "RULE_BASED");
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE",
+                "RULE_BASED");
         Assert.assertEquals(ratingEngineSummaries.size(), 2);
-        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "ACTIVE", "RULE_BASED");
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "ACTIVE",
+                "RULE_BASED");
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), null, "AI_BASED");
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
@@ -133,27 +140,24 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
                 RatingRule.DEFAULT_BUCKET_NAME);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "testGet" })
     public void testUpdate() {
         // test update rating engine
         re1.setDisplayName(RATING_ENGINE_NAME_1);
-        re1.setNote(RATING_ENGINE_NOTE_1);
         re1.setStatus(RatingEngineStatus.ACTIVE);
         RatingEngine ratingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re1);
         Assert.assertNotNull(ratingEngine);
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
-        Assert.assertEquals(RATING_ENGINE_NOTE_1, ratingEngine.getNote());
         Assert.assertEquals(re1.getId(), ratingEngine.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
 
-        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId());
+        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
+                .getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 2);
 
         ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re1.getId());
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
-        Assert.assertEquals(RATING_ENGINE_NOTE_1, ratingEngine.getNote());
         Assert.assertEquals(ratingEngine.getId(), re1.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
 
@@ -215,6 +219,20 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
     }
 
+    private void testRatingEngineNoteCreation(RatingEngine ratingEngine, boolean shouldHaveRatingEngineNote) {
+        if (shouldHaveRatingEngineNote) {
+            List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),
+                    ratingEngine.getId());
+            Assert.assertNotNull(ratingEngineNotes);
+            Assert.assertEquals(ratingEngineNotes.size(), 1);
+            Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE_1);
+        } else {
+            List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),
+                    ratingEngine.getId());
+            Assert.assertTrue(CollectionUtils.isEmpty(ratingEngineNotes));
+        }
+    }
+
     private List<String> generateSeletedAttributes() {
         List<String> selectedAttributes = new ArrayList<>();
         selectedAttributes.add(ATTR1);
@@ -223,12 +241,12 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         return selectedAttributes;
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId());
         ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId());
-        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId());
+        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
+                .getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
     }

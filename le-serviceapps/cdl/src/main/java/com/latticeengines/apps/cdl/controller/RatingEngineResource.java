@@ -43,7 +43,8 @@ public class RatingEngineResource {
     private final RatingEngineNoteService ratingEngineNoteService;
 
     @Inject
-    public RatingEngineResource(RatingEngineService ratingEngineService, RatingEngineNoteService ratingEngineNoteService) {
+    public RatingEngineResource(RatingEngineService ratingEngineService,
+            RatingEngineNoteService ratingEngineNoteService) {
         this.ratingEngineService = ratingEngineService;
         this.ratingEngineNoteService = ratingEngineNoteService;
     }
@@ -52,9 +53,8 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
     public List<RatingEngineSummary> getRatingEngineSummaries( //
-                                                               @PathVariable String customerSpace,
-                                                               @RequestParam(value = "status", required = false) String status, //
-                                                               @RequestParam(value = "type", required = false) String type) {
+            @PathVariable String customerSpace, @RequestParam(value = "status", required = false) String status, //
+            @RequestParam(value = "type", required = false) String type) {
         return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(type, status);
     }
 
@@ -79,7 +79,6 @@ public class RatingEngineResource {
     public RatingEngine getRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingEngineById(ratingEngineId, true);
     }
-
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -107,7 +106,8 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/counts", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update rating engine counts")
-    public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+    public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId) {
         // TODO: to convert to PUT
         return ratingEngineService.updateRatingEngineCounts(ratingEngineId);
     }
@@ -122,15 +122,16 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel getRatingModel(@PathVariable String customerSpace, @PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
+    public RatingModel getRatingModel(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId) {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel updateRatingModel(@PathVariable String customerSpace, @RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
-                                         @PathVariable String ratingModelId) {
+    public RatingModel updateRatingModel(@PathVariable String customerSpace, @RequestBody RatingModel ratingModel,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
         return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
     }
 
@@ -145,16 +146,18 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one note for a certain rating engine.")
-    public boolean createNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId, @RequestBody NoteParams noteParams) {
+    public Boolean createNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+            @RequestBody NoteParams noteParams) {
         log.info(String.format("RatingEngineId=%s's note createdUser=%s", ratingEngineId, noteParams.getUserName()));
         ratingEngineNoteService.create(ratingEngineId, noteParams);
-        return true;
+        return Boolean.TRUE;
     }
 
     @RequestMapping(value = "/{ratingEngineId}/notes/{noteId}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a note from a certain rating engine via rating engine id and note id.")
-    public void deleteNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId, @PathVariable String noteId) {
+    public void deleteNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+            @PathVariable String noteId) {
         log.info(String.format("RatingEngineNoteId=%s deleted by user=%s", noteId,
                 MultiTenantContext.getEmailAddress()));
         ratingEngineNoteService.deleteById(noteId);
@@ -163,11 +166,11 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/notes/{noteId}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Update the content of a certain note via note id.")
-    public boolean updateNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId, @PathVariable String noteId,
-                              @RequestBody NoteParams noteParams) {
+    public Boolean updateNote(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+            @PathVariable String noteId, @RequestBody NoteParams noteParams) {
         log.info(String.format("RatingEngineNoteId=%s update by %s", noteId, noteParams.getUserName()));
         ratingEngineNoteService.updateById(noteId, noteParams);
-        return true;
+        return Boolean.TRUE;
     }
 
 }

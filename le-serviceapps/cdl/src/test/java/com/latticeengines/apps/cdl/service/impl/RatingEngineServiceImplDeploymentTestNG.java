@@ -17,11 +17,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -51,14 +53,17 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     private RatingEngineService ratingEngineService;
 
     @Inject
+    private RatingEngineNoteService ratingEngineNoteService;
+
+    @Inject
     private CDLTestDataService cdlTestDataService;
 
     private RatingEngine rbRatingEngine;
     private String rbRatingEngineId;
-    
+
     private RatingEngine aiRatingEngine;
     private String aiRatingEngineId;
-    
+
     private Date createdDate;
     private Date updatedDate;
 
@@ -66,14 +71,17 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     public void setup() throws KeyManagementException, NoSuchAlgorithmException, IOException {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId());
-        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), constructSegment(SEGMENT_NAME));
+        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
+                constructSegment(SEGMENT_NAME));
         Assert.assertNotNull(createdSegment);
-        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
+                createdSegment.getName());
         log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
         rbRatingEngine = new RatingEngine();
         rbRatingEngine.setSegment(retrievedSegment);
         rbRatingEngine.setCreatedBy(CREATED_BY);
         rbRatingEngine.setType(RatingEngineType.RULE_BASED);
+        rbRatingEngine.setNote(RATING_ENGINE_NOTE);
 
         aiRatingEngine = new RatingEngine();
         aiRatingEngine.setSegment(retrievedSegment);
@@ -99,7 +107,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         ratingEngineService.deleteById(createdRatingEngine.getId());
         createdRatingEngine = ratingEngineService.getRatingEngineById(rbRatingEngineId, false);
         Assert.assertNull(createdRatingEngine);
-        
+
         List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);
@@ -112,8 +120,8 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         assertRatingEngine(createdRatingEngine);
     }
 
-	protected void assertRatingEngine(RatingEngine createdRatingEngine) {
-		Assert.assertNotNull(createdRatingEngine);
+    protected void assertRatingEngine(RatingEngine createdRatingEngine) {
+        Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getId());
         rbRatingEngineId = createdRatingEngine.getId();
         Assert.assertNotNull(createdRatingEngine.getCreated());
@@ -121,13 +129,13 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(createdRatingEngine.getUpdated());
         updatedDate = createdRatingEngine.getUpdated();
         Assert.assertNotNull(createdRatingEngine.getDisplayName());
-        Assert.assertNull(createdRatingEngine.getNote());
-        
+        Assert.assertNotNull(createdRatingEngine.getNote());
+
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
         Assert.assertNotNull(createdRatingEngine.getRatingModels());
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
         Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
-	}
+    }
 
     private void testGet() {
         // test get a list
@@ -185,6 +193,12 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(createdRatingEngine);
         log.info("String is " + createdRatingEngineStr);
 
+        // test rating engine note creation
+        List<RatingEngineNote> ratingEngineNotes = ratingEngineNoteService.getAllByRatingEngineId(rbRatingEngineId);
+        Assert.assertNotNull(ratingEngineNotes);
+        Assert.assertEquals(ratingEngineNotes.size(), 1);
+        Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE);
+
         Set<RatingModel> ratingModels = createdRatingEngine.getRatingModels();
         Assert.assertNotNull(ratingModels);
         Assert.assertEquals(ratingModels.size(), 1);
@@ -200,11 +214,9 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
     private void testUpdateRatingEngine() {
         // test update rating engine
         rbRatingEngine.setDisplayName(RATING_ENGINE_NAME);
-        rbRatingEngine.setNote(RATING_ENGINE_NOTE);
         rbRatingEngine.setStatus(RatingEngineStatus.ACTIVE);
         RatingEngine createdRatingEngine = ratingEngineService.createOrUpdate(rbRatingEngine, mainTestTenant.getId());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
-        Assert.assertEquals(RATING_ENGINE_NOTE, createdRatingEngine.getNote());
         Assert.assertTrue(createdRatingEngine.getUpdated().after(updatedDate));
         log.info("Created date is " + createdDate);
         log.info("The create date for the newly updated one is " + createdRatingEngine.getCreated());

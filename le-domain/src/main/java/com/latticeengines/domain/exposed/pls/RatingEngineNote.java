@@ -1,11 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,10 +17,9 @@ public class RatingEngineNote extends Note {
 
     private static final long serialVersionUID = 1L;
 
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = false)
     @JsonIgnore
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private RatingEngine ratingEngine;
 
     public void setRatingEngine(RatingEngine ratingEngine) {
