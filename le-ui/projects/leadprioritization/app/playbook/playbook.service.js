@@ -480,6 +480,8 @@ angular.module('lp.playbook')
             url: this.host + '/play/launches/dashboard/',
             params: {
                 playName: params.playName,
+                sortby: params.sortby,
+                descending: params.descending,
                 startTimestamp: 0,
                 offset: params.offset || 0,
                 max: 10

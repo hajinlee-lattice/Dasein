@@ -13,8 +13,8 @@ angular.module('lp.playbook.dashboard.launch_history', [])
         current: 1,
         pagesize: 10,
         showPagination: false,
-        sortBy: 'launchTime',
-        sortDesc: false
+        sortBy: 'created',
+        sortDesc: true
     });
 
     vm.init = function() {
@@ -53,13 +53,31 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
     };
 
+    vm.sort = function(header) {
+
+        vm.sortBy = header;
+
+        var params = {
+            playName: $stateParams.play_name,
+            sortby: header,
+            descending: vm.sortDesc
+        };
+
+        console.log(vm.sortBy, vm.sortDesc);
+
+        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+            console.log(result);
+            vm.launches = result;
+        });
+    }
+
     vm.playSelectChange = function(play){
 
         console.log(play);
 
         var playName = null;
 
-        if(play === {}){
+        if(play === undefined){
             playName = null;
         } else {
             playName = play.undefined.name;

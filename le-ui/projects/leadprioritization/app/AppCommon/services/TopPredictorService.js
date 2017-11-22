@@ -563,13 +563,35 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
                 if (bucketToDisplay.name.indexOf(">") > -1) {
                     var lessThanBucketName = bucketToDisplay.name,
-                        removedLessThanCharacter = lessThanBucketName.substr(1);
+                        removedLessThanCharacter = lessThanBucketName.substr(1),
+                        million = (bucketToDisplay.name.indexOf("M") >= 0),
+                        billion = (bucketToDisplay.name.indexOf("B") >= 0),
+                        number = parseFloat(removedLessThanCharacter.replace(/,/g, ''));
 
-                    bucketToDisplay.SortProperty = parseFloat(removedLessThanCharacter.replace(/,/g, ''));
+                    if (toReturn.name === 'Revenue Range') {
+                        if (million === true) {
+                            sortValue = number * 1000000;
+                        } else if (billion === true) {
+                            sortValue = number * 1000000000;
+                        }
+                    }
+
+                    bucketToDisplay.SortProperty = sortValue;
+
                 } else if (bucketToDisplay.name.indexOf("-") > -1) {
-                    var values = bucketToDisplay.name.split('-'),
+                    var million = (bucketToDisplay.name.indexOf("M") >= 0),
+                        billion = (bucketToDisplay.name.indexOf("B") >= 0),
+                        values = bucketToDisplay.name.split('-'),
                         minValue = parseInt(values[0]),
                         maxValue = parseInt(values[1]);
+
+                    if (toReturn.name === 'Revenue Range') {
+                        if (million === true) {
+                            minValue = minValue * 1000000;
+                        } else if (billion === true) {
+                            minValue = minValue * 1000000000;
+                        }
+                    }
 
                     bucketToDisplay.SortProperty = minValue;
                 }

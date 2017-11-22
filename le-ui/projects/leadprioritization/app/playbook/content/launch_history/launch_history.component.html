@@ -51,63 +51,55 @@
     	<table>
     		<thead>
     			<tr>
-    				<th>
+
+    				<th class="sortable" ng-if="vm.allPlaysHistory" ng-click="vm.sort('created'); vm.sortDesc = !vm.sortDesc">
                         Launch Date
                         <i  aria-hidden="true" 
+                            ng-if="vm.allPlaysHistory"
                             ng-class="{
-                                'fa fa-sort': vm.sortBy != 'launchTime',
-                                'fa fa-sort-desc': vm.sortBy === 'launchTime' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'launchTime' && !vm.sortDesc}"></i>
+                                'fa fa-sort': vm.sortBy != 'created',
+                                'fa fa-sort-desc': vm.sortBy === 'created' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'created' && !vm.sortDesc}"></i>
                     </th>
                     <th ng-if="vm.allPlaysHistory">
                         Play Name
-                        <i  aria-hidden="true" 
+                        <!-- <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'playDisplayName',
                                 'fa fa-sort-desc': vm.sortBy === 'playDisplayName' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'playDisplayName' && !vm.sortDesc}"></i>
+                                'fa fa-sort-asc': vm.sortBy === 'playDisplayName' && !vm.sortDesc}"></i> -->
                     </th>
-    				<th>
+    				<th class="sortable" ng-click="vm.sort('accountsSelected'); vm.sortDesc = !vm.sortDesc">
                         Selected Targets
                         <i  aria-hidden="true" 
                             ng-class="{
-                                'fa fa-sort': vm.sortBy != 'stats.selectedTargets',
-                                'fa fa-sort-desc': vm.sortBy === 'stats.selectedTargets' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'stats.selectedTargets' && !vm.sortDesc}"></i>
+                                'fa fa-sort': vm.sortBy != 'accountsSelected',
+                                'fa fa-sort-desc': vm.sortBy === 'accountsSelected' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'accountsSelected' && !vm.sortDesc}"></i>
                    </th>
-    				<th>
+    				<th class="sortable" ng-click="vm.sort('accountsSuppressed'); vm.sortDesc = !vm.sortDesc">
                         Suppressed
                         <i  aria-hidden="true" 
                             ng-class="{
-                                'fa fa-sort': vm.sortBy != 'stats.suppressed',
-                                'fa fa-sort-desc': vm.sortBy === 'stats.suppressed' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'stats.suppressed' && !vm.sortDesc}"></i>
+                                'fa fa-sort': vm.sortBy != 'accountsSuppressed',
+                                'fa fa-sort-desc': vm.sortBy === 'accountsSuppressed' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'accountsSuppressed' && !vm.sortDesc}"></i>
                    </th>
-                    <th>
+                    <th class="sortable" ng-click="vm.sort('accountsErrored'); vm.sortDesc = !vm.sortDesc">
                         Errors
                         <i  aria-hidden="true" 
                             ng-class="{
-                                'fa fa-sort': vm.sortBy != 'stats.errors',
-                                'fa fa-sort-desc': vm.sortBy === 'stats.errors' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'stats.errors' && !vm.sortDesc}"></i>
+                                'fa fa-sort': vm.sortBy != 'accountsErrored',
+                                'fa fa-sort-desc': vm.sortBy === 'accountsErrored' && vm.sortDesc, 
+                                'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
                    </th>
     				<th>
                         Recommendation <br/>Launched
-                        <i  aria-hidden="true" 
-                            ng-class="{
-                                'fa fa-sort': vm.sortBy != 'stats.recommendationsLaunched',
-                                'fa fa-sort-desc': vm.sortBy === 'stats.recommendationsLaunched' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'stats.recommendationsLaunched' && !vm.sortDesc}"></i>
                    </th>
     				<th>
                         Contacts within <br/>Recommendation
-                        <i  aria-hidden="true" 
-                            ng-class="{
-                                'fa fa-sort': vm.sortBy != 'stats.contactsWithinRecommendations',
-                                'fa fa-sort-desc': vm.sortBy === 'stats.contactsWithinRecommendations' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'stats.contactsWithinRecommendations' && !vm.sortDesc}"></i>
                    </th>
-                    <th>
+                    <th class="sortable" ng-click="vm.sort('launchState'); vm.sortDesc = !vm.sortDesc">
                         Status
                         <i  aria-hidden="true" 
                             ng-class="{

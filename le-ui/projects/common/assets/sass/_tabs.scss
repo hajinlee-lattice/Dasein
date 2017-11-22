@@ -154,6 +154,15 @@ section.tabs.navigation:last-child,
                 background-color: #ffffff;
                 border-top-color: #457EBA;
             }
+            &.disabled {
+                & > a {
+                    color: #8e8e8e;
+                }
+                &:hover > a {
+                    border-top-color: transparent;
+                    background-color: #E2E3E5;
+                }
+            }
             
             &.active > a {
                 background-color: #fafafa;
