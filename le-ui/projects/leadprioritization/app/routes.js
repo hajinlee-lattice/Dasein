@@ -1,9 +1,26 @@
 angular
 .module('mainApp')
-.run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility, LookupStore, $timeout) {
+.service('StateChangeService', function() {
+    this.states = {
+        fromStates: [],
+        fromStatesParams: [],
+        toStates: [],
+        toStatesParams: []
+    };
+
+    this.getToState = function() {
+        return this.states.toStates[this.states.toStates.length - 1];
+    }
+})
+.run(function($rootScope, $state, ServiceErrorUtility, LookupStore, StateChangeService) {
     var self = this;
 
     $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
+        StateChangeService.states.toStates.push(toState);
+        StateChangeService.states.toStatesParams.push(params);
+        StateChangeService.states.fromStates.push(fromState);
+        StateChangeService.states.fromStatesParams.push(fromParams);
+
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
             event.preventDefault();

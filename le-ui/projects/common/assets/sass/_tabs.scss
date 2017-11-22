@@ -151,7 +151,7 @@ section.tabs.navigation:last-child,
             }
 
             &:hover > a {
-                background-color: #ffffff;
+                //background-color: #ffffff;
                 border-top-color: #457EBA;
             }
             &.disabled {
@@ -175,6 +175,11 @@ section.tabs.navigation:last-child,
 /*
 Chunky Interior Tabs (My Data, Play List, etc...)
 ================================================== */
+.tabs,
+.tabs * {
+    -webkit-transition: none;
+    transition: none;
+}
 .tabs.interior {
     @include flex-container;
     position: relative;
@@ -223,12 +228,15 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 border-right: 3px solid #F9F9F9;
             }
             &:hover {
-                background: #fff;
                 .tab-container {
                     border-top-color: #457EBA;
                     border-bottom-color: transparent;
-                    background: #fff;
                     z-index: 1;
+                }
+            }
+            &:active {
+                .tab-container {
+                    border-top-color: #ef6a30;
                 }
             }
             &.active {
@@ -346,11 +354,9 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 top: -1px;
                 font-size: 8px;
                 margin-left: 1em;
-                .tooltip_ {
+                text-transform: none;
+                .tooltip_{
                     text-align: left;
-                    h3 {
-                        margin-bottom: 25px;
-                    }
                 }
             }
         }

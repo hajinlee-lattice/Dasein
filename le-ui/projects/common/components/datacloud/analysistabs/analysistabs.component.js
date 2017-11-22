@@ -1,6 +1,6 @@
 angular.module('common.datacloud.analysistabs', [])
 .controller('AnalysisTabsController', function (
-    $state, $stateParams, FeatureFlagService, DataCloudStore, QueryStore
+    $state, $stateParams, FeatureFlagService, DataCloudStore, QueryStore, StateChangeService
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -38,10 +38,7 @@ angular.module('common.datacloud.analysistabs', [])
         var all = [];
 
         ['accountRestriction','contactRestriction'].forEach(function(source) {
-
-            // console.log(source);
             if (QueryStore[source].restriction) {
-                // console.log(QueryStore[source].restriction);
                 buckets = QueryStore.getAllBuckets(QueryStore[source].restriction.logicalRestriction.restrictions)
                 all = [].concat(all, buckets);
             }
@@ -55,10 +52,12 @@ angular.module('common.datacloud.analysistabs', [])
             'home.model.analysis.explorer.builder':'builder',
             'home.segment.explorer.builder':'builder',
             'home.model.analysis.explorer.attributes':'attributes',
-            'home.segment.explorer.attributes':'attributes'
+            'home.segment.explorer.attributes':'attributes',
+            'home.segment.accounts':'accounts',
+            'home.segment.contacts':'contacts'
         };
 
-        return map[$state.current.name] == type;
+        return map[StateChangeService.getToState().name] == type;
     }
 
     vm.setStateParams = function(section) {
@@ -91,6 +90,10 @@ angular.module('common.datacloud.analysistabs', [])
 
     vm.ifInModel = function(model, not) {
         return vm.inModel() ? model : not;
+    }
+
+    vm.go = function(state) {
+        $state.go(state);
     }
 
     vm.init();

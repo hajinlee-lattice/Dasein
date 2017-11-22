@@ -24,27 +24,39 @@
         float: right;
         clear: both;
         
-        a.recent-link {
+        .recent-link {
             position: relative;
             display: block;
             font-size: 0.95em;
             text-overflow: ellipsis;
-            max-width: 13em;
+            max-width: 14em;
             text-align: right;
-            padding: 0.4em 0em .3em;
-            border-bottom: 1px dotted #aaa;
+            padding: 0.333em 0.4em;
             overflow: hidden;
+            color: #222;
+            -webkit-transition: none;
+            transition: none;
+            
+            &:nth-child(odd) {
+                background: #f9f9f9;
+            }
+
+            &:first-child {
+                border-top: 2px solid #d0d0d0 ;
+            }
             
             &:last-child {
                 border-bottom: none;
             }
 
             &.default:hover {
-                font-weight: bold;
+                background: #65b7e5;
+                color: white;
             }
             
             &.default:active {
-                color: #333;
+                background: #3989c4;
+                cursor: default;
             }
             
             .fa-spinner {

@@ -1610,15 +1610,15 @@ angular.module('common.datacloud.explorer', [
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
         });
     }
-
-    vm.getAttributeUseCount = function(attribute) {
+    
+    vm.getAttributeRules = function(attribute) {
         var attributes = QueryStore.getDataCloudAttributes(true);
 
         attributes = attributes.filter(function(item) {
             return item.bucketRestriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId);
         });
 
-        return attributes.length;
+        return attributes;
     }
 
     vm.init();

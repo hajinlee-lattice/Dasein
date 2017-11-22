@@ -275,22 +275,26 @@ tooltip {
   }
 }
 
+
+.show-tooltip,
+.more-info {
+    pointer-events: all !important;
+}
+
+.show-tooltip,
 .more-info {
     position: relative;
     cursor: default;
-    &:hover {
-        .tooltip_ {
-            display: block;
-        }
+    &:hover > .tooltip_ {
+        display: block;
     }
-    .tooltip_ {
+    > .tooltip_ {
         @include box-shadow(0);
         display: none;
         position: absolute;
-        top: calc(100% + 11px);
         left: 50%;
         transform: translateX(-50%);
-        width: 325px;
+        width: 280px;
         font-weight: normal;
         font-size: 125%;
         h5 {
@@ -298,14 +302,41 @@ tooltip {
             margin-bottom: 1em;
         }
         p {
-            margin-bottom: 25px;
+            margin-bottom: .5em;
+            color: #a0a0a0;
+            line-height: 1.2em;
+            font-size: 12px;
             &:last-child {
                 margin-bottom: 0;
             }
         }
+        h3 {
+            color: #fff;
+            text-transform: none;
+            font-size: 18px;
+            font-weight: normal;
+            margin-bottom: .1em;
+        }
+        em {
+            color: #fff;
+            width: auto;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 1.2em;
+            height: auto;
+        }
+        ul {
+            color: #666;
+            list-style: disc inside none;
+            li {
+                color: #ccc;
+                line-height: 1.2em;
+                font-size: 12px;
+            }
+        }
         & > .cover {
             background-color: #222831;
-            border-radius: 6px;
+            border-radius: 2px;
             overflow: hidden;
             position: relative;
             z-index: 20;
@@ -319,7 +350,6 @@ tooltip {
             display: block;
             position: absolute;
             left: calc(50% - 10px);
-            top: -9px;
             height: 20px;
             width: 20px;
             background: #222831;
@@ -331,12 +361,54 @@ tooltip {
             display: block;
             position: absolute;
             left: calc(50% - 10px);
-            top: -9px;
             height: 20px;
             width: 20px;
             background: inherit;
             transform: rotate(45deg);
             z-index: 10;
         }
+    }
+    &.left > .tooltip_ {
+        left: 25%;
+        transform: translateX(-25%);
+        
+        &:after,
+        &:before {
+            left: calc(25% - 8px);
+        }
+    }
+    &:not(.top) > .tooltip_ {
+        top: calc(100% + 15px);
+        
+        &:after,
+        &:before {
+            top: -9px;
+        }
+    }
+    &.top > .tooltip_ {
+        bottom: calc(1.5em + 11px);
+        
+        &:after,
+        &:before {
+            bottom: -9px;
+        }
+    }
+    &.delay {
+        div.tooltip_ {
+            -webkit-transition: opacity 0ms ease 0ms;
+            transition: opacity 0ms ease 0ms;
+        }
+        div.tooltip_ {
+            opacity: 0;
+            pointer-events: none;
+            display: block;
+
+            p, div.cover, h2, h3 { }
+        }
+        &:hover div.tooltip_ {
+            opacity: 1;
+            z-index: 5;
+            -webkit-transition: opacity 333ms ease 1000ms;
+        }                           
     }
 }

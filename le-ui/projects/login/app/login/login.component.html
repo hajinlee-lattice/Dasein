@@ -6,7 +6,9 @@
                 <img src="/login/assets/images/logo_login.png" alt="Lattice">
                 <ul class="user-info" ng-if="$ctrl.login.username">
                     <li class="label">username</li>
-                    <li class="value">{{$ctrl.login.username}}</li>
+                    <li class="value">
+                        <span class="recent-link">{{$ctrl.login.username}}</span>
+                    </li>
                     <li class="label">
                         <span 
                             ui-sref="login.update" 
@@ -15,13 +17,17 @@
                         password
                     </li>
                     <li class="value" ng-if="$ctrl.login.alreadyExpired && $ctrl.login.expireDays > 0">
-                        expired {{$ctrl.login.expireDays}} days ago</li>
+                        <span class="recent-link">expired {{$ctrl.login.expireDays}} days ago</span>
+                    </li>
                     <li class="value" ng-if="$ctrl.login.alreadyExpired && $ctrl.login.expireDays == 0">
-                        expired today</li>
+                        <span class="recent-link">expired today</span>
+                    </li>
                     <li class="value" ng-if="!$ctrl.login.alreadyExpired && $ctrl.login.expireDays > 90">
-                        expires on {{$ctrl.login.expires | date:'MM/dd/yyyy'}}</li>
+                        <span class="recent-link">expires on {{$ctrl.login.expires | date:'MM/dd/yyyy'}}</span>
+                    </li>
                     <li class="value" ng-if="!$ctrl.login.alreadyExpired && $ctrl.login.expireDays <= 90">
-                        expires in {{$ctrl.login.expireDays}} days</li>
+                        <span class="recent-link">expires in {{$ctrl.login.expireDays}} days</span>
+                    </li>
                     <li class="label" ng-if="$ctrl.login.tenant">
                         <span 
                             ui-sref="login.tenants" 

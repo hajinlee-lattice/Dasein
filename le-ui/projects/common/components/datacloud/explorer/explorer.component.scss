@@ -1076,7 +1076,7 @@
                         display: block;
                     }
                 }
-                & > .column {
+                & > div.column {
                     @include flex-item(1 1 auto);
                     padding: 0;
                     &.checkspace {
