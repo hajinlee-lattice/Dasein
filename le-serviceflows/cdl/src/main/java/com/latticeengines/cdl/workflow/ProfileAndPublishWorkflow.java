@@ -3,10 +3,12 @@ package com.latticeengines.cdl.workflow;
 import javax.inject.Inject;
 
 import org.springframework.batch.core.Job;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.ProfileAndPublishListener;
+import com.latticeengines.cdl.workflow.steps.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.FinishProfile;
 import com.latticeengines.cdl.workflow.steps.StartProfile;
 import com.latticeengines.cdl.workflow.steps.UpdateStatsObjects;
@@ -45,6 +47,9 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
     @Inject
     private FinishProfile finishProfile;
 
+    @Autowired
+    private AwsApsGeneratorStep apsGenerator;
+
     @Bean
     public Job calculateStatsWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -58,6 +63,7 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
                 .next(sortContactWrapper)//
                 .next(sortProductWrapper) //
                 .next(calculatePurchaseHistoryWrapper)//
+                .next(apsGenerator)//
                 .next(updateStatsObjects) //
                 .next(redshiftPublishWorkflow) //
                 .next(finishProfile) //

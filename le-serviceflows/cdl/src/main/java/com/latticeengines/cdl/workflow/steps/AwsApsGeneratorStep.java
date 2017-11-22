@@ -15,6 +15,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
@@ -52,23 +53,17 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
 
     @Override
     protected void setupConfig(AWSPythonBatchConfiguration config) {
-        Table aggrTable = getObjectFromContext(ConsolidateTransactionData.AGGREGATE_TABLE_KEY, Table.class);
-        if (!apsEnabled || aggrTable == null) {
-            log.info("There's no need for AggregatedTransaction");
+        Table periodTable = dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
+                TableRoleInCollection.ConsolidatedPeriodTransaction);
+        if (periodTable == null) {
+            log.warn("There's not metadata table for period aggregated table!");
             return;
         }
-        // Table transactionTable =
-        // dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
-        // TableRoleInCollection.AggregatedTransaction);
-        // if (transactionTable == null) {
-        // log.warn("There's not metadata table for AggregatedTransaction");
-        // return;
-        // }
         /*
          * config.setInputPaths(Arrays.asList("/Pods/Aps/input/*.avro"));
          * config.setOutputPath("/Pods/Aps/output");
          */
-        List<String> inputPaths = getInputPaths(aggrTable);
+        List<String> inputPaths = getInputPaths(periodTable);
         config.setInputPaths(inputPaths);
         String hdfsPath = getOutputPath(config);
         config.setOutputPath(hdfsPath);
