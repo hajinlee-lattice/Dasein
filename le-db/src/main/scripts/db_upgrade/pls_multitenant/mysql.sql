@@ -40,6 +40,14 @@ CREATE PROCEDURE `UpdateCDLTables`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdatePlayTables`()
+    BEGIN
+        ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
+            ADD COLUMN `TABLE_NAME` varchar(255);
+    END;
+//
+DELIMITER ;
+
 CREATE PROCEDURE `UpdateSegmentExportTables`()
     BEGIN
         CREATE TABLE `METADATA_SEGMENT_EXPORT` (
@@ -174,6 +182,7 @@ CREATE PROCEDURE `UpdateSchema`()
     BEGIN
         START TRANSACTION;
         CALL `UpdateCDLTables`();
+        CALL `UpdatePlayTables`();
         CALL `UpdateSegmentExportTables`();
         CALL `UpdateNoteTables`();
         CALL `UpdateMetadataAttribute`();
