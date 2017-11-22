@@ -277,6 +277,7 @@ public class CalculateStatsStep extends ProfileStepBase<CalculateStatsStepConfig
                 attr.setDescription(latticeIdCm.getDescription());
                 attr.setFundamentalType(FundamentalType.NUMERIC);
                 attr.setCategory(latticeIdCm.getCategory());
+                attr.setGroupsViaList(latticeIdCm.getGroups());
                 count.incrementAndGet();
             } else if (amColMap.containsKey(attr.getName())) {
                 ColumnMetadata cm = amColMap.get(attr.getName());

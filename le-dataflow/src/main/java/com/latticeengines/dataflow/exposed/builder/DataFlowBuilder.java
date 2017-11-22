@@ -2,9 +2,11 @@ package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -13,6 +15,8 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.HdfsStorage;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 public abstract class DataFlowBuilder {
@@ -221,6 +226,13 @@ public abstract class DataFlowBuilder {
                 if (fm.getPropertyValue("enumValues") != null) {
                     fm.setPropertyValue("enumValues", attribute.getCleanedUpEnumValuesAsString());
                 }
+                if (fm.getPropertyValue("groups") != null) {
+                    String groups = CollectionUtils.isNotEmpty(attribute.getGroupsAsList())
+                            ? StringUtils.join(attribute.getGroupsAsList(), ",") : null;
+                    if (StringUtils.isNotBlank(groups)) {
+                        fm.setPropertyValue("groups", groups);
+                    }
+                }
                 fm.setNullable(attribute.getNullable());
 
                 Map<String, Object> properties = attribute.getProperties();
@@ -274,6 +286,14 @@ public abstract class DataFlowBuilder {
                     attribute.setScale(Integer.parseInt(fm.getPropertyValue("scale")));
                 }
                 attribute.setCleanedUpEnumValuesAsString(fm.getPropertyValue("enumValues"));
+
+                if (StringUtils.isNotBlank(fm.getPropertyValue("groups"))) {
+                    List<ColumnSelection.Predefined> groups = Arrays.stream(fm.getPropertyValue("groups").split(","))
+                            .map(ColumnSelection.Predefined::fromName).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(groups)) {
+                        attribute.setGroupsViaList(groups);
+                    }
+                }
 
                 AttributeUtils.setPropertiesFromStrings(attribute, fm.getProperties());
 
