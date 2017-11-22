@@ -25,6 +25,17 @@ CREATE PROCEDURE `UpdateCDLTables`()
 
         ALTER TABLE `PLS_MultiTenant`.`SOURCE_FILE`
             CHANGE COLUMN `ENTITY_EXTERNAL_TYPE` `BUSINESS_ENTITY` VARCHAR(255);
+            
+        ALTER TABLE `PLS_MultiTenant`.`AI_MODEL`
+            ADD COLUMN `MODELING_CONFIG_FILTERS` longtext,
+            ADD COLUMN `MODELING_JOBID` varchar(255),
+            ADD COLUMN `TARGET_CUSTOMER_SET` varchar(255),
+		    ADD COLUMN `TARGET_PRODUCTS` longtext,
+		    ADD COLUMN `WORKFLOW_TYPE` varchar(255),
+		    ADD COLUMN `FK_TRAINING_SEGMENT_ID` bigint;
+		    
+		ALTER TABLE `PLS_MultiTenant`.`AI_MODEL` ADD CONSTRAINT `FKk2ahhvijs5146b4g5e9jrgeuq` foreign key (`FK_TRAINING_SEGMENT_ID`) references `PLS_MultiTenant`.`METADATA_SEGMENT` (`PID`) on delete cascade;
+    
     END;
 //
 DELIMITER ;
