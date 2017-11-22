@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -83,6 +84,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -938,7 +940,7 @@ public class InternalResource extends InternalResourceBase {
                 if (user.getEmail().equals(export.getCreatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     if (export != null) {
-                        String url =  appPublicUrl + "/lp/tenant/" + tenantName + "/export/" + exportID;
+                        String url = appPublicUrl + "/lp/tenant/" + tenantName + "/export/" + exportID;
                         if (result.equals("COMPLETED")) {
                             emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType,
                                     export.getCleanupBy());
@@ -1473,7 +1475,8 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         // return dataLakeService.getAttributesInPredefinedGroup(predefined);
         // Todo: jlm Uncomment when attribute groups are supported
-        return dataLakeService.getAttributes(0, 50);
+        return dataLakeService.getAttributes(0, 50).stream().filter(col -> col.getEntity() == BusinessEntity.Account)
+                .collect(Collectors.toList());
     }
 
 }
