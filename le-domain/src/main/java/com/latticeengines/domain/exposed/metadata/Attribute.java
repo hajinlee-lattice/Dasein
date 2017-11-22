@@ -347,7 +347,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.groups = groups;
     }
 
-    @JsonProperty("Groups")
+    @JsonProperty("groups")
     public List<ColumnSelection.Predefined> getGroupsAsList() {
         if (StringUtils.isNotBlank(groups)) {
             return Arrays.stream(groups.split(",")) //
@@ -358,7 +358,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
     }
 
-    @JsonProperty("Groups")
+    @JsonProperty("groups")
     public void setGroupsViaList(List<ColumnSelection.Predefined> groupList) {
         if (groupList == null || groupList.isEmpty()) {
             this.groups = null;
