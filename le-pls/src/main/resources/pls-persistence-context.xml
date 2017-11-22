@@ -24,7 +24,7 @@
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.globally_quoted_identifiers">true</prop>
             </props>
         </property>
@@ -49,7 +49,7 @@
 		<property name="jpaProperties">
           <props>
             <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-            <prop key="hibernate.show_sql">true</prop>
+            <prop key="hibernate.show_sql">false</prop>
             <prop key="hibernate.globally_quoted_identifiers">true</prop>
             <prop key="hibernate.id.new_generator_mappings">true</prop>
             <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
