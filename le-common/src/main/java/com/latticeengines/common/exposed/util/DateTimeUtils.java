@@ -1,5 +1,8 @@
 package com.latticeengines.common.exposed.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -9,6 +12,7 @@ import java.util.TimeZone;
 
 public class DateTimeUtils {
 
+    private static Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
     private static Long earliest;
     private static Long latest;
@@ -68,17 +72,26 @@ public class DateTimeUtils {
             int year = Integer.parseInt(dateUnits[0]);
             int month = Integer.parseInt(dateUnits[1]);
             int day = Integer.parseInt(dateUnits[2]);
-            int dayPeriod = (year - 1900) * 12 * 31 + month * 31 + day;
+            int dayPeriod = (year - 1900) * 13 * 32 + month * 32 + day;
+            log.info("Date to day period " + dateString + " " + dayPeriod);
             return new Integer(dayPeriod);
         } catch (Exception e) {
+            log.error("Failed to convert " + dateString + " to period", e);
             return null;
         }
     }
 
     public static String dayPeriodToDate(Integer dayPeriod) {
-        int year = dayPeriod / (12 * 31);
-        int month = (dayPeriod / 31) % 12;
-        int day = dayPeriod % 31;
+        if (dayPeriod == null) {
+            log.info("Got null period");
+            return null;
+        }
+        int year = dayPeriod / (13 * 32);
+        int month = (dayPeriod / 32) % 13;
+        if (month == 0) {
+            log.error("Invalid month for period " + dayPeriod);
+        }
+        int day = dayPeriod % 32;
         String monthStr = (month < 10) ? "0" + month : month + "";
         String dayStr = (day < 10) ? "0" + day : day + "";
         String result = (year + 1900) + "-" + monthStr + "-" + dayStr;

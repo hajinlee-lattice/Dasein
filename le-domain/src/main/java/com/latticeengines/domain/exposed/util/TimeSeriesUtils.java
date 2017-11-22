@@ -33,7 +33,7 @@ public class TimeSeriesUtils {
 
     public static Set<Integer> collectPeriods(YarnConfiguration yarnConfiguration, String avroDir, String periodField) {
 
-        avroDir = standardizeAvroDir(avroDir);
+        avroDir = getPath(avroDir) + "/*.avro";
         log.info("Collect " + periodField + " periods from " + avroDir);
         Set<Integer> periodSet = new HashSet<Integer>();
         try {
@@ -51,6 +51,7 @@ public class TimeSeriesUtils {
     }
 
     public static void cleanupPeriodData(YarnConfiguration yarnConfiguration, String avroDir, Set<Integer> periods) {
+        avroDir = getPath(avroDir);
         log.info("Clean periods from " + avroDir);
         try {
             List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
@@ -80,15 +81,21 @@ public class TimeSeriesUtils {
         cleanupPeriodData(yarnConfiguration, avroDir, null);
     }
 
-    private static String standardizeAvroDir(String avroDir) {
-        avroDir = avroDir.trim();
-        if (!avroDir.endsWith("*.avro")) {
-            if (avroDir.endsWith("/")) {
-                avroDir = avroDir + "*.avro";
-            } else {
-                avroDir = avroDir + "/*.avro";
+    private static String getPath(String avroDir) {
+        log.info("Get avro path input " + avroDir);
+        if (!avroDir.endsWith(".avro")) {
+            return avroDir;
+        } else {
+            String[] dirs = avroDir.trim().split("/");
+            avroDir = "";
+            for (int i = 0; i < (dirs.length - 1); i++) {
+                log.info("Get avro path dir " + dirs[i]);
+                if (!dirs[i].isEmpty()) {
+                    avroDir = avroDir + "/" + dirs[i];
+                }
             }
         }
+        log.info("Get avro path output " + avroDir);
         return avroDir;
     }
 
@@ -100,6 +107,8 @@ public class TimeSeriesUtils {
     public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir, Set<Integer> periods,
                                          PeriodStrategy periodStrategy, String earliestTransaction) {
         PeriodBuilder periodBuilder = null;
+        avroDir = getPath(avroDir);
+        targetDir = getPath(targetDir);
         log.info("Collect period data from " + avroDir + " to " + targetDir);
 
         if (periodStrategy != null) {
@@ -112,6 +121,10 @@ public class TimeSeriesUtils {
                 String[] dirs = fileName.split("/");
                 String avroName = dirs[dirs.length - 1];
                 Integer period = getPeriodFromFileName(avroName);
+                log.info("Collect period data from file " + avroName + " period " + period);
+                if (period == null) {
+                    continue;
+                }
                 if (periodBuilder != null) {
                     period = new Integer(periodBuilder.toPeriodId(DateTimeUtils.dayPeriodToDate(period)));
                 }
@@ -125,7 +138,8 @@ public class TimeSeriesUtils {
     }
 
     public static boolean distributePeriodData(YarnConfiguration yarnConfiguration, String inputDir, String targetDir, Set<Integer> periods, String periodField) {
-        inputDir = standardizeAvroDir(inputDir);
+        inputDir = getPath(inputDir) + "/*.avro";
+        targetDir = getPath(targetDir);
         log.info("Dritribute period data from " + inputDir + " to " + targetDir);
         Map<Integer, String> periodFileMap = new HashMap<Integer, String>();
         for (Integer period : periods) {
@@ -160,6 +174,7 @@ public class TimeSeriesUtils {
     public static Integer getEarliestPeriod(YarnConfiguration yarnConfiguration, Table transactionTable) {
         try {
             String avroDir = transactionTable.getExtracts().get(0).getPath();
+            avroDir = getPath(avroDir);
             log.info("Looking for earliest period table " + transactionTable.getName() + " path " + avroDir); 
             List<String>  avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
             Collections.sort(avroFiles);
