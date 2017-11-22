@@ -107,7 +107,8 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(PID,IngestionName,Config,CronExpression,SchedularEnabled,NewJobRetryInterval,NewJobMaxRetry,IngestionType);
+(PID,IngestionName,Config,CronExpression,@var1,NewJobRetryInterval,NewJobMaxRetry,IngestionType)
+SET SchedularEnabled = (@var1 = 'True' OR @var1 = 1);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CategoricalDimension.csv' INTO TABLE `CategoricalDimension`
 FIELDS TERMINATED BY ','

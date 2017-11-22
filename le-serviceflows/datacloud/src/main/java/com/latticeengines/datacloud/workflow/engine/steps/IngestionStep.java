@@ -1,65 +1,21 @@
 package com.latticeengines.datacloud.workflow.engine.steps;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import javax.annotation.Resource;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.codehaus.plexus.util.StringUtils;
-import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
-import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
-import com.latticeengines.datacloud.etl.service.SourceService;
-import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.datacloud.EngineConstants;
-import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionProviderService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
-import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
-import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.yarn.exposed.service.JobService;
 
@@ -68,40 +24,22 @@ import com.latticeengines.yarn.exposed.service.JobService;
 public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(IngestionStep.class);
 
-    private IngestionProgress progress;
-
     @Autowired
     private IngestionProgressService ingestionProgressService;
 
-    @Autowired
-    private IngestionVersionService ingestionVersionService;
+    @Resource(name = "ingestionSFTPProviderService")
+    private IngestionProviderService ingestionSFTPProviderService;
 
-    @Autowired
-    private EaiProxy eaiProxy;
+    @Resource(name = "ingestionAPIProviderService")
+    private IngestionProviderService ingestionAPIProviderService;
 
-    @Autowired
-    private SqoopProxy sqoopProxy;
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private SourceService sourceService;
-
-    @Autowired
-    private EmailService emailService;
+    @Resource(name = "ingestionSQLProviderService")
+    private IngestionProviderService ingestionSQLProviderService;
 
     @Autowired
     protected JobService jobService;
 
-    private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(24);
-
-    private static final String sqoopPrefix = "part-m-";
-    private static final String SQOOP_OPTION_WHERE = "--where";
-    private static final String TMP_PREFIX = "TMP_";
+    private IngestionProgress progress;
 
     @Override
     public void execute() {
@@ -115,379 +53,28 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             progress.setIngestion(ingestion);
             switch (progress.getIngestion().getIngestionType()) {
             case SFTP:
-                ingestFromSftp();
+                ingestionSFTPProviderService.ingest(progress);
                 break;
             case API:
-                ingestByApi();
+                ingestionAPIProviderService.ingest(progress);
                 break;
             case SQL_TO_CSVGZ:
-                ingestBySqoopToCSVGZ();
-                break;
             case SQL_TO_SOURCE:
-                ingestBySqoopToSource();
+                ingestionSQLProviderService.ingest(progress);
                 break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
             }
-
             log.info("Exiting IngestionStep execute()");
         } catch (Exception e) {
             failByException(e);
         }
     }
 
-    private void ingestByApi() throws Exception {
-        try {
-            Path ingestionDir = new Path(progress.getDestination()).getParent();
-            if (HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())) {
-                HdfsUtils.rmdir(yarnConfiguration, ingestionDir.toString());
-            }
-            ApiConfiguration apiConfig = (ApiConfiguration) progress.getIngestion().getProviderConfiguration();
-            log.info(String.format("Downloading from %s ...", apiConfig.getFileUrl()));
-            URL url = new URL(apiConfig.getFileUrl());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.connect();
-            InputStream connStream = conn.getInputStream();
-            FileSystem hdfs = FileSystem.get(yarnConfiguration);
-            FSDataOutputStream outStream = hdfs.create(new Path(progress.getDestination()));
-            IOUtils.copy(connStream, outStream);
-            outStream.close();
-            connStream.close();
-            conn.disconnect();
-            log.info("Download completed");
-            Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
-            progress = ingestionProgressService.updateProgress(progress).size(size).status(ProgressStatus.FINISHED)
-                    .commit(true);
-            checkCompleteVersionFromApi(progress.getIngestion(), progress.getVersion());
-        } catch (Exception e) {
-            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
-            log.error(String.format("Ingestion failed of exception %s. Progress: %s", e.getMessage(),
-                    progress.toString()));
-        }
-    }
-
-    @SuppressWarnings("static-access")
-    private void checkCompleteVersionFromApi(Ingestion ingestion, String version) {
-        ApiConfiguration apiConfig = (ApiConfiguration) ingestion.getProviderConfiguration();
-        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder
-                .constructIngestionDir(ingestion.getIngestionName(), version);
-        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
-                return;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
-                    hdfsDir.toString()), e);
-        }
-        Path file = new Path(hdfsDir.toString(), apiConfig.getFileName());
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, file.toString())) {
-                HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-                emailNotify(apiConfig, ingestion.getIngestionName(), version, hdfsDir.toString());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to check %s in HDFS or create %s in HDFS dir %s",
-                    file.toString(), hdfsPathBuilder.SUCCESS_FILE, hdfsDir.toString()), e);
-        }
-        ingestionVersionService.updateCurrentVersion(ingestion, version);
-    }
-
-    private void ingestFromSftp() throws Exception {
-        String destFile = progress.getDestination();
-        // Multiple jobs could be running at same time to download files to same
-        // folder.
-        // To avoid violation, download file to unique tmp folder first.
-        Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(),
-                TMP_PREFIX + UUID.randomUUID().toString());
-        Path tmpDestFile = new Path(tmpDestDir, new Path(progress.getDestination()).getName());
-        progress.setDestination(tmpDestFile.toString());
-        CamelRouteConfiguration camelRouteConfig = ingestionProgressService.createCamelRouteConfiguration(progress);
-        progress.setDestination(destFile);
-        AppSubmission submission = eaiProxy.submitEaiJob(camelRouteConfig);
-        String eaiAppId = submission.getApplicationIds().get(0);
-        log.info("EAI Service ApplicationId: " + eaiAppId);
-        JobStatus finalStatus = jobService.waitFinalJobStatus(eaiAppId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
-        if (finalStatus.getStatus() == FinalApplicationStatus.SUCCEEDED
-                && waitForFileToBeDownloaded(tmpDestFile.toString())) {
-            HdfsUtils.moveFile(yarnConfiguration, tmpDestFile.toString(), progress.getDestination());
-            Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
-            progress = ingestionProgressService.updateProgress(progress).size(size).status(ProgressStatus.FINISHED)
-                    .commit(true);
-            HdfsUtils.rmdir(yarnConfiguration, tmpDestDir.toString());
-            log.info("Ingestion finished. Progress: " + progress.toString());
-            checkCompleteVersionFromSftp(progress.getIngestion(), progress.getVersion());
-        } else {
-            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
-            log.error("Ingestion failed. Progress: " + progress.toString());
-        }
-
-    }
-
-    @SuppressWarnings("static-access")
-    private void checkCompleteVersionFromSftp(Ingestion ingestion, String version) {
-        SftpConfiguration sftpConfig = (SftpConfiguration) progress.getIngestion().getProviderConfiguration();
-        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder
-                .constructIngestionDir(ingestion.getIngestionName(), version);
-        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
-                return;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
-                    hdfsDir.toString()), e);
-        }
-
-        String fileNamePattern = ingestionVersionService.getFileNamePattern(version, sftpConfig.getFileNamePrefix(),
-                sftpConfig.getFileNamePostfix(), sftpConfig.getFileExtension(), sftpConfig.getFileTimestamp());
-        List<String> sftpFiles = SftpUtils.getFileNames(sftpConfig, fileNamePattern);
-
-        List<String> hdfsFiles = getHdfsFileNamesByExtension(hdfsDir.toString(), sftpConfig.getFileExtension());
-        if (sftpFiles.size() > hdfsFiles.size()) {
-            return;
-        }
-        Set<String> hdfsFileSet = new HashSet<>(hdfsFiles);
-        for (String sftpFile : sftpFiles) {
-            if (!hdfsFileSet.contains(sftpFile)) {
-                return;
-            }
-        }
-
-        try {
-            HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-            Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(), TMP_PREFIX + "*");
-            HdfsUtils.rmdir(yarnConfiguration, tmpDestDir.toString());
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s and delete all tmp dirs",
-                    hdfsPathBuilder.SUCCESS_FILE, hdfsDir.toString()), e);
-        }
-        emailNotify(sftpConfig, ingestion.getIngestionName(), version, hdfsDir.toString());
-        ingestionVersionService.updateCurrentVersion(ingestion, version);
-    }
-
-    private List<String> getHdfsFileNamesByExtension(String hdfsDir, final String fileExtension) {
-        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
-            @Override
-            public boolean accept(String filename) {
-                return filename.endsWith(fileExtension);
-            }
-        };
-        List<String> result = new ArrayList<String>();
-        try {
-            if (HdfsUtils.isDirectory(yarnConfiguration, hdfsDir.toString())) {
-                List<String> hdfsFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filter);
-                if (!CollectionUtils.isEmpty(hdfsFiles)) {
-                    for (String fullName : hdfsFiles) {
-                        result.add(new Path(fullName).getName());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to scan hdfs directory %s", hdfsDir.toString()), e);
-        }
-        return result;
-    }
-
-    private void ingestBySqoopToSource() throws Exception {
-        SqlToSourceConfiguration config = (SqlToSourceConfiguration) progress.getIngestion().getProviderConfiguration();
-        DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(config.getDbHost()).port(config.getDbPort()).db(config.getDb()).user(config.getDbUser())
-                .encryptedPassword(config.getDbPwdEncrypted());
-        Path hdfsDir = new Path(progress.getDestination());
-        if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir.toString())) {
-            HdfsUtils.rmdir(yarnConfiguration, hdfsDir.toString());
-        }
-
-        SqoopImporter.Builder builder = new SqoopImporter.Builder().setCustomer(progress.getTriggeredBy())
-                .setNumMappers(config.getMappers()).setSplitColumn(config.getTimestampColumn())
-                .setTable(config.getDbTable()).setTargetDir(progress.getDestination())
-                .setDbCreds(new DbCreds(credsBuilder)).setSync(false)
-                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        StringBuilder whereClause = new StringBuilder();
-        switch (config.getCollectCriteria()) {
-        case NEW_DATA:
-            whereClause.append("\"");
-            String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(config.getSource());
-            Date startDate = null;
-            if (currentVersion != null) {
-                startDate = HdfsPathBuilder.dateFormat.parse(currentVersion);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                whereClause.append(
-                        String.format("%s > '%s' AND ", config.getTimestampColumn(), dateFormat.format(startDate)));
-            }
-            Date endDate = HdfsPathBuilder.dateFormat.parse(progress.getVersion());
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            whereClause.append(String.format("%s <= '%s'", config.getTimestampColumn(), dateFormat.format(endDate)));
-            whereClause.append("\"");
-            log.info(String.format("Selected date range (%s, %s]", startDate, endDate));
-            break;
-        default:
-            break;
-        }
-        if (whereClause.length() > 0) {
-            builder = builder.addExtraOption(SQOOP_OPTION_WHERE).addExtraOption(whereClause.toString());
-        }
-        SqoopImporter importer = builder.build();
-
-        ApplicationId appId = ConverterUtils
-                .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
-        JobStatus finalStatus = jobService.waitFinalJobStatus(appId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
-        if (finalStatus.getStatus() == FinalApplicationStatus.SUCCEEDED
-                && ingestionVersionService.isCompleteVersion(progress.getIngestion(), progress.getVersion())) {
-            Source source = sourceService.findBySourceName(config.getSource());
-            log.info(String.format("Counting total records in source %s for version %s...", source.getSourceName(),
-                    progress.getVersion()));
-            Long count = hdfsSourceEntityMgr.count(source, progress.getVersion());
-            log.info(String.format("Total records in source %s for version %s: %d", source.getSourceName(),
-                    progress.getVersion(), count));
-            ingestionVersionService.updateCurrentVersion(progress.getIngestion(), progress.getVersion());
-            progress = ingestionProgressService.updateProgress(progress).size(count).status(ProgressStatus.FINISHED)
-                    .commit(true);
-            log.info("Ingestion finished. Progress: " + progress.toString());
-        } else {
-            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
-                    .errorMessage("Sqoop upload failed: " + importer.toString()).commit(true);
-            log.error("Ingestion failed. Progress: " + progress.toString() + " SqoopImporter: " + importer.toString());
-        }
-
-    }
-
-    private void ingestBySqoopToCSVGZ() throws Exception {
-        SqlToTextConfiguration config = (SqlToTextConfiguration) progress.getIngestion().getProviderConfiguration();
-        DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(config.getDbHost()).port(config.getDbPort()).db(config.getDb()).user(config.getDbUser())
-                .encryptedPassword(config.getDbPwdEncrypted());
-        Path hdfsDir = new Path(progress.getDestination()).getParent();
-        if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir.toString())) {
-            HdfsUtils.rmdir(yarnConfiguration, hdfsDir.toString());
-        }
-        SqoopImporter importer = new SqoopImporter.Builder() //
-                .setCustomer(progress.getTriggeredBy()) //
-                .setTable(config.getDbTable()) //
-                .setTargetDir(hdfsDir.toString()) //
-                .setDbCreds(new DbCreds(credsBuilder)) //
-                .setMode(config.getSqoopMode()) //
-                .setQuery(config.getDbQuery()) //
-                .setNumMappers(config.getMappers()) //
-                .setSplitColumn(config.getSplitColumn()) //
-                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
-                .build();
-        List<String> otherOptions = new ArrayList<>(Arrays.asList("--relaxed-isolation", "--as-textfile"));
-        if (!StringUtil.isEmpty(config.getNullString())) {
-            otherOptions.add("--null-string");
-            otherOptions.add(config.getNullString());
-            otherOptions.add("--null-non-string");
-            otherOptions.add(config.getNullString());
-        }
-        if (!StringUtil.isEmpty(config.getEnclosedBy())) {
-            otherOptions.add("--enclosed-by");
-            otherOptions.add(config.getEnclosedBy());
-        }
-        if (!StringUtil.isEmpty(config.getOptionalEnclosedBy())) {
-            otherOptions.add("--optionally-enclosed-by");
-            otherOptions.add(config.getOptionalEnclosedBy());
-        }
-        if (!StringUtil.isEmpty(config.getEscapedBy())) {
-            otherOptions.add("--escaped-by");
-            otherOptions.add(config.getEscapedBy());
-        }
-        if (!StringUtil.isEmpty(config.getFieldTerminatedBy())) {
-            otherOptions.add("--fields-terminated-by");
-            otherOptions.add(config.getFieldTerminatedBy());
-        }
-        importer.setOtherOptions(otherOptions);
-        ApplicationId appId = ConverterUtils
-                .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
-        JobStatus finalStatus = jobService.waitFinalJobStatus(appId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
-        if (finalStatus.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new RuntimeException(
-                    "Application final status is not " + FinalApplicationStatus.SUCCEEDED.toString());
-        }
-        for (int i = 0; i < config.getMappers(); i++) {
-            String sqoopPostfix = String.format("%05d", i);
-            Path file = new Path(hdfsDir, sqoopPrefix + sqoopPostfix);
-            if (!waitForFileToBeDownloaded(file.toString())) {
-                throw new RuntimeException("Failed to download " + file.toString());
-            }
-        }
-        renameFiles();
-        if (config.isCompressed()) {
-            compressGzipFiles();
-        }
-        progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FINISHED).commit(true);
-    }
-
-    private void renameFiles() throws Exception {
-        SqlToTextConfiguration sqlToTextConfig = (SqlToTextConfiguration) progress.getIngestion()
-                .getProviderConfiguration();
-        Path hdfsDir = new Path(progress.getDestination()).getParent();
-        for (int i = 0; i < sqlToTextConfig.getMappers(); i++) {
-            String sqoopPostfix = String.format("%05d", i);
-            Path originFile = new Path(hdfsDir, sqoopPrefix + sqoopPostfix);
-            Path renameFile = new Path(progress.getDestination());
-            renameFile = new Path(hdfsDir,
-                    renameFile.getName() + (sqlToTextConfig.getMappers() > 1 ? "_" + sqoopPostfix : "")
-                            + (sqlToTextConfig.getFileExtension() == null ? "" : sqlToTextConfig.getFileExtension()));
-            try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
-                fs.rename(originFile, renameFile);
-            }
-        }
-    }
-
-    private void compressGzipFiles() throws Exception {
-        SqlToTextConfiguration sqlToTextConfig = (SqlToTextConfiguration) progress.getIngestion()
-                .getProviderConfiguration();
-        Path hdfsDir = new Path(progress.getDestination()).getParent();
-        for (int i = 0; i < sqlToTextConfig.getMappers(); i++) {
-            Path destFile = new Path(progress.getDestination());
-            Path gzHdfsPath = new Path(hdfsDir,
-                    destFile.getName() + (sqlToTextConfig.getMappers() > 1 ? "_" + String.format("%05d", i) : "")
-                            + (sqlToTextConfig.getFileExtension() == null ? "" : sqlToTextConfig.getFileExtension())
-                            + EngineConstants.GZ);
-            Path uncompressedFilePath = new Path(hdfsDir,
-                    destFile.getName() + (sqlToTextConfig.getMappers() > 1 ? "_" + String.format("%05d", i) : "")
-                            + (sqlToTextConfig.getFileExtension() == null ? "" : sqlToTextConfig.getFileExtension()));
-            HdfsUtils.compressGZFileWithinHDFS(yarnConfiguration, gzHdfsPath.toString(),
-                    uncompressedFilePath.toString());
-            HdfsUtils.rmdir(yarnConfiguration, uncompressedFilePath.toString());
-        }
-    }
-
-    private void emailNotify(ProviderConfiguration config, String ingestion, String version, String destPath) {
-        if (!config.isEmailEnabled()) {
-            return;
-        }
-        if (StringUtils.isBlank(config.getNotifyEmail())) {
-            log.error("Email for notification is empty");
-            return;
-        }
-        log.info(String.format("Sending notification email to %s", config.getNotifyEmail()));
-        String subject = String.format("Ingestion %s for version %s is finished", ingestion, version);
-        String content = String.format("Files are accessible at the following HDFS folder: %s", destPath);
-        emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(config.getNotifyEmail()));
-        log.info(String.format("Sent notification email to %s", config.getNotifyEmail()));
-    }
-
     private void failByException(Exception e) {
         progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
                 .errorMessage(e.getMessage().substring(0, 1000)).commit(true);
         log.error("Ingestion failed for progress: " + progress.toString(), e);
-    }
-
-    private boolean waitForFileToBeDownloaded(String destPath) {
-        Long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < 10000) {
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, destPath)) {
-                    return true;
-                }
-                Thread.sleep(1000L);
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-        return false;
     }
 }

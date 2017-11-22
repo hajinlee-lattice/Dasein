@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
-import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionAPIProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressUpdater;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
@@ -43,7 +43,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     private HdfsPathBuilder hdfsPathBuilder;
 
     @Autowired
-    private IngestionApiProviderService apiProviderService;
+    private IngestionAPIProviderService apiProviderService;
 
     @Autowired
     private SourceService sourceService;

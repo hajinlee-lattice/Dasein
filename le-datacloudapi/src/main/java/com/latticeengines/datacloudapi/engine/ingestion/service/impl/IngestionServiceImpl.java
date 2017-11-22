@@ -9,14 +9,14 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
@@ -62,7 +62,7 @@ public class IngestionServiceImpl implements IngestionService {
     @Autowired
     protected YarnClient yarnClient;
 
-    @Resource(name = "ingestionApiProviderService")
+    @Resource(name = "ingestionAPIProviderService")
     private IngestionProviderService apiProviderService;
 
     @Resource(name = "ingestionSFTPProviderService")

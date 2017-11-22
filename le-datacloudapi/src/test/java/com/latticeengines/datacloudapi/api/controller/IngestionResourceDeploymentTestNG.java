@@ -25,7 +25,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
-import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionAPIProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
@@ -60,7 +60,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private DataCloudEngineService datacloudEngineService;
 
     @Autowired
-    private IngestionApiProviderService apiProviderService;
+    private IngestionAPIProviderService apiProviderService;
 
     private static final String DNB_INGESTION = "DnBCacheSeedTest";
     private static final String DNB_VERSION = "2016-08-01_00-00-00_UTC";
