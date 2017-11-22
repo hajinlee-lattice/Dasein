@@ -656,6 +656,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "PRODUCT_ID", "PRODUCT ID")) //
                 .type(Schema.Type.STRING) //
+                .required()
                 .notNull() //
                 .interfaceName(InterfaceName.ProductId) //
                 .logicalType(LogicalDataType.Id) //
@@ -704,6 +705,8 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(
                         "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
+                .required() //
                 .interfaceName(InterfaceName.AccountId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -751,6 +754,8 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Quantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet("QUANTITY")) //
                 .type(Schema.Type.LONG) //
+                .notNull() //
+                .required() //
                 .interfaceName(InterfaceName.Quantity) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -760,6 +765,8 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Amount.name()) //
                 .allowedDisplayNames(Sets.newHashSet( "AMOUNT")) //
                 .type(Schema.Type.LONG) //
+                .notNull() //
+                .required() //
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -770,6 +777,8 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets
                         .newHashSet("TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME", "TRANSACTION TIME")) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
+                .required() //
                 .interfaceName(InterfaceName.TransactionTime) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -779,6 +788,8 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.TransactionType.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE")) //
                 .type(Schema.Type.STRING) //
+                .notNull() //
+                .required() //
                 .interfaceName(InterfaceName.TransactionType) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
