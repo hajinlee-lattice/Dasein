@@ -113,7 +113,6 @@ def deployApp(app, modules):
 
 def deployMs(mods):
     for module in ['core'] + mods:
-        print "------------>" + module
         deployMsModule(module)
 
 
@@ -126,7 +125,6 @@ def deployMsModule(module):
         if fn[-4:] == '.war':
             moduleWar = fn
             print 'found %s in %s' % (moduleWar, moduleDir)
-            print '------------'
             break
 
     if moduleWar is None:
