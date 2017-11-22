@@ -31,7 +31,7 @@ PRESETS = {
     'cdl': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'datacloudapi', 'lp', 'cdl', 'dante',
-                    'objectapi']
+                    'objectapi', 'sqoop']
     },
     'etl': {
         'apps': ['microservice', 'matchapi'],
@@ -113,6 +113,7 @@ def deployApp(app, modules):
 
 def deployMs(mods):
     for module in ['core'] + mods:
+        print "------------>" + module
         deployMsModule(module)
 
 
@@ -125,6 +126,7 @@ def deployMsModule(module):
         if fn[-4:] == '.war':
             moduleWar = fn
             print 'found %s in %s' % (moduleWar, moduleDir)
+            print '------------'
             break
 
     if moduleWar is None:
