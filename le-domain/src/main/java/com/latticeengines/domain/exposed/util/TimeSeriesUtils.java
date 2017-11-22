@@ -222,7 +222,8 @@ public class TimeSeriesUtils {
     }
 
     private static PeriodBuilder getPeriodBuilder(PeriodStrategy strategy, String minDateStr) {
-        PeriodBuilder periodBuilder = new CalendarMonthPeriodBuilder(minDateStr);
+        // TODO: getting period builder by strategy and factory
+        PeriodBuilder periodBuilder = new CalendarMonthPeriodBuilder();
         return periodBuilder;
     }
 

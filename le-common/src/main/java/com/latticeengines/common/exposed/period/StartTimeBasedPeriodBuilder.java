@@ -4,10 +4,16 @@ import java.time.LocalDate;
 
 public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
 
+    private static final LocalDate DEFAULT_FIRST_DATE = LocalDate.of(2000, 1, 1);
+
     protected LocalDate startDate;
 
+    protected StartTimeBasedPeriodBuilder() {
+        this(DEFAULT_FIRST_DATE);
+    }
+
     public StartTimeBasedPeriodBuilder(String startDate) {
-        this.startDate = LocalDate.parse(startDate);
+        this(LocalDate.parse(startDate));
     }
 
     public StartTimeBasedPeriodBuilder(LocalDate startDate) {

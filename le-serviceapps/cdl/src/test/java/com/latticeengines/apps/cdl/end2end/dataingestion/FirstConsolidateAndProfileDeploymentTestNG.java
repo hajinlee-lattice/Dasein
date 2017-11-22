@@ -140,7 +140,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_1,
                 BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
-        // verifyTestSegment1Counts(segment1Counts);
+        verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_2_CONTACT_1,
@@ -153,7 +153,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
                 RuleBucketName.D, RATING_D_COUNT_1, //
                 RuleBucketName.F, RATING_F_COUNT_1
         );
-        // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
+        verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
 }

@@ -8,7 +8,11 @@ public class CalendarQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder im
 
     private static final long serialVersionUID = -4975605566623744278L;
 
-    public CalendarQuarterPeriodBuilder(String startDate) {
+    CalendarQuarterPeriodBuilder() {
+        super();
+    }
+
+    CalendarQuarterPeriodBuilder(String startDate) {
         super(startDate);
     }
 

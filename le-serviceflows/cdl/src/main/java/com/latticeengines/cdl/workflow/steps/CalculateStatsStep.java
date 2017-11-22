@@ -285,6 +285,7 @@ public class CalculateStatsStep extends ProfileStepBase<CalculateStatsStepConfig
                 attr.setSubcategory(removeNonAscII(cm.getSubcategory()));
                 attr.setFundamentalType(cm.getFundamentalType());
                 attr.setCategory(cm.getCategory());
+                attr.setGroupsViaList(cm.getGroups());
                 count.incrementAndGet();
             } else if (StringUtils.isBlank(attr.getCategory())) {
                 attr.setCategory(Category.ACCOUNT_ATTRIBUTES);

@@ -7,7 +7,11 @@ public class CalendarMonthPeriodBuilder extends StartTimeBasedPeriodBuilder impl
 
     private static final long serialVersionUID = -8736107964245177059L;
 
-    public CalendarMonthPeriodBuilder(String startDate) {
+    public CalendarMonthPeriodBuilder() {
+        super();
+    }
+
+    CalendarMonthPeriodBuilder(String startDate) {
         super(startDate);
     }
 

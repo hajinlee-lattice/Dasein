@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -64,7 +65,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_1,
                 BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
-        // verifyTestSegment1Counts(segment1Counts);
+        verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_2_CONTACT_1,
@@ -150,7 +151,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
                 BusinessEntity.Product, numProducts);
-        // verifyTestSegment1Counts(segment1Counts);
+        verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
                 BusinessEntity.Contact, SEGMENT_2_CONTACT_2,

@@ -44,8 +44,9 @@ public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements
     }
 
     private PeriodBuilder getPeriodBuilder(String minDateStr) {
+        // TODO: getting period builder by strategy and factory
         if (periodBuilder == null) {
-            periodBuilder = new CalendarMonthPeriodBuilder(minDateStr);
+            periodBuilder = new CalendarMonthPeriodBuilder();
         }
         return periodBuilder;
     }
