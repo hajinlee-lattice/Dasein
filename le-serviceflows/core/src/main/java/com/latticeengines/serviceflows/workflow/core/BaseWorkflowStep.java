@@ -53,6 +53,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     protected static final String PREMATCH_EVENT_TABLE = "PREMATCH_EVENT_TABLE";
     protected static final String FILTER_EVENT_TABLE = "FILTER_EVENT_TABLE";
+    protected static final String MATCH_FETCH_ONLY = "MATCH_FETCH_ONLY";
     protected static final String EVENT_TABLE = "EVENT_TABLE";
     protected static final String EVENT_COLUMN = "EVENT_COLUMN";
     protected static final String DB_CREDS = "DB_CREDS";

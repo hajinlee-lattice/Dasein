@@ -31,8 +31,7 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         retainFields.addAll(accountTable.getFieldNames());
         retainFields.add(InterfaceName.Train.name());
         retainFields.add(InterfaceName.Target.name());
-        retainFields.removeAll(Arrays.asList(InterfaceName.AccountId.name(), "CREATION_DATE", "UPATE_DATE",
-                InterfaceName.LatticeAccountId.name()));
+        retainFields.removeAll(Arrays.asList(InterfaceName.AccountId.name(), "CREATION_DATE", "UPATE_DATE"));
 
         FieldList inputGroupFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
         Node result = apsTable.join(new FieldList("LEAccount_ID", "Period_ID"), inputTable, inputGroupFields,

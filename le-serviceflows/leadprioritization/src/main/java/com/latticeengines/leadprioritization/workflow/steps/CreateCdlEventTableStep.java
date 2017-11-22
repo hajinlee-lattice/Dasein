@@ -176,6 +176,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         putObjectInContext(configuration.getOutputTableName(), eventTable);
+        putStringValueInContext(MATCH_FETCH_ONLY, "true");
     }
 
 }

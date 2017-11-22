@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
@@ -132,6 +133,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             putObjectInContext(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
 
         }
+
         matchInput.setDataCloudVersion(getConfiguration().getDataCloudVersion());
         log.info("Using Data Cloud Version = " + getConfiguration().getDataCloudVersion());
 
@@ -218,7 +220,21 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
         matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
 
+        checkFetchOnly(matchInput);
+
         return matchInput;
+    }
+
+    private void checkFetchOnly(MatchInput matchInput) {
+        String fetchOnly = getStringValueFromContext(MATCH_FETCH_ONLY);
+        if ("true".equalsIgnoreCase(fetchOnly)) {
+            log.info("Match fetch only = true");
+            matchInput.setFetchOnly(true);
+            matchInput.setSkipKeyResolution(true);
+            Map<MatchKey, List<String>> keyMap = new TreeMap<>();
+            keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
+            matchInput.setKeyMap(keyMap);
+        }
     }
 
 }
