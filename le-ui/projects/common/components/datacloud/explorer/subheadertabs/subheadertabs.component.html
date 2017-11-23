@@ -17,7 +17,7 @@
     </ul>
     <ul class="subheader-tabs-buttons">
         <li class="save-segment">
-            <button class="save button white-button dropdown-container" ng-click="vm.toggleExportDropdown($event)" ng-mouseover="vm.showExportDropdown=true" ng-mouseleave="vm.showExportDropdown ? vm.toggleExportDropdown($event) : null"> 
+<!--             <button class="save button white-button dropdown-container" ng-click="vm.toggleExportDropdown($event)" ng-mouseover="vm.showExportDropdown=true"> 
                 <div> 
                     Export 
                     <span class="fa fa-chevron-down" ng-class="{'fa-rotate-180' : vm.showExportDropdown}"></span>
@@ -42,7 +42,8 @@
                         </li>
                     </ul>
                 </div>
-            </button>
+            </button> -->
+            <menu-dropdown config="vm.header.exportSegment" class="button" style="padding-right:0px;"></menu-dropdown>
             &nbsp;
             <button class="clear button white-button" 
                     ng-click="vm.clearSegment()" 

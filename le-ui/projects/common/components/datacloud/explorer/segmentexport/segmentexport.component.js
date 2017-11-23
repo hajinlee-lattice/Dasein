@@ -17,9 +17,10 @@ angular
         vm.init = function() {
             console.log($stateParams);
             console.log(vm);
+            vm.downloadSegmentExport(); //automatic download
         }
 
-        vm.init();
+        
 
 
         vm.downloadSegmentExport = function() {
@@ -42,4 +43,6 @@ angular
         vm.hideDownloadMessage = function() {
             vm.showDownloadMessage = false;
         }
+
+        vm.init();
     })

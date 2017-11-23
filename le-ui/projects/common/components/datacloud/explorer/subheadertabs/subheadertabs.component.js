@@ -1,11 +1,11 @@
 angular.module('common.datacloud.explorer.subheadertabs', [])
 .controller('SubHeaderTabsController', function(
     $state, $stateParams, $timeout, FeatureFlagService, DataCloudStore, QueryStore, 
-    SegmentService, SegmentStore
+    SegmentService, SegmentStore, HealthService
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
-    vm.showExportDropdown = false;
+    // vm.showExportDropdown = false;
     vm.displayExportBanner = false;
     angular.extend(vm, {
         stateParams: $stateParams,
@@ -15,11 +15,36 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
         public: QueryStore.getPublic(),
         builderClicked: false,
         attribuesClicked: false,
-        isSaving: false
+        isSaving: false,
+        header: {
+            exportSegment: {
+                class: 'white-button select-label',
+                click: false,
+                icon: 'fa fa-chevron-down',
+                iconlabel: 'Export',
+                iconclass: 'save button white-button select-more',
+                iconrotate: true
+            }
+        }
     });
 
     vm.init = function() {
         QueryStore.setPublicProperty('enableSaveSegmentButton', false);
+        this.header.exportSegment.items = [
+            {
+                label: 'Accounts',
+                icon: 'fa fa-building-o',
+                click: checkStatusBeforeExport.bind(null, 'ACCOUNT')
+            },{
+                label: 'Contacts',
+                icon: 'fa fa-users',
+                click: checkStatusBeforeExport.bind(null, 'CONTACT')
+            },{
+                label: 'Accounts and Contacts',
+                icon: 'fa fa-briefcase',
+                click: checkStatusBeforeExport.bind(null, 'ACCOUNT_AND_CONTACT')
+            }
+        ];
     }
 
     vm.checkState = function(type) {
@@ -152,6 +177,7 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
 
             SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(function(result) {
               console.log(result);
+              vm.displayExportBanner = true;
 
             });
         } 
@@ -170,24 +196,32 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
 
                 SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(function(result) {
                     console.log(result);
+                    vm.displayExportBanner = true;
 
                 });
             });
         };
-        vm.displayExportBanner = true;
+        
     };
 
 
-    vm.toggleExportDropdown = function($event) {
-        if ($event != null) {
-            $event.stopPropagation();
-        }
-        vm.showExportDropdown = !vm.showExportDropdown;
-        
-    }
+    // vm.toggleExportDropdown = function($event) {
+    //     if ($event != null) {
+    //         $event.stopPropagation();
+    //     }
+    //     vm.showExportDropdown = !vm.showExportDropdown;
+    // }
 
     vm.hideExportBanner = function() {
         vm.displayExportBanner = false;
+    }
+
+    function checkStatusBeforeExport(exportType, $event) {
+        $event.preventDefault();
+
+        HealthService.checkSystemStatus().then(function() {
+            vm.exportSegment(exportType);
+        });
     }
 
     vm.init();
