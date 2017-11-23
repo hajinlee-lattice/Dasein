@@ -134,9 +134,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private ExecutorService dnbDataSourceServiceExecutor;
 
-    @SuppressWarnings("unchecked")
     private final List<DnBBatchMatchContext> unsubmittedBatches = Collections.synchronizedList(new ArrayList<>());
-    @SuppressWarnings("unchecked")
     private final List<DnBBatchMatchContext> submittedBatches = Collections.synchronizedList(new ArrayList<>());
     private final Queue<DnBBatchMatchContext> finishedBatches = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean batchFetchersInitiated = new AtomicBoolean(false);
