@@ -156,7 +156,6 @@ public class AIModel extends RatingModel {
 	}
 
     @JsonIgnore
-    @Transient
     public ApplicationId getModelingJobId() {
 		return ConverterUtils.toApplicationId(modelingJobId);
 	}
