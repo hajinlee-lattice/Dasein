@@ -27,10 +27,12 @@ CREATE PROCEDURE `UpdateCDLTables`()
             CHANGE COLUMN `ENTITY_EXTERNAL_TYPE` `BUSINESS_ENTITY` VARCHAR(255);
             
         ALTER TABLE `PLS_MultiTenant`.`AI_MODEL`
+        		ADD COLUMN `MODELING_METHOD` varchar(255),
             ADD COLUMN `MODELING_CONFIG_FILTERS` longtext,
             ADD COLUMN `MODELING_JOBID` varchar(255),
             ADD COLUMN `TARGET_CUSTOMER_SET` varchar(255),
 		    ADD COLUMN `TARGET_PRODUCTS` longtext,
+		    ADD COLUMN `TRAINING_PRODUCTS` longtext,
 		    ADD COLUMN `WORKFLOW_TYPE` varchar(255),
 		    ADD COLUMN `FK_TRAINING_SEGMENT_ID` bigint;
 		    
@@ -187,6 +189,7 @@ CREATE PROCEDURE `UpdateSchema`()
         CALL `UpdateNoteTables`();
         CALL `UpdateMetadataAttribute`();
         CALL `UpdateSegmentAndRatingEngine`();
+        CALL `UpdatePlayTables`();
         CALL `UpdateWorkflowJob`();
         COMMIT;
     END;

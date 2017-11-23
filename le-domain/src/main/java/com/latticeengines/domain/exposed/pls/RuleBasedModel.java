@@ -18,11 +18,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 
+import io.swagger.annotations.ApiModel;
+
 @Entity
 @javax.persistence.Table(name = "RULE_BASED_MODEL")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OnDelete(action = OnDeleteAction.CASCADE)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@ApiModel("Represents RuleBasedModel JSON Object")
 public class RuleBasedModel extends RatingModel {
 
     public static final String RULE_BASED_MODEL_PREFIX = "rule_based_model";

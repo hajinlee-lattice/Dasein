@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 
 public interface AIModelEntityMgr extends BaseEntityMgrRepository<AIModel, Long>{
 
+	AIModel createOrUpdateAIModel(AIModel aiModel, String ratingEngineId);
+	
     List<AIModel> findByRatingEngineId(String ratingEngineId, Pageable pageable);
 
     AIModel findById(String id);

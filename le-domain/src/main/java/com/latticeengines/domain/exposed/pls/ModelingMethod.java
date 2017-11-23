@@ -3,6 +3,9 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel("Represents ModelingMethod JSON Object")
 public enum ModelingMethod {
 
 	PROPENSITY("Propensity"), //

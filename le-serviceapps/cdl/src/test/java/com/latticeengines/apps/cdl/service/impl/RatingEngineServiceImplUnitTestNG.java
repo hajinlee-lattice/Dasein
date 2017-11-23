@@ -15,6 +15,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -50,6 +52,15 @@ public class RatingEngineServiceImplUnitTestNG {
         RatingEngineSummary ratingEngineSummary = ratingEngineService
                 .constructRatingEngineSummary(createDefaultRatingEngine(), TENANT);
         validateRatingEngineSummary(ratingEngineSummary);
+    }
+    
+    @Test(groups = "unit")
+    public void testAIRatingModel() {
+    		AIModel aiModel = new AIModel();
+    		aiModel.setId(AIModel.generateIdStr());
+    		aiModel.setWorkflowType(ModelWorkflowType.CROSS_SELL);
+        
+    		System.out.println(aiModel);
     }
 
     private void mockDataFeedProxy() {

@@ -32,7 +32,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public AIModel createOrUpdate(AIModel ratingModel, String ratingEngineId) {
-        aiModelEntityMgr.createOrUpdate(ratingModel);
+        aiModelEntityMgr.createOrUpdateAIModel(ratingModel, ratingEngineId);
         return ratingModel;
     }
 

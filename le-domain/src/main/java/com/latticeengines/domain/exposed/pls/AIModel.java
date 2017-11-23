@@ -16,6 +16,8 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -28,26 +30,31 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
+import io.swagger.annotations.ApiModel;
+
 @Entity
 @javax.persistence.Table(name = "AI_MODEL")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @OnDelete(action = OnDeleteAction.CASCADE)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @NamedEntityGraph(name = "AIModel.details", attributeNodes = {@NamedAttributeNode("ratingEngine"), @NamedAttributeNode("trainingSegment")})
+@ApiModel("Represents AIModel JSON Object")
 public class AIModel extends RatingModel {
 
-    public static final String AI_MODEL_PREFIX = "ai_model";
+	public static final String AI_MODEL_PREFIX = "ai_model";
     public static final String AI_MODEL_FORMAT = "%s__%s";
-
+    
     @JsonIgnore
     @Column(name = "TARGET_PRODUCTS", length=10000)
     @Type(type = "text")
     private String targetProducts;
     
+    @JsonProperty("modelingMethod")
     @Column(name = "MODELING_METHOD")
     @Enumerated(EnumType.STRING)
     private ModelingMethod modelingMethod;
     
+    @JsonProperty("workflowType")
     @Column(name = "WORKFLOW_TYPE")
     @Enumerated(EnumType.STRING)
     private ModelWorkflowType workflowType;
@@ -56,6 +63,14 @@ public class AIModel extends RatingModel {
     @Column(name = "TRAINING_PRODUCTS", length=10000)
     @Type(type = "text")
     private String trainingProducts;
+    
+    @JsonProperty("modelingJobId")
+    @Column(name = "MODELING_JOBID")
+    private String modelingJobId;
+    
+    @JsonProperty("targetCustomerSet")
+    @Column(name = "TARGET_CUSTOMER_SET")
+    private String targetCustomerSet;
     
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TRAINING_SEGMENT_ID")
@@ -69,6 +84,11 @@ public class AIModel extends RatingModel {
     private ModelSummary modelSummary;
 
 
+    @JsonIgnore
+    @Column(name = "MODELING_CONFIG_FILTERS", length=10000)
+    @Type(type = "text")
+    private String modelingConfigFilters;
+    
     @JsonProperty("targetProducts")
 	public List<String> getTargetProducts() {
     		List<String> productList = null;
@@ -81,7 +101,7 @@ public class AIModel extends RatingModel {
 
     @JsonProperty("targetProducts")
 	public void setTargetProducts(List<String> targetProducts) {
-		this.targetProducts = JsonUtils.serialize(targetProducts);;
+		this.targetProducts = JsonUtils.serialize(targetProducts);
 	}
 	
     public void setModel(ModelSummary modelSummary) {
@@ -135,4 +155,41 @@ public class AIModel extends RatingModel {
 		this.trainingSegment = trainingSegment;
 	}
 
+    @JsonIgnore
+    @Transient
+    public ApplicationId getModelingJobId() {
+		return ConverterUtils.toApplicationId(modelingJobId);
+	}
+    
+	public void setModelingJobId(String modelingJobId) {
+		this.modelingJobId = modelingJobId;
+	}
+
+	@JsonProperty("modelingConfigFilters")
+	public List<ModelingConfigFilter> getModelingConfigFilters() {
+		List<ModelingConfigFilter> filters = null;
+        if (StringUtils.isNotBlank(this.modelingConfigFilters)) {
+            List<?> attrListIntermediate = JsonUtils.deserialize(this.modelingConfigFilters, List.class);
+            filters = JsonUtils.convertList(attrListIntermediate, ModelingConfigFilter.class);
+        }
+        return filters;
+	}
+
+	@JsonProperty("modelingConfigFilters")
+	public void setModelingConfigFilters(List<ModelingConfigFilter> filters) {
+		this.modelingConfigFilters = JsonUtils.serialize(filters);
+	}
+
+	public String getTargetCustomerSet() {
+		return targetCustomerSet;
+	}
+
+	public void setTargetCustomerSet(String targetCustomerSet) {
+		this.targetCustomerSet = targetCustomerSet;
+	}
+	
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

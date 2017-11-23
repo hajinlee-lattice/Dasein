@@ -16,8 +16,11 @@ import com.latticeengines.apps.cdl.repository.AIModelRepository;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
+import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
+import com.latticeengines.domain.exposed.pls.ModelingConfigFilter.MODEL_CONFIG;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.network.exposed.modelquality.ModelQualityModelRunInterface;
 
 public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 	private static final Logger log = LoggerFactory.getLogger(AIModelEntityMgrImplTestNG.class);
@@ -37,9 +40,6 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Autowired
     private RatingEngineEntityMgr ratingEngineEntityMgr;
-    
-    @Autowired
-    private AIModelRepository aiModelRepository;
 
     private RatingEngine ratingEngine;
     private String ratingEngineId;
@@ -96,6 +96,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     public void testUpdateTrainingData() {
     		aiModel.setTrainingSegment(createMetadataSegment(TRAINING_SEGMENT_NAME));
     		aiModel.setTrainingProducts(generateTrainingProducts());
+    		aiModel.setTargetCustomerSet("new");
     		aiModelEntityMgr.update(aiModel);
     		
     		aiModel = aiModelEntityMgr.findById(aiModel.getId());
@@ -105,13 +106,25 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     
     @Test(groups = "functional", dependsOnMethods= {"testUpdateTrainingData"})
     public void testUpdateRefineSettings() {
-    		aiModel.setTrainingSegment(createMetadataSegment(TRAINING_SEGMENT_NAME));
-    		aiModel.setTrainingProducts(generateTrainingProducts());
+    		ModelingConfigFilter spendFilter = new ModelingConfigFilter();
+    		spendFilter.setConfigName(MODEL_CONFIG.SPEND_IN_PERIOD);
+    		spendFilter.setCriteria("Atmost");
+    		spendFilter.setValue(1500);
+    		
+    		ModelingConfigFilter quantityFilter = new ModelingConfigFilter();
+    		quantityFilter.setConfigName(MODEL_CONFIG.QUANTITY_IN_PERIOD);
+    		quantityFilter.setCriteria("Atmost");
+    		quantityFilter.setValue(100);
+    		
+    		List<ModelingConfigFilter> configFitlers = new ArrayList<>();
+    		configFitlers.add(spendFilter);
+    		configFitlers.add(quantityFilter);
+    		
+    		aiModel.setModelingConfigFilters(configFitlers);
     		aiModelEntityMgr.update(aiModel);
     		
     		aiModel = aiModelEntityMgr.findById(aiModel.getId());
-    		Assert.assertNotNull(aiModel, "Could not find AIModel");
-    		assertUpdatedModelWithTrainingData(aiModel);
+    		assertUpdatedModelWithConfigFilters(aiModel, configFitlers);
     }
 
 	@Test(groups = "functional", dependsOnMethods= {"testUpdateRefineSettings"})
@@ -140,12 +153,22 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     		
     		Assert.assertNotNull(aiModel.getTrainingProducts());
     		Assert.assertNotNull(aiModel.getTrainingProducts().contains(PRODUCT_ID3));
+    		Assert.assertEquals(aiModel.getTargetCustomerSet(), "new");
 	}
+    
+    private void assertUpdatedModelWithConfigFilters(AIModel aiModel, List<ModelingConfigFilter> filters) {
+		assertUpdatedAIModel(aiModel);
+		Assert.assertNotNull(aiModel.getModelingConfigFilters());
+		Assert.assertEquals(aiModel.getModelingConfigFilters().size(), filters.size());
+		for (ModelingConfigFilter filter: filters) {
+			Assert.assertTrue(aiModel.getModelingConfigFilters().contains(filter));
+		}
+    }
     
     private void assertDefaultAIModel(AIModel aiModel) {
         Assert.assertNotNull(aiModel);
         Assert.assertNotNull(aiModel.getId());
-        Assert.assertEquals(1, aiModel.getIteration());
+        Assert.assertEquals(aiModel.getIteration(), 1);
         Assert.assertNotNull(aiModel.getRatingEngine());
         
         Assert.assertNull(aiModel.getTargetProducts());

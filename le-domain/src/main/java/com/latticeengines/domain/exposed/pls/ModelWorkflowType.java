@@ -3,6 +3,9 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel("Represents ModelWorkflowType JSON Object")
 public enum ModelWorkflowType {
 
 	ADEFAULT("ListBased"), 
