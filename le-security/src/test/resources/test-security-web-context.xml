@@ -45,6 +45,7 @@
                    create-session="stateless">
         <security:csrf disabled="true"/>
         <security:intercept-url pattern="/security/internal/health/**" access="permitAll" />
+        <security:intercept-url pattern="/security/internal/bad" access="permitAll" />
         <security:intercept-url pattern="/security/internal/**" access="hasRole('INTERNAL_USER')" />
         <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>

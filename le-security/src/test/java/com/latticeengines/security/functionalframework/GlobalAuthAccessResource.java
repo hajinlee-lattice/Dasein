@@ -13,4 +13,9 @@ public class GlobalAuthAccessResource {
         return SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
     }
 
+    @RequestMapping(value = "/garesource/bad", method = RequestMethod.GET, headers = "Accept=application/json")
+    public String getBad() {
+        throw new RuntimeException("I want to fail");
+    }
+
 }

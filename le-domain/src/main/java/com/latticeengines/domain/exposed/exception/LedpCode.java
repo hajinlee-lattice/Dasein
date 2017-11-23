@@ -285,6 +285,9 @@ public enum LedpCode {
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
+    LEDP_19001("Unauthorized."), //
+    LEDP_19002("Access denied."), //
+    LEDP_19003("Resource not found."), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //

@@ -27,4 +27,14 @@ public class TestInternalResource {
         return StatusDocument.online();
     }
 
+    @RequestMapping(value = "/internal/bad", method = RequestMethod.GET, headers = "Accept=application/json")
+    public String getBad() {
+        throw new RuntimeException("I want to fail");
+    }
+
+    @RequestMapping(value = "/internal/noaccess", method = RequestMethod.GET, headers = "Accept=application/json")
+    public String getNoAccess() {
+        return "You should not see this!";
+    }
+
 }
