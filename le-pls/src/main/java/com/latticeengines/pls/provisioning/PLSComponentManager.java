@@ -67,7 +67,7 @@ public class PLSComponentManager {
         try {
             maxPremiumEnrichAttributesStr = configDir.get("/EnrichAttributesMaxNumber").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
         LOGGER.info("maxPremiumEnrichAttributesStr is " + maxPremiumEnrichAttributesStr);
         ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumEnrichAttributesStr);
@@ -76,14 +76,14 @@ public class PLSComponentManager {
         try {
             emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
         List<String> superAdminEmails = EmailUtils.parseEmails(emailListInJson);
 
         try {
             emailListInJson = configDir.get("/LatticeAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
         List<String> internalAdminEmails = EmailUtils.parseEmails(emailListInJson);
 
@@ -91,14 +91,14 @@ public class PLSComponentManager {
         try {
             emailListInJson = configDir.get("/ExternalAdminEmails").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
         List<String> externalAdminEmails = EmailUtils.parseEmails(emailListInJson);
 
         try {
             emailListInJson = configDir.get("/ThirdPartyUserEmails").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
         List<String> thirdPartyEmails = EmailUtils.parseEmails(emailListInJson);
 
@@ -177,10 +177,14 @@ public class PLSComponentManager {
                 UserRegistration uReg = createAdminUserRegistration(email, accessLevel);
                 try {
                     userService.createUser(uReg);
+                    user = userService.findByEmail(email);
+                    if (user == null) {
+                        throw new RuntimeException(String.format("Cannot find the new user %s.", email));
+                    }
                 } catch (Exception e) {
                     throw new LedpException(LedpCode.LEDP_18028, String.format("Adding new user %s error.", email), e);
                 }
-                updatePasswordBasedOnUsername(uReg.getUser());
+                updatePasswordBasedOnUsername(user);
             }
             try {
                 userService.assignAccessLevel(accessLevel, tenantId, email);
@@ -215,7 +219,7 @@ public class PLSComponentManager {
         return uReg;
     }
 
-    void updatePasswordBasedOnUsername(User user) {
+    private void updatePasswordBasedOnUsername(User user) {
         // update the default password "admin" to SHA256(CipherUtils(username))
         if (user == null) {
             LOGGER.error("User cannot be found.");
