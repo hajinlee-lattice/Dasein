@@ -3,11 +3,11 @@ package com.latticeengines.security.exposed.globalauth.impl;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,20 +127,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         latticeAuthenticationData.setCreationDate(now);
         latticeAuthenticationData.setLastModificationDate(now);
         gaAuthenticationEntityMgr.create(latticeAuthenticationData);
-
-        boolean inUserTable = false;
-        int retries = 0;
-        while (!inUserTable && retries++ < 5) {
-            inUserTable = (gaUserEntityMgr.findByEmail(user.getEmail()) != null);
-        }
-
-        boolean inAuthTable = false;
-        retries = 0;
-        while (!inAuthTable && retries++ < 5) {
-            inAuthTable = (gaAuthenticationEntityMgr.findByUsername(user.getEmail()) != null);
-        }
-
-        return inUserTable && inAuthTable;
+        return true;
     }
 
     @Override
