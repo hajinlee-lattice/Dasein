@@ -9,12 +9,14 @@ import java.io.InputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.FileUploadService;
@@ -68,9 +70,11 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount, null, null,
+        SourceFile sourceFile = fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation
+                        .SalesforceAccount, null, null,
                 fileInputStream);
 
+        Assert.assertNotNull(sourceFile);
         String contents = HdfsUtils
                 .getHdfsFileContents(
                         yarnConfiguration, //

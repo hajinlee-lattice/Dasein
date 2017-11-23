@@ -36,6 +36,8 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     private static final Logger log = LoggerFactory.getLogger(FileUploadServiceImpl.class);
 
+    private static final int MAX_RETRY = 3;
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -89,7 +91,7 @@ public class FileUploadServiceImpl implements FileUploadService {
                         new String[] { String.format("%.2f", rows)});
             }
             sourceFileService.create(file);
-            return sourceFileService.findByName(file.getName());
+            return getSourceFilewithRetry(file.getName());
         } catch (IOException e) {
             if (outputHdfsPath != null) {
                 try {
@@ -101,6 +103,25 @@ public class FileUploadServiceImpl implements FileUploadService {
             log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, displayName), e);
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { displayName });
         }
+    }
+
+    private SourceFile getSourceFilewithRetry(String fileName) {
+        int retry = 1;
+        SourceFile sourceFile = sourceFileService.findByName(fileName);
+        while (sourceFile == null) {
+            if (retry > MAX_RETRY) {
+                throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
+            }
+            log.error(String.format("Cannot find source file with name: %s, retry count: %d", fileName, retry));
+            try {
+                Thread.sleep(500);
+                retry++;
+                sourceFile = sourceFileService.findByName(fileName);
+            } catch (InterruptedException e) {
+                log.info("Sleep thread interrupted.");
+            }
+        }
+        return sourceFile;
     }
 
     @Override
