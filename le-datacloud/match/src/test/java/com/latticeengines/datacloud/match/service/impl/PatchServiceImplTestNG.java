@@ -24,8 +24,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component
 public class PatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final String ALPHABET_ACCOUNT_ID = "320001703404";
-    private static final String GREG_GOOGLER_ACCOUNT_ID = "270002176521";
+    private static final String ALPHABET_ACCOUNT_ID = "450000298086";
+    private static final String GREG_GOOGLER_ACCOUNT_ID = "530000381629";
     private static final String GREG_GOOGLER_DUNS = "039024002";
 
     @Autowired
