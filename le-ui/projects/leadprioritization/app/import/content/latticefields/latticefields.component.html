@@ -7,7 +7,7 @@
 
     <h3 class="{{vm.importType}}-matching">{{vm.importType}} Matching Fields</h3>
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
-    <ul ng-init="fieldMapping = {}">
+    <ul ng-init="fieldMapping = fieldMapping || {}">
     	<li ng-repeat="field in vm.matchingFieldsList">
     		<label>{{field}}</label>
     		<select class="form-control"
@@ -16,8 +16,12 @@
 			    ng-class="{'required': true}">
 
                 <option value="" hidden disabled>-- Unmapped Field --</option>
-    			<option ng-repeat="availableField in vm.availableFields" value="{{field}}:{{availableField}}" ng-disabled="vm.unavailableFields.indexOf(availableField) !== -1">
-					{{availableField}}
+    			<option 
+                    ng-repeat="availableField in vm.availableFields" 
+                    value="{{field}}:{{availableField.userField}}" 
+                    ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
+                    ng-init="(availableField.mappedField == field ? fieldMapping[field].userField = field + ':' + availableField.userField : '')">
+					{{availableField.userField}}
 				</option>
 
     		</select>
@@ -35,10 +39,13 @@
                 ng-class="{'required': true}">
 
                 <option value="" hidden disabled>-- Unmapped Field --</option>
-                <option ng-repeat="availableField in vm.availableFields" value="{{field}}:{{availableField}}" ng-disabled="vm.unavailableFields.indexOf(availableField) !== -1">
-                    {{availableField}}
+                <option 
+                    ng-repeat="availableField in vm.availableFields" 
+                    value="{{field}}:{{availableField.userField}}" 
+                    ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
+                    ng-init="(availableField.mappedField == field ? fieldMapping[field].userField = field + ':' + availableField.userField : '')">
+                    {{availableField.userField}}
                 </option>
-
             </select>
         </li>
     </ul>

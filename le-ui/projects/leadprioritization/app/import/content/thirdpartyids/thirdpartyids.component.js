@@ -13,7 +13,6 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     });
 
     vm.init = function() {
-        console.log(vm.fieldMappings);
         vm.fieldMappings.forEach(function(fieldMapping) {
             var userField = fieldMapping.userField;
             vm.availableFields.push(userField);

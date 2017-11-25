@@ -6,7 +6,7 @@
         </p>
     </div>
     <div class="alert">{{ vm.AvailableFields.length }} new Custom Fields have been found.</div>
-    <ul class="customfields">
+    <ul class="customfields" ng-init="fieldMapping = fieldMapping || {}">
         <li class="customfield">
             <ul class="field">
                 <li class="field-name">
@@ -34,7 +34,7 @@
                     </span>
                 </li>
                 <li class="ignore">
-                    <input type="checkbox" name="ignore_all" ng-click="vm.toggleIgnores($event)" ng-model="vm.toggleIgnore" id="toggleIgnore"/> <label for="toggleIgnore">Ignore</label>
+                    <input type="checkbox" name="ignore_all" id="toggleIgnore" ng-model="checked" ng-change="vm.toggleIgnores(checked, fieldMapping)"/> <label for="toggleIgnore">Ignore</label>
                     <span class="more-info">&#105;
                         <div class="tooltip_">
                             <div class="cover">
@@ -47,17 +47,17 @@
                 </li>
             </ul>
         </li>
-        <li ng-repeat="fieldMapping in vm.fieldMappings | filter:vm.filterStandardList" class="customfield">
+        <li ng-repeat="field in vm.fieldMappings | filter:vm.filterStandardList" class="customfield">
             <ul class="field">
-                <li class="field-name">{{fieldMapping.userField}}</li>
+                <li class="field-name">{{field.userField}}</li>
                 <li class="type">
                     <select
 							class="custom-select"
-							name="columnType_{{ ::fieldMapping.userField }}"
-							ng-model="fieldMapping.fieldType"
-							ng-init="fieldMapping.fieldType=fieldMapping.fieldType"
+							name="columnType_{{ ::field.userField }}"
+							ng-model="fieldMapping[field.userField].fieldType"
+							ng-init="fieldMapping[field.userField].fieldType = field.fieldType"
 							ng-change="vm.changeType(fieldMapping)"
-							value="{{fieldMapping.fieldType}}">
+							value="{{field.fieldType}}">
 						<option value="TEXT" selected>Text</option>
 						<option value="NUMBER">Number</option>
 						<option value="BOOLEAN">Boolean</option>
@@ -65,8 +65,8 @@
 					</select>
                 </li>
                 <li class="ignore">
-                    <input type="checkbox" ng-model="fieldMapping.ignored" ng-click="vm.changeIgnore(fieldMapping)"/> 
-                    <label for="customFieldsIgnore[{{field.CustomField}}]">Ignore</label>
+                    <input type="checkbox" class="ignoreCheckbox" id="{{field.userField}}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)"/> 
+                    <label for="{{field.userField}}">Ignore</label>
                 </li>
             </ul>
         </li>

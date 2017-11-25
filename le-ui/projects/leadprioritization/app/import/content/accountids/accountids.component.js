@@ -38,6 +38,7 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.changeLatticeField = function(mapping) {
         ImportWizardStore.setSaveObjects([{userField: mapping.userField, mappedField: vm.Id}]);
+        ImportWizardStore.setValidation('one', true);
     };
 
     vm.init();

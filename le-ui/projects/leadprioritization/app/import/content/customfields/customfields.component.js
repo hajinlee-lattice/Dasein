@@ -10,6 +10,7 @@ angular.module('lp.import.wizard.customfields', [])
         AvailableFields: [],
         ignoredFields: FieldDocument.ignoredFields = [],
         fieldMappings: FieldDocument.fieldMappings,
+        fieldMappingIgnore: {}
     });
 
     vm.init = function() {
@@ -21,16 +22,6 @@ angular.module('lp.import.wizard.customfields', [])
         	    vm.AvailableFields.push(item.userField);
             }
         });
-        vm.customFields.forEach(function(item){
-            vm.customFieldsIgnore[item.CustomField] = false;
-        });
-
-        vm.toggleIgnores = function($event) {
-            var target = $event.target;
-            vm.customFields.forEach(function(item){
-                vm.customFieldsIgnore[item.CustomField] = target.checked;
-            });
-        }
 
         for( var i=0 ; i< vm.fieldMappings.length; i++) {
             if (vm.fieldMappings[i].mappedField == null) {
@@ -39,19 +30,36 @@ angular.module('lp.import.wizard.customfields', [])
         }
     };
 
+    vm.toggleIgnores = function(checked, fieldMapping) {
+        angular.element(".ignoreCheckbox").prop('checked', checked);
+        for(var i in fieldMapping) {
+            fieldMapping[i].ignore = checked;
+        }
+        vm.changeIgnore(fieldMapping);
+    }
+
     vm.changeIgnore = function(fieldMapping) {
-        console.log(fieldMapping);
-         vm.fieldMappings.forEach(function(fieldMapping) {
-             if (fieldMapping.ignored) {
-                 vm.ignoredFields.push(fieldMapping.userField);
-                 delete fieldMapping.ignored;
-             }
-         });
-        ImportWizardStore.setFieldDocument(FieldDocument);
+        var ignoredFields = [];
+        for(var i in fieldMapping) {
+            var userField = i,
+                item = fieldMapping[userField],
+                ignore = item.ignore;
+            if(ignore) {
+                ignoredFields.push(userField);
+            }
+        }
+        ImportWizardStore.setIgnore(ignoredFields);
     }
+
     vm.changeType = function(fieldMapping) {
-        ImportWizardStore.setFieldDocument(FieldDocument);
+        for(var i in fieldMapping) {
+            var userField = i,
+                item = fieldMapping[userField];
+
+            ImportWizardStore.remapType(userField, item.fieldType);
+        }
     }
+
     vm.filterStandardList = function(input) {
         for (var i =0 ; i < vm.AvailableFields.length; i++) {
             if (vm.AvailableFields[i] === input.userField) {

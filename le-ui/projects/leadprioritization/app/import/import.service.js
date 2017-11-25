@@ -15,7 +15,7 @@ angular.module('lp.import')
         };
 
         this.validation = {
-            one: true,
+            one: false,
             two: true,
             three: true,
             four: true,
@@ -203,7 +203,7 @@ angular.module('lp.import')
 
     this.nextSaveMapping = function(nextState) {
         this.saveObjects.forEach(function(item, index) {
-            ImportWizardStore.remap(item.userField, item.mappedField);
+            ImportWizardStore.remapMap(item.userField, item.mappedField);
         });
         $state.go(nextState);
     }
@@ -298,7 +298,7 @@ angular.module('lp.import')
         return indexes;
     }
 
-    this.remap = function(userField, mappedField) {
+    this.remapMap = function(userField, mappedField) {
         var mappedIndexes = findIndexes(this.fieldDocument.fieldMappings, 'mappedField', mappedField),
             userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField);
 
@@ -311,6 +311,18 @@ angular.module('lp.import')
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedField = mappedField;
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = true;
         });
+    }
+
+    this.remapType = function(userField, type) {
+        var userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField);
+
+        userIndexes.forEach(function(index) {
+            ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type;
+        });
+    }
+
+    this.setIgnore = function(ignoredFields) {
+        ImportWizardStore.fieldDocument.ignoredFields = ignoredFields;
     }
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility) {

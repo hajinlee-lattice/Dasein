@@ -28,10 +28,8 @@ angular.module('lp.import.wizard.latticefields', [])
     });
 
     vm.init = function() {
-        console.log(vm.fieldMappings);
         vm.fieldMappings.forEach(function(fieldMapping) {
-            var userField = fieldMapping.userField;
-            vm.availableFields.push(userField);
+            vm.availableFields.push(fieldMapping);
         });
     };
 

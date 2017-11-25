@@ -9,7 +9,6 @@ angular.module('lp.import.wizard.jobstatus', [])
     });
 
     vm.init = function() {
-
     }
 
     vm.init();
