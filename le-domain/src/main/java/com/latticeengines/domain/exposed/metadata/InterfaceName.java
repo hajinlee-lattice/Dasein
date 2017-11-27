@@ -77,6 +77,12 @@ public enum InterfaceName {
 
     ConsolidateReport, //
 
+    // CDL External
+    SFDC_Sandbox_ID,
+    SFDC_Production_ID,
+    MKTO_ID,
+    ELOQUA_ID,
+
     // Data Cloud
     LatticeAccountId, // Id in AccountMaster
     LDC_Name,

@@ -25,8 +25,10 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -34,6 +36,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -54,6 +58,9 @@ public class ModelingFileUploadResource {
 
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
+
+    @Autowired
+    private CDLExternalSystemProxy cdlExternalSystemProxy;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -168,5 +175,31 @@ public class ModelingFileUploadResource {
             return ResponseDocument.successResponse(ImmutableMap.of(schemaInterpretation, modelingFileMetadataService
                     .getSchemaToLatticeSchemaFields(entity, source, feedType)));
         }
+    }
+
+    @RequestMapping(value = "/cdlexternalsystemmappings", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "return a map with all supported external systems.")
+    public ResponseDocument<Map<String, List<Enum>>> getCDLExternalSystemMap() {
+        return ResponseDocument.successResponse(CDLExternalSystem.EXTERNAL_SYSTEM);
+    }
+
+    @RequestMapping(value = "/cdlexternalsystem/{systemType}/accountinterface/{accountInterface}", method =
+            RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "create a CDL external system record.")
+    public void createCDLExternalSystem(@PathVariable String systemType, @PathVariable InterfaceName accountInterface) {
+        cdlExternalSystemProxy.createCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), systemType,
+                accountInterface);
+    }
+
+    @RequestMapping(value = "/cdlexternalsystem", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "create a CDL external system record.")
+    public void createCDLExternalSystem(@RequestParam(value = "crmAccount", required = false) InterfaceName crmAccountInt,
+                                        @RequestParam(value = "mapAccount", required = false) InterfaceName mapAccountInt,
+                                        @RequestParam(value = "erpAccount", required = false) InterfaceName erpAccountInt) {
+        cdlExternalSystemProxy.createCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), crmAccountInt,
+                mapAccountInt, erpAccountInt);
     }
 }

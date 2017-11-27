@@ -27,6 +27,12 @@ public class SetTenantAspect {
         setSecurityContext(CustomerSpace.parse(customerSpace).toString());
     }
 
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.CDLExternalSystemServiceImpl.*(..))")
+    public void allCDLExternalSystemService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setSecurityContext(CustomerSpace.parse(customerSpace).toString());
+    }
+
     private void setSecurityContext(String customerSpace) {
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
         if (tenant == null) {
