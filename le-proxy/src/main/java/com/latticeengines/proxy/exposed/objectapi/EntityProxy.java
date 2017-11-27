@@ -84,7 +84,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return getCountFromCache(customerSpace, frontEndQuery);
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)")
+    @Cacheable(cacheNames = CacheNames.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         DataPage page = getDataFromCache(customerSpace, frontEndQuery);
