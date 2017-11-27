@@ -1,5 +1,5 @@
-angular.module('lp.import.wizard.accountids', [])
-.controller('ImportWizardAccountIDs', function(
+angular.module('lp.import.wizard.contactids', [])
+.controller('ImportWizardContactIDs', function(
     $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields
 ) {
     var vm = this;
@@ -12,9 +12,10 @@ angular.module('lp.import.wizard.accountids', [])
         AvailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
-            account: 'Id',
+            contact: 'contactId',
+            account: 'accountId',
         },
-        UnmappedFieldsMappingsMap: {}
+        UnmappedFieldsMappingsMap: {},
     });
 
     vm.init = function() {

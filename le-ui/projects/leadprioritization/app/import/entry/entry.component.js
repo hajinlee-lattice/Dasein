@@ -1,9 +1,8 @@
 angular.module('lp.import.entry', [
     'lp.import.entry.accounts',
-    'lp.import.entry.accountfields',
     'lp.import.entry.contacts',
-    'lp.import.entry.contactfields',
-    'lp.import.entry.eloquoa'
+    'lp.import.entry.productpurchases',
+    'lp.import.entry.productbundles'
 ])
 .controller('ImportEntry', function(
     $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportStore
@@ -28,10 +27,9 @@ angular.module('lp.import.entry', [
         var state = $state.current.name;
         switch (state) {
             case 'home.import.entry.accounts': vm.changeEntityType('accounts'); break;
-            case 'home.import.entry.accountfields': vm.changeEntityType('accountfields'); break;
             case 'home.import.entry.contacts': vm.changeEntityType('contacts'); break;
-            case 'home.import.entry.contactfields': vm.changeEntityType('contactfields'); break;
-            case 'home.import.entry.eloquoa': vm.changeEntityType('eloquoa'); break;
+            case 'home.import.entry.product_purchases': vm.changeEntityType('product_purchases'); break;
+            case 'home.import.entry.product_bundles': vm.changeEntityType('product_bundles'); break;
         }
     }
 

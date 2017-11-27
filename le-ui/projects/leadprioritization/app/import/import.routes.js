@@ -6,7 +6,10 @@ angular
     'lp.import.wizard.latticefields',
     'lp.import.wizard.jobstatus',
     'lp.import.wizard.customfields',
-    'lp.import.wizard.accountids'
+    'lp.import.wizard.accountids',
+    'lp.import.wizard.contactids',
+    'lp.import.wizard.transactionids',
+    'lp.import.wizard.productids'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -35,14 +38,6 @@ angular
                 }
             }
         })
-        .state('home.import.entry.accountfields', {
-            url: '/accountfields',
-            views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/accountfields/accountfields.component.html'
-                }
-            }
-        })
         .state('home.import.entry.contacts', {
             url: '/contacts',
             views: {
@@ -51,18 +46,12 @@ angular
                 }
             }
         })
-        .state('home.import.entry.contactfields', {
-            url: '/contactfields',
-            views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/contactfields/contactfields.component.html'
-                }
-            }
+        .state('home.import.entry.product_purchases', {
+            url: '/product_purchases'
         })
-        .state('home.import.entry.eloquoa', {
-            url: '/eloquoa'
+        .state('home.import.entry.product_bundles', {
+            url: '/product_bundles'
         })
-
 
         .state('home.import.wizard', {
             url: '/wizard',
@@ -229,47 +218,13 @@ angular
                 }
             }
         })
-
-
-        .state('home.import.wizard.accountfields', {
-            url: '/accountfields',
-            resolve: {
-                WizardValidationStore: function(ImportWizardStore) {
-                    return ImportWizardStore;
-                },
-                WizardProgressContext: function() {
-                    return 'import';
-                },
-                WizardProgressItems: function($stateParams, ImportWizardStore) {
-                    var wizard_steps = $stateParams.wizard_steps;
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'accountfields');
-                }
-            },
-            views: {
-                'wizard_progress': {
-                    controller: 'ImportWizardProgress',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/progress/progress.component.html'
-                },
-                'wizard_controls': {
-                    resolve: {
-                        WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.accountfields', nextState: 'home.segments' };
-                        }
-                    },
-                    controller: 'ImportWizardControls',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/controls/controls.component.html'
-                }
-            }
-        })
-        .state('home.import.wizard.accountfields.one', {
-            url: '/accountids',
+        .state('home.import.wizard.contacts.one', {
+            url: '/contactids',
             views: {
                 'wizard_content@home.import.wizard': {
-                    controller: 'ImportWizardAccountIDs',
+                    controller: 'ImportWizardContactIDs',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/accountids/accountids.component.html'
+                    templateUrl: 'app/import/content/contactids/contactids.component.html'
                 }
             },
             resolve: {
@@ -293,67 +248,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.accountfields.one.two', {
-            url: '/thirdpartyids',
-            views: {
-                'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/content/thirdpartyids/thirdpartyids.component.html'
-                }
-            }
-        })
-        .state('home.import.wizard.accountfields.one.two.three', {
-            url: '/customfields',
-            views: {
-                'wizard_content@home.import.wizard': {
-                    controller: 'ImportWizardCustomFields',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/import/content/customfields/customfields.component.html'
-                }
-            }
-        })
-        .state('home.import.wizard.accountfields.one.two.three.four', {
-            url: '/jobstatus',
-            views: {
-                'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
-                }
-            }
-        })
-
-
-        .state('home.import.wizard.contacts', {
-            url: '/accounts',
-            resolve: {
-                WizardValidationStore: function(ImportWizardStore) {
-                    return ImportWizardStore;
-                },
-                WizardProgressContext: function() {
-                    return 'import';
-                },
-                WizardProgressItems: function($stateParams, ImportWizardStore) {
-                    var wizard_steps = $stateParams.wizard_steps;
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contacts');
-                }
-            },
-            views: {
-                'wizard_progress': {
-                    controller: 'ImportWizardProgress',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/progress/progress.component.html'
-                },
-                'wizard_controls': {
-                    resolve: {
-                        WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.contacts', nextState: 'home.segments' };
-                        }
-                    },
-                    controller: 'ImportWizardControls',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/controls/controls.component.html'
-                }
-            }
-        })
-        .state('home.import.wizard.contacts.one', {
+        .state('home.import.wizard.contacts.one.two', {
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
@@ -410,67 +305,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.contacts.one.two', {
-            url: '/customfields',
-            views: {
-                'wizard_content@home.import.wizard': {
-                    controller: 'ImportWizardCustomFields',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/import/content/customfields/customfields.component.html'
-                }
-            }
-        })
         .state('home.import.wizard.contacts.one.two.three', {
-            url: '/jobstatus',
-            views: {
-                'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
-                }
-            }
-        })
-
-
-        .state('home.import.wizard.contactfields', {
-            url: '/accounts',
-            resolve: {
-                WizardValidationStore: function(ImportWizardStore) {
-                    return ImportWizardStore;
-                },
-                WizardProgressContext: function() {
-                    return 'import';
-                },
-                WizardProgressItems: function($stateParams, ImportWizardStore) {
-                    var wizard_steps = $stateParams.wizard_steps;
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contactfields');
-                }
-            },
-            views: {
-                'wizard_progress': {
-                    controller: 'ImportWizardProgress',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/progress/progress.component.html'
-                },
-                'wizard_controls': {
-                    resolve: {
-                        WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.contactfields', nextState: 'home.segments' };
-                        }
-                    },
-                    controller: 'ImportWizardControls',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/wizard/controls/controls.component.html'
-                }
-            }
-        })
-        .state('home.import.wizard.contactfields.one', {
-            url: '/latticefields',
-            views: {
-                'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
-                }
-            },
-        })
-        .state('home.import.wizard.contactfields.one.two', {
             url: '/customfields',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -480,7 +315,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.contactfields.one.two.three', {
+        .state('home.import.wizard.contacts.one.two.three.four', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -488,10 +323,8 @@ angular
                 }
             }
         })
-
-
-        .state('home.import.wizard.eloquoa', {
-            url: '/accounts',
+        .state('home.import.wizard.product_purchases', {
+            url: '/product_purchases',
             resolve: {
                 WizardValidationStore: function(ImportWizardStore) {
                     return ImportWizardStore;
@@ -501,7 +334,7 @@ angular
                 },
                 WizardProgressItems: function($stateParams, ImportWizardStore) {
                     var wizard_steps = $stateParams.wizard_steps;
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'eloquoa');
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product_purchases');
                 }
             },
             views: {
@@ -513,7 +346,7 @@ angular
                 'wizard_controls': {
                     resolve: {
                         WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.eloquoa', nextState: 'home.segments' };
+                            return { backState: 'home.import.entry.product_purchases', nextState: 'home.segments' };
                         }
                     },
                     controller: 'ImportWizardControls',
@@ -521,13 +354,15 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.import.wizard.eloquoa.one'
+            redirectTo: 'home.import.wizard.product_purchases.one'
         })
-        .state('home.import.wizard.eloquoa.one', {
-            url: '/latticefields',
+        .state('home.import.wizard.product_purchases.one', {
+            url: '/transactionids',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
+                    controller: 'ImportWizardTransactionIDs',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/transactionids/transactionids.component.html'
                 }
             },
             resolve: {
@@ -551,17 +386,192 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.eloquoa.one.two', {
-            url: '/customfields',
+        .state('home.import.wizard.product_purchases.one.two', {
+            url: '/latticefields',
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
+                        deferred.resolve(result['Account']);
+                    });
+
+                    return deferred.promise;
+                },
+                Type: function(){
+                    return "Contact";
+                },
+                MatchingFields: function() {
+                    return [
+                        { name: 'Contact ID', options: [{ name: "ContactID" }, { name: "Another Value" }] },
+                        { name: 'Account ID', options: [{ name: "AccountID" }, { name: "Another Value" }] },
+                        { name: 'Last Name', options: [{ name: "LastName" }, { name: "Another Value" }] },
+                        { name: 'First Name', options: [{ name: "FirstName" }, { name: "Another Value" }] },
+                        { name: 'Title', options: [{ name: "Title" }, { name: "Another Value" }] },
+                        { name: 'Email', options: [{ name: "Email" }, { name: "Another Value" }] }
+                    ];
+                },
+                AnalysisFields: function() {
+                    return [
+                        { name: 'Lead Status', options: [{ name: "LeadStatus" }, { name: "Another Value" }] },
+                        { name: 'Lead Source', options: [{ name: "LeadSource" }, { name: "Another Value" }] },
+                        { name: 'Lead Type', options: [{ name: "Contact" }, { name: "Another Value" }] },
+                        { name: 'Twitter', options: [{ name: "Twitter" }, { name: "Another Value" }] },
+                        { name: 'LinkedIn URL', options: [{ name: "LinkedInURL" }, { name: "Another Value" }] },
+                        { name: 'Created Date', options: [{ name: "CreatedDate" }, { name: "Another Value" }] },
+                        { name: 'Last Modified Date', options: [{ name: "LastModified" }, { name: "Another Value" }] },
+                        { name: 'Has Opted Out of Email', options: [{ name: "OptedOutEmail" }, { name: "Another Value" }] },
+                        { name: 'Has Opted Out of Phone Calls', options: [{ name: "OptedOutPhone" }, { name: "Another Value" }] },
+                        { name: 'Birthdate', options: [{ name: "Birthdate" }, { name: "Another Value" }] }
+                    ];
+                }
+            },
             views: {
                 'wizard_content@home.import.wizard': {
-                    controller: 'ImportWizardCustomFields',
+                    controller: 'ImportWizardLatticeFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
                 }
             }
         })
-        .state('home.import.wizard.eloquoa.one.two.three', {
+        .state('home.import.wizard.product_purchases.one.two.three', {
+            url: '/jobstatus',
+            views: {
+                'wizard_content@home.import.wizard': {
+                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
+                }
+            }
+        })
+        .state('home.import.wizard.product_bundles', {
+            url: '/product_bundles',
+            resolve: {
+                WizardValidationStore: function(ImportWizardStore) {
+                    return ImportWizardStore;
+                },
+                WizardProgressContext: function() {
+                    return 'import';
+                },
+                WizardProgressItems: function($stateParams, ImportWizardStore) {
+                    var wizard_steps = $stateParams.wizard_steps;
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product_bundles');
+                }
+            },
+            views: {
+                'wizard_progress': {
+                    controller: 'ImportWizardProgress',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/progress/progress.component.html'
+                },
+                'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.import.entry.product_bundles', nextState: 'home.segments' };
+                        }
+                    },
+                    controller: 'ImportWizardControls',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/controls/controls.component.html'
+                }
+            },
+            redirectTo: 'home.import.wizard.product_bundles.one'
+        })
+        .state('home.import.wizard.product_bundles.one', {
+            url: '/transactionids',
+            views: {
+                'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardProductIDs',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/productids/productids.component.html'
+                }
+            },
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
+                        deferred.resolve(result['Account']);
+                    });
+
+                    return deferred.promise;
+                }
+            }
+        })
+        .state('home.import.wizard.product_bundles.one.two', {
+            url: '/latticefields',
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields().then(function(result) {
+                        deferred.resolve(result['Account']);
+                    });
+
+                    return deferred.promise;
+                },
+                Type: function(){
+                    return "Contact";
+                },
+                MatchingFields: function() {
+                    return [
+                        { name: 'Contact ID', options: [{ name: "ContactID" }, { name: "Another Value" }] },
+                        { name: 'Account ID', options: [{ name: "AccountID" }, { name: "Another Value" }] },
+                        { name: 'Last Name', options: [{ name: "LastName" }, { name: "Another Value" }] },
+                        { name: 'First Name', options: [{ name: "FirstName" }, { name: "Another Value" }] },
+                        { name: 'Title', options: [{ name: "Title" }, { name: "Another Value" }] },
+                        { name: 'Email', options: [{ name: "Email" }, { name: "Another Value" }] }
+                    ];
+                },
+                AnalysisFields: function() {
+                    return [
+                        { name: 'Lead Status', options: [{ name: "LeadStatus" }, { name: "Another Value" }] },
+                        { name: 'Lead Source', options: [{ name: "LeadSource" }, { name: "Another Value" }] },
+                        { name: 'Lead Type', options: [{ name: "Contact" }, { name: "Another Value" }] },
+                        { name: 'Twitter', options: [{ name: "Twitter" }, { name: "Another Value" }] },
+                        { name: 'LinkedIn URL', options: [{ name: "LinkedInURL" }, { name: "Another Value" }] },
+                        { name: 'Created Date', options: [{ name: "CreatedDate" }, { name: "Another Value" }] },
+                        { name: 'Last Modified Date', options: [{ name: "LastModified" }, { name: "Another Value" }] },
+                        { name: 'Has Opted Out of Email', options: [{ name: "OptedOutEmail" }, { name: "Another Value" }] },
+                        { name: 'Has Opted Out of Phone Calls', options: [{ name: "OptedOutPhone" }, { name: "Another Value" }] },
+                        { name: 'Birthdate', options: [{ name: "Birthdate" }, { name: "Another Value" }] }
+                    ];
+                }
+            },
+            views: {
+                'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardLatticeFields',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
+                }
+            }
+        })
+        .state('home.import.wizard.product_bundles.one.two.three', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -569,5 +579,4 @@ angular
                 }
             }
         });
-
 });

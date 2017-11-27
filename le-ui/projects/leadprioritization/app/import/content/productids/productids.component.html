@@ -7,10 +7,10 @@
     <div class="id-options" ng-if="!vm.state.accountDedupeField">
         <div class="id-options-item">
             <div>
-                <label for="dedupeField">Unique Identifier</label>
+                <label for="dedupeField">Unique Product Identifier</label>
                 <select 
                     class="form-control"
-                    ng-model="vm.fieldMapping.account"
+                    ng-model="vm.fieldMapping.product"
                     ng-change="vm.changeLatticeField(vm.fieldMapping)"
                     ng-class="{'required': true}">
                     <option value="" hidden disabled>-- Choose Unique Identifier --</option>

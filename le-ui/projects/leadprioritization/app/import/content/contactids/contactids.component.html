@@ -7,7 +7,24 @@
     <div class="id-options" ng-if="!vm.state.accountDedupeField">
         <div class="id-options-item">
             <div>
-                <label for="dedupeField">Unique Identifier</label>
+                <label for="dedupeField">Unique Contact Identifier</label>
+                <select 
+                    class="form-control"
+                    ng-model="vm.fieldMapping.contact"
+                    ng-change="vm.changeLatticeField(vm.fieldMapping)"
+                    ng-class="{'required': true}">
+                    <option value="" hidden disabled>-- Choose Unique Identifier --</option>
+                    <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField}}">
+                        {{AvailableField}}
+				    </option>
+               </select>
+            </div>
+        </div>
+    </div>
+    <div class="id-options" ng-if="!vm.state.accountDedupeField">
+        <div class="id-options-item">
+            <div>
+                <label for="dedupeField">Unique Account Identifier</label>
                 <select 
                     class="form-control"
                     ng-model="vm.fieldMapping.account"
@@ -16,7 +33,7 @@
                     <option value="" hidden disabled>-- Choose Unique Identifier --</option>
                     <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField}}">
                         {{AvailableField}}
-				    </option>
+                    </option>
                </select>
             </div>
         </div>

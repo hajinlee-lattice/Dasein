@@ -71,58 +71,32 @@ angular.module('lp.import')
                 }
             }
         ],
-        "accountfields": [
+        "contacts": [
             { 
-                label: 'Account ID', 
-                state: 'accountfields.one', 
+                label: 'Contact IDs', 
+                state: 'contacts.one',
                 backState: 'home.segment.explorer.attributes',
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
-                label: 'Other IDs', 
-                state: 'accountfields.one.two', 
-                nextLabel: 'Next',
-                nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveMapping(nextState);
-                } 
-            },{ 
-                label: 'Custom Fields', 
-                state: 'accountfields.one.two.three', 
-                nextLabel: 'Import File', 
-                nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState);
-                }
-            },{ 
-                label: 'Import Data', 
-                state: 'accountfields.one.two.three.four', 
-                nextLabel: 'Done', 
-                hideBack: true,
-                nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-                    $state.go(nextState); 
-                }
-            }
-        ],
-        "contacts": [
-            { 
                 label: 'Lattice Fields', 
-                state: 'contacts.one', 
-                nextLabel: 'Next', 
-                nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
-                } 
-            },{ 
-                label: 'Custom Fields', 
                 state: 'contacts.one.two', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveGeneric(nextState);
+                } 
+            },{ 
+                label: 'Custom Fields', 
+                state: 'contacts.one.two.thre', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 
-                state: 'contacts.one.two.three', 
+                state: 'contacts.one.two.three.four', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -131,24 +105,24 @@ angular.module('lp.import')
                 }
             }
         ],
-        "contactfields": [
+        "product_purchases": [
             { 
-                label: 'Lattice Fields', 
-                state: 'contactfields.one', 
+                label: 'Transaction IDs', 
+                state: 'product_purchases.one', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveGeneric(nextState);
                 } 
             },{ 
-                label: 'Custom Fields', 
-                state: 'contactfields.one.two', 
+                label: 'Lattice Fields', 
+                state: 'product_purchases.one.two', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                    ImportWizardStore.nextSaveGeneric(nextState);
                 }
             },{ 
                 label: 'Import Data', 
-                state: 'contactfields.one.two.three', 
+                state: 'product_purchases.one.two.three', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -157,24 +131,24 @@ angular.module('lp.import')
                 }
             }
         ],
-        "eloquoa": [
+        "product_bundles": [
             { 
-                label: 'Lattice Fields', 
-                state: 'eloquoa.one', 
+                label: 'Product ID', 
+                state: 'product_bundles.one', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveGeneric(nextState);
                 } 
             },{ 
-                label: 'Custom Fields', 
-                state: 'eloquoa.one.two', 
+                label: 'Lattice Fields', 
+                state: 'product_bundles.one.two', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                    ImportWizardStore.nextSaveGeneric(nextState);
                 }
             },{ 
                 label: 'Import Data', 
-                state: 'eloquoa.one.two.three', 
+                state: 'product_bundles.one.two.three', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
