@@ -2,6 +2,14 @@
 
 echo "APP_ROOT=${APP_ROOT}"
 
+if [ -f "/etc/ledp/lattice.crt" ]; then
+    cp -f /etc/ledp/lattice.crt /etc/pki/tls/star.lattice.local.crt
+fi
+
+if [ -f "/etc/ledp/lattice.key" ]; then
+    cp -f /etc/ledp/lattice.key /etc/pki/tls/private/private.key
+fi
+
 if [ -z "${LE_ENVIRONMENT}" ]; then
     echo "must specify LE_ENVIRONMENT"
     exit 1

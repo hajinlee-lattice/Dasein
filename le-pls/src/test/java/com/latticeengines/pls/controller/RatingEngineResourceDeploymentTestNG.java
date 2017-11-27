@@ -164,8 +164,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         RatingEngine ratingEngine = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines", re1,
                 RatingEngine.class);
         Assert.assertNotNull(ratingEngine);
-        Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
-        Assert.assertEquals(RATING_ENGINE_NOTE_1, ratingEngine.getNote());
+        Assert.assertEquals(ratingEngine.getDisplayName(), RATING_ENGINE_NAME_1);
+        Assert.assertEquals(ratingEngine.getNote(), RATING_ENGINE_NOTE_1);
         Assert.assertEquals(re1.getId(), ratingEngine.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
 
