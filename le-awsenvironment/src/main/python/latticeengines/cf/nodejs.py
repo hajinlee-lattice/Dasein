@@ -7,7 +7,7 @@ import boto3
 import os
 
 from .module.ec2 import ec2_defn
-from .module.ecs import ContainerDefinition, TaskDefinition
+from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import Parameter, EnvVarParameter, ArnParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
@@ -72,8 +72,12 @@ def express_task(environment, profile_vars, port, mode):
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
 
+    ledp = Volume("ledp", "/etc/ledp")
+    container = container.mount("/etc/ledp", ledp)
+
     task = TaskDefinition("expresstask")
     task.add_container(container)
+    task.add_volume(ledp)
     return task
 
 def provision_cli(args):
