@@ -5,21 +5,43 @@
     </h2>
 
     <div 
-        class="exclude-filter"
-        ng-if="
-            vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
-        <label>
+        class="targets-filters"
+        ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
 
+        <label ng-if="vm.noSFCount > 0">
             <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
-
             <input 
                 type="checkbox" 
                 class=""
                 ng-model="excludeAccounts"
                 ng-change="vm.excludeNonSalesForceCheckbox(!excludeAccounts)" />
-            Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.accountsWithoutSfId | number }}</span>)
+            Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)
         </label>
-    </div>
+
+        <label>
+            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
+            <input 
+                type="checkbox" 
+                class=""
+                ng-model=""
+                ng-change="" />
+            Limit to only <input type="text" value="3000" /> highest rated targets
+        </label>
+
+        <ul class="bucket-checkboxes">
+            <li 
+                ng-class="!selectedBucket ? '' : 'unselected'"
+                ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
+                ng-click="vm.bucketClick(bucket.bucket); selectedBucket = !selectedBucket">
+                
+                <h3>{{bucket.bucket}}</h3>
+                <h4>Accounts</h4>
+                <p>{{bucket.count | number}} ({{ (bucket.count / vm.counts.accounts.value)  | percentage: 0 }})</p>
+
+            </li>
+        </ul>
+
+    </div><!-- End .targets-filters -->
 
     <div class="success-message" ng-if="vm.saved === true">
         <h3>Your segment was saved successfully!</h3>
@@ -74,7 +96,7 @@
     - Hadden
     -->
 
-    <table class="list-table" ng-if="vm.page === 'Accounts'">
+    <table ng-if="vm.page === 'Accounts'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <th class="sortable" ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse">
@@ -126,7 +148,7 @@
         </tbody>
     </table>
 
-    <table class="list-table" ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
+    <table ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <th class="sortable" ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse">
@@ -166,7 +188,7 @@
         </tbody>
     </table>
 
-    <table class="list-table" ng-if="vm.page === 'Contacts'">
+    <table ng-if="vm.page === 'Contacts'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <th class="sortable" ng-click="sortType = 'ContactName'; sortReverse = !sortReverse">

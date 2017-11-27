@@ -16,6 +16,7 @@ angular.module('lp.playbook')
         this.currentPlay = this.currentPlay || null;
         this.playLaunches = null;
         this.savedTalkingPoints = null;
+        this.targetData = null;
 
         this.settings_form = {
             play_display_name: '',
@@ -371,16 +372,22 @@ angular.module('lp.playbook')
             launchedState: launchedState,
             hasLaunched: hasLaunched
         };
+    }    
+
+    this.setTargetData = function(targetData) {
+        this.targetData = targetData;
+    }
+    this.getTargetData = function(){ 
+        return this.targetData;
+    };
+
+    this.setTalkingPoints = function(talkingPoints) {
+        this.savedTalkingPoints = talkingPoints;
     }
 
-    this.getTargetData = function(engineId, query){ 
-        var deferred = $q.defer();
-
-        PlaybookWizardService.getTargetData(engineId, query).then(function(response) {
-            deferred.resolve(response);
-        });
-        return deferred.promise;
-    };
+    this.getTalkingPoints = function() {
+        return this.savedTalkingPoints;
+    }
 
 })
 .service('PlaybookWizardService', function($q, $http, $state, $timeout) {

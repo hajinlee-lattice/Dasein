@@ -284,9 +284,6 @@ section.container.custom-fields {
             }
         }
     }
-    thead {
-        border-bottom: #333 solid 1px;
-    }
     tr {
         th {
             padding: .5em 1em 1em;
@@ -676,30 +673,11 @@ Media Queries
             clear: none;
             margin: 0;
         }
-
-        table {
-            margin-bottom: 0;
-
-            tr {
-                td {
-                    width: auto;
-                }
-            }
-        }
-
         &.with-padding {
             margin: 1.5em 2em;
         }
-
         tr {
-            border-bottom: 1px solid #e9e9e9;
-
-            select {
-                /*max-width: 90%;*/
-            }
-
             td {
-                border-right: 1px solid #e9e9e9;
 
                 &.field-mapping-inputs {
                     padding: 0.5em 1em;
@@ -711,29 +689,10 @@ Media Queries
                         }
                     }
                 }
-
-                &:last-child {
-                    border-right: none;
-                }
             }
         }
-
-        thead {
-            tr {
-                th {
-                    border: none;
-                    padding: .5em 1em;
-                    color: #bbb;
-                }
-            }
-        }
-
         tbody {
             tr {
-                &:nth-child(odd) {
-                    background: #f9f9f9;
-                }
-
                 td {
                     &.field-mapping-label label {
                         width: auto;

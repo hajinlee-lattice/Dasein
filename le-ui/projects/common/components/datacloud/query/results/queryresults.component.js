@@ -5,17 +5,20 @@ angular.module('common.datacloud.query.results', [
     $q, $scope, $state, $stateParams, $filter, $rootScope,
     BrowserStorageUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts, /*AccountsCount, ContactsCount,*/ 
-    CountWithoutSalesForce, Contacts, PlaybookWizardStore
+    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFCount
 ) {
     var vm = this;
     angular.extend(vm, {
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
+        section: $stateParams.section,
+        page: $stateParams.pageTitle,
+        myDataOrSegmentAccounts: vm.section === 'segment.analysis' && vm.page === 'Accounts',
+        myDataOrSegmentContacts: vm.section === 'segment.analysis' && vm.page === 'Contacts',
         accounts: Accounts,
-        counts: QueryStore.getCounts(),
+        counts: {},
         accountsCount: null, //AccountsCount,
-        accountsWithoutSfId: CountWithoutSalesForce,
         contacts: Contacts,
         contactsCount: null, //ContactsCount,
         loading: true,
@@ -33,18 +36,19 @@ angular.module('common.datacloud.query.results', [
             updateOn: 'default blur',
             debounce: 1500
         },
+        accountsCoverage: AccountsCoverage,
         excludeNonSalesForce: false,
+        noSFCount: NoSFCount,
         sortType: 'LDC_Name',
         sortReverse: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
         saving: false,
-        section: $stateParams.section,
-        page: $stateParams.pageTitle,
         config: Config,
         currentTargetTab: 'Accounts'
     });
 
     vm.init = function() {
+        
         if(vm.segment != null && vm.section != 'wizard.targets'){
             $rootScope.$broadcast('header-back', { 
                 path: '^home.segment.accounts',
@@ -53,8 +57,32 @@ angular.module('common.datacloud.query.results', [
             });
         }
 
-        vm.accountsCount = vm.counts.accounts.value;
-        vm.contactsCount = vm.counts.contacts.value;
+        // Set Counts for Segment and PLay Targets
+        if (vm.section === 'segment.analysis') {
+
+            // Get counts from QueryStore
+            vm.counts = QueryStore.getCounts();
+
+        } else {
+            
+            // Set counts for accounts and contacts
+            vm.counts = { 
+                accounts: { 
+                    value: vm.accountsCoverage.accountCount 
+                },
+                contacts: {
+                    value: vm.accountsCoverage.contactCount
+                }
+            };
+
+            // Create array of buckets to be used when launching play
+            vm.selectedBuckets = [];
+            vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
+                vm.selectedBuckets.push(bucket.bucket);
+            });
+
+        }
+
     }
 
     function updatePage() {
@@ -62,6 +90,8 @@ angular.module('common.datacloud.query.results', [
         var offset = (vm.current - 1) * vm.pagesize;
 
         if (vm.section === 'segment.analysis') {
+            
+            // My Data or Segment Account & Contacts pages
             var dataQuery = {
                 "free_form_text_search": vm.search,
                 "account_restriction": vm.accountRestriction,
@@ -80,84 +110,91 @@ angular.module('common.datacloud.query.results', [
                 }
             };
 
-            // vm.setCurrentRestrictionForSaveButton();
-
             if (vm.page === 'Accounts'){
                 QueryStore.setAccounts(dataQuery).then(function(response) {
                     vm.accounts = response.data;
                     vm.loading = false;
                 });
-            } else {
+            } else if (vm.page === 'Contacts'){
                 QueryStore.setContacts(dataQuery).then(function(response) {
-                    console.log(response.data);
                     vm.contacts = response.data;
                     vm.loading = false;
                 });
             }
 
         } else {
+
+            // Targets page for create Play flow
+            var query = { 
+                free_form_text_search: '',
+                restrictNotNullSalesforceId: false,
+                entityType: 'Account',
+                bucketFieldName: 'ScoreBucket',
+                maximum: 10,
+                offset: 0,
+                sortBy: 'LDC_Name',
+                descending: false,
+                selectedBuckets: vm.selectedBuckets
+            };
+
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
 
-                var engineId = data.ratingEngine.id,
-                    query = { 
-                        free_form_text_search: '',
-                        restrictNotNullSalesforceId: vm.excludeNonSalesForce,
-                        entityType: 'Account',
-                        bucketFieldName: 'ScoreBucket',
-                        maximum: 10,
-                        offset: offset,
-                        sortBy: 'LDC_Name',
-                        descending: false
-                    };
+                console.log(data);
 
-                PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ 
-                    vm.accounts = data.data; 
-                    vm.loading = false;
+                var engineId = data.ratingEngine.id;
+
+                PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
+                    PlaybookWizardStore.setTargetData(data.data);
+                    
+                    vm.accounts = PlaybookWizardStore.getTargetData();
                 });
 
             });
 
-            PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
-                var engineId = data.ratingEngine.id,
-                    engineIdObject = [{id: engineId}];
-                PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                    vm.accountsWithoutSfId = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] && data.ratingEngineIdCoverageMap[engineId].accountCount ? data.ratingEngineIdCoverageMap[engineId].accountCount : 0);
-                });
-            });
 
             PlaybookWizardStore.setValidation('targets', true);
             vm.loading = false;
+
         }
 
-        console.log(vm.page);
+        if (vm.myDataOrSegmentAccounts){
 
-        if(vm.page === 'Accounts' || vm.page === 'Available Targets' || vm.page === 'Playbook'){
+            // Accounts page in the my data or segment screens
+            // Get counts for accounts
             QueryStore.GetCountByQuery('accounts').then(function(data){ 
-            
                 vm.counts.accounts.value = data;
                 vm.counts.accounts.loading = false;
+                
                 if(data > 10){
                     vm.showAccountPagination = true;
                     vm.showContactPagination = false;
                 }
             });
-        } else {
+
+        
+        } else if (vm.myDataOrSegmentContacts){
+
+            // Contacts page in the my data or segment screens
+            // Get counts for contacts
             QueryStore.GetCountByQuery('contacts').then(function(data){ 
-                
                 vm.counts.contacts.value = data;
                 vm.counts.contacts.loading = false;
+
 
                 if(vm.counts.contacts.value < 10){
                     vm.showAccountPagination = false;
                     vm.showContactPagination = true;
                 }
+
             });
         }
 
-        if((vm.page === 'Accounts' || vm.page === 'Available Targets') && vm.counts.accounts.value > 10){
+        // Show Account or Contact pagination
+        // I need to refactor the pagination for this page - Jon (Nov 26)
+        if((vm.page === 'Accounts' || vm.page === 'Playbook') && (vm.counts.accounts.value > 10)){
             vm.showAccountPagination = true;
             vm.showContactPagination = false;
-        } else if (vm.page === 'Contacts' && vm.counts.contacts.value > 10){
+        } else if (vm.page === 'Contacts' && (vm.counts.contacts.value > 10)){
             vm.showAccountPagination = false;
             vm.showContactPagination = true;
         }
@@ -213,6 +250,28 @@ angular.module('common.datacloud.query.results', [
 
         updatePage();
     };
+
+
+    
+
+    vm.bucketClick = function(bucket) {
+
+        console.log(bucket);
+        console.log(vm.selectedBuckets);
+
+        var index = vm.selectedBuckets.indexOf(bucket);
+
+        if (vm.selectedBuckets.indexOf(bucket) > -1) {
+            vm.selectedBuckets.splice( index, 1 );
+        } else {
+            vm.selectedBuckets.push( bucket );
+        }
+
+        updatePage();
+
+    }
+
+
 
 
     vm.checkSaveButtonState = function(){
@@ -296,6 +355,10 @@ angular.module('common.datacloud.query.results', [
     });
 
     vm.init();
-});
+}).filter('percentage', ['$filter', function ($filter) {
+  return function (input, decimals) {
+    return $filter('number')(input * 100, decimals) + '%';
+  };
+}]);
 
 
