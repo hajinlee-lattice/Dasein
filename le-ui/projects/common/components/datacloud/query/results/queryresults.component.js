@@ -125,35 +125,82 @@ angular.module('common.datacloud.query.results', [
         } else {
 
             // Targets page for create Play flow
-            var query = { 
-                free_form_text_search: '',
-                restrictNotNullSalesforceId: false,
-                entityType: 'Account',
-                bucketFieldName: 'ScoreBucket',
-                maximum: 10,
-                offset: 0,
-                sortBy: 'LDC_Name',
-                descending: false,
-                selectedBuckets: vm.selectedBuckets
-            };
+            var dataQuery = { 
+                    free_form_text_search: '',
+                    restrictNotNullSalesforceId: false,
+                    entityType: 'Account',
+                    bucketFieldName: 'ScoreBucket',
+                    maximum: 10,
+                    offset: 0,
+                    sortBy: 'LDC_Name',
+                    descending: false,
+                    selectedBuckets: vm.selectedBuckets
+                },
+                noSfCountQuery = { 
+                    free_form_text_search: '',
+                    restrictNotNullSalesforceId: true,
+                    entityType: 'Account',
+                    bucketFieldName: 'ScoreBucket',
+                    maximum: 1000000,
+                    offset: 0,
+                    sortBy: 'LDC_Name',
+                    descending: false
+                };;
 
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                
+                // Get play rating engine and create array object literal for getting the counts.
+                var engineId = data.ratingEngine.id,
+                    engineIdObject = [{id: engineId}];
 
-                console.log(data);
-
-                var engineId = data.ratingEngine.id;
-
-                PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
+                // Get Account Data                
+                PlaybookWizardService.getTargetData(engineId, dataQuery).then(function(data){ 
                     PlaybookWizardStore.setTargetData(data.data);
-                    
                     vm.accounts = PlaybookWizardStore.getTargetData();
+                });
+
+                // Get Account Counts for Pagination
+                PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
+                    var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
+
+                    console.log(vm.selectedBuckets, accountsCoverage.bucketCoverageCounts);
+
+                    for (var i = 0; i < accountsCoverage.bucketCoverageCounts.length; i++) {
+                        var bucket = accountsCoverage.bucketCoverageCounts[i].bucket;
+
+                        for (var i = 0; i < vm.selectedBuckets.length; i++) {
+                            if (vm.selectedBuckets[i] === bucket) {
+                                console.log(accountsCoverage.bucketCoverageCounts.count);
+                                return accountsCoverage.bucketCoverageCounts.count;
+                            }
+                        }; 
+                    };
+
+                    
+
+                    vm.counts = { 
+                        accounts: { 
+                            value: vm.accountsCoverage.accountCount 
+                        },
+                        contacts: {
+                            value: vm.accountsCoverage.contactCount
+                        }
+                    };
+                });
+
+                // Get Account Counts for Non SalesForce ID Results
+                PlaybookWizardService.getTargetData(engineId, noSfCountQuery).then(function(data){ 
+                    PlaybookWizardStore.setTargetData(data.data.length);
+                    vm.noSFCount = PlaybookWizardStore.getTargetData();
                 });
 
             });
 
-
-            PlaybookWizardStore.setValidation('targets', true);
             vm.loading = false;
+            vm.current = 1;
+            PlaybookWizardStore.setValidation('targets', true);
+
+            console.log(vm.counts.accounts.value);
 
         }
 
@@ -256,19 +303,14 @@ angular.module('common.datacloud.query.results', [
 
     vm.bucketClick = function(bucket) {
 
-        console.log(bucket);
-        console.log(vm.selectedBuckets);
+        var index = vm.selectedBuckets.indexOf(bucket.bucket);
 
-        var index = vm.selectedBuckets.indexOf(bucket);
-
-        if (vm.selectedBuckets.indexOf(bucket) > -1) {
+        if (index > -1) {
             vm.selectedBuckets.splice( index, 1 );
         } else {
-            vm.selectedBuckets.push( bucket );
+            vm.selectedBuckets.push( bucket.bucket );
         }
-
         updatePage();
-
     }
 
 

@@ -18,21 +18,21 @@
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)
         </label>
 
-        <label>
-            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
+        <!-- <label>
+            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" 
             <input 
                 type="checkbox" 
                 class=""
                 ng-model=""
                 ng-change="" />
             Limit to only <input type="text" value="3000" /> highest rated targets
-        </label>
+        </label> -->
 
         <ul class="bucket-checkboxes">
             <li 
                 ng-class="!selectedBucket ? '' : 'unselected'"
                 ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
-                ng-click="vm.bucketClick(bucket.bucket); selectedBucket = !selectedBucket">
+                ng-click="vm.bucketClick(bucket); selectedBucket = !selectedBucket">
                 
                 <h3>{{bucket.bucket}}</h3>
                 <h4>Accounts</h4>
