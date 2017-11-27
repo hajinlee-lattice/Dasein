@@ -76,7 +76,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", #customerSpace, #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheNames.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -84,13 +84,14 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return getCountFromCache(customerSpace, frontEndQuery);
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", #customerSpace, #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheNames.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)")
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
-        return getDataFromCache(customerSpace, frontEndQuery);
+        DataPage page = getDataFromCache(customerSpace, frontEndQuery);
+        return page;
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", #customerSpace, #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheNames.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);

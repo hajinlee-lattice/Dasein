@@ -22,10 +22,8 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
-
-
 @Component("metadataProxy")
-@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 @CacheConfig(cacheNames = CacheNames.Constants.MetadataCacheName)
 public class MetadataProxy extends MicroserviceRestApiProxy {
 
@@ -117,7 +115,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return Arrays.<String> asList(importTableNames);
     }
 
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|%s\", #customerSpace,
+    // @Cacheable(key = "T(java.lang.String).format(\"%s|%s\",
+    // T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace),
     // #tableName)")
     public Table getTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
