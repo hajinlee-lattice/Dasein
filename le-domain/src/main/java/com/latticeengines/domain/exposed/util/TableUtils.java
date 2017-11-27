@@ -9,6 +9,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -36,6 +37,10 @@ public class TableUtils {
 
             if (attr.getLength() != null) {
                 fieldBuilder = fieldBuilder.prop("length", attr.getLength().toString());
+            }
+            if (CollectionUtils.isNotEmpty(attr.getGroupsAsList())) {
+                String str = StringUtils.join(attr.getGroupsAsList(), ",");
+                fieldBuilder = fieldBuilder.prop("groups", str);
             }
             if (attr.getPrecision() != null) {
                 fieldBuilder = fieldBuilder.prop("precision", attr.getPrecision().toString());
