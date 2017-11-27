@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -26,6 +28,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -50,6 +53,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     private MetadataSegment segment;
 
@@ -77,6 +83,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         re1.setSegment(retrievedSegment);
         re1.setCreatedBy(CREATED_BY);
         re1.setType(RatingEngineType.RULE_BASED);
+        re1.setNote(RATING_ENGINE_NOTE_1);
         re2 = new RatingEngine();
         re2.setSegment(retrievedSegment);
         re2.setCreatedBy(CREATED_BY);
@@ -86,7 +93,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = "deployment")
     public void testCreate() {
         testCreate(re1);
+        testRatingEngineNoteCreation(re1, true);
         testCreate(re2);
+        testRatingEngineNoteCreation(re2, false);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
@@ -159,13 +168,11 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     public void testUpdate() {
         // test update rating engine
         re1.setDisplayName(RATING_ENGINE_NAME_1);
-        re1.setNote(RATING_ENGINE_NOTE_1);
         re1.setStatus(RatingEngineStatus.ACTIVE);
         RatingEngine ratingEngine = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines", re1,
                 RatingEngine.class);
         Assert.assertNotNull(ratingEngine);
         Assert.assertEquals(ratingEngine.getDisplayName(), RATING_ENGINE_NAME_1);
-        Assert.assertEquals(ratingEngine.getNote(), RATING_ENGINE_NOTE_1);
         Assert.assertEquals(re1.getId(), ratingEngine.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
 
@@ -177,7 +184,6 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         ratingEngine = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId(),
                 RatingEngine.class);
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
-        Assert.assertEquals(RATING_ENGINE_NOTE_1, ratingEngine.getNote());
         Assert.assertEquals(ratingEngine.getId(), re1.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
 
@@ -234,6 +240,20 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR2));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR3));
 
+    }
+
+    private void testRatingEngineNoteCreation(RatingEngine ratingEngine, boolean shouldHaveRatingEngineNote) {
+        if (shouldHaveRatingEngineNote) {
+            List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),
+                    ratingEngine.getId());
+            Assert.assertNotNull(ratingEngineNotes);
+            Assert.assertEquals(ratingEngineNotes.size(), 1);
+            Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE_1);
+        } else {
+            List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),
+                    ratingEngine.getId());
+            Assert.assertTrue(CollectionUtils.isEmpty(ratingEngineNotes));
+        }
     }
 
     private void testCreate(RatingEngine re) {
