@@ -478,6 +478,27 @@ angular.module('common.datacloud.query.service',[
         return restrictions;
     }
 
+    this.generateBucketLabel = function(bkt) {
+        switch (bkt.Cmp) {
+            case 'empty': bkt.Lbl = ''; break;
+            case 'between': bkt.Lbl = bkt.Vals[0] + ' - ' + bkt.Vals[1]; break;
+            case 'IS_NULL': bkt.Lbl = ''; break;
+            case 'IS_NOT_NULL': bkt.Lbl = ''; break;
+            case 'GREATER_THAN': bkt.Lbl = '> ' + bkt.Vals[0]; break;
+            case 'LESS_THAN': bkt.Lbl = '< ' + bkt.Vals[0]; break;
+            case 'GREATER_OR_EQUAL': bkt.Lbl = '>= ' + bkt.Vals[0]; break;
+            case 'LESS_OR_EQUAL': bkt.Lbl = '<= ' + bkt.Vals[0]; break;
+            case 'GTE_AND_LTE': bkt.Lbl = '>= ' + bkt.Vals[0] + ' and <= ' + bkt.Vals[1]; break;
+            case 'GTE_AND_LT': bkt.Lbl = '>= ' + bkt.Vals[0] + ' and < ' + bkt.Vals[1]; break;
+            case 'GT_AND_LTE': bkt.Lbl = '> ' + bkt.Vals[0] + ' and <= ' + bkt.Vals[1]; break;
+            case 'GT_AND_LT': bkt.Lbl = '> ' + bkt.Vals[0] + ' and < ' + bkt.Vals[1]; break;
+            default:
+                bkt.Lbl = bkt.Vals[0] ? bkt.Vals[0] : 'empty';
+        }
+
+        return bkt;
+    }
+
     this.init();
 })
 .service('QueryService', function($http, $q, SegmentStore) {

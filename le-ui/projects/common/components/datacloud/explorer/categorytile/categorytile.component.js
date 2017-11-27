@@ -60,10 +60,10 @@ angular
             }
 
             vm.categoryOrderBy = function() {
-                if(vm.lookupMode) {
-                    order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
-                } else if(vm.section == 'segment.analysis') {
+                if(vm.section == 'segment.analysis') {
                     order = [ 'SegmentChecked', '-Count', '-Value' ];
+                } else if(vm.lookupMode) {
+                    order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
                 } else {
                     order = [ '-HighlightHighlighted', '-Value' ];
                 }
@@ -141,7 +141,6 @@ angular
             }
 
             vm.displayAttributeValue = function(attribute, property) {
-
                 var property = property || 'Lbl',
                     enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].Bkts && vm.cube.Stats[enrichmentKey].Bkts.List ? vm.cube.Stats[enrichmentKey].Bkts.List : null);
@@ -165,6 +164,17 @@ angular
                 }
             }
 
+            vm.generateBucketOperation = function(bkt) {
+                var ret = bkt.Cmp == 'NOT_EQUAL' ? 'is not' : 'is';                
+
+                return ret;
+            }
+
+            vm.generateBucketLabel = function(bkt) {
+                var bkt = QueryStore.generateBucketLabel(bkt);
+
+                return bkt.Lbl || 'empty';
+            }
         }
     };
 });

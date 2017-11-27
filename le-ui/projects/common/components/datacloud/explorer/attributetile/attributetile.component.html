@@ -2,6 +2,10 @@
 <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
      ng-class="{'active': enrichment.IsSelected}">
     <span>
+        <span class="attribute-count background-color" ng-if="(totalcount = vm.getAttributeRules(enrichment).length) > 0">
+            <strong>{{ totalcount }}</strong>
+        </span>
+
         <attribute-feedback-button 
             button-type="'menu'" 
             attribute="enrichment" 
@@ -58,21 +62,28 @@
             
             <ul class="attribute-stats">
                 <li ng-repeat="stat in vm.cube.data.Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
-                    class="attribute-stat"
+                    class="attribute attribute-stat"
                     ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
-                                'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]
+                                'disabled-grayout': vm.section == 'segment.analysis' && (statcount = vm.getAttributeRules(enrichment, stat).length) == 0
                               }"
                     ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))"
                     ng-init="highest = vm.getHighestStat(vm.cube.data.Stats[enrichment.ColumnId].Bkts.List)">
                     <ul class="graph">
-                        <li class="label" title="{{stat.Lbl}}">
-                            <input  type="checkbox"
+                        <li class="label column checkspace show-tooltip delay top left" title="{{stat.Lbl}}">
+                            <!--input  type="checkbox"
                                     ng-model="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)]" 
                                     ng-checked="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)]" 
                                     name="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)}}" 
                                     id="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)}}"
-                                    ng-if="vm.section == 'segment.analysis'" />
+                                    ng-if="vm.section == 'segment.analysis'" /-->
+                            <i class="plus fa fa-plus" ng-if="statcount == 0"></i>
+                            <i class="plus fa fa-check" ng-if="statcount == 1"></i>
+                            <i class="plus attribute-use-count" ng-if="statcount >= 2">{{ statcount }}</i>
+                            <i class="fa fa-check" ng-if="statcount == 1"></i>
+                            <i class="attribute-use-count" ng-if="statcount >= 2">
+                                {{ statcount }}
+                            </i>
                             {{stat.Lbl}}
                         </li>
                         <li class="bar_">

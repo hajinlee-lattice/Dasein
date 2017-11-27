@@ -1,6 +1,6 @@
 <section class="analysis-tabs tabs interior stretched">
-    <ul>
-        <li class="" ui-sref="{{vm.attributes}}" ng-class="{'active':vm.checkState('builder') || vm.checkState('attributes')}">
+    <ul class="noselect-children">
+        <li ui-sref="{{vm.attributes}}" ng-class="{'active':vm.checkState('builder') || vm.checkState('attributes')}">
             <div class="tab-container">
                 <h2>Attributes
                     <span class="more-info left">&#105;
@@ -24,7 +24,7 @@
                 </div>
             </div>
         </li>
-        <li class="info noselect-children" ui-sref="{{vm.accounts}}" ng-class="{'active':vm.checkState('accounts')}">
+        <li ui-sref="{{vm.accounts}}" ng-class="{'active':vm.checkState('accounts')}">
             <div class="tab-container">
                 <h2>Accounts</h2>
                 <div class="enrichmentCounts">
@@ -33,7 +33,7 @@
                 </div>
             </div>
         </li>
-        <li class="" ui-sref="{{vm.contacts}}" ng-class="{'active':vm.checkState('contacts')}">
+        <li ui-sref="{{vm.contacts}}" ng-class="{'active':vm.checkState('contacts')}">
             <div class="tab-container">
                 <h2>Contacts</h2>
                 <div class="enrichmentCounts">

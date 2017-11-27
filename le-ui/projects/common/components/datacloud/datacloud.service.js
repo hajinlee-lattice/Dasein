@@ -193,6 +193,7 @@ angular.module('common.datacloud')
 
     this.getCount = function(){
         var deferred = $q.defer();
+
         if (DataCloudStore.count) {
             deferred.resolve(DataCloudStore.count);
         } else {
@@ -201,6 +202,7 @@ angular.module('common.datacloud')
                 deferred.resolve(response);
             });
         }
+        
         return deferred.promise;
     }
 

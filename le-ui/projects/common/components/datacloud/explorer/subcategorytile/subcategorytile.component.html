@@ -44,31 +44,31 @@
                                 ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" 
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
                                 ng-if="vm.section == 'segment.analysis'" /-->
-                        <i class="plus fa fa-plus" ng-if="vm.getAttributeRules(attribute).length == 0"></i>
-                        <i class="plus fa fa-check" ng-if="vm.getAttributeRules(attribute).length == 1"></i>
-                        <i class="plus attribute-use-count" ng-if="vm.getAttributeRules(attribute).length >= 2">{{ vm.getAttributeRules(attribute).length }}</i>
-                        <i class="fa fa-check" ng-if="vm.getAttributeRules(attribute).length == 1"></i>
-                        <i class="attribute-use-count" ng-if="vm.getAttributeRules(attribute).length >= 2">
-                            {{ vm.getAttributeRules(attribute).length }}
+                        <i class="plus fa fa-plus" ng-if="(totalcount = vm.getAttributeRules(attribute)).length == 0"></i>
+                        <i class="plus fa fa-check" ng-if="totalcount.length == 1"></i>
+                        <i class="plus attribute-use-count" ng-if="totalcount.length >= 2">{{ totalcount.length }}</i>
+                        <i class="fa fa-check" ng-if="totalcount.length == 1"></i>
+                        <i class="attribute-use-count" ng-if="totalcount.length >= 2">
+                            {{ totalcount.length }}
                         </i>
-                        <div class="tooltip_" ng-if="vm.getAttributeRules(attribute).length >= 1">
-                            <div class="cover" ng-if="vm.getAttributeRules(attribute).length == 1">
+                        <div class="tooltip_" ng-if="totalcount.length >= 1">
+                            <div class="cover" ng-if="totalcount.length == 1">
                                 <h3>Attribute Selected</h3>
                                 <p>This attribute has been used already and can be used again in another query condition. Go to Refine Query to make changes.</p>
                                 <em>Query Snippet:</em>
                                 <ul>
-                                    <li ng-repeat="rule in vm.getAttributeRules(attribute)">{{attribute.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
+                                    <li ng-repeat="rule in totalcount">{{attribute.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
                                 </ul>
                             </div>
-                            <div class="cover" ng-if="vm.getAttributeRules(attribute).length >= 2">
+                            <div class="cover" ng-if="totalcount.length >= 2">
                                 <h3>Multiple Uses</h3>
                                 <p>This attribute has been used more than once.<br>Go to Refine Query to make changes.</p>
                                 <em>Query Snippets:</em>
                                 <ul>
-                                    <li ng-repeat="rule in vm.getAttributeRules(attribute) | limitTo: 3">{{attribute.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
-                                    <li ng-if="vm.getAttributeRules(attribute).length == 4">{{attribute.DisplayName}} is {{vm.getAttributeRules(attribute)[3].bucketRestriction.bkt.Lbl}}</li>
-                                    <li ng-if="vm.getAttributeRules(attribute).length > 4">
-                                        And {{vm.getAttributeRules(attribute).length - 3}} other instances
+                                    <li ng-repeat="rule in totalcount | limitTo: 3">{{attribute.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
+                                    <li ng-if="totalcount.length == 4">{{attribute.DisplayName}} is {{totalcount[3].bucketRestriction.bkt.Lbl}}</li>
+                                    <li ng-if="totalcount.length > 4">
+                                        And {{totalcount.length - 3}} other instances
                                     </li>
                                 </ul>
                             </div>
@@ -78,7 +78,7 @@
                         <i class="fa fa-check" ng-if="vm.getAttributeUseCount(attribute) == 1"></i>
                         <i class="attribute-use-count" ng-if="vm.getAttributeUseCount(attribute) > 1">{{ vm.getAttributeUseCount(attribute) }}</i-->
                     </div>
-                    <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && vm.getAttributeRules(attribute).length == 0">
+                    <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && totalcount.length == 0">
                         <div class="cover">
                             <h3>Select Attribute</h3>
                             <p>Match accounts that have this condition. By default this is an AND condition with other selections. Go to Refine Query to make changes and use advanced query language</p>

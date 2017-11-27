@@ -1315,7 +1315,7 @@ angular.module('common.datacloud.explorer', [
                 index = vm.enrichmentsMap[key];
             
             if (index || index === 0) {
-                // vm.enrichments[index].SegmentChecked = true;
+                vm.enrichments[index].SegmentChecked = true;
                 vm.enrichments[index].SegmentRangesChecked = {};
                 vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
                 vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
@@ -1460,14 +1460,12 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
 
-        var attributeKey = attribute.Attribute || attribute.FieldName,
-            stat = vm.getAttributeStat(attribute) || {};
+        attribute.SegmentChecked = true;
 
-        // if (!stat.Rng) {
-        //     return false;
-        // }
-        
-        var attributeRangeKey = (stat.Lbl ? vm.makeSegmentsRangeKey(attribute, stat.Rng, stat.Lbl) : ''),
+        var attribute = angular.copy(attribute),
+            attributeKey = attribute.Attribute || attribute.FieldName,
+            stat = vm.getAttributeStat(attribute) || {},
+            attributeRangeKey = (stat.Lbl ? vm.makeSegmentsRangeKey(attribute, stat.Rng, stat.Lbl) : ''),
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
@@ -1487,7 +1485,7 @@ angular.module('common.datacloud.explorer', [
         QueryStore['add' + entity + 'Restriction']({
             columnName: attributeKey, 
             resourceType: entity, 
-            bkt: topBkt
+            bkt: angular.copy(topBkt)
         });
 
         vm.checkSaveButtonState();
@@ -1497,14 +1495,14 @@ angular.module('common.datacloud.explorer', [
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
         var disable = disable || false,
-            attributeKey = enrichment.Attribute || enrichment.ColumnName || enrichment.ColumnId,
+            attributeKey = enrichment.Attribute || enrichment.ColumnId || enrichment.ColumnId,
             attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng, stat.Lbl),
-            fieldName = enrichment.ColumnName || enrichment.ColumnId,
+            fieldName = enrichment.ColumnId || enrichment.ColumnId,
             entity = enrichment.Entity,
             segmentName = $stateParams.segment;
 
             // if(stat.Rng === undefined){
-            //     var attributeRangeKey = stat.columnName + stat.Lbl;
+            //     var attributeRangeKey = stat.columnId + stat.Lbl;
             // } else {
             //     var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
             // }
@@ -1519,19 +1517,25 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
 
-        if (entity === 'Account' || entity === 'PurchaseHistory') {
-            if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-                QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-            } else {
-                QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-            }
-        } else {
-            if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-                QueryStore.addContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-            } else {
-                QueryStore.removeContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-            }
-        }
+        QueryStore['add' + entity + 'Restriction']({
+            columnName: attributeKey, 
+            resourceType: entity, 
+            bkt: angular.copy(stat)
+        });
+
+        // if (entity === 'Account' || entity === 'PurchaseHistory') {
+        //     if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
+        //         QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
+        //     } else {
+        //         QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
+        //     }
+        // } else {
+        //     if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
+        //         QueryStore.addContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
+        //     } else {
+        //         QueryStore.removeContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
+        //     }
+        // }
 
         vm.TileTableItems = {};
         if (vm.metadataSegments || QueryRestriction) {
@@ -1610,12 +1614,21 @@ angular.module('common.datacloud.explorer', [
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
         });
     }
-    
-    vm.getAttributeRules = function(attribute) {
+
+    vm.getAttributeRules = function(attribute, bucket) {
         var attributes = QueryStore.getDataCloudAttributes(true);
 
         attributes = attributes.filter(function(item) {
-            return item.bucketRestriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId);
+            var restriction = item.bucketRestriction,
+                isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
+                isSameBucket = true,
+                bkt = restriction.bkt;
+
+            if (bucket) {
+                isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
+            }
+
+            return isSameAttribute && isSameBucket;
         });
 
         return attributes;
