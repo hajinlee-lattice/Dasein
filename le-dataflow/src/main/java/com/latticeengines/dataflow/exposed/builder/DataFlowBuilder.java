@@ -226,12 +226,10 @@ public abstract class DataFlowBuilder {
                 if (fm.getPropertyValue("enumValues") != null) {
                     fm.setPropertyValue("enumValues", attribute.getCleanedUpEnumValuesAsString());
                 }
-                if (fm.getPropertyValue("groups") != null) {
-                    String groups = CollectionUtils.isNotEmpty(attribute.getGroupsAsList())
-                            ? StringUtils.join(attribute.getGroupsAsList(), ",") : null;
-                    if (StringUtils.isNotBlank(groups)) {
-                        fm.setPropertyValue("groups", groups);
-                    }
+                String groups = CollectionUtils.isNotEmpty(attribute.getGroupsAsList())
+                        ? StringUtils.join(attribute.getGroupsAsList(), ",") : null;
+                if (StringUtils.isNotBlank(groups)) {
+                    fm.setPropertyValue("groups", groups);
                 }
                 fm.setNullable(attribute.getNullable());
 
