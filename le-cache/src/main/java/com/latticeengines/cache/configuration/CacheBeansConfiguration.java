@@ -16,14 +16,12 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 import com.latticeengines.domain.exposed.cache.CacheNames;
 
 @Configuration
-@ComponentScan
 @EnableCaching
 public class CacheBeansConfiguration {
 
