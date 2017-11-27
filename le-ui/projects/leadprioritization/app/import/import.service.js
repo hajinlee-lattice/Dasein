@@ -400,7 +400,7 @@ angular.module('lp.import')
                 result,
                 params = params || {};
 
-            params.displayName = params.displayName || 'FileName',
+            params.displayName = params.displayName || FileName,
             params.source = params.source || 'File',
             params.entity = params.entity || 'Account',
             params.feedType = params.feedType || 'AccountSchema';
