@@ -14,7 +14,7 @@ public class CacheEntity {
         return this.v;
     }
 
-    @CachePut(key = "entitytest")
+    @CachePut(cacheNames = "Test")
     public void putValue(int v) {
         this.v = v;
     }
