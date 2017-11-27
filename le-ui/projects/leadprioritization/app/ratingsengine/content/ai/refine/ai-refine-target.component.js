@@ -106,7 +106,7 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
 
         vm.init();
     })
-    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineAIStore, RatingsEngineAIService, Products, Segments) {
+    .controller('RatingsEngineAIRefineModel', function ($scope, RefineService, RatingsEngineStore, RatingsEngineAIStore, RatingsEngineAIService, Products, Segments) {
         var vm = this;
         // console.log('PRODUCTS',Products);
         angular.extend(vm, {
@@ -164,6 +164,15 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             vm.getProspectCustomers();
 
         }
+
+        vm.similarProductsChecked = function() {
+            console.log(vm.similarProducts);
+            if(!vm.similarProducts){
+                RatingsEngineAIStore.addSimilarProducts({});
+                // RatingsEngineStore.nextSaveProductToAIModel();
+            }
+        }
+        
         vm.getSpentOptions = function () {
             return vm.spentOptions;
         }
@@ -179,7 +188,10 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             // console.log(element);
         }
         vm.productsCallback = function (elements) {
-            // console.log(elements);
+            console.log(elements);
+            RatingsEngineAIStore.addSimilarProducts(elements);
+            RatingsEngineStore.nextSaveProductToAIModel();
+
         }
 
         vm.getProspectCustomers = function () {

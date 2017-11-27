@@ -12,6 +12,7 @@ angular.module('lp.ratingsengine.ai', [])
         this.buildOptions = [];
 
         this.productsSelected = {};
+        this.similarProducts = {};
 
         /************* Refine variables *************/
         this.customers = '',
@@ -134,7 +135,16 @@ angular.module('lp.ratingsengine.ai', [])
         }
 
         this.getProductsSelectedIds = function() {
-            return Object.keys(this.productsSelected);
+            var ids = Object.keys(this.productsSelected);
+            var similarProds = Object.keys(this.similarProducts);
+            if(similarProds.length > 0) {
+                ids = ids.concat(similarProds);
+            }
+            return ids;
+        }
+
+        this.addSimilarProducts = function(products) {
+            this.similarProducts = products;
         }
 
 

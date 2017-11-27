@@ -79,7 +79,7 @@
                         <p class="option-title">Let me model on a similar Product, but not exacly the one I want to sell into</p>
                         <div class="switch-container">
                             <label class="switch">
-                                <input type="checkbox" ng-model="vm.similarProducts">
+                                <input type="checkbox" ng-model="vm.similarProducts" ng-checked="vm.similarProductsChecked()">
                                 <span class="slider round"></span>
                             </label>
                         </div>
@@ -104,91 +104,12 @@
                         </div>
                     </div>
                     <div class="option-body" ng-show="vm.similarSegments">
-                        <chips placeholder="Choose similar Segment" datasource="vm.segmentsDatasource" callback-function="vm.callbackSegments(args)" single-selection="true"></chips>
+                        <chips placeholder="Choose similar Segment" datasource="vm.segmentsDatasource" callback-function="vm.callbackSegments(args)"
+                            single-selection="true"></chips>
                     </div>
                 </div>
             </div>
             <div class="col"></div>
         </div>
     </div>
-    <!-- <div class="body-container">
-        <div class="options-container">
-            <div class="choises-container">
-                <div class="choises">
-                    <div class="choise">
-                        <input type="checkbox" id="spent" ng-model="vm.spent">
-                        <label for="spent">Only use success where spend in the quarter was</label>
-                    </div>
-                    <div class="choise" ng-if="vm.spent">
-                        <div class="selection">
-                            <div class="choise">
-                                <option-spinner label="$" placeholder="Select numerical value" options="vm.options"></option-spinner>
-                             
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="choise">
-                        <input type="checkbox" id="bought" name="type-sell" value="resell" ng-model="vm.bought">
-                        <label for="bought">Only use success where quantity bought in the quarter was</label>
-                    </div>
-                    <div class="choise" ng-if="vm.bought">
-                        <div class="selection">
-                            <div class="choise">
-                                <label for="units" class="lable-left">Units</label>
-                                <input type="number" id="units" min="1">
-                                <select>
-                                    <option>At least</option>
-                                    <option>At most</option>
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="choise">
-                        <input type="checkbox" id="historical" name="type-sell" value="resell" ng-model="vm.historical">
-                        <label for="historical">When modeling, only use historical records for the last</label>
-                    </div>
-                    <div class="choise" ng-if="vm.historical">
-                        <div class="selection">
-                            <div class="choise">
-                                <input type="number" id="historical" min="1" width="10px">
-                                <select>
-                                    <option>Months</option>
-                                    <option>Years</option>
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="choise">
-                        <input type="checkbox" id="products" name="type-sell" value="resell" ng-model="vm.similarProducts">
-                        <label for="products">Let me model on a similar Product, but not exacly the one I want to sell into</label>
-                    </div>
-                    <div class="choise" ng-if="vm.similarProducts">
-                        <div class="selection">
-                            <div class="choise">
-                                <chips placeholder="Choose similar Products" datasource="vm.productsDataSource" callback-function="vm.productsCallback(args)"
-                                    single-selection="false"></chips>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="choise">
-                        <input type="checkbox" id="segments" name="type-sell" value="resell" ng-model="vm.similarSegments">
-                        <label for="segments">Let me model on a similar Segment, but not exacly the one I want to sell into</label>
-                    </div>
-                    <div class="choise" ng-if="vm.similarSegments">
-                        <div class="selection">
-                            <div class="choise">
-                                <chips placeholder="Choose similar Segment" datasource="vm.datasource" callback-function="vm.callbackSegments(args)" single-selection="false"></chips>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div> -->
 </section>

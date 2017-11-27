@@ -606,10 +606,10 @@ angular
             })
 
             .state('home.ratingsengine.ai.segment.prospect.products.refine.model', {
-                url: '/model/:ai_model',
+                url: '/model/:ai_model_job_id',
                 resolve: {
-                    AIModel : function($stateParams){
-                        var aiModelId = $stateParams.ai_model || '?';
+                    AIModelJobId : function($stateParams){
+                        var aiModelId = $stateParams.ai_model_job_id || '?';
                         console.log('Routing AI MODEL ', aiModelId);
                         return aiModelId;
                     }
@@ -617,10 +617,11 @@ angular
                 views: {
 
                     'wizard_content@home.ratingsengine.ai': {
-                        controller: function (AIModel) {
+                        controller: function (AIModelJobId, RatingsEngineStore) {
                             var vm = this;
-                            vm.aiModelId = AIModel;
-                            console.log('ID', vm.aiModelId);
+                            vm.modelingJobId = AIModelJobId;
+                            console.log('ID', vm.modelingJobId);
+                            RatingsEngineStore.setValidation('model', true);
                         },
                         controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/ai/model/ai-model.component.html'

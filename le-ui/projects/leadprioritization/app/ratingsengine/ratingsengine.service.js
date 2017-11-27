@@ -102,10 +102,11 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Model', 
                     state: 'segment.prospect.products.refine.model', 
-                    nextLabel: 'Rating Engines'
-                    // nextFn: function(nextState) {
-                    //     RatingsEngineStore.nextSaveRatingEngine(nextState);
-                    // } 
+                    nextLabel: 'Rating Engines',
+                    nextFn: function(nextState) {
+                        $state.go('home.ratingsengine.list.ratings');
+                        // RatingsEngineStore.nextSaveRatingEngine(nextState);
+                    } 
                 }
             ],
             "segment": [
@@ -592,7 +593,9 @@ angular.module('lp.ratingsengine')
         };
 
         RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(model) {
-            $state.go(nextState, { rating_id: model.id });
+            if(nextState) {
+                $state.go(nextState, { rating_id: model.id });
+            }
         });
        
 
@@ -631,17 +634,20 @@ angular.module('lp.ratingsengine')
         console.log('Launching the model');
         RatingsEngineService.createAIModel(currentRating.id, obj.id, opts).then(function(applicationid) {
             console.log('Application id', applicationid);
-            var id = RatingsEngineStore.tmpId;
-            var obj = {
-                modelingJobId : applicationid
-            }
+            var id = applicationid.Result;//RatingsEngineStore.tmpId;
+            var obj = currentRating.ratingModels[0].AI;
+            obj.modelingJobId = id;
+            var opts = {
+                AI: obj
+            };
+
             console.log('Model Launched', id, nextState);
-            $state.go(nextState, { ai_model: id });
-            // RatingsEngineService.updateRatingModel(currentRating.id, id, opts).then(function(model) {
-            //     console.log('Job created', model);
-            //     $state.go(nextState, { rating_id: model.id });
+            // $state.go(nextState, { ai_model: id });
+            RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(aiModel) {
+                console.log('Job id', aiModel.AI, aiModel.AI.modelingJobId);
+                $state.go(nextState, { ai_model_job_id: aiModel.AI.modelingJobId });
                 
-            // });
+            });
         });
     }
 
