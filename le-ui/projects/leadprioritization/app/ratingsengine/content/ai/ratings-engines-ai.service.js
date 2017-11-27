@@ -133,6 +133,9 @@ angular.module('lp.ratingsengine.ai', [])
             this.prioritizeOption[value] = value;
         }
 
+        this.getProductsSelectedIds = function() {
+            return Object.keys(this.productsSelected);
+        }
 
 
     })
@@ -197,8 +200,7 @@ angular.module('lp.ratingsengine.ai', [])
                 url: url,
                 params: {
                     max: params.max || 1000,
-                    offset: params.offset || 0,
-                    max: 10
+                    offset: params.offset || 0
                 },
                 headers: {
                     'Accept': 'application/json'

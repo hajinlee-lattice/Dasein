@@ -36,13 +36,13 @@
             <div class="choises-container">
                 <div class="choises">
                     <div class="choise">
-                        <input type="radio" id="not-yet" name="type-notyet" value="notyet" ng-model="vm.sellType" 
-                                ng-change="vm.sellTypeChosen('notyet')">
+                        <input type="radio" id="not-yet" name="type-notyet" value="new" ng-model="vm.sellType" 
+                                ng-change="vm.sellTypeChosen('new')">
                         <label for="not-yet">Sell to "Not yet" group for the first time</label>
                     </div>
                     <div class="choise">
                         <input type="radio" id="resell" name="type-resell" value="resell" ng-model="vm.sellType" 
-                                ng-change="vm.sellTypeChosen('resell')">
+                                ng-change="vm.sellTypeChosen('resell')" disabled>
                         <label for="resell">Resell to customers who already bought</label>
                     </div>
                     <div class="choise" ng-show="vm.sellType === 'resell'">
@@ -57,13 +57,13 @@
                 </div>
                 <div class="choises">
                     <div class="choise">
-                        <input type="radio" id="buy" name="prioritize" value="buy" ng-model="vm.prioritizeOption"
-                                ng-change="vm.prioritizeOptionChosen('buy')">
+                        <input type="radio" id="buy" name="prioritize" value="PROPENSITY" ng-model="vm.prioritizeOption"
+                                ng-change="vm.prioritizeOptionChosen('PROPENSITY')">
                         <label for="buy">Prioritize by likelihood to buy</label>
                     </div>
                     <div class="choise">
                         <input type="radio" id="spend" name="prioritize" value="spend" ng-model="vm.prioritizeOption"
-                                ng-change="vm.prioritizeOptionChosen('spend')">
+                                ng-change="vm.prioritizeOptionChosen('spend')" disabled>
                         <label for="spend">Prioritize by likely amount to spend</label>
                     </div>
                 </div>

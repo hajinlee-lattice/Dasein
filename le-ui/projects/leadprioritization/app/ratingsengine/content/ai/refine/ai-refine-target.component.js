@@ -28,6 +28,8 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
                     vm.refine = newVal;
                 }, true);
             vm.resellOption = vm.resellOptions[0];
+            vm.sellTypeChosen('new');
+            vm.prioritizeOptionChosen('PROPENSITY');
 
         }
 
@@ -38,7 +40,8 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
          */
         vm.sellTypeChosen = function (value) {
             // console.log('Changed ' + value);
-            if ('sell' === value) {
+            vm.sellType = value;
+            if ('new' === value) {
                 RatingsEngineAIStore.setSellOption(value, {});
                 vm.getProspectCustomers();
             } else {
@@ -55,6 +58,7 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
          */
         vm.prioritizeOptionChosen = function (value) {
             // console.log('Prioritize', value);
+            vm.prioritizeOption = value;
             RatingsEngineAIStore.setPrioritizeOption(value);
             vm.getProspectCustomers();
             vm.validateNextStep();

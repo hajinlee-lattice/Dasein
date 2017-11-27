@@ -606,11 +606,23 @@ angular
             })
 
             .state('home.ratingsengine.ai.segment.prospect.products.refine.model', {
-                url: '/model',
+                url: '/model/:ai_model',
+                resolve: {
+                    AIModel : function($stateParams){
+                        var aiModelId = $stateParams.ai_model || '?';
+                        console.log('Routing AI MODEL ', aiModelId);
+                        return aiModelId;
+                    }
+                },
                 views: {
 
                     'wizard_content@home.ratingsengine.ai': {
-
+                        controller: function (AIModel) {
+                            var vm = this;
+                            vm.aiModelId = AIModel;
+                            console.log('ID', vm.aiModelId);
+                        },
+                        controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/ai/model/ai-model.component.html'
                     }
                 }
