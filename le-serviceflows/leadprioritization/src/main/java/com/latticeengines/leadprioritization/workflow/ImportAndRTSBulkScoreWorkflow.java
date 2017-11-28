@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
+import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;

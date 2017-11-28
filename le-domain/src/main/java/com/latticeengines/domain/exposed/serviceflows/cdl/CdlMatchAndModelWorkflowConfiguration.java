@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
+package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfi
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.BaseLPWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class CdlMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {

@@ -1,4 +1,6 @@
-package com.latticeengines.leadprioritization.workflow.listeners;
+package com.latticeengines.serviceflows.workflow.listeners;
+
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +9,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -14,8 +17,8 @@ import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProx
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
-@Component("SendEmailAfterScoringCompletionListener")
-public class SendEmailAfterScoringCompletionListener extends LEJobListener {
+@Component("SendEmailAfterRTSBulkScoringCompletionListener")
+public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(JobExecutionListener.class);
 
@@ -43,8 +46,24 @@ public class SendEmailAfterScoringCompletionListener extends LEJobListener {
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             try {
                 proxy.sendPlsScoreEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+
+                Object involvedEnrichmentForInternalAttributes = jobExecution.getExecutionContext()
+                        .get(WorkflowContextConstants.Outputs.ENRICHMENT_FOR_INTERNAL_ATTRIBUTES_ATTEMPTED);
+                if (involvedEnrichmentForInternalAttributes != null //
+                        && involvedEnrichmentForInternalAttributes.toString()
+                                .equalsIgnoreCase(Boolean.TRUE.toString())) {
+                    String serializedInternalEnrichmentAttributes = (String) jobExecution.getExecutionContext()
+                            .get(WorkflowContextConstants.Outputs.INTERNAL_ENRICHMENT_ATTRIBUTES_LIST);
+                    List<?> internalEnrichmentAttributesObj = JsonUtils
+                            .deserialize(serializedInternalEnrichmentAttributes, List.class);
+                    List<String> internalEnrichmentAttributes = JsonUtils.convertList(internalEnrichmentAttributesObj,
+                            String.class);
+                    emailInfo.setExtraInfoList(internalEnrichmentAttributes);
+
+                    proxy.sendPlsEnrichInternalAttributeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+                }
             } catch (Exception e) {
-                log.error("Can not send scoring email: " + e.getMessage());
+                log.error("Can not send RTS bulk scoring email: " + e.getMessage());
             }
         }
     }

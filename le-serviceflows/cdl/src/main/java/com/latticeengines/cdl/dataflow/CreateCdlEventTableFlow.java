@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.dataflow;
+package com.latticeengines.cdl.dataflow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CreateCdlEventTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
 
 @Component("createCdlEventTableFlow")
 public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEventTableParameters> {

@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.RTSScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
+import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;

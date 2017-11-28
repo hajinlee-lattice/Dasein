@@ -1,11 +1,11 @@
-package com.latticeengines.leadprioritization.workflow;
+package com.latticeengines.cdl.workflow;
 
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.CdlMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CdlMatchAndModelWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
 import com.latticeengines.serviceflows.workflow.modeling.CreateNote;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
@@ -56,4 +56,5 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
                 .next(downloadAndProcessModelSummaries) //
                 .next(createNote).build();
     }
+
 }

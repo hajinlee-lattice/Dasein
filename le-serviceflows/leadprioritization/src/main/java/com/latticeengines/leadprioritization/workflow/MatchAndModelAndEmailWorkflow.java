@@ -6,13 +6,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.leadprioritization.workflow.steps.PivotScoreAndEvent;
 import com.latticeengines.leadprioritization.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
+import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;

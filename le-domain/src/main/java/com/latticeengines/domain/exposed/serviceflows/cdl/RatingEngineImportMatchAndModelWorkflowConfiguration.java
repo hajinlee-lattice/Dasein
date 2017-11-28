@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
+package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import java.util.List;
 import java.util.Map;
@@ -15,15 +15,15 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreateCdlEventTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
-public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
+public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
         private RatingEngineImportMatchAndModelWorkflowConfiguration configuration = new RatingEngineImportMatchAndModelWorkflowConfiguration();

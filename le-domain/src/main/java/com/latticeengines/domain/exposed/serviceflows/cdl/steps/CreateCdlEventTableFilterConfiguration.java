@@ -1,8 +1,8 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
+package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
-public class CreateCdlEventTableFilterConfiguration extends BaseLPDataFlowStepConfiguration {
+public class CreateCdlEventTableFilterConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private String trainFilterTableName;
     private String targetFilterTableName;

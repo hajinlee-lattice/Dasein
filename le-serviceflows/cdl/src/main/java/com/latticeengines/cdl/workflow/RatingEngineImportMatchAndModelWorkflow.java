@@ -1,15 +1,15 @@
-package com.latticeengines.leadprioritization.workflow;
+package com.latticeengines.cdl.workflow;
 
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.RatingEngineImportMatchAndModelWorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
-import com.latticeengines.leadprioritization.workflow.steps.CreateCdlEventTableFilterStep;
-import com.latticeengines.leadprioritization.workflow.steps.CreateCdlEventTableStep;
+import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
+import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
+import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;

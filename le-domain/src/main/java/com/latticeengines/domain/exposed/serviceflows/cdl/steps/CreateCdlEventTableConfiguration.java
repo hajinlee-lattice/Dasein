@@ -1,6 +1,6 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
+package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
-public class CreateCdlEventTableConfiguration extends BaseLPDataFlowStepConfiguration {
+public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private String sourceSchemaInterpretation;
     private String outputTableName;

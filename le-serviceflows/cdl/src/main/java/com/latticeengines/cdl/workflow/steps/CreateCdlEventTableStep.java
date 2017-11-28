@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.workflow.steps;
+package com.latticeengines.cdl.workflow.steps;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,8 +21,8 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CreateCdlEventTableParameters;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreateCdlEventTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;

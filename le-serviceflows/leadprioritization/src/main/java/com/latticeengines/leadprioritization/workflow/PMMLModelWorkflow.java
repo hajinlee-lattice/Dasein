@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.CreatePMMLModel;
+import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;

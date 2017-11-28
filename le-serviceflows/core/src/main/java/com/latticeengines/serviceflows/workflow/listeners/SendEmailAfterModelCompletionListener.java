@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.workflow.listeners;
+package com.latticeengines.serviceflows.workflow.listeners;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -6,12 +6,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ScoreWorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
+import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
