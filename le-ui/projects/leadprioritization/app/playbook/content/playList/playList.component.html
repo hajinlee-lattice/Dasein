@@ -79,7 +79,7 @@
                     </div><!-- End .tile-metadata -->
                     <div class="tile-body" ng-if="!vm.current.tileStates[play.name].editPlay">
 
-                        <div ng-if="play.launchHistory.playLaunch == null && play.segment == null"><strong>This play was started but not finished.</strong> It can be launched after all steps are completed.</div>
+                        <div ng-if="play.launchHistory.mostRecentLaunch === null"><strong>This play was started but not finished.</strong> It can be launched after all steps are completed.</div>
 
                         <div ng-if="
                             play.launchHistory.playLaunch == null && 
@@ -103,36 +103,40 @@
 
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
-                        <button 
+
+                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="!play.launchHistory.playLaunch && !play.ratingEngine && !vm.current.tileStates[play.name].launching"
+                            ng-if="play.launchHistory.mostRecentLaunch === null"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
-                        <button 
+                        <!-- <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="!play.launchHistory.playLaunch && play.ratingEngine && !vm.current.tileStates[play.name].launching"
+                            ng-if="!play.launchHistory.mostRecentLaunch && play.ratingEngine && !vm.tileStates[play.name].launching"
                             ng-disabled="vm.lockLaunching || play.ratingEngine.status != 'ACTIVE'"
                             ng-click="vm.launchPlay($event, play)">
                             Launch
-                        </button>
+                        </button> -->
+
                         <button
                             type="button"
                             class="button gray-button pull-right"
                             ng-if="vm.tileStates[play.name].launching">
                             <i class="fa fa-spinner fa-pulse fw"></i> 
                             Launching...</button>
-                        <span ng-if="play.launchHistory.playLaunch && !vm.current.tileStates[play.name].launching">
+                        <span ng-if="!vm.current.tileStates[play.name].launching">
                             <span 
-                                class="launch-success pull-left">
+                                class="launch-success pull-left"
+                                ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
                                 <i class="fa fa-check" aria-hidden="true"></i>
                                 Launched {{play.launchHistory.playLaunch.updated | date}}
                             </span>
                             <button 
                                 type="button"
                                 class="button blue-button pull-right"
+                                ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'Failed'"
                                 ng-disabled="play.ratingEngine.status != 'ACTIVE'"
                                 ng-click="vm.launchPlay($event, play)">
                                 Re-Launch
