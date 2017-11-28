@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.pls;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,7 +152,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             if (!StringUtils.isEmpty(start)) {
                 url += "&" + "start" + "=" + start;
             }
-            log.info("getModelsCount from " + url);
+            log.info("getting models count from " + url);
+
+            URI uri = restTemplate.getUriTemplateHandler().expand(url);
+            log.info("Encoded URL: " + uri);
+
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
             throw new RuntimeException("getModelsCount: Remote call failure: " + e.getMessage(), e);
@@ -167,8 +172,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             if (!StringUtils.isEmpty(start)) {
                 url += "&" + "start" + "=" + start;
             }
+            log.info("getting paginated models from " + url);
 
-            log.info("getPaginatedModels from " + url);
+            URI uri = restTemplate.getUriTemplateHandler().expand(url);
+            log.info("Encoded URL: " + uri);
+
             List<?> modelSummaryObjList = restTemplate.getForObject(url, List.class);
             List<ModelSummary> modelSummaryList = JsonUtils.convertList(modelSummaryObjList, ModelSummary.class);
 
