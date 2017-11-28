@@ -151,7 +151,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             if (!StringUtils.isEmpty(start)) {
                 url += "&" + "start" + "=" + start;
             }
-            log.debug("Get from " + url);
+            log.info("getModelsCount from " + url);
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
             throw new RuntimeException("getModelsCount: Remote call failure: " + e.getMessage(), e);
@@ -168,7 +168,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
                 url += "&" + "start" + "=" + start;
             }
 
-            log.debug("Get from " + url);
+            log.info("getPaginatedModels from " + url);
             List<?> modelSummaryObjList = restTemplate.getForObject(url, List.class);
             List<ModelSummary> modelSummaryList = JsonUtils.convertList(modelSummaryObjList, ModelSummary.class);
 

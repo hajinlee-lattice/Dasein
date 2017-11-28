@@ -449,6 +449,7 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
         if (StringUtils.isNotEmpty(start)) {
+            log.info("getModelSummariesCount - start = " + start + ", tenant = " + tenantId);
             lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
         }
         return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus);
@@ -469,6 +470,7 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
         if (StringUtils.isNotEmpty(start)) {
+            log.info("getPaginatedModelSummaries - start = " + start + ", tenant = " + tenantId);
             lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
         }
         return postProcessModelSummaryList(
