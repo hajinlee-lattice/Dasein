@@ -352,9 +352,6 @@ angular
                 }],
                 Config: [function(){
                     return null;
-                }],
-                NoSFCount: [function(){
-                    return null;
                 }]
             }),
             views: {

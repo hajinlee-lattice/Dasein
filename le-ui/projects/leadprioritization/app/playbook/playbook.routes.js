@@ -576,37 +576,6 @@ angular
                     return deferred.promise;
 
                 }],
-                NoSFCount: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
-                    
-                    var deferred = $q.defer(),
-                        savedRating = PlaybookWizardStore.getSavedRating(),
-                        engineId = savedRating.id,
-                        query = { 
-                                free_form_text_search: '',
-                                restrictNotNullSalesforceId: true,
-                                entityType: 'Account',
-                                bucketFieldName: 'ScoreBucket',
-                                maximum: 1000000,
-                                offset: 0,
-                                sortBy: 'LDC_Name',
-                                descending: false
-                            };
-
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
-
-                        var engineId = data.ratingEngine.id;
-
-                        PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
-                            PlaybookWizardStore.setTargetData(data.data.length);
-                            deferred.resolve(PlaybookWizardStore.getTargetData());
-
-                        });
-
-                    });
-
-                    return deferred.promise;
-
-                }],
                 Contacts: [function(){
                     return null;
                 }]

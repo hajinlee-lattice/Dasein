@@ -31,6 +31,8 @@ angular.module('common.datacloud.query.service',[
         enableSaveSegmentButton: false
     };
 
+    this.bucketsToLaunch = null;
+
     this.init = function() {
         this.resetRestrictions();
     }
@@ -52,6 +54,13 @@ angular.module('common.datacloud.query.service',[
                 }
             }
         };
+    }
+
+    this.setBucketsToLaunch = function(buckets) {
+        this.bucketsToLaunch = buckets;
+    }
+    this.getBucketsToLaunch = function() {
+        return this.bucketsToLaunch;
     }
 
     this.setPublicProperty = function(property, value) {

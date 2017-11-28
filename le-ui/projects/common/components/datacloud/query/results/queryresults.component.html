@@ -8,7 +8,7 @@
         class="targets-filters"
         ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
 
-        <label ng-if="vm.noSFCount > 0">
+        <label>
             <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
             <input 
                 type="checkbox" 
@@ -18,15 +18,15 @@
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)
         </label>
 
-        <!-- <label>
-            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" 
+        <label>
+            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
             <input 
                 type="checkbox" 
                 class=""
                 ng-model=""
                 ng-change="" />
             Limit to only <input type="text" value="3000" /> highest rated targets
-        </label> -->
+        </label>
 
         <ul class="bucket-checkboxes">
             <li 

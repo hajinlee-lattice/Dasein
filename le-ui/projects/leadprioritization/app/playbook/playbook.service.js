@@ -1,5 +1,5 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
+.service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, QueryStore){
     var PlaybookWizardStore = this;
     
     this.current = {
@@ -34,7 +34,7 @@ angular.module('lp.playbook')
         this.validation = {
             settings: false,
             rating: true,
-            targets: false,
+            targets: true,
             insights: false,
             preview: true,
             launch: true
@@ -170,6 +170,8 @@ angular.module('lp.playbook')
 
     this.nextLaunch = function() {
         var play = PlaybookWizardStore.currentPlay;
+
+
         PlaybookWizardStore.launchPlay(play).then(function(data) {
             $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
@@ -216,7 +218,12 @@ angular.module('lp.playbook')
                 PlaybookWizardStore.savePlay({
                     displayName: play.displayName,
                     name: play.name,
-                    ratingEngine: rating
+                    ratingEngine: rating,
+                    launchHistory: {
+                        playLaunch: {
+                            bucketsToLaunch: bucketsToLaunch
+                        }
+                    }
                 }).then(function(response){
                     PlaybookWizardStore.setSegment(segment);
                 });
@@ -390,7 +397,7 @@ angular.module('lp.playbook')
     }
 
 })
-.service('PlaybookWizardService', function($q, $http, $state, $timeout) {
+.service('PlaybookWizardService', function($q, $http, $state, $timeout, QueryStore) {
     this.host = '/pls'; //default
 
     this.getPlays = function() {
@@ -503,12 +510,15 @@ angular.module('lp.playbook')
 
     this.launchPlay = function(play) {
         var deferred = $q.defer(),
-            play_name = play.name;
+            play_name = play.name,
+            bucketsToLaunch = QueryStore.getBucketsToLaunch();
+
         $http({
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',
             data: {
-                launch_state: 'Launching'
+                launch_state: 'Launching',
+                bucketsToLaunch: bucketsToLaunch
             }
         }).then(function(response){
             deferred.resolve(response.data);

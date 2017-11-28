@@ -5,7 +5,7 @@ angular.module('common.datacloud.query.results', [
     $q, $scope, $state, $stateParams, $filter, $rootScope,
     BrowserStorageUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts, /*AccountsCount, ContactsCount,*/ 
-    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFCount
+    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService
 ) {
     var vm = this;
     angular.extend(vm, {
@@ -38,7 +38,6 @@ angular.module('common.datacloud.query.results', [
         },
         accountsCoverage: AccountsCoverage,
         excludeNonSalesForce: false,
-        noSFCount: NoSFCount,
         sortType: 'LDC_Name',
         sortReverse: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -135,17 +134,7 @@ angular.module('common.datacloud.query.results', [
                     sortBy: 'LDC_Name',
                     descending: false,
                     selectedBuckets: vm.selectedBuckets
-                },
-                noSfCountQuery = { 
-                    free_form_text_search: '',
-                    restrictNotNullSalesforceId: true,
-                    entityType: 'Account',
-                    bucketFieldName: 'ScoreBucket',
-                    maximum: 1000000,
-                    offset: 0,
-                    sortBy: 'LDC_Name',
-                    descending: false
-                };;
+                };
 
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
                 
@@ -159,24 +148,32 @@ angular.module('common.datacloud.query.results', [
                     vm.accounts = PlaybookWizardStore.getTargetData();
                 });
 
+                var filtered = [];
+                for (var i = 0; i < vm.accounts.length; i++) {
+                    if (vm.accounts[i].SalesforceAccountID === "" || vm.accounts[i].SalesforceAccountID === null) {
+                        filtered.push(vm.accounts[i]);
+                        vm.noSFCount = filtered.length;
+                    }
+                }
+                vm.noSFCount = filtered.length;
+
+
                 // Get Account Counts for Pagination
                 PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
                     var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
 
                     console.log(vm.selectedBuckets, accountsCoverage.bucketCoverageCounts);
 
-                    for (var i = 0; i < accountsCoverage.bucketCoverageCounts.length; i++) {
-                        var bucket = accountsCoverage.bucketCoverageCounts[i].bucket;
+                    // for (var i = 0; i < accountsCoverage.bucketCoverageCounts.length; i++) {
+                    //     var bucket = accountsCoverage.bucketCoverageCounts[i].bucket;
 
-                        for (var i = 0; i < vm.selectedBuckets.length; i++) {
-                            if (vm.selectedBuckets[i] === bucket) {
-                                console.log(accountsCoverage.bucketCoverageCounts.count);
-                                return accountsCoverage.bucketCoverageCounts.count;
-                            }
-                        }; 
-                    };
-
-                    
+                    //     for (var i = 0; i < vm.selectedBuckets.length; i++) {
+                    //         if (vm.selectedBuckets[i] === bucket) {
+                    //             console.log(accountsCoverage.bucketCoverageCounts.count);
+                    //             return accountsCoverage.bucketCoverageCounts.count;
+                    //         }
+                    //     }; 
+                    // };
 
                     vm.counts = { 
                         accounts: { 
@@ -188,19 +185,10 @@ angular.module('common.datacloud.query.results', [
                     };
                 });
 
-                // Get Account Counts for Non SalesForce ID Results
-                PlaybookWizardService.getTargetData(engineId, noSfCountQuery).then(function(data){ 
-                    PlaybookWizardStore.setTargetData(data.data.length);
-                    vm.noSFCount = PlaybookWizardStore.getTargetData();
-                });
-
             });
 
             vm.loading = false;
             vm.current = 1;
-            PlaybookWizardStore.setValidation('targets', true);
-
-            console.log(vm.counts.accounts.value);
 
         }
 
@@ -310,6 +298,9 @@ angular.module('common.datacloud.query.results', [
         } else {
             vm.selectedBuckets.push( bucket.bucket );
         }
+
+        QueryStore.setBucketsToLaunch(vm.selectedBuckets);
+
         updatePage();
     }
 
