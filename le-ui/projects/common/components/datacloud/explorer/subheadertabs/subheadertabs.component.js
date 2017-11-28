@@ -16,6 +16,7 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
         builderClicked: false,
         attribuesClicked: false,
         isSaving: false,
+        enableSaveSegmentMsg: false,
         header: {
             exportSegment: {
                 class: 'white-button select-label',
@@ -124,7 +125,6 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                     num_rows: 10
                 }
             });
-            // vm.public.enableSaveSegmentButton = false;
             QueryStore.setPublicProperty('enableSaveSegmentButton', false);
             vm.isSaving = true;
             SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
@@ -133,6 +133,11 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                     vm.clickSegmentButton({
                         edit: segment.name
                     });
+                }else{
+                    vm.enableSaveSegmentMsg = true;
+                    $timeout(function() {
+                        vm.enableSaveSegmentMsg = false;
+                    },3500);
                 }
 
                 vm.saved = true;
