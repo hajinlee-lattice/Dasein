@@ -13,6 +13,7 @@ angular.module('lp.models.segments', [
         filteredItems: [],
         totalLength: SegmentsList.length,
         tileStates: {},
+        inEditing: {},
         query: '',
         header: {
             sort: {
@@ -87,7 +88,7 @@ angular.module('lp.models.segments', [
 
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
-
+        vm.inEditing = angular.copy(segment);
         var tileState = vm.tileStates[segment.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editSegment = !tileState.editSegment;
@@ -105,7 +106,10 @@ angular.module('lp.models.segments', [
         }
 
         var tileState = vm.tileStates[segment.name];
-        tileState.editSegment = false;
+        tileState.editSegment = !tileState.editSegment;
+        segment.display_name = vm.inEditing.display_name || segment.display_name;
+        segment.description = vm.inEditing.description || '';
+        vm.inEditing = {};
     };
 
     vm.saveSegmentClicked = function($event, segment) {
@@ -113,6 +117,7 @@ angular.module('lp.models.segments', [
 
         vm.saveInProgress = true;
         createOrUpdateSegment(segment);
+        
     };
 
     vm.addSegment = function() {
@@ -148,13 +153,11 @@ angular.module('lp.models.segments', [
             var errorMsg = result.errorMsg;
 
             if (result.success) {
-                vm.cancelEditSegmentClicked(null, segment);        
-                // why reload?
-                // if ($state.current.name == 'home.segments') {
-                //     $state.go('home.segments', {}, { reload: true});
-                // } else {
-                //     $state.go('home.model.segmentation', {}, { reload: true });
-                // }
+                var tileState = vm.tileStates[segment.name];
+                tileState.editSegment = !tileState.editSegment;
+                vm.saveInProgress = false;
+                vm.showAddSegmentError = false;
+                vm.inEditing = {};
             } else {
                 vm.saveInProgress = false;
                 vm.addSegmentErrorMessage = errorMsg;
