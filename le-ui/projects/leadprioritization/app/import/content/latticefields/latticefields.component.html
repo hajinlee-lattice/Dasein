@@ -9,18 +9,18 @@
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
     <ul ng-init="fieldMapping = fieldMapping || {}">
     	<li ng-repeat="field in vm.matchingFieldsList">
-    		<label>{{field}}</label>
+    		<label>{{field.name}}</label>
     		<select class="form-control"
-    		    ng-model="fieldMapping[field].userField"
+    		    ng-model="fieldMapping[field.name].userField"
 			    ng-change="vm.changeLatticeField(fieldMapping)"
 			    ng-class="{'required': true}">
 
-                <option value="" hidden disabled>-- Unmapped Field --</option>
+                <option value="">-- Unmapped Field --</option>
     			<option 
                     ng-repeat="availableField in vm.availableFields" 
-                    value="{{field}}:{{availableField.userField}}" 
+                    value="{{field.name}}:{{availableField.userField}}" 
                     ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
-                    ng-init="(availableField.mappedField == field ? fieldMapping[field].userField = field + ':' + availableField.userField : '')">
+                    ng-init="(availableField.mappedField == field.name ? fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
 					{{availableField.userField}}
 				</option>
 
@@ -28,26 +28,28 @@
     	</li>
     </ul>
 
-    <h3 class="analysis">Analysis Fields</h3>
-    <p>These optional fields are used for analysis and are useful if you can provide them.</p>
-    <ul>
-        <li ng-repeat="field in vm.analysisFieldsList">
-            <label>{{field}}</label>
-            <select class="form-control"
-                ng-model="fieldMapping[field].userField"
-                ng-change="vm.changeLatticeField(fieldMapping)"
-                ng-class="{'required': true}">
+    <div ng-if="vm.analysisFieldsList.length">
+        <h3 class="analysis">Analysis Fields</h3>
+        <p>These optional fields are used for analysis and are useful if you can provide them.</p>
+        <ul>
+            <li ng-repeat="field in vm.analysisFieldsList">
+                <label>{{field.name}}</label>
+                <select class="form-control"
+                    ng-model="fieldMapping[field.name].userField"
+                    ng-change="vm.changeLatticeField(fieldMapping)"
+                    ng-class="{'required': true}">
 
-                <option value="" hidden disabled>-- Unmapped Field --</option>
-                <option 
-                    ng-repeat="availableField in vm.availableFields" 
-                    value="{{field}}:{{availableField.userField}}" 
-                    ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
-                    ng-init="(availableField.mappedField == field ? fieldMapping[field].userField = field + ':' + availableField.userField : '')">
-                    {{availableField.userField}}
-                </option>
-            </select>
-        </li>
-    </ul>
+                    <option value="">-- Unmapped Field --</option>
+                    <option 
+                        ng-repeat="availableField in vm.availableFields" 
+                        value="{{field.name}}:{{availableField.userField}}" 
+                        ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
+                        ng-init="(availableField.mappedField == field.name ? fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
+                        {{availableField.userField}}
+                    </option>
+                </select>
+            </li>
+        </ul>
+    </div>
 
 </div>

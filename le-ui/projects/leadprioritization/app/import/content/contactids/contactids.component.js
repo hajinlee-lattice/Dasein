@@ -10,10 +10,11 @@ angular.module('lp.import.wizard.contactids', [])
         fieldMappings: FieldDocument.fieldMappings,
         fieldMappingsMap: {},
         AvailableFields: [],
+        unavailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
-            contact: 'contactId',
-            account: 'accountId',
+            contact: 'ContactId',
+            account: 'AccountId',
         },
         UnmappedFieldsMappingsMap: {},
     });
@@ -23,37 +24,39 @@ angular.module('lp.import.wizard.contactids', [])
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);
 
-        vm.UnmappedFields.forEach(function(field) {
-            vm.UnmappedFieldsMappingsMap[field.name] = field;
-        });
-
-        vm.fieldMappings.forEach(function(fieldMapping) {
-            vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
-        });
-
         vm.fieldMappings.forEach(function(fieldMapping, index) {
-            var userField = fieldMapping.userField;
-            if(fieldMapping.mappedField != null) {
-                vm.selectedIndex = index;
+            vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
+            vm.AvailableFields.push(fieldMapping);
+            for(var i in vm.mappedFieldMap) {
+                if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
+                    vm.fieldMapping[i] = fieldMapping.userField
+                }
             }
-            vm.AvailableFields.push(userField);
         });
+        checkValidation();
     };
 
     vm.changeLatticeField = function(mapping) {
         var mapped = [];
+        vm.unavailableFields = [];
         for(var i in mapping) {
             var key = i,
                 item = mapping[key],
                 map = {userField: item, mappedField: vm.mappedFieldMap[key]};
 
             mapped.push(map);
+            vm.unavailableFields.push(item)
         }
         ImportWizardStore.setSaveObjects(mapped);
-        if(mapped.length >= Object.keys(vm.mappedFieldMap).length) {
-            ImportWizardStore.setValidation('one', true);
-        }
+        checkValidation();
     };
+
+    var checkValidation = function() {
+        if(Object.keys(vm.fieldMapping).length >= Object.keys(vm.mappedFieldMap).length) {
+             ImportWizardStore.setValidation('one', true);
+        }
+    }
+
 
     vm.init();
 });

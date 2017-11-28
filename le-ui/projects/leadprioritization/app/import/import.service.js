@@ -301,12 +301,12 @@ angular.module('lp.import')
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility) {
 
-	this.GetSchemaToLatticeFields = function(csvFileName) {
+	this.GetSchemaToLatticeFields = function(csvFileName, entity) {
 	        var deferred = $q.defer();
 	        var params = { 
-                'entity':  'Account',
+                'entity':  entity,
                 'source': 'File',
-	            'feedType': 'AccountSchema' 
+	            'feedType': entity + 'Schema' 
             };
 
 	        $http({
@@ -321,13 +321,13 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-	    this.GetFieldDocument = function(FileName) {
+	    this.GetFieldDocument = function(FileName, entity) {
 	        var deferred = $q.defer();
-	        var entity = "account";
+	        var entity = entity;
 	        var params =  {
                 'entity': entity,
                 'source': 'File',
-	            'feedType': 'AccountSchema'
+	            'feedType': entity + 'Schema'
             };
 
 	        $http({

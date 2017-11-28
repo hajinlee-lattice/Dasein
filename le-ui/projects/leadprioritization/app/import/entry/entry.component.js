@@ -26,15 +26,15 @@ angular.module('lp.import.entry', [
     vm.init = function() {
         var state = $state.current.name;
         switch (state) {
-            case 'home.import.entry.accounts': vm.changeEntityType('accounts'); break;
-            case 'home.import.entry.contacts': vm.changeEntityType('contacts'); break;
-            case 'home.import.entry.product_purchases': vm.changeEntityType('product_purchases'); break;
-            case 'home.import.entry.product_bundles': vm.changeEntityType('product_bundles'); break;
+            case 'home.import.entry.accounts': vm.changeEntityType('Account', 'accounts'); break;
+            case 'home.import.entry.contacts': vm.changeEntityType('Contact', 'contacts'); break;
+            case 'home.import.entry.product_purchases': vm.changeEntityType('Transaction', 'product_purchases'); break;
+            case 'home.import.entry.product_bundles': vm.changeEntityType('Product', 'product_bundles'); break;
         }
     }
 
-    vm.changeEntityType = function(type) {
-        vm.goState = type;
+    vm.changeEntityType = function(type, goState) {
+        vm.goState = goState || type.toLowerCase();
         ImportWizardStore.setEntityType(type);
     }
 

@@ -8,7 +8,7 @@ angular.module('lp.import.wizard.latticefields', [])
     var makeList = function(object) {
         var list = [];
         for(var i in object) {
-            list.push(object[i].name);
+            list.push(object[i]);
         }
         return list;
     }

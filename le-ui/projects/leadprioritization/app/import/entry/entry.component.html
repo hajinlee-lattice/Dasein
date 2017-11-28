@@ -6,18 +6,18 @@
       </div>
       <hr />
       <div class="section-body with-padding">
-
+{{vm.goState}}
         <div class="button-tabs">
-          <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('accounts');" ui-sref="home.import.entry.accounts">
+          <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Account', 'accounts');" ui-sref="home.import.entry.accounts">
             <span>Accounts</span>
           </div>
-          <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('contacts');" ui-sref="home.import.entry.contacts">
+          <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Contact', 'contacts');" ui-sref="home.import.entry.contacts">
             <span>Contacts</span>
           </div>
-          <div class="button eloqua {{ vm.goState == 'product_purchases' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('product_purchases');" ui-sref="home.import.entry.product_purchases">
+          <div class="button eloqua {{ vm.goState == 'product_purchases' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Transaction', 'product_purchases');" ui-sref="home.import.entry.product_purchases">
             <span>Product Purchases</span>
           </div>
-          <div class="button eloqua {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('product_bundles');" ui-sref="home.import.entry.product_bundles">
+          <div class="button eloqua {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_bundles');" ui-sref="home.import.entry.product_bundles">
             <span>Product Bundles</span>
           </div>
         </div>
