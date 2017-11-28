@@ -130,8 +130,8 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
     }
 
     public enum CRMType {
-        SFDC_Sandbox("SFDC Sandbox", InterfaceName.SFDC_Sandbox_ID, null),
-        SFDC_Production("SFDC Production", InterfaceName.SFDC_Production_ID, null);
+        SFDC_Sandbox("SFDC Sandbox", InterfaceName.SalesforceSandboxAccountID, InterfaceName.SalesforceSandboxContactID),
+        SFDC_Production("SFDC Production", InterfaceName.SalesforceAccountID, InterfaceName.SalesforceContactID);
 
         private final String systemName;
         private final InterfaceName accountInterface;
@@ -184,8 +184,8 @@ public class CDLExternalSystem implements HasPid, HasTenant, HasTenantId {
     }
 
     public enum MAPType {
-        Marketo("Marketo", InterfaceName.MKTO_ID, null),
-        Eloqua("Eloqua", InterfaceName.ELOQUA_ID, null);
+        Marketo("Marketo", InterfaceName.MarketoAccountID, null),
+        Eloqua("Eloqua", InterfaceName.EloquaAccountID, null);
 
         private final String systemName;
         private final InterfaceName accountInterface;

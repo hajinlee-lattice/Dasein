@@ -15,16 +15,16 @@ public class CDLExternalSystemUnitTestNG {
         cdlExternalSystem.setPid(1L);
         String cdlExternalSystemStr = JsonUtils.serialize(cdlExternalSystem);
         Assert.assertNotNull(cdlExternalSystemStr);
-        Assert.assertTrue(cdlExternalSystemStr.contains(InterfaceName.SFDC_Sandbox_ID.name()));
+        Assert.assertTrue(cdlExternalSystemStr.contains(InterfaceName.SalesforceSandboxAccountID.name()));
 
         String allSystem = JsonUtils.serialize(CDLExternalSystem.EXTERNAL_SYSTEM);
-        Assert.assertTrue(allSystem.contains(InterfaceName.SFDC_Production_ID.name()));
-        Assert.assertTrue(allSystem.contains(InterfaceName.SFDC_Sandbox_ID.name()));
-        Assert.assertTrue(allSystem.contains(InterfaceName.MKTO_ID.name()));
-        Assert.assertTrue(allSystem.contains(InterfaceName.ELOQUA_ID.name()));
+        Assert.assertTrue(allSystem.contains(InterfaceName.SalesforceAccountID.name()));
+        Assert.assertTrue(allSystem.contains(InterfaceName.SalesforceSandboxAccountID.name()));
+        Assert.assertTrue(allSystem.contains(InterfaceName.MarketoAccountID.name()));
+        Assert.assertTrue(allSystem.contains(InterfaceName.EloquaAccountID.name()));
 
         CDLExternalSystem.CRMType crmType = CDLExternalSystem.CRMType.fromAccountInterface(InterfaceName
-                .SFDC_Sandbox_ID);
+                .SalesforceSandboxAccountID);
         Assert.assertTrue(crmType == CDLExternalSystem.CRMType.SFDC_Sandbox);
     }
 }

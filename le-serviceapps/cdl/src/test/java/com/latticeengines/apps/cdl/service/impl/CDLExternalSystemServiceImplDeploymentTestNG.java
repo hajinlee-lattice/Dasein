@@ -29,8 +29,8 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Test(groups = "deployment")
     public void testCreateAndGet() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, "crm", InterfaceName.SFDC_Production_ID);
-        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, "MAP", InterfaceName.MKTO_ID);
+        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, "crm", InterfaceName.SalesforceAccountID);
+        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, "MAP", InterfaceName.MarketoAccountID);
         List<CDLExternalSystem> systems = cdlExternalSystemProxy.getCDLExternalSystems(customerSpace);
         Assert.assertNotNull(systems);
         Assert.assertEquals(systems.size(), 2);
@@ -50,8 +50,8 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
     public void testCreateAndGet2() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, InterfaceName.SFDC_Sandbox_ID, InterfaceName
-                .ELOQUA_ID, null);
+        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, InterfaceName.SalesforceSandboxAccountID, InterfaceName
+                .EloquaAccountID, null);
         List<CDLExternalSystem> systems = cdlExternalSystemProxy.getCDLExternalSystems(customerSpace);
         Assert.assertNotNull(systems);
         Assert.assertEquals(systems.size(), 3);

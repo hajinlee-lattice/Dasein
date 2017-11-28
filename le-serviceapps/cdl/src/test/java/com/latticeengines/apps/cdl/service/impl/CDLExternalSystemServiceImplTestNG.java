@@ -26,8 +26,8 @@ public class CDLExternalSystemServiceImplTestNG extends CDLFunctionalTestNGBase 
     @Test(groups = "functional")
     public void testCreateAndGet() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemService.createExternalSystem(customerSpace, "crm", InterfaceName.SFDC_Production_ID);
-        cdlExternalSystemService.createExternalSystem(customerSpace, "MAP", InterfaceName.MKTO_ID);
+        cdlExternalSystemService.createExternalSystem(customerSpace, "crm", InterfaceName.SalesforceAccountID);
+        cdlExternalSystemService.createExternalSystem(customerSpace, "MAP", InterfaceName.MarketoAccountID);
         List<CDLExternalSystem> systems = cdlExternalSystemService.getAllExternalSystem(customerSpace);
         Assert.assertNotNull(systems);
         Assert.assertEquals(systems.size(), 2);
@@ -47,8 +47,8 @@ public class CDLExternalSystemServiceImplTestNG extends CDLFunctionalTestNGBase 
     @Test(groups = "functional", dependsOnMethods = "testCreateAndGet")
     public void testCreateAndGet2() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemService.createExternalSystem(customerSpace, InterfaceName.SFDC_Sandbox_ID, InterfaceName
-                .ELOQUA_ID, null);
+        cdlExternalSystemService.createExternalSystem(customerSpace, InterfaceName.SalesforceSandboxAccountID, InterfaceName
+                .EloquaAccountID, null);
         List<CDLExternalSystem> systems = cdlExternalSystemService.getAllExternalSystem(customerSpace);
         Assert.assertNotNull(systems);
         Assert.assertEquals(systems.size(), 3);
