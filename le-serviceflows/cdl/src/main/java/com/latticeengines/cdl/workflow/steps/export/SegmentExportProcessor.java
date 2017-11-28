@@ -377,14 +377,18 @@ public class SegmentExportProcessor {
                     metadataSegmentExport.getContactFrontEndRestriction().getRestriction(),
                     modifiableAccountIdCollectionForContacts);
             contactFrontEndQuery.setContactRestriction(contactRestrictionWithAccountIdList);
+            setSortField(BusinessEntity.Contact,
+                    Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
+                    contactFrontEndQuery);
         } else {
             contactFrontEndQuery.setAccountRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
             contactFrontEndQuery.setContactRestriction(metadataSegmentExport.getContactFrontEndRestriction());
+            setSortField(
+                    BusinessEntity.Contact, Arrays.asList(InterfaceName.CompanyName.name(),
+                            InterfaceName.AccountId.name(), InterfaceName.ContactName.name()),
+                    false, contactFrontEndQuery);
         }
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
-        setSortField(BusinessEntity.Contact,
-                Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
-                contactFrontEndQuery);
 
         Set<String> addFieldsAccounts = new HashSet<>();
         Set<String> addFieldsContacts = new HashSet<>();
@@ -421,6 +425,12 @@ public class SegmentExportProcessor {
 
         prepareLookupsForFrontEndQueries(accountFrontEndQuery, mergedAccountLookupFields, contactFrontEndQuery,
                 mergedContactLookupFields);
+
+        if (metadataSegmentExport.getType() == MetadataSegmentExportType.CONTACT) {
+            Lookup specialHandlingForAccountNameLookupForContacts = new AttributeLookup(BusinessEntity.Account,
+                    InterfaceName.LDC_Name.name());
+            contactFrontEndQuery.getLookups().add(specialHandlingForAccountNameLookupForContacts);
+        }
 
         log.info(" accountFrontEndQuery -: " + JsonUtils.serialize(accountFrontEndQuery));
 

@@ -31,9 +31,11 @@ public enum MetadataSegmentExportType {
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactName.name(), //
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.Email.name(), //
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.PhoneNumber.name(), //
-                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.AccountId.name() //
+                    MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.AccountId.name(), //
+                    //
+                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.LDC_Name.name() //
             ), //
-            Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id")), //
+            Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id", "Company Name")), //
     ACCOUNT_AND_CONTACT( //
             Arrays.asList( //
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactId.name(), //
