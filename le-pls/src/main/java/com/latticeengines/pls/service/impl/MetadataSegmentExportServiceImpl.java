@@ -18,6 +18,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +32,14 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.workflow.SegmentExportWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("metadataSegmentExportService")
@@ -54,7 +59,13 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private MetadataProxy metadataProxy;
 
     @Autowired
+    private EntityProxy entityProxy;
+
+    @Autowired
     private SegmentExportWorkflowSubmitter segmentExportWorkflowSubmitter;
+
+    @Value("${pls.segment.export.max}")
+    private Long maxEntryLimitForExport;
 
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
@@ -74,6 +85,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Override
     public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob) {
+        checkExportSize(metadataSegmentExportJob);
 
         setCreatedBy(metadataSegmentExportJob);
 
@@ -87,6 +99,22 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         submitExportWorkflowJob(metadataSegmentExportJob);
 
         return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExportJob.getExportId());
+    }
+
+    private void checkExportSize(MetadataSegmentExport metadataSegmentExportJob) {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setAccountRestriction(metadataSegmentExportJob.getAccountFrontEndRestriction());
+        frontEndQuery.setContactRestriction(metadataSegmentExportJob.getContactFrontEndRestriction());
+        frontEndQuery.setMainEntity(metadataSegmentExportJob.getType() == MetadataSegmentExportType.ACCOUNT
+                ? BusinessEntity.Account : BusinessEntity.Contact);
+
+        Tenant tenant = MultiTenantContext.getTenant();
+
+        Long entriesCount = entityProxy.getCount(tenant.getId(), frontEndQuery);
+        log.info("Total entries for export = " + entriesCount);
+        if (entriesCount > maxEntryLimitForExport) {
+            throw new LedpException(LedpCode.LEDP_18169, new String[] { maxEntryLimitForExport.toString() });
+        }
     }
 
     @Override
