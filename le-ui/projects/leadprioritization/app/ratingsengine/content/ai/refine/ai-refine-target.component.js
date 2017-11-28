@@ -188,10 +188,7 @@ angular.module('lp.ratingsengine.ai.refine', ['mainApp.appCommon.directives.chip
             // console.log(element);
         }
         vm.productsCallback = function (elements) {
-            console.log(elements);
             RatingsEngineAIStore.addSimilarProducts(elements);
-            RatingsEngineStore.nextSaveProductToAIModel();
-
         }
 
         vm.getProspectCustomers = function () {

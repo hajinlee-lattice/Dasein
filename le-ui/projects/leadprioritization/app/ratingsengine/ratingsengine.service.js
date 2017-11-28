@@ -1,6 +1,6 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
-    $q, $state, $stateParams, RatingsEngineService, DataCloudStore, RatingsEngineAIStore,
+    $q, $state, $stateParams,  $rootScope, RatingsEngineService, DataCloudStore, RatingsEngineAIStore,
     BrowserStorageUtility, SegmentStore, $timeout
 ){
     var RatingsEngineStore = this;
@@ -574,7 +574,7 @@ angular.module('lp.ratingsengine')
     this.nextSaveTypeModel = function(nextState){
         var currentRating = RatingsEngineStore.getCurrentRating();
         var obj = currentRating.ratingModels[0].AI;
-        obj.workflowType = 'CROSS_SELL';
+        obj.workflowType = RatingsEngineAIStore.aiModelOptions.workflowType;//'CROSS_SELL';
         var opts = {
             AI: obj
         };
@@ -585,9 +585,11 @@ angular.module('lp.ratingsengine')
 
     this.nextSaveProductToAIModel = function(nextState){
         var currentRating = RatingsEngineStore.getCurrentRating();
-        var productsIds = RatingsEngineAIStore.getProductsSelectedIds();
+        var targetProducts = RatingsEngineAIStore.getProductsSelectedIds();
+       
         var obj = currentRating.ratingModels[0].AI;
-        obj.targetProducts  = productsIds;//'CROSS_SELL';
+        obj.targetProducts  = targetProducts;
+        
         var opts = {
             AI: obj
         };
@@ -602,10 +604,12 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRefineToAIModel = function(nextState) {
+        $rootScope.$broadcast('model:inprogress',true);
         var currentRating = RatingsEngineStore.getCurrentRating();
         var obj = currentRating.ratingModels[0].AI;
-        obj.targetCustomerSet = "new";
-        obj.modelingMethod = "PROPENSITY";
+        obj.targetCustomerSet = RatingsEngineAIStore.aiModelOptions.targetCustomerSet;//"new";
+        obj.modelingMethod = RatingsEngineAIStore.aiModelOptions.modelingMethod;//"PROPENSITY";
+        obj.trainingProducts = RatingsEngineAIStore.getProdutTrainingIds();
         var opts = {
             AI: obj
         };
@@ -614,14 +618,6 @@ angular.module('lp.ratingsengine')
         RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(applicationid) {
             console.log(applicationid);
             RatingsEngineStore.nextLaunchAIModel(nextState);
-            // RatingsEngineService.createAIModel(currentRating.id, obj.id, opts).then(function(applicationid) {
-            //     var obj = {
-            //         modelingJobId : applicationid
-            //     }
-            //     RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(model) {
-                    
-            //     });
-            // });
         });
     }
     

@@ -1,4 +1,14 @@
 $break-small: 1128px;
+section.ai-rifine.container {
+    .loading {
+        background: url('/assets/images/spinners/spinner-lattice-dots-100x100.gif') no-repeat center top;
+        padding-top: 115px;
+        text-align: center;
+        width: 100%;
+        margin: 60px auto 0;
+        font-size: 18px;
+    }
+}
 
 section.ratings-engine-ai-refine.container {
     p {

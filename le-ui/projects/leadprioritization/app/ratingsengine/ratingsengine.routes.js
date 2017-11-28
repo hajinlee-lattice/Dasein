@@ -590,6 +590,20 @@ angular
                 views: {
 
                     'wizard_content@home.ratingsengine.ai': {
+                        controller: function($scope){
+                            var vm = this;
+                            vm.inProgress = false;
+                            $scope.$on('model:inprogress', function(event,data) {
+                                if(data === true){
+                                    vm.inProgress = true;
+                                }else {
+                                    vm.inProgress = false;
+                                }
+                            });
+                           
+                            
+                        },
+                        controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine.component.html'
                     },
                     'refine-target@home.ratingsengine.ai.segment.prospect.products.refine': {
@@ -610,7 +624,6 @@ angular
                 resolve: {
                     AIModelJobId : function($stateParams){
                         var aiModelId = $stateParams.ai_model_job_id || '?';
-                        console.log('Routing AI MODEL ', aiModelId);
                         return aiModelId;
                     }
                 },
@@ -620,7 +633,6 @@ angular
                         controller: function (AIModelJobId, RatingsEngineStore) {
                             var vm = this;
                             vm.modelingJobId = AIModelJobId;
-                            console.log('ID', vm.modelingJobId);
                             RatingsEngineStore.setValidation('model', true);
                         },
                         controllerAs: 'vm',

@@ -13,6 +13,16 @@ angular.module('lp.ratingsengine.ai', [])
 
         this.productsSelected = {};
         this.similarProducts = {};
+        this.trainingProducts = []; // this is the value to add to the AI model
+
+        this.aiModelOptions = {
+            workflowType: 'CROSS_SELL',
+            targetCustomerSet: 'new',
+            modelingMethod: 'PROPENSITY',
+            trainingProducts: [],
+            modelingJobId: '',
+            similarSegmentId: ''
+        };
 
         /************* Refine variables *************/
         this.customers = '',
@@ -136,15 +146,15 @@ angular.module('lp.ratingsengine.ai', [])
 
         this.getProductsSelectedIds = function() {
             var ids = Object.keys(this.productsSelected);
-            var similarProds = Object.keys(this.similarProducts);
-            if(similarProds.length > 0) {
-                ids = ids.concat(similarProds);
-            }
             return ids;
         }
 
         this.addSimilarProducts = function(products) {
             this.similarProducts = products;
+        }
+
+        this.getProdutTrainingIds = function(){
+            return Object.keys(this.similarProducts);
         }
 
 
