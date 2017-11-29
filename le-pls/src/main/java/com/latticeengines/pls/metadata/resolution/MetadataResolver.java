@@ -118,7 +118,9 @@ public class MetadataResolver {
                 }
             }
             if (!foundMatchingAttribute) {
-                attrIterator.remove();
+                if (attribute.getDefaultValueStr() == null) {
+                    attrIterator.remove();
+                }
             }
         }
 
