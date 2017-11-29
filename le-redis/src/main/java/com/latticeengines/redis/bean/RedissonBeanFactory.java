@@ -49,7 +49,7 @@ public class RedissonBeanFactory implements FactoryBean<RedissonClient> {
         Config config = new Config();
         Codec codec = new CompositeCodec(StringCodec.INSTANCE, JsonJacksonMapCodec.INSTANCE);
         config.setCodec(codec);
-        ReplicatedServersConfig serverConfig = config.useReplicatedServers()  //
+        ReplicatedServersConfig serverConfig = config.useReplicatedServers() //
                 .setTimeout(40000) //
                 .setRetryInterval(40000).setScanInterval(2000) //
                 .setMasterConnectionPoolSize(masterPoolSize).setMasterConnectionMinimumIdleSize(masterIdle) //

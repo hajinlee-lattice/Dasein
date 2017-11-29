@@ -222,4 +222,8 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     protected void putLongValueInContext(String key, Long val) {
         executionContext.putLong(key, val);
     }
+
+    public boolean shouldSkipStep() {
+        return false;
+    }
 }

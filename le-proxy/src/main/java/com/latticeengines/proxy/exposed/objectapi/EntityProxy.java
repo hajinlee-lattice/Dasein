@@ -42,8 +42,6 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     private LocalCacheManager<String, DataPage> dataCache;
 
     private LocalCacheManager<String, Map<String, Long>> ratingCache;
-    
-    public static final String a = "a";
 
     @Inject
     public EntityProxy(CacheManager cacheManager) {

@@ -12,10 +12,14 @@ public enum CacheNames {
     MetadataCache(Constants.MetadataCacheName), //
     SessionCache(Constants.SessionCacheName);//
 
-    private final String name;
+    private String name;
 
     CacheNames(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public static CacheNames[] getCdlConsolidateCacheGroup() {
@@ -25,10 +29,6 @@ public enum CacheNames {
     public static CacheNames[] getCdlProfileCacheGroup() {
         return new CacheNames[] { DataLakeStatsCache, DataLakeCMCache, EntityCountCache, EntityDataCache,
                 EntityRatingCountCache };
-    }
-
-    public static final String getName(CacheNames c) {
-        return c.name;
     }
 
     public static class Constants {
