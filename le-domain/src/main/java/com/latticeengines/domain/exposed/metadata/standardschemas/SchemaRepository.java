@@ -1041,7 +1041,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute email = attr("Email") //
-                .allowedDisplayNames(Sets.newHashSet("EMAIL")) //
+                .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL ADDRESS")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Email) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
