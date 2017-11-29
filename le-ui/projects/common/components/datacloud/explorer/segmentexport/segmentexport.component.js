@@ -28,12 +28,14 @@ angular
                 SegmentService.DownloadExportedSegment(vm.exportId).then(function (result) {
                     var contentDisposition = result.headers('Content-Disposition');
                     var element = document.createElement("a");
+                    var fileName = contentDisposition.match(/filename="(.+)"/)[1];
+                    element.download = fileName;
                     var file = new Blob([result.data], {type: 'application/octect-stream'});
                     var fileURL = window.URL.createObjectURL(file);
                     element.href = fileURL;
-                    var fileName = contentDisposition.match(/filename="(.+)"/)[1];
-                    element.download = fileName;
+                    document.body.appendChild(element);
                     element.click();
+                    document.body.removeChild(element);
                     vm.showDownloadMessage = true;
                 });
             } 
