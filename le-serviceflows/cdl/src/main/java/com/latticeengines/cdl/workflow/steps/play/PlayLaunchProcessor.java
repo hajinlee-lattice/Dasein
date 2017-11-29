@@ -86,7 +86,7 @@ public class PlayLaunchProcessor {
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
 
-    @Value("${datadb.datasource.url}")
+    @Value("${datadb.datasource.sqoop.url}")
     private String dataDbUrl;
 
     @Value("${datadb.datasource.user}")
@@ -329,6 +329,7 @@ public class PlayLaunchProcessor {
         playLaunch.setAccountsLaunched(playLaunchContext.getCounter().getAccountLaunched().get());
         playLaunch.setContactsLaunched(playLaunchContext.getCounter().getContactLaunched().get());
         playLaunch.setAccountsErrored(playLaunchContext.getCounter().getAccountErrored().get());
+        playLaunch.setAccountsSuppressed(playLaunchContext.getCounter().getAccountSuppressed().get());
 
         updateLaunchProgress(playLaunchContext);
         log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");

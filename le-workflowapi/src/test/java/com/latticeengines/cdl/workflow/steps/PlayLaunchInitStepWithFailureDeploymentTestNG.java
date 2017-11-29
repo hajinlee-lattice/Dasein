@@ -69,7 +69,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
 
-    @Value("${datadb.datasource.url}")
+    @Value("${datadb.datasource.sqoop.url}")
     private String dataDbUrl;
 
     @Value("${datadb.datasource.user}")
