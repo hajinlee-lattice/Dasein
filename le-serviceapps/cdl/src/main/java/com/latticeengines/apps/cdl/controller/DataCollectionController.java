@@ -57,7 +57,8 @@ public class DataCollectionController {
     @ApiOperation(value = "Clear cache for data collection")
     public ResponseDocument<String> clearCache(@PathVariable String customerSpace) {
         CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(customerSpace, CacheNames.getCdlProfileCacheGroup());
+        cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
+                CacheNames.getCdlProfileCacheGroup());
         return ResponseDocument.successResponse("Success");
     }
 }

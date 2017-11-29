@@ -11,10 +11,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.cache.CacheNames;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
-import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
@@ -67,7 +66,8 @@ public class DataFeedExecutionListener extends LEJobListener {
             }
             // refresh caches
             CacheService cacheService = CacheServiceBase.getCacheService();
-            cacheService.refreshKeysByPattern(customerSpace, CacheNames.getCdlConsolidateCacheGroup());
+            cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
+                    CacheNames.getCdlConsolidateCacheGroup());
             // update segment and rating engine counts
             SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
             RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace);
