@@ -6,7 +6,6 @@
       </div>
       <hr />
       <div class="section-body with-padding">
-{{vm.goState}}
         <div class="button-tabs">
           <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Account', 'accounts');" ui-sref="home.import.entry.accounts">
             <span>Accounts</span>
@@ -22,7 +21,7 @@
           </div>
         </div>
 
-        <div class="import-additional-info" ui-view="entry_content"></div>
+        <div class="import-additional-info import-additional-info-{{vm.goState}}" ui-view="entry_content"></div>
 
         <div 
             file-uploader-container

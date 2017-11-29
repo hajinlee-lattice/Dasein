@@ -184,16 +184,19 @@ angular
                         { name: 'PhoneNumber'},
                         { name: 'City'},
                         { name: 'Country'},
-                        { name: 'State'},
-                        { name: 'PostalCode'}
+                        { name: 'State_Province'},
+                        { name: 'Postal_Code'}
                     ];
                 },
                 AnalysisFields: function() {
                     return [
-                        { name: 'Customer'},
-                        { name: 'AnnualRevenue'},
+                        { name: 'Account_Type'},
                         { name: 'Industry'},
-                        { name: 'NumberOfEmployees'}
+                        { name: 'Est_Yearly_Revenue'},
+                        { name: 'Est_Yearly_Revenue_Currency_External_ID'},
+                        { name: 'Lattitude'},
+                        { name: 'Longitude'},
+                        { name: 'Account_Business_Segment'}
                     ];
                 }
             },

@@ -32,7 +32,7 @@ angular.module('lp.import')
     this.wizardProgressItems = {
         "all": [
             { 
-                label: 'Account ID', 
+                label: 'Account IDs', 
                 state: 'accounts.one', 
                 backState: 'home.segment.explorer.attributes',
                 nextLabel: 'Next', 
