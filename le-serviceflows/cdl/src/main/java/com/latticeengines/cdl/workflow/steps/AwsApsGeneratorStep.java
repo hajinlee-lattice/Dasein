@@ -55,8 +55,8 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     protected void setupConfig(AWSPythonBatchConfiguration config) {
         Table periodTable = dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
                 TableRoleInCollection.ConsolidatedPeriodTransaction);
-        if (periodTable == null) {
-            log.warn("There's not metadata table for period aggregated table!");
+        if (!apsEnabled || periodTable == null) {
+            log.warn("Aps generation is disabled or there's not metadata table for period aggregated table!");
             return;
         }
         /*
