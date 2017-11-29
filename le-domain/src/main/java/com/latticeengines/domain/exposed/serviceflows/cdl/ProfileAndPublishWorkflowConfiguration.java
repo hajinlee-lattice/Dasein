@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsSt
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortContactStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortProductStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 
 public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -24,6 +25,7 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
         private SortProductStepConfiguration sortProductStepConfiguration = new SortProductStepConfiguration();
         private CalculatePurchaseHistoryConfiguration calculatePurchaseHistoryConfiguration = new CalculatePurchaseHistoryConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
+        public AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("profileAndPublishWorkflow", customerSpace,
@@ -34,11 +36,13 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
             calculatePurchaseHistoryConfiguration.setCustomerSpace(customerSpace);
             updateStatsObjectsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
+            awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -54,6 +58,7 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder microServiceHostPort(String microserviceHostPort) {
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microserviceHostPort);
+            awsPythonDataConfiguration.setMicroServiceHostPort(microserviceHostPort);
             return this;
         }
 
@@ -68,6 +73,7 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
             configuration.add(sortContactConfiguration);
             configuration.add(sortProductStepConfiguration);
             configuration.add(calculatePurchaseHistoryConfiguration);
+            configuration.add(awsPythonDataConfiguration);
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;
         }
