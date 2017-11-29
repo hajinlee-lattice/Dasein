@@ -19,6 +19,8 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
     vm.init = function() {
 
+        console.log($state);
+
         console.log(vm.launches);
 
         if(vm.launches.launchSummaries.length > 10){

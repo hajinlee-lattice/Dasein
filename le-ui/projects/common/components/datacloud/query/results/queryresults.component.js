@@ -185,6 +185,8 @@ angular.module('common.datacloud.query.results', [
                     };
                 });
 
+                QueryStore.setBucketsToLaunch(vm.selectedBuckets);
+
             });
 
             vm.loading = false;

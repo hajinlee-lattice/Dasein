@@ -70,8 +70,9 @@
                                 <span ng-if="play.ratingEngine.segment == null" class="gray-text">Segment not selected</span>
                             </li>
                             <li>
-                                Last Data Refresh: 
-                                <span class="gray-text" ng-if="!play.ratingEngine.lastRefreshedDate">No refresh data yet</span></span>
+                                Insights: 
+
+                                <span class="red-text" ng-if="!play.ratingEngine.lastRefreshedDate">No refresh data yet</span></span>
                                 <span class="blue-text" ng-if="play.ratingEngine.lastRefreshedDate">{{play.ratingEngine.lastRefreshedDate | date}}</span></span>
                             </li>
                         </ul>
@@ -135,7 +136,7 @@
                             </span>
                             <button 
                                 type="button"
-                                class="button blue-button pull-right"
+                                class="button white-button pull-right"
                                 ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched' || play.launchHistory.mostRecentLaunch.launchState === 'Failed'"
                                 ng-disabled="play.ratingEngine.status != 'ACTIVE'"
                                 ng-click="vm.launchPlay($event, play)">

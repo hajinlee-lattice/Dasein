@@ -45,7 +45,7 @@
         </ul>
 
     	<div class="table-metadata">
-    		{{vm.launches.launchSummaries.length}} play launches
+    		{{vm.launches.launchSummaries.length}} play launch<span ng-if="vm.launches.launchSummaries.length > 1">es</span>
     	</div>
 
     	<table>
@@ -94,10 +94,10 @@
                                 'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
                    </th>
     				<th>
-                        Recommendation <br/>Launched
+                        Launched <br/>Recommendations
                    </th>
     				<th>
-                        Contacts within <br/>Recommendation
+                        Contacts within <br/>Recommendations
                    </th>
                     <th class="sortable" ng-click="vm.sort('launchState'); vm.sortDesc = !vm.sortDesc">
                         Status

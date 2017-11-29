@@ -13,20 +13,28 @@
             <input 
                 type="checkbox" 
                 class=""
+                ng-disabled="vm.noSFCount === 0"
                 ng-model="excludeAccounts"
                 ng-change="vm.excludeNonSalesForceCheckbox(!excludeAccounts)" />
-            Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)
+            <span ng-class="vm.noSFCount === 0 ? 'disabled-text' : ''">Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)</label>
         </label>
 
-        <label>
             <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
+        <div class="checkbox-input" ng-class="vm.accounts.length < 5000 ? 'disabled-text' : ''">
             <input 
                 type="checkbox" 
                 class=""
                 ng-model=""
-                ng-change="" />
-            Limit to only <input type="text" value="3000" /> highest rated targets
-        </label>
+                ng-change=""
+                ng-disabled="vm.accounts.length < 5000" />
+            <label>Limit to only </label>
+            <input 
+                type="text" 
+                value="3000" 
+                class="form-control"
+                ng-disabled="vm.accounts.length < 5000" />
+            <span> highest rated targets</span>
+        </div>
 
         <ul class="bucket-checkboxes">
             <li 
@@ -50,7 +58,7 @@
 
     <ul class="filters">
         <li class="query">
-            <div class="ng-search" ng-if="vm.section !== 'dashboard.targets' && vm.section !== 'wizard.targets'">
+            <div class="ng-search">
                 <a class="button icon-button white-button" ng-click="vm.clearSearch()">
                     <span 
                         class="fa fa-search" 
@@ -63,7 +71,7 @@
                     type="text" 
                     name="SegmentResultSearch" 
                     class="form-control" 
-                    placeholder="Search"
+                    placeholder="Search {{vm.counts.accounts.value | number}} Accounts"
                     ng-model="vm.search"
                     ng-model-options='{ debounce: 1000 }'
                     ng-change='vm.submitQuery()'
@@ -92,7 +100,7 @@
 
     
     <!--
-    The way of rendering these tables needs to be consolidated and refactored in M15.
+    The way of rendering these tables needs to be consolidated and refactored.
     - Hadden
     -->
 

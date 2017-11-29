@@ -1,7 +1,7 @@
 angular.module('lp.playbook.playlisttabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.controller('PlayListTabsController', function ($filter, ResourceUtility, PlaybookWizardStore) {
+.controller('PlayListTabsController', function ($state, $filter, ResourceUtility, PlaybookWizardStore) {
     var vm = this;
 
     angular.extend(vm, {
@@ -16,4 +16,13 @@ angular.module('lp.playbook.playlisttabs', [
         
         return ($filter('filter')(vm.current.plays, filter, true) || []).length;
     }
+
+    vm.historyTabIsDisabled = ((vm.count('Launching') + vm.count('Launched') + vm.count('Failed')) === 0);
+
+    // console.log(vm.historyTabIsDisabled);
+
+    vm.clickLaunchHistoryTab = function($event) {
+        $state.go('home.playbook.plays.launch_history', {reload: true});
+    };
+
 });

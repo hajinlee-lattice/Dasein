@@ -11,7 +11,10 @@
                 </div>
             </div>
         </li>
-        <li ui-sref="home.playbook.plays.launch_history" ui-sref-active="active">
+        <li 
+            ng-click="vm.clickLaunchHistoryTab($event);"
+            ng-class="{'disabled': vm.historyTabIsDisabled, 'active': $state.current.name === 'home.playbook.plays.launch_history'}"
+            ui-sref-active="active">
             <div class="tab-container">
                 <h2>Launch History</h2>
                 <div class="enrichmentCounts">

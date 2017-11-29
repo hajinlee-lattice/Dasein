@@ -258,9 +258,6 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                 color: #222;
                 font-size: 15px;
             }
-            &.disabled {
-                display: none;
-            }
             .enrichmentCounts {
                     white-space: nowrap;
                     text-transform: uppercase;
@@ -291,6 +288,20 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                     height: 20px;
                     width: 20px;
                     background-size: contain;
+                }
+            }
+
+            &.disabled {
+                cursor: default;
+                .count, .enrichmentCounts, & > .tab-container > h2 {
+                    color: #929292;
+                }
+                &:hover, &:active {
+                    .tab-container {
+                        cursor: default;
+                        border-top-color: transparent;
+                        border-bottom-color: transparent;
+                    }
                 }
             }
             &.tab-browse {

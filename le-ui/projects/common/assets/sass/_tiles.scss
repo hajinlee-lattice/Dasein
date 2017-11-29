@@ -134,55 +134,58 @@ Should be incorporated across PD and LP (models list, campaigns list).
     margin: 0 0 3px;
     padding: 0;
     & > li {
-        position: relative;
-        //min-height: 300px;
-        padding: 13px;
-        margin-bottom: 26px;
-        vertical-align: top;
-        background-color: #fff;
-        border-style: solid;
-        border-color: #d0d0d0;
-        border-width: 1px;
-        border-top-right-radius: 4px;
-        border-top-left-radius: 4px;
-        border-bottom-right-radius: 6px;
-        border-bottom-left-radius: 6px;
+      position: relative;
+      //min-height: 300px;
+      padding: 13px;
+      margin-bottom: 26px;
+      vertical-align: top;
+      background-color: #fff;
+      border-style: solid;
+      border-color: #d0d0d0;
+      border-width: 1px;
+      border-top-right-radius: 4px;
+      border-top-left-radius: 4px;
+      border-bottom-right-radius: 6px;
+      border-bottom-left-radius: 6px;
+      &:hover {
+          transition: all 0ms ease 0s;
+          border-color: #6A9ACE;
+          -webkit-box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
+          -moz-box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
+          box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
+          cursor: pointer;
+      }
+      &:active {
+        border-color: #72b8e8;
+      }
+      &.no-style {
+      	background: none;
+      	border: none;
+        padding: 0;
+      }
+      &.create-tile {
+        background: transparent;
+        border: #7b7b7b dashed 1px;
         &:hover {
-            transition: all 0ms ease 0s;
             border-color: #457eba;
-            -webkit-box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.2);
-            -moz-box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.2);
-            box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.2);
-            cursor: pointer;
+            border-style: solid;
         }
-        &.no-style {
-        	background: none;
-        	border: none;
-          padding: 0;
+        .form-group {
+            margin-bottom: 10px;
         }
-        &.create-tile {
-          background: transparent;
-          border: #7b7b7b dashed 1px;
-          &:hover {
-              border-color: #457eba;
-              border-style: solid;
-          }
-          .form-group {
-              margin-bottom: 10px;
-          }
-          .actions {
-              position: absolute;
-              bottom: 13px;
-              width: 90%;
-          }
+        .actions {
+            position: absolute;
+            bottom: 13px;
+            width: 90%;
         }
+      }
     }
 }
 
 .tile-header {
     word-wrap: break-word;
-    margin-bottom: 15px;
-    margin-top: 3px;
+    margin-bottom: 20px;
+    margin-top: 10px;
     h2 {
         margin: 0;
         color: #333333;
@@ -200,8 +203,8 @@ Should be incorporated across PD and LP (models list, campaigns list).
         }
     }
     .edit {
-        top: 2px;
-        right: 2px; 
+        top: 9px;
+        right: 9px; 
         position: absolute;
         button {
             padding: 0.5em 0.75em 0.35em 0.8em;
@@ -222,7 +225,6 @@ Should be incorporated across PD and LP (models list, campaigns list).
                 border-radius: 4px;
                 border-bottom-right-radius: 0;
                 border-bottom-left-radius: 0;
-                border-top-left-radius: 0;
 
                 &:hover * {
                   color: #fff;

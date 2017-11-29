@@ -34,6 +34,11 @@ angular.module('lp.ratingsengine.ratingslist', [
         }
     });
     vm.displayNames = {};
+
+    vm.count = function(type) {
+        return $filter('filter')(vm.current.ratings, { status: type }, true).length;
+    }
+
     vm.init = function($q, $filter) {
 
         // console.log(vm.current.ratings);
@@ -43,6 +48,20 @@ angular.module('lp.ratingsengine.ratingslist', [
         vm.header.filter.filtered = vm.current.ratings;
         vm.header.filter.unfiltered = vm.current.ratings;
 
+        console.log(vm.current.ratings);
+
+        $scope.$watch(vm.current.ratings, function(newValue, oldValue) {
+
+            console.log(newValue, oldValue);
+
+            angular.forEach(vm.header.filter.items, function(item) {
+                console.log(vm.count(item.action.status));
+
+                console.log(item);
+
+                item.total = vm.count(item.action.status);
+            });
+        });
         // angular.forEach(vm.current.ratings, function(rating) {
         //     vm.tileStates[rating.id] = {
         //         showCustomMenu: false,
@@ -51,7 +70,6 @@ angular.module('lp.ratingsengine.ratingslist', [
         //     };
         // });
     }
-
     /**
      * if they decide they want to add sorting by account or contact counts uncomment this and add
      * { label: 'Accounts', icon: 'numeric', property: 'accountCount' },
@@ -154,8 +172,10 @@ angular.module('lp.ratingsengine.ratingslist', [
             id: rating.id,
             status: newStatus 
         });
-
         rating.status = newStatus;
+
+        RatingsEngineStore.setRatings(vm.current.ratings, true);
+
     };
 
     vm.saveRatingClicked = function($event, rating) {
@@ -183,6 +203,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         $event.stopPropagation();
 
         DeleteRatingModal.show(rating);
+
     };
 
     function updateRating(updatedRating) {

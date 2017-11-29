@@ -165,6 +165,16 @@ input[type="search"] {
 }
 
 
+.checkbox-input {
+  & > * {
+    display: inline;
+  }
+  input[type="text"] {
+    width: 80px;
+  }
+}
+
+
 
 
 /* Custom Drop Down
@@ -808,9 +818,15 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 ===================================================================== */
 .bucket-checkboxes {
     @include flex-container;
-    justify-content: center;
+    justify-content: space-between;
     li {
-        margin: 0 4px;
+        /* 
+          Add width to adjust for number of items 
+          Playbook Targets screen (common/components/datacloud/explorer/queryresults.component.html)
+          has 5 buckets and this is the first instance, so it is set at 19%. 
+          Change css within the context of your instance.
+        */
+        width: 19%;
         padding: 20px 30px;
         background: #467dba;
         border: #467dba solid 1px;
