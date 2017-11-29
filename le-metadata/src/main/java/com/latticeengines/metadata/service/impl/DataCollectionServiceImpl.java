@@ -198,8 +198,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         Set<BusinessEntity> entitySet = statistics.getCategories().values().stream()
                 .flatMap(cat -> cat.getSubcategories().values().stream()
                         .flatMap(subcat -> subcat.getAttributes().keySet().stream().map(AttributeLookup::getEntity))) //
-                .map(entity -> BusinessEntity.PurchaseHistory.equals(entity) ? BusinessEntity.Transaction : entity) //
                 .collect(Collectors.toSet());
+        if (entitySet.contains(BusinessEntity.PurchaseHistory)) {
+            entitySet.remove(BusinessEntity.PurchaseHistory);
+            entitySet.add(BusinessEntity.Transaction);
+            entitySet.add(BusinessEntity.PeriodTransaction);
+        }
         return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
     }
 

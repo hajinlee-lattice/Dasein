@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataAggregaterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 
 @Component("periodDataAggregateFlow")
@@ -38,6 +39,9 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
         result = aggregate(config, result);
         result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGoupByFields(), COMPOSITE_KEY),
                 new FieldList(config.getGoupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));
+
+        // TODO: a temp way of adding period name
+        result = result.addColumnWithFixedValue(InterfaceName.PeriodName.name(), "Month", String.class);
 
         return result;
     }

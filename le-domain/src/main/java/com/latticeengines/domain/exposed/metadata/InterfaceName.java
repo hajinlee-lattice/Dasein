@@ -16,6 +16,7 @@ public enum InterfaceName {
     BundleId, //
     TransactionId, //
     PeriodId, //
+    PeriodName, //
     Target, //
     AnalyticPurchaseState_ID, //
     Train, //

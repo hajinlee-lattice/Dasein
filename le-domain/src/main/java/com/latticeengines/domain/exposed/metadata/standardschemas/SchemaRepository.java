@@ -956,17 +956,23 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionDayPeriod.name()) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "DAYPERIOD", "TRANSACTION_DAY_PERIOD", "TRANSACTION DAY PERIOD" })) //
+                .allowedDisplayNames(Sets.newHashSet("DAYPERIOD", "TRANSACTION_DAY_PERIOD", "TRANSACTION DAY PERIOD")) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.TransactionDayPeriod) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.PeriodId.name()) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "DATE", "TRANSACTION_DATE", "TRANSACTION DATE" })) //
+                .allowedDisplayNames(Sets.newHashSet("DATE", "TRANSACTION_DATE", "TRANSACTION DATE")) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.PeriodId) //
-                .logicalType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.PeriodName.name()) //
+                .allowedDisplayNames(Sets.newHashSet("PERIOD NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PeriodName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
