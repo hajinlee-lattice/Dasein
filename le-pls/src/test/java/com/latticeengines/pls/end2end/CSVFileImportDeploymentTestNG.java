@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -35,6 +41,7 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -42,7 +49,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
 
-    private static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/service/impl/";
+    private static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";
     private static final String SOURCE = "File";
     private static final String FEED_TYPE_SUFFIX = "Schema";
 
@@ -50,9 +57,11 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final String ENTITY_CONTACT = "Contact";
     private static final String ENTITY_TRANSACTION = "Transaction";
 
-    private static final String ACCOUNT_SOURCE_FILE = "Q_CDLAccount.csv";
-    private static final String CONTACT_SOURCE_FILE = "";
-    private static final String TRANSACTION_SOURCE_FILE = "";
+    private static final String ACCOUNT_SOURCE_FILE = "Account_base.csv";
+    private static final String CONTACT_SOURCE_FILE = "Contact_base.csv";
+    private static final String TRANSACTION_SOURCE_FILE = "Transaction_base.csv";
+
+    private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
@@ -72,6 +81,22 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Autowired
     private CDLImportService cdlImportService;
 
+    @Autowired
+    private DataFeedProxy dataFeedProxy;
+
+    private SourceFile baseAccountFile;
+
+    private SourceFile baseContactFile;
+
+    private SourceFile baseTransactionFile;
+
+    private SourceFile missingAccountFile;
+
+    private DataFeedTask accountDataFeedTask;
+
+    private DataFeedTask contactDataFeedTask;
+
+    private DataFeedTask transactionDataFeedTask;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -79,41 +104,124 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
 
-        uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
-//        uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
-//        uploadSourceFile(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
+        prepareBaseData();
+        getDataFeedTask();
     }
 
-    private void uploadSourceFile(String sourceFileName, String entity) {
-        SourceFile sourceFile = fileUploadService.uploadFile(sourceFileName, sourceFileName,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + sourceFileName));
+    private void prepareBaseData() {
+
+        baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
+        Assert.assertNotNull(baseAccountFile);
+        startCDLImport(baseAccountFile, ENTITY_ACCOUNT);
+        baseContactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
+        Assert.assertNotNull(baseContactFile);
+        startCDLImport(baseContactFile, ENTITY_CONTACT);
+        baseTransactionFile = uploadSourceFile(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
+        startCDLImport(baseTransactionFile, ENTITY_TRANSACTION);
+    }
+
+    private void getDataFeedTask() {
+        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT +
+                FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
+        contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_CONTACT +
+                FEED_TYPE_SUFFIX, ENTITY_CONTACT);
+        transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_TRANSACTION +
+                FEED_TYPE_SUFFIX, ENTITY_TRANSACTION);
+    }
+
+    private SourceFile uploadSourceFile(String csvFileName, String entity) {
+        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(entity), entity, csvFileName,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
+
 
         String feedType = entity + FEED_TYPE_SUFFIX;
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
-                (sourceFileName, entity, SOURCE, feedType);
+                (sourceFile.getName(), entity, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
         }
-        modelingFileMetadataService.resolveMetadata(sourceFileName, fieldMappingDocument, entity, SOURCE, feedType);
-
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, entity, SOURCE, feedType);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
-        Table table = metadataProxy.getTable(customerSpace, sourceFile.getTableName());
-        Set<String> headers = getHeaderFields(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + sourceFileName));
-        compare(table, headers);
 
-        ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, sourceFileName, sourceFileName,
-                SOURCE, entity, feedType);
+        return sourceFile;
+    }
+
+    private void startCDLImport(SourceFile sourceFile, String entity) {
+        ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, sourceFile.getName(),
+                sourceFile.getName(),
+                SOURCE, entity, entity + FEED_TYPE_SUFFIX);
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment", enabled = false)
-    public void verify() {
+    @Test(groups = "deployment", enabled = true)
+    public void verifyBase() {
+        Assert.assertNotNull(accountDataFeedTask);
+        Assert.assertNotNull(contactDataFeedTask);
+        Table accountTemplate = accountDataFeedTask.getImportTemplate();
+        Table contactTemplate = contactDataFeedTask.getImportTemplate();
+        Table transactionTemplate = transactionDataFeedTask.getImportTemplate();
+        Set<String> accountHeaders = getHeaderFields(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH +
+                ACCOUNT_SOURCE_FILE));
+        Table accountSourceTable = metadataProxy.getTable(customerSpace, baseAccountFile.getTableName());
+        compare(accountSourceTable, accountHeaders);
+        Assert.assertEquals(accountTemplate.getAttributes().size(), accountSourceTable.getAttributes().size());
+        Assert.assertNotNull(contactTemplate.getAttribute(InterfaceName.PhoneNumber));
+        Assert.assertNotNull(transactionTemplate.getAttribute(InterfaceName.ContactId));
+    }
 
+    @Test(groups = "deployment", dependsOnMethods = "verifyBase")
+    public void verifyColumnMissing() {
+        missingAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
+        Assert.assertNotNull(missingAccountFile);
+        startCDLImport(missingAccountFile, ENTITY_ACCOUNT);
+        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT +
+                FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
+        Table accountTemplate2 = accountDataFeedTask.getImportTemplate();
+        Table sourceTable = metadataProxy.getTable(customerSpace, missingAccountFile.getTableName());
+        Assert.assertNull(accountTemplate2.getAttribute(InterfaceName.Website));
+        Assert.assertNull(sourceTable.getAttribute(InterfaceName.Website));
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyBase")
+    public void verifyDataTypeChange() {
+        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+
+
+        String feedType = ENTITY_CONTACT + FEED_TYPE_SUFFIX;
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
+                (sourceFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            if (fieldMapping.getUserField().equalsIgnoreCase("Postal_Code")) {
+                fieldMapping.setFieldType(UserDefinedType.NUMBER);
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE, feedType);
+        sourceFile = sourceFileService.findByName(sourceFile.getName());
+        Exception ex = null;
+        try {
+            ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, sourceFile.getName(),
+                    sourceFile.getName(),
+                    SOURCE, ENTITY_CONTACT, ENTITY_CONTACT + FEED_TYPE_SUFFIX);
+
+            JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+            assertEquals(completedStatus, JobStatus.COMPLETED);
+        } catch (Exception e) {
+            ex = e;
+        }
+        Assert.assertNotNull(ex);
     }
 
     private Set<String> getHeaderFields(URL sourceFileURL) {

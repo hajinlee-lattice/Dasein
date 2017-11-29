@@ -120,7 +120,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         if (attribute == null) {
             return null;
         } else {
-            return Type.valueOf(attribute.getDataType().toUpperCase());
+            return Type.valueOf(attribute.getPhysicalDataType().toUpperCase());
         }
     }
 
