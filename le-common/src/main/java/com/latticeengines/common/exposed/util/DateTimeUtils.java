@@ -1,14 +1,14 @@
 package com.latticeengines.common.exposed.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DateTimeUtils {
 
@@ -38,6 +38,22 @@ public class DateTimeUtils {
         try {
             return dateFormat.parse(dateString);
         } catch (ParseException e) {
+            // HACK.. replace last space char with + char and try again. This is
+            // for dealing with URL encoding issue due to randomness in class
+            // loading
+            dateString = dateString.trim();
+            String space = " ";
+            String plus = "+";
+            if (dateString.contains(space)) {
+                dateString = dateString.substring(0, dateString.lastIndexOf(space)) + plus
+                        + dateString.substring(dateString.lastIndexOf(space) + 1);
+                try {
+                    log.info("Trying to parse updated string: " + dateString);
+                    return dateFormat.parse(dateString);
+                } catch (ParseException ex) {
+                    log.error("Could not parse string even after applying space replacement hack: " + dateString);
+                }
+            }
             throw new RuntimeException(e);
         }
     }
