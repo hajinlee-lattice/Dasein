@@ -51,7 +51,7 @@ angular.module('lp.import')
                 state: 'accounts.one.two.three', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
+                    ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Custom Fields', 
@@ -85,11 +85,11 @@ angular.module('lp.import')
                 state: 'contacts.one.two', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
+                    ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Custom Fields', 
-                state: 'contacts.one.two.thre', 
+                state: 'contacts.one.two.three', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState);
@@ -111,14 +111,14 @@ angular.module('lp.import')
                 state: 'product_purchases.one', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
+                    ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
                 state: 'product_purchases.one.two', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
+                    ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 
@@ -137,14 +137,14 @@ angular.module('lp.import')
                 state: 'product_bundles.one', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
+                    ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
                 state: 'product_bundles.one.two', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveGeneric(nextState);
+                    ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 

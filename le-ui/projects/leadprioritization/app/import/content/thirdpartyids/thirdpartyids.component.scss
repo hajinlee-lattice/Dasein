@@ -1,5 +1,8 @@
 .third-party-ids {
 	ul.field-mapping {
+		li.header {
+			border-bottom: 1px solid #d0d0d0;
+		}
 		li.field, li.header {
 			margin: 10px 0;
 			& > ul {

@@ -3,13 +3,13 @@
     <div class="header">
         <h2>Lattice Fields</h2>
     </div>
-    <p>Lattice uses several account fields that you should provide for each record, if possible. Please review the fields below to make sure everything is mapping correctly.</p>
+    <p>{{vm.latticeFieldsDescription(vm.importType)}}</p>
 
     <h3 class="{{vm.importType}}-matching">{{vm.importType}} Matching Fields</h3>
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
     <ul ng-init="fieldMapping = fieldMapping || {}">
     	<li ng-repeat="field in vm.matchingFieldsList">
-    		<label>{{field.name}}</label>
+    		<label>{{field.displayName || field.name}}</label>
     		<select class="form-control"
     		    ng-model="fieldMapping[field.name].userField"
 			    ng-change="vm.changeLatticeField(fieldMapping)"

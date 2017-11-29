@@ -178,8 +178,8 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Website Address'},
-                        { name: 'D-U-N-S'},
+                        { name: 'Website'},
+                        { name: 'DUNS'},
                         { name: 'CompanyName'},
                         { name: 'PhoneNumber'},
                         { name: 'City'},
@@ -293,37 +293,25 @@ angular
         .state('home.import.wizard.contacts.one.two', {
             url: '/latticefields',
             resolve: {
-                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
-                    var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
-                        ImportWizardStore.setFieldDocument(result.Result);
-                        deferred.resolve(result.Result);
-                    });
-
-                    return deferred.promise;
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
-                    var deferred = $q.defer();
-
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
-                        deferred.resolve(result['Account']);
-                    });
-
-                    return deferred.promise;
+                    return ImportWizardStore.getUnmappedFields();
                 },
                 Type: function(){
                     return "Contacts";
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Website Address'},
+                        { name: 'Website', displayName: 'Website test'},
                         { name: 'CompanyName'},
-                        { name: 'D-U-N-S'},
+                        { name: 'DUNS'},
                         { name: 'IP_Address'},
                         { name: 'City'},
                         { name: 'Country'},
-                        { name: 'State'},
-                        { name: 'PostalCode'},
+                        { name: 'State_Provence'},
+                        { name: 'Postal_Code'},
                         { name: 'Last_Name'},
                         { name: 'First_Name'},
                         { name: 'Email'}
@@ -432,23 +420,11 @@ angular
         .state('home.import.wizard.product_purchases.one.two', {
             url: '/latticefields',
             resolve: {
-                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
-                    var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
-                        ImportWizardStore.setFieldDocument(result.Result);
-                        deferred.resolve(result.Result);
-                    });
-
-                    return deferred.promise;
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
-                    var deferred = $q.defer();
-
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
-                        deferred.resolve(result['Account']);
-                    });
-
-                    return deferred.promise;
+                    return ImportWizardStore.getUnmappedFields();
                 },
                 Type: function(){
                     return "Transactions";
@@ -547,23 +523,11 @@ angular
         .state('home.import.wizard.product_bundles.one.two', {
             url: '/latticefields',
             resolve: {
-                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
-                    var deferred = $q.defer();
-                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
-                        ImportWizardStore.setFieldDocument(result.Result);
-                        deferred.resolve(result.Result);
-                    });
-
-                    return deferred.promise;
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
-                    var deferred = $q.defer();
-
-                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
-                        deferred.resolve(result['Account']);
-                    });
-
-                    return deferred.promise;
+                    return ImportWizardStore.getUnmappedFields();
                 },
                 Type: function(){
                     return "Products";

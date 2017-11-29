@@ -12,7 +12,7 @@ angular.module('lp.import.wizard.productids', [])
         AvailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
-            product: 'ProductId',
+            product: 'Id',
         },
         UnmappedFieldsMappingsMap: {},
     });

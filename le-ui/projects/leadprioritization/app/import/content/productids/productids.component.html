@@ -1,7 +1,4 @@
 <div class="import-accountid container file-import-content">
-    <div class="header">
-        <h2>Account IDs</h2>
-    </div>
     <p>Please provide unique identifier attribute Lattice platform should use to de-duplicate your account records.  The data provided in this file will override the existing data.</p>
 
     <div class="id-options" ng-if="!vm.state.accountDedupeField">
@@ -19,12 +16,6 @@
 				    </option>
                </select>
             </div>
-        </div>
-    </div>
-    <div class="row" ng-if="vm.state.accountDedupeField">
-        <div>
-            <label for="dedupeField">Unique Identifier</label>
-            <input id="dedupeField" type="text" value="{{::vm.state.accountDedupeField}}" disabled></input>
         </div>
     </div>
 </div>

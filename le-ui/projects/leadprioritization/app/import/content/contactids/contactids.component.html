@@ -1,9 +1,5 @@
 <div class="import-accountid container file-import-content">
-    <div class="header">
-        <h2>Account IDs</h2>
-    </div>
-    <p>Please provide unique identifier attribute Lattice platform should use to de-duplicate your account records.  The data provided in this file will override the existing data.</p>
-
+    <p>Please provide unique identifier attribute Lattice platform should use to de-duplicate your contact records and match the contact records to your accounts.  The data provided in this file will override the existing data.</p>
     <div class="id-options">
         <div class="id-options-item">
             <div>
@@ -14,14 +10,14 @@
                     ng-change="vm.changeLatticeField(vm.fieldMapping)"
                     ng-class="{'required': true}">
                     <option value="" hidden disabled>-- Choose Unique Identifier --</option>
-                    <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userfield}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
+                    <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
                         {{AvailableField.userField}}
 				    </option>
                </select>
             </div>
         </div>
     </div>
-    <div class="id-options" ng-if="!vm.state.accountDedupeField">
+    <div class="id-options">
         <div class="id-options-item">
             <div>
                 <label for="dedupeField">Unique Account Identifier</label>

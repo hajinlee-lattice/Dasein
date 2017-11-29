@@ -13,7 +13,7 @@ angular.module('lp.import.wizard.contactids', [])
         unavailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
-            contact: 'ContactId',
+            contact: 'Id',
             account: 'AccountId',
         },
         UnmappedFieldsMappingsMap: {},
@@ -29,7 +29,7 @@ angular.module('lp.import.wizard.contactids', [])
             vm.AvailableFields.push(fieldMapping);
             for(var i in vm.mappedFieldMap) {
                 if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
-                    vm.fieldMapping[i] = fieldMapping.userField
+                    vm.fieldMapping[i] = fieldMapping.userField;
                 }
             }
         });
