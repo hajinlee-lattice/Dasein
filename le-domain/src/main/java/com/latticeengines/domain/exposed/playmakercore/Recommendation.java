@@ -239,7 +239,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     }
 
     public String getPriorityDisplayName() {
-        return priorityID.getName();
+        return priorityID != null ? priorityID.getName() : "";
     }
 
     public void setPriorityDisplayName(String name) {

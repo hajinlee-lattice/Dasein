@@ -31,7 +31,13 @@ import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed
 public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(UlyssesDeploymentTestNGBase.class);
 
-    private static final String CLIENT_ID_LP = "lp";
+    protected static String CLIENT_ID = UlyssesSupportedClients.CLIENT_ID_LP;
+
+    protected static class UlyssesSupportedClients {
+        public static final String CLIENT_ID_LP = "lp";
+        public static final String CLIENT_ID_PM = "playmaker";
+
+    }
 
     @Value("${common.test.oauth.url}")
     protected String authHostPort;
@@ -62,7 +68,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         Tenant tenant = setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
         String oneTimeKey = oauth2RestApiProxy.createAPIToken(tenant.getId());
 
-        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, tenant.getId(), oneTimeKey, CLIENT_ID_LP);
+        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, tenant.getId(), oneTimeKey, CLIENT_ID);
         OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(getOAuth2RestTemplate());
         log.info("Access Token: " + accessToken.getValue());
     }

@@ -34,6 +34,16 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Query query = session.createQuery(queryStr);
         query.setString("recommendationId", recommendationId);
         return (Recommendation) query.uniqueResult();
+
+        //
+        // CriteriaBuilder builder = session.getCriteriaBuilder();
+        // CriteriaQuery<Recommendation> query =
+        // builder.createQuery(Recommendation.class);
+        // Root<Recommendation> root = query.from(Recommendation.class);
+        // query.select(root).where(builder.equal(root.get("recommendationId"),
+        // recommendationId));
+        //
+        // return session.createQuery(query).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")

@@ -24,7 +24,7 @@ public class RecommendationResource {
     @RequestMapping(value = "/{recommendationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a recommendation by recommendationId")
-    public Recommendation getTalkingPointById(@PathVariable String recommendationId) {
+    public Recommendation getRecommendationById(@PathVariable String recommendationId) {
         return lpiPMRecommendation.getRecommendationById(recommendationId);
     }
 
