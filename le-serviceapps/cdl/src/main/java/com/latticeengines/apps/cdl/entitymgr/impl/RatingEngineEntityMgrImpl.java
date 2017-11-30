@@ -139,6 +139,20 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         if (ratingEngine.getStatus() != null) {
             retrievedRatingEngine.setStatus(ratingEngine.getStatus());
         }
+        if (ratingEngine.getNote() != null) {
+            RatingEngineNote ratingEngineNote = new RatingEngineNote();
+            ratingEngineNote.setNotesContents(ratingEngine.getNote());
+            ratingEngineNote.setCreatedByUser(ratingEngine.getCreatedBy());
+            ratingEngineNote.setLastModifiedByUser(ratingEngine.getCreatedBy());
+
+            Long nowTimestamp = (new Date()).getTime();
+            ratingEngineNote.setCreationTimestamp(nowTimestamp);
+            ratingEngineNote.setLastModificationTimestamp(nowTimestamp);
+            ratingEngineNote.setRatingEngine(retrievedRatingEngine);
+            ratingEngineNote.setOrigin(NoteOrigin.NOTE.name());
+            ratingEngineNote.setId(UUID.randomUUID().toString());
+            retrievedRatingEngine.addRatingEngineNote(ratingEngineNote);
+        }
         if (MapUtils.isNotEmpty(ratingEngine.getCountsAsMap())) {
             retrievedRatingEngine.setCountsByMap(ratingEngine.getCountsAsMap());
         }

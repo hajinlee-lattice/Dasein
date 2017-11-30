@@ -39,6 +39,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final String RATING_ENGINE_NAME = "Rating Engine";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
+    private static final String RATING_ENGINE_NEW_NOTE = "This is a Rating Engine that covers East Asia market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static final String LDC_NAME = "LDC_Name";
     private static final String LE_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
@@ -157,6 +158,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // test update
         RatingEngine re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
+        re.setNote(RATING_ENGINE_NEW_NOTE);
         re.setStatus(RatingEngineStatus.ACTIVE);
         re.setId(ratingEngine.getId());
         re.setCountsByMap(ImmutableMap.of( //
@@ -176,6 +178,15 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 + ratingEngineEntityMgr.findById(ratingEngine.getId()).getUpdated());
         System.out.println("Created date is " + createdDate);
         System.out.println("The create date for the newly updated one is " + createdRatingEngine.getCreated());
+
+        // test rating engine note update
+        ratingEngineNotes = ratingEngineNoteEntityMgr.getAllByRatingEngine(createdRatingEngine);
+        Assert.assertNotNull(ratingEngineNotes);
+        Assert.assertEquals(ratingEngineNotes.size(), 2);
+        Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE);
+        Assert.assertEquals(ratingEngineNotes.get(1).getNotesContents(), RATING_ENGINE_NEW_NOTE);
+        log.info(String.format("Rating Engine Note is %s", ratingEngineNotes.get(0)));
+
         ratingEngineList = ratingEngineEntityMgr.findAll();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);

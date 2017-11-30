@@ -41,6 +41,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     private static final String RATING_ENGINE_NAME = "Rating Engine";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
+    private static final String RATING_ENGINE_NEW_NOTE = "This is a Rating Engine that covers East Asia market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static final Long RATING_A_COUNT = 4L;
     private static final Long RATING_D_COUNT = 190L;
@@ -215,6 +216,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         // test update rating engine
         rbRatingEngine.setDisplayName(RATING_ENGINE_NAME);
         rbRatingEngine.setStatus(RatingEngineStatus.ACTIVE);
+        rbRatingEngine.setNote(RATING_ENGINE_NEW_NOTE);
         RatingEngine createdRatingEngine = ratingEngineService.createOrUpdate(rbRatingEngine, mainTestTenant.getId());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
         Assert.assertTrue(createdRatingEngine.getUpdated().after(updatedDate));
@@ -224,6 +226,13 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(rbRatingEngineId, ratingEngineList.get(0).getId());
+
+        // test rating engine note update
+        List<RatingEngineNote> ratingEngineNotes = ratingEngineNoteService.getAllByRatingEngineId(rbRatingEngineId);
+        Assert.assertNotNull(ratingEngineNotes);
+        Assert.assertEquals(ratingEngineNotes.size(), 2);
+        Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE);
+        Assert.assertEquals(ratingEngineNotes.get(1).getNotesContents(), RATING_ENGINE_NEW_NOTE);
 
         List<RatingEngineSummary> summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(
                 RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.name());

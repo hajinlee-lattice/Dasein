@@ -36,6 +36,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
     private static final String RATING_ENGINE_NAME_1 = "Rating Engine 1";
     private static final String RATING_ENGINE_NOTE_1 = "This is a Rating Engine that covers North America market";
+    private static final String RATING_ENGINE_NEW_NOTE = "This is a Rating Engine that covers East Asia market";
     @SuppressWarnings("unused")
     private static final String RATING_ENGINE_NAME_2 = "Rating Engine 2";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
@@ -119,10 +120,11 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "ACTIVE",
                 "RULE_BASED");
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
-        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE", "AI_BASED");
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE",
+                "AI_BASED");
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
 
-        // test RuleBased  rating engine
+        // test RuleBased rating engine
         RatingEngine ruleRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re1.getId());
         Assert.assertNotNull(ruleRatingEngine);
         Assert.assertEquals(ruleRatingEngine.getId(), re1.getId());
@@ -140,8 +142,8 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(rm.getIteration(), 1);
         Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
                 RatingRule.DEFAULT_BUCKET_NAME);
-        
-        // test AI  rating engine
+
+        // test AI rating engine
         RatingEngine aiRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re2.getId());
         Assert.assertNotNull(aiRatingEngine);
         Assert.assertEquals(aiRatingEngine.getId(), re2.getId());
@@ -156,7 +158,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         it = ratingModels.iterator();
         rm = it.next();
         Assert.assertTrue(rm instanceof AIModel);
-        Assert.assertEquals(rm.getIteration(), 1);  
+        Assert.assertEquals(rm.getIteration(), 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGet" })
@@ -166,9 +168,10 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         testUpdateAIModel();
     }
 
-	protected void testUpdateRuleBasedModel() {
-		re1.setDisplayName(RATING_ENGINE_NAME_1);
+    protected void testUpdateRuleBasedModel() {
+        re1.setDisplayName(RATING_ENGINE_NAME_1);
         re1.setStatus(RatingEngineStatus.ACTIVE);
+        re1.setNote(RATING_ENGINE_NEW_NOTE);
         RatingEngine ratingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re1);
         Assert.assertNotNull(ratingEngine);
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
@@ -184,6 +187,14 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
         Assert.assertEquals(ratingEngine.getId(), re1.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+
+        // test update rating engine note
+        List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),
+                ratingEngine.getId());
+        Assert.assertNotNull(ratingEngineNotes);
+        Assert.assertEquals(ratingEngineNotes.size(), 2);
+        Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE_1);
+        Assert.assertEquals(ratingEngineNotes.get(1).getNotesContents(), RATING_ENGINE_NEW_NOTE);
 
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "ACTIVE", null);
         Assert.assertNotNull(ratingEngineSummaries);
@@ -227,10 +238,10 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR1));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR2));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR3));
-	}
-	
-	protected void testUpdateAIModel() {
-		re2.setDisplayName(RATING_ENGINE_NAME_2);
+    }
+
+    protected void testUpdateAIModel() {
+        re2.setDisplayName(RATING_ENGINE_NAME_2);
         re2.setStatus(RatingEngineStatus.ACTIVE);
         RatingEngine ratingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re2);
         Assert.assertNotNull(ratingEngine);
@@ -238,7 +249,8 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(re2.getId(), ratingEngine.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
 
-        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId());
+        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
+                .getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 2);
 
@@ -274,17 +286,17 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         rm = ratingEngineProxy.getRatingModel(mainTestTenant.getId(), re2.getId(), ratingModelId);
         Assert.assertNotNull(rm);
         Assert.assertTrue(rm instanceof AIModel);
-        
+
         ((AIModel) rm).setWorkflowType(ModelWorkflowType.CROSS_SELL);
-		rm = ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), re2.getId(), ratingModelId, rm);
-		Assert.assertNotNull(rm);
-		
-		rm = ratingEngineProxy.getRatingModel(mainTestTenant.getId(), re2.getId(), ratingModelId);
+        rm = ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), re2.getId(), ratingModelId, rm);
+        Assert.assertNotNull(rm);
+
+        rm = ratingEngineProxy.getRatingModel(mainTestTenant.getId(), re2.getId(), ratingModelId);
         Assert.assertNotNull(rm);
         Assert.assertTrue(rm instanceof AIModel);
-        AIModel aiModel = (AIModel)rm;
+        AIModel aiModel = (AIModel) rm;
         Assert.assertEquals(aiModel.getWorkflowType(), ModelWorkflowType.CROSS_SELL);
-	}
+    }
 
     private void testCreate(RatingEngine re) {
         RatingEngine createdRe = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re);
@@ -294,16 +306,16 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertNotNull(new ArrayList<>(createdRe.getRatingModels()));
 
         if (createdRe.getActiveModel() instanceof RuleBasedModel) {
-	        RuleBasedModel ruModel = (RuleBasedModel) createdRe.getActiveModel();
-	        Assert.assertNotNull(ruModel);
-	        Assert.assertNotNull(ruModel.getSelectedAttributes());
-	        Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
-        } else if (createdRe.getActiveModel() instanceof AIModel){
-        		AIModel ruModel = (AIModel) createdRe.getActiveModel();
-	        Assert.assertNotNull(ruModel);
+            RuleBasedModel ruModel = (RuleBasedModel) createdRe.getActiveModel();
+            Assert.assertNotNull(ruModel);
+            Assert.assertNotNull(ruModel.getSelectedAttributes());
+            Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
+        } else if (createdRe.getActiveModel() instanceof AIModel) {
+            AIModel ruModel = (AIModel) createdRe.getActiveModel();
+            Assert.assertNotNull(ruModel);
         }
     }
-  
+
     private void testRatingEngineNoteCreation(RatingEngine ratingEngine, boolean shouldHaveRatingEngineNote) {
         if (shouldHaveRatingEngineNote) {
             List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),

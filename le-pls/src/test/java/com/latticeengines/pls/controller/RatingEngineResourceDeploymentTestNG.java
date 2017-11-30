@@ -39,7 +39,6 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     private static final String RATING_ENGINE_NOTE_1 = "This is a Rating Engine that covers North America market";
     @SuppressWarnings("unused")
     private static final String RATING_ENGINE_NAME_2 = "Rating Engine 1";
-    @SuppressWarnings("unused")
     private static final String RATING_ENGINE_NOTE_2 = "This is a Rating Engine that covers East Asia market";
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
@@ -169,12 +168,21 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         // test update rating engine
         re1.setDisplayName(RATING_ENGINE_NAME_1);
         re1.setStatus(RatingEngineStatus.ACTIVE);
+        re1.setNote(RATING_ENGINE_NOTE_2);
         RatingEngine ratingEngine = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines", re1,
                 RatingEngine.class);
         Assert.assertNotNull(ratingEngine);
         Assert.assertEquals(ratingEngine.getDisplayName(), RATING_ENGINE_NAME_1);
         Assert.assertEquals(re1.getId(), ratingEngine.getId());
         Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+
+        // test update rating engine note
+        List<RatingEngineNote> ratingEngineNotes = ratingEngineProxy.getAllNotes(mainTestTenant.getId(),
+                ratingEngine.getId());
+        Assert.assertNotNull(ratingEngineNotes);
+        Assert.assertEquals(ratingEngineNotes.size(), 2);
+        Assert.assertEquals(ratingEngineNotes.get(0).getNotesContents(), RATING_ENGINE_NOTE_1);
+        Assert.assertEquals(ratingEngineNotes.get(1).getNotesContents(), RATING_ENGINE_NOTE_2);
 
         List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);

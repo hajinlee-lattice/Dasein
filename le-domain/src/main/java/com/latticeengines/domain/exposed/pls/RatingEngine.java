@@ -125,7 +125,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private Set<RatingModel> ratingModels = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE,
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH,
             CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<RatingEngineNote> ratingEngineNotes;
