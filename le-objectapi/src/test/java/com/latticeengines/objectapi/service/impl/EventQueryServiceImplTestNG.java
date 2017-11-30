@@ -1,7 +1,10 @@
 package com.latticeengines.objectapi.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+
 import java.util.Collections;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -27,8 +30,6 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-import static org.mockito.ArgumentMatchers.any;
-
 public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     @Autowired
@@ -36,6 +37,8 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     @Autowired
     private QueryEvaluatorService queryEvaluatorService;
+
+    private static final String PRODUCT_ID = "6368494B622E0CB60F9C80FEB1D0F95F";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -61,6 +64,36 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         Assert.assertEquals(count, 21197L);
     }
 
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    public void testCrossPeriodQuery() {
+        Bucket.Transaction txn1 = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), null, null, false);
+        TimeFilter timeFilter = TimeFilter.ever();
+        timeFilter.setPeriod(TimeFilter.Period.Quarter.name());
+        Bucket.Transaction txn2 = new Bucket.Transaction(PRODUCT_ID, timeFilter, null, null, false);
+
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction restriction1 = new BucketRestriction(attrLookup, Bucket.txnBkt(txn1));
+        Restriction restriction2 = new BucketRestriction(attrLookup, Bucket.txnBkt(txn2));
+        Restriction restriction = Restriction.builder().and(restriction1, restriction2).build();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        eventQueryService.getScoringTuples(frontEndQuery);
+    }
+
+    @Test(groups = "functional")
+    public void testHasEngaged() {
+        Bucket.Transaction txn = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), null, null, false);
+        long scoringCount = countTxnBktForScoring(txn);
+        Assert.assertEquals(scoringCount, 832);
+        long trainingCount = countTxnBktForTraining(txn);
+        Assert.assertEquals(trainingCount, 16378);
+        long eventCount = countTxnBktForEvent(txn);
+        Assert.assertEquals(eventCount, 5374);
+    }
+
     private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
         FrontEndQuery frontEndQuery = new FrontEndQuery();
@@ -71,13 +104,6 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-
-        //FrontEndRestriction contactFERestriction = new FrontEndRestriction();
-        //Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact,
-        //                                                      InterfaceName.Title.name()).eq("Buyer").build();
-        //contactFERestriction.setRestriction(cntRestriction);
-        //frontEndQuery.setContactRestriction(contactFERestriction);
-
         DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery);
         Assert.assertNotNull(dataPage.getData());
         return dataPage.getData().size();
@@ -107,9 +133,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        DataPage dataPage = eventQueryService.getTrainingTuples(frontEndQuery);
-        Assert.assertNotNull(dataPage.getData());
-        return dataPage.getData().size();
+        return eventQueryService.getTrainingCount(frontEndQuery);
     }
 
     private long countTxnBktForEvent(Bucket.Transaction txn) {
@@ -122,9 +146,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        DataPage dataPage = eventQueryService.getEventTuples(frontEndQuery);
-        Assert.assertNotNull(dataPage.getData());
-        return dataPage.getData().size();
+        return eventQueryService.getEventCount(frontEndQuery);
     }
 
     private void mockDataCollectionProxy() {

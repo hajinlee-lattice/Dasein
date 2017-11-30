@@ -517,8 +517,7 @@ public class TransactionRestrictionTranslator {
 
         TimeFilter timeFilter = new TimeFilter(res.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
                                                res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
-        TransactionRestriction prior = new TransactionRestriction(res.getProductName(), //
-                                                                  res.getProductId(), //
+        TransactionRestriction prior = new TransactionRestriction(res.getProductId(), //
                                                                   timeFilter, //
                                                                   negate, //
                                                                   res.getSpentFilter(), //
@@ -536,8 +535,7 @@ public class TransactionRestrictionTranslator {
         TimeFilter timeFilter = new TimeFilter(res.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
                                                res.getTimeFilter().getPeriod(), res.getTimeFilter().getValues());
 
-        TransactionRestriction notWithin = new TransactionRestriction(res.getProductName(), //
-                                                                      res.getProductId(), //
+        TransactionRestriction notWithin = new TransactionRestriction(res.getProductId(), //
                                                                       timeFilter, //
                                                                       !negate, //
                                                                       null, //

@@ -6,11 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -20,7 +17,6 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -54,10 +50,6 @@ public class Bucket implements Serializable {
 
     @JsonProperty("Txn")
     private Transaction transaction;
-
-    @Deprecated
-    @JsonIgnore
-    private Pair<Object, Object> range;
 
     public static Bucket nullBkt() {
         return new Bucket();
@@ -157,9 +149,6 @@ public class Bucket implements Serializable {
             for (Long cnt : bucket.encodedCountList) {
                 this.encodedCountList[idx++] = cnt;
             }
-        }
-        if (bucket.range != null) {
-            this.range = bucket.range;
         }
         if (bucket.lift != null) {
             this.lift = bucket.lift;
@@ -287,38 +276,6 @@ public class Bucket implements Serializable {
 
         public AggregationFilter getUnitFilter() {
             return unitFilter;
-        }
-    }
-
-    @Deprecated
-    @JsonIgnore
-    public Pair<Object, Object> getRange() {
-        return range;
-    }
-
-    @Deprecated
-    @JsonIgnore
-    public void setRange(Pair<Object, Object> range) {
-        this.range = range;
-    }
-
-    @Deprecated
-    @JsonProperty("Rng")
-    @ApiModelProperty("First value is the lower bound of the range, inclusive. Null is negative infinity. "
-            + "Second value is the upper bound of the range, exclusive. Null is positive infinity. "
-            + "Should not set both to null.")
-    private List<Object> getRangeAsList() {
-        return range == null ? null : Arrays.asList(range.getLeft(), range.getRight());
-    }
-
-    @Deprecated
-    @JsonProperty("Rng")
-    @ApiModelProperty("First value is the lower bound of the range, inclusive. Null is negative infinity. "
-            + "Second value is the upper bound of the range, exclusive. Null is positive infinity. "
-            + "Should not set both to null.")
-    private void setRangeViaList(List<Object> objs) {
-        if (objs != null) {
-            this.range = ImmutablePair.of(objs.get(0), objs.get(1));
         }
     }
 }

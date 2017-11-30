@@ -289,8 +289,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("upper(%s.LDC_Name) like ?", ACCOUNT));
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testTimeRestriction() {
+        // TODO: restriction based on Transaction (daily aggregated table) is to be deprecated.
         // time restriction
         Restriction inner = Restriction.builder() //
                 .let(BusinessEntity.Transaction, TRS_TRANSACTION_DATE)//
@@ -401,6 +402,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testWindowFunction() {
+        // TODO: restriction based on Transaction (daily aggregated table) is to be deprecated.
         String accountTotalAmount = "AccountTotalAmount";
         String maxAmount = "MaxAmount";
         String caseAmount = "CaseAmount";

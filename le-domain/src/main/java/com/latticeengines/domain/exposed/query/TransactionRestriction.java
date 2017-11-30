@@ -10,9 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class TransactionRestriction extends Restriction {
 
-    @JsonProperty("productName")
-    private String productName;
-
     @JsonProperty("productId")
     private String productId;
 
@@ -31,22 +28,13 @@ public class TransactionRestriction extends Restriction {
     public TransactionRestriction() {
     }
 
-    public TransactionRestriction(String productName, String productId, TimeFilter timeFilter, boolean negate,
-            AggregationFilter spentFilter, AggregationFilter unitFilter) {
-        this.productName = productName;
+    public TransactionRestriction(String productId, TimeFilter timeFilter, boolean negate, //
+                                  AggregationFilter spentFilter, AggregationFilter unitFilter) {
         this.productId = productId;
         this.timeFilter = timeFilter;
         this.negate = negate;
         this.spentFilter = spentFilter;
         this.unitFilter = unitFilter;
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
     }
 
     public String getProductId() {

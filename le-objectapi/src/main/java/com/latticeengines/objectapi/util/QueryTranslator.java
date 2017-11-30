@@ -1,5 +1,7 @@
 package com.latticeengines.objectapi.util;
 
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +44,6 @@ import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
-
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
 
 public class QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
@@ -306,6 +306,7 @@ public class QueryTranslator {
         return optimized;
     }
 
+    // this is only used by non-event-table translations
     private Restriction translateTransactionRestriction(BusinessEntity entity, Restriction restriction, //
                                                         QueryBuilder queryBuilder) {
         Restriction translated;

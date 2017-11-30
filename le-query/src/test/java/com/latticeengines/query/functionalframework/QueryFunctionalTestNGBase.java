@@ -54,13 +54,13 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static String transactionTableName;
     protected static final String BUCKETED_NOMINAL_ATTR = "TechIndicator_AdobeCreativeSuite";
     protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr354";
-    protected static final long BUCKETED_YES_IN_CUSTOEMR = 10189;
-    protected static final long BUCKETED_NO_IN_CUSTOEMR = 15884;
-    protected static final long TOTAL_RECORDS = 105344;
+    protected static final long BUCKETED_YES_IN_CUSTOEMR = 236;
+    protected static final long BUCKETED_NO_IN_CUSTOEMR = 402;
+    protected static final long TOTAL_RECORDS = 3170;
     protected static final long BUCKETED_NULL_IN_CUSTOEMR = TOTAL_RECORDS - BUCKETED_YES_IN_CUSTOEMR
             - BUCKETED_NO_IN_CUSTOEMR;
 
-    protected static final String ATTR_ACCOUNT_NAME = "name";
+    protected static final String ATTR_ACCOUNT_NAME = "LDC_Name";
     protected static final String ATTR_ACCOUNT_WEBSITE = InterfaceName.Website.name();
     protected static final String ATTR_ACCOUNT_CITY = "LDC_City";
 
@@ -71,6 +71,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static final String ATTR_CONTACT_ID = InterfaceName.ContactId.name();
     protected static final String ATTR_CONTACT_EMAIL = InterfaceName.Email.name();
     protected static final String ATTR_TOTAL_AMOUNT = InterfaceName.TotalAmount.name();
+
     protected static final String TRS_TRANSACTION_DATE = InterfaceName.TransactionDate.name();
 
     @BeforeClass(groups = "functional")

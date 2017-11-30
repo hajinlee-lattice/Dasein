@@ -97,7 +97,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count, new Long(105163L));
+        Assert.assertEquals(count, new Long(3165L));
 
         // must have transaction
         frontEndQuery.setRestrictHasTransaction(true);
