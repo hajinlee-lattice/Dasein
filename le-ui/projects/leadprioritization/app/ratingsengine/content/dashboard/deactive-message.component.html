@@ -1,0 +1,9 @@
+<section class="rating-engine-deactivate">
+    <p>Deactivating a rating engine will prevent all of the plays which use it from launching. This rating engine is currently being used by the following plays:</p>
+    <ul class="plays-used-list">
+        <li ng-repeat="play in vm.rating.plays">{{play.displayName}}</li>
+    </ul>
+
+    <p>If you choose to deactivate it, you can activate a different model to launch the play again.</p>
+    <p>Otherwise, it's best practice to create a new play for a new rating engine.</p>
+</section>

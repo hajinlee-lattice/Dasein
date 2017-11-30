@@ -1,7 +1,7 @@
-angular.module('lp.ratingsengine.dashboard', [])
+angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.modal.window'])
 .controller('RatingsEngineDashboard', function(
-    $q, $stateParams, $state, $rootScope, StateHistory, RatingsEngineStore, RatingsEngineService, 
-    Rating, TimestampIntervalUtility, NumberUtility
+    $q, $stateParams, $state, $rootScope, $scope, StateHistory, RatingsEngineStore, RatingsEngineService, 
+    Rating, TimestampIntervalUtility, NumberUtility, ModalStore
 ) {
     var vm = this;
 
@@ -14,7 +14,47 @@ angular.module('lp.ratingsengine.dashboard', [])
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility
     });
+    vm.initModalWindow = function() {
+        vm.config = {
+            'name': "rating_engine_deactivate",
+            'type': 'sm',
+            'title': 'Deactive Rating Engine',
+            'titlelength': 100,
+            'dischargetext': 'CANCEL',
+            'dischargeaction' :'cancel',
+            'confirmtext': 'DEACTIVATE',
+            'confirmaction' : 'deactivate',
+            'icon': 'ico ico-model ico-black',
+            'showclose': false
+        };
+    
+        vm.modalCallback = function (args) {
+            if('closedForced' === args) {
+            }else if(vm.config.dischargeaction === args){
+                vm.toggleModal();
+            } else if(vm.config.confirmaction === args){
+                var modal = ModalStore.get(vm.config.name);
+                modal.waiting(true);
+                modal.disableDischargeButton(true);
+                vm.deactivateRating();
+            }
+        }
+        vm.toggleModal = function () {
+            var modal = ModalStore.get(vm.config.name);
+            if(modal){
+                modal.toggle();
+            }
+        }
+        vm.viewUrl = function () {
+            return 'app/ratingsengine/content/dashboard/deactive-message.component.html';
+        }
 
+        $scope.$on("$destroy", function() {
+            ModalStore.remove(vm.config.name);
+        });
+    }
+
+   
     vm.getBarHeight = function(label, count) {
         // find the highest bucket value and use that for total
         var max = Object.values(vm.buckets.data).reduce(function (a, b) {
@@ -28,6 +68,7 @@ angular.module('lp.ratingsengine.dashboard', [])
         if(vm.rating.coverageInfo && vm.rating.coverageInfo.bucketCoverageCounts) {
             vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
         }
+        vm.initModalWindow();
         // vm.buckets = makeGraph([
         //     {bucket: 'A', count: 0},
         //     {bucket: 'A-', count: 753},
@@ -129,18 +170,37 @@ angular.module('lp.ratingsengine.dashboard', [])
         return (status === 'ACTIVE' ? true : false);
     }
 
-    vm.status_toggle = vm.isActive(vm.rating.summary.status);
-
-    vm.toggleActive = function() {
+    vm.deactivateRating = function(){
         var newStatus = (vm.isActive(vm.rating.summary.status) ? 'INACTIVE' : 'ACTIVE'),
-            newRating = {
+        newRating = {
             id: vm.rating.summary.id,
             status: newStatus
         }
         RatingsEngineService.saveRating(newRating).then(function(data){
             vm.rating.summary = data;
             vm.status_toggle = vm.isActive(data.status);
+            vm.toggleModal();
         });
+    }
+
+    vm.status_toggle = vm.isActive(vm.rating.summary.status);
+
+    vm.toggleActive = function() {
+        var active = vm.isActive(vm.rating.summary.status);
+        if(active){
+            var modal = ModalStore.get(vm.config.name);
+            modal.toggle();
+        } else {
+            var newStatus = (vm.isActive(vm.rating.summary.status) ? 'INACTIVE' : 'ACTIVE'),
+                newRating = {
+                id: vm.rating.summary.id,
+                status: newStatus
+            }
+            RatingsEngineService.saveRating(newRating).then(function(data){
+                vm.rating.summary = data;
+                vm.status_toggle = vm.isActive(data.status);
+            });
+        }
     }
 
     vm.init();

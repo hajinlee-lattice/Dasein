@@ -410,3 +410,115 @@ Popovers
   border-left-color: #ffffff;
   bottom: -10px;
 }
+
+
+/* The Modal (background) */
+
+.le_modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.166);
+  /* Modal Content Box */
+  .modal-content {
+      font-family: 'ProximaNova-Regular', Arial, sans-serif;
+      display: flex;
+      max-height: 80vh;
+      flex-direction: column;
+      background-color: #fefefe;
+      margin: 4% auto;
+      padding: 2px;
+      border: 1px solid #888;
+      width: 50%;
+      max-height: 80vh;
+      border-radius: 5px;
+
+      border: 1px solid #999999;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      &.sm {
+          width: 30%;
+      }
+      &.md {
+          width: 60%;
+      }
+      &.lg {
+          width: 80%;
+      }
+      .modal-header {
+          height: 50px;
+          min-height: 50px;
+          display: flex;
+          flex-direction: row-reverse;
+          align-items: center;
+          /* The Close Button */
+          .close {
+              color: #aaa;
+              font-size: 28px;
+              font-weight: bold;
+              padding: 10px;
+              &:hover,
+              &:focus {
+                  color: black;
+                  text-decoration: none;
+                  cursor: pointer;
+              }
+          }
+          .title-container {
+              font-size: 20px;
+              width: 100%;
+              height: 50px;
+              display: flex;
+              align-items: center;
+              .title-icon {
+                  padding: 0px;
+                  padding-right: 10px;
+              }
+              .title {
+                margin-left: 10px;
+              }
+          }
+      }
+      .modal-body {
+          border-top: 1px solid rgba(153, 152, 152, 0.405);
+          border-bottom: 1px solid rgba(153, 152, 152, 0.405);
+          overflow: auto;
+          padding: 10px;
+          max-height: 80%;
+          padding: 0 20px 0 20px;
+
+          .modal-message{
+            display: flex;
+            font-size: 26px;
+            font-family: 'ProximaNova-Regular', Arial, sans-serif;
+
+          }
+          .modal-spinner{
+            display: flex;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+          }
+      }
+      .modal-footer {
+          display: flex;
+          flex-direction: row-reverse;
+          align-items: center;
+          justify-content: space-between;
+          padding: 20px;
+          height: 10%;
+      }
+  }
+  &.opened {
+      display: block;
+  }
+  &.closed {
+      display: none;
+  }
+}

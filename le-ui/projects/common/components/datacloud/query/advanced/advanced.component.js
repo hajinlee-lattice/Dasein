@@ -274,7 +274,7 @@ angular.module('common.datacloud.query.builder', [
 
     vm.updateCount = function() {
         vm.prevBucketCountAttr = null;
-
+        QueryStore.setPublicProperty('enableSaveSegmentButton', true);
         if (vm.mode == 'rules') {
             QueryStore.counts[vm.treeMode + 's'].loading = true;
 
