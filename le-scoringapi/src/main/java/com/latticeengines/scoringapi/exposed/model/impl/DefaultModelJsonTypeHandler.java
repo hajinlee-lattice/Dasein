@@ -62,11 +62,14 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
     private Map<String, FieldSchema> defaultFieldSchemaForMatch;
 
+    static {
+        CacheUtil.setCacheBuilderSpec(CacheBuilderSpec.parse("weakKeys,weakValues"));
+    }
+
     @PostConstruct
     private void init() {
         defaultFieldSchemaForMatch = new HashMap<>();
         populateDefaultFieldSchemas();
-        CacheUtil.setCacheBuilderSpec(CacheBuilderSpec.parse("weakKeys,weakValues"));
     }
 
     private void populateDefaultFieldSchemas() {
