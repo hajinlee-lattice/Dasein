@@ -26,4 +26,5 @@ public class ImportProperty extends BaseProperty {
     public static final String IGNORED_ROWS = "ignoredRows";
     public static final String DUPLICATE_ROWS_LIST = "duplicateRowsList";
     public static final String DUPLICATE_ROWS = "duplciateRows";
+    public static final String SKIP_UPDATE_ATTR_NAME = "skipUpdateAttrName";
 }

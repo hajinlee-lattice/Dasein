@@ -133,6 +133,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         String metadataFile = ctx.getProperty(ImportProperty.METADATAFILE, String.class);
         String contents;
+        //CDL import won't update the attribute name to interface name.
+        boolean skipUpdate = Boolean.parseBoolean(ctx.getProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, String.class));
 
         if (metadataFile != null) {
             try {
@@ -152,7 +154,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         for (Attribute attr : table.getAttributes()) {
             ModelingMetadata.AttributeMetadata attrMetadata = attrMap.get(attr.getName());
-            if (attr.getInterfaceName() != null) {
+            if (!skipUpdate && attr.getInterfaceName() != null) {
                 if (attr.getName().equals(InterfaceName.Id.name())) {
                     ctx.setProperty(ImportProperty.ID_COLUMN_NAME, attr.getInterfaceName().name());
                 }

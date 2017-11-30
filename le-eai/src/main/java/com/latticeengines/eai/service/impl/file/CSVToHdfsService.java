@@ -81,6 +81,8 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
             context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
             context.setProperty(ImportProperty.DEDUP_ENABLE, Boolean.TRUE.toString());
+            //CDL import won't update the attribute name to interface name.
+            context.setProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, Boolean.TRUE.toString());
             context.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
             if (dataFeedTask == null) {

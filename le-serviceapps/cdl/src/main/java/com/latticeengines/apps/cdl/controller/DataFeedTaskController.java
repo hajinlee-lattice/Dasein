@@ -52,7 +52,7 @@ public class DataFeedTaskController {
                     metadata);
             return ResponseDocument.successResponse(taskId);
         } catch (Exception e) {
-            log.error("Failed to create data feed task: " + e.getMessage());
+            log.error(String.format("Failed to create data feed task, exception: %s", e.toString()));
             return ResponseDocument.failedResponse(e);
         }
 
