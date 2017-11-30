@@ -10,7 +10,7 @@ public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
 
     private static final LocalDate DEFAULT_FIRST_DATE = LocalDate.of(2000, 1, 1);
 
-    private static LocalDate OVERWRITTING_NOW;
+    private static LocalDate OVERWRITING_NOW;
 
     protected LocalDate startDate;
 
@@ -33,8 +33,8 @@ public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
 
     @Override
     public int currentPeriod() {
-        if (OVERWRITTING_NOW != null) {
-            return toPeriodId(OVERWRITTING_NOW);
+        if (OVERWRITING_NOW != null) {
+            return toPeriodId(OVERWRITING_NOW);
         } else {
             return toPeriodId(LocalDate.now());
         }
@@ -48,7 +48,7 @@ public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
 
     @VisibleForTesting
     public void overwriteNow(LocalDate fakedNow) {
-        OVERWRITTING_NOW = fakedNow;
+        OVERWRITING_NOW = fakedNow;
     }
 
 }
