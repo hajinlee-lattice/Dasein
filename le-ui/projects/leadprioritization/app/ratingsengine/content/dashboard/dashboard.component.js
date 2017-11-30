@@ -187,7 +187,7 @@ angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.moda
 
     vm.toggleActive = function() {
         var active = vm.isActive(vm.rating.summary.status);
-        if(active){
+        if(active && vm.rating.plays.length > 0){
             var modal = ModalStore.get(vm.config.name);
             modal.toggle();
         } else {
