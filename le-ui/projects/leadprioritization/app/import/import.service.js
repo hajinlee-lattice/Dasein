@@ -3,7 +3,6 @@ angular.module('lp.import')
     var ImportWizardStore = this;
 
     this.init = function() {
-        
         this.csvFileName = null;
         this.fieldDocument = null;
         this.unmappedFields = null;
@@ -24,10 +23,19 @@ angular.module('lp.import')
 
         this.saveObjects = [];
 
+        this.thirdpartyidFields = {
+            fields: [],
+            map: []
+        };
+
         this.entityType = null;
     }
 
     this.init();
+
+    this.clear = function() {
+        this.init();
+    }
 
     this.wizardProgressItems = {
         "all": [
@@ -260,6 +268,17 @@ angular.module('lp.import')
 
     this.getSaveObjects = function() {
         return this.saveObjects;
+    }
+
+    this.setThirdpartyidFields = function(fields, map) {
+        this.thirdpartyidFields = {
+            fields: fields,
+            map: map
+        };
+    }
+
+    this.getThirdpartyidFields = function() {
+        return this.thirdpartyidFields;
     }
 
     var findIndexes = function(object, property, value) {

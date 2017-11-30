@@ -24,6 +24,7 @@ angular.module('lp.import.entry', [
     });
 
     vm.init = function() {
+        ImportWizardStore.clear();
         var state = $state.current.name;
         switch (state) {
             case 'home.import.entry.accounts': vm.changeEntityType('Account', 'accounts'); break;

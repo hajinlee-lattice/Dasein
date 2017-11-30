@@ -29,7 +29,7 @@ angular.module('common.wizard.progress', [
             vm.itemMap[vm.rootState + item.state.split('.').pop()] = item;
         });
 
-        console.log('Progress component', vm.itemMap);
+        //console.log('Progress component', vm.itemMap);
     }
 
     vm.click = function(state, $event) {

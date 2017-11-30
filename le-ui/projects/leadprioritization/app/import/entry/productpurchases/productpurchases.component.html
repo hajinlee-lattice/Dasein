@@ -1,4 +1,4 @@
-<p>Please provide product bundle names Lattice platform should use to aggregate your products into logical groupings you would like to use to run sales plays and marketing campaigns.  The csv file should contain one row for each product x product bundle combination.</p>
+<p>Please provide a csv file containing one row for each transaction and one column for each the required fields.</p>
 
 <a href="assets/downloads/account-example.csv" target="_self" class="download-link"><i class="fa fa-download"></i> Download a sample CSV file that has all of the required fields.</a>
 
@@ -7,31 +7,26 @@
     <table>
         <thead>
             <tr>
+                <th>Transaction_ID</th>
                 <th>Product_ID</th>
-                <th>Product_Bundle_ID</th>
-                <th>Description</th>
+                <th>Account_ID</th>
+                <th>Contact_ID</th>
+                <th>Amount</th>
+                <th>Quantity</th>
+                <th>Cost</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>001</td>
-                <td>100</td>
-                <td>office application products</td>
-            </tr>
-            <tr>
-                <td>001</td>
-                <td>200</td>
-                <td>office enterprise application products</td>
-            </tr>
-            <tr>
                 <td>002</td>
-                <td>100</td>
-                <td>office application products</td>
-            </tr>
-            <tr>
-                <td>002</td>
-                <td>300</td>
-                <td>office application premium products</td>
+                <td>003</td>
+                <td>004</td>
+                <td>$34,023</td>
+                <td>3</td>
+                <td>$12,560</td>
+                <td>01/01/2016</td>
             </tr>
         </tbody>
     </table>
