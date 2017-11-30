@@ -333,6 +333,10 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             for (int i = 0; i < modelAttribute.getAllowedDisplayNames().size(); i++) {
                 if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField)) {
                     return true;
+                }  else if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField.replace(" ", "_"))) {
+                    return true;
+                } else if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField.replace(" ", ""))) {
+                    return true;
                 }
             }
         }
