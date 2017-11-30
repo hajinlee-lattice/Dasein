@@ -2,7 +2,7 @@ package com.latticeengines.workflow.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +32,18 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s workflowjob where workflowjob.workflowId in :workflowIds",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameterList("workflowIds", workflowIds);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<WorkflowJob> findByTenant(Tenant tenant) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
@@ -39,6 +51,19 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("tenantPid", tenant.getPid());
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s workflowjob where workflowjob.tenant.pid=:tenantPid and " +
+                "workflowjob.workflowId in :workflowIds", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("tenantPid", tenant.getPid());
+        query.setParameter("workflowIds", workflowIds);
         return query.list();
     }
 

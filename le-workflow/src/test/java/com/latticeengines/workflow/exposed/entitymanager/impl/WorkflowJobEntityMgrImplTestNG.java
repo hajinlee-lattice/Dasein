@@ -2,6 +2,7 @@ package com.latticeengines.workflow.exposed.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -111,7 +112,6 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.size(), 1);
         assertEquals(workflowJobs.get(0).getApplicationId(), "application_00002");
         assertEquals(workflowJobs.get(0).getUserId(), "user2");
-
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
@@ -138,5 +138,37 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
         assertEquals(workflowJob5.getStatus(), FinalApplicationStatus.FAILED);
         assertEquals(workflowJob5.getStartTimeInMillis(), new Long(10000L));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
+    public void testFindByTenantAndWorkflowIds() {
+        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant1);
+        assertEquals(workflowJobs.size(), 2);
+
+        workflowJobs.get(0).setWorkflowId(100L);
+        workflowJobs.get(1).setWorkflowId(200L);
+        workflowJobEntityMgr.update(workflowJobs.get(0));
+        workflowJobEntityMgr.update(workflowJobs.get(1));
+        List<Long> workflowIds = new ArrayList<>();
+        workflowIds.add(100L);
+        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant1, workflowIds);
+        assertEquals(workflowJobs.size(), 1);
+
+        workflowIds.add(200L);
+        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant1, workflowIds);
+        assertEquals(workflowJobs.size(), 2);
+
+        workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
+        assertEquals(workflowJobs.size(), 2);
+
+        List<Long> nonExistWorkflowIds = new ArrayList<>();
+        nonExistWorkflowIds.add(777L);
+        nonExistWorkflowIds.add(888L);
+        nonExistWorkflowIds.add(999L);
+        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant1, nonExistWorkflowIds);
+        assertEquals(workflowJobs.size(), 0);
+        workflowJobs = workflowJobEntityMgr.findByWorkflowIds(nonExistWorkflowIds);
+        assertEquals(workflowJobs.size(), 0);
     }
 }

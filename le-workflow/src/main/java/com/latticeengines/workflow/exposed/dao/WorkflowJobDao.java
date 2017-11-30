@@ -13,7 +13,11 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     WorkflowJob findByWorkflowId(long workflowId);
 
+    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds);
+
     List<WorkflowJob> findByTenant(Tenant tenant);
+
+    List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds);
 
     void updateStatusFromYarn(WorkflowJob workflowJob, JobStatus yarnJobStatus);
 

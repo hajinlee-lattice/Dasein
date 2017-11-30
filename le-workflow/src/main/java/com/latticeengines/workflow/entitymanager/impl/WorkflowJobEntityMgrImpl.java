@@ -51,6 +51,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds) {
+        return workflowJobDao.findByWorkflowIds(workflowIds);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public WorkflowJob findByWorkflowIdWithFilter(long workflowId) {
         return workflowJobDao.findByWorkflowId(workflowId);
     }
@@ -59,6 +65,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByTenant(Tenant tenant) {
         return workflowJobDao.findByTenant(tenant);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds) {
+        return workflowJobDao.findByTenantAndWorkflowIds(tenant, workflowIds);
     }
 
     @Override
