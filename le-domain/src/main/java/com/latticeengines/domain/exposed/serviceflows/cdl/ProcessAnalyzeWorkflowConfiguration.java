@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.period.PeriodStrategy;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
