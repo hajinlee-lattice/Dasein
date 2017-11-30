@@ -198,7 +198,7 @@ angular
             url: '/targets/:segment',
             params: {
                 pageIcon: 'ico-targets',
-                pageTitle: 'Avaliable Targets',
+                pageTitle: 'Available Targets',
                 section: 'dashboard.targets'
             },
             resolve: {
@@ -280,7 +280,7 @@ angular
             url: '/accounts',
             params: {
                 pageIcon: 'ico-targets',
-                pageTitle: 'Avaliable Targets',
+                pageTitle: 'Available Targets',
                 section: 'dashboard.targets',
                 currentTargetTab: 'accounts'
             },
@@ -310,7 +310,7 @@ angular
             url: '/contacts',
             params: {
                 pageIcon: 'ico-targets',
-                pageTitle: 'Avaliable Targets',
+                pageTitle: 'Available Targets',
                 section: 'dashboard.targets',
                 currentTargetTab: 'contacts'
             },
