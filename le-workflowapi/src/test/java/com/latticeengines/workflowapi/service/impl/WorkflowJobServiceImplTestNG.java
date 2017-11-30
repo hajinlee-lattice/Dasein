@@ -202,7 +202,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertNull(workflowJobService.getStepNames(executionId));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
+    @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobs" })
     public void testUpdateParentJobId() {
         List<Long> testWorkflowIds = new ArrayList<>();
         testWorkflowIds.add(workflowIds.get(10001L));
@@ -213,11 +213,11 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         WorkflowJob workflowjob1 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(1));
         WorkflowJob workflowjob2 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(2));
         WorkflowJob workflowjob3 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(3));
-        Assert.assertNull(workflowjob0.getParentJobId());
-        Assert.assertNull(workflowjob1.getParentJobId());
-        Assert.assertNull(workflowjob2.getParentJobId());
+        Assert.assertEquals(workflowjob0.getParentJobId(), workflowIds.get(10000L));
+        Assert.assertEquals(workflowjob1.getParentJobId(), workflowIds.get(10000L));
+        Assert.assertEquals(workflowjob2.getParentJobId(), workflowIds.get(10000L));
         Assert.assertNull(workflowjob3);
-        Long parentJobId = 10000L;
+        Long parentJobId = 20000L;
         workflowJobService.updateParentJobId(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds, parentJobId);
         workflowjob0 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(0));
         workflowjob1 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(1));
