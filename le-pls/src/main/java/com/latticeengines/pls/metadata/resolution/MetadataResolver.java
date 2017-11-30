@@ -282,6 +282,10 @@ public class MetadataResolver {
             for (int i = 0; i < attribute.getAllowedDisplayNames().size(); i++) {
                 if (allowedDisplayNames.get(i).equalsIgnoreCase(header)) {
                     return true;
+                } else if (allowedDisplayNames.get(i).equalsIgnoreCase(header.replace(" ", "_"))) {
+                    return true;
+                } else if (allowedDisplayNames.get(i).equalsIgnoreCase(header.replace(" ", ""))) {
+                    return true;
                 }
             }
         }

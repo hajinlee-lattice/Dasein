@@ -1041,7 +1041,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute email = attr("Email") //
-                .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL ADDRESS")) //
+                .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL_ADDRESS")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Email) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1049,28 +1049,29 @@ public class SchemaRepository {
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .build();
         Attribute city = attr("City") //
-                .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING CITY")) //
+                .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING_CITY")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
         Attribute state = attr("State") //
-                .allowedDisplayNames(Sets.newHashSet("STATE", "STATE PROVINCE", "BILLING STATE", "BILLING PROVINCE")) //
+                .allowedDisplayNames(Sets.newHashSet("STATE", "STATE PROVINCE", "STATE_PROVINCE", "BILLING_STATE",
+                        "BILLING_PROVINCE")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
         Attribute country = attr("Country") //
-                .allowedDisplayNames(Sets.newHashSet("COUNTRY", "BILLING COUNTRY")) //
+                .allowedDisplayNames(Sets.newHashSet("COUNTRY", "BILLING_COUNTRY")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
         Attribute postalCode = attr("PostalCode") //
-                .allowedDisplayNames(Sets.newHashSet("POSTALCODE", "BILLING ZIP", "POSTAL CODE")) //
+                .allowedDisplayNames(Sets.newHashSet("POSTALCODE", "BILLING_ZIP", "POSTAL CODE", "POSTAL_CODE")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1078,7 +1079,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute contactCompanyName = attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME")) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1086,7 +1087,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute accountCompanyName = attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME", "DISPLAY NAME")) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME", "DISPLAY_NAME")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1094,7 +1095,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute phoneNumber = attr("PhoneNumber") //
-                .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE NUMBER")) //
+                .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE_NUMBER")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1102,7 +1103,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute duns = attr("DUNS") //
-                .allowedDisplayNames(Sets.newHashSet("DUNS", "DUNS NUMBER")) //
+                .allowedDisplayNames(Sets.newHashSet("DUNS", "DUNS_NUMBER")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.DUNS) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
