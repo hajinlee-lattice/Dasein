@@ -252,6 +252,42 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     @Transient
     @JsonIgnore
+    public void setTotalRows(Long totalRows) {
+        setDetailValue("TotalRows", totalRows);
+    }
+
+    @Transient
+    @JsonIgnore
+    public Long getTotalRows() {
+        return getDetailValue("TotalRows") != null ? Long.parseLong(getDetailValue("TotalRows").toString()) : null;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setIgnoredRows(Long ignoredRows) {
+        setDetailValue("IgnoredRows", ignoredRows);
+    }
+
+    @Transient
+    @JsonIgnore
+    public Long getIgnoredRows() {
+        return getDetailValue("IgnoredRows") != null ? Long.parseLong(getDetailValue("IgnoredRows").toString()) : null;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setDedupedRows(Long dedupedRows) {
+        setDetailValue("DedupedRows", dedupedRows);
+    }
+
+    @Transient
+    @JsonIgnore
+    public Long getDedupedRows() {
+        return getDetailValue("DedupedRows") != null ? Long.parseLong(getDetailValue("DedupedRows").toString()) : null;
+    }
+
+    @Transient
+    @JsonIgnore
     private void setListDetailFromString(String key, String value) {
         Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
         if (value != null) {

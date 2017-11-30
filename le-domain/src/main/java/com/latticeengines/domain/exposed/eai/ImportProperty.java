@@ -22,4 +22,8 @@ public class ImportProperty extends BaseProperty {
     public static final String EXTRACT_RECORDS_LIST = "extractRecordsList";
     public static final String DEDUP_ENABLE = "dedupEnable";
     public static final String ID_COLUMN_NAME = "idColumnName";
+    public static final String IGNORED_ROWS_LIST = "ignoredRowsList";
+    public static final String IGNORED_ROWS = "ignoredRows";
+    public static final String DUPLICATE_ROWS_LIST = "duplicateRowsList";
+    public static final String DUPLICATE_ROWS = "duplciateRows";
 }

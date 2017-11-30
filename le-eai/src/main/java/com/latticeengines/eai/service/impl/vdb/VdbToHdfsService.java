@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
@@ -57,6 +58,10 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
             importContext.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
             importContext.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
             importContext.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
+            importContext.setProperty(ImportProperty.IGNORED_ROWS, new HashMap<String, Long>());
+            importContext.setProperty(ImportProperty.IGNORED_ROWS_LIST, new HashMap<String, List<Long>>());
+            importContext.setProperty(ImportProperty.DUPLICATE_ROWS, new HashMap<String, Long>());
+            importContext.setProperty(ImportProperty.DUPLICATE_ROWS_LIST, new HashMap<String, List<Long>>());
             String collectionIdentifiers = config.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
             if (!StringUtils.isEmpty(collectionIdentifiers)) {
                 @SuppressWarnings("unchecked")
@@ -154,19 +159,38 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 Map.class);
         Map<String, List<Long>> multipleRecords = importContext.getProperty(ImportProperty.EXTRACT_RECORDS_LIST,
                 Map.class);
+        Map<String, Long> ignoredRecord = importContext.getProperty(ImportProperty.IGNORED_ROWS, Map.class);
+        Map<String, List<Long>> mutipleIgnoredRecords = importContext.getProperty(ImportProperty.IGNORED_ROWS_LIST,
+                Map.class);
+
+        Map<String, Long> duplicateRecord = importContext.getProperty(ImportProperty.DUPLICATE_ROWS, Map.class);
+        Map<String, List<Long>> mutipleDuplicatedRecords = importContext.getProperty(ImportProperty.DUPLICATE_ROWS_LIST,
+                Map.class);
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             Table table = tableMetaData.get(entry.getValue().getCollectionIdentifier());
+            Long ignoredRows = ignoredRecord.get(table.getName());
+            Long totalRows = (long) entry.getValue().getTotalRows();
+            Long duplicateRows = (long) duplicateRecord.get(table.getName());
             if (multipleExtractMap.get(table.getName())) {
                 List<String> recordList = new ArrayList<>();
                 for (Long record : multipleRecords.get(table.getName())) {
                     recordList.add(record.toString());
                 }
+                ignoredRows = 0L;
+                for (Long record : mutipleIgnoredRecords.get(table.getName())) {
+                    ignoredRows += record;
+                }
+                duplicateRows = 0L;
+                for (Long record : mutipleDuplicatedRecords.get(table.getName())) {
+                    duplicateRows += record;
+                }
                 updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
-                        multipleTargets.get(table.getName()), recordList);
+                        multipleTargets.get(table.getName()), recordList, totalRows, ignoredRows, duplicateRows);
             } else {
                 updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
                         Arrays.asList(targetPathsMap.get(table.getName())),
-                        Arrays.asList(processedRecordsMap.get(table.getName()).toString()));
+                        Arrays.asList(processedRecordsMap.get(table.getName()).toString()),
+                        totalRows, ignoredRows, duplicateRows);
             }
         }
 

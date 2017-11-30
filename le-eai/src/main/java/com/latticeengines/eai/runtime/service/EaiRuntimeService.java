@@ -72,7 +72,7 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
     }
 
     public void updateJobDetailExtractInfo(String jobIdentifier, String templateName, List<String> pathList,
-                                           List<String> processedRecords) {
+            List<String> processedRecords, Long totalRows, Long ignoredRows, Long dedupedRows) {
         EaiImportJobDetail jobDetail = eaiImportJobDetailService
                 .getImportJobDetailByCollectionIdentifier(jobIdentifier);
         if (jobDetail != null) {
@@ -84,6 +84,9 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
             jobDetail.setTemplateName(templateName);
             jobDetail.setPathDetail(pathList);
             jobDetail.setPRDetail(processedRecords);
+            jobDetail.setTotalRows(totalRows);
+            jobDetail.setIgnoredRows(ignoredRows);
+            jobDetail.setDedupedRows(dedupedRows);
             //when extract has processed records info means the import completed, waiting for register.
             jobDetail.setStatus(ImportStatus.WAITINGREGISTER);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);

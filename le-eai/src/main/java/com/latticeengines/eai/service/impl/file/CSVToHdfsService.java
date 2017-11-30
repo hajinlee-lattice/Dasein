@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -137,8 +140,12 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
 
         Map<String, String> targetPathsMap = context.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
 
+        long ignoredRecords = counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
+        long duplicatedRecords = counters.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue();
+        long totalRecords = processedRecords + ignoredRecords + duplicatedRecords;
         updateJobDetailExtractInfo(config.getJobIdentifier(), templateName,
-                Arrays.asList(targetPathsMap.get(templateName)), Arrays.asList(Long.toString(processedRecords)));
+                Arrays.asList(targetPathsMap.get(templateName)), Arrays.asList(Long.toString(processedRecords)),
+                totalRecords, ignoredRecords, duplicatedRecords);
     }
 
 

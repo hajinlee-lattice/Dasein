@@ -2,19 +2,24 @@ package com.latticeengines.eai.service.impl.vdb;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.Schema;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -41,7 +47,9 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
 import com.latticeengines.domain.exposed.pls.VdbGetQueryData;
@@ -90,6 +98,28 @@ public class VdbTableImportServiceImpl extends ImportService {
     private int recordsPerExtract;
 
     private static final int MAX_RETRIES = 3;
+
+
+    private int ignoredNumber = 0;
+    private int duplicateNumber = 0;
+
+    private Map<String, String> errorMap = new HashMap<>();
+
+    private Map<String, String> duplicateMap = new HashMap<>();
+
+    private Set<String> uniqueIds = new HashSet<>();
+
+    private CSVPrinter csvFilePrinter;
+
+    private CSVPrinter duplicateFilePrinter;
+
+    private static final String ERROR_FILE = "error.csv";
+
+    private static final String DUPLICATE_FILE = "duplicate.csv";
+
+    private String id;
+
+    private String idColumnName;
 
     @Override
     public ConnectorConfiguration generateConnectorConfiguration(String connectorConfig, ImportContext context) {
@@ -323,6 +353,10 @@ public class VdbTableImportServiceImpl extends ImportService {
                     new ArrayList<String>());
             context.getProperty(ImportProperty.EXTRACT_RECORDS_LIST, Map.class).put(table.getName(),
                     new ArrayList<Long>());
+            context.getProperty(ImportProperty.IGNORED_ROWS_LIST, Map.class).put(table.getName(),
+                    new ArrayList<Long>());
+            context.getProperty(ImportProperty.DUPLICATE_ROWS_LIST, Map.class).put(table.getName(),
+                    new ArrayList<Long>());
         } else {
             context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
         }
@@ -337,6 +371,10 @@ public class VdbTableImportServiceImpl extends ImportService {
                 .add(hdfsUri);
         List.class.cast(context.getProperty(ImportVdbProperty.EXTRACT_RECORDS_LIST, Map.class).get(table.getName()))
                 .add(processedRecords);
+        List.class.cast(context.getProperty(ImportVdbProperty.IGNORED_ROWS_LIST, Map.class).get(table.getName()))
+                .add(new Long(ignoredNumber));
+        List.class.cast(context.getProperty(ImportVdbProperty.DUPLICATE_ROWS_LIST, Map.class).get(table.getName()))
+                .add(new Long(duplicateNumber));
     }
 
     @SuppressWarnings("unchecked")
@@ -349,6 +387,7 @@ public class VdbTableImportServiceImpl extends ImportService {
         } else {
             throw new LedpException(LedpCode.LEDP_17010);
         }
+
         CustomerSpace customerSpace = CustomerSpace.parse(context.getProperty(ImportProperty.CUSTOMER, String.class));
         List<Table> tables = extractionConfig.getTables();
         for (Table table : tables) {
@@ -357,8 +396,23 @@ public class VdbTableImportServiceImpl extends ImportService {
             if (importVdbTableConfiguration == null) {
                 continue;
             }
+
+            try {
+                csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
+                        LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+                duplicateFilePrinter = new CSVPrinter(new FileWriter(DUPLICATE_FILE),
+                        LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+            } catch (IOException e1) {
+                log.error("I/O exception, error message is " + e1.getMessage());
+            }
+
             long startTime = System.currentTimeMillis();
             int extractRecords = 0;
+            ignoredNumber = 0;
+            Attribute keyAttr = table.getAttribute(InterfaceName.Id.toString());
+            if (keyAttr != null) {
+                idColumnName = keyAttr.getName();
+            }
             try {
                 String queryDataUrl = vdbConnectorConfiguration.getGetQueryDataEndpoint();
                 String statusUrl = vdbConnectorConfiguration.getReportStatusEndpoint();
@@ -395,6 +449,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     fileIndex = getFileIndex(avroFileName, targetPath, yarnConfiguration);
                 }
                 int startRow = processedLines;
+
                 VdbValueConverter vdbValueConverter = new VdbValueConverter();
 
                 DataContainer dataContainer = new DataContainer(vdbValueConverter, table);
@@ -437,7 +492,8 @@ public class VdbTableImportServiceImpl extends ImportService {
                             if (vdbQueryDataResult == null) {
                                 break;
                             }
-                            int rowsAppend = appendGenericRecord(attributeMap, dataContainer, vdbQueryDataResult);
+                            int rowsAppend = appendGenericRecord(attributeMap, dataContainer,
+                                    vdbQueryDataResult, startRow);
                             if (rowsAppend != rowsToGet) {
                                 log.warn(String.format("Row batch is %d, but only %d rows append to avro.", rowsToGet,
                                         rowsAppend));
@@ -472,9 +528,12 @@ public class VdbTableImportServiceImpl extends ImportService {
                                 if ((extractRecords + rowsToGet) > recordsPerExtract) {
                                     if (needMultipleExtracts) {
                                         updateExtractContext(table, context, targetPath, new Long(extractRecords));
+                                        generateCSVFile(yarnConfiguration, targetPath, true);
                                         fileIndex = 0;
                                         targetPath = generateNewTargetPath(customerSpace, yarnConfiguration);
                                         extractRecords = 0;
+                                        ignoredNumber = 0;
+                                        duplicateNumber = 0;
                                     }
                                 }
                             }
@@ -500,6 +559,10 @@ public class VdbTableImportServiceImpl extends ImportService {
                 if (!error) {
                     context.getProperty(ImportVdbProperty.PROCESSED_RECORDS, Map.class).put(table.getName(),
                             new Long(totalRows));
+                    context.getProperty(ImportVdbProperty.IGNORED_ROWS, Map.class).put(table.getName(),
+                            new Long(ignoredNumber));
+                    context.getProperty(ImportVdbProperty.DUPLICATE_ROWS, Map.class).put(table.getName(),
+                            new Long(duplicateNumber));
                     String fileName = generateAvroFileName(avroFileName, fileIndex);
                     boolean fileCopy = copyToHdfs(dataContainer, targetPath + "/" + fileName, yarnConfiguration);
                     fileIndex++;
@@ -511,6 +574,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
                     log.info(String.format("Total load data from DL takes %d ms",
                             System.currentTimeMillis() - startTime));
+                    generateCSVFile(yarnConfiguration, targetPath, false);
                 } else {
                     reportStatus(statusUrl, vdbLoadTableStatus);
                     throw new LedpException(LedpCode.LEDP_17015, new String[] { vdbLoadTableStatus.getMessage() });
@@ -535,20 +599,31 @@ public class VdbTableImportServiceImpl extends ImportService {
     }
 
     private int appendGenericRecord(HashMap<String, Attribute> attributeMap, DataContainer dataContainer,
-            VdbQueryDataResult vdbQueryDataResult) {
+            VdbQueryDataResult vdbQueryDataResult, int startRow) {
         int rowSize = vdbQueryDataResult.getColumns().get(0).getValues().size();
         int rowsAppend = 0;
         for (int i = 0; i < rowSize; i++) {
-            if (validateRecord(attributeMap, vdbQueryDataResult, i)) {
-                dataContainer.newRecord();
-                for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
-                    if (attributeMap.containsKey(column.getColumnName())) {
-                        Attribute attr = attributeMap.get(column.getColumnName());
-                        dataContainer.setValueForAttribute(attr, column.getValues().get(i));
+            try {
+                id = null;
+                if (validateRecord(attributeMap, vdbQueryDataResult, i)) {
+                    dataContainer.newRecord();
+                    for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
+                        if (attributeMap.containsKey(column.getColumnName())) {
+                            Attribute attr = attributeMap.get(column.getColumnName());
+                            dataContainer.setValueForAttribute(attr, column.getValues().get(i));
+                        }
                     }
                 }
-                dataContainer.endRecord();
-                rowsAppend++;
+                if (errorMap.size() == 0 && duplicateMap.size() == 0) {
+                    dataContainer.endRecord();
+                    rowsAppend++;
+                } else if (errorMap.size() > 0) {
+                    handleError(i + startRow);
+                } else if (duplicateMap.size() > 0) {
+                    handleDuplicate(i + startRow);
+                }
+            } catch (Exception e) {
+                log.error("I/O Exception when creating csv file!");
             }
         }
         return rowsAppend;
@@ -569,7 +644,20 @@ public class VdbTableImportServiceImpl extends ImportService {
                             String record = getVdbRecord(vdbQueryDataResult, index);
                             log.error(String.format("Missing required field: %s. Record values: %s",
                                     attributeMap.get(column.getColumnName()).getName(), record));
+
+                            errorMap.put(column.getColumnName(),
+                                    String.format("Missing required field: %s. Record values: %s",
+                                            attributeMap.get(column.getColumnName()).getName(), record));
                             break;
+                        }
+                    } else if (idColumnName.equals(attributeMap.get(column.getColumnName()).getName())) {
+                        id = column.getValues().get(index);
+                        if (uniqueIds.contains(id)) {
+                            result = false;
+                            duplicateMap.put(column.getColumnName(), String.format("The id %s is duplicated.", id));
+                            break;
+                        } else {
+                            uniqueIds.add(id);
                         }
                     }
                 }
@@ -645,6 +733,49 @@ public class VdbTableImportServiceImpl extends ImportService {
         } catch (IOException e) {
             log.error("Cannot get files from extract folder!");
             return 0;
+        }
+    }
+
+    private void handleError(long lineNumber) throws IOException {
+        ignoredNumber++;
+
+        id = id != null ? id : "";
+        csvFilePrinter.printRecord(lineNumber, id, errorMap.values().toString());
+        csvFilePrinter.flush();
+
+        errorMap.clear();
+    }
+
+    private void handleDuplicate(long lineNumber) throws IOException {
+        duplicateNumber++;
+
+        id = id != null ? id : "";
+        duplicateFilePrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
+        duplicateFilePrinter.flush();
+
+        duplicateMap.clear();
+    }
+
+    private void generateCSVFile(Configuration yarnConfiguration, String targetPath, boolean createPrinter) {
+        try {
+            csvFilePrinter.close();
+            if (ignoredNumber != 0) {
+                HdfsUtils.copyLocalToHdfs(yarnConfiguration, ERROR_FILE, targetPath + "/" + ERROR_FILE);
+            }
+
+            duplicateFilePrinter.close();
+            if (duplicateNumber != 0) {
+                HdfsUtils.copyLocalToHdfs(yarnConfiguration, DUPLICATE_FILE, targetPath + "/" + DUPLICATE_FILE);
+            }
+            if (createPrinter) {
+                csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
+                        LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+
+                duplicateFilePrinter = new CSVPrinter(new FileWriter(DUPLICATE_FILE),
+                        LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
+            }
+        } catch (IOException e) {
+            log.error("I/O exception, error message is " + e.getMessage());
         }
     }
 }
