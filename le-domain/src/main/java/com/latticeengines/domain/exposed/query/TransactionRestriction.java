@@ -13,6 +13,9 @@ public class TransactionRestriction extends Restriction {
     @JsonProperty("productId")
     private String productId;
 
+    @JsonProperty("targetProductId")
+    private String targetProductId;
+
     @JsonProperty("timeFilter")
     private TimeFilter timeFilter;
 
@@ -45,6 +48,14 @@ public class TransactionRestriction extends Restriction {
         this.productId = productId;
     }
 
+    public String getTargetProductId() {
+        return targetProductId;
+    }
+
+    public void setTargetProductId(String targetProductId) {
+        this.targetProductId = targetProductId;
+    }
+
     public TimeFilter getTimeFilter() {
         return timeFilter;
     }
@@ -66,6 +77,10 @@ public class TransactionRestriction extends Restriction {
     }
 
     public void setSpentFilter(AggregationFilter spentFilter) {
+        if (spentFilter != null && AggregationSelector.SPENT != spentFilter.getSelector()) {
+            throw new IllegalArgumentException("Invalid aggregation selector for spent filter. Valid type should be " +
+                                               AggregationSelector.SPENT);
+        }
         this.spentFilter = spentFilter;
     }
 
@@ -74,7 +89,10 @@ public class TransactionRestriction extends Restriction {
     }
 
     public void setUnitFilter(AggregationFilter unitFilter) {
+        if (unitFilter != null && AggregationSelector.UNIT != unitFilter.getSelector()) {
+            throw new IllegalArgumentException("Invalid aggregation selector for unit filter. Valid type should be " +
+                                               AggregationSelector.UNIT);
+        }
         this.unitFilter = unitFilter;
     }
-
 }

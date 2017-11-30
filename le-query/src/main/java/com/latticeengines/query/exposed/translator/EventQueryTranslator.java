@@ -212,11 +212,20 @@ public class EventQueryTranslator {
             break;
         case AT_LEAST_ONCE:
         case EACH:
-            aggrPredicate = aggr.eq(String.valueOf(1));
+            aggrPredicate = toBooleanExpression(aggr, cmp, values);
+            //aggrPredicate = aggr.eq(String.valueOf(1));
             break;
         }
 
         return aggrPredicate;
+    }
+
+    private boolean isNotLessThanOperation(ComparisonType cmp) {
+        if (ComparisonType.LESS_THAN != cmp && ComparisonType.LESS_OR_EQUAL != cmp) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -232,24 +241,30 @@ public class EventQueryTranslator {
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
         List<Object> values = aggregationFilter.getValues();
+        boolean isNotLessComparison = isNotLessThanOperation(cmp);
+        BooleanExpression isNull = trxnVal.isNull();
 
         WindowFunction windowAgg = null;
         switch (aggregateType) {
         case SUM:
-            windowAgg = SQLExpressions.sum(trxnValNumber).over();
+            windowAgg = SQLExpressions.sum(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
             break;
         case AVG:
             windowAgg = SQLExpressions.avg(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
             break;
         case AT_LEAST_ONCE:
-            BooleanExpression condition = toBooleanExpression(trxnVal, cmp, values);
-            NumberExpression trxnValExists = new CaseBuilder().when(condition).then(1).otherwise(0);
-            windowAgg = SQLExpressions.max(trxnValExists).over();
+            if (isNotLessComparison) {
+                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            } else {
+                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            }
             break;
         case EACH:
-            BooleanExpression each = toBooleanExpression(trxnVal, cmp, values);
-            NumberExpression trxnValExistsOrNull = new CaseBuilder().when(each).then(1).otherwise(0);
-            windowAgg = SQLExpressions.min(trxnValExistsOrNull).over();
+            if (isNotLessComparison) {
+                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            } else {
+                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            }
             break;
         }
 
@@ -454,12 +469,19 @@ public class EventQueryTranslator {
                                                original.getTimeFilter().getPeriod(),
                                                Collections.singletonList(ONE_LEG_BEHIND_OFFSET));
 
-        TransactionRestriction oneLegBehind = new TransactionRestriction( //
-                original.getProductId(), //
-                timeFilter, //
-                false, //
-                null, //
-                null);
+        String targetProductId = original.getTargetProductId() == null
+                ? original.getProductId()
+                : original.getTargetProductId();
+
+        if (StringUtils.isEmpty(targetProductId)) {
+            throw new RuntimeException("Invalid transaction restriction, no target product specified");
+        }
+
+        TransactionRestriction oneLegBehind = new TransactionRestriction(targetProductId, //
+                                                                         timeFilter, //
+                                                                         false, //
+                                                                         null, //
+                                                                         null);
         return oneLegBehind;
     }
 
@@ -480,6 +502,9 @@ public class EventQueryTranslator {
                                                      AttributeRepository repository,
                                                      TransactionRestriction txRestriction,
                                                      boolean isScoring) {
+        if (StringUtils.isEmpty(txRestriction.getProductId())) {
+            throw new RuntimeException("Invalid transaction restriction, no product specified");
+        }
         SQLQuery subQueryExpression = translateTransaction(queryFactory, repository, txRestriction, isScoring);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
@@ -573,13 +598,13 @@ public class EventQueryTranslator {
                                               AttributeRepository repository,
                                               Restriction restriction,
                                               boolean isScoring,
-                                              boolean checkNextPeriod,
+                                              boolean isEvent,
                                               QueryBuilder builder) {
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
 
-        AtomicReference<String> periodRef = new AtomicReference<>(null);
+        AtomicReference<String> periodRef = new AtomicReference<>(TimeFilter.Period.Month.name());
 
         // set transaction entity
         if (rootRestriction instanceof LogicalRestriction) {
@@ -599,7 +624,7 @@ public class EventQueryTranslator {
         builder.with(translateAllKeys(queryFactory, repository, period));
 
         // combine one leg behind restriction for event query, this is not needed for scoring and training
-        if (!isScoring && checkNextPeriod) {
+        if (isEvent) {
             if (rootRestriction instanceof LogicalRestriction) {
                 BreadthFirstSearch bfs = new BreadthFirstSearch();
                 bfs.run(rootRestriction, (object, ctx) -> {
@@ -649,7 +674,8 @@ public class EventQueryTranslator {
                     subQueryTableMap.put(logicalRestriction, new ArrayList<>());
                 } else if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
-                    SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, isScoring);
+                    SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction,
+                                                                        isScoring);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     List<String> childSubQueryList = subQueryTableMap.get(parent);
@@ -667,7 +693,8 @@ public class EventQueryTranslator {
             });
         } else if (rootRestriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
-            SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, isScoring);
+            SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, isScoring
+            );
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
             SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
