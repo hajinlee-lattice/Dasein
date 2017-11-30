@@ -10,6 +10,7 @@ import com.latticeengines.cdl.workflow.steps.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.FinishProfile;
 import com.latticeengines.cdl.workflow.steps.StartProcessing;
 import com.latticeengines.cdl.workflow.steps.UpdateStatsObjects;
+import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
