@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.listeners.ProfileAndPublishListener;
+import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
 import com.latticeengines.cdl.workflow.steps.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.FinishProfile;
 import com.latticeengines.cdl.workflow.steps.StartProcessing;
@@ -46,7 +46,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private AwsApsGeneratorStep apsGenerator;
 
     @Inject
-    private ProfileAndPublishListener profileAndPublishListener;
+    private ProcessAnalyzeListener processAnalyzeListener;
 
     @Override
     public Workflow defineWorkflow() {
@@ -62,7 +62,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(updateStatsObjects) //
                 .next(redshiftPublishWorkflow) //
                 .next(finishProfile) //
-                .listener(profileAndPublishListener) //
+                .listener(processAnalyzeListener) //
                 .build();
     }
 
