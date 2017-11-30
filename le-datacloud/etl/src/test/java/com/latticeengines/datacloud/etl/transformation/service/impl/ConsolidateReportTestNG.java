@@ -94,6 +94,7 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
         TransformationStepConfig step1 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
         baseSources.add(contact.getSourceName());
+        baseSources.add(account.getSourceName());
         step1.setBaseSources(baseSources);
         step1.setTransformer(ConsolidateReportFlow.TRANSFORMER_NAME);
         step1.setTargetSource(contactReport.getSourceName());
@@ -140,16 +141,16 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
     private void prepareAccount() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(InterfaceName.LatticeAccountId.name(), String.class));
+        schema.add(Pair.of(InterfaceName.Id.name(), String.class));
         schema.add(Pair.of(InterfaceName.CDLCreatedTime.name(), Long.class));
 
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         Object[][] accountData;
         try {
-            accountData = new Object[][] {
-                    { "123", ((Date) formatter.parse("2017-11-10")).getTime() }, //
-                    { "456", ((Date) formatter.parse("2017-10-08")).getTime() }, //
-                    { "789", null }, //
-                    { null, ((Date) formatter.parse("2017-11-11")).getTime() }, //
+            accountData = new Object[][] { { "123", "1", ((Date) formatter.parse("2017-11-10")).getTime() }, //
+                    { "456", "2", ((Date) formatter.parse("2017-10-08")).getTime() }, //
+                    { "789", "4", null }, //
+                    { null, "5", ((Date) formatter.parse("2017-11-11")).getTime() }, //
             };
         } catch (ParseException e) {
             throw new RuntimeException("Fail to prepare account data", e);
@@ -160,14 +161,16 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
 
     private void prepareContact() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of(InterfaceName.ContactId.name(), String.class));
+        schema.add(Pair.of(InterfaceName.Id.name(), String.class));
+        schema.add(Pair.of(InterfaceName.AccountId.name(), String.class));
         schema.add(Pair.of(InterfaceName.CDLCreatedTime.name(), Long.class));
 
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         Object[][] contactData;
         try {
-            contactData = new Object[][] { { "123", ((Date) formatter.parse("2017-10-08")).getTime() }, //
-                    { "456", null }, //
+            contactData = new Object[][] { { "123", "5", ((Date) formatter.parse("2017-10-08")).getTime() }, //
+                    { "456", null, null }, //
+                    { null, "6", null }
             };
         } catch (ParseException e) {
             throw new RuntimeException("Fail to prepare contact data", e);
@@ -240,15 +243,16 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
     }
 
     private void verifyContactReport(Iterator<GenericRecord> records) {
-        String accountReportStr = records.next().get(InterfaceName.ConsolidateReport.name()).toString();
+        String contactReportStr = records.next().get(InterfaceName.ConsolidateReport.name()).toString();
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            JsonNode node = om.readTree(accountReportStr);
+            JsonNode node = om.readTree(contactReportStr);
             JsonNode report = node.get(BusinessEntity.Contact.name());
             Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_NEW).asInt(), 0);
-            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UPDATE).asInt(), 2);
+            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UPDATE).asInt(), 3);
+            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_MATCH).asInt(), 1);
         } catch (IOException e) {
-            throw new RuntimeException("Fail to read parse report: " + accountReportStr);
+            throw new RuntimeException("Fail to read parse report: " + contactReportStr);
         }
     }
 

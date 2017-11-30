@@ -49,6 +49,10 @@ public class ConsolidateReportFlow
             newReport = reportNew(source, parameters);
             updateReport = reportUpdate(totalReport, newReport);
             reports.addAll(Arrays.asList(newReport, updateReport));
+            if (parameters.getBaseTables().size() > 1) {
+                matchReport = reportMatchAccount(source, addSource(parameters.getBaseTables().get(1)));
+                reports.add(matchReport);
+            }
             break;
         case Product:
             totalReport = reportTotal(source);
@@ -65,6 +69,15 @@ public class ConsolidateReportFlow
                     parameters.getEntity() + " is not supported in ConsolidateReportFlow yet");
         }
         return merge(reports);
+    }
+
+    private Node reportMatchAccount(Node node, Node accountSource) {
+        node = node.filter(String.format("%s != null", InterfaceName.AccountId.name()),
+                new FieldList(InterfaceName.AccountId.name()));
+        node = node.innerJoin(InterfaceName.AccountId.name(), accountSource, InterfaceName.Id.name());
+        node = node.count("__MATCH_COUNT__").rename(new FieldList("__MATCH_COUNT__"), new FieldList(REPORT_CONTENT))
+                .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_MATCH, String.class).renamePipe("MatchReport");
+        return node;
     }
 
     private Node reportTotal(Node node) {
@@ -89,8 +102,7 @@ public class ConsolidateReportFlow
         newReport = newReport.rename(new FieldList(REPORT_CONTENT), new FieldList("NewCount")).retain("NewCount");
         Node updateReport = totalReport.combine(newReport)
                 .apply(String.format("%s - (%s == null ? Long.valueOf(0) : %s)", "TotalCount", "NewCount", "NewCount"),
-                        new FieldList("TotalCount", "NewCount"),
-                        new FieldMetadata(REPORT_CONTENT, Long.class))
+                        new FieldList("TotalCount", "NewCount"), new FieldMetadata(REPORT_CONTENT, Long.class))
                 .retain(REPORT_CONTENT).addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_UPDATE, String.class)
                 .renamePipe("UpdateReport");
         return updateReport;
@@ -116,7 +128,7 @@ public class ConsolidateReportFlow
     }
 
     private Node formatContent(Node node) {
-        return node.apply(String.format("String.valueOf(%s)", REPORT_CONTENT),
-                new FieldList(REPORT_CONTENT), new FieldMetadata(REPORT_CONTENT, String.class));
+        return node.apply(String.format("String.valueOf(%s)", REPORT_CONTENT), new FieldList(REPORT_CONTENT),
+                new FieldMetadata(REPORT_CONTENT, String.class));
     }
 }

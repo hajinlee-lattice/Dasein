@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateReportConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
@@ -59,7 +60,8 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Table activeMasterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedContact);
+        Table activeMasterTable = dataCollectionProxy.getTable(customerSpace,
+                TableRoleInCollection.ConsolidatedContact);
         if (activeMasterTable == null) {
             throw new IllegalStateException("Cannot find the master table in default collection");
         }
@@ -105,13 +107,15 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
             TransformationStepConfig calc = calcStats(customerSpace, STATS_TABLE_PREFIX);
             TransformationStepConfig sort = sort(customerSpace);
             TransformationStepConfig sortProfile = sortProfile(customerSpace, PROFILE_TABLE_PREFIX);
+            TransformationStepConfig report = report(customerSpace, PROFILE_TABLE_PREFIX);
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
                     profile, //
                     bucket, //
                     calc, //
                     sort, //
-                    sortProfile //
+                    sortProfile, //
+                    report //
             );
             // -----------
             request.setSteps(steps);
@@ -119,6 +123,39 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private TransformationStepConfig report(CustomerSpace customerSpace, String profileTablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(profileStep);
+        step.setInputSteps(inputSteps);
+
+        String tableSourceName = "CustomerUniverse";
+
+        Table accountMasterTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                TableRoleInCollection.ConsolidatedAccount);
+        SourceTable sourceTable = new SourceTable(accountMasterTable.getName(), customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
+
+        step.setTransformer("ConsolidateReporter");
+        ConsolidateReportConfig config = new ConsolidateReportConfig();
+        config.setEntity(getEntity());
+        String configStr = appendEngineConf(config, lightEngineConfig());
+        step.setConfiguration(configStr);
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(getReportTablePrefix());
+        step.setTargetTable(targetTable);
+
+        return step;
+    }
+
+    private String getReportTablePrefix() {
+        return getEntity().name() + "ReportTablePrefix";
     }
 
     private TransformationStepConfig profile(CustomerSpace customerSpace, String sourceTableName) {
