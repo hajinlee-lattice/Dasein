@@ -10,11 +10,12 @@
                         <span class="recent-link">{{$ctrl.login.username}}</span>
                     </li>
                     <li class="label">
+                        password
                         <span 
                             ui-sref="login.update" 
                             ng-if="$ctrl.state.current.name != 'login.update'" 
-                            class="default">[change]</span>
-                        password
+                            class="default fa fa-edit"
+                            title="Change your password"></span>
                     </li>
                     <li class="value" ng-if="$ctrl.login.alreadyExpired && $ctrl.login.expireDays > 0">
                         <span class="recent-link">expired {{$ctrl.login.expireDays}} days ago</span>
@@ -29,11 +30,12 @@
                         <span class="recent-link">expires in {{$ctrl.login.expireDays}} days</span>
                     </li>
                     <li class="label" ng-if="$ctrl.login.tenant">
+                        current tenant
                         <span 
                             ui-sref="login.tenants" 
                             ng-if="$ctrl.state.current.name != 'login.tenants'" 
-                            class="default">[change]</span>
-                        current tenant
+                            class="default fa fa-edit"
+                            title="Change your tenant"></span>
                     </li>
 
                     <li class="value" ng-if="$ctrl.login.tenant">
@@ -44,10 +46,11 @@
                     
                     <span ng-if="$ctrl.getHistory($ctrl.login.username).length > 0">
                         <li class="label">
+                            recent tenants
                             <span 
                                 ng-click="$ctrl.clearHistory($ctrl.login.username)" 
-                                class="default">[clear]</span>
-                            recent tenants
+                                class="default fa fa-trash"
+                                title="Delete recent tenants history"></span>
                         </li>
                         
                         <li class="value">

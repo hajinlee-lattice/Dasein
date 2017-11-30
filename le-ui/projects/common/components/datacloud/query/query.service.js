@@ -8,7 +8,6 @@ angular.module('common.datacloud.query.service',[
     this.segment = null;
 
     // for Adanced Query Builder
-    this.addBucketTreeRoot = null;
     this.history = [];
 
     this.validContexts = ['accounts', 'contacts'];
@@ -231,7 +230,11 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setAddBucketTreeRoot = function(tree) {
-        this.addBucketTreeRoot = tree;
+        if (tree === null) {
+            delete this.addBucketTreeRoot;
+        } else {
+            this.addBucketTreeRoot = tree;
+        }
     }
 
     this.getAddBucketTreeRoot = function(tree) {
@@ -474,15 +477,18 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.getDataCloudAttributes = function(ignoreCache) {
-        //if (ignoreCache) {
-            var restrictions = [];
+        var treeRoot = QueryStore.getAddBucketTreeRoot();
+        var restrictions = [];
+
+        if (treeRoot) {
+            this.getAllBuckets(treeRoot.logicalRestriction.restrictions, restrictions);
+        } else {
             var ar = QueryStore.getAccountRestriction();
             var cr = QueryStore.getContactRestriction();
 
             this.getAllBuckets(ar.restriction.logicalRestriction.restrictions, restrictions);
             this.getAllBuckets(cr.restriction.logicalRestriction.restrictions, restrictions);
-
-        //}
+        }
 
         return restrictions;
     }

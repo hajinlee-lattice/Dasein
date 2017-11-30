@@ -90,6 +90,8 @@ angular.module('common.datacloud.query.builder', [
                 console.log('[AQB] Cube:', vm.cube);
             }, 1);
         });
+
+        QueryStore.setAddBucketTreeRoot(null);
     }
 
     vm.initCoverageMap = function(map) {
@@ -409,14 +411,12 @@ angular.module('common.datacloud.query.builder', [
     vm.compareTree = function(old, current) {
         // remove AQB properties like labelGlyph/collapse
         SegmentStore.sanitizeSegmentRestriction(old);
-        SegmentStore.sanitizeSegmentRestriction(current);
+        SegmentStore.sanitizeSegmentRestriction(angular.copy(current));
 
         return (JSON.stringify(old) === JSON.stringify(current));
     }
 
     vm.checkDisableSave = function() {
-        return false;
-
         // FIXME: this stuff is disabled for now
         if (!QueryStore.currentSavedTree || !vm.tree) {
             return true;
@@ -430,7 +430,7 @@ angular.module('common.datacloud.query.builder', [
 
     vm.goAttributes = function() {
         if (vm.mode == 'rules') {
-            var state = 'home.ratingsengine.wizard.segment.attributes';
+            var state = 'home.ratingsengine.wizard.segment.attributes.add';
         } else {
             var state = vm.inModel
                     ? 'home.model.analysis.explorer.attributes'

@@ -1,6 +1,8 @@
 angular.module('lp.ratingsengine.dashboard', [])
-.controller('RatingsEngineDashboard', function($q, $stateParams, $state, $rootScope,
-    RatingsEngineStore, RatingsEngineService, Rating, TimestampIntervalUtility, NumberUtility) {
+.controller('RatingsEngineDashboard', function(
+    $q, $stateParams, $state, $rootScope, StateHistory, RatingsEngineStore, RatingsEngineService, 
+    Rating, TimestampIntervalUtility, NumberUtility
+) {
     var vm = this;
 
     angular.extend(vm, {
@@ -8,6 +10,7 @@ angular.module('lp.ratingsengine.dashboard', [])
         hasRules: RatingsEngineStore.hasRules(Rating.summary),
         editable: true,
         editing: {},
+        StateHistory: StateHistory,
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility
     });

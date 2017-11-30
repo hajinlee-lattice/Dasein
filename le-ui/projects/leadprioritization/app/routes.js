@@ -1,25 +1,45 @@
 angular
 .module('mainApp')
-.service('StateChangeService', function() {
+.service('StateHistory', function() {
     this.states = {
-        fromStates: [],
-        fromStatesParams: [],
-        toStates: [],
-        toStatesParams: []
+        from: [],
+        fromParams: [],
+        to: [],
+        toParams: []
     };
 
-    this.getToState = function() {
-        return this.states.toStates[this.states.toStates.length - 1];
+    this.lastTo = function() {
+        return this.states.to[this.states.to.length - 1];
+    }
+
+    this.lastFrom = function() {
+        return this.states.from[this.states.from.length - 1];
+    }
+
+    this.isTo = function(name) {
+        return this.lastTo().name == name;
+    }
+
+    this.isFrom = function(name) {
+        return this.lastFrom().name == name;
+    }
+
+    this.setTo = function(state, params) {
+        this.states.to.push(state);
+        this.states.toParams.push(params);
+    }
+
+    this.setFrom = function(state, params) {
+        this.states.from.push(state);
+        this.states.fromParams.push(params);
     }
 })
-.run(function($rootScope, $state, ServiceErrorUtility, LookupStore, StateChangeService) {
+.run(function($rootScope, $state, ServiceErrorUtility, LookupStore, StateHistory) {
     var self = this;
 
-    $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
-        StateChangeService.states.toStates.push(toState);
-        StateChangeService.states.toStatesParams.push(params);
-        StateChangeService.states.fromStates.push(fromState);
-        StateChangeService.states.fromStatesParams.push(fromParams);
+    $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
+        StateHistory.setTo(toState, toParams);
+        StateHistory.setFrom(fromState, fromParams);
 
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
@@ -28,8 +48,8 @@ angular
         }
 
         var views = toState.views || {},
-            params = toState.params,
-            LoadingText = params ? (params.LoadingText || '') : '',
+            toParams = toState.toParams,
+            LoadingText = toParams ? (toParams.LoadingText || '') : '',
             split, view, hasMain = false;
 
         for (view in views) {
@@ -40,19 +60,19 @@ angular
             }
         }
 
-        if (hasMain && params && params.LoadingSpinner !== false) {
+        if (hasMain && toParams && toParams.LoadingSpinner !== false) {
             ShowSpinner(LoadingText);
         }
 
         if (toState.redirectTo) {
             event.preventDefault();
-            $state.go(toState.redirectTo, params);
+            $state.go(toState.redirectTo, toParams);
         }
 
         ServiceErrorUtility.hideBanner();
     });
 
-    $rootScope.$on('$stateChangeSuccess', function(event, toState, params, fromState, fromParams) {
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
         var from = fromState.name;
         var to = toState.name;
 

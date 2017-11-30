@@ -2,8 +2,31 @@
 <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
      ng-class="{'active': enrichment.IsSelected}">
     <span>
-        <span class="attribute-count background-color" ng-if="(totalcount = vm.getAttributeRules(enrichment).length) > 0">
-            <strong>{{ totalcount }}</strong>
+        <span class="attribute-count background-color show-tooltip delay bottom left" ng-if="(totalcount = vm.getAttributeRules(enrichment)).length > 0">
+            <strong>{{ totalcount.length }}</strong>
+
+            <div class="tooltip_">
+                <div class="cover" ng-if="totalcount.length == 1">
+                    <h3>Attribute Selected</h3>
+                    <p>This attribute has been used already and can be used again in another query condition. Go to Refine Query to make changes.</p>
+                    <em>Query Snippet:</em>
+                    <ul>
+                        <li ng-repeat="rule in totalcount">{{enrichment.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
+                    </ul>
+                </div>
+                <div class="cover" ng-if="totalcount.length >= 2">
+                    <h3>Multiple Uses</h3>
+                    <p>This attribute has been used more than once.<br>Go to Refine Query to make changes.</p>
+                    <em>Query Snippets:</em>
+                    <ul>
+                        <li ng-repeat="rule in totalcount | limitTo: 3">{{enrichment.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
+                        <li ng-if="totalcount.length == 4">{{enrichment.DisplayName}} is {{totalcount[3].bucketRestriction.bkt.Lbl}}</li>
+                        <li ng-if="totalcount.length > 4">
+                            And {{totalcount.length - 3}} other instances
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </span>
 
         <attribute-feedback-button 
@@ -62,13 +85,21 @@
             
             <ul class="attribute-stats">
                 <li ng-repeat="stat in vm.cube.data.Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
-                    class="attribute attribute-stat"
+                    class="attribute attribute-stat delay top"
                     ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
-                                'disabled-grayout': vm.section == 'segment.analysis' && (statcount = vm.getAttributeRules(enrichment, stat).length) == 0
+                                'disabled-grayout': vm.section == 'segment.analysis' && (statcount = vm.getAttributeRules(enrichment, stat).length) == 0,
+                                'show-tooltip': vm.section == 'segment.analysis'
                               }"
                     ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))"
                     ng-init="highest = vm.getHighestStat(vm.cube.data.Stats[enrichment.ColumnId].Bkts.List)">
+                    <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && statcount == 0">
+                        <div class="cover">
+                            <h3>Select Attribute</h3>
+                            <p>Match accounts that have this condition. By default this is an AND condition with other selections. Go to Refine Query to make changes and use advanced query language</p>
+                            <em>Click to select this attribute</em>
+                        </div>
+                    </div>
                     <ul class="graph">
                         <li class="label column checkspace show-tooltip delay top left" title="{{stat.Lbl}}">
                             <!--input  type="checkbox"

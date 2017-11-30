@@ -7,7 +7,7 @@ angular
 ])
 .controller('SidebarRootController', function(
     $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, 
-    DataCloudStore, StateChangeService
+    DataCloudStore, StateHistory
 ) {
     var vm = this;
 
@@ -84,7 +84,7 @@ angular
     }
 
     vm.checkToState = function(toState) {
-        return StateChangeService.getToState().name == toState;
+        return StateHistory.lastTo().name == toState;
     }
 
     vm.isStateName = function(state_names) {

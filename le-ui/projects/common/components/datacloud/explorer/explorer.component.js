@@ -94,6 +94,10 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.init = function() {
+        if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
+            vm.section = 'segment.analysis';
+        }
+
         QueryStore.setSegmentEnabled = false;
 
         if (vm.segment != null && vm.segment != "Create"){
@@ -1175,7 +1179,13 @@ angular.module('common.datacloud.explorer', [
     }
 
     /* jumps you to non-empty category when you filter */
-    var gotoNonemptyCategory = function() {
+    var gotoNonemptyCategory = function() { 
+        var treeRoot = QueryStore.getAddBucketTreeRoot();
+
+        if (treeRoot) {
+            return false;
+        }
+
         var categories = [],
             category = '';
         
@@ -1459,7 +1469,6 @@ angular.module('common.datacloud.explorer', [
         if (!vm.cube.data.Stats) {
             return false;
         }
-
         attribute.SegmentChecked = true;
 
         var attribute = angular.copy(attribute),
@@ -1601,18 +1610,36 @@ angular.module('common.datacloud.explorer', [
     };
 
     vm.selectRatingsEngineAttribute = function(enrichment) {
-        vm.statusMessage(vm.label.saving_alert, {wait: 0});
-        var rule = getRatingsEngineRule(RatingsEngineModels);
-        DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.ColumnId]).then(function(response) {
-            enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
-            var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
-            DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
-            RatingsEngineStore.setValidation('attributes', (SelectedForRatingsEngine.length > 0));
-            if(!SelectedForRatingsEngine.length) {
-                vm.metadata.toggle.show.selected_ratingsengine_attributes = false;
-            }
+        var treeRoot = QueryStore.getAddBucketTreeRoot();
+
+
+        if (treeRoot) {
+            var enrichments = vm.topAttributes[enrichment.Category].Subcategories[enrichment.Subcategory],
+                attribute = enrichments.filter(function(item) { return item.Attribute == enrichment.ColumnId })[0];
+
+            vm.selectSegmentAttribute(attribute);
+
+            RatingsEngineStore.setValidation('add', true);
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
-        });
+        } else {
+            vm.statusMessage(vm.label.saving_alert, {wait: 0});
+
+            var rule = getRatingsEngineRule(RatingsEngineModels);
+
+            DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.ColumnId]).then(function(response) {
+                enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
+                
+                var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
+
+                DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
+
+                if (!SelectedForRatingsEngine.length) {
+                    vm.metadata.toggle.show.selected_ratingsengine_attributes = false;
+                }
+
+                vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            });
+        }
     }
 
     vm.getAttributeRules = function(attribute, bucket) {

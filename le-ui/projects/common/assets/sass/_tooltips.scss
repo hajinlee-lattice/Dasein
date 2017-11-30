@@ -297,6 +297,7 @@ tooltip {
         width: 280px;
         font-weight: normal;
         font-size: 125%;
+        text-align: left;
         h5 {
             color: #eee;
             margin-bottom: 1em;
@@ -395,8 +396,8 @@ tooltip {
     }
     &.delay {
         div.tooltip_ {
-            -webkit-transition: opacity 0ms ease 0ms;
-            transition: opacity 0ms ease 0ms;
+            -webkit-transition: opacity 0ms ease 0ms !important;
+            transition: opacity 0ms ease 0ms !important;
         }
         div.tooltip_ {
             opacity: 0;
@@ -408,7 +409,8 @@ tooltip {
         &:hover div.tooltip_ {
             opacity: 1;
             z-index: 5;
-            -webkit-transition: opacity 333ms ease 1000ms;
+            -webkit-transition: opacity 333ms ease 1000ms !important;
+            transition: opacity 333ms ease 1000ms !important;
         }                           
     }
 }

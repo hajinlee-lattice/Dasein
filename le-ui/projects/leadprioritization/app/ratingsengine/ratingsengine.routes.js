@@ -374,6 +374,20 @@ angular
                     }
                 }
             })
+            .state('home.ratingsengine.wizard.segment.attributes.add', {
+                url: '/add',
+                params: {
+                    section: 'wizard.ratingsengine_attributes',
+                    gotoNonemptyCategory: true
+                },
+                views: {
+                    'wizard_content@home.ratingsengine.wizard': {
+                        controller: 'DataCloudController',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/datacloud/explorer/explorer.component.html'
+                    }
+                }
+            })
             .state('home.ratingsengine.wizard.segment.attributes.rules', {
                 url: '/rules',
                 params: {

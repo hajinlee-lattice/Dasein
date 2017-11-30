@@ -17,6 +17,7 @@ angular.module('lp.ratingsengine')
         this.validation = {
             segment: true,
             attributes: true,
+            add: true,
             rules: true,
             summary: true,
             prospect: false,
@@ -51,6 +52,11 @@ angular.module('lp.ratingsengine')
                     state: 'segment.attributes', 
                     nextLabel: 'Next, Set Rules'
                 },{ 
+                    hide: true,
+                    label: 'Add',
+                    state: 'segment.attributes.add', 
+                    nextLabel: 'Next, Rules'
+                },{ 
                     label: 'Rules', 
                     state: 'segment.attributes.rules', 
                     nextLabel: 'Next, Summary', 
@@ -63,6 +69,21 @@ angular.module('lp.ratingsengine')
                     nextLabel: 'Save', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveSummary(nextState);
+                    }
+                }
+            ],
+            "rules": [
+                { 
+                    hide: true,
+                    label: 'Add',
+                    state: 'segment.attributes.add', 
+                    nextLabel: 'Next, Rules'
+                },{
+                    label: 'Rules', 
+                    state: 'segment.attributes.rules', 
+                    nextLabel: 'Back To Dashboard', 
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveRules(nextState);
                     }
                 }
             ],
@@ -107,54 +128,6 @@ angular.module('lp.ratingsengine')
                         $state.go('home.ratingsengine.list.ratings');
                         // RatingsEngineStore.nextSaveRatingEngine(nextState);
                     } 
-                }
-            ],
-            "segment": [
-                { 
-                    label: 'Segment', 
-                    state: 'segment', 
-                    nextLabel: 'Back To Dashboard', 
-                    nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveRatingEngine(nextState);
-                    } 
-                }
-            ],
-            "attributes": [
-                { 
-                    label: 'Attributes', 
-                    state: 'segment.attributes', 
-                    nextLabel: 'Next, Set Rules'
-                },{ 
-                    label: 'Rules', 
-                    state: 'segment.attributes.rules', 
-                    nextLabel: 'Back To Dashboard', 
-                    nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveRules(nextState);
-                    }
-                }
-            ],
-            "rules": [
-                { 
-                    label: 'Attributes', 
-                    state: 'segment.attributes', 
-                    nextLabel: 'Next, Set Rules'
-                },{ 
-                    label: 'Rules', 
-                    state: 'segment.attributes.rules', 
-                    nextLabel: 'Back To Dashboard', 
-                    nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveRules(nextState);
-                    }
-                }
-            ],
-            "summary": [
-                { 
-                    label: 'Summary', 
-                    state: 'segment.attributes.rules.summary', 
-                    nextLabel: 'Back To Dashboard', 
-                    nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveSummary(nextState);
-                    }
                 }
             ]
         };

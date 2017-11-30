@@ -1,6 +1,6 @@
 angular.module('common.datacloud.analysistabs', [])
 .controller('AnalysisTabsController', function (
-    $state, $stateParams, FeatureFlagService, DataCloudStore, QueryStore, StateChangeService
+    $state, $stateParams, FeatureFlagService, DataCloudStore, QueryStore, StateHistory
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -57,7 +57,7 @@ angular.module('common.datacloud.analysistabs', [])
             'home.segment.contacts':'contacts'
         };
 
-        return map[StateChangeService.getToState().name] == type;
+        return map[StateHistory.lastTo().name] == type;
     }
 
     vm.setStateParams = function(section) {

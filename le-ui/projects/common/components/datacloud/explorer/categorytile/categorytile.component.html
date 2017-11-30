@@ -108,7 +108,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && totalcount.length == 0">
+                    <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && vm.getAttributeRules(attribute).length == 0">
                         <div class="cover">
                             <h3>Select Attribute</h3>
                             <p>Match accounts that have this condition. By default this is an AND condition with other selections. Go to Refine Query to make changes and use advanced query language</p>

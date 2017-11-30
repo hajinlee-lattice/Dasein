@@ -1,5 +1,7 @@
 angular.module('lp.ratingsengine.wizard.summary', [])
-.controller('RatingsEngineSummary', function ($q, $state, $stateParams, Rating, CurrentRatingEngine, RatingsEngineModels, RatingsEngineStore) {
+.controller('RatingsEngineSummary', function (
+    $q, $state, $stateParams, Rating, CurrentRatingEngine, RatingsEngineModels, RatingsEngineStore, QueryStore
+) {
     var vm = this;
 
     angular.extend(vm, {
@@ -92,36 +94,31 @@ angular.module('lp.ratingsengine.wizard.summary', [])
         return map;
     }
 
-
     vm.getRuleCount = function(bkt) {
         if (bkt) {
             var buckets = [
                 vm.rating_rule.bucketToRuleMap[bkt.bucket] 
             ];
         } else {
-            var buckets = [ 
-                vm.rating_rule.bucketToRuleMap['A'], 
-                vm.rating_rule.bucketToRuleMap['A-'], 
-                vm.rating_rule.bucketToRuleMap['B'], 
-                vm.rating_rule.bucketToRuleMap['C'], 
-                vm.rating_rule.bucketToRuleMap['D'], 
-                vm.rating_rule.bucketToRuleMap['F'] 
-            ];
+            var buckets = [];
+
+            vm.bucketLabels.forEach(function(bucketName, index) {
+                buckets.push(vm.rating_rule.bucketToRuleMap[bucketName]); 
+            });
         }
 
-        var filtered = [];
+        var filtered = [], restrictions = [];
 
         buckets.forEach(function(bucket, index) {
-            var restrictions = bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions;
+            restrictions = QueryStore.getAllBuckets(bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions);
             
             filtered = filtered.concat(restrictions.filter(function(value, index) {
-                return value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
+                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
             }));
         })
 
         return filtered.length;
     }
-
 
     vm.getRuleRecordCounts = function(restrictions) {
         var restrictions = restrictions || vm.getAllBucketRestrictions(),

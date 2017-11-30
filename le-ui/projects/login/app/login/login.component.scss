@@ -14,7 +14,7 @@
 
 .user-info {
     position: absolute;
-    text-align: right;
+    text-align: center;
     right: 1em;
     white-space: nowrap;
     
@@ -29,20 +29,20 @@
             display: block;
             font-size: 0.95em;
             text-overflow: ellipsis;
-            max-width: 14em;
-            text-align: right;
-            padding: 0.333em 0.4em;
+            max-width: 13.6em;
+            text-align: left;
+            padding: 0.333em 0.2em;
             overflow: hidden;
             color: #222;
             -webkit-transition: none;
-            transition: none;
+            transition: none; 
             
             &:nth-child(odd) {
                 background: #f9f9f9;
             }
 
             &:first-child {
-                border-top: 2px solid #d0d0d0 ;
+                border-top: 1px solid #d0d0d0 ;
             }
             
             &:last-child {
@@ -70,21 +70,26 @@
         &.label {
             font-weight: bold;
             font-size: 100%;
+            width: 100%;
             
             .default {
                 cursor: pointer;
-                color: #aaa;
+                color: #999;
                 font-weight: normal;
                 font-size: 100%;
+                position: absolute;
+                right: 0;
             }
-            
+
+            .default:hover,
             .default:hover {
-                text-decoration: underline;
+                color: #000;
             }
         }
         
         &.value {
-            margin-bottom: 1em;
+            margin-bottom: 1.4em;
+            width: 100%;
         }
         
         &.control {

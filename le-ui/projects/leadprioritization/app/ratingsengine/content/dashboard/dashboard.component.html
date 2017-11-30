@@ -45,8 +45,11 @@
                                 </span>
                             </div>
                             <div class="dashboard-section-footer-column">
-                                <button class="button blue-button" ui-sref="home.ratingsengine.wizard.segment.attributes.rules({rating_id: vm.rating.summary.id, wizard_steps: 'rules'})">
-                                    <span>Edit</span>
+                                <button class="button blue-button" ng-disabled="vm.StateHistory.isTo('home.ratingsengine.wizard.segment.attributes.rules')" ui-sref="home.ratingsengine.wizard.segment.attributes.rules({rating_id: vm.rating.summary.id, wizard_steps: 'rules'})">
+                                    <span ng-if="!vm.StateHistory.isTo('home.ratingsengine.wizard.segment.attributes.rules')" >Edit</span>
+                                    <span ng-if="vm.StateHistory.isTo('home.ratingsengine.wizard.segment.attributes.rules')">
+                                        <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                                    </span>
                                 </button>
                             </div>
                         </div>

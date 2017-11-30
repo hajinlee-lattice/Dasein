@@ -1,5 +1,6 @@
 <ul class="import-wizard-progress">
-    <li     ng-repeat="item in vm.items" 
+    <li     ng-repeat="item in vm.items"
+            ng-if="!item.hide"
             ng-click="vm.click(item.state, $event)"
             ui-sref="home.{{ vm.context }}{{vm.wizard}}{{ item.state }}" 
             ui-sref-active="previous" 

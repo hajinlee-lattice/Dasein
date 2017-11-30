@@ -91,14 +91,14 @@ angular.module('common.wizard.controls', [])
                 vm.next = '';
                 
                 if (i+1 < vm.items.length) {
-                    next = vm.items[i+1].state;
+                    next = vm.getNext(i).state;
                     nsplit = next.split('.');
 
                     vm.next = vm.rootState + nsplit.join('.');
                 }
 
                 if (i-1 >= 0) {
-                    prev = vm.items[i-1].state;
+                    prev = vm.getPrev(i) ? vm.getPrev(i).state : vm.prev;
                     psplit = prev.split('.');
                     
                     vm.prev = vm.rootState + psplit.join('.');
@@ -108,6 +108,35 @@ angular.module('common.wizard.controls', [])
         }
 
         vm.isValid();
+    }
+
+    vm.getNext = function(index) {
+        var item,
+            i = 1;
+
+        while (item = vm.items[index + i++]) {
+            if (item.hide) {
+                continue;
+            }
+
+            break;
+        }
+        return item;
+    }
+
+    vm.getPrev = function(index) {
+        var item,
+            i = 1;
+
+        while (item = vm.items[index + i--]) {
+            if (item.hide) {
+                continue;
+            }
+
+            break;
+        }
+
+        return item;
     }
 
     vm.isValid = function() {

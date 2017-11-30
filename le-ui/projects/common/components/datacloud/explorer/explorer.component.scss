@@ -886,7 +886,7 @@
                     }
                     ul.attribute-stats {
                         li.attribute-stat {
-                            &, & *, & *:after, & * :before {
+                            & * {
                                 -webkit-transition: none;
                                 transition: none;
                             }

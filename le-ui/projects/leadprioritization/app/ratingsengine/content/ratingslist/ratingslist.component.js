@@ -48,16 +48,16 @@ angular.module('lp.ratingsengine.ratingslist', [
         vm.header.filter.filtered = vm.current.ratings;
         vm.header.filter.unfiltered = vm.current.ratings;
 
-        console.log(vm.current.ratings);
+        //console.log(vm.current.ratings);
 
         $scope.$watch(vm.current.ratings, function(newValue, oldValue) {
 
-            console.log(newValue, oldValue);
+            //console.log(newValue, oldValue);
 
             angular.forEach(vm.header.filter.items, function(item) {
-                console.log(vm.count(item.action.status));
+                //console.log(vm.count(item.action.status));
 
-                console.log(item);
+                //console.log(item);
 
                 item.total = vm.count(item.action.status);
             });
