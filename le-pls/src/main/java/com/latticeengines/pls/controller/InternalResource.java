@@ -515,15 +515,11 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get required column names for the event table used for the specified model")
-    public List<String> getRequiredColumns(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
+    public List<Attribute> getRequiredColumns(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
             HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
-        List<String> columnNames = new ArrayList<>();
-        for (Attribute attr : modelMetadataService.getRequiredColumns(modelId)) {
-            columnNames.add(attr.getName());
-        }
-        return columnNames;
+        return modelMetadataService.getRequiredColumns(modelId);
     }
 
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
