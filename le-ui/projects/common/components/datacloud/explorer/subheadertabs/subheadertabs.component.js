@@ -25,7 +25,8 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                 iconlabel: 'Export',
                 iconclass: 'save button white-button select-more',
                 iconrotate: true,
-                icondisabled: false
+                icondisabled: false,
+                showSpinner: false
             }
         }
     });
@@ -182,10 +183,11 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             console.log('saveMetadataSegmentExport new', segmentName, ts, segmentExport);
 
             SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(function(result) {
-              console.log(result);
-              vm.displayExportBanner = true;
-              vm.header.exportSegment.icondisabled = false;
-
+                console.log(result);
+                if (result.success) { 
+                    vm.displayExportBanner = true;
+                }
+                vm.toggleExportDropdown(false);
             });
         } 
         else {
@@ -203,13 +205,14 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
 
                 SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(function(result) {
                     console.log(result);
-                    vm.displayExportBanner = true;
-                    vm.header.exportSegment.icondisabled = false;
+                    if (result.success) { 
+                        vm.displayExportBanner = true;
+                    }
+                    vm.toggleExportDropdown(false);
 
                 });
             });
         };
-        
     };
 
 
@@ -224,11 +227,16 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
         vm.displayExportBanner = false;
     }
 
+    vm.toggleExportDropdown = function(bool) {
+        vm.header.exportSegment.icondisabled = bool;
+        vm.header.exportSegment.showSpinner = bool;
+    }
+
     function checkStatusBeforeExport(exportType, $event) {
         $event.preventDefault();
 
         HealthService.checkSystemStatus().then(function() {
-            vm.header.exportSegment.icondisabled = true; //disable dropdown
+            vm.toggleExportDropdown(true); //disable dropdown
             vm.exportSegment(exportType);
         });
     }

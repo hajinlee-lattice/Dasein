@@ -343,16 +343,24 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                result = response.data;
+                result = {
+                    data: response.data,
+                    success: true
+                }
                 deferred.resolve(result);
 
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                result = {
+                    data: response.data,
+                    errorMsg: (response.data.errorMsg ? response.data.errorMsg : 'unspecified error'),
+                    success: false
+                };
+                deferred.resolve(result);
+                // var errorMsg = response.data.errorMsg || 'unspecified error';
+                // deferred.resolve(errorMsg);
             }
         );
         return deferred.promise;

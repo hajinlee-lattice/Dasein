@@ -621,7 +621,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{date}}", DateTimeUtils.convertToStringUTCISO8601(cleanupBy));
             builder.replaceToken("{{url}}", hostport);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS segment export complete email to " + user.getEmail() + " succeeded.");
@@ -641,7 +641,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{exportID}}", exportID);
             builder.replaceToken("{{exportType}}", type);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS export segment error email to " + user.getEmail() + " succeeded.");

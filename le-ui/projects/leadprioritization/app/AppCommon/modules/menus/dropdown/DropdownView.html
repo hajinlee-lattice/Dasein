@@ -16,7 +16,8 @@
             ng-disabled="config.icondisabled"
             ng-class="{ 'open': visible }">
             {{ iconlabel }}<span ng-if="iconlabel">&nbsp;&nbsp;</span>
-        <span class="{{ icon || 'fa fa-chevron-down' }}" ng-class="{ 'fa-rotate-180': visible && iconrotate }"></span>
+        <span ng-if="!config.showSpinner" class="{{ icon || 'fa fa-chevron-down' }}" ng-class="{ 'fa-rotate-180': visible && iconrotate }"></span>
+        <span ng-if="config.showSpinner" class="fa fa-spinner fa-spin fa-fw"></span>
     </button>
     <ul class="model-menu" ng-show="visible" ng-click="visible = !visible">
         <li
