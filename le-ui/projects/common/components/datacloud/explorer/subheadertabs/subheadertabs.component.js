@@ -24,7 +24,8 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                 icon: 'fa fa-chevron-down',
                 iconlabel: 'Export',
                 iconclass: 'save button white-button select-more',
-                iconrotate: true
+                iconrotate: true,
+                icondisabled: false
             }
         }
     });
@@ -183,6 +184,7 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(function(result) {
               console.log(result);
               vm.displayExportBanner = true;
+              vm.header.exportSegment.icondisabled = false;
 
             });
         } 
@@ -202,6 +204,7 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                 SegmentService.CreateOrUpdateSegmentExport(segmentExport).then(function(result) {
                     console.log(result);
                     vm.displayExportBanner = true;
+                    vm.header.exportSegment.icondisabled = false;
 
                 });
             });
@@ -225,6 +228,7 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
         $event.preventDefault();
 
         HealthService.checkSystemStatus().then(function() {
+            vm.header.exportSegment.icondisabled = true; //disable dropdown
             vm.exportSegment(exportType);
         });
     }
