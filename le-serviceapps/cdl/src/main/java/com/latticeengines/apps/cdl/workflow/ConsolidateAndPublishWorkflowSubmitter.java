@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
-import com.latticeengines.common.exposed.period.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;

@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.period.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
 public class PeriodConvertorConfig extends TransformerConfig {
 

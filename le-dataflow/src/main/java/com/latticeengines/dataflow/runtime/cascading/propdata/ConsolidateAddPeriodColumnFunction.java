@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
-import com.latticeengines.common.exposed.period.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

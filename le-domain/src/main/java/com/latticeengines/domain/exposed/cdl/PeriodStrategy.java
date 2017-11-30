@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.period;
+package com.latticeengines.domain.exposed.cdl;
 
 public enum PeriodStrategy {
     CalendarQuarter, CalendarMonth;

@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.period.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
