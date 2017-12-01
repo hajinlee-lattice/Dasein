@@ -20,7 +20,7 @@
                         ng-model="vm.fieldMapping[$index].mappedField"
                         ng-change="vm.changeLatticeField(vm.fieldMapping)">
                         <option value="" hidden disabled>--</option>
-                        <option ng-repeat="type in field.types" value="{{type}}">
+                        <option ng-repeat="type in field.types" value="{{type}}" ng-disabled="vm.unavailableTypes.indexOf(type) !== -1">
                             {{type}}
                         </option>
                     </select>
@@ -29,7 +29,7 @@
                     <select 
                         ng-model="vm.fieldMapping[$index].userField" 
                         ng-change="vm.changeLatticeField(vm.fieldMapping)"
-                        ng-options="item disable when vm.unavailableFields.indexOf(item) !== -1 for item in vm.availableFields | filter: vm.hiddenFilter">
+                        ng-options="item disable when (vm.unavailableFields.indexOf(item) !== -1) for item in vm.availableFields | filter: vm.hiddenFilter">
                     </select>
 <!--                 
                     <select

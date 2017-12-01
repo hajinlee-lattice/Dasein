@@ -74,8 +74,9 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-                    $state.go(nextState); 
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ],
@@ -108,8 +109,9 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-                    $state.go(nextState); 
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ],
@@ -134,8 +136,9 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-                    $state.go(nextState); 
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ],
@@ -160,8 +163,9 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName());
-                    $state.go(nextState); 
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                        $state.go(nextState); 
+                    });
                 }
             }
         ]

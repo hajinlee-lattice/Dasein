@@ -26,7 +26,7 @@ angular.module('lp.import.wizard.latticefields', [])
         matchingFieldsListMap: {},
         analysisFieldsListMap: {},
         csvFileName: ImportWizardStore.getCsvFileName(),
-        ignoredFields: FieldDocument.ignoredFields = [],
+        ignoredFields: FieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
         ignoredFieldLabel: '-- Unmapped Field --',
         UnmappedFieldsMap: {},

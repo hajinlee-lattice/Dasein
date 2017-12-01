@@ -11,6 +11,7 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         fields: ImportWizardStore.getThirdpartyidFields().fields,
         availableFields: [],
         unavailableFields: [],
+        unavailableTypes: [],
         hiddenFields: [],
         field: {name: '', types: ['MAP','CRM','ERP','Other'], field: ''}
     });
@@ -41,6 +42,14 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         //     }
         //     mapped.push(map);
         // }
+        
+        vm.unavailableFields = [];
+        vm.unavailableTypes = [];
+        mapping.forEach(function(item){
+            //vm.unavailableFields.push(item.userField);
+            vm.unavailableTypes.push(item.mappedField);
+        });
+
         ImportWizardStore.setSaveObjects(mapping);
         ImportWizardStore.setThirdpartyidFields(vm.fields, mapping);
     };
