@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
+import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.FailureReportingListener;
@@ -63,10 +64,12 @@ public class WorkflowTranslator {
             }
         }
 
-        SimpleJobBuilder simpleJobBuilder = jobBuilderFactory.get(name).start(step(workflow.getSteps().get(0)));
+        Choreographer choreographer = workflow.getChoreographer();
+        choreographer.linkStepNamespaces(workflow.getStepNamespaces());
+        SimpleJobBuilder simpleJobBuilder = jobBuilderFactory.get(name).start(step(workflow.getSteps().get(0), choreographer, 0));
         if (workflow.getSteps().size() > 1) {
             for (int i = 1; i < workflow.getSteps().size(); i++) {
-                simpleJobBuilder = simpleJobBuilder.next(step(workflow.getSteps().get(i)));
+                simpleJobBuilder = simpleJobBuilder.next(step(workflow.getSteps().get(i), choreographer, i));
             }
         }
 
@@ -76,14 +79,16 @@ public class WorkflowTranslator {
         return simpleJobBuilder.build();
     }
 
-    public Step step(AbstractStep<? extends BaseStepConfiguration> step) throws Exception {
+    public Step step(AbstractStep<? extends BaseStepConfiguration> step, Choreographer choreographer, int seq) //
+            throws Exception {
         return stepBuilderFactory.get(step.name()) //
-                .tasklet(tasklet(step)) //
+                .tasklet(tasklet(step, choreographer, seq)) //
                 .allowStartIfComplete(step.isRunAgainWhenComplete()) //
                 .build();
     }
 
-    protected Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step) {
+    protected Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step, //
+                              Choreographer choreographer, int seq) {
         return new Tasklet() {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
@@ -97,7 +102,8 @@ public class WorkflowTranslator {
 
                 if (!step.isDryRun()) {
                     boolean configurationWasSet = step.setup();
-                    if (step.getConfiguration() != null && step.getConfiguration().isSkipStep()) {
+                    boolean shouldSkip = choreographer.skipStep(step, seq);
+                    if (shouldSkip) {
                         step.skipStep();
                         stepExecution.setExitStatus(ExitStatus.NOOP);
                     } else {

@@ -334,6 +334,11 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception {
+        return waitForCompletion(workflowId, maxWaitTime, 30000);
+    }
+
+    @Override
+    public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval) throws Exception {
         WorkflowStatus status = null;
         long start = System.currentTimeMillis();
         int retryOnException = 16;
@@ -353,7 +358,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 if (--retryOnException == 0)
                     throw e;
             } finally {
-                Thread.sleep(30000);
+                Thread.sleep(checkInterval);
             }
         } while (System.currentTimeMillis() - start < maxWaitTime);
 

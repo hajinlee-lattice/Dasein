@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportM
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.workflow.core.WorkflowTranslator;
+import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
@@ -69,7 +70,8 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         doNothing().when(workflowJobEntityMgr).updateWorkflowJob(any(WorkflowJob.class));
         setConfigurationForScoring.setWorkflowJobEntityMgr(workflowJobEntityMgr);
 
-        runner.launchStep(workflowTranslator.step(setConfigurationForScoring), params, executionContext);
+        Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
+        runner.launchStep(workflowTranslator.step(setConfigurationForScoring, choreographer, 0), params, executionContext);
         Thread.sleep(10000);
         assertTrue(setConfigurationForScoring
                 .getObjectFromContext(ExportStepConfiguration.class.getName(), ExportStepConfiguration.class)

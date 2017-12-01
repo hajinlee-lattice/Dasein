@@ -14,6 +14,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -80,8 +81,6 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         customerSpace = bootstrapWorkFlowTenant().toString();
-        workflowConfig = new WorkflowConfiguration();
-        workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
     }
 
     @AfterClass(groups = "functional")
@@ -92,7 +91,13 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @BeforeMethod(groups = "functional")
+    public void setupMethod() {
+        workflowConfig = new WorkflowConfiguration();
+        workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+    }
+
+    @Test(groups = "functional")
     public void testStart() throws Exception {
         failableStep.setFail(false);
         workflowConfig.setWorkflowName(failableWorkflow.name());
@@ -101,7 +106,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertEquals(status, BatchStatus.COMPLETED);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testGetJobs() throws Exception {
         failableStep.setFail(false);
         workflowConfig.setWorkflowName(failableWorkflow.name());
@@ -114,7 +119,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertEquals(job.getJobType(), failableWorkflow.name());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testRestart() throws Exception {
         failableStep.setFail(true);
         workflowConfig.setWorkflowName(failableWorkflow.name());
@@ -168,14 +173,14 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertNotNull(job.getErrorMsg());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testGetNames() throws Exception {
         List<String> workflowNames = workflowService.getNames();
         assertTrue(workflowNames.contains(failableWorkflow.name()));
         assertTrue(workflowNames.contains(runCompletedStepAgainWorkflow.name()));
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testWorkflowWithFailingListener() throws Exception {
         int successfulListenerCalls = SuccessfulListener.calls;
         int failureListenerCalls = FailingListener.calls;
@@ -187,7 +192,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertEquals(FailingListener.calls, failureListenerCalls + 1);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testStop() throws Exception {
         sleepableStep.setSleepTime(1500L);
         workflowConfig.setWorkflowName(sleepableWorkflow.name());

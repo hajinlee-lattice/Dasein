@@ -81,7 +81,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     public void skipStep() {
-        log.info("Skipping step: " + configurationClass.getName());
+        log.info("Skipping step: " + getClass().getSimpleName());
     }
 
     /**
