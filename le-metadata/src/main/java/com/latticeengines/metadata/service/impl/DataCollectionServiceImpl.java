@@ -60,7 +60,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         dataCollectionEntityMgr.update(collection);
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
         CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(customerSpace, CacheNames.getCdlProfileCacheGroup());
+        cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
+                CacheNames.getCdlProfileCacheGroup());
 
         return newVersion;
     }
