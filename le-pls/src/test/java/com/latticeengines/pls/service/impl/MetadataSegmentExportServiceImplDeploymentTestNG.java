@@ -3,25 +3,26 @@ package com.latticeengines.pls.service.impl;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
-import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
-public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsFunctionalTestNGBase {
+@Listeners({ GlobalAuthCleanupTestListener.class })
+@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+@ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
+public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
     private final static String SEGMENT_NAME = "segment";
     private final static String CREATED_BY = "lattice@lattice-engines.com";
 
@@ -29,47 +30,22 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsFunctio
     private MetadataSegmentExportService metadataSegmentExportService;
 
     @Autowired
-    private TenantService tenantService;
-
-    @Autowired
-    private SegmentService segmentService;
-
-    private MetadataSegment segment;
-
-    private Tenant tenant;
+    private TestPlayCreationHelper testPlayCreationHelper;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+        testPlayCreationHelper.setupTenant();
 
-        setupTestEnvironmentWithGATenants(1);
-        tenant = testBed.getTestTenants().get(0);
-        MultiTenantContext.setTenant(tenant);
-
-        segment = new MetadataSegment();
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
-        segment.setDisplayName(SEGMENT_NAME);
-        MetadataSegment createdSegment = segmentService
-                .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(tenant.getId()).toString(),
-                createdSegment.getName());
-        Assert.assertNotNull(retrievedSegment);
-
-    }
-
-    @AfterClass(groups = "deployment")
-    public void teardown() throws Exception {
-        if (tenant != null) {
-            tenantService.discardTenant(tenant);
-        }
     }
 
     @Test(groups = "deployment")
     public void testBasicOperations() {
         MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
-        metadataSegmentExport.setTenant(tenant);
         metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT);
-        metadataSegmentExport.setSegment(segment);
+        metadataSegmentExport.setAccountFrontEndRestriction(new FrontEndRestriction());
+        metadataSegmentExport.setContactFrontEndRestriction(new FrontEndRestriction());
         metadataSegmentExport.setStatus(Status.RUNNING);
+        metadataSegmentExport.setExportPrefix(SEGMENT_NAME);
         metadataSegmentExport.setPath("some/path");
         metadataSegmentExport.setCreatedBy(CREATED_BY);
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
@@ -86,6 +62,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends PlsFunctio
         Assert.assertNotNull(retrievedMetadataSegmentExport);
         Assert.assertNotNull(retrievedMetadataSegmentExport.getPid());
         Assert.assertNotNull(retrievedMetadataSegmentExport.getExportId());
+        Assert.assertTrue(retrievedMetadataSegmentExport.getFileName().startsWith(SEGMENT_NAME));
 
         metadataSegmentExportService.deleteSegmentExportByExportId(exportId);
     }
