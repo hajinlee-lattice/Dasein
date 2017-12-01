@@ -49,6 +49,9 @@ angular.module('lp.import.wizard.latticefields', [])
 
     vm.init = function() {
         vm.fieldMappings.forEach(function(fieldMapping) {
+            if(fieldMapping.mappedField) {
+                vm.unavailableFields.push(fieldMapping.mappedField);
+            }
             vm.availableFields.push(fieldMapping);
         });
     };

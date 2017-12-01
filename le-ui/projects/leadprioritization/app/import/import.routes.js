@@ -307,7 +307,7 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Website', displayName: 'Website test'},
+                        { name: 'Website'},
                         { name: 'CompanyName'},
                         { name: 'DUNS'},
                         { name: 'IP_Address'},
