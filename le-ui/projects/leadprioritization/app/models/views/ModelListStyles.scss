@@ -237,7 +237,6 @@ Model List
 }
 .editable-buttons {
     margin-top:1.5em;
-    margin-bottom: 1.5em;
     &:after {
         display: table;
         content: "";
@@ -245,7 +244,6 @@ Model List
     }
     button {
         width: 48%;
-        padding: 0.75em 0;
     }
 }
 .model-title:hover h2:after {

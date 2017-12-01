@@ -19,12 +19,10 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
     vm.init = function() {
 
-        console.log($state);
-
-        console.log(vm.launches);
-
         if(vm.launches.launchSummaries.length > 10){
             vm.showPagination = true;
+        } else {
+            vm.showPagination = false;
         }
 
         vm.defaultPlayLaunchList = angular.copy(vm.launches.uniquePlaysWithLaunches);
@@ -53,6 +51,8 @@ angular.module('lp.playbook.dashboard.launch_history', [])
             contactsWithinRecommendations: vm.cumulativeStats.contactsWithinRecommendations
         }
 
+        console.log(vm.launches.launchSummaries.length, vm.showPagination);
+
     };
 
     vm.sort = function(header) {
@@ -71,6 +71,7 @@ angular.module('lp.playbook.dashboard.launch_history', [])
             console.log(result);
             vm.launches = result;
         });
+
     }
 
     vm.playSelectChange = function(play){
@@ -91,6 +92,12 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
         PlaybookWizardStore.getPlayLaunches(params).then(function(result){
             vm.launches = result;
+
+            if(vm.launches.launchSummaries.length > 10){
+                vm.showPagination = true;
+            } else {
+                vm.showPagination = true;
+            }
         });
     };
 

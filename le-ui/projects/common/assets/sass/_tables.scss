@@ -1,3 +1,18 @@
+
+
+/*
+    See Playbook Launch History for HTML Example
+*/
+.no-data {
+    text-align: center;
+    margin-top: 60px;
+    h2 {
+        color: #333 !important;
+        margin-bottom: 10px !important;
+    }
+}
+
+
 .table-header {
     h2 {
         font-size: 110%;
@@ -24,6 +39,9 @@ table {
     border-spacing: 0;
     vertical-align: baseline;
     width: 100%;
+    &.no-tbody {
+        margin-bottom: 0;
+    }
     thead {
         border-color: #D0D1D0;
         border-style: solid;

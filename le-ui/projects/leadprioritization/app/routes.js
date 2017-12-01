@@ -146,6 +146,15 @@ angular
                     });
                     
                     return deferred.promise;
+                },
+                Model: function(){
+                    return null;
+                },
+                IsPmml: function(){
+                    return null;
+                },
+                HasRatingsAvailable: function(){
+                    return null;
                 }
             },
             views: {
@@ -180,6 +189,8 @@ angular
                             });
                         }
                     },
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 }
             }
@@ -199,13 +210,26 @@ angular
                     });
 
                     return deferred.promise;
+                },          
+                Model: function(){
+                    return null;
+                },
+                IsPmml: function(){
+                    return null;
+                },
+                HasRatingsAvailable: function(){
+                    return null;
                 }
             },
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
-                "summary@": {
+                "summary@": {  
+                    controller: 'ModelListController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/summary/ModelListView.html'
                 },
                 "main@": {
@@ -221,11 +245,26 @@ angular
                 pageIcon: 'ico-model',
                 pageTitle: 'Models > Creation History'
             },
+            resolve: {
+                Model: function(){
+                    return null;
+                },
+                IsPmml: function(){
+                    return null;
+                },
+                HasRatingsAvailable: function(){
+                    return null;
+                }
+            },
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
+                    controller: 'ModelListController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/summary/ModelListView.html'
                 },
                 "main@": {
@@ -266,31 +305,8 @@ angular
             },
             views: {
                 "navigation@": {
-                    controller: function($scope, $rootScope, Model, IsPmml, FeatureFlagService, HasRatingsAvailable) {
-                        $scope.IsPmml = IsPmml;
-                        $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
-                        $scope.Uploaded = Model.ModelDetails.Uploaded;
-                        $scope.HasRatingsAvailable = HasRatingsAvailable;
-
-                        if(JSON.stringify(HasRatingsAvailable) != "{}"){
-                            $scope.HasRatingsAvailable = true;
-                        } else {
-                            $scope.HasRatingsAvailable = false;
-                        }
-
-                        FeatureFlagService.GetAllFlags().then(function() {
-                            var flags = FeatureFlagService.Flags();
-                            $scope.canRemodel = FeatureFlagService.FlagIsEnabled(flags.VIEW_REMODEL) && !$scope.IsPmml && !$scope.Uploaded;
-                            $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE) || FeatureFlagService.UserIs('EXTERNAL_ADMIN');
-                            $scope.showAlerts = 0; // disable for all (PLS-1670) FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
-                            $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
-                            $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
-                            $scope.showSampleLeads = FeatureFlagService.FlagIsEnabled(flags.VIEW_SAMPLE_LEADS);
-                        });
-
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-
-                    },
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/ModelView.html'
                 },
                 "summary@": {
@@ -738,6 +754,8 @@ angular
             },
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "main@": {
@@ -766,6 +784,8 @@ angular
             },
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "main@": {
@@ -837,6 +857,8 @@ angular
 
                         });
                     },
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -1179,7 +1201,8 @@ angular
             },
             views: {
                 "navigation@": {
-                    //templateUrl: 'app/navigation/sidebar/EloquaSettingsView.html'
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -1468,6 +1491,8 @@ angular
             },
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {

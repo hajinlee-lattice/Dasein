@@ -5,8 +5,11 @@ angular.module('lp.models.list', [
     'mainApp.appCommon.services.HealthService',
     'mainApp.models.modals.CopyModelFromTenantModal',
 ])
-.controller('ModelListController', function ($state,
-    ResourceUtility, ModelList, ModelStore, CopyModelFromTenantModal, ImportModelModal, FeatureFlagService, ServiceErrorUtility, HealthService
+.controller('ModelListController', function (
+    $state, $filter,
+    ResourceUtility, ModelList, ModelStore, 
+    CopyModelFromTenantModal, ImportModelModal, 
+    FeatureFlagService, ServiceErrorUtility, HealthService
 ) {
     var vm = this;
 
@@ -76,6 +79,11 @@ angular.module('lp.models.list', [
                 }*/
             ];
 
+            FeatureFlagService.GetAllFlags().then(function(result) {
+                var flags = FeatureFlagService.Flags();
+                vm.showModelCreationHistory = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
+            });
+
             /*
             FeatureFlagService.GetAllFlags().then(function(result) {
                 var flags = FeatureFlagService.Flags();
@@ -118,6 +126,10 @@ angular.module('lp.models.list', [
             vm.pmmlLength = pmml.length;
         }
     });
+
+    vm.count = function(type) {
+        return $filter('filter')(vm.models, { Status: type }, true).length;
+    }
 
     function checkStatusBeforeCreate(sref, $event) {
         $event.preventDefault();

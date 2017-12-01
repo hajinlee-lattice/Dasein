@@ -1,14 +1,26 @@
-<section class="tabs navigation" ng-controller="SidebarRootController">
+<section class="tabs interior containerx">
     <ul>
-        <li class="active" ui-sref-active-eq="active">
-            <a ui-sref="home.models">
-                {{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}
-            </a>
+        <li 
+            ui-sref="home.models" 
+            ui-sref-active-eq="active">
+            <div class="tab-container">
+                <h2>{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">{{ vm.models.length }}</span> total
+                    <span class="count">{{ vm.count('Active', true) }}</span> active
+                </div>
+            </div>
         </li>
-        <li ui-sref-active="active" ng-if="showModelCreationHistory">
-            <a ui-sref="home.models.history">
-                {{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}
-            </a>
+        <li 
+            ui-sref="home.models.history"
+            ui-sref-active="active" 
+            ng-if="vm.showModelCreationHistory">
+            <div class="tab-container">
+                <h2>{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">{{ vm.models.length }}</span> total
+                </div>
+            </div>
         </li>
     </ul>
 </section>

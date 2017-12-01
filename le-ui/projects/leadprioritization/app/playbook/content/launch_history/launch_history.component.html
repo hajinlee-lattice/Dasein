@@ -1,7 +1,25 @@
 
 
 <section class="playbook playbook-launch-history container">
-    <div class="card-content" ng-class="{'has-footer': !vm.allPlaysHistory}">
+
+
+    <div 
+        ng-if="vm.launches.launchSummaries.length === 0"
+        class="no-data">
+        <h2>No plays have been launched.</h2>
+        <a 
+            class="button white-button"
+            ui-sref="home.playbook.wizard">
+            Create a play
+        </a>
+    </div>
+
+
+
+    <div
+        ng-if="vm.launches.launchSummaries.length > 0" 
+        class="card-content" 
+        ng-class="{'has-footer': !vm.allPlaysHistory}">
 
         <chips 
             ng-show="vm.allPlaysHistory"
