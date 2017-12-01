@@ -127,12 +127,15 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
-        // go to dashboard if there are rules in ratingModels
-        var url = RatingsEngineStore.hasRules(rating) 
-            ? 'home.ratingsengine.dashboard'
-            : 'home.ratingsengine.wizard.segment';
+        var tileState = vm.current.tileStates[rating.id];
+        if(tileState.editRating !== true){
+            // go to dashboard if there are rules in ratingModels
+            var url = RatingsEngineStore.hasRules(rating) 
+                ? 'home.ratingsengine.dashboard'
+                : 'home.ratingsengine.wizard.segment';
 
-        $state.go(url, { rating_id: rating.id }); 
+            $state.go(url, { rating_id: rating.id }); 
+        }
     };
 
     vm.editRatingClick = function($event, rating) {
