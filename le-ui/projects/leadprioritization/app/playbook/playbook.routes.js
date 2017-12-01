@@ -17,7 +17,18 @@ angular
     $stateProvider
         .state('home.playbook', {
             url: '/playbook',
-            redirectTo: 'home.playbook.plays'
+            redirectTo: 'home.playbook.plays',
+            resolve: {
+                Model: function(){
+                    return null;
+                },
+                IsPmml: function(){
+                    return null;
+                },
+                HasRatingsAvailable: function(){
+                    return null;
+                }
+            }
         })
         .state('home.playbook.plays', {
             url: '/plays',
@@ -109,6 +120,8 @@ angular
                             sref: 'home.playbook'
                         });
                     },
+                    controller: 'SidebarRootController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
                 },
                 'main@': {
