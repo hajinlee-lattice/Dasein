@@ -415,13 +415,18 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
-            Long accountCount = accountCountOption.orElse(0L);
-            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
 
             CoverageInfo coverageInfo = new CoverageInfo();
 
+            Long accountCount = accountCountOption.orElse(0L);
             coverageInfo.setAccountCount(accountCount);
-            coverageInfo.setContactCount(contactCount);
+
+            try {
+                Long contactCount = getContactCount(tenent, contactFrontEndQuery);
+                coverageInfo.setContactCount(contactCount);
+            } catch (Exception ex) {
+                log.info("Got error in fetching contact count", ex);
+            }
 
             List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
             for (RuleBucketName bucket : RuleBucketName.values()) {
@@ -482,13 +487,18 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
-            Long accountCount = accountCountOption.orElse(0L);
-            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
 
             CoverageInfo coverageInfo = new CoverageInfo();
 
+            Long accountCount = accountCountOption.orElse(0L);
             coverageInfo.setAccountCount(accountCount);
-            coverageInfo.setContactCount(contactCount);
+
+            try {
+                Long contactCount = getContactCount(tenent, contactFrontEndQuery);
+                coverageInfo.setContactCount(contactCount);
+            } catch (Exception ex) {
+                log.info("Got error in fetching contact count", ex);
+            }
 
             List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
             for (RuleBucketName bucket : RuleBucketName.values()) {
@@ -518,19 +528,48 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     void loadBasicCoverage(Tenant tenent, Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap, String key,
-            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery) {
+            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery) throws Exception {
         log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
-        Long accountCount = entityProxy.getCount( //
-                tenent.getId(), //
-                accountFrontEndQuery);
-        Long contactCount = getContactCount(tenent, contactFrontEndQuery);
 
         CoverageInfo coverageInfo = new CoverageInfo();
+        Exception accountCountException = null;
+        Exception contactCountException = null;
 
-        coverageInfo.setAccountCount(accountCount);
-        coverageInfo.setContactCount(contactCount);
+        try {
+            Long accountCount = entityProxy.getCount( //
+                    tenent.getId(), //
+                    accountFrontEndQuery);
+            coverageInfo.setAccountCount(accountCount);
+        } catch (Exception ex) {
+            accountCountException = ex;
+            log.info("Got error in fetching account count", ex);
+        }
 
-        segmentIdAndSingleRulesCoverageMap.put(key, coverageInfo);
+        try {
+            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
+            coverageInfo.setContactCount(contactCount);
+        } catch (Exception ex) {
+            contactCountException = ex;
+            log.info("Got error in fetching contact count", ex);
+        }
+
+        // PLS-5940 - we want to do more fine grained exception handling so that
+        // if contact count exception occurs it doesn't affect
+        // successful account count
+        // if account count is successful, put the coverage info in final
+        // result
+        if (accountCountException == null) {
+            segmentIdAndSingleRulesCoverageMap.put(key, coverageInfo);
+        }
+
+        // after putting coverage info (if any count is successful) then throw
+        // account exception exception for regular exception handling in caller
+        // api
+        if (accountCountException != null) {
+            throw accountCountException;
+        } else if (contactCountException != null) {
+            throw contactCountException;
+        }
     }
 
     private Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
