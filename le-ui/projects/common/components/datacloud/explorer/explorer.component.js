@@ -136,8 +136,6 @@ angular.module('common.datacloud.explorer', [
         if (vm.section === 'segment.analysis') {
             // vm.setCurrentRestrictionForSaveButton();
             vm.metadataSegments = QueryRestriction;
-
-            vm.checkSaveButtonState();
         }
 
         // for Advanced Query Builder
