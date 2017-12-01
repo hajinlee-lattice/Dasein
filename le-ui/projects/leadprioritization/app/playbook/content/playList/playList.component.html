@@ -24,8 +24,9 @@
             <ul class="tiles">
                 <li
                     ng-repeat="
-                        play in vm.header.filter.filtered.plays |
+                        play in vm.current.plays |
                         filter: vm.query |
+                        filter: vm.header.filter.value : true | 
                         orderBy: vm.header.sort.order + vm.header.sort.property |
                         startFrom: (current - 1) * pagesize |
                         limitTo: pagesize"

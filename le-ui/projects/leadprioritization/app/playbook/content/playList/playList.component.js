@@ -29,8 +29,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
             },
             filter: {
                 label: 'Filter By',
-                unfiltered: PlaybookWizardStore.current.plays,
-                filtered: PlaybookWizardStore.current,
+                value: {},
                 items: [
                     { label: "All", action: { }, total: PlaybookWizardStore.current.plays.length
                     },
@@ -65,9 +64,12 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
     vm.init = function($q) {
 
-        console.log(vm.current);
+        // console.log(vm.current);
+        
 
         PlaybookWizardStore.clear();
+        vm.header.filter.filtered = vm.current.plays;
+        vm.header.filter.unfiltered = vm.current.plays;
     }
 
     vm.init();

@@ -303,11 +303,14 @@ angular.module('lp.playbook')
 
         PlaybookWizardService.deletePlay(playName).then(function(result) {
             deferred.resolve(result);
+            if(result === true){
+                PlaybookWizardStore.setPlays(PlaybookWizardStore.current.plays.filter(function(play) { 
+                    return play.name != playName;
+                }));
+            }
         });
 
-        this.setPlays(this.current.plays.filter(function(play) { 
-            return play.name != playName;
-        }));
+        
         return deferred.promise;
     }
     this.getPlayLaunches = function(params) {
