@@ -38,10 +38,12 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.yarn.exposed.service.JobService;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
-        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml" })
+// TODO - enable when we have a way to simulate full/partial failure
+//
+//@Listeners({ GlobalAuthCleanupTestListener.class })
+//@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+//@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
+//        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml" })
 public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private PlayLaunchInitStep playLaunchInitStep;
@@ -105,7 +107,8 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
 
     private CustomerSpace customerSpace;
 
-    @BeforeClass(groups = "workflow")
+    // TODO - enable when we have a way to simulate full/partial failure
+    @BeforeClass(groups = "workflow", enabled = false)
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
@@ -142,13 +145,15 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
         playLaunchInitStep.setConfiguration(createConf(customerSpace, playId, playLaunchId));
     }
 
-    @AfterClass(groups = { "workflow" })
+    // TODO - enable when we have a way to simulate full/partial failure
+    @AfterClass(groups = { "workflow" }, enabled = false)
     public void teardown() throws Exception {
 
         testPlayCreationHelper.cleanupArtifacts();
     }
 
-    @Test(groups = "workflow")
+    // TODO - enable when we have a way to simulate full/partial failure
+    @Test(groups = "workflow", enabled = false)
     public void testExecute() {
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNull(playLaunch.getAccountsLaunched());

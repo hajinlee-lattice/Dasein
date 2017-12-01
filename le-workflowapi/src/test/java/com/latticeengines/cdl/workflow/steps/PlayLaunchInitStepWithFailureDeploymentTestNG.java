@@ -8,14 +8,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
@@ -33,13 +29,14 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.yarn.exposed.service.JobService;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
-        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml" })
+// TODO - enable when we have a way to simulate full/partial failure
+//
+//@Listeners({ GlobalAuthCleanupTestListener.class })
+//@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+//@ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
+//        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml" })
 public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private PlayLaunchInitStep playLaunchInitStep;
@@ -105,7 +102,8 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
 
     private CustomerSpace customerSpace;
 
-    @BeforeClass(groups = "workflow")
+    // TODO - enable when we have a way to simulate full/partial failure
+    @BeforeClass(groups = "workflow", enabled = false)
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
@@ -141,12 +139,14 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
         playLaunchInitStep.setConfiguration(createConf(customerSpace, playId, playLaunchId));
     }
 
-    @AfterClass(groups = { "workflow" })
+    // TODO - enable when we have a way to simulate full/partial failure
+    @AfterClass(groups = { "workflow" }, enabled = false)
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
     }
 
-    @Test(groups = "workflow")
+    // TODO - enable when we have a way to simulate full/partial failure
+    @Test(groups = "workflow", enabled = false)
     public void testExecute() {
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNull(playLaunch.getAccountsLaunched());
@@ -172,7 +172,8 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
         }
     }
 
-    @Test(groups = "workflow", dependsOnMethods = { "testExecute" })
+    // TODO - enable when we have a way to simulate full/partial failure
+    @Test(groups = "workflow", dependsOnMethods = { "testExecute" }, enabled = false)
     public void verifyRecommendationsDirectly() {
         List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
         Assert.assertNotNull(recommendations);
