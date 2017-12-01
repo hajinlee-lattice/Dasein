@@ -13,31 +13,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.domain.exposed.dataloader.DataReadyResult;
-import com.latticeengines.domain.exposed.dataloader.GetDataTablesResult;
-import com.latticeengines.domain.exposed.dataloader.LaunchIdQuery;
-import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.vdb.SpecParser;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
+import com.latticeengines.domain.exposed.dataloader.DataReadyResult;
+import com.latticeengines.domain.exposed.dataloader.GetDataTablesResult;
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult.ValueResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.dataloader.LaunchIdQuery;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
 import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
 import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
@@ -52,16 +55,13 @@ import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.VdbGetQueryData;
-import com.latticeengines.domain.exposed.pls.VdbQueryDataResult;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
+import com.latticeengines.domain.exposed.pls.VdbQueryDataResult;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.remote.exposed.service.Headers;
 import com.latticeengines.remote.util.CrmUtils;
 import com.latticeengines.remote.util.DlConfigUtils;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-
-import javax.annotation.PostConstruct;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
@@ -113,15 +113,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final int STATUS_SUCCESS = 3;
 
     private static final int MAX_RETRIES = 3;
-    private static final String[] RETRY_TRIGGERS = new String[] {"Collection was modified"};
+    private static final String[] RETRY_TRIGGERS = new String[] { "Collection was modified" };
     private static final int RETRY_WAIT_TIME = 10000;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader =
-            new MagicAuthenticationHeaderHttpRequestInterceptor();
-    private List<ClientHttpRequestInterceptor> addMagicAuthHeaders =
-            Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
+    private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
+    private List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
+            .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
@@ -324,8 +323,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         InstallTemplateRequest request = new InstallTemplateRequest(tenantName, spec.toString());
         InstallResult result = installVisiDBStructureFile(request, dlUrl);
         if (result.getStatus() != 3 && result.getErrorMessage() != null) {
-            throw new LedpException(LedpCode.LEDP_21001, new String[] { String.valueOf(result.getStatus()),
-                    result.getErrorMessage() });
+            throw new LedpException(LedpCode.LEDP_21001,
+                    new String[] { String.valueOf(result.getStatus()), result.getErrorMessage() });
         }
         return result;
     }
@@ -352,8 +351,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     private String marshallDefaultSegmentSpec(Segment segment) {
         String templateA = DEFAULT_SEGMENT_TEMPLATE.replace(MODELID_TOKEN, getActualOrUninitializedModelId(segment));
-        return templateA
-                .replace(MODELIDLENGTH_TOKEN, String.valueOf(getActualOrUninitializedModelId(segment).length()));
+        return templateA.replace(MODELIDLENGTH_TOKEN,
+                String.valueOf(getActualOrUninitializedModelId(segment).length()));
     }
 
     private String getActualOrUninitializedModelId(Segment segment) {
@@ -396,7 +395,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     @RestApiCall
-    public GetQueryMetaDataColumnsResponse getQueryMetadataColumns(GetQueryMetaDataColumnsRequest request, String dlUrl) {
+    public GetQueryMetaDataColumnsResponse getQueryMetadataColumns(GetQueryMetaDataColumnsRequest request,
+            String dlUrl) {
         try {
             String response = callDLRestService(dlUrl, GET_QUERY_METADATA_COLUMNS, request);
             return JsonUtils.deserialize(response, GetQueryMetaDataColumnsResponse.class);
@@ -419,11 +419,11 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     @Override
     @RestApiCall
     public InstallResult deleteDLTenant(DeleteVisiDBDLRequest request, String dlUrl, boolean retry) {
-        try{
+        try {
             String response = callDLRestService(dlUrl, DELETE_TENANT, request);
             return JsonUtils.deserialize(response, InstallResult.class);
-        }catch (IOException ex) {
-               throw new LedpException(LedpCode.LEDP_21007, ex);
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21007, ex);
         }
     }
 
@@ -477,10 +477,10 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             if (!CrmUtils.checkVerificationStatus(response)) {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(response);
-                for (JsonNode node: jNode.get("Value")) {
+                for (JsonNode node : jNode.get("Value")) {
                     if (node.get("Key").asText().equals("Info")) {
-                        throw new RuntimeException(String.format("CRM verification failed: %s",
-                                node.get("Value").asText()));
+                        throw new RuntimeException(
+                                String.format("CRM verification failed: %s", node.get("Value").asText()));
                     }
                 }
                 throw new RuntimeException("CRM verification failed for an unknonw reason.");
@@ -558,13 +558,13 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             if (json.get("Status").asInt() != STATUS_SUCCESS) {
                 throw new IllegalStateException("Returned status from DL is not SUCCESS.");
             }
-            for(JsonNode kvpair: json.get("Value")) {
-                if("Config".equalsIgnoreCase(kvpair.get("Key").asText())) {
+            for (JsonNode kvpair : json.get("Value")) {
+                if ("Config".equalsIgnoreCase(kvpair.get("Key").asText())) {
                     return kvpair.get("Value").asText();
                 }
             }
             throw new IOException("Cannot find Config file in the response.");
-        } catch (IOException|IllegalStateException ex) {
+        } catch (IOException | IllegalStateException ex) {
             throw new LedpException(LedpCode.LEDP_21002, ex);
         }
     }
@@ -581,39 +581,43 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @RestApiCall
     public <T> String callDLRestService(String dlUrl, String endpoint, T payload) throws IOException {
-        if (dlUrl.endsWith("/")) dlUrl = dlUrl.substring(0, dlUrl.length() - 1);
-        if (!dlUrl.endsWith(DL_REST_SERVICE)) dlUrl += DL_REST_SERVICE;
+        if (dlUrl.endsWith("/"))
+            dlUrl = dlUrl.substring(0, dlUrl.length() - 1);
+        if (!dlUrl.endsWith(DL_REST_SERVICE))
+            dlUrl += DL_REST_SERVICE;
 
         String stringifiedPayload;
         if (payload.getClass().equals(String.class)) {
-            stringifiedPayload = ( String ) payload;
+            stringifiedPayload = (String) payload;
         } else {
-            stringifiedPayload =  JsonUtils.serialize(payload);
+            stringifiedPayload = JsonUtils.serialize(payload);
         }
 
         int retry = 0;
-        log.info("Send POST to " + dlUrl + endpoint + " with payload = "
-                + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
+        log.info("Send POST to " + dlUrl + endpoint + " with payload = " + stringifiedPayload + " with header "
+                + Headers.getHeaders());
         String response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
                 Headers.getHeaders(), stringifiedPayload);
         while (retry < MAX_RETRIES && shouldRetry(response)) {
-            log.info("Retry #" + String.valueOf(++retry) + ": Send POST to " + dlUrl + endpoint
-                    + " with payload = " + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
+            log.info("Retry #" + String.valueOf(++retry) + ": Send POST to " + dlUrl + endpoint + " with payload = "
+                    + stringifiedPayload.substring(0, Math.min(stringifiedPayload.length(), 200)));
 
-            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false,
-                    Headers.getHeaders(), stringifiedPayload);
+            response = HttpClientWithOptionalRetryUtils.sendPostRequest(dlUrl + endpoint, false, Headers.getHeaders(),
+                    stringifiedPayload);
 
         }
 
-        log.info("Get response from " + dlUrl + endpoint + ": "
-                + response.substring(0, Math.min(response.length(), 200)));
+        log.info("Get response from " + dlUrl + endpoint + ": " + response);
 
         return response;
 
     }
 
     private static boolean shouldRetry(String response) {
-        for (String trigger : RETRY_TRIGGERS) { if (response.contains(trigger)) return true; }
+        for (String trigger : RETRY_TRIGGERS) {
+            if (response.contains(trigger))
+                return true;
+        }
         return false;
     }
 
@@ -660,7 +664,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
             if (result.getStatus() != 3) {
                 String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
-                throw new LedpException(LedpCode.LEDP_21010, new String[] { String.valueOf(result.getStatus()), error });
+                throw new LedpException(LedpCode.LEDP_21010,
+                        new String[] { String.valueOf(result.getStatus()), error });
             }
             String launchId = null;
             List<ValueResult> valueResults = result.getValueResult();
@@ -676,8 +681,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             if (launchId != null) {
                 return Long.parseLong(launchId);
             } else {
-                throw new LedpException(LedpCode.LEDP_21010, new String[] { String.valueOf(result.getStatus()),
-                        "Launch id was not returned." });
+                throw new LedpException(LedpCode.LEDP_21010,
+                        new String[] { String.valueOf(result.getStatus()), "Launch id was not returned." });
             }
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21011, ex);
@@ -700,7 +705,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
             if (result.getStatus() != 3) {
                 String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
-                throw new LedpException(LedpCode.LEDP_21012, new String[] { String.valueOf(result.getStatus()), error });
+                throw new LedpException(LedpCode.LEDP_21012,
+                        new String[] { String.valueOf(result.getStatus()), error });
             }
             return result;
         } catch (IOException ex) {
@@ -720,7 +726,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
             if (result.getStatus() != 3) {
                 String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
-                throw new LedpException(LedpCode.LEDP_21014, new String[] { String.valueOf(result.getStatus()), error });
+                throw new LedpException(LedpCode.LEDP_21014,
+                        new String[] { String.valueOf(result.getStatus()), error });
             }
             return result;
         } catch (IOException ex) {
@@ -783,7 +790,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
             if (result.getStatus() != 3) {
                 String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
-                throw new LedpException(LedpCode.LEDP_21018, new String[] { String.valueOf(result.getStatus()), error });
+                throw new LedpException(LedpCode.LEDP_21018,
+                        new String[] { String.valueOf(result.getStatus()), error });
             }
             return result;
         } catch (IOException ex) {
@@ -833,8 +841,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     @RestApiCall
-    public QueryDataResult getQueryData(String tenantName, String queryHandle, int startRow,
-            int rowCount, String dlUrl) {
+    public QueryDataResult getQueryData(String tenantName, String queryHandle, int startRow, int rowCount,
+            String dlUrl) {
         try {
             Map<String, String> paramerters = new HashMap<>();
             paramerters.put("tenantName", tenantName);
@@ -864,8 +872,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             paramerters.put("dataProviderName", dataProviderName);
             paramerters.put("sourceTableName", sourceTableName);
             String response = callDLRestService(dlUrl, GET_SOURCE_TABLE_METADATA, paramerters);
-            SourceTableMetadataResult result = JsonUtils.deserialize(response,
-                    SourceTableMetadataResult.class);
+            SourceTableMetadataResult result = JsonUtils.deserialize(response, SourceTableMetadataResult.class);
 
             if (!result.getSuccess()) {
                 String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
@@ -909,8 +916,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public VdbQueryDataResult getQueryDataResult(String dlEndPoint, VdbGetQueryData vdbGetQueryData) {
-        return postWithRetry(dlEndPoint, vdbGetQueryData,
-                VdbQueryDataResult.class);
+        return postWithRetry(dlEndPoint, vdbGetQueryData, VdbQueryDataResult.class);
     }
 
     @Override
@@ -920,15 +926,19 @@ public class DataLoaderServiceImpl implements DataLoaderService {
 
     @Override
     public DataReadyResult readyToExportData(String dlEndpoint, LaunchIdQuery query) {
-        if (dlEndpoint.endsWith("/")) dlEndpoint = dlEndpoint.substring(0, dlEndpoint.length() - 1);
-        if (!dlEndpoint.endsWith(DL_REST_SERVICE)) dlEndpoint += DL_REST_SERVICE;
+        if (dlEndpoint.endsWith("/"))
+            dlEndpoint = dlEndpoint.substring(0, dlEndpoint.length() - 1);
+        if (!dlEndpoint.endsWith(DL_REST_SERVICE))
+            dlEndpoint += DL_REST_SERVICE;
         return postWithRetry(dlEndpoint + READY_TO_EXPORT_DATA, query, DataReadyResult.class);
     }
 
     @Override
     public GetDataTablesResult getDataTables(String dlEndpoint, LaunchIdQuery query) {
-        if (dlEndpoint.endsWith("/")) dlEndpoint = dlEndpoint.substring(0, dlEndpoint.length() - 1);
-        if (!dlEndpoint.endsWith(DL_REST_SERVICE)) dlEndpoint += DL_REST_SERVICE;
+        if (dlEndpoint.endsWith("/"))
+            dlEndpoint = dlEndpoint.substring(0, dlEndpoint.length() - 1);
+        if (!dlEndpoint.endsWith(DL_REST_SERVICE))
+            dlEndpoint += DL_REST_SERVICE;
         return postWithRetry(dlEndpoint + GET_DATA_TABLES, query, GetDataTablesResult.class);
     }
 
@@ -940,8 +950,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             paramerters.put("launchStatus", launchStatus);
             paramerters.put("message", message);
             String response = callDLRestService(dlEndpoint, EDIT_LAUNCH_STATUS, paramerters);
-            InstallResult result = JsonUtils.deserialize(response,
-                    InstallResult.class);
+            InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
 
             if (result.getStatus() != 3) {
                 String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
