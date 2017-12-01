@@ -65,7 +65,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         deleteUserByRestCall(EXTERNAL_USER_EMAIL);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testSendAndReceiveInternalEmail() {
         createNewUserAndSendEmail(INTERNAL_USER_EMAIL);
     }
