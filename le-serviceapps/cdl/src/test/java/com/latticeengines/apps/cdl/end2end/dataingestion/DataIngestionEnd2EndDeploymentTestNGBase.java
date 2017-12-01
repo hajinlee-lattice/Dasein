@@ -174,6 +174,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected String consolidateAppId;
     protected String profileAppId;
+    protected String processAnalyzeAppId;
     protected DataCollection.Version initialVersion;
 
     @BeforeClass(groups = { "end2end", "precheckin" })
@@ -220,6 +221,15 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 false);
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
         profileAppId = appId.toString();
+    }
+
+    void processAnalyze() {
+        logger.info("Start processing and analyzing ...");
+        ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId());
+        processAnalyzeAppId = appId.toString();
+        com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
+                false);
+        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
     }
 
     void uploadAccountCSV() {

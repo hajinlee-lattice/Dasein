@@ -69,7 +69,7 @@ public class DataFeedController {
 
     @RequestMapping(value = "/processanalyze", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Invoke process analyze workflow. Returns the job id.")
+    @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace);

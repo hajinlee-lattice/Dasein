@@ -7,8 +7,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartProcessingConfiguration;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -17,33 +18,36 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
     }
 
     public static class Builder {
-        public ProcessAnalyzeWorkflowConfiguration configuration = new ProcessAnalyzeWorkflowConfiguration();
-        public StartProcessingConfiguration startProcessingConfiguration = new StartProcessingConfiguration();
-        public ConsolidateDataWorkflowConfiguration.Builder consolidateDataConfigurationBuilder = new ConsolidateDataWorkflowConfiguration.Builder();
-        public RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
-        public Builder initialDataFeedStatus(Status initialDataFeedStatus) {
-            startProcessingConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
+        public ProcessAnalyzeWorkflowConfiguration configuration = new ProcessAnalyzeWorkflowConfiguration();
+        private ProcessStepConfiguration processStepConfiguration = new ProcessStepConfiguration();
+        private ProcessAccountStepConfiguration processAccountStepConfiguration = new ProcessAccountStepConfiguration();
+        private ConsolidateDataWorkflowConfiguration.Builder consolidateDataConfigurationBuilder = new ConsolidateDataWorkflowConfiguration.Builder();
+        private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
+
+        public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
+            processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
             return this;
         }
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("consolidateAndPublishWorkflow", customerSpace,
                     "consolidateAndPublishWorkflow");
-            startProcessingConfiguration.setCustomerSpace(customerSpace);
+            processStepConfiguration.setCustomerSpace(customerSpace);
+            processAccountStepConfiguration.setCustomerSpace(customerSpace);
             consolidateDataConfigurationBuilder.customer(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            startProcessingConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            processStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            startProcessingConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             consolidateDataConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
@@ -115,12 +119,13 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder importJobIds(List<Long> importJobIds) {
-            startProcessingConfiguration.setImportJobIds(importJobIds);
+            processStepConfiguration.setImportJobIds(importJobIds);
             return this;
         }
 
         public ProcessAnalyzeWorkflowConfiguration build() {
-            configuration.add(startProcessingConfiguration);
+            configuration.add(processStepConfiguration);
+            configuration.add(processAccountStepConfiguration);
             configuration.add(consolidateDataConfigurationBuilder.build());
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;

@@ -2,16 +2,11 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.io.IOException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -26,6 +21,17 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     public ApplicationId consolidate(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/consolidate", shortenCustomerSpace(customerSpace));
         ResponseDocument<String> responseDoc = post("consolidate", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        String appIdStr = responseDoc.getResult();
+        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId processAnalyze(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze", shortenCustomerSpace(customerSpace));
+        ResponseDocument<String> responseDoc = post("process and analyze", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }

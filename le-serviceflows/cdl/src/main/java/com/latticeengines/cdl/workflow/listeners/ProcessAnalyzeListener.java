@@ -1,18 +1,21 @@
 package com.latticeengines.cdl.workflow.listeners;
 
+import java.lang.reflect.Method;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.ProxyUtils;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -30,6 +33,9 @@ public class ProcessAnalyzeListener extends LEJobListener {
     private DataFeedProxy dataFeedProxy;
 
     @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Inject
@@ -37,9 +43,6 @@ public class ProcessAnalyzeListener extends LEJobListener {
 
     @Inject
     private EntityProxy entityProxy;
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -51,35 +54,40 @@ public class ProcessAnalyzeListener extends LEJobListener {
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+        String initialDataFeedStatus = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_STATUS);
         String customerSpace = job.getTenant().getId();
-        String initialDataFeedStatus = job
-                .getInputContextValue(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS);
 
-        if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            DataFeedExecution execution = dataFeedProxy.finishExecution(customerSpace, initialDataFeedStatus);
-            log.info(String.format("trying to finish running execution %s", execution));
-            if (execution.getStatus() != Status.Consolidated) {
-                throw new RuntimeException("Can't finish execution");
-            }
-            // refresh caches
-            // CacheService cacheService = CacheServiceBase.getCacheService();
-            // cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-            // CacheNames.getCdlConsolidateCacheGroup());
-            // update segment and rating engine counts
+        if (jobExecution.getStatus() == BatchStatus.FAILED) {
+            log.info(String.format("Workflow failed. Update datafeed status for customer %s with status of %s",
+                    customerSpace, initialDataFeedStatus));
+            dataFeedProxy.updateDataFeedStatus(customerSpace, initialDataFeedStatus);
+        } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
+            log.info(String.format("Workflow completed. Update datafeed status for customer %s with status of %s",
+                    customerSpace, Status.Active.getName()));
+            dataFeedProxy.finishProfile(customerSpace, Status.Active.getName());
             DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-            log.info("Switch data collection to version " + inactiveVersion);
-            dataCollectionProxy.switchVersion(customerSpace, inactiveVersion);
-            // update segment and rating engine counts
-            SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
-            RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace);
-        } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
-            log.error("workflow failed!");
-            DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);
-            log.info(String.format("trying to fail running execution %s", execution));
-            if (execution.getStatus() != Status.Failed) {
-                throw new RuntimeException("Can't fail execution");
-            }
+
+//            log.info("Switch data collection to version " + inactiveVersion);
+//            dataCollectionProxy.switchVersion(customerSpace, inactiveVersion);
+//            // update segment and rating engine counts
+//            SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
+//            RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace);
+
+        } else {
+            log.warn("Workflow ended in an unknown state.");
         }
     }
 
+    @Component("evictEntityKeyGenerator")
+    class EvictEntityKeyGenerator implements KeyGenerator {
+
+        @Override
+        public Object generate(Object target, Method method, Object... params) {
+            JobExecution jobExecution = (JobExecution) params[0];
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+            String customerSpace = job.getTenant().getId();
+            return ProxyUtils.shortenCustomerSpace(customerSpace) + "|.*";
+        }
+
+    }
 }
