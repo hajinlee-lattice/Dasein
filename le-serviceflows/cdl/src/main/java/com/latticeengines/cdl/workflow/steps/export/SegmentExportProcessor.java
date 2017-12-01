@@ -239,7 +239,7 @@ public class SegmentExportProcessor {
                                     if (contact.get(fieldNameInAccountLookupResult) != null) {
                                         builder.set(field.name(), contact.get(fieldNameInAccountLookupResult));
                                     } else {
-                                        builder.set(field.name(), account.get(fieldNameInAccountLookupResult));
+                                        setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
                                     }
                                 }
 
@@ -261,7 +261,7 @@ public class SegmentExportProcessor {
                             fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
                                     .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
                         }
-                        builder.set(field.name(), account.get(fieldNameInAccountLookupResult));
+                        setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
                     }
                     records.add(builder.build());
                 }
@@ -278,7 +278,7 @@ public class SegmentExportProcessor {
                             fieldNameInAccountLookupResult = fieldNameInAccountLookupResult
                                     .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
                         }
-                        builder.set(field.name(), account.get(fieldNameInAccountLookupResult));
+                        setValueInAvroRecord(account, builder, field, fieldNameInAccountLookupResult);
                     }
                     records.add(builder.build());
                 }
@@ -290,6 +290,12 @@ public class SegmentExportProcessor {
 
         return accountList.size();
 
+    }
+
+    private void setValueInAvroRecord(Map<String, Object> account, GenericRecordBuilder builder, Field field,
+            String fieldNameInAccountLookupResult) {
+        Object val = account.get(fieldNameInAccountLookupResult);
+        builder.set(field.name(), val == null ? null : val.toString());
     }
 
     private long fetchAndProcessContactsPage(SegmentExportContext segmentExportContext, long segmentContactsCount,
@@ -326,7 +332,7 @@ public class SegmentExportProcessor {
                         fieldNameInContactLookupResult = fieldNameInContactLookupResult
                                 .substring(MetadataSegmentExport.CONTACT_PREFIX.length());
                     }
-                    builder.set(field.name(), contact.get(fieldNameInContactLookupResult));
+                    setValueInAvroRecord(contact, builder, field, fieldNameInContactLookupResult);
                 }
                 records.add(builder.build());
             }
