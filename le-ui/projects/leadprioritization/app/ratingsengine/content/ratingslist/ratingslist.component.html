@@ -11,7 +11,7 @@
             <div class="pull-right">
                 <a
                     class="button blue-button"
-                    ui-sref="home.ratingsengine.ratingsenginetype">
+                    ui-sref="{{vm.createRatingState}}">
                     Create Rating Engine
                 </a>
             </div>
@@ -199,7 +199,7 @@
                 <li class="create-tile" ng-if="vm.current.ratings.length < 12">
                     <a
                         class="button new-tile-button"
-                        ui-sref="home.ratingsengine.wizard">
+                        ui-sref="{{vm.createRatingState}}">
                         <span>&#43;</span>
                         Create Rating Engine
                     </a>

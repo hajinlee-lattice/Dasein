@@ -10,6 +10,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         current: RatingsEngineStore.current,
         query: '',
         ceil: window.Math.ceil,
+        createRatingState: 'home.ratingsengine.ratingsenginetype',
         header: {
             sort: {
                 label: 'Sort By',
@@ -38,7 +39,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.count = function(type) {
         return $filter('filter')(vm.current.ratings, { status: type }, true).length;
     }
-
+    
     vm.init = function($q, $filter) {
 
         // console.log(vm.current.ratings);
