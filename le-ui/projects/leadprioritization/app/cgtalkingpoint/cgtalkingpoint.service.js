@@ -204,7 +204,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             // accounts.push(tmpObj);
             var tmpObj = {
                 name: value.LDC_Name,
-                id: value.AccountId
+                id: value.SalesforceAccountID
             };
             accounts.push(tmpObj);
         });
@@ -427,17 +427,23 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             data: {
                 "lookups": 
                 [{
-                    "attribute": { 
-                        "entity": "Account", 
-                        "attribute": "AccountId" 
-                    } 
-                }, 
-                { 
-                    "attribute": { 
-                        "entity": "Account", 
-                        "attribute": "LDC_Name" 
-                    } 
-                }], 
+                    "attribute": {
+                        "entity": "Account",
+                        "attribute": "AccountId"
+                    }
+                },
+                {
+                    "attribute": {
+                        "entity": "Account",
+                        "attribute": "LDC_Name"
+                    }
+                },
+                {
+                    "attribute": {
+                        "entity": "Account",
+                        "attribute": "SalesforceAccountID"
+                    }
+                }],
                 "page_filter": { 
                     "num_rows": count, 
                     "row_offset": 0 
