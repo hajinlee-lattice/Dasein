@@ -203,7 +203,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
-            if (fieldMapping.getUserField().equalsIgnoreCase("Postal_Code")) {
+            if (fieldMapping.getUserField().equalsIgnoreCase("Fax")) {
                 fieldMapping.setFieldType(UserDefinedType.NUMBER);
                 fieldMapping.setMappedToLatticeField(false);
             }
