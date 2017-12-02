@@ -17,9 +17,9 @@ public class WorkflowBuilder {
     public WorkflowBuilder next(AbstractWorkflow<?> nextWorkflow) {
         int idx = 0;
         for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
-            String stepPath = nextWorkflow.defineWorkflow().getStepDAG().get(idx);
-            stepPath = StringUtils.isBlank(stepPath) ? nextWorkflow.name() : nextWorkflow.name() + "." + stepPath;
-            workflow.step(step, stepPath);
+            String namespace = nextWorkflow.defineWorkflow().getStepNamespaces().get(idx);
+            namespace = StringUtils.isBlank(namespace) ? nextWorkflow.name() : nextWorkflow.name() + "." + namespace;
+            workflow.step(step, namespace);
             idx++;
         }
 
@@ -29,9 +29,9 @@ public class WorkflowBuilder {
     public WorkflowBuilder next(WorkflowInterface<?> nextWorkflow) {
         int idx = 0;
         for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
-            String stepPath = nextWorkflow.defineWorkflow().getStepDAG().get(idx);
-            stepPath = StringUtils.isBlank(stepPath) ? nextWorkflow.name() : nextWorkflow.name() + "." + stepPath;
-            workflow.step(step, stepPath);
+            String namespace = nextWorkflow.defineWorkflow().getStepNamespaces().get(idx);
+            namespace = StringUtils.isBlank(namespace) ? nextWorkflow.name() : nextWorkflow.name() + "." + namespace;
+            workflow.step(step, namespace);
             idx++;
         }
 

@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public interface Choreographer {
 
-    void linkStepDAG(List<String> stepDAG);
+    void linkStepNamespaces(List<String> stepNamespaces);
     boolean skipStep(final AbstractStep<? extends BaseStepConfiguration> step, int seq);
 
     Choreographer DEFAULT_CHOREOGRAPHER = new BaseChoreographer();

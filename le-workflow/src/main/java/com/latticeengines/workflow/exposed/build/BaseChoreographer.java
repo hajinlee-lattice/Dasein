@@ -10,7 +10,7 @@ public class BaseChoreographer implements Choreographer {
 
     protected static final String ROOT = "root";
 
-    private List<String> stepDAG;
+    private List<String> stepNamespaces;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -18,13 +18,13 @@ public class BaseChoreographer implements Choreographer {
     }
 
     @Override
-    public void linkStepDAG(List<String> stepDAG) {
-        this.stepDAG = stepDAG;
+    public void linkStepNamespaces(List<String> stepNamespaces) {
+        this.stepNamespaces = stepNamespaces;
     }
 
     protected String getStepNamespace(int seq) {
         try {
-            String namespace = stepDAG.get(seq);
+            String namespace = stepNamespaces.get(seq);
             return namespace == null ? "" : namespace;
         } catch (IndexOutOfBoundsException e) {
             return null;
