@@ -82,6 +82,7 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
         ctx.setProperty(DataFlowProperty.APPCTX, appCtx);
+        ctx.setProperty(DataFlowProperty.APPLYTABLEPROPERTIES, Boolean.TRUE);
 
         // partitions
         ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);

@@ -4,13 +4,15 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 
 import java.util.Random;
 
+import javax.inject.Inject;
+
+import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -30,13 +32,17 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 @Component(TRANSFORMER_MATCH)
 public class BulkMatchTransformer extends AbstractMatchTransformer {
 
-    @Autowired
-    protected MatchProxy matchProxy;
+    private final MatchProxy matchProxy;
 
-    @Autowired
-    protected Configuration yarnConfiguration;
+    protected final Configuration yarnConfiguration;
 
     private static final Logger log = LoggerFactory.getLogger(BulkMatchTransformer.class);
+
+    @Inject
+    public BulkMatchTransformer(MatchProxy matchProxy, Configuration yarnConfiguration) {
+        this.matchProxy = matchProxy;
+        this.yarnConfiguration = yarnConfiguration;
+    }
 
     public String getName() {
         return TRANSFORMER_MATCH;
@@ -50,13 +56,29 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
         return saveResult(matchCommand, outputAvroPath);
     }
 
+    @Override
+    protected boolean match(String inputAvroPath, Schema schema, String outputAvroPath, MatchTransformerConfig config) {
+        log.info("Using table schema: " + schema.toString(true));
+        MatchInput input = constructMatchInput(inputAvroPath, schema, config);
+        MatchCommand matchCommand = matchProxy.matchBulk(input, HdfsPodContext.getHdfsPodId());
+        matchCommand = waitForMatchCommand(matchCommand);
+        return saveResult(matchCommand, outputAvroPath);
+    }
+
     private MatchInput constructMatchInput(String avroDir, MatchTransformerConfig config) {
+        return constructMatchInput(avroDir, null, config);
+    }
+
+    private MatchInput constructMatchInput(String avroDir, Schema schema, MatchTransformerConfig config) {
         MatchInput matchInput = config.getMatchInput();
         if (matchInput.getTenant() == null) {
             matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         }
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);
+        if (schema != null) {
+            inputBuffer.setSchema(schema);
+        }
         matchInput.setInputBuffer(inputBuffer);
         return matchInput;
     }

@@ -118,7 +118,7 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
     @Override
     public boolean transform(TransformationProgress pipelineProgress, String workflowDir, TransformStep step) {
         try {
-            log.info("Start in transformer");
+            log.info("Start in transformer " + getName());
             T configuration = getConfiguration(step.getConfig());
             if (configuration == null) {
                 log.error("Invalid transformer configuration");

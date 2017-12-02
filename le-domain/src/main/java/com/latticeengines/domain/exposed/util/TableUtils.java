@@ -57,6 +57,11 @@ public class TableUtils {
             if (attr.getSourceLogicalDataType() != null) {
                 fieldBuilder = fieldBuilder.prop("sourceLogicalType", attr.getSourceLogicalDataType());
             }
+            String groups = CollectionUtils.isNotEmpty(attr.getGroupsAsList())
+                    ? StringUtils.join(attr.getGroupsAsList(), ",") : null;
+            if (StringUtils.isNotBlank(groups)) {
+                fieldBuilder = fieldBuilder.prop("groups", groups);
+            }
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
 
             for (Map.Entry<String, Object> entry : attr.getEntries()) {

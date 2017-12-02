@@ -76,6 +76,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -252,6 +253,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             importTemplate.setTableType(TableType.IMPORTTABLE);
             switch (entity) {
             case Account:
+                importTemplate.getAttributes()
+                        .forEach(attr -> attr.setGroupsViaList(Arrays.asList( //
+                                ColumnSelection.Predefined.TalkingPoint, //
+                                ColumnSelection.Predefined.CompanyProfile)));
                 importTemplate.setName(SchemaInterpretation.Account.name());
                 break;
             case Contact:
@@ -560,7 +565,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             Assert.assertTrue(report.has(BusinessEntity.Contact.name()));
             Assert.assertTrue(report.has(BusinessEntity.Product.name()));
             Assert.assertTrue(report.has(BusinessEntity.Transaction.name()));
-            ObjectNode accountReport = (ObjectNode)report.get(BusinessEntity.Account.name());
+            ObjectNode accountReport = (ObjectNode) report.get(BusinessEntity.Account.name());
             Assert.assertNotNull(accountReport);
             Assert.assertTrue(accountReport.has("NEW"));
             Assert.assertTrue(accountReport.has("UPDATE"));
@@ -585,12 +590,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Map<String, Integer> map = JsonUtils.deserialize(publishReport.getJson().getPayload(),
                 new TypeReference<Map<String, Integer>>() {
                 });
-        logger.info("Redshift report size is " +map.entrySet().size() +
-                ", expected " + expectedCounts.size() + " reports for redshift exporting.");
+        logger.info("Redshift report size is " + map.entrySet().size() + ", expected " + expectedCounts.size()
+                + " reports for redshift exporting.");
         // assertEquals(map.entrySet().size(), expectedCounts.size(),
-        //        "Should have " + expectedCounts.size() + " reports for redshift exporting.");
-        expectedCounts.forEach((role, count) -> logger.info("Redshit report role " + role + " count " +
-                                                map.get(role.name()).longValue() + " should have " + count.longValue()));
+        // "Should have " + expectedCounts.size() + " reports for redshift
+        // exporting.");
+        expectedCounts.forEach((role, count) -> logger.info("Redshit report role " + role + " count "
+                + map.get(role.name()).longValue() + " should have " + count.longValue()));
         expectedCounts.forEach((role, count) -> assertEquals(map.get(role.name()).longValue(), count.longValue(),
                 "The count of table " + role + " does not meet the expectation."));
     }
@@ -692,8 +698,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         final MetadataSegment segment1 = segment;
         expectedCounts.forEach((entity, count) -> {
             Assert.assertNotNull(segment1.getEntityCount(entity), "Cannot find count of " + entity);
-            // Assert.assertEquals(segment1.getEntityCount(entity), count);
-            logger.info("Segment count " + entity.name() + " expected " + segment1.getEntityCount(entity) + " found " + count);
+            Assert.assertEquals(segment1.getEntityCount(entity), count);
+            logger.info("Segment count " + entity.name() + " expected " + segment1.getEntityCount(entity) + " found "
+                    + count);
         });
     }
 
@@ -750,8 +757,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         expectedCounts.forEach((bkt, count) -> {
             Assert.assertNotNull(counts.get(bkt.getName()),
                     "Cannot find count for bucket " + bkt.getName() + " in rating engine.");
-            // Assert.assertEquals(counts.get(bkt.getName()), count);
-            logger.info("Rating engine count " + bkt.getName() + " expected " + counts.get(bkt.getName()) + " found " + count);
+            Assert.assertEquals(counts.get(bkt.getName()), count);
+            logger.info("Rating engine count " + bkt.getName() + " expected " + counts.get(bkt.getName()) + " found "
+                    + count);
         });
     }
 

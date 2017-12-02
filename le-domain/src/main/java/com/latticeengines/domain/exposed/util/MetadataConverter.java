@@ -5,8 +5,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -22,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public class MetadataConverter {
     private static Set<Schema.Type> supportedAvroTypes = new HashSet<Schema.Type>();
@@ -204,6 +208,13 @@ public class MetadataConverter {
                 List<String> enumValues = Arrays.asList(enumValuesString.split(","));
                 attribute.setCleanedUpEnumValues(enumValues);
             }
+            if (StringUtils.isNotBlank(field.getProp("groups"))) {
+                List<ColumnSelection.Predefined> groups = Arrays.stream(field.getProp("groups").split(","))
+                        .map(ColumnSelection.Predefined::fromName).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(groups)) {
+                    attribute.setGroupsViaList(groups);
+                }
+            }
             AttributeUtils.setPropertiesFromStrings(attribute, field.props());
 
             return attribute;
@@ -216,6 +227,13 @@ public class MetadataConverter {
         List<Attribute> attrs = new ArrayList<>();
         String fieldName = field.name();
         JsonNode bucketedAttrs = field.getJsonProp("bucketed_attrs");
+
+        List<ColumnSelection.Predefined> groups = new ArrayList<>();
+        if (StringUtils.isNotBlank(field.getProp("groups"))) {
+            groups = Arrays.stream(field.getProp("groups").split(","))
+                    .map(ColumnSelection.Predefined::fromName).collect(Collectors.toList());
+        }
+
         if (bucketedAttrs == null) {
             attrs.add(getAttribute(field));
         } else {
@@ -228,6 +246,9 @@ public class MetadataConverter {
                 attr.setNumOfBits(bucketedAttr.get("num_bits").asInt());
                 attr.setPhysicalName(fieldName);
                 attr.setNullable(Boolean.TRUE);
+                if (CollectionUtils.isNotEmpty(groups)) {
+                    attr.setGroupsViaList(groups);
+                }
                 attrs.add(attr);
             }
         }

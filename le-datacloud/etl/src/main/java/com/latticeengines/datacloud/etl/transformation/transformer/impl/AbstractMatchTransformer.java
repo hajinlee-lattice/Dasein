@@ -1,27 +1,42 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.apache.avro.Schema;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransformerConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractTransformer.class);
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
+
+    @Inject
+    private MetadataProxy metadataProxy;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Override
     public boolean validateConfig(MatchTransformerConfig config, List<String> baseSources) {
@@ -49,15 +64,40 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
         if (!(baseSources[0] instanceof TableSource)) {
             sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(baseSources[0],
                     baseSourceVersions.get(0)).toString();
+            return match(sourceDirInHdfs, workflowDir, getConfiguration(confStr));
         } else {
-            Table table = ((TableSource) baseSources[0]).getTable();
-            if (table.getExtracts().size() > 1) {
+            TableSource tableSource = (TableSource) baseSources[0];
+            Table table = (tableSource).getTable();
+
+            if (table.getExtracts().size() != 1) {
                 throw new IllegalArgumentException("Can only handle single extract table.");
             }
-            sourceDirInHdfs = table.getExtracts().get(0).getPath();
+
+            String avroDir = table.getExtracts().get(0).getPath();
+            String tableName = table.getName();
+            CustomerSpace customerSpace = tableSource.getCustomerSpace();
+
+            Schema schema = null;
+            try {
+                String avscPath = hdfsPathBuilder //
+                        .constructTableSchemaFilePath(tableName, customerSpace, "").toString();
+                InputStream is = HdfsUtils.getInputStream(yarnConfiguration, avscPath);
+                schema = new Schema.Parser().parse(is);
+            } catch (IOException e) {
+                log.warn("Failed to get schema from avsc", e);
+            }
+
+            if (schema == null) {
+                table = metadataProxy.getTable(customerSpace.toString(), tableName);
+                schema = TableUtils.createSchema("input", table);
+            }
+
+            return match(avroDir, schema, workflowDir, getConfiguration(confStr));
         }
-        return match(sourceDirInHdfs, workflowDir, getConfiguration(confStr));
+
     }
 
     abstract boolean match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config);
+
+    abstract boolean match(String inputAvroPath, Schema schema, String outputAvroPath, MatchTransformerConfig config);
 }
