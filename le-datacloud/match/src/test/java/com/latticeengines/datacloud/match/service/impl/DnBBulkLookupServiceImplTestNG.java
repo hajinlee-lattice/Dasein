@@ -83,7 +83,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
     }
 
-    @Test(groups = "dnb", enabled = true)
+    @Test(groups = "dnb", enabled = false)
     public void testDnBBulkLookupWithErrorRecords() {
         DnBBatchMatchContext batchContext = dnBBulkLookupDispatcher.sendRequest(generateInputWithErrorRecords());
         Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.SUBMITTED);
@@ -116,8 +116,8 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     public static Object[][] getEntityInputData() {
         return new Object[][] {
-                { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", "013919572", 7, new DnBMatchGrade("AZZAAZZZFFZ"),
-                        "AMAZON INC", "232 E OHIO ST FL 3", "CHICAGO", "IL", "US", "606113217", "(312) 642-5400" },
+                { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", "002078755", 7, new DnBMatchGrade("AZZAAZZZFFZ"),
+                        "AMAZON", "2801 S WESTERN AVE", "CHICAGO", "IL", "US", "606085220", "(773) 869-9056" },
                 { "GOOGLE GERMANY", "HAMBURG", null, "DE", "330465266", 7, new DnBMatchGrade("AZZAZZZZZFZ"),
                         "Google Germany GmbH", "ABC-Str. 19", "Hamburg", "DE", "DE", "20354", "040808179000" },
                 { "GORMAN MFG CO INC", "SACRAMENTO", "CA", "US", "009175688", 7, new DnBMatchGrade("AZZAAZZZFFZ"),

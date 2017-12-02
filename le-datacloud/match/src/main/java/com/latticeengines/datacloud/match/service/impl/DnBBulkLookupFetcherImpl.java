@@ -1,8 +1,13 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -140,12 +145,13 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                     (returnCode == DnBReturnCode.PARTIAL_SUCCESS ? "2" : "1"));
             String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
             byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
-            String decodedStr = new String(decodeResults);
+            List<String> resultsList = decompress(decodeResults);
             if (batchContext.getLogDnBBulkResult()) {
-                log.info(String.format("Match result for serviceBatchId = %s:\n%s", batchContext.getServiceBatchId(),
-                        decodedStr));
+                log.info(String.format("Match result for serviceBatchId = %s", batchContext.getServiceBatchId()));
+                for (String res : resultsList) {
+                    log.info(res);
+                }
             }
-            List<String> resultsList = Arrays.asList(decodedStr.split("\n"));
             for (String result : resultsList) {
                 DnBMatchContext normalizedResult = normalizeOneRecord(result, batchContext.getServiceBatchId());
                 DnBMatchContext context = batchContext.getContexts().get(normalizedResult.getLookupRequestId());
@@ -161,10 +167,25 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             }
         } catch (Exception ex) {
             log.error(String.format("Fail to extract match result from response of DnB bulk match request %s: %s",
-                    batchContext.getServiceBatchId(), response));
+                    batchContext.getServiceBatchId(), response), ex);
             batchContext.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }
 
+    }
+
+    private List<String> decompress(byte[] compressed) throws IOException {
+        List<String> res = new ArrayList<>();
+        ByteArrayInputStream bis = new ByteArrayInputStream(compressed);
+        GZIPInputStream gis = new GZIPInputStream(bis);
+        BufferedReader br = new BufferedReader(new InputStreamReader(gis, "UTF-8"));
+        String line;
+        while ((line = br.readLine()) != null) {
+            res.add(line);
+        }
+        br.close();
+        gis.close();
+        bis.close();
+        return res;
     }
 
     private DnBReturnCode parseBatchProcessStatus(String body) {
@@ -250,7 +271,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             output.setDnbCode(DnBReturnCode.OK);
         } catch (Exception e) {
             log.error(String.format("Fail to extract duns from match result of DnB bulk match request %s: %s",
-                    serviceBatchId, record));
+                    serviceBatchId, record), e);
             output.setDnbCode(DnBReturnCode.UNMATCH);
         }
         return output;
