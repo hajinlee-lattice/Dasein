@@ -58,6 +58,8 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.go = function(state, isPrev, params) {
+        angular.element(window).scrollTop(0,0);
+
         var current = vm.itemMap[$state.current.name];
 
         vm.nextDisabled = true;
@@ -98,7 +100,7 @@ angular.module('common.wizard.controls', [])
                 }
 
                 if (i-1 >= 0) {
-                    prev = vm.getPrev(i) ? vm.getPrev(i).state : vm.prev;
+                    prev = vm.getPrev(i-1) ? vm.getPrev(i-1).state : WizardControlsOptions.backState;
                     psplit = prev.split('.');
                     
                     vm.prev = vm.rootState + psplit.join('.');
@@ -115,7 +117,7 @@ angular.module('common.wizard.controls', [])
             i = 1;
 
         while (item = vm.items[index + i++]) {
-            if (item.hide) {
+            if (item.hide && index + i < vm.items.length) {
                 continue;
             }
 
@@ -126,16 +128,17 @@ angular.module('common.wizard.controls', [])
 
     vm.getPrev = function(index) {
         var item,
-            i = 1;
+            i = 0;
 
-        while (item = vm.items[index + i--]) {
-            if (item.hide) {
+        while (item = vm.items[index + i]) {
+            i = i - 1;
+
+            if (item.hide && index + i >= 0) {
                 continue;
             }
 
             break;
         }
-
         return item;
     }
 
