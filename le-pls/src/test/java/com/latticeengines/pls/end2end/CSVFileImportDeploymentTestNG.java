@@ -103,7 +103,71 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+    }
 
+    @Test(groups = "deployment")
+    public void testSchemaUpdate() {
+        SourceFile firstFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Small_Account.csv"));
+
+
+        String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX + "TestSchemaUpdate";
+        boolean cityExist = false;
+        boolean countryExist = false;
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
+                (firstFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if(fieldMapping.getUserField().equalsIgnoreCase("city")) {
+                cityExist = true;
+            }
+            if (fieldMapping.getUserField().equalsIgnoreCase("country")) {
+                countryExist = true;
+            }
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+        Assert.assertFalse(cityExist);
+        Assert.assertFalse(countryExist);
+
+        modelingFileMetadataService.resolveMetadata(firstFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE, feedType);
+
+        ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, firstFile.getName(),
+                firstFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
+
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        SourceFile secondFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Extend_Account.csv",
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Extend_Account.csv"));
+
+        fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
+                (secondFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equalsIgnoreCase("city")) {
+                Assert.assertNotNull(fieldMapping.getMappedField());
+                Assert.assertFalse(fieldMapping.isMappedToLatticeField());
+                cityExist = true;
+            }
+            if (fieldMapping.getUserField().equalsIgnoreCase("country")) {
+                Assert.assertNotNull(fieldMapping.getMappedField());
+                Assert.assertFalse(fieldMapping.isMappedToLatticeField());
+                countryExist = true;
+            }
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+        Assert.assertTrue(cityExist);
+        Assert.assertTrue(countryExist);
+    }
+
+    @Test(groups = "deployment")
+    public void importBase() {
         prepareBaseData();
         getDataFeedTask();
     }
@@ -159,7 +223,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", dependsOnMethods = "importBase")
     public void verifyBase() {
         Assert.assertNotNull(accountDataFeedTask);
         Assert.assertNotNull(contactDataFeedTask);

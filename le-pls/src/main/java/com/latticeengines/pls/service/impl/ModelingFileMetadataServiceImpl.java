@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
@@ -86,13 +87,40 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         log.info(String.format("Customer Space: %s, entity: %s, source: %s, datafeed: %s", customerSpace.toString(),
                 entity, source, feedType));
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+        FieldMappingDocument fieldMappingFromSchemaRepo = getFieldMappingDocumentBestEffort(sourceFileName,
+                schemaInterpretation, null);
         if (dataFeedTask == null) {
-            SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
-            return getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, null);
+            return fieldMappingFromSchemaRepo;
         } else {
             Table templateTable = dataFeedTask.getImportTemplate();
-            return getFieldMappingBaseOnTable(sourceFile, templateTable);
+            FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
+            return mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo);
         }
+    }
+
+    private FieldMappingDocument mergeFieldMappingBestEffort(FieldMappingDocument templateMapping,
+                                                             FieldMappingDocument standardMapping) {
+        FieldMappingDocument finalMapping = templateMapping;
+        Map<String, FieldMapping> standardMappingMap = new HashMap<>();
+        for (FieldMapping fieldMapping : standardMapping.getFieldMappings()) {
+            standardMappingMap.put(fieldMapping.getUserField(), fieldMapping);
+        }
+        List<FieldMapping> fieldMappings = new ArrayList<>();
+        for (FieldMapping fieldMapping : templateMapping.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                if (standardMappingMap.containsKey(fieldMapping.getUserField()) &&
+                        standardMappingMap.get(fieldMapping.getUserField()).getMappedField() != null) {
+                    fieldMapping.setMappedField(standardMappingMap.get(fieldMapping.getUserField()).getMappedField());
+                    fieldMapping.setMappedToLatticeField(false);
+                    fieldMappings.add(fieldMapping);
+                }
+            } else {
+                fieldMappings.add(fieldMapping);
+            }
+        }
+        finalMapping.setFieldMappings(fieldMappings);
+        return finalMapping;
     }
 
     private FieldMappingDocument getFieldMappingBaseOnTable(SourceFile sourceFile, Table table) {
