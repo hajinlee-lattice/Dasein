@@ -1,7 +1,6 @@
 package com.latticeengines.workflow.functionalframework;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -78,26 +77,20 @@ public class DynamicWorkflowChoreographer extends BaseChoreographer implements C
     }
 
     private boolean skipRootA(NamedStep namedStep, int seq) {
-        if (stepA.getStepName().equals(namedStep.getStepName())) {
-            List<String> namespace = getStepNamespace(seq);
-            if (namespace.size() == 0) {
-                return true;
-            }
-        }
-        return false;
+        return stepA.getStepName().equals(namedStep.getStepName()) && ROOT.equals(getParentWorkflow(seq));
     }
 
     private boolean skipCInWorkflowB(NamedStep namedStep, int seq) {
-        return  namespaceEndWith(seq, Collections.singletonList(workflowB.name())) //
+        return  getStepNamespace(seq).endsWith(workflowB.name()) //
                 && stepC.getStepName().equals(namedStep.getStepName());
     }
 
     private boolean skipRootWorkflow(int seq, String workflowName) {
-        return namespaceBeginWith(seq, Collections.singletonList(workflowName));
+        return getStepNamespace(seq).startsWith(workflowName);
     }
 
     private boolean skipWorkflow(int seq, String workflowName) {
-        return namespaceContains(seq, Collections.singletonList(workflowName));
+        return getStepNamespace(seq).contains(workflowName);
     }
 
     public void setSkipStrategy(String skipStrategy) {

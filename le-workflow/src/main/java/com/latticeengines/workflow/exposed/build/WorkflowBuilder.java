@@ -1,7 +1,6 @@
 package com.latticeengines.workflow.exposed.build;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -11,17 +10,16 @@ public class WorkflowBuilder {
     private Workflow workflow = new Workflow();
 
     public WorkflowBuilder next(AbstractStep<? extends BaseStepConfiguration> step) {
-        workflow.step(step, new ArrayList<>());
+        workflow.step(step, null);
         return this;
     }
 
     public WorkflowBuilder next(AbstractWorkflow<?> nextWorkflow) {
         int idx = 0;
         for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
-            List<String> namespace = new ArrayList<>();
-            namespace.add(nextWorkflow.name());
-            namespace.addAll(nextWorkflow.defineWorkflow().getStepNamespaces().get(idx));
-            workflow.step(step, namespace);
+            String stepPath = nextWorkflow.defineWorkflow().getStepDAG().get(idx);
+            stepPath = StringUtils.isBlank(stepPath) ? nextWorkflow.name() : nextWorkflow.name() + "." + stepPath;
+            workflow.step(step, stepPath);
             idx++;
         }
 
@@ -31,10 +29,9 @@ public class WorkflowBuilder {
     public WorkflowBuilder next(WorkflowInterface<?> nextWorkflow) {
         int idx = 0;
         for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
-            List<String> namespace = new ArrayList<>();
-            namespace.add(nextWorkflow.name());
-            namespace.addAll(nextWorkflow.defineWorkflow().getStepNamespaces().get(idx));
-            workflow.step(step, namespace);
+            String stepPath = nextWorkflow.defineWorkflow().getStepDAG().get(idx);
+            stepPath = StringUtils.isBlank(stepPath) ? nextWorkflow.name() : nextWorkflow.name() + "." + stepPath;
+            workflow.step(step, stepPath);
             idx++;
         }
 

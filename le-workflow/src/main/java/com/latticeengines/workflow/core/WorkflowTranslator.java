@@ -65,7 +65,7 @@ public class WorkflowTranslator {
         }
 
         Choreographer choreographer = workflow.getChoreographer();
-        choreographer.linkStepNamespaces(workflow.getStepNamespaces());
+        choreographer.linkStepDAG(workflow.getStepDAG());
         SimpleJobBuilder simpleJobBuilder = jobBuilderFactory.get(name).start(step(workflow.getSteps().get(0), choreographer, 0));
         if (workflow.getSteps().size() > 1) {
             for (int i = 1; i < workflow.getSteps().size(); i++) {
