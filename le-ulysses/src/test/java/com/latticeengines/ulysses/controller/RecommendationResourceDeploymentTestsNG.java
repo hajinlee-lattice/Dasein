@@ -3,6 +3,10 @@ package com.latticeengines.ulysses.controller;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -10,6 +14,7 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.playmakercore.dao.RecommendationDao;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
@@ -18,6 +23,9 @@ public class RecommendationResourceDeploymentTestsNG extends UlyssesDeploymentTe
 
     @Autowired
     private RecommendationEntityMgr recommendationEntityMgr;
+
+    @Autowired
+    private RecommendationDao recommendationDao;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -52,10 +60,21 @@ public class RecommendationResourceDeploymentTestsNG extends UlyssesDeploymentTe
             Recommendation recc = getOAuth2RestTemplate()
                     .getForObject(getRecommendationResourceUrl() + recommendation.getId(), Recommendation.class);
             Assert.assertNotNull(recc);
-            Assert.assertEquals(recc.getId(), recommendation.getAccountId());
+            Assert.assertEquals(recc.getId(), recommendation.getId());
         } finally {
-            recommendationEntityMgr.delete(recommendation);
+            deleteRecommendation(recommendation);
         }
+    }
+
+    private void deleteRecommendation(Recommendation recommendation) {
+        PlatformTransactionManager ptm = applicationContext.getBean("dataTransactionManager",
+                PlatformTransactionManager.class);
+        TransactionTemplate tx = new TransactionTemplate(ptm);
+        tx.execute(new TransactionCallbackWithoutResult() {
+            public void doInTransactionWithoutResult(TransactionStatus status) {
+                recommendationDao.delete(recommendation);
+            }
+        });
     }
 
 }
