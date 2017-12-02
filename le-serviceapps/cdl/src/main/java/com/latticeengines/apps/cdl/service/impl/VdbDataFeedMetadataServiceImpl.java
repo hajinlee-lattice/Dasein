@@ -46,7 +46,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public Table getMetadata(String metadataStr) {
+    public Table getMetadata(String metadataStr, String entity) {
         VdbLoadTableConfig vdbLoadTableConfig = null;
         try {
             vdbLoadTableConfig = JsonUtils.deserialize(metadataStr, VdbLoadTableConfig.class);
@@ -55,7 +55,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         Table metaTable = new Table();
         for (VdbSpecMetadata metadata : vdbLoadTableConfig.getMetadataList()) {
-            Attribute attr = VdbMetadataUtils.convertToAttribute(metadata);
+            Attribute attr = VdbMetadataUtils.convertToAttribute(metadata, entity);
             metaTable.addAttribute(attr);
         }
         metaTable.setPrimaryKey(null);

@@ -21,7 +21,7 @@ public abstract class DataFeedMetadataService {
         return services.get(serviceName);
     }
 
-    public abstract Table getMetadata(String metadataStr);
+    public abstract Table getMetadata(String metadataStr, String entity);
 
     public abstract Table resolveMetadata(Table original, Table schemaTable);
 

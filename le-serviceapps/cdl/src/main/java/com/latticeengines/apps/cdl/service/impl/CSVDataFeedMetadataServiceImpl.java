@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("csvDataFeedMetadataService")
@@ -35,15 +36,17 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public Table getMetadata(String metadataStr) {
+    public Table getMetadata(String metadataStr, String entity) {
         CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
         log.info("Template table name: " + importConfig.getTemplateName());
         Table metaTable = metadataProxy.getTable(importConfig.getCustomerSpace().toString(),
                 importConfig.getTemplateName());
-        List<ColumnSelection.Predefined> groups = new ArrayList<>();
-        groups.add(ColumnSelection.Predefined.TalkingPoint);
-        for (Attribute attribute : metaTable.getAttributes()) {
-            attribute.setGroupsViaList(groups);
+        if (BusinessEntity.getByName(entity) == BusinessEntity.Account) {
+            List<ColumnSelection.Predefined> groups = new ArrayList<>();
+            groups.add(ColumnSelection.Predefined.TalkingPoint);
+            for (Attribute attribute : metaTable.getAttributes()) {
+                attribute.setGroupsViaList(groups);
+            }
         }
         return metaTable;
     }
@@ -94,7 +97,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                 if (!StringUtils.equalsIgnoreCase(srcAttrs.get(attr.getName()).getPhysicalDataType(),
                         attr.getPhysicalDataType())) {
                     log.error(String.format("Field %s should have the type %s, not %s", attr.getName(),
-                            srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
+                            srcAttrs.get(attr.getName()).getPhysicalDataType(), attr.getPhysicalDataType()));
                     return false;
                 }
             }

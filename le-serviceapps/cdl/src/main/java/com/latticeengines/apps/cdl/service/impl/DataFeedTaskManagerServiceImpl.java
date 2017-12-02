@@ -74,7 +74,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
         }
         MultiTenantContext.setTenant(tenant);
-        Table newMeta = dataFeedMetadataService.getMetadata(metadata);
+        Table newMeta = dataFeedMetadataService.getMetadata(metadata, entity);
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);

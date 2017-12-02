@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class VdbMetadataUtils {
 
@@ -30,7 +31,7 @@ public class VdbMetadataUtils {
     static final Set<String> unparsableFundamentalTypes = new HashSet<>(Arrays.asList( //
             "alert", "segment", "unknown"));
 
-    public static Attribute convertToAttribute(VdbSpecMetadata metadata) {
+    public static Attribute convertToAttribute(VdbSpecMetadata metadata, String entity) {
         try {
             Attribute attr = new Attribute();
             attr.setNullable(Boolean.TRUE);
@@ -57,7 +58,9 @@ public class VdbMetadataUtils {
                 attr.setLogicalDataType(LogicalDataType.Timestamp);
             }
             setAttributeExtensions(attr, metadata.getExtensions());
-            setAttributeGroup(attr);
+            if (BusinessEntity.getByName(entity) == BusinessEntity.Account) {
+                setAttributeGroup(attr);
+            }
             return attr;
         } catch (Exception e) {
             // see the log to add unit test

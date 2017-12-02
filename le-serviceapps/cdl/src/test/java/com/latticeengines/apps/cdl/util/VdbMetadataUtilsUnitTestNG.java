@@ -23,7 +23,7 @@ public class VdbMetadataUtilsUnitTestNG {
         VdbSpecMetadata metadata = createVdbMetadata();
         metadata.setFundamentalType(vdbValue);
 
-        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata);
+        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata, "Account");
         runBasicVerification(attribute);
         if (expected == null) {
             Assert.assertNull(attribute.getFundamentalType());
@@ -48,7 +48,7 @@ public class VdbMetadataUtilsUnitTestNG {
         VdbSpecMetadata metadata = createVdbMetadata();
         metadata.setStatisticalType(vdbType);
 
-        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata);
+        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata, "Account");
         runBasicVerification(attribute);
         if (expected == null) {
             Assert.assertNull(attribute.getStatisticalType());
@@ -84,7 +84,7 @@ public class VdbMetadataUtilsUnitTestNG {
         for (String vdbValue: VdbMetadataUtils.unparsableFundamentalTypes) {
             VdbSpecMetadata metadata = createVdbMetadata();
             metadata.setFundamentalType(vdbValue);
-            Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata);
+            Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata, "Account");
             runBasicVerification(attribute);
             Assert.assertNull(attribute.getFundamentalType());
         }
@@ -149,7 +149,7 @@ public class VdbMetadataUtilsUnitTestNG {
     @Test(groups = "unit")
     public void testMetadataExtension() {
         VdbSpecMetadata metadata = createVdbMetadata();
-        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata);
+        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata, "Account");
         Assert.assertNotNull(attribute);
         Assert.assertTrue(attribute.getExcludeFromAll());
         Assert.assertFalse(attribute.getExcludeFromListView());

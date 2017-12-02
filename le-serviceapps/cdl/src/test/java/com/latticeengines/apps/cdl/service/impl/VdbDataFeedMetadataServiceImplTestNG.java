@@ -51,7 +51,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)
     public void testGetMetadata() {
-        testTable = vdbDataFeedMetadataService.getMetadata(testVdbMetadata);
+        testTable = vdbDataFeedMetadataService.getMetadata(testVdbMetadata, "Account");
         Assert.assertNotNull(testTable);
         Assert.assertEquals(testTable.getName(), "FS_Data_For_Dante_Accounts_1000");
         Attribute requiredField = testTable.getAttribute("account");
@@ -66,7 +66,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(urlField.getGroupsAsList(), Arrays.asList(ColumnSelection.Predefined.CompanyProfile));
         Assert.assertEquals(verticalField.getGroupsAsList(),
                 Arrays.asList(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.CompanyProfile));
-        Table error = vdbDataFeedMetadataService.getMetadata(errorVdbMetadata);
+        Table error = vdbDataFeedMetadataService.getMetadata(errorVdbMetadata, "Account");
     }
 
     @Test(groups = "functional")
