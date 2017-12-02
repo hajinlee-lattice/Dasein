@@ -14,7 +14,6 @@ public class Headers {
     static {
         List<BasicNameValuePair> list = new ArrayList<>();
         list.add(new BasicNameValuePair("MagicAuthentication", "Security through obscurity!"));
-        list.add(new BasicNameValuePair("Content-Type", "application/json; charset=utf-8"));
         list.add(new BasicNameValuePair("Accept", "application/json"));
         headers = ImmutableList.copyOf(list);
     }
