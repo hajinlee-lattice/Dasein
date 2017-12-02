@@ -18,7 +18,7 @@ angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.moda
         vm.config = {
             'name': "rating_engine_deactivate",
             'type': 'sm',
-            'title': 'Deactive Rating Engine',
+            'title': 'Deactivate Rating Engine',
             'titlelength': 100,
             'dischargetext': 'CANCEL',
             'dischargeaction' :'cancel',
