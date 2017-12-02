@@ -5,7 +5,7 @@ import java.util.Map;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("Represents ModelingMethod JSON Object")
+@ApiModel("Represents ModelingMethod Enum values")
 public enum ModelingMethod {
 
 	PROPENSITY("Propensity"), //

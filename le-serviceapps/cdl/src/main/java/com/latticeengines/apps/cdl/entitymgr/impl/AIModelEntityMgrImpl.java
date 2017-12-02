@@ -69,7 +69,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
     @Transactional(propagation = Propagation.REQUIRED)
 	public AIModel createOrUpdateAIModel(AIModel aiModel, String ratingEngineId) {
         if (aiModel.getId() == null) {
-            throw new UnsupportedOperationException("Create new AIModel is not yet Supported");
+            throw new UnsupportedOperationException("Create new AIModel is not Supported");
         }
         else {
         		AIModel retrievedAIModel = findById(aiModel.getId());
@@ -93,6 +93,10 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
         retrievedAIModel.setTargetCustomerSet(aiModel.getTargetCustomerSet());
         retrievedAIModel.setTargetProducts(aiModel.getTargetProducts());
         retrievedAIModel.setTrainingProducts(aiModel.getTrainingProducts());
+        retrievedAIModel.setTrainingSegment(aiModel.getTrainingSegment());
+        retrievedAIModel.setModelingJobId(aiModel.getModelingJobId() != null ? aiModel.getModelingJobId().toString() : null);
+        retrievedAIModel.setModelingConfigFilters(aiModel.getModelingConfigFilters());
+        retrievedAIModel.setModelSummary(aiModel.getModelSummary());
     }
 		
 }

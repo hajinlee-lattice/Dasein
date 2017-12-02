@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,15 +14,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
-import com.latticeengines.apps.cdl.repository.AIModelRepository;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
+import com.latticeengines.domain.exposed.pls.ModelingConfig;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
-import com.latticeengines.domain.exposed.pls.ModelingConfigFilter.MODEL_CONFIG;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
-import com.latticeengines.network.exposed.modelquality.ModelQualityModelRunInterface;
 
 public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 	private static final Logger log = LoggerFactory.getLogger(AIModelEntityMgrImplTestNG.class);
@@ -34,6 +34,8 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final String PRODUCT_ID1 = "PID1";
     private static final String PRODUCT_ID2 = "PID2";
     private static final String PRODUCT_ID3 = "PID3";
+    
+    private static final String APP_JOB_ID = "application_1510227628013_17833";
 
     @Autowired
     private AIModelEntityMgr aiModelEntityMgr;
@@ -97,7 +99,10 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     		aiModel.setTrainingSegment(createMetadataSegment(TRAINING_SEGMENT_NAME));
     		aiModel.setTrainingProducts(generateTrainingProducts());
     		aiModel.setTargetCustomerSet("new");
-    		aiModelEntityMgr.update(aiModel);
+    		
+    		aiModel.setModelingJobId(APP_JOB_ID);
+    		
+    		aiModelEntityMgr.createOrUpdateAIModel(aiModel, ratingEngineId);
     		
     		aiModel = aiModelEntityMgr.findById(aiModel.getId());
     		Assert.assertNotNull(aiModel, "Could not find AIModel");
@@ -106,22 +111,15 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     
     @Test(groups = "functional", dependsOnMethods= {"testUpdateTrainingData"})
     public void testUpdateRefineSettings() {
-    		ModelingConfigFilter spendFilter = new ModelingConfigFilter();
-    		spendFilter.setConfigName(MODEL_CONFIG.SPEND_IN_PERIOD);
-    		spendFilter.setCriteria("Atmost");
-    		spendFilter.setValue(1500);
+        ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD, "Atmost", 1500);
+    	 	ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD, "Atmost", 100);
     		
-    		ModelingConfigFilter quantityFilter = new ModelingConfigFilter();
-    		quantityFilter.setConfigName(MODEL_CONFIG.QUANTITY_IN_PERIOD);
-    		quantityFilter.setCriteria("Atmost");
-    		quantityFilter.setValue(100);
-    		
-    		List<ModelingConfigFilter> configFitlers = new ArrayList<>();
-    		configFitlers.add(spendFilter);
-    		configFitlers.add(quantityFilter);
-    		
-    		aiModel.setModelingConfigFilters(configFitlers);
-    		aiModelEntityMgr.update(aiModel);
+	 	Map<ModelingConfig, ModelingConfigFilter> configFitlers = new HashMap<>();
+	 	configFitlers.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);
+	 	configFitlers.put(ModelingConfig.QUANTITY_IN_PERIOD, quantityFilter);
+	 	aiModel.setModelingConfigFilters(configFitlers);
+		
+    		aiModelEntityMgr.createOrUpdateAIModel(aiModel, ratingEngineId);
     		
     		aiModel = aiModelEntityMgr.findById(aiModel.getId());
     		assertUpdatedModelWithConfigFilters(aiModel, configFitlers);
@@ -154,14 +152,16 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     		Assert.assertNotNull(aiModel.getTrainingProducts());
     		Assert.assertNotNull(aiModel.getTrainingProducts().contains(PRODUCT_ID3));
     		Assert.assertEquals(aiModel.getTargetCustomerSet(), "new");
+    		
+    		Assert.assertEquals(aiModel.getModelingJobId().toString(), APP_JOB_ID);
 	}
     
-    private void assertUpdatedModelWithConfigFilters(AIModel aiModel, List<ModelingConfigFilter> filters) {
+    private void assertUpdatedModelWithConfigFilters(AIModel aiModel, Map<ModelingConfig, ModelingConfigFilter> filters) {
 		assertUpdatedAIModel(aiModel);
 		Assert.assertNotNull(aiModel.getModelingConfigFilters());
 		Assert.assertEquals(aiModel.getModelingConfigFilters().size(), filters.size());
-		for (ModelingConfigFilter filter: filters) {
-			Assert.assertTrue(aiModel.getModelingConfigFilters().contains(filter));
+		for (ModelingConfigFilter filter: filters.values()) {
+			Assert.assertTrue(aiModel.getModelingConfigFilters().values().contains(filter));
 		}
     }
     

@@ -1,18 +1,36 @@
 package com.latticeengines.domain.exposed.pls;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+
+@ApiModel("Represents ModelingConfigFilter JSON Object")
 public class ModelingConfigFilter {
 
-	private MODEL_CONFIG configName;
+	@JsonProperty("configName")
+	private ModelingConfig configName;
 	
+	@JsonProperty("criteria")
 	private String criteria;
 	
+	@JsonProperty("value")
 	private Integer value;
 	
-	public MODEL_CONFIG getConfigName() {
+	public ModelingConfigFilter() {
+		
+	}
+	
+	public ModelingConfigFilter(ModelingConfig configName, String criteria, Integer value) {
+		this.configName = configName;
+		this.criteria = criteria;
+		this.value = value;
+	}
+	
+	public ModelingConfig getConfigName() {
 		return configName;
 	}
 
-	public void setConfigName(MODEL_CONFIG configName) {
+	public void setConfigName(ModelingConfig configName) {
 		this.configName = configName;
 	}
 
@@ -46,10 +64,4 @@ public class ModelingConfigFilter {
 		return this.configName != null ? this.configName.hashCode() : super.hashCode();
 	}
 
-
-	public static enum MODEL_CONFIG {
-		SPEND_IN_PERIOD,
-		QUANTITY_IN_PERIOD,
-		HISTORICAL_RECORDS
-	}
 }

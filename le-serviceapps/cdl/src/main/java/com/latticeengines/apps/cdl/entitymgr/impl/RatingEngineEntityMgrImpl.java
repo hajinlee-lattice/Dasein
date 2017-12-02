@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -175,52 +176,54 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         if (segment == null || segment.getName() == null) {
             throw new LedpException(LedpCode.LEDP_18153, new String[] { ratingEngine.toString() });
         }
+        
+        if (ratingEngine.getStatus() == null) {
+            ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
+        }
+        if (ratingEngine.getNote() != null) {
+            RatingEngineNote ratingEngineNote = new RatingEngineNote();
+            ratingEngineNote.setNotesContents(ratingEngine.getNote());
+            ratingEngineNote.setCreatedByUser(ratingEngine.getCreatedBy());
+            ratingEngineNote.setLastModifiedByUser(ratingEngine.getCreatedBy());
+
+            Long nowTimestamp = (new Date()).getTime();
+            ratingEngineNote.setCreationTimestamp(nowTimestamp);
+            ratingEngineNote.setLastModificationTimestamp(nowTimestamp);
+            ratingEngineNote.setRatingEngine(ratingEngine);
+            ratingEngineNote.setOrigin(NoteOrigin.NOTE.name());
+            ratingEngineNote.setId(UUID.randomUUID().toString());
+            ratingEngine.addRatingEngineNote(ratingEngineNote);
+        }
+        
         switch (type) {
         case RULE_BASED:
-
             RuleBasedModel ruleBasedModel = new RuleBasedModel();
             ruleBasedModel.setId(RuleBasedModel.generateIdStr());
+            updateBaseRatingModel(ratingEngine, ruleBasedModel);
+            
             ruleBasedModel.setRatingRule(new RatingRule());
-            ruleBasedModel.setCreated(new Date());
-            ruleBasedModel.setUpdated(new Date());
             List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
             ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
-            ratingEngine.addRatingModel(ruleBasedModel);
-            if (ratingEngine.getStatus() == null) {
-                ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
-            }
-            if (ratingEngine.getNote() != null) {
-                RatingEngineNote ratingEngineNote = new RatingEngineNote();
-                ratingEngineNote.setNotesContents(ratingEngine.getNote());
-                ratingEngineNote.setCreatedByUser(ratingEngine.getCreatedBy());
-                ratingEngineNote.setLastModifiedByUser(ratingEngine.getCreatedBy());
-
-                Long nowTimestamp = (new Date()).getTime();
-                ratingEngineNote.setCreationTimestamp(nowTimestamp);
-                ratingEngineNote.setLastModificationTimestamp(nowTimestamp);
-                ratingEngineNote.setRatingEngine(ratingEngine);
-                ratingEngineNote.setOrigin(NoteOrigin.NOTE.name());
-                ratingEngineNote.setId(UUID.randomUUID().toString());
-                ratingEngine.addRatingEngineNote(ratingEngineNote);
-            }
+            
             ratingEngineDao.create(ratingEngine);
             break;
         case AI_BASED:
-
             AIModel aiModel = new AIModel();
             aiModel.setId(AIModel.generateIdStr());
-            aiModel.setCreated(new Date());
-            aiModel.setUpdated(new Date());
-            ratingEngine.addRatingModel(aiModel);
-            if (ratingEngine.getStatus() == null) {
-                ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
-            }
+            updateBaseRatingModel(ratingEngine, aiModel);
+            
             ratingEngineDao.create(ratingEngine);
             break;
         default:
             break;
         }
     }
+
+	protected void updateBaseRatingModel(RatingEngine ratingEngine, RatingModel ruleBasedModel) {
+		ruleBasedModel.setCreated(new Date());
+		ruleBasedModel.setUpdated(new Date());
+		ratingEngine.addRatingModel(ruleBasedModel);
+	}
 
     @VisibleForTesting
     List<String> findUsedAttributes(MetadataSegment segment) {

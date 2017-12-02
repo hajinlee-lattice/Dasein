@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -13,7 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.Transient;
+import javax.persistence.OneToOne;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -72,17 +73,15 @@ public class AIModel extends RatingModel {
     @Column(name = "TARGET_CUSTOMER_SET")
     private String targetCustomerSet;
     
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TRAINING_SEGMENT_ID")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("trainingSegment")
     private MetadataSegment trainingSegment;
     
-    // TODO in M14, we do not support AImodel
-    // @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "aImodel")
-    @Transient
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_MODEL_SUMMARY_ID")
     @JsonProperty("modelSummary")
     private ModelSummary modelSummary;
-
 
     @JsonIgnore
     @Column(name = "MODELING_CONFIG_FILTERS", length=10000)
@@ -103,14 +102,6 @@ public class AIModel extends RatingModel {
 	public void setTargetProducts(List<String> targetProducts) {
 		this.targetProducts = JsonUtils.serialize(targetProducts);
 	}
-	
-    public void setModel(ModelSummary modelSummary) {
-        this.modelSummary = modelSummary;
-    }
-
-    public ModelSummary getModel() {
-        return this.modelSummary;
-    }
 
     public static String generateIdStr() {
         return String.format(AI_MODEL_FORMAT, AI_MODEL_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
@@ -157,7 +148,9 @@ public class AIModel extends RatingModel {
 
     @JsonIgnore
     public ApplicationId getModelingJobId() {
-		return ConverterUtils.toApplicationId(modelingJobId);
+    		if(StringUtils.isNotBlank(modelingJobId))
+    			return ConverterUtils.toApplicationId(modelingJobId);
+    		return null;
 	}
     
 	public void setModelingJobId(String modelingJobId) {
@@ -165,17 +158,17 @@ public class AIModel extends RatingModel {
 	}
 
 	@JsonProperty("modelingConfigFilters")
-	public List<ModelingConfigFilter> getModelingConfigFilters() {
-		List<ModelingConfigFilter> filters = null;
+	public Map<ModelingConfig, ModelingConfigFilter> getModelingConfigFilters() {
+		Map<ModelingConfig, ModelingConfigFilter> filters = null;
         if (StringUtils.isNotBlank(this.modelingConfigFilters)) {
-            List<?> attrListIntermediate = JsonUtils.deserialize(this.modelingConfigFilters, List.class);
-            filters = JsonUtils.convertList(attrListIntermediate, ModelingConfigFilter.class);
+            Map<?, ?> attrListIntermediate = JsonUtils.deserialize(this.modelingConfigFilters, Map.class);
+            filters = JsonUtils.convertMap(attrListIntermediate, ModelingConfig.class, ModelingConfigFilter.class);
         }
         return filters;
 	}
 
 	@JsonProperty("modelingConfigFilters")
-	public void setModelingConfigFilters(List<ModelingConfigFilter> filters) {
+	public void setModelingConfigFilters(Map<ModelingConfig, ModelingConfigFilter> filters) {
 		this.modelingConfigFilters = JsonUtils.serialize(filters);
 	}
 
@@ -191,4 +184,12 @@ public class AIModel extends RatingModel {
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
+	public ModelSummary getModelSummary() {
+		return modelSummary;
+	}
+
+	public void setModelSummary(ModelSummary modelSummary) {
+		this.modelSummary = modelSummary;
+	}
 }
