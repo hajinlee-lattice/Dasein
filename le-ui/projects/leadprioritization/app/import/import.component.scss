@@ -17,4 +17,12 @@
         background: none;
         padding: 0;
     }
+    .ng-pristine .form-control.required,
+    .ng-pristine .form-control:required {
+        border-left-width: 5px;
+        border-left-color: #EF6A30;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    }
 }
+

@@ -32,6 +32,12 @@ angular.module('lp.cg.talkingpoint.editor', [])
         default_link_target: '_blank',
         target_list: false,
         setup : function(ed) {
+            ed.on('keydown', function (e, evt) {
+                // prevents tabbing while in the wysiwyg
+                if (e.keyCode == 9) {
+                    e.preventDefault()
+                }
+            });
             ed.on('blur', function(e) {
                 $timeout(function(){
                     if(!CgTalkingPointStore.saveOnBlur || CgTalkingPointStore.deleteClicked) {
@@ -44,6 +50,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
                     if(content === '') {
                         return false;
                     }
+
                     CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                     talkingPoint.content = content;
 

@@ -48,6 +48,7 @@ angular.module('lp.import.wizard.latticefields', [])
     }
 
     vm.init = function() {
+        ImportWizardStore.setValidation('latticefields', false);
         vm.fieldMappings.forEach(function(fieldMapping) {
             if(fieldMapping.mappedField) {
                 vm.unavailableFields.push(fieldMapping.mappedField);
@@ -56,9 +57,10 @@ angular.module('lp.import.wizard.latticefields', [])
         });
     };
 
-    var makeObject = function(pseudoObject, delimiter) {
+    var makeObject = function(string, delimiter) {
         var delimiter = delimiter || ':',
-            pieces = pseudoObject.split(delimiter);
+            string = string || '',
+            pieces = string.split(delimiter);
 
         return {
             mappedField: pieces[0],
@@ -66,7 +68,7 @@ angular.module('lp.import.wizard.latticefields', [])
         }
     }
 
-    vm.changeLatticeField = function(mapping) {
+    vm.changeLatticeField = function(mapping, form) {
         var _mapping = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
@@ -76,7 +78,20 @@ angular.module('lp.import.wizard.latticefields', [])
             _mapping.push(map);
         }
         ImportWizardStore.setSaveObjects(_mapping);
+        vm.checkValid(form);
     };
+
+    vm.checkValidDelay = function(form) {
+        $timeout(function() {
+            vm.checkValid(form);
+        }, 1);
+    };
+
+    vm.checkValid = function(form) {
+        if(form.$valid) {
+           ImportWizardStore.setValidation('latticefields', true);
+       }
+   }
 
     if (FieldDocument) {
         vm.init();

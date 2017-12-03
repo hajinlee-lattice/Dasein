@@ -3,62 +3,67 @@
         <h2>Account IDs</h2>
     </div>
     <p>Please provide unique identifier attribute Lattice platform should use to de-duplicate your account records.  The data provided in this file will override the existing data.</p>
-
-    <div class="id-options" ng-if="!vm.state.accountDedupeField">
-        <div class="id-options-item">
-            <div>
-                <label for="dedupeField">Unique Product Identifier</label>
-                <select 
-                    class="form-control"
-                    ng-model="vm.fieldMapping.product"
-                    ng-change="vm.changeLatticeField(vm.fieldMapping)"
-                    ng-class="{'required': true}">
-                    <option value="" hidden disabled>-- Choose Unique Identifier --</option>
-                    <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
-                        {{AvailableField.userField}}
-                    </option>
-               </select>
+    <form name="form">
+        <div class="id-options" ng-if="!vm.state.accountDedupeField">
+            <div class="id-options-item">
+                <div>
+                    <label for="dedupeField">Unique Product Identifier</label>
+                    <select 
+                        class="form-control"
+                        ng-model="vm.fieldMapping.product"
+                        ng-init="vm.checkValidDelay(form)"
+                        ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+                        ng-required="true"
+                        ng-class="{'required': true}">
+                        <option value="" hidden disabled>-- Choose Unique Identifier --</option>
+                        <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
+                            {{AvailableField.userField}}
+                        </option>
+                   </select>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="id-options" ng-if="!vm.state.accountDedupeField">
-        <div class="id-options-item">
-            <div>
-                <label for="dedupeField">Unique Contact Identifier</label>
-                <select 
-                    class="form-control"
-                    ng-model="vm.fieldMapping.contact"
-                    ng-change="vm.changeLatticeField(vm.fieldMapping)"
-                    ng-class="{'required': true}">
-                    <option value="" hidden disabled>-- Choose Unique Identifier --</option>
-                    <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
-                        {{AvailableField.userField}}
-				    </option>
-               </select>
+        <div class="id-options" ng-if="!vm.state.accountDedupeField">
+            <div class="id-options-item">
+                <div>
+                    <label for="dedupeField">Unique Contact Identifier</label>
+                    <select 
+                        class="form-control"
+                        ng-model="vm.fieldMapping.contact"
+                        ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+                        ng-required="true"
+                        ng-class="{'required': true}">
+                        <option value="" hidden disabled>-- Choose Unique Identifier --</option>
+                        <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
+                            {{AvailableField.userField}}
+    				    </option>
+                   </select>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="id-options" ng-if="!vm.state.accountDedupeField">
-        <div class="id-options-item">
-            <div>
-                <label for="dedupeField">Unique Account Identifier</label>
-                <select 
-                    class="form-control"
-                    ng-model="vm.fieldMapping.account"
-                    ng-change="vm.changeLatticeField(vm.fieldMapping)"
-                    ng-class="{'required': true}">
-                    <option value="" hidden disabled>-- Choose Unique Identifier --</option>
-                    <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
-                        {{AvailableField.userField}}
-                    </option>
-               </select>
+        <div class="id-options" ng-if="!vm.state.accountDedupeField">
+            <div class="id-options-item">
+                <div>
+                    <label for="dedupeField">Unique Account Identifier</label>
+                    <select 
+                        class="form-control"
+                        ng-model="vm.fieldMapping.account"
+                        ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+                        ng-required="true"
+                        ng-class="{'required': true}">
+                        <option value="" hidden disabled>-- Choose Unique Identifier --</option>
+                        <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
+                            {{AvailableField.userField}}
+                        </option>
+                   </select>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row" ng-if="vm.state.accountDedupeField">
-        <div>
-            <label for="dedupeField">Unique Identifier</label>
-            <input id="dedupeField" type="text" value="{{::vm.state.accountDedupeField}}" disabled></input>
+        <div class="row" ng-if="vm.state.accountDedupeField">
+            <div>
+                <label for="dedupeField">Unique Identifier</label>
+                <input id="dedupeField" type="text" value="{{::vm.state.accountDedupeField}}" disabled></input>
+            </div>
         </div>
-    </div>
+    </form>
 </div>

@@ -1,6 +1,6 @@
 angular.module('lp.import.wizard.productids', [])
 .controller('ImportWizardProductIDs', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields
+    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields
 ) {
     var vm = this;
 
@@ -21,6 +21,7 @@ angular.module('lp.import.wizard.productids', [])
         vm.UnmappedFields = UnmappedFields;
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);
+        ImportWizardStore.setValidation('ids', false);
 
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
@@ -31,10 +32,9 @@ angular.module('lp.import.wizard.productids', [])
                 }
             }
         });
-        checkValidation();
     };
 
-    vm.changeLatticeField = function(mapping) {
+    vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
         for(var i in mapping) {
             var key = i,
@@ -44,13 +44,19 @@ angular.module('lp.import.wizard.productids', [])
             mapped.push(map);
         }
         ImportWizardStore.setSaveObjects(mapped);
-        checkValidation();
+        vm.checkValid(form);
     };
 
-    var checkValidation = function() {
-        if(Object.keys(vm.fieldMapping).length >= Object.keys(vm.mappedFieldMap).length) {
-             ImportWizardStore.setValidation('one', true);
-        }
+    vm.checkValidDelay = function(form) {
+        $timeout(function() {
+            vm.checkValid(form);
+        }, 1);
+    };
+
+    vm.checkValid = function(form) {
+        if(form.$valid) {
+             ImportWizardStore.setValidation('ids', true);
+         }
     }
 
     vm.init();

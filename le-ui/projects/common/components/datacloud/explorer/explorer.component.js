@@ -88,7 +88,8 @@ angular.module('common.datacloud.explorer', [
         addBucketTreeRoot: null,
         feedbackModal: DataCloudStore.getFeedbackModal(),
         stateParams: $stateParams,
-        segment: $stateParams.segment
+        segment: $stateParams.segment,
+        inWizard: false
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
@@ -96,6 +97,7 @@ angular.module('common.datacloud.explorer', [
     vm.init = function() {
         if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
             vm.section = 'segment.analysis';
+            vm.inWizard = true;
         }
 
         QueryStore.setSegmentEnabled = false;

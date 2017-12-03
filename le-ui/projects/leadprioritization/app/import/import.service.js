@@ -14,11 +14,11 @@ angular.module('lp.import')
         };
 
         this.validation = {
-            one: false,
-            two: true,
-            three: true,
-            four: true,
-            five: true
+            ids: false,
+            thirdpartyids: true,
+            latticefields: false,
+            customfields: true,
+            jobstatus: true
         }
 
         this.saveObjects = [];
@@ -41,7 +41,7 @@ angular.module('lp.import')
         "all": [
             { 
                 label: 'Account IDs', 
-                state: 'accounts.one', 
+                state: 'accounts.ids', 
                 backState: 'home.segment.explorer.attributes',
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
@@ -49,28 +49,28 @@ angular.module('lp.import')
                 } 
             },{ 
                 label: 'Other IDs', 
-                state: 'accounts.one.two', 
+                state: 'accounts.ids.thirdpartyids', 
                 nextLabel: 'Next',
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
-                state: 'accounts.one.two.three', 
+                state: 'accounts.ids.thirdpartyids.latticefields', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Custom Fields', 
-                state: 'accounts.one.two.three.four', 
+                state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 
-                state: 'accounts.one.two.three.four.five', 
+                state: 'accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -83,7 +83,7 @@ angular.module('lp.import')
         "contacts": [
             { 
                 label: 'Contact IDs', 
-                state: 'contacts.one',
+                state: 'contacts.ids',
                 backState: 'home.segment.explorer.attributes',
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
@@ -91,21 +91,21 @@ angular.module('lp.import')
                 } 
             },{ 
                 label: 'Lattice Fields', 
-                state: 'contacts.one.two', 
+                state: 'contacts.ids.latticefields', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Custom Fields', 
-                state: 'contacts.one.two.three', 
+                state: 'contacts.ids.latticefields.customfields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 
-                state: 'contacts.one.two.three.four', 
+                state: 'contacts.ids.latticefields.customfields.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -118,21 +118,21 @@ angular.module('lp.import')
         "product_purchases": [
             { 
                 label: 'Transaction IDs', 
-                state: 'product_purchases.one', 
+                state: 'product_purchases.ids', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
-                state: 'product_purchases.one.two', 
+                state: 'product_purchases.ids.latticefields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 
-                state: 'product_purchases.one.two.three', 
+                state: 'product_purchases.ids.latticefields.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -145,21 +145,21 @@ angular.module('lp.import')
         "product_bundles": [
             { 
                 label: 'Product ID', 
-                state: 'product_bundles.one', 
+                state: 'product_bundles.ids', 
                 nextLabel: 'Next', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
-                state: 'product_bundles.one.two', 
+                state: 'product_bundles.ids.latticefields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 
                 label: 'Import Data', 
-                state: 'product_bundles.one.two.three', 
+                state: 'product_bundles.ids.latticefields.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {

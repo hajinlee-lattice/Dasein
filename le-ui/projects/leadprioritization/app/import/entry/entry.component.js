@@ -95,7 +95,7 @@ angular.module('lp.import.entry', [
     }
 
     vm.click = function() {
-        $state.go('home.import.wizard.' + vm.goState + '.one');
+        $state.go('home.import.wizard.' + vm.goState + '.ids');
     }
 
     vm.init();

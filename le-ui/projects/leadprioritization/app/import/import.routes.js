@@ -113,7 +113,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.accounts.one', {
+        .state('home.import.wizard.accounts.ids', {
             url: '/accountids',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -143,7 +143,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.accounts.one.two', {
+        .state('home.import.wizard.accounts.ids.thirdpartyids', {
             url: '/thirdpartyids',
             resolve: {
                 Identifiers: function() {
@@ -164,7 +164,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.accounts.one.two.three', {
+        .state('home.import.wizard.accounts.ids.thirdpartyids.latticefields', {
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
@@ -178,24 +178,24 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Website'},
-                        { name: 'DUNS'},
-                        { name: 'CompanyName'},
-                        { name: 'PhoneNumber'},
-                        { name: 'City'},
-                        { name: 'Country'},
-                        { name: 'State_Province'},
-                        { name: 'Postal_Code'}
+                        { name: 'Website' },
+                        { name: 'DUNS' },
+                        { name: 'CompanyName' },
+                        { name: 'PhoneNumber' },
+                        { name: 'City' },
+                        { name: 'Country' },
+                        { name: 'State' },
+                        { name: 'PostalCode'}
                     ];
                 },
                 AnalysisFields: function() {
                     return [
-                        { name: 'Account_Type'},
-                        { name: 'Industry'},
-                        { name: 'Est_Yearly_Revenue'},
-                        { name: 'Est_Yearly_Revenue_Currency_External_ID'},
-                        { name: 'Lattitude'},
-                        { name: 'Longitude'},
+                        { name: 'Account_Type' },
+                        { name: 'Industry' },
+                        { name: 'Est_Yearly_Revenue' },
+                        { name: 'Est_Yearly_Revenue_Currency_External_ID' },
+                        { name: 'Lattitude' },
+                        { name: 'Longitude' },
                         { name: 'Account_Business_Segment'}
                     ];
                 }
@@ -208,7 +208,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.accounts.one.two.three.four', {
+        .state('home.import.wizard.accounts.ids.thirdpartyids.latticefields.customfields', {
             url: '/customfields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
@@ -223,7 +223,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.accounts.one.two.three.four.five', {
+        .state('home.import.wizard.accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -263,7 +263,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.contacts.one', {
+        .state('home.import.wizard.contacts.ids', {
             url: '/contactids',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -293,7 +293,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.contacts.one.two', {
+        .state('home.import.wizard.contacts.ids.latticefields', {
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
@@ -307,26 +307,26 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Website'},
-                        { name: 'CompanyName'},
-                        { name: 'DUNS'},
-                        { name: 'IP_Address'},
-                        { name: 'City'},
-                        { name: 'Country'},
-                        { name: 'State_Provence'},
-                        { name: 'Postal_Code'},
-                        { name: 'Last_Name'},
-                        { name: 'First_Name'},
+                        { name: 'Website' },
+                        { name: 'CompanyName' },
+                        { name: 'DUNS' },
+                        { name: 'IP_Address' },
+                        { name: 'City' },
+                        { name: 'Country' },
+                        { name: 'State_Provence' },
+                        { name: 'Postal_Code' },
+                        { name: 'Last_Name' },
+                        { name: 'First_Name' },
                         { name: 'Email'}
                     ];
                 },
                AnalysisFields: function() {
                     return [
-                        { name: 'Lead_Status'},
-                        { name: 'Lead_Source'},
-                        { name: 'Lead_Type'},
-                        { name: 'Created_Date'},
-                        { name: 'Do_Not_Call'},
+                        { name: 'Lead_Status' },
+                        { name: 'Lead_Source' },
+                        { name: 'Lead_Type' },
+                        { name: 'Created_Date' },
+                        { name: 'Do_Not_Call' },
                         { name: 'Do_Not_Mail'}
                     ];
                 }
@@ -339,7 +339,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.contacts.one.two.three', {
+        .state('home.import.wizard.contacts.ids.latticefields.customfields', {
             url: '/customfields',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -349,7 +349,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.contacts.one.two.three.four', {
+        .state('home.import.wizard.contacts.ids.latticefields.customfields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -388,9 +388,9 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.import.wizard.product_purchases.one'
+            redirectTo: 'home.import.wizard.product_purchases.ids'
         })
-        .state('home.import.wizard.product_purchases.one', {
+        .state('home.import.wizard.product_purchases.ids', {
             url: '/transactionids',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -420,7 +420,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.product_purchases.one.two', {
+        .state('home.import.wizard.product_purchases.ids.latticefields', {
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
@@ -434,10 +434,10 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Transaction_Date'},
-                        { name: 'Amount'},
-                        { name: 'Quantity'},
-                        { name: 'Cost'}
+                        { name: 'TransactionTime', required: true },
+                        { name: 'Amount', required: true },
+                        { name: 'Quantity', required: true },
+                        { name: 'Cost' }
                     ];
                 },
                 AnalysisFields: function() {
@@ -452,7 +452,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.product_purchases.one.two.three', {
+        .state('home.import.wizard.product_purchases.ids.latticefields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -491,9 +491,9 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.import.wizard.product_bundles.one'
+            redirectTo: 'home.import.wizard.product_bundles.ids'
         })
-        .state('home.import.wizard.product_bundles.one', {
+        .state('home.import.wizard.product_bundles.ids', {
             url: '/transactionids',
             views: {
                 'wizard_content@home.import.wizard': {
@@ -523,7 +523,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.product_bundles.one.two', {
+        .state('home.import.wizard.product_bundles.ids.latticefields', {
             url: '/latticefields',
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
@@ -537,7 +537,7 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Product_Bundle_Name'},
+                        { name: 'Product_Bundle_Name' },
                         { name: 'Product_Family'}
                     ];
                 },
@@ -553,7 +553,7 @@ angular
                 }
             }
         })
-        .state('home.import.wizard.product_bundles.one.two.three', {
+        .state('home.import.wizard.product_bundles.ids.latticefields.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
