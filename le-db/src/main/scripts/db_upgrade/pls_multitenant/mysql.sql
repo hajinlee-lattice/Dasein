@@ -34,9 +34,11 @@ CREATE PROCEDURE `UpdateCDLTables`()
 		    ADD COLUMN `TARGET_PRODUCTS` longtext,
 		    ADD COLUMN `TRAINING_PRODUCTS` longtext,
 		    ADD COLUMN `WORKFLOW_TYPE` varchar(255),
-		    ADD COLUMN `FK_TRAINING_SEGMENT_ID` bigint;
+		    ADD COLUMN `FK_TRAINING_SEGMENT_ID` bigint,
+		    ADD COLUMN `FK_MODEL_SUMMARY_ID` bigint;
 		    
 		ALTER TABLE `PLS_MultiTenant`.`AI_MODEL` ADD CONSTRAINT `FKk2ahhvijs5146b4g5e9jrgeuq` foreign key (`FK_TRAINING_SEGMENT_ID`) references `PLS_MultiTenant`.`METADATA_SEGMENT` (`PID`) on delete cascade;
+		ALTER TABLE `PLS_MultiTenant`.`AI_MODEL` ADD CONSTRAINT `FKgenp90xodrrj475g7g7xcxoti` foreign key (`FK_MODEL_SUMMARY_ID`) references `PLS_MultiTenant`.`MODEL_SUMMARY` (`PID`);
     
     END;
 //
