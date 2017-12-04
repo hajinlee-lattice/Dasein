@@ -2,7 +2,7 @@ package com.latticeengines.query.exposed.translator;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -267,26 +267,6 @@ public class TransactionRestrictionTranslator {
         }
     }
 
-    private BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
-        AggregationType aggregateType = aggregationFilter.getAggregationType();
-        ComparisonType cmp = aggregationFilter.getComparisonType();
-        List<Object> values = aggregationFilter.getValues();
-
-        BooleanExpression aggrPredicate = null;
-        switch (aggregateType) {
-        case SUM:
-        case AVG:
-            aggrPredicate = toBooleanExpression(aggr, cmp, values);
-            break;
-        case AT_LEAST_ONCE:
-        case EACH:
-            aggrPredicate = aggr.eq(String.valueOf(1));
-            break;
-        }
-
-        return aggrPredicate;
-    }
-
     @SuppressWarnings("unchecked")
     private WindowFunction translateAggregateTimeWindow(StringPath keysAccountId,
                                                         StringPath keysPeriodId,
@@ -299,25 +279,29 @@ public class TransactionRestrictionTranslator {
 
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
-        List<Object> values = aggregationFilter.getValues();
+        boolean isNotLessComparison = TranslatorUtils.isNotLessThanOperation(cmp);
 
         WindowFunction windowAgg = null;
         switch (aggregateType) {
         case SUM:
-            windowAgg = SQLExpressions.sum(trxnValNumber).over();
+            windowAgg = SQLExpressions.sum(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
             break;
         case AVG:
-            windowAgg = SQLExpressions.avg(trxnValNumber).over();
+            windowAgg = SQLExpressions.avg(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
             break;
         case AT_LEAST_ONCE:
-            BooleanExpression condition = toBooleanExpression(trxnVal, cmp, values);
-            NumberExpression trxnValExists = new CaseBuilder().when(condition).then(1).otherwise(0);
-            windowAgg = SQLExpressions.max(trxnValExists).over();
+            if (isNotLessComparison) {
+                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            } else {
+                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            }
             break;
         case EACH:
-            BooleanExpression each = toBooleanExpression(trxnVal, cmp, values);
-            NumberExpression trxnValExistsOrNull = new CaseBuilder().when(each).then(1).otherwise(0);
-            windowAgg = SQLExpressions.min(trxnValExistsOrNull).over();
+            if (isNotLessComparison) {
+                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            } else {
+                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
+            }
             break;
         }
 

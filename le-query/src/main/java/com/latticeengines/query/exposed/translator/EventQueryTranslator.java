@@ -2,7 +2,7 @@ package com.latticeengines.query.exposed.translator;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -199,50 +199,19 @@ public class EventQueryTranslator {
         }
     }
 
-    private BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
-        AggregationType aggregateType = aggregationFilter.getAggregationType();
-        ComparisonType cmp = aggregationFilter.getComparisonType();
-        List<Object> values = aggregationFilter.getValues();
-
-        BooleanExpression aggrPredicate = null;
-        switch (aggregateType) {
-        case SUM:
-        case AVG:
-            aggrPredicate = toBooleanExpression(aggr, cmp, values);
-            break;
-        case AT_LEAST_ONCE:
-        case EACH:
-            aggrPredicate = toBooleanExpression(aggr, cmp, values);
-            //aggrPredicate = aggr.eq(String.valueOf(1));
-            break;
-        }
-
-        return aggrPredicate;
-    }
-
-    private boolean isNotLessThanOperation(ComparisonType cmp) {
-        if (ComparisonType.LESS_THAN != cmp && ComparisonType.LESS_OR_EQUAL != cmp) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private WindowFunction translateAggregateTimeWindow(StringPath keysAccountId,
                                                         StringPath keysPeriodId,
                                                         StringPath trxnVal,
                                                         TimeFilter timeFilter,
                                                         AggregationFilter aggregationFilter,
-                                                        boolean ascendindPeriod) {
+                                                        boolean ascendingPeriod) {
         NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
 
 
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
-        List<Object> values = aggregationFilter.getValues();
-        boolean isNotLessComparison = isNotLessThanOperation(cmp);
-        BooleanExpression isNull = trxnVal.isNull();
+        boolean isNotLessComparison = TranslatorUtils.isNotLessThanOperation(cmp);
 
         WindowFunction windowAgg = null;
         switch (aggregateType) {
@@ -268,7 +237,7 @@ public class EventQueryTranslator {
             break;
         }
 
-        if (ascendindPeriod) {
+        if (ascendingPeriod) {
             windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId);
         } else {
             windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId.desc());

@@ -123,7 +123,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertEquals(count, totalCount);
 
         // Check add up
-        AggregationFilter filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1000));
+        AggregationFilter filter1 = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
         AggregationFilter filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1000, 3000));
         AggregationFilter filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(3000));
         Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
@@ -134,7 +134,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         long count3 = countTxnBkt(txn3);
         Assert.assertEquals(count1 + count2 + count3, totalCount);
 
-        filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1));
+        filter1 = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1));
         filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1, 10));
         filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(10));
         txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
@@ -179,8 +179,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     public void testAccountContactWithTxn() {
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
         // Check add up
-        AggregationFilter filter = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(1000));
+        AggregationFilter filter = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), filter, null, false);
+
         Restriction txnRestriction = getTxnRestriction(txn);
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
         Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name()).eq("Buyer").build();

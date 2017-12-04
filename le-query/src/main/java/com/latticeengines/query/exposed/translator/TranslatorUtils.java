@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+import com.latticeengines.domain.exposed.query.AggregationFilter;
+import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
@@ -36,5 +38,27 @@ public class TranslatorUtils {
         default:
             throw new UnsupportedOperationException("Unsupported comparison type " + cmp);
         }
+    }
+
+    public static boolean isNotLessThanOperation(ComparisonType cmp) {
+        return (ComparisonType.LESS_THAN != cmp && ComparisonType.LESS_OR_EQUAL != cmp);
+    }
+
+    public static BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
+        AggregationType aggregateType = aggregationFilter.getAggregationType();
+        ComparisonType cmp = aggregationFilter.getComparisonType();
+        List<Object> values = aggregationFilter.getValues();
+
+        BooleanExpression aggrPredicate = null;
+        switch (aggregateType) {
+        case SUM:
+        case AVG:
+        case AT_LEAST_ONCE:
+        case EACH:
+            aggrPredicate = toBooleanExpression(aggr, cmp, values);
+            break;
+        }
+
+        return aggrPredicate;
     }
 }
