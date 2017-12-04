@@ -24,7 +24,8 @@ angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.moda
             'dischargeaction' :'cancel',
             'confirmtext': 'DEACTIVATE',
             'confirmaction' : 'deactivate',
-            'icon': 'ico ico-model ico-black',
+            'icon': 'ico ico-model',
+            'confirmcolor': 'blue-button',
             'showclose': false
         };
     

@@ -417,16 +417,16 @@ Popovers
 .le_modal {
   display: none;
   position: fixed;
-  z-index: 1;
+  z-index: 33;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   overflow: auto;
   background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.166);
+  background-color: rgba(0, 0, 0, 0.5);
   /* Modal Content Box */
-  .modal-content {
+  .le-modal-content {
       font-family: 'ProximaNova-Regular', Arial, sans-serif;
       display: flex;
       max-height: 80vh;
@@ -451,9 +451,9 @@ Popovers
       &.lg {
           width: 80%;
       }
-      .modal-header {
-          height: 50px;
-          min-height: 50px;
+      .le-modal-header {
+          height: 10%;
+          // min-height: 50px;
           display: flex;
           flex-direction: row-reverse;
           align-items: center;
@@ -470,22 +470,21 @@ Popovers
                   cursor: pointer;
               }
           }
-          .title-container {
+          .le-title-container {
               font-size: 20px;
               width: 100%;
-              height: 50px;
+              padding: 17px;
               display: flex;
               align-items: center;
               .title-icon {
-                  padding: 0px;
-                  padding-right: 10px;
+                  // padding-right: 10px;
               }
-              .title {
-                margin-left: 10px;
+              .le-title {
+                margin-left: 20px;
               }
           }
       }
-      .modal-body {
+      .le-modal-body {
           border-top: 1px solid rgba(153, 152, 152, 0.405);
           border-bottom: 1px solid rgba(153, 152, 152, 0.405);
           overflow: auto;
@@ -493,20 +492,20 @@ Popovers
           max-height: 80%;
           padding: 0 20px 0 20px;
 
-          .modal-message{
+          .le-modal-message{
             display: flex;
             font-size: 26px;
             font-family: 'ProximaNova-Regular', Arial, sans-serif;
 
           }
-          .modal-spinner{
+          .le-modal-spinner{
             display: flex;
             justify-content: center;
             height: 100%;
             padding: 20px;
           }
       }
-      .modal-footer {
+      .le-modal-footer {
           display: flex;
           flex-direction: row-reverse;
           align-items: center;
@@ -517,8 +516,24 @@ Popovers
   }
   &.opened {
       display: block;
+      opacity: 1;
+      animation-name: fadeInOpacity;
+      animation-iteration-count: 1;
+      animation-timing-function: ease-in;
+      animation-duration: .12s;
+      
   }
   &.closed {
       display: none;
   }
+
+    @keyframes fadeInOpacity {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  
 }

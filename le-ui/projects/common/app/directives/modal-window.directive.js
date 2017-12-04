@@ -75,7 +75,8 @@ angular.module('mainApp.appCommon.directives.modal.window', [])
                 "dischargeaction" : scope.config.dischargeaction || 'cancel',
                 "confirmtext": scope.config.confirmtext || "OK",
                 "confirmaction" : scope.config.confirmaction || 'ok',
-                "contenturl": scope.config.contenturl || ''
+                "contenturl": scope.config.contenturl || '',
+                "confirmcolor": scope.config.confirmcolor || 'blue-button'
             };
 
             scope.toggle = function () {
