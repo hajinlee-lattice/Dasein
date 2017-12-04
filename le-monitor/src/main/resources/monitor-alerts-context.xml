@@ -10,6 +10,7 @@
       http://www.springframework.org/schema/task/spring-task-3.2.xsd">
 
     <import resource="classpath:monitor-email-settings-context.xml" />
+    <import resource="classpath:camille-runtime-context.xml" />
 
     <context:annotation-config />
     <context:component-scan

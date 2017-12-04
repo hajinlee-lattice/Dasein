@@ -25,8 +25,11 @@ public class AlertServiceImpl implements AlertService {
     @Value("${monitor.alert.service.enabled:false}")
     private boolean alertServiceEnabled;
 
+    // @Autowired
+    // private PagerDutyService pagerDutyEmailService;
+
     @Autowired
-    private PagerDutyService pagerDutyEmailService;
+    private PagerDutyService pagerDutyService;
 
     @Override
     public String triggerCriticalEvent(String description, String clientUrl, String dedupKey,
@@ -37,23 +40,24 @@ public class AlertServiceImpl implements AlertService {
     @Override
     public String triggerCriticalEvent(String description, String clientUrl, String dedupKey,
             Iterable<? extends BasicNameValuePair> details) {
-        if (!this.alertServiceEnabled) {
-            return "disabled";
-        }
+//        if (!this.alertServiceEnabled) {
+//            return "disabled";
+//        }
 
         try {
-            pagerDutyEmailService.triggerEvent(description, clientUrl, dedupKey, details);
+            // return pagerDutyEmailService.triggerEvent(description, clientUrl, dedupKey, details);
+            return pagerDutyService.triggerEvent(description, clientUrl, dedupKey, details);
         } catch (Exception e) {
             // Intentionally log and consume error
             log.error(fatal, String.format("Problem sending event to PagerDuty. description:%s clientUrl:%s dedupKey:%s",
                     description, clientUrl, dedupKey), e);
             return "fail";
         }
-        return "success";
     }
 
     public void enableTestMode() {
         this.alertServiceEnabled = true;
-        ((PagerDutyEmailServiceImpl) this.pagerDutyEmailService).useTestService();
+        // ((PagerDutyEmailServiceImpl) this.pagerDutyEmailService).useTestService();
+        ((PagerDutyServiceImpl) this.pagerDutyService).useTestServiceApiKey();
     }
 }

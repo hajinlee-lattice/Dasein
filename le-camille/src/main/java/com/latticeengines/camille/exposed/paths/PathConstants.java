@@ -33,4 +33,6 @@ public final class PathConstants {
 
     public static final String DEFAULT_SPACE_FILE = "default-space";
 
+    public static final String TRIGGER_FILTER_FILE = "TriggerEventFilter.json";
+
 }
