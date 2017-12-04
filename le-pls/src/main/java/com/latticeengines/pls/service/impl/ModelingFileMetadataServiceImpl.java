@@ -152,6 +152,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument,
                                 String entity, String source, String feedType) {
+        fulfillFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -162,6 +163,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             table = dataFeedTask.getImportTemplate();
         }
         resolveMetadata(sourceFile, fieldMappingDocument, table);
+    }
+
+    private void fulfillFieldMapping(FieldMappingDocument fieldMappingDocument) {
+        if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
+                || fieldMappingDocument.getFieldMappings().size() == 0) {
+            return;
+        }
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                log.warn(String.format("Mapped field for %s is null, set to user field", fieldMapping.getUserField()));
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+            }
+        }
+
     }
 
     private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table) {
