@@ -103,6 +103,8 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
     vm.tileClick = function ($event, play) {
         $event.preventDefault();
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
+        PlaybookWizardStore.setPlay(play);
+        console.log(play);
         if(launchedStatus.hasLaunched) {
             $state.go('home.playbook.dashboard', {play_name: play.name} );
         } else {

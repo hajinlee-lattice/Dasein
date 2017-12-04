@@ -46,7 +46,7 @@ section.main-content {
     position: relative;
     padding-left: 60px;
     @media screen and (max-height: $max-height) {
-        padding-left: 70px;
+        padding-left: 60px;
     }
 }
 section.summary-blank-line {
@@ -64,7 +64,7 @@ span.ico-container {
     width: 36px;
     padding: 4px;
     border-radius: 50%;
-    background: rgba(255,255,255,.08);
+    background: #444;
     text-align: center;
     position: relative;
     animation-duration: 5s;
@@ -102,7 +102,7 @@ span.ico-container {
     .ico {
         position: absolute;
         top: 50%;
-        left: 50%;
+        left: 52%;
         mask-repeat: no-repeat;
         -webkit-mask-repeat: no-repeat;
         transform: translateY(-50%) translateX(-50%);
@@ -132,6 +132,26 @@ span.ico-container {
     }
 }
 
+li.transitioning {
+    .ico-container {
+        animation-name: transitioning;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+    }
+}
+
+@keyframes transitioning {
+  0% {
+    background-color: #555;
+  }
+  50% {
+    background-color: #ef6a30;
+  }
+  100% {
+    background-color: #555;
+  }
+}
+
 .menu.model-view {
     .ico {
         height: 20px;
@@ -153,7 +173,7 @@ nav.primary-nav {
     @media screen and (max-height: $max-height) {
         //overflow: auto;
         //overflow-x: hidden;
-        width: 70px;
+        width: 60px;
     }
     *[disabled] {
         pointer-events: none;
@@ -215,11 +235,11 @@ nav.primary-nav {
         }
         .ico-arrow-open {
             position: absolute;
-            left: 0;
+            left: 4px;
             height: 50px;
             width: 50px;
             color: white;
-            top: -2px;
+            top: -4px;
         }
     }
     .logo-container {
@@ -269,7 +289,7 @@ nav.primary-nav {
                 transition: none;
             }
             &:hover > a span:first-of-type {
-                background-color: #464646;
+                background-color: #505050;
                 transition: none;
                 span:not(.no-svg) {
                     background-color: white;
@@ -451,7 +471,7 @@ html.no-cssmask {
                 opacity: .5;
             }
             .ico-arrow-open {
-                top: -9px;
+                top: -12px;
                 transform: rotate(180deg);
             }
         }
@@ -500,7 +520,7 @@ html.no-cssmask {
 
 // Secondary Nav (Hamburger and Profile Nav)
 html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear span.ico-container .ico {
-    background-color: #333;
+    //background-color: #333;
 }
 
 .secondary-nav {
@@ -526,15 +546,44 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
             white-space: nowrap;
             &:nth-last-child(2) {
                 @include flex-item(1 1 auto);
-            }
+            } 
+            .profile-user-icon,
             .jobs-nav-gear {
                 float: right;
                 height: 100%;
                 position: relative;
-                padding: 1.2em .8em 0;
+                padding: 1.2em .8em;
+                line-height: 0.8em;
+
+                span.ico-container {
+                    background: #E2E3E5;
+                    width: 36px;
+                    margin: 0;
+
+                }
                 
                 &:hover {
                     background-color: #f9f9f9;
+
+                    span.ico-container {
+                        background: #d9d9d9;
+                    }
+                }
+
+                &,
+                span.ico-container,
+                span.fa:before {
+                    -webkit-transition: none;
+                    transition: none;
+                }
+
+                &.active {
+                    background: #222831;
+
+                    span.ico-container {
+                        background: #ef6a30;
+                        color: #fff;
+                    }
                 }
 
                 span.jobs-nav-number {
@@ -546,6 +595,19 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 }
 
                 > span {
+                }
+            }
+            .profile-user-icon {
+                float: none;
+
+                span.ico-container {
+                    margin-right: 0.8em;
+                    margin-left: .2em;
+                    
+                    span {
+                        margin: 3px;
+                        font-size: 1.65em;
+                    }
                 }
             }
         }
@@ -675,11 +737,12 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 font-size: 14px;
                 text-overflow: ellipsis;
                 overflow: hidden;
+                margin-top: .4em;
             }
             .tenant-name {
                 font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
                 font-size: 12px;
-                margin-top: -4px;
+                margin-top: .25em;
                 text-overflow: ellipsis;
                 overflow: hidden;
             }

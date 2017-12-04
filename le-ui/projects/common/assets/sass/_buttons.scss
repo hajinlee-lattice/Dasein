@@ -120,15 +120,24 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 		color: #222222;//$black-titanium;
 		background-color: $pearl-white;
 		border-color: $silver;
+
+		&, & *,
+		&:after,
+		&:before,
+		& *:after,
+		& *:before {
+			-webkit-transition: color 0s linear 0s, transform 150ms linear 0s;
+			transition: color 0s linear 0s, transform 150ms linear 0s;
+		}
 		&:hover,
-    &:focus {
-      color: #629ACC;
-      //background-color: $white-gold;
-    }
-    &:active {
-			color: #65B7E6;
-      border-color: #65B7E6;
-      //background-color: $palladium;
+		&:focus {
+		  	color: #457EBA;
+		  	//border-color: #457EBA;
+		}
+		&:active {
+			color: #222222;
+      		border-color: $silver;
+      		//background-color: $palladium;
 		}
 	}
   &.gray-button {

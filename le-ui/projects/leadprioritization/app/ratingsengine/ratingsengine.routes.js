@@ -113,7 +113,7 @@ angular
                     "summary@": {
                         templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
-                    "navigation@": {
+                    "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, Rating) {
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.stateName = function () {
@@ -160,7 +160,7 @@ angular
                     "summary@": {
                         templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
-                    "navigation@": {
+                    "navigation@home": {
                         controller: function ($scope, $stateParams, $state, $rootScope, Rating) {
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.stateName = function () {

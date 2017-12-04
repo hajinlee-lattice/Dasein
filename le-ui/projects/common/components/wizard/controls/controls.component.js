@@ -100,7 +100,7 @@ angular.module('common.wizard.controls', [])
                 }
 
                 if (i-1 >= 0) {
-                    prev = vm.getPrev(i-1) ? vm.getPrev(i-1).state : WizardControlsOptions.backState;
+                    prev = vm.getPrev(i-1) ? vm.getPrev(i-1).state : vm.prev;
                     psplit = prev.split('.');
                     
                     vm.prev = vm.rootState + psplit.join('.');

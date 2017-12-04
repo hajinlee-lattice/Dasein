@@ -1,50 +1,36 @@
-<section ng-controller="SidebarRootController as vm" class="lp-sidebar-menu noselect-children" ng-click="vm.handleSidebarToggle($event)">
-    <div class="logo-container">
-        <a href="#/" class="logo" style="float: none;padding: 0;">
-            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
+<ul ng-controller="SidebarRootController as vm" class="menu ratingsengine-view">
+    <li role="presentation">
+        <a ui-sref="home.ratingsengine">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}">
+                <span class="ico ico-back no-svg"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}</span>
         </a>
-    </div>
-    <ul class="menu ratingsengine-view">
-        <li role="presentation">
-            <a ui-sref="home.ratingsengine">
-                <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}">
-                    <span class="ico ico-back no-svg"></span>
-                </span>
-                <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}</span>
-            </a>
-        </li>
-        <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.dashboard'}" ng-disabled="menuDisabled || dashboardDisabled">
-            <a ui-sref="home.ratingsengine.dashboard">
-                <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
-                    <span class="ico ico-model ico-light-gray"></span>
-                </span>
-                <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}</span>
-            </a>
-        </li>
-        
+    </li>
+    <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.dashboard'}" ng-disabled="menuDisabled || dashboardDisabled">
+        <a ui-sref="home.ratingsengine.dashboard">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
+                <span class="ico ico-model ico-light-gray"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}</span>
+        </a>
+    </li>
+    
+    <!-- <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.wizard.segment.attributes.rules'}" ng-disabled="menuDisabled || dashboardDisabled">
+        <a ui-sref="home.ratingsengine.wizard.segment.attributes.rules({rating_id: stateParams.rating_id, wizard_steps: 'rules'})">
+            <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}">
+                <span class="ico ico-performance ico-light-gray"></span>
+            </span>
+            <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}</span>
+        </a>
+    </li> -->
 
-
-        <!-- <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.wizard.segment.attributes.rules'}" ng-disabled="menuDisabled || dashboardDisabled">
-            <a ui-sref="home.ratingsengine.wizard.segment.attributes.rules({rating_id: stateParams.rating_id, wizard_steps: 'rules'})">
-                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}">
-                    <span class="ico ico-performance ico-light-gray"></span>
-                </span>
-                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}</span>
-            </a>
-        </li>
-        -->
-
-
-        <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.ratingsengine.dashboard.notes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
-                <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
-                    <span class="ico ico-notes"></span>
-                </span>
-                <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}</span>
-            </a>
-        </li>
-    </ul>
-    <button class="open-button open">
-        <span class="ico ico-arrow-open"></span>
-    </button>
-</section>
+    <li role="presentation" ui-sref-active="active">
+        <a ui-sref="home.ratingsengine.dashboard.notes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}">
+                <span class="ico ico-notes"></span>
+            </span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}</span>
+        </a>
+    </li>
+</ul>

@@ -247,11 +247,6 @@ angular
                 }
             },
             views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
                 "summary@": {
                     controller: 'ExplorerTabsController',
                     controllerAs: 'vm',

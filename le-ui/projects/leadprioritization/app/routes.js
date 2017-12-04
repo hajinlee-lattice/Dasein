@@ -12,8 +12,16 @@ angular
         return this.states.to[this.states.to.length - 1];
     }
 
+    this.lastToParams = function() {
+        return this.states.toParams[this.states.toParams.length - 1];
+    }
+
     this.lastFrom = function() {
         return this.states.from[this.states.from.length - 1];
+    }
+
+    this.lastFromParams = function() {
+        return this.states.fromParams[this.states.fromParams.length - 1];
     }
 
     this.isTo = function(name) {
@@ -48,7 +56,7 @@ angular
         }
 
         var views = toState.views || {},
-            toParams = toState.toParams,
+            toParams = toParams,
             LoadingText = toParams ? (toParams.LoadingText || '') : '',
             split, view, hasMain = false;
 
@@ -146,15 +154,6 @@ angular
                     });
                     
                     return deferred.promise;
-                },
-                Model: function(){
-                    return null;
-                },
-                IsPmml: function(){
-                    return null;
-                },
-                HasRatingsAvailable: function(){
-                    return null;
                 }
             },
             views: {
@@ -165,7 +164,7 @@ angular
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
-                "navigation": {
+                "sidebar": {
                     controller: function($scope, $rootScope, $stateParams, $state, Tenant, FeatureFlagService) {
                         var tenantName = $stateParams.tenantName;
 
@@ -189,9 +188,10 @@ angular
                             });
                         }
                     },
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                    templateUrl: 'app/navigation/sidebar/sidebar.component.html'
+                },
+                "navigation@home": {
+                    templateUrl: 'app/navigation/sidebar/root/root.component.html'
                 }
             }
         })
@@ -210,23 +210,9 @@ angular
                     });
 
                     return deferred.promise;
-                },          
-                Model: function(){
-                    return null;
-                },
-                IsPmml: function(){
-                    return null;
-                },
-                HasRatingsAvailable: function(){
-                    return null;
                 }
             },
             views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
                 "summary@": {  
                     controller: 'ModelListController',
                     controllerAs: 'vm',
@@ -245,23 +231,7 @@ angular
                 pageIcon: 'ico-model',
                 pageTitle: 'Models > Creation History'
             },
-            resolve: {
-                Model: function(){
-                    return null;
-                },
-                IsPmml: function(){
-                    return null;
-                },
-                HasRatingsAvailable: function(){
-                    return null;
-                }
-            },
             views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
                 "summary@": {
                     controller: 'ModelListController',
                     controllerAs: 'vm',
@@ -304,10 +274,10 @@ angular
                 }
             },
             views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
+                "navigation@home": {
+                    controller: 'SidebarModelController',
                     controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/ModelView.html'
+                    templateUrl: 'app/navigation/sidebar/model/model.component.html'
                 },
                 "summary@": {
                     controller: 'ModelDetailController',
@@ -315,40 +285,6 @@ angular
                 },
                 "main@": {
                     template: ''
-                }
-            }
-        })
-        .state('home.model.segmentation', {
-            url: '/segmentation',
-            params: {
-                pageTitle: 'Segments',
-                pageIcon: 'ico-segments'
-            },
-            views: {
-                "summary@": {
-                    controller: function($rootScope, Model) {
-                        $rootScope.$broadcast('model-details', {
-                            displayName: Model.ModelDetails.DisplayName
-                        });
-                    },
-                    template: ''
-                },
-                "main@": {
-                    resolve: {
-                        SegmentsList: function($q, SegmentService, SegmentStore) {
-                            var deferred = $q.defer();
-
-                            SegmentService.GetSegments().then(function(result) {
-                                SegmentStore.setSegments(result);
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
-                    controller: 'SegmentationListController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/models/views/SegmentationListView.html'
                 }
             }
         })
@@ -497,10 +433,6 @@ angular
                 pageTitle: 'History'
             },
             views: {
-                "summary@": {
-                    controller: '',
-                    template: ''
-                },
                 "main@": {
                     controller: 'ModelRatingsHistoryController',
                     controllerAs: 'vm',
@@ -515,10 +447,6 @@ angular
                 pageTitle: 'Ratings'
             },
             views: {
-                "summary@": {
-                    controller: '',
-                    template: ''
-                },
                 "main@": {
                     templateUrl: 'app/models/views/ModelRatingsDemoView.html'
                 }
@@ -746,55 +674,6 @@ angular
                 }
             }
         })
-        .state('home.campaigns', {
-            url: '/campaigns',
-            params: {
-                pageTitle: 'Campaigns',
-                pageIcon: 'ico-campaign'
-            },
-            views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "main@": {
-                    resolve: {
-                        Campaigns: function($q, CampaignService) {
-                            var deferred = $q.defer();
-
-                            CampaignService.GetCampaigns().then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
-                    controller: 'CampaignListController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/campaigns/views/CampaignListView.html'
-                }
-            }
-        })
-        .state('home.campaigns.models', {
-            url: '/models/{campaignId}',
-            params: {
-                pageTitle: 'Campaigns',
-                pageIcon: 'ico-model'
-            },
-            views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "main@": {
-                    controller: 'CampaignModelsController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/campaigns/views/CampaignModelsView.html'
-                }
-            }
-        })
         .state('home.marketosettings', {
             url: '/marketosettings',
             redirectto: 'home.marketosettings.apikey',
@@ -842,7 +721,7 @@ angular
                 }
             },
             views: {
-                "navigation@": {
+                "navigation@home": {
                     controller: function($scope, $state, FeatureFlagService, ApiHost, DataCloudStore) {
                         DataCloudStore.setHost(ApiHost);
 
@@ -857,9 +736,7 @@ angular
 
                         });
                     },
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                    templateUrl: 'app/navigation/sidebar/root/root.component.html'
                 },
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
@@ -1200,11 +1077,6 @@ angular
                 }
             },
             views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
                 "summary@": {
                     template: ''
                 },
@@ -1426,8 +1298,8 @@ angular
         //         pageTitle: 'User Settings'
         //     },
         //     views: {
-        //         "navigation@": {
-        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         "navigation@home": {
+        //             templateUrl: 'app/navigation/sidebar/root/root.component.html'
         //         },
         //         "summary@": {
         //             templateUrl: 'app/navigation/summary/BlankLine.html'
@@ -1452,7 +1324,7 @@ angular
         //     url: '/deploymentwizard',
         //     views: {
         //         "navigation@": {
-        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //             templateUrl: 'app/navigation/sidebar/root/root.component.html'
         //         },
         //         "summary@": {
         //             templateUrl: 'app/navigation/summary/BlankLine.html'
@@ -1466,8 +1338,8 @@ angular
         // .state('home.activate', {
         //     url: '/activate',
         //     views: {
-        //         "navigation@": {
-        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         "navigation@home": {
+        //             templateUrl: 'app/navigation/sidebar/root/root.component.html'
         //         },
         //         "summary@": {
         //             resolve: {
@@ -1490,11 +1362,6 @@ angular
                 pageTitle: 'Manage Users'
             },
             views: {
-                "navigation@": {
-                    controller: 'SidebarRootController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
@@ -1523,8 +1390,8 @@ angular
         // .state('home.setup', {
         //     url: '/setup',
         //     views: {
-        //         "navigation@": {
-        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         "navigation@home": {
+        //             templateUrl: 'app/navigation/sidebar/root/root.component.html'
         //         },
         //         "summary@": {
         //             resolve: {
@@ -1543,8 +1410,8 @@ angular
         // .state('home.fields', {
         //     url: '/fields',
         //     views: {
-        //         "navigation@": {
-        //             templateUrl: 'app/navigation/sidebar/RootView.html'
+        //         "navigation@home": {
+        //             templateUrl: 'app/navigation/sidebar/root/root.component.html'
         //         },
         //         "summary@": {
         //             resolve: {

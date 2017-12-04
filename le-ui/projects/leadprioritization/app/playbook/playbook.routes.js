@@ -6,6 +6,7 @@ angular
     'lp.playbook.plays',
     'lp.playbook.dashboard',
     'lp.playbook.dashboard.launch_history',
+    'lp.playbook.dashboard.sidebar',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.rating',
     'lp.playbook.wizard.targets',
@@ -101,26 +102,8 @@ angular
                 }
             },
             views: {
-                "navigation@": {
-                    controller: function($scope, $stateParams, $state, $rootScope, PlaybookWizardStore) {
-                        var play = PlaybookWizardStore.getCurrentPlay();
-                        $scope.play_name = $stateParams.play_name || '';
-                        $scope.segment = play.segment;
-                        $scope.targetsDisabled = (play.ratingEngine ? false : true);
-                        $scope.stateName = function() {
-                            return $state.current.name;
-                        }
-                        var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
-                        if($state.current.name === 'home.playbook.dashboard.launch_job') {
-                            $scope.menuDisabled = true;
-                        }
-                        $rootScope.$broadcast('header-back', { 
-                            path: '^home.playbook.dashboard',
-                            displayName: play.displayName,
-                            sref: 'home.playbook'
-                        });
-                    },
-                    controller: 'SidebarRootController',
+                "navigation@home": { 
+                    controller: 'SidebarPlaybookController',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
                 },

@@ -1,15 +1,12 @@
 angular
-.module('pd.navigation.sidebar', [
+.module('pd.navigation.sidebar.root', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.FeatureFlagService',
     'common.datacloud'
 ])
 .controller('SidebarRootController', function(
-    $rootScope, $state, $stateParams, 
-    FeatureFlagService, ResourceUtility, 
-    DataCloudStore, StateHistory,
-    Model, IsPmml, HasRatingsAvailable
+    $state, $stateParams, StateHistory, FeatureFlagService, ResourceUtility, DataCloudStore
 ) {
     var vm = this;
 
@@ -17,34 +14,17 @@ angular
         state: $state,
         ResourceUtility: ResourceUtility,
         stateParams: $stateParams,
+        StateHistory: StateHistory,
         MyDataStates: [
             'home.nodata',
             'home.segment.explorer.attributes',
             'home.segment.explorer.builder',
             'home.segment.accounts',
             'home.segment.contacts'
-        ],
-        model: Model
-
+        ]
     });
 
     vm.init = function() {
-
-        if(vm.model) {
-            vm.IsPmml = IsPmml,
-            vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
-            vm.Uploaded = Model.ModelDetails.Uploaded;
-            vm.HasRatingsAvailable = HasRatingsAvailable;
-
-            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-        }
-
-        if(JSON.stringify(vm.HasRatingsAvailable) != "{}"){
-            vm.HasRatingsAvailable = true;
-        } else {
-            vm.HasRatingsAvailable = false;
-        }
-
         vm.isDataAvailable = DataCloudStore.metadata.enrichmentsTotal > 0;
 
         FeatureFlagService.GetAllFlags().then(function(result) {
@@ -64,38 +44,7 @@ angular
             vm.showCdlEnabledPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             vm.showLatticeInsightsPage = FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS);
             vm.showContactUs = false;
-
-            vm.canRemodel = FeatureFlagService.FlagIsEnabled(flags.VIEW_REMODEL) && !vm.IsPmml && !vm.Uploaded;
-            vm.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE) || FeatureFlagService.UserIs('EXTERNAL_ADMIN');
-            vm.showAlerts = 0; // disable for all (PLS-1670) FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
-            vm.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
-            vm.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
-            vm.showSampleLeads = FeatureFlagService.FlagIsEnabled(flags.VIEW_SAMPLE_LEADS);
         });
-
-        if (typeof(sessionStorage) !== 'undefined') {
-            if (sessionStorage.getItem('open-nav') === 'true' || !sessionStorage.getItem('open-nav')) {
-                $("body").addClass('open-nav');
-            } else {
-                $("body").removeClass('open-nav');
-            }
-        }
-    }
-
-    vm.handleSidebarToggle = function($event) {
-        var target = angular.element($event.target),
-            collapsable_click = !target.parents('.menu').length;
-
-        if (collapsable_click) {
-            $('body').toggleClass('open-nav');
-            $('body').addClass('controlled-nav');  // indicate the user toggled the nav
-
-            if (typeof(sessionStorage) !== 'undefined'){
-                sessionStorage.setItem('open-nav', $('body').hasClass('open-nav'));
-            }
-
-            $rootScope.$broadcast('sidebar:toggle');
-        }
     }
 
     vm.getMyDataState = function() {
@@ -116,6 +65,26 @@ angular
 
     vm.isStateName = function(state_names) {
         return (state_names || []).indexOf($state.current.name) !== -1; 
+    }
+
+    vm.isTransitingFrom = function(state_names) {
+        return false;
+        return (state_names || []).indexOf(StateHistory.lastFrom().name) !== -1 && (state_names || []).indexOf(StateHistory.lastTo().name) !== -1; 
+    }
+
+    vm.isTransitingTo = function(state_names) {
+        return false;
+        return (state_names || []).indexOf(StateHistory.lastTo().name) !== -1 && (state_names || []).indexOf($state.current.name) === -1; 
+    }
+
+    vm.isTransitingToMyData = function(state_names) {
+        return false;
+        return (state_names || []).indexOf($state.current.name) === -1 && vm.isTransitingTo(state_names) && (!StateHistory.lastToParams().segment || StateHistory.lastToParams().segment == 'Create');
+    }
+
+    vm.isTransitingToSegmentation = function(state_names) {
+        return false;
+        return vm.isTransitingTo(state_names) && (StateHistory.lastToParams().segment && StateHistory.lastToParams().segment != 'Create') || ('home.segments' !== $state.current.name && StateHistory.lastTo().name === 'home.segments');
     }
 
     vm.init();

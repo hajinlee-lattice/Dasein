@@ -275,9 +275,13 @@ angular.module('lp.playbook')
     }
 
     this.getPlay = function(play_name, nocache) {
-        var deferred = $q.defer();
-        if(this.currentPlay && play_name && !nocache) {
-            deferred.resolve(this.currentPlay);
+        var deferred = $q.defer(),
+            play = this.current.plays.filter(function(item) {
+                return item.name == play_name;
+            });
+
+        if (play && !nocache) {
+            deferred.resolve(play);
         } else {
             PlaybookWizardService.getPlay(play_name).then(function(data){
                 PlaybookWizardStore.setPlay(data);

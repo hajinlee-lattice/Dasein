@@ -131,7 +131,7 @@ var mainApp = angular.module('mainApp', [
         }
     };
 })
-.config(function ($httpProvider) {
+.config(function($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
 })
 // prevent $http caching of API results
