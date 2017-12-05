@@ -101,26 +101,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     private FieldMappingDocument mergeFieldMappingBestEffort(FieldMappingDocument templateMapping,
                                                              FieldMappingDocument standardMapping) {
-        FieldMappingDocument finalMapping = templateMapping;
         Map<String, FieldMapping> standardMappingMap = new HashMap<>();
         for (FieldMapping fieldMapping : standardMapping.getFieldMappings()) {
             standardMappingMap.put(fieldMapping.getUserField(), fieldMapping);
         }
-        List<FieldMapping> fieldMappings = new ArrayList<>();
         for (FieldMapping fieldMapping : templateMapping.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 if (standardMappingMap.containsKey(fieldMapping.getUserField()) &&
                         standardMappingMap.get(fieldMapping.getUserField()).getMappedField() != null) {
                     fieldMapping.setMappedField(standardMappingMap.get(fieldMapping.getUserField()).getMappedField());
                     fieldMapping.setMappedToLatticeField(false);
-                    fieldMappings.add(fieldMapping);
                 }
-            } else {
-                fieldMappings.add(fieldMapping);
             }
         }
-        finalMapping.setFieldMappings(fieldMappings);
-        return finalMapping;
+        return templateMapping;
     }
 
     private FieldMappingDocument getFieldMappingBaseOnTable(SourceFile sourceFile, Table table) {
