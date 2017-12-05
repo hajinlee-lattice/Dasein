@@ -110,6 +110,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                     putDomainsInAccountTransferTable(transferId, domainBuffer);
                 }
                 executeDomainCollectionTransfer(transferId);
+                log.info("Finished dumping " + domains.size() + " domains to collector's url stream.");
             }
         }
     }

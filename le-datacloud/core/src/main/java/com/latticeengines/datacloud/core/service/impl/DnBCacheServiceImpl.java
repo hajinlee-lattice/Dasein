@@ -290,9 +290,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         double factor = Math.random();
         if (factor <= expireFactor) {
             log.info(String.format(
-                    "Cache is expired: Id=%s, IsWhiteCache=%b, IsDunsInAM=%s, Cache Timestamp (in day)=%d, Calculated expire factor=%f",
+                    "Cache is expired: Id=%s, IsWhiteCache=%b, IsDunsInAM=%s, Cache Timestamp (in day)=%d, Current Timestamp (in day)=%d, Calculated expire factor=%f",
                     cache.getId(), cache.isWhiteCache(), cache.isDunsInAMString(), cache.getTimestamp().longValue(),
-                    factor));
+                    System.currentTimeMillis() / DnBCache.DAY_IN_MILLIS, factor));
             removeCache(cache);
             return true;
         } else {
