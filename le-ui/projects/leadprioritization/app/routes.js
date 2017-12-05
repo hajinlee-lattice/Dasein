@@ -142,18 +142,6 @@ angular
                 },
                 ApiHost: function() {
                     return '/pls'; // don't remove this. -Lazarus
-                },    
-                EnrichmentCount: function($q, $state, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getCount().then(function(result) {
-                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                        deferred.resolve(result.data);
-                    });
-                    
-                    return deferred.promise;
                 }
             },
             views: {
@@ -165,7 +153,7 @@ angular
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "sidebar": {
-                    controller: function($scope, $rootScope, $stateParams, $state, Tenant, FeatureFlagService) {
+                    controller: function($scope, $rootScope, $stateParams, $state, Tenant, FeatureFlagService, DataCloudStore) {
                         var tenantName = $stateParams.tenantName;
 
                         if (tenantName != Tenant.DisplayName) {
@@ -174,8 +162,8 @@ angular
 
                             FeatureFlagService.GetAllFlags().then(function(result) {
                                 var flags = FeatureFlagService.Flags();
-
                                 if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
+                                    console.log('Routing to home.segment.explorer.attributes');
                                     $state.go('home.segment.explorer.attributes', {
                                         tenantName: Tenant.DisplayName,
                                         segment: 'Create'

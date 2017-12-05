@@ -66,14 +66,17 @@ angular
 
                     return deferred.promise;
                 }],
-                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
                     var deferred = $q.defer();
 
                     DataCloudStore.setHost(ApiHost);
 
-                    DataCloudStore.getAllTopAttributes().then(function(result) {
-                        deferred.resolve(result['Categories'] || result || {});
-                    });
+                    if (EnrichmentCount !== 0) { //PLS-5894
+                        console.log('execute EnrichmentTopAttributes');
+                        DataCloudStore.getAllTopAttributes().then(function(result) {
+                            deferred.resolve(result['Categories'] || result || {});
+                        });
+                    }
 
                     return deferred.promise;
                 }], 
@@ -423,8 +426,20 @@ angular
             url: '/nodata',
             params: {
                 pageTitle: 'My Data',
-                pageIcon: 'ico-analysis',
-                section: 'segment.analysis'               
+                pageIcon: 'ico-analysis'
+            },
+            resolve: {
+                AttributesCount: ['$q', '$state', 'DataCloudStore', 'ApiHost', function($q, $state, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
+
+                    DataCloudStore.getAttributesCount().then(function(result) {
+                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                        deferred.resolve(result.data);
+                    });
+                    return deferred.promise;
+                }]
             },
             views: {
                 "main@": {

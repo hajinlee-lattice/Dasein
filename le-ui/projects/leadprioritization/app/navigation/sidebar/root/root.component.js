@@ -21,11 +21,12 @@ angular
             'home.segment.explorer.builder',
             'home.segment.accounts',
             'home.segment.contacts'
-        ]
+        ],
+        isDataAvailable: true
     });
 
     vm.init = function() {
-        vm.isDataAvailable = DataCloudStore.metadata.enrichmentsTotal > 0;
+        vm.isDataAvailable = (DataCloudStore.metadata.enrichmentsTotal == 0) ? false : true;
 
         FeatureFlagService.GetAllFlags().then(function(result) {
             var flags = FeatureFlagService.Flags();

@@ -60,6 +60,21 @@ angular
                 pageTitle: 'Jobs',
                 jobCreationSuccess: null
             },
+            resolve: {
+                // This a temporary fix so the Jobs page does not 
+                // enable the sidebar when no data is available
+                AttributesCount: function($q, $state, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
+
+                    DataCloudStore.getAttributesCount().then(function(result) {
+                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                        deferred.resolve(result.data);
+                    });
+                    return deferred.promise;
+                }
+            },
             views: {
                 "main@": {
                     templateUrl: 'app/jobs/views/ListView.html'

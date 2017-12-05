@@ -32,7 +32,7 @@ angular.module('common.datacloud')
             generalSelectedTotal: 0,
             premiumSelectLimit: 0,
             premiumSelectedTotal: 0,
-            enrichmentsTotal: 0,
+            enrichmentsTotal: -1,
             tabSection: 'browse',
             category: null,
             subcategory: null
@@ -41,6 +41,7 @@ angular.module('common.datacloud')
             show: false,
             context: null
         };
+        this.attributesCount = null;
     }
 
     this.init();
@@ -208,6 +209,27 @@ angular.module('common.datacloud')
 
     this.setCount = function(count){
         DataCloudStore.count = count;
+    }
+
+    this.getAttributesCount = function() {
+        // This call is really a workaround for the fact that getCount() will first
+        // return 0 for an empty tenant, then after a refresh, will return ~21,000. 
+        var deferred = $q.defer();
+        if (DataCloudStore.attributesCount) {
+            deferred.resolve(DataCloudStore.attributesCount);
+        } else {
+            DataCloudService.getAttributesCount().then(function(response){
+                DataCloudStore.setAttributesCount(response.data);
+                deferred.resolve(response);
+            });
+        }
+        
+        return deferred.promise;
+    }
+
+    this.setAttributesCount = function(count){
+        DataCloudStore.attributesCount = count;
+        console.log('DataCloudStore.attributesCount is set to', DataCloudStore.attributesCount);
     }
 
     this.getSelectedCount = function(){
@@ -409,6 +431,20 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
+    this.getAttributesCount = function(){
+        var deferred = $q.defer(),
+            url = '/pls/datacollection/attributes/count';
+        
+        $http({
+            method: 'get',
+            url: url
+        }).then(function(response){
+            deferred.resolve(response);
+        });
+        
+        return deferred.promise;
+    }
+
     this.getSelectedCount = function(){
         var deferred = $q.defer();
         
@@ -493,7 +529,7 @@ angular.module('common.datacloud')
     this.getAllTopAttributes = function(opts) {
         var deferred = $q.defer(),
             url = this.url('/statistics/topn?topbkt=true','/stats/topn');
-        
+
         $http({
             method: 'get',
             url: url
