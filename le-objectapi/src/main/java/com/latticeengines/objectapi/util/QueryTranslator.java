@@ -227,7 +227,14 @@ public class QueryTranslator {
         // only apply has transaction restriction to account entity
         if (BusinessEntity.Account.equals(frontEndQuery.getMainEntity())) {
             if (Boolean.TRUE.equals(frontEndQuery.getRestrictHasTransaction())) {
-                Restriction hasTransaction = Restriction.builder().exists(BusinessEntity.Transaction).that(null).build();
+                BusinessEntity innerEntity = BusinessEntity.Transaction;
+                Restriction innerRestriction = Restriction.builder()
+                        .let(BusinessEntity.Transaction, InterfaceName.AccountId.name()).isNotNull().build();
+                Restriction hasTransaction = addSubselectRestriction(BusinessEntity.Account,
+                                                                     null,
+                                                                     innerEntity,
+                                                                     innerRestriction,
+                                                                     InterfaceName.AccountId.name());
                 return joinRestrictions(restriction, hasTransaction);
             }
         }
