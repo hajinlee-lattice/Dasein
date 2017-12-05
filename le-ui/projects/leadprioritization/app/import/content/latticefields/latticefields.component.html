@@ -5,7 +5,7 @@
     </div>
     <p>{{vm.latticeFieldsDescription(vm.importType)}}</p>
 
-    <h3 class="{{vm.importType}}-matching">{{vm.importType}} Matching Fields</h3>
+    <h3 class="{{vm.importType}}-matching">{{vm.importType + (vm.importType == 'Contacts' ? ' Fields' : ' Matching Fields')}}</h3>
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
     <form name="form">
         <ul ng-init="fieldMapping = fieldMapping || {}">
