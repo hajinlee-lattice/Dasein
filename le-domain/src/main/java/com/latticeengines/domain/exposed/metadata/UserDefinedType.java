@@ -9,6 +9,7 @@ public enum UserDefinedType {
     TEXT(Schema.Type.STRING, FieldType.STRING), //
     NUMBER(Schema.Type.DOUBLE, FieldType.FLOAT), //
     BOOLEAN(Schema.Type.BOOLEAN, FieldType.BOOLEAN), //
+    INTEGER(Schema.Type.INT, FieldType.INTEGER),
     DATE(Schema.Type.LONG, FieldType.LONG); //
 
     private Schema.Type avroType;

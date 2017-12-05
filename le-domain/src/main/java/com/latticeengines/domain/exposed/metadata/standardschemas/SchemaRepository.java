@@ -753,7 +753,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.Quantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet("QUANTITY")) //
-                .type(Schema.Type.LONG) //
+                .type(Schema.Type.INT) //
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.Quantity) //
@@ -764,7 +764,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.Amount.name()) //
                 .allowedDisplayNames(Sets.newHashSet( "AMOUNT")) //
-                .type(Schema.Type.LONG) //
+                .type(Schema.Type.INT) //
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.Amount) //

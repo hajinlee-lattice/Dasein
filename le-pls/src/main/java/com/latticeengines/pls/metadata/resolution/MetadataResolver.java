@@ -265,6 +265,8 @@ public class MetadataResolver {
             fieldType = UserDefinedType.DATE;
             break;
         case "INT":
+            fieldType = UserDefinedType.INTEGER;
+            break;
         case "DOUBLE":
             fieldType = UserDefinedType.NUMBER;
             break;
@@ -406,6 +408,8 @@ public class MetadataResolver {
             fundamentalType = UserDefinedType.TEXT;
         } else if (isBooleanTypeColumn(columnFields)) {
             fundamentalType = UserDefinedType.BOOLEAN;
+        } else if (isIntegerTypeColumn(columnFields)) {
+            fundamentalType = UserDefinedType.INTEGER;
         } else if (isDoubleTypeColumn(columnFields)) {
             fundamentalType = UserDefinedType.NUMBER;
         } else if (isDateTypeColumn(columnFields)) {
@@ -453,6 +457,20 @@ public class MetadataResolver {
             if (columnField != null && !columnField.isEmpty()) {
                 try {
                     Double.parseDouble(columnField);
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isIntegerTypeColumn(List<String> columnFields) {
+        for (String columnField : columnFields) {
+            if (columnField != null && !columnField.isEmpty()) {
+                try {
+                    Integer.parseInt(columnField);
                 } catch (NumberFormatException e) {
                     return false;
                 }
