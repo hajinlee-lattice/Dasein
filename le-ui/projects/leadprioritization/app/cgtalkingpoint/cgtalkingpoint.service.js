@@ -448,7 +448,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
                     "num_rows": count, 
                     "row_offset": 0 
                 }, 
-                "restrict_with_sfdcid": true 
+                "restrict_with_sfdcid": false 
             }
         }).then(function(response){
             deferred.resolve(response.data);
