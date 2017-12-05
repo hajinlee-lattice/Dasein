@@ -86,6 +86,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("getTable", url, Table.class);
     }
 
+    public String getTableName(String customerSpace, TableRoleInCollection role) {
+        return getTableName(customerSpace, role, null);
+    }
+
     public String getTableName(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames?role={role}";
         List<Object> args = new ArrayList<>();
