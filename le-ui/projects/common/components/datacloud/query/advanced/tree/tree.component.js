@@ -296,9 +296,9 @@ angular
             }
 
             vm.addAttribute = function(tree) {
-                this.root.saveState();
+                vm.root.saveState();
                 QueryStore.setAddBucketTreeRoot(vm.tree);
-                this.root.goAttributes();
+                vm.root.goAttributes();
             }
 
             vm.mouseDown = function() {
@@ -320,7 +320,7 @@ angular
                     vm.root.droppedItem = vm;
                     
                     if (dropped) {
-                        this.root.saveState();
+                        vm.root.saveState();
                         vm.root.dropMoveItem(dragged, dropped);
                         //vm.unused = false;
                     }
@@ -351,7 +351,7 @@ angular
 
             vm.addOperator = function(tree) {
                 var operator = tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND';
-                this.root.saveState();
+                vm.root.saveState();
 
                 if (tree.logicalRestriction) {
                     tree.logicalRestriction.restrictions.push({
@@ -365,7 +365,7 @@ angular
 
             this.clickOperator = function() {
                 $timeout(function() {
-                    this.root.saveState();
+                    vm.root.saveState();
                 }, 50);
             }
 
@@ -381,7 +381,7 @@ angular
             }
 
             this.clickDelete = function() {
-                this.root.saveState();
+                vm.root.saveState();
 
                 vm.parent.logicalRestriction.restrictions.forEach(function(item, index) {
                     if (item == vm.tree) {
