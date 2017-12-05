@@ -363,25 +363,25 @@ angular
                 }
             }
 
-            this.clickOperator = function() {
+            vm.clickOperator = function() {
                 $timeout(function() {
                     vm.root.saveState();
                 }, 50);
             }
 
-            this.clickEditMode = function(value) {
+            vm.clickEditMode = function(value) {
                 vm.editMode = value;
             }
 
-            this.clickCollapsed = function() {
+            vm.clickCollapsed = function() {
                 // FIXME - collapsed property is weeded out of equivalency check
-                //this.root.saveState(true); // true wont update counts
+                //vm.root.saveState(true); // true wont update counts
 
                 vm.tree.collapsed = !vm.tree.collapsed;
             }
 
-            this.clickDelete = function() {
-                this.root.saveState();
+            vm.clickDelete = function() {
+                vm.root.saveState();
 
                 vm.parent.logicalRestriction.restrictions.forEach(function(item, index) {
                     if (item == vm.tree) {

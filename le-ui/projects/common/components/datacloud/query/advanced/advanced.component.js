@@ -257,8 +257,11 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.setState = function(newState) {
+        //console.log('set',newState);
         if (!vm.compareTree(newState, angular.copy(vm.tree))) {
             vm.labelIncrementor = 0;
+            
+            QueryStore[vm.treeMode + 'Restriction'].restriction = newState[0];
 
             vm.restriction = {
                 restriction: newState[0]
