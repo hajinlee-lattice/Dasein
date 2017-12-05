@@ -161,6 +161,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return dataCollectionEntityMgr.getTablesOfRole(collectionName, tableRole, version);
     }
 
+    @Override
+    public List<String> getTableNames(String customerSpace, String collectionName, TableRoleInCollection tableRole,
+                                     DataCollection.Version version) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+        if (version == null) {
+            // by default get active version
+            version = dataCollectionEntityMgr.getActiveVersion();
+        }
+        log.info("Getting all table names of role " + tableRole + " in collection " + collectionName);
+        return dataCollectionEntityMgr.getTableNamesOfRole(collectionName, tableRole, version);
+    }
+
     public AttributeRepository getAttrRepo(String customerSpace, String collectionName,
             DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {

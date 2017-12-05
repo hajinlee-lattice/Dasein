@@ -86,6 +86,19 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("getTable", url, Table.class);
     }
 
+    public String getTableName(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames?role={role}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(role);
+        if (version != null) {
+            urlPattern += "&version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        return get("getTableName", url, String.class);
+    }
+
     @SuppressWarnings("rawtypes")
     public List<MetadataSegment> getSegments(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/segments",

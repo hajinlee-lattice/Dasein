@@ -98,7 +98,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         dataCollectionDao.delete(dataCollection);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
@@ -107,6 +107,17 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
         return tableNames.stream().map(tableEntityMgr::findByName).filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
+        List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
+        if (tableNames == null) {
+            return Collections.emptyList();
+        } else {
+            return tableNames;
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

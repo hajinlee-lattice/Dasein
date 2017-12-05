@@ -3,6 +3,7 @@ package com.latticeengines.metadata.controller;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,6 +70,20 @@ public class DefaultDataCollectionResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         List<Table> tables = dataCollectionService.getTables(customerSpace, null, role, version);
         if (tables == null || tables.isEmpty()) {
+            return null;
+        } else {
+            return tables.get(0);
+        }
+    }
+
+    @RequestMapping(value = "/tablenames", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get the default data collection")
+    public String getTableName(@PathVariable String customerSpace, @RequestParam(value = "role") TableRoleInCollection role,
+                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        List<String> tables = dataCollectionService.getTableNames(customerSpace, null, role, version);
+        if (CollectionUtils.isEmpty(tables)) {
             return null;
         } else {
             return tables.get(0);

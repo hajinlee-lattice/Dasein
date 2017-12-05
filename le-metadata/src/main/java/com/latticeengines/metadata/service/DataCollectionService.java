@@ -25,6 +25,9 @@ public interface DataCollectionService {
     List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
             DataCollection.Version version);
 
+    List<String> getTableNames(String customerSpace, String collectionName, TableRoleInCollection tableRole,
+                          DataCollection.Version version);
+
     StatisticsContainer getStats(String customerSpace, String collectionName, DataCollection.Version version);
 
     AttributeRepository getAttrRepo(String customerSpace, String collectionName, DataCollection.Version version);
