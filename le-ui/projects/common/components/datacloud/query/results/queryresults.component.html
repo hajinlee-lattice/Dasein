@@ -8,35 +8,36 @@
         class="targets-filters"
         ng-if="vm.section === 'wizard.targets'">
 
-        <label>
+        <label ng-if="vm.noSFCount != 0">
             <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
             <input 
                 type="checkbox" 
                 class=""
-                ng-disabled="vm.noSFCount === 0"
                 ng-model="excludeAccounts"
                 ng-change="vm.excludeNonSalesForceCheckbox(!excludeAccounts)" />
-            <span ng-class="vm.noSFCount === 0 ? 'disabled-text' : ''">Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)</label>
+            Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)
         </label>
 
             <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
-        <div class="checkbox-input" ng-class="vm.accounts.length < 5000 ? 'disabled-text' : ''">
+        <div 
+            class="checkbox-input" 
+            ng-if="vm.accounts.length > 5000">
             <input 
                 type="checkbox" 
                 class=""
                 ng-model=""
-                ng-change=""
-                ng-disabled="vm.accounts.length < 5000" />
+                ng-change="" />
             <label>Limit to only </label>
             <input 
                 type="text" 
                 value="3000" 
-                class="form-control"
-                ng-disabled="vm.accounts.length < 5000" />
+                class="form-control" />
             <span> highest rated targets</span>
         </div>
 
-        <ul class="bucket-checkboxes">
+        <ul 
+            class="bucket-checkboxes"
+            ng-if="vm.accountsCoverage.bucketCoverageCounts.length > 1">
             <li 
                 ng-class="!selectedBucket ? '' : 'unselected'"
                 ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
@@ -44,7 +45,7 @@
                 
                 <h3>{{bucket.bucket}}</h3>
                 <h4>Accounts</h4>
-                <p>{{bucket.count | number}} ({{ (bucket.count / vm.counts.accounts.value)  | percentage: 0 }})</p>
+                <p>{{bucket.count | number}} ({{ ::bucket.percentage | percentage: 0 }})</p>
 
             </li>
         </ul>

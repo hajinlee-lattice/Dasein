@@ -9,7 +9,7 @@ angular.module('lp.playbook.wizard.rating', [])
         ratings: Ratings,
         ratingsCounts: null,
         currentPage: 1,
-        pageSize: 20,
+        pageSize: 10,
         block_user: true
     });
 

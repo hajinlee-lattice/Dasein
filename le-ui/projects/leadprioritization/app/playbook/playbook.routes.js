@@ -524,9 +524,8 @@ angular
                 }],
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
 
+
                     var deferred = $q.defer(),
-                        savedRating = PlaybookWizardStore.getSavedRating(),
-                        engineId = savedRating.id,
                         query = { 
                                 free_form_text_search: '',
                                 restrictNotNullSalesforceId: false,
@@ -538,7 +537,7 @@ angular
                                 descending: false
                             };
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
 
                         var engineId = data.ratingEngine.id;
 
@@ -557,7 +556,7 @@ angular
 
                     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
 
                         var engineId = data.ratingEngine.id,
                             engineIdObject = [{id: engineId}];
