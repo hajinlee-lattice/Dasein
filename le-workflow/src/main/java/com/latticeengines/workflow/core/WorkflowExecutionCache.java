@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
-
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +24,10 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -129,7 +128,8 @@ public class WorkflowExecutionCache {
 
             Job job = new Job();
             job.setId(workflowId.getId());
-            if (FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
+            if (FinalApplicationStatus.FAILED.name().equals(workflowJob.getStatus()) ||
+                    JobStatus.FAILED.name().equals(workflowJob.getStatus())) {
                 job.setJobStatus(JobStatus.FAILED);
             } else {
                 JobStatus status = getJobStatusFromBatchStatus(workflowStatus.getStatus());

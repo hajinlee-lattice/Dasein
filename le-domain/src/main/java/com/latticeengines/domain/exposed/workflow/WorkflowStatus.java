@@ -3,9 +3,10 @@ package com.latticeengines.domain.exposed.workflow;
 import java.util.Date;
 import java.util.EnumSet;
 
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.BatchStatus;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
@@ -93,4 +94,21 @@ public class WorkflowStatus {
         this.customerSpace = customerSpace;
     }
 
+    public FinalApplicationStatus toYarnStatus() {
+        switch (status) {
+            case COMPLETED:
+                return FinalApplicationStatus.SUCCEEDED;
+            case ABANDONED:
+                return FinalApplicationStatus.KILLED;
+            case STOPPING:
+            case STOPPED:
+            case FAILED:
+                return FinalApplicationStatus.FAILED;
+            case STARTING:
+            case STARTED:
+            case UNKNOWN:
+            default:
+                return FinalApplicationStatus.UNDEFINED;
+        }
+    }
 }

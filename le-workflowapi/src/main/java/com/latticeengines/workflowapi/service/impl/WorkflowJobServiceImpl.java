@@ -1,9 +1,7 @@
 package com.latticeengines.workflowapi.service.impl;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -49,40 +46,23 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public JobStatus getJobStatus(Long workflowId) {
-        try {
-            return JobStatus.getMappedStatus(workflowJobEntityMgr.findByWorkflowId(workflowId).getStatus());
-        } catch (RuntimeException exc) {
-            log.warn(String.format("Failed to get job status for job %d.", workflowId));
-
-            return null;
-        }
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        return (workflowJob != null) ? JobStatus.fromString(workflowJob.getStatus()) : null;
     }
 
     @Override
     public List<JobStatus> getJobStatus(List<Long> workflowIds) {
-        List<JobStatus> status = new ArrayList<>();
-        for (Long workflowId : workflowIds) {
-            status.add(getJobStatus(workflowId));
-        }
-
-        return status;
+        return workflowIds.stream().map(this::getJobStatus).collect(Collectors.toList());
     }
 
     @Override
     public List<JobStatus> getJobStatus(String customerSpace, List<Long> workflowIds) {
-        try {
-            Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
-            List<WorkflowJob> jobs = (workflowIds == null) ?
-                    workflowJobEntityMgr.findByTenant(tenant) :
-                    workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant, workflowIds);
-            jobs.removeIf(Objects::isNull);
-            return jobs.stream().map(job -> JobStatus.getMappedStatus(job.getStatus())).collect(Collectors.toList());
-        } catch (RuntimeException exc) {
-            log.warn(String.format("Failed to get job status. customerSpace=%s, workflowIds=%s.",
-                    customerSpace, JsonUtils.serialize(workflowIds)));
-
-            return Collections.emptyList();
-        }
+        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        List<WorkflowJob> jobs = (workflowIds == null) ?
+                workflowJobEntityMgr.findByTenant(tenant) :
+                workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant, workflowIds);
+        jobs.removeIf(Objects::isNull);
+        return jobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
     }
 
     @Override
@@ -104,36 +84,34 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public List<Job> getJobs(String customerSpace, Set<Long> workflowIds, Set<String> types, Boolean includeDetails,
                              Boolean hasParentId, Long parentJobId) {
-        try {
-            Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
-            List<Job> jobs = getJobsByTenant(tenant.getPid());
-            jobs.removeIf(Objects::isNull);
+        String tenantId = CustomerSpace.parse(customerSpace).toString();
+        Tenant tenant = tenantService.findByTenantId(tenantId);
 
-            if (workflowIds != null) {
-                jobs.removeIf(job -> !workflowIds.contains(job.getId()));
-            }
-
-            if (types != null) {
-                jobs.removeIf(job -> !types.contains(job.getJobType()));
-            }
-
-            if (!includeDetails) {
-                jobs.forEach(job -> job.setSteps(null));
-            }
-
-            if (hasParentId) {
-                jobs.removeIf(job -> !parentJobId.equals(job.getParentId()));
-            }
-
-            return jobs;
-        } catch (RuntimeException exc) {
-            log.warn(String.format("Failed to get jobs. customerSpace=%s, workflowIds=%s, types=%s, " +
-                    "includeDetails=%s, hasParentId=%s, parentJobId=%d",
-                    customerSpace, JsonUtils.serialize(workflowIds), JsonUtils.serialize(types),
-                    String.valueOf(includeDetails), String.valueOf(hasParentId), parentJobId));
-
-            return Collections.emptyList();
+        if (tenant == null) {
+            log.error("Cannot get tenant by tenantId " + tenantId);
+            return null;
         }
+
+        List<Job> jobs = getJobsByTenant(tenant.getPid());
+        jobs.removeIf(Objects::isNull);
+
+        if (workflowIds != null) {
+            jobs.removeIf(job -> !workflowIds.contains(job.getId()));
+        }
+
+        if (types != null) {
+            jobs.removeIf(job -> !types.contains(job.getJobType()));
+        }
+
+        if (!includeDetails) {
+            jobs.forEach(job -> job.setSteps(null));
+        }
+
+        if (hasParentId) {
+            jobs.removeIf(job -> !parentJobId.equals(job.getParentId()));
+        }
+
+        return jobs;
     }
 
     @Override
@@ -143,26 +121,19 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<Job> getJobsByTenant(Long tenantPid, List<String> types) {
-        try {
-            List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid);
-            jobs.removeIf(Objects::isNull);
+        List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid);
+        jobs.removeIf(Objects::isNull);
 
-            if (types != null) {
-                types.forEach(type -> jobs.removeIf(job -> !job.getJobType().equals(type)));
-            }
-
-            return jobs;
-        } catch (RuntimeException exc) {
-            log.warn(String.format("Failed to get jobs. tenantPid=%d, types=%s",
-                    tenantPid, JsonUtils.serialize(types)));
-
-            return Collections.emptyList();
+        if (types != null) {
+            types.forEach(type -> jobs.removeIf(job -> !job.getJobType().equals(type)));
         }
+
+        return jobs;
     }
 
     @Override
     public JobStatus getJobStatusByApplicationId(String applicationId) {
-        return JobStatus.getMappedStatus(workflowJobEntityMgr.findByApplicationId(applicationId).getStatus());
+        return JobStatus.fromString(workflowJobEntityMgr.findByApplicationId(applicationId).getStatus());
     }
 
     @Override

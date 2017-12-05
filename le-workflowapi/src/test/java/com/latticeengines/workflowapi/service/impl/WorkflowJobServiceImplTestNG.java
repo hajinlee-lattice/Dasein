@@ -60,7 +60,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         job.setId(workflowJob.getWorkflowId());
         job.setParentId(workflowJob.getParentJobId());
         job.setApplicationId(workflowJob.getApplicationId());
-        job.setJobStatus(JobStatus.getMappedStatus(workflowJob.getStatus()));
+        job.setJobStatus(JobStatus.fromString(workflowJob.getStatus()));
         job.setInputs(workflowJob.getInputContext());
         job.setJobType(workflowJob.getType());
         job.setSteps(new ArrayList<>());
@@ -84,7 +84,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(status, JobStatus.FAILED);
 
         status = workflowJobService.getJobStatus(workflowIds.get(20000L));
-        Assert.assertEquals(status, JobStatus.FAILED);
+        Assert.assertEquals(status, JobStatus.CANCELLED);
 
         List<Long> testWorkflowIds1 = new ArrayList<>();
         testWorkflowIds1.add(workflowIds.get(10000L));
@@ -93,7 +93,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         List<JobStatus> statuses = workflowJobService.getJobStatus(testWorkflowIds1);
         Assert.assertEquals(statuses.size(), 3);
         Assert.assertEquals(statuses.get(0), JobStatus.PENDING);
-        Assert.assertEquals(statuses.get(1), JobStatus.FAILED);
+        Assert.assertEquals(statuses.get(1), JobStatus.CANCELLED);
         Assert.assertNull(statuses.get(2));
 
         List<Long> testWorkflowIds2 = new ArrayList<>();
@@ -142,7 +142,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(0).getJobType(), "application_20000");
 
         jobs = workflowJobService.getJobs(StringUtils.EMPTY, null, null, false, false,0L);
-        Assert.assertEquals(jobs.size(), 0);
+        Assert.assertNull(jobs);
         jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), null, null, false, false, 0L);
         Assert.assertEquals(jobs.size(), 5);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
@@ -245,7 +245,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob1.setApplicationId(applicationId);
         workflowJob1.setInputContext(inputContext);
         workflowJob1.setTenant(tenant);
-        workflowJob1.setStatus(FinalApplicationStatus.UNDEFINED);
+        workflowJob1.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.UNDEFINED).name());
         workflowJob1.setWorkflowId(jobExecution1.getJobId());
         workflowJob1.setType(jobInstance1.getJobName());
         workflowJob1.setParentJobId(null);
@@ -263,7 +263,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob11.setApplicationId(applicationId);
         workflowJob11.setInputContext(inputContext);
         workflowJob11.setTenant(tenant);
-        workflowJob11.setStatus(FinalApplicationStatus.UNDEFINED);
+        workflowJob11.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.UNDEFINED).name());
         workflowJob11.setWorkflowId(jobExecution11.getJobId());
         workflowJob11.setType(jobInstance11.getJobName());
         workflowJob11.setParentJobId(workflowIds.get(10000L));
@@ -281,7 +281,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob12.setApplicationId(applicationId);
         workflowJob12.setInputContext(inputContext);
         workflowJob12.setTenant(tenant);
-        workflowJob12.setStatus(FinalApplicationStatus.SUCCEEDED);
+        workflowJob12.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.SUCCEEDED).name());
         workflowJob12.setWorkflowId(jobExecution12.getJobId());
         workflowJob12.setType(jobInstance12.getJobName());
         workflowJob12.setParentJobId(workflowIds.get(10000L));
@@ -299,7 +299,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob13.setApplicationId(applicationId);
         workflowJob13.setInputContext(inputContext);
         workflowJob13.setTenant(tenant);
-        workflowJob13.setStatus(FinalApplicationStatus.FAILED);
+        workflowJob13.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.FAILED).name());
         workflowJob13.setWorkflowId(jobExecution13.getJobId());
         workflowJob13.setType(jobInstance13.getJobName());
         workflowJob13.setParentJobId(workflowIds.get(10000L));
@@ -317,7 +317,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob2.setApplicationId(applicationId);
         workflowJob2.setInputContext(inputContext);
         workflowJob2.setTenant(tenant);
-        workflowJob2.setStatus(FinalApplicationStatus.KILLED);
+        workflowJob2.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.KILLED).name());
         workflowJob2.setWorkflowId(jobExecution2.getJobId());
         workflowJob2.setType(jobInstance2.getJobName());
         workflowJobEntityMgr.create(workflowJob2);

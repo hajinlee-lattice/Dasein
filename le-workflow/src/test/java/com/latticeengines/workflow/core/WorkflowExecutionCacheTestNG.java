@@ -37,7 +37,7 @@ public class WorkflowExecutionCacheTestNG extends WorkflowTestNGBase {
         workflowJob.setWorkflowId(1L);
         workflowJob.setTenant(MultiTenantContext.getTenant());
         workflowJob.setApplicationId("applicationid_0002");
-        workflowJob.setStatus(FinalApplicationStatus.UNDEFINED);
+        workflowJob.setStatus(FinalApplicationStatus.UNDEFINED.name());
         workflowJobEntityMgr.create(workflowJob);
 
         WorkflowService workflowService = mock(WorkflowService.class);

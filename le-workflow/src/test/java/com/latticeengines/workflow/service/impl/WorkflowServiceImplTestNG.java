@@ -5,7 +5,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -111,8 +111,8 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         failableStep.setFail(false);
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
-        workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
-        List<Job> jobs = workflowService.getJobs(Arrays.asList(workflowId), failableWorkflow.name());
+        workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT);
+        List<Job> jobs = workflowService.getJobs(Collections.singletonList(workflowId), failableWorkflow.name());
         assertEquals(jobs.size(), 1);
         Job job = jobs.get(0);
         assertEquals(job.getId().longValue(), workflowId.getId());
@@ -194,7 +194,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
     @Test(groups = "functional")
     public void testStop() throws Exception {
-        sleepableStep.setSleepTime(1500L);
+        sleepableStep.setSleepTime(10000L);
         workflowConfig.setWorkflowName(sleepableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.getStatus(workflowId).getStatus();
@@ -212,5 +212,4 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.STOPPED);
     }
-
 }

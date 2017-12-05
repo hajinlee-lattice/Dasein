@@ -3,7 +3,6 @@ package com.latticeengines.workflowapi.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -15,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
+
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.JacocoUtils;
@@ -90,7 +89,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         String jobId = batchService.submitJob(jobRequest);
         job.setId(jobId);
 
-        createWorkflowJob(workflowConfig, job, jobId.toString());
+        createWorkflowJob(workflowConfig, job, jobId);
         return jobId;
     }
 
@@ -131,6 +130,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         workflowJob.setApplicationId(appId);
         workflowJob.setInputContext(workflowConfig.getInputProperties());
         workflowJob.setStartTimeInMillis(System.currentTimeMillis());
+        workflowJob.setType(workflowConfig.getWorkflowName());
         workflowJobEntityMgr.create(workflowJob);
     }
 
@@ -191,8 +191,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
         if (workflowId == null) {
-            com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
-            return job;
+            return getJobFromWorkflowJobAndYarn(workflowJob);
         }
         return workflowService.getJob(workflowId);
     }
@@ -209,7 +208,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
                 if (workflowId == null || (workflowJob.getStatus() != null
-                        && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED))) {
+                        && workflowJob.getStatus().equalsIgnoreCase(FinalApplicationStatus.FAILED.name()))) {
                     com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
                     jobs.add(job);
                 } else {
@@ -244,7 +243,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
 
         // get state first from database
-        if (workflowJob.getStatus() != null && FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
+        if (workflowJob.getStatus() != null &&
+                (FinalApplicationStatus.FAILED.name().equalsIgnoreCase(workflowJob.getStatus())) ||
+                 JobStatus.FAILED.name().equalsIgnoreCase(workflowJob.getStatus())) {
             job.setJobStatus(JobStatus.FAILED);
         } else {
             WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
@@ -259,12 +260,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         try {
             jobs.addAll(getJobsByTenant(tenantPid));
             if (type != null) {
-                Iterator<com.latticeengines.domain.exposed.workflow.Job> iter = jobs.iterator();
-                while (iter.hasNext()) {
-                    if (!iter.next().getJobType().equals(type)) {
-                        iter.remove();
-                    }
-                }
+                jobs.removeIf(job -> !job.getJobType().equals(type));
             }
         } catch (Exception e) {
             log.warn(String.format("Error while getting jobs for tenant pid %s, with error %s", tenantPid,

@@ -136,7 +136,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
         workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
         assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
-        assertEquals(workflowJob5.getStatus(), FinalApplicationStatus.FAILED);
+        assertEquals(workflowJob5.getStatus(), FinalApplicationStatus.FAILED.name());
         assertEquals(workflowJob5.getStartTimeInMillis(), new Long(10000L));
     }
 

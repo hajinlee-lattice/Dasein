@@ -11,6 +11,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.workflow.exposed.dao.WorkflowJobDao;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
@@ -83,7 +84,7 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(propagation = Propagation.REQUIRED)
     public WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {
-        workflowJob.setStatus(yarnJobStatus.getStatus());
+        workflowJob.setStatus(JobStatus.fromString(yarnJobStatus.getStatus().name(), null).name());
         workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
         workflowJobDao.updateStatusFromYarn(workflowJob, yarnJobStatus);
         return workflowJob;

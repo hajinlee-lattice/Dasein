@@ -49,7 +49,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
 
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setTenant(t);
-        workflowJob.setStatus(FinalApplicationStatus.FAILED);
+        workflowJob.setStatus(JobStatus.FAILED.name());
         workflowJob.setStartTimeInMillis(100000000L);
         workflowJobEntityMgr.create(workflowJob);
 
@@ -85,7 +85,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         assertEquals(job.getStartTimestamp(), new Date(workflowJob.getStartTimeInMillis()));
 
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
-        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
+        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED.name());
         assertEquals(workflowJob.getStartTimeInMillis().longValue(), 100000001L);
 
     }
@@ -110,7 +110,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
 
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
-        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
+        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED.name());
     }
 
     @Test(groups = "functional", enabled = true)
@@ -131,5 +131,4 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         Assert.assertNotNull(jobId);
         log.info("job id is " + jobId);
     }
-
 }

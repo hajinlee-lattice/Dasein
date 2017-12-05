@@ -71,8 +71,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     private String inputContextString;
 
     @Column(name = "STATUS")
-    @Enumerated(EnumType.STRING)
-    private FinalApplicationStatus status;
+//    @Enumerated(EnumType.STRING)
+//    private FinalApplicationStatus status;
+    private String status;
 
     @Column(name = "START_TIME")
     private Long startTimeInMillis;
@@ -267,13 +268,21 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         this.outputContextString = outputContextString;
     }
 
-    public FinalApplicationStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(FinalApplicationStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
+
+//    public FinalApplicationStatus getStatus() {
+//        return status;
+//    }
+//
+//    public void setStatus(FinalApplicationStatus status) {
+//        this.status = status;
+//    }
 
     public Long getStartTimeInMillis() {
         return startTimeInMillis;
