@@ -1,28 +1,11 @@
 package com.latticeengines.query.exposed.translator;
 
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.query.AggregationFilter;
-import com.latticeengines.domain.exposed.query.AggregationType;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.query.QueryBuilder;
-import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.SubQuery;
-import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -35,7 +18,24 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
-import com.querydsl.sql.WindowFunction;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.QueryBuilder;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.query.exposed.factory.QueryFactory;
+
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregateTimeWindow;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateTimeWindow;
 
 public class TransactionRestrictionTranslator {
     public static final int NUM_ADDITIONAL_PERIOD = 2;
@@ -240,112 +240,6 @@ public class TransactionRestrictionTranslator {
                 .withProjection(PRODUCT_ID)
                 .withProjection(ACCOUNT_ID);
 
-    }
-
-    @SuppressWarnings("unchecked")
-    private WindowFunction translateEver(WindowFunction windowAgg) {
-        return windowAgg.rows().between().unboundedPreceding().currentRow();
-    }
-
-    @SuppressWarnings("unchecked")
-    private WindowFunction translatePrior(WindowFunction windowAgg,
-                                          int priorOffset) {
-        return windowAgg.rows().between().unboundedPreceding().preceding(priorOffset);
-    }
-
-    @SuppressWarnings("unchecked")
-    private WindowFunction translateBetween(WindowFunction windowAgg,
-                                            int startOffset, int endOffset,
-                                            boolean preceding) {
-        // for row preceding, SQL requires we start with the larger offset, order matters
-        int minOffset = Math.min(startOffset, endOffset);
-        int maxOffset = Math.max(startOffset, endOffset);
-        if (preceding) {
-            return windowAgg.rows().between().preceding(maxOffset).preceding(minOffset);
-        } else {
-            return windowAgg.rows().between().following(minOffset).following(maxOffset);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private WindowFunction translateAggregateTimeWindow(StringPath keysAccountId,
-                                                        StringPath keysPeriodId,
-                                                        StringPath trxnVal,
-                                                        TimeFilter timeFilter,
-                                                        AggregationFilter aggregationFilter,
-                                                        boolean ascendingPeriod) {
-        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
-
-
-        AggregationType aggregateType = aggregationFilter.getAggregationType();
-        ComparisonType cmp = aggregationFilter.getComparisonType();
-        boolean isNotLessComparison = TranslatorUtils.isNotLessThanOperation(cmp);
-
-        WindowFunction windowAgg = null;
-        switch (aggregateType) {
-        case SUM:
-            windowAgg = SQLExpressions.sum(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            break;
-        case AVG:
-            windowAgg = SQLExpressions.avg(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            break;
-        case AT_LEAST_ONCE:
-            if (isNotLessComparison) {
-                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            } else {
-                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            }
-            break;
-        case EACH:
-            if (isNotLessComparison) {
-                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            } else {
-                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            }
-            break;
-        }
-
-        if (ascendingPeriod) {
-            windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId);
-        } else {
-            windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId.desc());
-        }
-
-        return translateTimeWindow(timeFilter, windowAgg);
-    }
-
-    private WindowFunction translateTimeWindow(TimeFilter timeFilter, WindowFunction windowAgg) {
-        ComparisonType type = timeFilter.getRelation();
-        if (ComparisonType.EVER == type) {
-            return translateEver(windowAgg);
-        } else if (ComparisonType.BETWEEN == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(1).toString()),
-                                    true);
-        } else if (ComparisonType.WITHIN == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    0,
-                                    true);
-        } else if (ComparisonType.PRIOR == type) {
-            return translatePrior(windowAgg,
-                                  Integer.valueOf(timeFilter.getValues().get(0).toString()));
-        } else if (ComparisonType.FOLLOWING == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    false);
-        } else if (ComparisonType.IN_CURRENT_PERIOD == type) {
-            return translateBetween(windowAgg, 0, 0, true);
-        } else if (ComparisonType.EQUAL == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    true);
-        } else {
-            throw new UnsupportedOperationException("Unsupported time filter type " + type);
-        }
     }
 
     private BooleanExpression translateProductId(String productIdStr) {

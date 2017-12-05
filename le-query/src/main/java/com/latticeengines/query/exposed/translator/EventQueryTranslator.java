@@ -1,9 +1,5 @@
 package com.latticeengines.query.exposed.translator;
 
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,28 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
-import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.query.AggregationFilter;
-import com.latticeengines.domain.exposed.query.AggregationType;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.query.LogicalOperator;
-import com.latticeengines.domain.exposed.query.LogicalRestriction;
-import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.domain.exposed.query.QueryBuilder;
-import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.SubQuery;
-import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
-import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.SubQueryExpression;
@@ -51,7 +25,33 @@ import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.Union;
-import com.querydsl.sql.WindowFunction;
+import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.QueryBuilder;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.query.exposed.factory.QueryFactory;
+
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregateTimeWindow;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateTimeWindow;
 
 public class EventQueryTranslator {
     private static final int NUM_ADDITIONAL_PERIOD = 2;
@@ -68,7 +68,6 @@ public class EventQueryTranslator {
     private static final String QUANTITY_AGG = "quantityagg";
     private static final String AMOUNT_VAL = "amountval";
     private static final String QUANTITY_VAL = "quantityval";
-    public static final String MAX_PERIOD = "maxperiod";
     private static final String MAX_PERIOD_ID = "maxperiodid";
     private static final String KEYS = "keys";
 
@@ -174,112 +173,6 @@ public class EventQueryTranslator {
         return maxPeriodIdSubQuery;
     }
 
-    @SuppressWarnings("unchecked")
-    private WindowFunction translateEver(WindowFunction windowAgg) {
-        return windowAgg.rows().between().unboundedPreceding().currentRow();
-    }
-
-    @SuppressWarnings("unchecked")
-    private WindowFunction translatePrior(WindowFunction windowAgg,
-                                          int priorOffset) {
-        return windowAgg.rows().between().unboundedPreceding().preceding(priorOffset);
-    }
-
-    @SuppressWarnings("unchecked")
-    private WindowFunction translateBetween(WindowFunction windowAgg,
-                                            int startOffset, int endOffset,
-                                            boolean preceding) {
-        // for row preceding, SQL requires we start with the larger offset, order matters
-        int minOffset = Math.min(startOffset, endOffset);
-        int maxOffset = Math.max(startOffset, endOffset);
-        if (preceding) {
-            return windowAgg.rows().between().preceding(maxOffset).preceding(minOffset);
-        } else {
-            return windowAgg.rows().between().following(minOffset).following(maxOffset);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private WindowFunction translateAggregateTimeWindow(StringPath keysAccountId,
-                                                        StringPath keysPeriodId,
-                                                        StringPath trxnVal,
-                                                        TimeFilter timeFilter,
-                                                        AggregationFilter aggregationFilter,
-                                                        boolean ascendingPeriod) {
-        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
-
-
-        AggregationType aggregateType = aggregationFilter.getAggregationType();
-        ComparisonType cmp = aggregationFilter.getComparisonType();
-        boolean isNotLessComparison = TranslatorUtils.isNotLessThanOperation(cmp);
-
-        WindowFunction windowAgg = null;
-        switch (aggregateType) {
-        case SUM:
-            windowAgg = SQLExpressions.sum(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            break;
-        case AVG:
-            windowAgg = SQLExpressions.avg(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            break;
-        case AT_LEAST_ONCE:
-            if (isNotLessComparison) {
-                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            } else {
-                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            }
-            break;
-        case EACH:
-            if (isNotLessComparison) {
-                windowAgg = SQLExpressions.min(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            } else {
-                windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
-            }
-            break;
-        }
-
-        if (ascendingPeriod) {
-            windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId);
-        } else {
-            windowAgg.partitionBy(keysAccountId).orderBy(keysPeriodId.desc());
-        }
-
-        return translateTimeWindow(timeFilter, windowAgg);
-    }
-
-    private WindowFunction translateTimeWindow(TimeFilter timeFilter, WindowFunction windowAgg) {
-        ComparisonType type = timeFilter.getRelation();
-        if (ComparisonType.EVER == type) {
-            return translateEver(windowAgg);
-        } else if (ComparisonType.BETWEEN == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(1).toString()),
-                                    true);
-        } else if (ComparisonType.WITHIN == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    0,
-                                    true);
-        } else if (ComparisonType.PRIOR == type) {
-            return translatePrior(windowAgg,
-                                  Integer.valueOf(timeFilter.getValues().get(0).toString()));
-        } else if (ComparisonType.FOLLOWING == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    false);
-        } else if (ComparisonType.IN_CURRENT_PERIOD == type) {
-            return translateBetween(windowAgg, 0, 0, true);
-        } else if (ComparisonType.EQUAL == type) {
-            return translateBetween(windowAgg,
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    true);
-        } else {
-            throw new UnsupportedOperationException("Unsupported time filter type " + type);
-        }
-    }
-
     private BooleanExpression translateProductId(String productIdStr) {
         return productId.in(productIdStr.split(","));
     }
@@ -351,9 +244,8 @@ public class EventQueryTranslator {
 
         if (unitFilter != null) {
             productSelectList.add(quantityVal.as(QUANTITY_VAL));
-            Expression unitWindowAgg =
-                    translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnQuantityVal, timeFilter, unitFilter, true)
-                            .as(quantityAggr);
+            Expression unitWindowAgg = translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnQuantityVal,
+                                                                    timeFilter, unitFilter, true).as(quantityAggr);
             apsSelectList.add(trxnQuantityVal);
             apsSelectList.add(unitWindowAgg);
         }
@@ -382,7 +274,8 @@ public class EventQueryTranslator {
         } else {
             aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate).not();
         }
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId, period);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
+                                                                         period);
 
         SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(aggrValPredicate.and(periodIdPredicate));
@@ -421,7 +314,8 @@ public class EventQueryTranslator {
                 .from(keysPath).leftJoin(productQuery, trxnPath)
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId, period);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
+                                                                         period);
 
         int expectedResult = (returnPositive) ? 1 : 0;
 
