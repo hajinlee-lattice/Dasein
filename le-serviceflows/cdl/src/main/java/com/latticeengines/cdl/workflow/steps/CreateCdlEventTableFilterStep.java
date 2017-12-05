@@ -74,7 +74,11 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
                 .buildDataTablePath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace()).toString();
         String tableName = configuration.getTargetTableName() + "_train_filter";
         filePath += "/" + tableName + "/" + "/part-00000.avro";
-        return convertToTable(schema, tableName, filePath, configuration.getTrainQuery(), InterfaceName.Train);
+        trainFilterTable = convertToTable(schema, tableName, filePath, configuration.getTrainQuery(),
+                InterfaceName.Train);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), trainFilterTable.getName(),
+                trainFilterTable);
+        return trainFilterTable;
     }
 
     private Table getTargetFilterTable() {
@@ -93,6 +97,8 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
         filePath += "/" + tableName + "/" + "/part-00000.avro";
         targetFilterTable = convertToTable(schema, tableName, filePath, configuration.getTargetQuery(),
                 InterfaceName.Target);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), targetFilterTable.getName(),
+                targetFilterTable);
         return targetFilterTable;
     }
 
@@ -155,7 +161,7 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
     private Schema getTrainSchema() {
         String schemaString = "{\"namespace\": \"RatingEngineModel\", \"type\": \"record\", "
                 + "\"name\": \"RatingEngineModelTrainFilter\"," + "\"fields\": ["
-                + "{\"name\": \"AccountId\", \"type\": \"string\"}, {\"name\": \"PeriodId\", \"type\": \"long\"}"
+                + "{\"name\": \"AccountId\", \"type\": [\"string\", \"null\"]}, {\"name\": \"PeriodId\", \"type\": [\"long\", \"null\"]}"
                 + "]}";
         Schema.Parser parser = new Schema.Parser();
         return parser.parse(schemaString);
@@ -164,7 +170,7 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
     private Schema getTargetSchema() {
         String schemaString = "{\"namespace\": \"RatingEngineModel\", \"type\": \"record\", "
                 + "\"name\": \"RatingEngineModelTargetFilter\"," + "\"fields\": ["
-                + "{\"name\": \"AccountId\", \"type\": \"string\"}, {\"name\": \"PeriodId\", \"type\": \"long\"}"
+                + "{\"name\": \"AccountId\", \"type\": [\"string\", \"null\"]}, {\"name\": \"PeriodId\", \"type\": [\"long\", \"null\"]}"
                 + "]}";
         Schema.Parser parser = new Schema.Parser();
         return parser.parse(schemaString);
