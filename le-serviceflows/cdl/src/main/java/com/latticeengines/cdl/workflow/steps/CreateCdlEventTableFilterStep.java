@@ -99,6 +99,8 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
     private Table convertToTable(Schema schema, String tableName, String filePath, FrontEndQuery query,
             InterfaceName type) {
 
+        String accountIdKey = InterfaceName.AccountId.name().toLowerCase();
+        String periodIdKey = InterfaceName.PeriodId.name().toLowerCase();
         int rowNumber = 0, pageSize = 10000;
         long total = 0;
         while (true) {
@@ -122,9 +124,9 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
             List<GenericRecord> records = new ArrayList<>();
             for (Map<String, Object> row : rows) {
                 GenericRecord record = new GenericData.Record(schema);
-                record.put(InterfaceName.AccountId.name(), row.get(InterfaceName.AccountId.name()));
+                record.put(InterfaceName.AccountId.name(), row.get(accountIdKey));
                 record.put(InterfaceName.PeriodId.name(),
-                        Long.valueOf(row.get(InterfaceName.PeriodId.name()).toString()));
+                        Long.valueOf(row.get(periodIdKey).toString()));
                 records.add(record);
             }
             writeRecords(schema, filePath, records);
