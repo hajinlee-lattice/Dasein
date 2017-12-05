@@ -97,7 +97,8 @@
                                 ng-focus="vm.onInputFocus($event)"
                                 maxlength="50"
                                 ng-trim="false"
-                                class="form-control" />
+                                class="form-control"
+                                ng-disabled="vm.saveInProgress" />
                                 </label>
                             <span>{{50 - segment.display_name.length}} characters remaining</span>
                         </div>
@@ -110,6 +111,7 @@
                                 data-ng-model="segment.description"
                                 maxlength="1000"
                                 ng-trim="false"
+                                ng-disabled="vm.saveInProgress"
                             ></textarea>
                             <span>{{1000 - segment.description.length}} characters remaining</span>
                         </div>

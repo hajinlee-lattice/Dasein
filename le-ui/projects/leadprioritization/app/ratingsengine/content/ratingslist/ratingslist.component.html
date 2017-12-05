@@ -165,7 +165,8 @@
                                 ng-change="vm.nameChanged(rating)"
                                 maxlength="50"
                                 ng-trim="false"
-                                class="form-control" />
+                                class="form-control" 
+                                ng-disabled="vm.saveInProgress"/>
                             </label>
                             <span>{{50 - vm.displayNames[rating.id].length}} characters remaining</span>
 

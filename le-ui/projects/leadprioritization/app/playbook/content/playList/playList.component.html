@@ -163,7 +163,8 @@
                                 ng-change="vm.nameChanged(play)"
                                 maxlength="50"
                                 ng-trim="false"
-                                class="form-control" />
+                                class="form-control"
+                                ng-disabled="vm.saveInProgress" />
                             </label>
                             <span>{{50 - play.displayName.length}} characters remaining</span>
                         </div>
