@@ -83,7 +83,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
     }
 
-    @Test(groups = "dnb", enabled = false)
+    @Test(groups = "dnb", enabled = true)
     public void testDnBBulkLookupWithErrorRecords() {
         DnBBatchMatchContext batchContext = dnBBulkLookupDispatcher.sendRequest(generateInputWithErrorRecords());
         Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.SUBMITTED);

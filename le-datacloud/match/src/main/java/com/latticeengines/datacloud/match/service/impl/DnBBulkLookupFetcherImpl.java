@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -145,7 +146,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                     (returnCode == DnBReturnCode.PARTIAL_SUCCESS ? "2" : "1"));
             String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
             byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
-            List<String> resultsList = decompress(decodeResults);
+            List<String> resultsList = Arrays.asList(new String(decodeResults).split("\n"));
             if (batchContext.getLogDnBBulkResult()) {
                 log.info(String.format("Match result for serviceBatchId = %s", batchContext.getServiceBatchId()));
                 for (String res : resultsList) {
@@ -173,6 +174,15 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
 
     }
 
+    /**
+     * DnB used to compress the result in GZIP format. Although the GZIP is
+     * removed, keep the decompress method for some time.
+     * 
+     * @param compressed
+     * @return
+     * @throws IOException
+     */
+    @SuppressWarnings("unused")
     private List<String> decompress(byte[] compressed) throws IOException {
         List<String> res = new ArrayList<>();
         ByteArrayInputStream bis = new ByteArrayInputStream(compressed);
