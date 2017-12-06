@@ -421,7 +421,8 @@ public class MetadataResolver {
         return fundamentalType;
     }
 
-    private boolean isDateTypeColumn(List<String> columnFields) {
+    @VisibleForTesting
+    boolean isDateTypeColumn(List<String> columnFields) {
         String[] supportedDateFormat = { "MM/dd/yyyy", "YYYY-MM-DD", "YYYY-MM-DD'T'HH:mm:ss.sssZ" };
         for (String columnField : columnFields) {
             Date date = null;
@@ -442,7 +443,8 @@ public class MetadataResolver {
         return true;
     }
 
-    private boolean isBooleanTypeColumn(List<String> columnFields) {
+    @VisibleForTesting
+    boolean isBooleanTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
             if (columnField != null && !columnField.isEmpty()
                     && !ACCEPTED_BOOLEAN_VALUES.contains(columnField.toLowerCase())) {
