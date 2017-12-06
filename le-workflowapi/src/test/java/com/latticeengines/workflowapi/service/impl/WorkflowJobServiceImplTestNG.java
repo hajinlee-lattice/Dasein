@@ -18,6 +18,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 import org.mockito.Mockito;
 
@@ -50,6 +51,12 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     private JobInstanceDao jobInstanceDao;
 
     private JobExecutionDao jobExecutionDao;
+
+    private WorkflowJob workflowJob1;
+    private WorkflowJob workflowJob11;
+    private WorkflowJob workflowJob12;
+    private WorkflowJob workflowJob13;
+    private WorkflowJob workflowJob2;
 
     private Function<WorkflowJob, Job> workflowJobToJobMapper = (WorkflowJob workflowJob) -> {
         if (workflowJob == null) {
@@ -227,6 +234,15 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(workflowjob2.getParentJobId(), parentJobId);
     }
 
+    @AfterClass(groups = "functional")
+    private void cleanup() {
+        workflowJobEntityMgr.delete(workflowJob1);
+        workflowJobEntityMgr.delete(workflowJob11);
+        workflowJobEntityMgr.delete(workflowJob12);
+        workflowJobEntityMgr.delete(workflowJob13);
+        workflowJobEntityMgr.delete(workflowJob2);
+    }
+
     private void createWorkflowJobs() {
         jobInstanceDao = new MapJobInstanceDao();
         jobExecutionDao = new MapJobExecutionDao();
@@ -241,7 +257,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance1 = jobInstanceDao.createJobInstance(applicationId, jobParameters1);
         JobExecution jobExecution1 = new JobExecution(jobInstance1, jobParameters1, null);
         jobExecutionDao.saveJobExecution(jobExecution1);
-        WorkflowJob workflowJob1 = new WorkflowJob();
+        workflowJob1 = new WorkflowJob();
         workflowJob1.setApplicationId(applicationId);
         workflowJob1.setInputContext(inputContext);
         workflowJob1.setTenant(tenant);
@@ -259,7 +275,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance11 = jobInstanceDao.createJobInstance(applicationId, jobParameters11);
         JobExecution jobExecution11 = new JobExecution(jobInstance11, jobParameters11, null);
         jobExecutionDao.saveJobExecution(jobExecution11);
-        WorkflowJob workflowJob11 = new WorkflowJob();
+        workflowJob11 = new WorkflowJob();
         workflowJob11.setApplicationId(applicationId);
         workflowJob11.setInputContext(inputContext);
         workflowJob11.setTenant(tenant);
@@ -277,7 +293,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance12 = jobInstanceDao.createJobInstance(applicationId, jobParameters12);
         JobExecution jobExecution12 = new JobExecution(jobInstance12, jobParameters12, null);
         jobExecutionDao.saveJobExecution(jobExecution12);
-        WorkflowJob workflowJob12 = new WorkflowJob();
+        workflowJob12 = new WorkflowJob();
         workflowJob12.setApplicationId(applicationId);
         workflowJob12.setInputContext(inputContext);
         workflowJob12.setTenant(tenant);
@@ -295,7 +311,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance13 = jobInstanceDao.createJobInstance(applicationId, jobParameters13);
         JobExecution jobExecution13 = new JobExecution(jobInstance13, jobParameters13, null);
         jobExecutionDao.saveJobExecution(jobExecution13);
-        WorkflowJob workflowJob13 = new WorkflowJob();
+        workflowJob13 = new WorkflowJob();
         workflowJob13.setApplicationId(applicationId);
         workflowJob13.setInputContext(inputContext);
         workflowJob13.setTenant(tenant);
@@ -313,7 +329,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance2 = jobInstanceDao.createJobInstance(applicationId, jobParameters2);
         JobExecution jobExecution2 = new JobExecution(jobInstance2, jobParameters2, null);
         jobExecutionDao.saveJobExecution(jobExecution2);
-        WorkflowJob workflowJob2 = new WorkflowJob();
+        workflowJob2 = new WorkflowJob();
         workflowJob2.setApplicationId(applicationId);
         workflowJob2.setInputContext(inputContext);
         workflowJob2.setTenant(tenant);
