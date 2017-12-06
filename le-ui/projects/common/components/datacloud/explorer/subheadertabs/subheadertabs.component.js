@@ -170,7 +170,9 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
     vm.exportSegment = function(exportType) {
         var segmentName = $stateParams.segment,
             ts = new Date().getTime();
-        console.log('export type', exportType);
+        // console.log('export type', exportType);
+        QueryStore.setPublicProperty('resetLabelIncrementor', true);
+
         if (segmentName === 'Create') {
             var accountRestriction = QueryStore.getAccountRestriction(),
                 contactRestriction = QueryStore.getContactRestriction(),

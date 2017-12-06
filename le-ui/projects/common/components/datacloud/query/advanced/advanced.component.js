@@ -182,6 +182,11 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.getBucketLabel = function(bucket) {
+        if (QueryStore.getPublic()['resetLabelIncrementor']) {
+            vm.labelIncrementor = 0;
+            QueryStore.setPublicProperty('resetLabelIncrementor', false);
+        }
+
         if (bucket && bucket.labelGlyph) {
             return bucket.labelGlyph;
         } else {

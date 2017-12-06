@@ -27,7 +27,8 @@ angular.module('common.datacloud.query.service',[
     this.contacts = [];
 
     this.public = {
-        enableSaveSegmentButton: false
+        enableSaveSegmentButton: false,
+        resetLabelIncrementor: false
     };
 
     this.bucketsToLaunch = null;
