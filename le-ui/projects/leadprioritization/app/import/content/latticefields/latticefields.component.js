@@ -51,7 +51,7 @@ angular.module('lp.import.wizard.latticefields', [])
         ImportWizardStore.setValidation('latticefields', false);
         vm.fieldMappings.forEach(function(fieldMapping) {
             if(fieldMapping.mappedField) {
-                vm.unavailableFields.push(fieldMapping.mappedField);
+                vm.unavailableFields.push(fieldMapping.userField);
             }
             vm.availableFields.push(fieldMapping);
         });
