@@ -76,10 +76,6 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
     @Override
     public void publish(String tenantId, Record request, RecordScoreResponse response) {
-
-        // Ignore score requests without lattice Id;
-        if (response.getLatticeId() == null)
-            return;
         ScoreRecordHistory scoreHistory = buildScoreHistory(tenantId, request, response);
         log.debug("Publish history id " + scoreHistory.getId() + "record " + scoreHistory.getIdType() + " "
                 + scoreHistory.getRecordId() + " latticeId " + scoreHistory.getLatticeId());
@@ -88,10 +84,6 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
     @Override
     public void publish(String tenantId, ScoreRequest request, ScoreResponse response) {
-        // Ignore score requests without lattice Id;
-        if (response.getLatticeId() == null)
-            return;
-
         Record record = new Record();
         record.setRecordId(response.getId());
         record.setIdType("Unknown");
