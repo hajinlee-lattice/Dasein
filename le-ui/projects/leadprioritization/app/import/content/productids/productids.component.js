@@ -54,9 +54,7 @@ angular.module('lp.import.wizard.productids', [])
     };
 
     vm.checkValid = function(form) {
-        if(form.$valid) {
-             ImportWizardStore.setValidation('ids', true);
-         }
+        ImportWizardStore.setValidation('ids', true);
     }
 
     vm.init();

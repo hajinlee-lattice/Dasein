@@ -58,9 +58,7 @@ angular.module('lp.import.wizard.accountids', [])
     };
 
     vm.checkValid = function(form) {
-        if(form.$valid) {
-             ImportWizardStore.setValidation('ids', true);
-         }
+        ImportWizardStore.setValidation('ids', true);
     }
 
     vm.init();
