@@ -38,6 +38,8 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.number.NumberStyleFormatter;
@@ -325,6 +327,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     return new Long(parseStringToNumber(fieldCsvValue).longValue());
                 }
             case STRING:
+                if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
+                    LOG.info("Timestamp value from csv: " + fieldCsvValue);
+                    try {
+                        return Long.toString(TimeStampConvertUtils.convertToLong(fieldCsvValue));
+                    } catch (Exception e) {
+                        LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
+                                "value %s.", attr.getName(), fieldCsvValue));
+                        DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
+                        return Long.toString(dtf.parseDateTime(fieldCsvValue).getMillis());
+                    }
+                }
                 return fieldCsvValue;
             case ENUM:
                 return fieldCsvValue;

@@ -11,6 +11,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.avro.Schema;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -20,9 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -83,6 +91,9 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     private SourceFile baseAccountFile;
 
@@ -173,7 +184,6 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     private void prepareBaseData() {
-
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         Assert.assertNotNull(baseAccountFile);
         startCDLImport(baseAccountFile, ENTITY_ACCOUNT);
@@ -221,6 +231,36 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+
+    @Test(groups = "deployment", dependsOnMethods = "importBase")
+    public void verifyTransaction() throws IOException {
+        Assert.assertNotNull(baseTransactionFile);
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
+                        CustomerSpace.parse(mainTestTenant.getId())).toString(), SourceType.FILE.getName());
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
+        String avroFileName = baseTransactionFile.getName().substring(0,
+                baseTransactionFile.getName().lastIndexOf("."));
+        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file -> {
+            if (!file.isDirectory() && file.getPath().toString().contains(avroFileName)
+                    && file.getPath().getName().endsWith("avro")) {
+                return true;
+            }
+            return false;
+        });
+        Assert.assertEquals(avroFiles.size(), 1);
+        String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
+        long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
+        Assert.assertEquals(rowCount, 100);
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
+        Assert.assertEquals(schema.getField("TransactionTime").schema().getTypes().get(0).getType(),
+                Schema.Type.STRING);
+        Assert.assertEquals(schema.getField("Amount").schema().getTypes().get(0).getType(),
+                Schema.Type.INT);
+        Assert.assertEquals(schema.getField("Quantity").schema().getTypes().get(0).getType(),
+                Schema.Type.INT);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")
