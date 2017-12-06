@@ -314,7 +314,7 @@ angular
                         { name: 'City' },
                         { name: 'Country' },
                         { name: 'State_Provence' },
-                        { name: 'Postal_Code' },
+                        { name: 'PostalCode' },
                         { name: 'Last_Name' },
                         { name: 'First_Name' },
                         { name: 'Email'}
