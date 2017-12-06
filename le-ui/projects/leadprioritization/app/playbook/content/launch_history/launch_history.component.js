@@ -110,14 +110,21 @@ angular.module('lp.playbook.dashboard.launch_history', [])
             playName = play[0].name;
         }
 
-        var params = {
-            playName: playName,
-            offset: 0
-        }
+        var dataParams = {
+                playName: playName,
+                offset: 0
+            },
+            countParams = {
+                playName: playName,
+                offset: 0,
+                startTimestamp: 0
+            };
 
-        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+        PlaybookWizardStore.getPlayLaunches(dataParams).then(function(result){
             vm.launches = result;
-            if(vm.launches.launchSummaries.length > 10){
+        });
+        PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result){
+            if(result > 10){
                 vm.showPagination = true;
             } else {
                 vm.showPagination = false;
