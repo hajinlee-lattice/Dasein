@@ -3,7 +3,7 @@ angular
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .controller('SidebarPlaybookController', function(
-    $rootScope, $state, $stateParams, StateHistory, ResourceUtility, PlaybookWizardStore
+    $rootScope, $state, $stateParams, StateHistory, ResourceUtility, PlaybookWizardStore, Play
 ) {
     var vm = this;
 
@@ -11,17 +11,19 @@ angular
         ResourceUtility: ResourceUtility,
         state: $state,
         stateParams: $stateParams,
-        StateHistory: StateHistory
+        StateHistory: StateHistory,
+        play: Play
     });
 
     vm.init = function() {
         vm.play_name = $stateParams.play_name || '';
 
-        var play = PlaybookWizardStore.getPlay(vm.play_name),
-            launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
+        var launchedStatus = PlaybookWizardStore.getLaunchedStatus(vm.play);
         
-        vm.segment = play.segment;
-        vm.targetsDisabled = (play.ratingEngine ? false : true);
+        console.log(vm.play);
+
+        vm.segment = vm.play.segment;
+        vm.targetsDisabled = (vm.play.ratingEngine ? false : true);
 
         if ($state.current.name === 'home.playbook.dashboard.launch_job') {
             vm.menuDisabled = true;
@@ -29,7 +31,7 @@ angular
 
         $rootScope.$broadcast('header-back', { 
             path: '^home.playbook.dashboard',
-            displayName: play.displayName,
+            displayName: vm.play.displayName,
             sref: 'home.playbook'
         });
     }

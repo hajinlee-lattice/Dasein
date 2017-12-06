@@ -18,7 +18,8 @@
             <div class="tab-container">
                 <h2>{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</h2>
                 <div class="enrichmentCounts">
-                    <span class="count">{{ vm.models.length }}</span> total
+                    <span class="count">{{ vm.modelsIncludingDeletedLength }}</span> total
+                    <span class="count">{{ vm.count('Active', true) }}</span> active
                 </div>
             </div>
         </li>

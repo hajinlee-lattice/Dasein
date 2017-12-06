@@ -7,7 +7,7 @@ angular.module('lp.models.list', [
 ])
 .controller('ModelListController', function (
     $state, $filter,
-    ResourceUtility, ModelList, ModelStore, 
+    ResourceUtility, ModelList, ModelStore, ModelService,
     CopyModelFromTenantModal, ImportModelModal, 
     FeatureFlagService, ServiceErrorUtility, HealthService
 ) {
@@ -55,6 +55,7 @@ angular.module('lp.models.list', [
         }
     },{
         init: function() {
+
             this.header.create.items = [
                 {
                     sref: 'home.models.import',
@@ -96,6 +97,13 @@ angular.module('lp.models.list', [
             vm.processModels(vm.models);
 
             ModelStore.getModels().then(vm.processModels);
+
+            ModelService.GetAllModels(false).then(function(result) {
+                if (result != null && result.success === true) {
+                    vm.modelsIncludingDeletedLength = result.resultObj.length;
+                }
+            });
+
         },
 
         showCopyModelFromTenant: function() {

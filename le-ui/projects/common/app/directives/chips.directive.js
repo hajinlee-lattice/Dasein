@@ -25,7 +25,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
 
             scope.isSelectionDone = function(){
-                if(Object.keys(scope.chips).length > 0 && scope.singleSelection){
+                if(Object.keys(scope.chips).length > 0){
                     return true;
                 } else {
                     return false;

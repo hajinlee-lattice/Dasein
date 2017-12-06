@@ -5,7 +5,7 @@ angular.module('common.datacloud.query.results', [
     $q, $scope, $state, $stateParams, $filter, $rootScope,
     BrowserStorageUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts,
-    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService
+    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFIdsCount
 ) {
     var vm = this;
     angular.extend(vm, {
@@ -14,11 +14,10 @@ angular.module('common.datacloud.query.results', [
         inModel: $state.current.name.split('.')[1] === 'model',
         section: $stateParams.section,
         page: $stateParams.pageTitle,
-        myDataOrSegmentAccounts: vm.section === 'segment.analysis' && vm.page === 'Accounts',
-        myDataOrSegmentContacts: vm.section === 'segment.analysis' && vm.page === 'Contacts',
         accounts: Accounts,
         counts: {},
         contacts: Contacts,
+        noSFCount: NoSFIdsCount,
         loading: true,
         saving: false,
         saved: false,
@@ -56,25 +55,30 @@ angular.module('common.datacloud.query.results', [
 
         // Set Counts for Segment and PLay Targets
         if (vm.section === 'segment.analysis') {
-
-            // Get counts from QueryStore
             vm.counts = QueryStore.getCounts();
-
         } else {
 
+            vm.selectedBuckets = [];
             if (vm.section === 'wizard.targets') {
-
+                
+                // Get sum of non-suppressed buckets to calculate percentage for each bucket
                 var numAccounts = 0;
                 for (var i = 0; i < vm.accountsCoverage.bucketCoverageCounts.length; i++) {
                     numAccounts += vm.accountsCoverage.bucketCoverageCounts[i].count;
                 }
-
-                // Create array of buckets to be used when launching play
-                vm.selectedBuckets = [];
+                // Create array (vm.selectedBuckets) of bucket names (e.g. ["A-", "B", "C"]) 
+                // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
                     vm.selectedBuckets.push(bucket.bucket);
-                    bucket.percentage = (bucket.count / numAccounts);
-                    console.log(bucket.percentage);
+                    bucket.percentage = Math.round(bucket.count / numAccounts);
+                });
+
+            } else if (vm.section === 'dashboard.targets') {
+
+                PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
+                    data.ratings.forEach(function(bucket){
+                        vm.selectedBuckets.push(bucket.bucket);
+                    });
                 });
 
             }
@@ -113,10 +117,29 @@ angular.module('common.datacloud.query.results', [
                     vm.accounts = response.data;
                     vm.loading = false;
                 });
+                QueryStore.GetCountByQuery('accounts').then(function(data){ 
+                    vm.counts.accounts.value = data;
+                    vm.counts.accounts.loading = false;
+                    
+                    if(data > 10){
+                        vm.showAccountPagination = true;
+                        vm.showContactPagination = false;
+                    }
+                });
             } else if (vm.page === 'Contacts'){
                 QueryStore.setContacts(dataQuery).then(function(response) {
                     vm.contacts = response.data;
                     vm.loading = false;
+                });
+                QueryStore.GetCountByQuery('contacts').then(function(data){ 
+                    vm.counts.contacts.value = data;
+                    vm.counts.contacts.loading = false;
+
+                    if(data > 10){
+                        vm.showAccountPagination = false;
+                        vm.showContactPagination = true;
+                    }
+
                 });
             }
 
@@ -125,7 +148,7 @@ angular.module('common.datacloud.query.results', [
             // Targets page for create Play flow
             var dataQuery = { 
                     free_form_text_search: '',
-                    restrictNotNullSalesforceId: false,
+                    restrictNotNullSalesforceId: vm.excludeNonSalesForce,
                     entityType: 'Account',
                     bucketFieldName: 'ScoreBucket',
                     maximum: vm.pagesize,
@@ -147,20 +170,27 @@ angular.module('common.datacloud.query.results', [
                     vm.accounts = PlaybookWizardStore.getTargetData();
                 });
 
-                var filtered = [];
-                for (var i = 0; i < vm.accounts.length; i++) {
-                    if (vm.accounts[i].SalesforceAccountID === "" || vm.accounts[i].SalesforceAccountID === null) {
-                        filtered.push(vm.accounts[i]);
-                        vm.noSFCount = filtered.length;
-                    }
-                }
-                vm.noSFCount = filtered.length;
+                // -----------------------------------------
+                // Uncomment this when backend supports 
+                // the checkbox 'Exclude non SalesForce accounts' 
+                // from target's list
 
+                // var filtered = [];
+                // console.log(vm.accounts);
+                // for (var i = 0; i < vm.accounts.length; i++) {
+                //     if (vm.accounts[i].SalesforceAccountID === "" || vm.accounts[i].SalesforceAccountID === null || vm.accounts[i].SalesforceAccountID === undefined) {
+                //         filtered.push(vm.accounts[i]);
+                //         vm.noSFCount = filtered.length;
+                //     }
+                // }
+                // vm.noSFCount = filtered.length;
+                // -----------------------------------------
 
                 // Get Account Counts for Pagination
                 PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                    var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null),
-                        filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {
+                    var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
+                    
+                    var filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {
                           return vm.selectedBuckets.indexOf(bucket.bucket) >= 0; 
                         });
 
@@ -174,7 +204,7 @@ angular.module('common.datacloud.query.results', [
                         return count;
                     };
 
-                    if (vm.section === 'wizard.targets') {
+                    if (vm.section === 'wizard.targets' || vm.section === 'dashboard.targets') {
                         vm.counts = { 
                             accounts: { 
                                 value: calculateCountsFromFiltered(filteredAccountsCoverage) 
@@ -198,6 +228,7 @@ angular.module('common.datacloud.query.results', [
                         vm.showAccountPagination = true;
                         vm.showContactPagination = false;
                     }
+                    vm.ratedTargetsLimit = vm.counts.accounts.value;
 
                 });
 
@@ -206,49 +237,25 @@ angular.module('common.datacloud.query.results', [
             });
 
             vm.loading = false;
-            vm.current = 1;
 
-        }
-
-        if (vm.myDataOrSegmentAccounts){
-
-            // Accounts page in the my data or segment screens
-            // Get counts for accounts
-            QueryStore.GetCountByQuery('accounts').then(function(data){ 
-                vm.counts.accounts.value = data;
-                vm.counts.accounts.loading = false;
-                
-                if(data > 10){
-                    vm.showAccountPagination = true;
-                    vm.showContactPagination = false;
-                }
-            });
-
-        
-        } else if (vm.myDataOrSegmentContacts){
-
-            // Contacts page in the my data or segment screens
-            // Get counts for contacts
-            QueryStore.GetCountByQuery('contacts').then(function(data){ 
-                vm.counts.contacts.value = data;
-                vm.counts.contacts.loading = false;
-
-
-                if(vm.counts.contacts.value < 10){
-                    vm.showAccountPagination = false;
-                    vm.showContactPagination = true;
-                }
-
-            });
         }
 
         vm.checkSaveButtonState();
 
     };
 
+    vm.updateTargetLimit = function() {
+        QueryStore.setRatedTargetsLimit(vm.ratedTargetsLimit);
+    }
+    vm.ratingLimitInputClick = function($event) {
+        $scope.targetsLimit = true;
+        $event.target.select();
+    }
 
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
         excludeAccounts = !excludeAccounts;
+
+        console.log(excludeAccounts);
 
         if(excludeAccounts){
             vm.excludeNonSalesForce = true;

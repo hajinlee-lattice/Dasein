@@ -71,12 +71,27 @@ angular
             url: '/launch_history',
             resolve: {
                 LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
-                    var deferred = $q.defer();
+                    var deferred = $q.defer(),
+                        params = {
+                            playName: '',
+                            sortby: 'created',
+                            descending: true,
+                            offset: 0
+                        };
 
-                    var params = {
-                        playName: $stateParams.play_name
-                    };
                     PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+                },
+                LaunchHistoryCount: function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer(),
+                        params = {
+                            playName: '',
+                            startTimestamp: 0
+                        };
+
+                    PlaybookWizardStore.getPlayLaunchCount(params).then(function(result){
                         deferred.resolve(result);
                     });
                     return deferred.promise;
@@ -97,8 +112,14 @@ angular
                 pageTitle: 'Play Overview'
             },
             resolve: {
-                Play: function(PlaybookWizardStore, $state, $stateParams) {
-                    return PlaybookWizardStore.getPlay($stateParams.play_name);
+                Play: function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer(),
+                        playName = $stateParams.play_name;
+
+                    PlaybookWizardStore.getPlay(playName, true).then(function(result){
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
                 }
             },
             views: {
@@ -201,7 +222,7 @@ angular
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
                     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
 
                         var engineId = data.ratingEngine.id,
                             query = { 
@@ -225,11 +246,14 @@ angular
                     return deferred.promise;
 
                 }],
+                NoSFIdsCount: [function(){
+                    return null;
+                }],
                 AccountsCoverage: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
                     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
                         var engineId = data.ratingEngine.id,
                             engineIdObject = [{id: engineId}];
 
@@ -246,7 +270,7 @@ angular
 
                     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+                    PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(play){
                         var play = play;
                         var config = {
                             play: play,
@@ -371,9 +395,24 @@ angular
                 LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
                     var deferred = $q.defer(),
                         params = {
-                            playName: $stateParams.play_name
+                            playName: $stateParams.play_name,
+                            sortBy: 'created',
+                            descending: true,
+                            offset: 0
                         };
                     PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+                }, 
+                LaunchHistoryCount: function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer(),
+                        params = {
+                            playName: $stateParams.play_name,
+                            startTimestamp: 0
+                        };
+
+                    PlaybookWizardStore.getPlayLaunchCount(params).then(function(result){
                         deferred.resolve(result);
                     });
                     return deferred.promise;
@@ -524,22 +563,21 @@ angular
                 }],
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
 
-
-                    var deferred = $q.defer(),
-                        query = { 
-                                free_form_text_search: '',
-                                restrictNotNullSalesforceId: false,
-                                entityType: 'Account',
-                                bucketFieldName: 'ScoreBucket',
-                                maximum: 10,
-                                offset: 0,
-                                sortBy: 'LDC_Name',
-                                descending: false
-                            };
+                    var deferred = $q.defer();
 
                     PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
 
-                        var engineId = data.ratingEngine.id;
+                        var engineId = data.ratingEngine.id,
+                            query = { 
+                                    free_form_text_search: '',
+                                    restrictNotNullSalesforceId: false,
+                                    entityType: 'Account',
+                                    bucketFieldName: 'ScoreBucket',
+                                    maximum: 10,
+                                    offset: 0,
+                                    sortBy: 'LDC_Name',
+                                    descending: false
+                                };
 
                         PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
                             PlaybookWizardStore.setTargetData(data.data);
@@ -551,6 +589,36 @@ angular
 
                     return deferred.promise;
 
+                }],
+                // NoSFIdsCount: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
+                    
+                //     var deferred = $q.defer();
+
+                //     PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
+
+                //         var engineId = data.ratingEngine.id,
+                //             query = {
+                //                 free_form_text_search: '',
+                //                 restrictNotNullSalesforceId: true,
+                //                 entityType: 'Account',
+                //                 bucketFieldName: 'ScoreBucket',
+                //                 maximum: 1000000,
+                //                 offset: 0,
+                //                 sortBy: 'LDC_Name',
+                //                 descending: false
+                //             };
+
+                //         PlaybookWizardService.getTargetData(engineId, query).then(function(data){ 
+                //             deferred.resolve(data.data.length);
+                //         });
+
+                //     });
+
+                //     return deferred.promise;
+
+                // }],
+                NoSFIdsCount: [function(){
+                    return null;
                 }],
                 AccountsCoverage: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 

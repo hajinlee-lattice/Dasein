@@ -28,7 +28,7 @@ angular.module('mainApp.playbook.content.playList.deletePlayModal', [
         });
     };
 })
-.controller('DeletePlayController', function ($scope, $rootScope, $timeout, $state, ResourceUtility, NavUtility, PlaybookWizardStore) {
+.controller('DeletePlayController', function ($scope, $rootScope, $timeout, $state, ResourceUtility, NavUtility, PlaybookWizardStore, PlaybookWizardService) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.deletePlayClick = function ($event) {

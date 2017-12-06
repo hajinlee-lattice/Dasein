@@ -4,9 +4,9 @@
 
 
     <div 
-        ng-if="vm.launches.launchSummaries.length === 0"
+        ng-if="vm.launchesCount === 0"
         class="no-data">
-        <h2>No plays have been launched.</h2>
+        <h2>There are no plays launched. The launch history will be available once you launch plays.</h2>
         <a 
             class="button white-button"
             ui-sref="home.playbook.wizard">
@@ -17,7 +17,7 @@
 
 
     <div
-        ng-if="vm.launches.launchSummaries.length > 0" 
+        ng-if="vm.launchesCount > 0" 
         class="card-content" 
         ng-class="{'has-footer': !vm.allPlaysHistory}">
 
@@ -65,7 +65,7 @@
         </ul>
 
     	<div class="table-metadata">
-    		{{vm.launches.launchSummaries.length}} play launch<span ng-if="vm.launches.launchSummaries.length > 1">es</span>
+    		{{vm.launchesCount}} play launch<span ng-if="vm.launchesCount > 1">es</span>
     	</div>
 
     	<table>
@@ -151,7 +151,7 @@
         <pd-pagination-controls
             ng-if="vm.showPagination"
             current="vm.current"
-            max="vm.launches.launchSummaries.length / vm.pagesize"
+            max="vm.launchesCount / vm.pagesize"
             class="pull-right">
         </pd-pagination-controls>
 

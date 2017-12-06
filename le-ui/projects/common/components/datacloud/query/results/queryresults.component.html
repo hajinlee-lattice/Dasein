@@ -8,32 +8,31 @@
         class="targets-filters"
         ng-if="vm.section === 'wizard.targets'">
 
-        <label ng-if="vm.noSFCount != 0">
-            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
+        <!-- <label ng-if="vm.noSFCount != 0">
             <input 
                 type="checkbox" 
                 class=""
                 ng-model="excludeAccounts"
                 ng-change="vm.excludeNonSalesForceCheckbox(!excludeAccounts)" />
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.noSFCount | number }}</span>)
-        </label>
+        </label> -->
 
-            <!-- ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)" -->
-        <div 
-            class="checkbox-input" 
-            ng-if="vm.accounts.length > 5000">
+        <!-- <div 
+            class="checkbox-input">
             <input 
-                type="checkbox" 
-                class=""
-                ng-model=""
-                ng-change="" />
+                type="checkbox"
+                ng-model="targetsLimit"
+                ng-change="targetsLimit && vm.updateTargetLimit()" />
             <label>Limit to only </label>
             <input 
-                type="text" 
-                value="3000" 
+                type="number" 
+                ng-model="vm.ratedTargetsLimit"
+                ng-model-options="{ debounce: 500 }"
+                ng-focus="vm.ratingLimitInputClick($event)"
+                ng-change="targetsLimit && vm.updateTargetLimit()"
                 class="form-control" />
             <span> highest rated targets</span>
-        </div>
+        </div> -->
 
         <ul 
             class="bucket-checkboxes"
@@ -42,11 +41,9 @@
                 ng-class="!selectedBucket ? '' : 'unselected'"
                 ng-repeat="bucket in vm.accountsCoverage.bucketCoverageCounts"
                 ng-click="vm.bucketClick(bucket); selectedBucket = !selectedBucket">
-                
                 <h3>{{bucket.bucket}}</h3>
                 <h4>Accounts</h4>
                 <p>{{bucket.count | number}} ({{ ::bucket.percentage | percentage: 0 }})</p>
-
             </li>
         </ul>
 
@@ -180,15 +177,18 @@
                             orderBy:sortType:sortReverse | 
                             filter:vm.search">
                 <td>{{account.LDC_Name}}</td>
-                <td>{{account.Website}}</td>
+                <td>
+                    <span ng-if="account.Website">{{account.Website}}</span>
+                    <span ng-if="!account.Website" class="gray-text">N/A</span>
+                </td>
                 <td>
                     <span 
                         class="gray-text"
-                        ng-if="account.SalesforceAccountID === null">
-                        None
+                        ng-if="!account.SalesforceAccountID">
+                        N/A
                     </span>
                     <span
-                        ng-if="account.SalesforceAccountID != null">
+                        ng-if="account.SalesforceAccountID">
                         {{account.SalesforceAccountID}}
                     </span>
                 </td>

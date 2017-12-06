@@ -6,6 +6,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     RatingsEngineStore, RatingsEngineService, DeleteRatingModal
 ) {
     var vm = this;
+
     angular.extend(vm, {
         current: RatingsEngineStore.current,
         query: '',
@@ -49,20 +50,10 @@ angular.module('lp.ratingsengine.ratingslist', [
         vm.header.filter.filtered = vm.current.ratings;
         vm.header.filter.unfiltered = vm.current.ratings;
 
-        //console.log(vm.current.ratings);
+        vm.totalLength = vm.count();
+        vm.activeCount = vm.count('ACTIVE');
+        vm.inactiveCount = vm.count('INACTIVE');
 
-        $scope.$watch(vm.current.ratings, function(newValue, oldValue) {
-
-            //console.log(newValue, oldValue);
-
-            angular.forEach(vm.header.filter.items, function(item) {
-                //console.log(vm.count(item.action.status));
-
-                //console.log(item);
-
-                item.total = vm.count(item.action.status);
-            });
-        });
         // angular.forEach(vm.current.ratings, function(rating) {
         //     vm.tileStates[rating.id] = {
         //         showCustomMenu: false,
@@ -167,7 +158,6 @@ angular.module('lp.ratingsengine.ratingslist', [
         if (disable) {
             return false;
         }
-
 
         var newStatus = (rating.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE');
 

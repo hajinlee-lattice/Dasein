@@ -31,30 +31,13 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
                 label: 'Filter By',
                 value: {},
                 items: [
-                    { label: "All", action: { }, total: PlaybookWizardStore.current.plays.length
-                    },
-                    { 
-                        label: "Draft", 
-                        action: { 
-                            launchHistory: {playLaunch: null},
-                            segment: null
-                        }, 
-                        total: ''
-                    },
-                    { 
-                        label: "Ready to Launch", 
-                        action: { 
-                            launchHistory: {playLaunch: null},
-                            hasSegment: true
-                        }, 
-                        total: '' 
-                    },
+                    { label: "All", action: { }, total: PlaybookWizardStore.current.plays.length },
                     {
                        label: "Launched", 
                         action: { 
                             launchHistory: {playLaunch: []}
                         }, 
-                        total: ''  
+                        total: ''
                     }
                 ]
             }
@@ -66,7 +49,6 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
         // console.log(vm.current);
         
-
         PlaybookWizardStore.clear();
         vm.header.filter.filtered = vm.current.plays;
         vm.header.filter.unfiltered = vm.current.plays;

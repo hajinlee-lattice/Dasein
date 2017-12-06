@@ -194,7 +194,7 @@ angular.module('lp.playbook.dashboard', [
     };
 
     var checkLaunchState;
-    var getPlay = function() {
+    vm.getPlay = function() {
         PlaybookWizardStore.getPlay(play_name, true).then(function(play){
             vm.play = play;
 
@@ -231,7 +231,7 @@ angular.module('lp.playbook.dashboard', [
 
     PlaybookWizardStore.clear();
     if(play_name) {
-        getPlay();
+        vm.getPlay();
     }
 
 });

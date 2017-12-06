@@ -1,5 +1,6 @@
 <div class="chips-query-container">
-    <div class="chips-container">
+    
+    <div class="chips-container" ng-show="isSelectionDone()">
         <div class="chip" ng-repeat="(key, value) in chips">
             <div class="chip-container">
                 <span>{{getDisplayName(value)}}</span>
@@ -7,6 +8,7 @@
             </div>
         </div>
     </div>
+
     <div class="text-container dropdown" ng-class="(showQueryList) ?'show-dropdown' : ''">
         <input class="query" type="text" placeholder="{{placeholder}}" ng-keydown="queryKeyPressed($event)" ng-model="query" ng-blur="blurText()"
             ng-show="!isSelectionDone()">
@@ -17,4 +19,5 @@
             </div>
         </div>
     </div>
+
 </div>

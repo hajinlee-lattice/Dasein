@@ -1,7 +1,6 @@
 .query-results {
     min-width: 680px;
     margin-top: 1.5em;
-
     h2 {
         background-image: url('/assets/images/ico-targets.png');
         margin: 0 0 20px;
@@ -9,7 +8,6 @@
         background-repeat: no-repeat;
         background-position: left;
     }
-
     .loading {
         background: url('/assets/images/spinners/spinner-lattice-dots-100x100.gif') no-repeat center top;
         padding-top: 115px;
@@ -18,40 +16,33 @@
         margin: 60px auto 0;
         font-size: 18px;
     }
-
+    .checkbox-input input[type="number"] {
+        width: 60px;
+    }
     .bucket-checkboxes li {
         width: 19%;
     }
-
-
     .exclude-filter {
         margin-bottom: 10px;
     }
-
-
     .pd-pagination {
         float: right;
         display: inline-block;
         text-align: right;
     }
-
-
     .targets-filters {
         margin-bottom: 20px;
         .bucket-checkboxes {
             margin-top: 30px;
         }
     }
-
-
     .filters {
         @include flex-container;
         justify-content: center;
-
+        margin-bottom: 20px;
         .query {
             @include flex-item(1 0 auto);
         }
-
         .buttons {
             @include flex-item(1 0 auto);
             text-align: right;

@@ -92,17 +92,25 @@ angular.module('lp.playbook')
 
     this.checkLaunchStateInterval = function(play){
         PlaybookWizardStore.checkLaunchState[play.name] = $interval(function() {
-            PlaybookWizardStore.getPlayLaunches(play.name).then(function(result) {
+            
+            var params = {
+                    playName: play.name,
+                    offset: 0
+                };
+
+            PlaybookWizardStore.getPlayLaunches(params).then(function(result) {
                 if(result.errorCode) {
-                    $interval.cancel(checkLaunchState[play.name]);
+                    $interval.cancel(PlaybookWizardStore.checkLaunchState[play.name]);
                 } else if(result && result[0]) {
                     if(result[0].launchState === 'Launched' || result[0].launchState === 'Failed') {
-                        $interval.cancel(checkLaunchState[play.name]);
+                        $interval.cancel(PlaybookWizardStore.checkLaunchState[play.name]);
                         play.launchHistory.mostRecentLaunch.launchState = result[0].launchState;
                         PlaybookWizardStore.current.tileStates[play.name].launching == false;
                     }
                 } 
             });
+
+
         }, 10 * 1000);
     }
     
@@ -322,12 +330,36 @@ angular.module('lp.playbook')
         if(this.playLaunches) {
             return this.playLaunches;
         } else {
+
+            console.log(params);
+
+            var params = {
+                playName: params.playName,
+                sortby: params.sortby,
+                descending: params.descending,
+                startTimestamp: 0,
+                offset: params.offset,
+                max: 10
+            };
+
             PlaybookWizardService.playLaunches(params).then(function(data){
                 deferred.resolve(data);
             });
             return deferred.promise;
         }
         
+    }
+    this.getPlayLaunchCount = function(params) {
+        var deferred = $q.defer(),
+            params = {
+                playName: params.playName,
+                startTimestamp: params.startTimestamp
+            };
+
+        PlaybookWizardService.getPlayLaunchCount(params).then(function(data){
+            deferred.resolve(data);
+        });
+        return deferred.promise;        
     }
     this.launchPlay = function(play) {
         var deferred = $q.defer();
@@ -494,19 +526,26 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    this.getPlayLaunchCount = function(params) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/play/launches/dashboard/count',
+            params: params
+        }).then(function(response){
+            deferred.resolve(response.data);
+        }, function(response) {
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
     this.playLaunches = function(params) {
         var deferred = $q.defer();
         $http({
             method: 'GET',
             url: this.host + '/play/launches/dashboard/',
-            params: {
-                playName: params.playName,
-                sortby: params.sortby,
-                descending: params.descending,
-                startTimestamp: 0,
-                offset: params.offset || 0,
-                max: 10
-            }
+            params: params
         }).then(function(response){
             deferred.resolve(response.data);
         }, function(response) {
@@ -518,14 +557,19 @@ angular.module('lp.playbook')
     this.launchPlay = function(play) {
         var deferred = $q.defer(),
             play_name = play.name,
-            bucketsToLaunch = QueryStore.getBucketsToLaunch();
+            bucketsToLaunch = QueryStore.getBucketsToLaunch(),
+            ratedTargetsLimit = QueryStore.getRatedTargetsLimit();
+
+        console.log(bucketsToLaunch);
+        console.log(ratedTargetsLimit);
 
         $http({
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',
             data: {
                 launch_state: 'Launching',
-                bucketsToLaunch: bucketsToLaunch
+                bucketsToLaunch: bucketsToLaunch,
+                accountsSelected: ratedTargetsLimit
             }
         }).then(function(response){
             deferred.resolve(response.data);

@@ -61,8 +61,7 @@
                     </div><!-- End .tile-header -->
                     <div 
                         class="tile-metadata"
-                        ng-if="!vm.tileStates[play.name].editPlay">
-                        
+                        ng-if="!vm.current.tileStates[play.name].editPlay">
                         <ul>
                             <li>Created by <span class="blue-text">{{play.createdBy}}</span> on <span class="blue-text">{{play.created | date}}</span></li>
                             <li>
@@ -125,7 +124,7 @@
                         <button
                             type="button"
                             class="button gray-button pull-right"
-                            ng-if="vm.tileStates[play.name].launching">
+                            ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launching'">
                             <i class="fa fa-spinner fa-pulse fw"></i> 
                             Launching...</button>
                         <span ng-if="!vm.current.tileStates[play.name].launching">

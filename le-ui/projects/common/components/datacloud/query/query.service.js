@@ -32,6 +32,7 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.bucketsToLaunch = null;
+    this.ratedTargetsLimit = null;
 
     this.init = function() {
         this.resetRestrictions();
@@ -61,6 +62,12 @@ angular.module('common.datacloud.query.service',[
     }
     this.getBucketsToLaunch = function() {
         return this.bucketsToLaunch;
+    }
+    this.setRatedTargetsLimit = function(limit) {
+        this.ratedTargetsLimit = limit;
+    }
+    this.getRatedTargetsLimit = function() {
+        return this.ratedTargetsLimit;
     }
 
     this.setPublicProperty = function(property, value) {

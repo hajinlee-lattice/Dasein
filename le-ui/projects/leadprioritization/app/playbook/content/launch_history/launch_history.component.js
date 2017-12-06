@@ -1,12 +1,14 @@
 angular.module('lp.playbook.dashboard.launch_history', [])
 .controller('PlaybookDashboardLaunchHistory', function(
-    $state, $stateParams, $timeout, ResourceUtility, PlaybookWizardStore, LaunchHistoryData
+    $scope, $state, $stateParams, $timeout, ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount
 ) {
     var vm = this;
 
     angular.extend(vm, {
         stored: PlaybookWizardStore.settings_form,
+        current: PlaybookWizardStore.current,
         launches: LaunchHistoryData,
+        launchesCount: LaunchHistoryCount,
         cumulativeStats: LaunchHistoryData.cumulativeStats,
         summaryData: {},
         launching: false,
@@ -19,7 +21,7 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
     vm.init = function() {
 
-        if(vm.launches.launchSummaries.length > 10){
+        if(vm.launchesCount > 10){
             vm.showPagination = true;
         } else {
             vm.showPagination = false;
@@ -34,14 +36,12 @@ angular.module('lp.playbook.dashboard.launch_history', [])
             vm.allPlaysHistory = false;
         }
 
-
         for(var i = 0; i < vm.launches.launchSummaries.length; i++) {
             if (vm.launches.launchSummaries[i].launchState == 'Launching') {
                 vm.launching = true;
                 break;
             }
         }
-
 
         vm.summaryData = {
             selectedTargets: vm.cumulativeStats.selectedTargets,
@@ -50,10 +50,37 @@ angular.module('lp.playbook.dashboard.launch_history', [])
             recommendationsLaunched: vm.cumulativeStats.recommendationsLaunched,
             contactsWithinRecommendations: vm.cumulativeStats.contactsWithinRecommendations
         }
-
-        console.log(vm.launches.launchSummaries.length, vm.showPagination);
-
     };
+
+    vm.count = function(type, current) {
+        var filter = current
+            ? { launchHistory: { playLaunch: { launchState: type } } }
+            : { launchHistory: { mostRecentLaunch: { launchState: type } } };
+        
+        return ($filter('filter')(vm.current.plays, filter, true) || []).length;
+    }
+
+    function updatePage() {
+        var offset = (vm.current - 1) * vm.pagesize,
+            params = {
+                playName: '',
+                sortBy: 'created',
+                descending: true,
+                offset: offset,
+                startTimestamp: vm.launches.launchSummaries[vm.launches.launchSummaries.length - 1].launchTime
+            };
+
+        PlaybookWizardStore.getPlayLaunches(params).then(function(result){
+            vm.launches = result;
+        });
+    }
+
+    $scope.$watch('vm.current', function(newValue, oldValue) {
+        vm.loading = true;
+        if (newValue != oldValue) {
+            updatePage();    
+        }
+    });
 
     vm.sort = function(header) {
 
@@ -75,9 +102,6 @@ angular.module('lp.playbook.dashboard.launch_history', [])
     }
 
     vm.playSelectChange = function(play){
-
-        console.log(play);
-
         var playName = null;
 
         if(play === undefined || play.length == 0){
@@ -87,16 +111,16 @@ angular.module('lp.playbook.dashboard.launch_history', [])
         }
 
         var params = {
-            playName: playName
+            playName: playName,
+            offset: 0
         }
 
         PlaybookWizardStore.getPlayLaunches(params).then(function(result){
             vm.launches = result;
-
             if(vm.launches.launchSummaries.length > 10){
                 vm.showPagination = true;
             } else {
-                vm.showPagination = true;
+                vm.showPagination = false;
             }
         });
     };
