@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -78,7 +77,7 @@ public class AIModel extends RatingModel {
     @JsonProperty("trainingSegment")
     private MetadataSegment trainingSegment;
     
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_MODEL_SUMMARY_ID")
     @JsonProperty("modelSummary")
     private ModelSummary modelSummary;

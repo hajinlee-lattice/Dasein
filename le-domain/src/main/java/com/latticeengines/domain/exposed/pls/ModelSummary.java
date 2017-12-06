@@ -104,7 +104,6 @@ public class ModelSummary
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     @Override
@@ -113,7 +112,6 @@ public class ModelSummary
     }
 
     @Override
-    @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
     }
@@ -167,7 +165,9 @@ public class ModelSummary
     @JsonProperty("Tenant")
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-        setTenantId(tenant.getPid());
+        if (tenant != null) {
+        		setTenantId(tenant.getPid());
+        }
     }
 
     @Override

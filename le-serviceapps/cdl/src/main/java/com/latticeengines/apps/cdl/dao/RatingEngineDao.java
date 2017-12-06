@@ -13,4 +13,6 @@ public interface RatingEngineDao extends BaseDao<RatingEngine> {
 
     List<String> findAllIdsInSegment(String segmentName);
 
+	void deleteById(String id);
+
 }

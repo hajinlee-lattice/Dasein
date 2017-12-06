@@ -33,7 +33,7 @@ public class BaseJpaRepositoryImpl<T, ID extends Serializable> extends SimpleJpa
 	
 	// We still need to use sessionFactory for all DML operations.
 	// 	Because, we are still using HibernateTransactionManager.
-	//	If we want to use, EntityManager for DML, then we need to switch to JPATransactionManager in our persistance configurations
+	//	If we want to use, EntityManager for DML, then we need to switch to JPATransactionManager in our persistence configurations
 	private final SessionFactory sessionFactory;
 	
 	public BaseJpaRepositoryImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {

@@ -54,5 +54,12 @@ public class RatingEngineDaoImpl extends BaseDaoImpl<RatingEngine> implements Ra
         }
         return (List<String>) query.list();
     }
+    
+    @Override
+    public void deleteById(String id) {
+    		Session session = getSessionFactory().getCurrentSession();
+        Query query = session.createQuery("delete from " + getEntityClass().getSimpleName() + " where id = :id").setParameter("id", id);
+        query.executeUpdate();
+    }
 
 }

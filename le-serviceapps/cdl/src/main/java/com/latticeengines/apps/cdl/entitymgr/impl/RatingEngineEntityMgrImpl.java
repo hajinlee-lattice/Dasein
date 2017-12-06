@@ -89,11 +89,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteById(String id) {
-        RatingEngine ratingEngine = findById(id);
-        if (ratingEngine == null) {
-            throw new NullPointerException(String.format("RatingEngine with id %s cannot be found", id));
-        }
-        super.delete(ratingEngine);
+    		// Old implementation was loading entire object into memory with all dependencies and then deleting it. 
+    		ratingEngineDao.deleteById(id);
     }
 
     @Override

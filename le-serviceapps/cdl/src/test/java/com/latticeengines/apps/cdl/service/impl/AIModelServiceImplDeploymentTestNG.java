@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -20,8 +21,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
 import com.latticeengines.domain.exposed.pls.ModelingConfig;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
@@ -31,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
+import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
 public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -61,9 +65,9 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     protected String aiRatingEngineId;
     protected String aiRatingModelId;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = {"deployment"})
     public void setup() throws KeyManagementException, NoSuchAlgorithmException, IOException, Exception {
-        setupTestEnvironment();
+    		setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId());
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
                 constructSegment(SEGMENT_NAME));
@@ -71,6 +75,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         reTestSegment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
                 createdSegment.getName());
         log.info(String.format("Created metadata segment with name %s", reTestSegment.getName()));
+        
     }
 
 	protected RatingEngine createRatingEngine(RatingEngine ratingEngine) {
@@ -190,6 +195,54 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         assertUpdatedModelWithConfigFilters((AIModel) rm, configFitlers);
     }
     
+    @Test(groups = "deployment", dependsOnMethods= {"testUpdateRatingModelConfigFitlers"})
+    private void testUpdateRatingModelWithModelSummary() {
+    		String uuid = UUID.randomUUID().toString();
+        String applicationId = "application_1111111111111_1111";
+        String modelVersion = "mver_" + uuid;
+        String modelName = "model_" + uuid;
+        String modelPath = "models/MulesoftAllRows20160314/";
+        
+        ModelSummaryUtils.TestModelConfiguration modelConfiguration = new ModelSummaryUtils.TestModelConfiguration(modelPath, modelName,
+                applicationId, modelVersion, uuid);
+        ModelSummary modelSummary = null;
+        try {
+        		modelSummary = ModelSummaryUtils.createModelSummary(internalResourceProxy, mainTestTenant, modelConfiguration);
+		} catch (IOException e) {
+			Assert.fail("Could not create ModelSummary", e);
+		}
+        Assert.assertNotNull(modelSummary);
+        log.info("Created ModelSummary ID: " + modelSummary.getId());
+        
+		ModelSummary retModelSummary = internalResourceProxy.getModelSummaryFromModelId(modelConfiguration.getModelId(),
+				CustomerSpace.parse(mainTestTenant.getId()));
+		Assert.assertNotNull(retModelSummary);
+	    Assert.assertNotNull(retModelSummary.getId());
+	    
+	    RatingModel rm = getRatingModel();
+        Assert.assertNotNull(rm);
+        Assert.assertTrue(rm instanceof AIModel);
+        AIModel aiModel = (AIModel)rm;
+        
+        ModelSummary selectedModelSummary = new ModelSummary();
+        selectedModelSummary.setId(retModelSummary.getId());
+        aiModel.setModelSummary(selectedModelSummary);
+        
+        updateRatingModel(aiModel);
+        rm = (AIModel) getRatingModel();
+        Assert.assertTrue(rm instanceof AIModel);
+        assertUpdatedModelWithModelSummary((AIModel) rm, retModelSummary);
+    }
+        
+    @Test(groups = "deployment", dependsOnMethods= {"testUpdateRatingModelWithModelSummary"})
+    public void tearDelete() {
+        deleteRatingEngine(aiRatingEngineId);
+        
+        List<RatingEngineSummary> ratingEngineList = getAllRatingEngineSummaries();
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.size(), 0);
+    }
+    
     private List<String> generateSeletedProducts() {
         List<String> selectedProducts = new ArrayList<>();
         selectedProducts.add(PRODUCT_ID1);
@@ -225,15 +278,28 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     		Assert.assertEquals(aiModel.getTrainingSegment().getDisplayName(), TRAINING_SEGMENT_NAME);
 	}
     
-    private void assertUpdatedModelWithConfigFilters(AIModel aiModel, Map<ModelingConfig, ModelingConfigFilter> filters) {
+    private void assertUpdatedModelWithConfigFilters(AIModel aiModel, Map<ModelingConfig, ModelingConfigFilter> testFilters) {
     	    assertUpdatedModelWithRelationshipObjects(aiModel);
     	    
+    	    if (testFilters == null) {
+    	    		return;
+    	    }
 		Assert.assertNotNull(aiModel.getModelingConfigFilters());
-		Assert.assertEquals(aiModel.getModelingConfigFilters().size(), filters.size());
-		for (ModelingConfigFilter filter: filters.values()) {
+		Assert.assertEquals(aiModel.getModelingConfigFilters().size(), testFilters.size());
+		for (ModelingConfigFilter filter: testFilters.values()) {
 			Assert.assertTrue(aiModel.getModelingConfigFilters().values().contains(filter));
 		}
     }
+    
+    private void assertUpdatedModelWithModelSummary(AIModel aiModel, ModelSummary testModelSummary) {
+    	    assertUpdatedModelWithConfigFilters(aiModel, null);
+	    
+    	    if(testModelSummary == null) {
+    	    	    return;
+    	    }
+		Assert.assertNotNull(aiModel.getModelSummary());
+		Assert.assertEquals(aiModel.getModelSummary().getId(), testModelSummary.getId());
+	}
     
     private void assertDefaultAIModel(AIModel aiModel) {
         Assert.assertNotNull(aiModel);
@@ -249,15 +315,6 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(aiModel.getTargetCustomerSet());
         Assert.assertNull(aiModel.getModelingJobId());
     }
-    
-    @Test(groups = "deployment", dependsOnMethods= {"testUpdateRatingModelConfigFitlers"})
-    public void tearDelete() {
-        deleteRatingEngine(aiRatingEngineId);
-        
-        List<RatingEngineSummary> ratingEngineList = getAllRatingEngineSummaries();
-        Assert.assertNotNull(ratingEngineList);
-        Assert.assertEquals(ratingEngineList.size(), 0);
-    }
 
 	protected void deleteRatingEngine(String ratingEngineId) {
 		RatingEngine ratingEngine = getRatingEngineById(ratingEngineId);
@@ -266,5 +323,5 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         ratingEngine = getRatingEngineById(ratingEngineId);
         Assert.assertNull(ratingEngine);
 	}
-
+	
 }

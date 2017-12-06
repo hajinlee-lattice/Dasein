@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -51,6 +52,11 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;
 
+    @Value("${common.test.pls.url}")
+    protected String internalResourceHostPort;
+    
+    protected InternalResourceRestApiProxy internalResourceProxy;
+    
     @Inject
     private WorkflowProxy workflowProxy;
 
@@ -64,6 +70,8 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
+        
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     protected void attachProtectedProxy(ProtectedRestApiProxy proxy) {
