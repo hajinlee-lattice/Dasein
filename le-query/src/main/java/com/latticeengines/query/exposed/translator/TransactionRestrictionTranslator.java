@@ -39,7 +39,6 @@ import static com.latticeengines.query.exposed.translator.TranslatorUtils.transl
 
 public class TransactionRestrictionTranslator {
     public static final int NUM_ADDITIONAL_PERIOD = 2;
-    public static final int ONE_LEG_BEHIND_OFFSET = 1;
     public static final String ACCOUNT_ID = InterfaceName.AccountId.name();
     public static final String PERIOD_ID = InterfaceName.PeriodId.name();
     public static final String PRODUCT_ID = InterfaceName.ProductId.name();
@@ -86,7 +85,6 @@ public class TransactionRestrictionTranslator {
     private StringPath trxnPeriodId = Expressions.stringPath(trxnPath, PERIOD_ID);
     private StringPath trxnAmountVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
     private StringPath trxnQuantityVal = Expressions.stringPath(trxnPath, QUANTITY_VAL);
-    private StringPath trxnVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
 
     // for testing purpose
     private static String currentDate = "current_date";
@@ -275,11 +273,12 @@ public class TransactionRestrictionTranslator {
         List<Expression> apsSelectList = new ArrayList<>();
         apsSelectList.addAll(Arrays.asList(keysAccountId, keysPeriodId));
 
+        productSelectList.add(amountVal.as(AMOUNT_VAL));
+        apsSelectList.add(trxnAmountVal);
+
         if (spentFilter != null) {
-            productSelectList.add(amountVal.as(AMOUNT_VAL));
             Expression spentWindowAgg = translateAggregateTimeWindow(
                     keysAccountId, keysPeriodId, trxnAmountVal, timeFilter, spentFilter, false).as(amountAggr);
-            apsSelectList.add(trxnAmountVal);
             apsSelectList.add(spentWindowAgg);
         }
 
@@ -287,7 +286,6 @@ public class TransactionRestrictionTranslator {
             productSelectList.add(quantityVal.as(QUANTITY_VAL));
             Expression unitWindowAgg = translateAggregateTimeWindow(
                     keysAccountId, keysPeriodId, trxnQuantityVal, timeFilter, unitFilter, false).as(quantityAggr);
-            apsSelectList.add(trxnQuantityVal);
             apsSelectList.add(unitWindowAgg);
         }
 
@@ -335,7 +333,7 @@ public class TransactionRestrictionTranslator {
         String txTableName = getPeriodTransactionTableName();
         StringPath tablePath = Expressions.stringPath(txTableName);
 
-        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
+        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnAmountVal.getMetadata());
         CaseBuilder caseBuilder = new CaseBuilder();
         NumberExpression trxnValExists = caseBuilder.when(trxnValNumber.goe(0)).then(1).otherwise(0);
 
@@ -345,7 +343,7 @@ public class TransactionRestrictionTranslator {
         SQLQuery productQuery = factory.query().select(accountId, periodId, amountVal.as(AMOUNT_VAL)).from(tablePath)
                 .where(translateProductId(productIdStr));
 
-        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
+        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnAmountVal, windowAgg)
                 .from(keysPath).leftJoin(productQuery, trxnPath)
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 

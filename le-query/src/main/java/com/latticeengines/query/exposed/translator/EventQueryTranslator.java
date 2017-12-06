@@ -89,7 +89,6 @@ public class EventQueryTranslator {
     private StringPath trxnPeriodId = Expressions.stringPath(trxnPath, PERIOD_ID);
     private StringPath trxnAmountVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
     private StringPath trxnQuantityVal = Expressions.stringPath(trxnPath, QUANTITY_VAL);
-    private StringPath trxnVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
 
     public QueryBuilder translateForScoring(QueryFactory queryFactory,
                                             AttributeRepository repository,
@@ -234,11 +233,12 @@ public class EventQueryTranslator {
         List<Expression> apsSelectList = new ArrayList<>();
         apsSelectList.addAll(Arrays.asList(keysAccountId, keysPeriodId));
 
+        productSelectList.add(amountVal.as(AMOUNT_VAL));
+        apsSelectList.add(trxnAmountVal);
+
         if (spentFilter != null) {
-            productSelectList.add(amountVal.as(AMOUNT_VAL));
             Expression spentWindowAgg = translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnAmountVal,
                                                                      timeFilter, spentFilter, true).as(amountAggr);
-            apsSelectList.add(trxnAmountVal);
             apsSelectList.add(spentWindowAgg);
         }
 
@@ -246,7 +246,6 @@ public class EventQueryTranslator {
             productSelectList.add(quantityVal.as(QUANTITY_VAL));
             Expression unitWindowAgg = translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnQuantityVal,
                                                                     timeFilter, unitFilter, true).as(quantityAggr);
-            apsSelectList.add(trxnQuantityVal);
             apsSelectList.add(unitWindowAgg);
         }
 
@@ -299,7 +298,7 @@ public class EventQueryTranslator {
         StringPath tablePath = Expressions.stringPath(txTableName);
         String period = txRestriction.getTimeFilter().getPeriod();
 
-        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
+        NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnAmountVal.getMetadata());
         CaseBuilder caseBuilder = new CaseBuilder();
         NumberExpression trxnValExists = caseBuilder.when(trxnValNumber.goe(0)).then(1).otherwise(0);
 
@@ -310,7 +309,7 @@ public class EventQueryTranslator {
                 .where(periodName.eq(period)) //
                 .where(translateProductId(productIdStr));
 
-        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnVal, windowAgg)
+        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnAmountVal, windowAgg)
                 .from(keysPath).leftJoin(productQuery, trxnPath)
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
