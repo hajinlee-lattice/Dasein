@@ -9,6 +9,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     angular.extend(vm, {
         current: RatingsEngineStore.current,
+        inEditing: {},
         query: '',
         ceil: window.Math.ceil,
         createRatingState: 'home.ratingsengine.ratingsenginetype',
@@ -35,7 +36,6 @@ angular.module('lp.ratingsengine.ratingslist', [
             }
         }
     });
-    vm.displayNames = {};
 
     vm.count = function(type) {
         return $filter('filter')(vm.current.ratings, { status: type }, true).length;
@@ -132,24 +132,22 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.editRatingClick = function($event, rating) {
         $event.stopPropagation();
-
+        vm.inEditing = angular.copy(rating);
         var tileState = vm.current.tileStates[rating.id];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editRating = !tileState.editRating;
-        vm.displayNames[rating.id] = rating.displayName; // remember prior display name in case user cancels
     };
 
     vm.nameChanged = function(rating) {
         var tileState = vm.current.tileStates[rating.id];
-        tileState.saveEnabled = vm.displayNames[rating.id].length > 0;
+        tileState.saveEnabled = rating.displayName.length > 0;
     };
 
     vm.cancelEditRatingClicked = function($event, rating) {
         $event.stopPropagation();
-
+        rating.displayName = vm.inEditing.displayName;
         var tileState = vm.current.tileStates[rating.id];
         tileState.editRating = !tileState.editRating;
-        delete vm.displayNames[rating.id]; //discard updated name
     };
 
     vm.editStatusClick = function($event, rating, disable){
@@ -160,18 +158,22 @@ angular.module('lp.ratingsengine.ratingslist', [
         }
 
         var newStatus = (rating.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE');
-
-        updateRating(rating);
-        rating.status = newStatus;
-
+        var updatedRating = {
+                id: rating.id,
+                status: newStatus,
+            }
+        updateRating(rating, updatedRating);
         RatingsEngineStore.setRatings(vm.current.ratings, true);
 
     };
 
     vm.saveRatingClicked = function($event, rating) {
         $event.stopPropagation();
-
-        updateRating(rating);
+        var updatedRating = {
+            id: rating.id,
+            displayName: rating.displayName
+        }
+        updateRating(rating, updatedRating);
     };
 
 
@@ -183,19 +185,14 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     };
 
-    function updateRating(rating) {
+    function updateRating(rating, updatedRating) {
         vm.saveInProgress = true;
-        var tileState = vm.current.tileStates[rating.id];
-        var updatedRatingName = vm.displayNames[rating.id];
-        var updatedRating = {
-            id: rating.id,
-            displayName: updatedRatingName //save updated rating name
-        }
         RatingsEngineService.saveRating(updatedRating).then(function(result) {
             vm.saveInProgress = false;
-            tileState.editRating = false;
-            rating.displayName = updatedRatingName; //updates display name of rating; otherwise displays old name
-            delete vm.displayNames[rating.id];
+            rating.status = result.status;
+            vm.inEditing = {};
+            vm.current.tileStates[rating.id].editRating = false;
+            rating.displayName = result.displayName; //updates display name of rating; otherwise displays old name
         });
     }
 });
