@@ -37,6 +37,7 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
     private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
 
     private final String tenantName = "TalkingPointAttributeTestTenant";
+    private final String accountAttributePrefix = "Account.";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -63,6 +64,8 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         List<TalkingPointAttribute> attributes = talkingPointAttributeService.getAccountAttributes(tenantName);
         Assert.assertNotNull(attributes);
         Assert.assertEquals(2, attributes.size());
+        Assert.assertTrue(attributes.get(0).getValue().startsWith(accountAttributePrefix));
+        Assert.assertTrue(attributes.get(1).getValue().startsWith(accountAttributePrefix));
     }
 
     @Test(groups = "functional")
@@ -83,6 +86,8 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
         Assert.assertEquals(notionAttributes.getInvalidNotions().size(), 2);
         Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 3);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("account").size(), 2);
+        Assert.assertTrue(notionAttributes.getNotionAttributes().get("account").get(0).getValue()
+                .startsWith(accountAttributePrefix));
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("recommendation").size(), 8);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("variable").size(), 5);
     }

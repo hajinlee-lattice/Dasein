@@ -36,6 +36,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     private final String recomendationAttributesFilePath = "com/latticeengines/dante/metadata/RecommendationAttributes.json";
     private final String variableAttributesFilePath = "com/latticeengines/dante/metadata/VariableAttributes.json";
     private final ColumnSelection.Predefined TalkingPointAttributeGroup = ColumnSelection.Predefined.TalkingPoint;
+    private final String accountAttributePrefix = "Account.";
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
@@ -62,8 +63,11 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
             if (rawAttrs == null) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
             }
+            // The Prefix is added since Dante UI looks for it to identify
+            // Account attributes
             return JsonUtils.convertList(rawAttrs, ColumnMetadata.class).stream()
-                    .map(attr -> new TalkingPointAttribute(attr.getDisplayName(), attr.getColumnId()))
+                    .map(attr -> new TalkingPointAttribute(attr.getDisplayName(),
+                            accountAttributePrefix + attr.getColumnId()))
                     .collect(Collectors.toList());
         } catch (LedpException e) {
             throw e;
