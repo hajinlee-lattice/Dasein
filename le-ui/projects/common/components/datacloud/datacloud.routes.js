@@ -72,7 +72,6 @@ angular
                     DataCloudStore.setHost(ApiHost);
 
                     if (EnrichmentCount !== 0) { //PLS-5894
-                        console.log('execute EnrichmentTopAttributes');
                         DataCloudStore.getAllTopAttributes().then(function(result) {
                             deferred.resolve(result['Categories'] || result || {});
                         });

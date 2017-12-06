@@ -468,12 +468,14 @@ angular.module('common.datacloud.query.service',[
         return this.validResourceTypes.indexOf(resourceType) > -1;
     };
 
-    this.getAllBuckets = function(tree, restrictions) {
+    this.getAllBuckets = function(tree, restrictions, getEmptyBuckets) {
         restrictions = restrictions || [];
 
         tree.forEach(function(branch) {
-            if (branch && branch.bucketRestriction && branch.bucketRestriction && typeof branch.bucketRestriction.bkt.Id == 'number') {
-                restrictions.push(branch);
+            if (branch && branch.bucketRestriction && branch.bucketRestriction) {
+                if (getEmptyBuckets || typeof branch.bucketRestriction.bkt.Id == 'number') {
+                    restrictions.push(branch);
+                }
             }
 
             if (branch && branch.logicalRestriction) {

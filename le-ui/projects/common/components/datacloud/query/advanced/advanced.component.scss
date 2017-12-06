@@ -133,14 +133,18 @@ div.advanced-query-builder {
         .query-algorithm-display {
             background: white;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 4px 0.5em;
+            border-radius: 3px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            padding: 2px 0.5em;
             width: 100%;
             margin-right: 0.25em;
         }
 
         .query-algorithm-undo {
             padding: 0 10px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
     }
 

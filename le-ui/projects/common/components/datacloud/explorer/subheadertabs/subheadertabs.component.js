@@ -120,8 +120,8 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             var segment = SegmentStore.sanitizeSegment({
                 name: name,
                 display_name: displayName,
-                account_restriction: accountRestriction,
-                contact_restriction: contactRestriction,
+                account_restriction: angular.copy(accountRestriction),
+                contact_restriction: angular.copy(contactRestriction),
                 page_filter: {
                     row_offset: 0,
                     num_rows: 10

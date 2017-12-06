@@ -58,8 +58,6 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.go = function(state, isPrev, params) {
-        angular.element(window).scrollTop(0,0);
-
         var current = vm.itemMap[$state.current.name];
 
         vm.nextDisabled = true;
@@ -72,6 +70,7 @@ angular.module('common.wizard.controls', [])
     }
 
     $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) { 
+        angular.element(window).scrollTop(0,0);
         vm.toState = toState;
         vm.item = vm.itemMap[vm.toState.name];
         vm.nextDisabled = false;

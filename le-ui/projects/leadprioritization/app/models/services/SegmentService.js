@@ -208,8 +208,7 @@ angular
 
     this.CreateOrUpdateSegment = function(segment) {
         var deferred = $q.defer();
-        console.log('CreateOrUpdateSegment call');
-        console.log(segment);
+        
         $http({
             method: 'POST',
             url: '/pls/datacollection/segments',
@@ -225,7 +224,6 @@ angular
                     success: true
                 };
                 deferred.resolve(result);
-                console.log(result);
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};

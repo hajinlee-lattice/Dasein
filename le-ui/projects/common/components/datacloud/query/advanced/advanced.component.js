@@ -143,21 +143,26 @@ angular.module('common.datacloud.query.builder', [
                 });
             }
         });
-
         if (vm.bucket) {
             var bucket = vm.rating_rule.bucketToRuleMap[vm.bucket],
                 fromBucket = bucket[vm.treeMode + '_restriction'],
                 restrictions = fromBucket.logicalRestriction.restrictions,
-                allBuckets = QueryStore.getAllBuckets(restrictions),
-                ids = [];
+                setBuckets = QueryStore.getAllBuckets(restrictions),
+                allBuckets = QueryStore.getAllBuckets(restrictions, null, true),
+                ids = [],
+                rids = [];
 
 
-            allBuckets.forEach(function(value, index) {
+            setBuckets.forEach(function(value, index) {
                 ids.push(value.bucketRestriction.attr);
             })
 
+            allBuckets.forEach(function(value, index) {
+                rids.push(value.bucketRestriction.attr);
+            })
+
             bucketRestrictions.forEach(function(value, index) {
-                if (ids.indexOf(value.bucketRestriction.attr) < 0) {
+                if (ids.indexOf(value.bucketRestriction.attr) < 0 && rids.indexOf(value.bucketRestriction.attr) < 0) {
                     restrictions.push(value);
                 }
             })
@@ -292,10 +297,10 @@ angular.module('common.datacloud.query.builder', [
             vm.bucketLabels.forEach(function(bucketName, index) {
                 var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
 
-                logical.restrictions = logical.restrictions.filter(function(restriction, index) {
-                    return restriction.bucketRestriction && restriction.bucketRestriction.bkt.Id;
-                });
-
+                //logical.restrictions = logical.restrictions.filter(function(restriction, index) {
+                //    return restriction.bucketRestriction && restriction.bucketRestriction.bkt.Id;
+                //});
+                
                 vm.buckets[vm.bucketsMap[bucketName]].count = -1;
 
                 SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName][vm.treeMode + '_restriction'] ]);

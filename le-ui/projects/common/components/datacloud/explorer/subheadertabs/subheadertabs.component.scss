@@ -32,10 +32,19 @@ div.explorer-subheader-tabs {
     ul.subheader-tabs-buttons {
         // margin-right: 14px;
         float: right;
+        
+        & > li {
+            position: relative;
+        }
+
         .confirmation-title{
+            position: absolute;
+            top: 2px;
+            left: 0;
+            margin-left: -50%;
             font-size: 0.9em;
             color: #222;
-            vertical-align: -webkit-baseline-middle;
+
             .confermation-ok{
                 padding: 0.4em;
                 color: green;
