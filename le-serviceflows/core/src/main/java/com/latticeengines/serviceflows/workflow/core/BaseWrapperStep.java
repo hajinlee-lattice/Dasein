@@ -37,7 +37,10 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
             putObjectInContext(configClassName, configuration);
             log.info("In pre processing phase, skip on execution complete.");
         } else {
+            log.info("In post processing phase.");
             onPostProcessingCompleted();
+            configuration.setSkipStep(true);
+            resetConfigurationPhase();
         }
     }
 
@@ -45,6 +48,16 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
     public void skipStep() {
         log.info("Skip the wrapper step and the wrapped workflow steps.");
         skipEmbeddedWorkflow(getWrappedWorkflowConfClass());
+        configuration.setSkipStep(true);
+        resetConfigurationPhase();
+    }
+
+    private void resetConfigurationPhase() {
+        BaseWrapperStepConfiguration stepConfig = getObjectFromContext(configuration.getClass().getName(),
+                configuration.getClass());
+        log.info("Switch " + configuration.getClass().getName() + " to " + PRE_PROCESSING);
+        stepConfig.setPhase(PRE_PROCESSING);
+        putObjectInContext(configuration.getClass().getName(), stepConfig);
     }
 
     protected void report(ReportPurpose purpose, String name, String json) {

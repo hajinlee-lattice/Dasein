@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 
 public class UpdateStatsObjectsUnitTestNG {
 
-    private UpdateStatsObjects updateStatsObjects = new UpdateStatsObjects();
+    private CombineStatistics updateStatsObjects = new CombineStatistics();
 
     private static final String RESOURCE_ROOT = "com/latticeengines/cdl/workflow/steps/updateStatsObjects";
 

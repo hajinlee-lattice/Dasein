@@ -86,12 +86,18 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String DATA_RULES = "DATA_RULES";
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
-    protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
-    protected static final String SERVING_STORE_IN_STATS = "SERVING_STORE_IN_STATS";
-    protected static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
-    protected static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";
+
+    // CDL
+    public static final String SERVING_STORE_IN_STATS = "SERVING_STORE_IN_STATS";
+    public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
+    public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
+    public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
+    public static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";
     protected static final String APPEND_TO_REDSHIFT_TABLE = "APPEND_TO_REDSHIFT_TABLE";
     protected static final String REDSHIFT_EXPORT_REPORT = "REDSHIFT_EXPORT_REPORT";
+    protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
+    protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
+    protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
 
     @Autowired
     protected Configuration yarnConfiguration;

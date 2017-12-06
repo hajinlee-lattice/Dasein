@@ -5,7 +5,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
-public class UpdateStatsObjectsConfiguration extends BaseStepConfiguration {
+public class CombineStatisticsConfiguration extends BaseStepConfiguration {
 
     @JsonProperty("customer_space")
     @NotNull

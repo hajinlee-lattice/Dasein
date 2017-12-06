@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 
@@ -20,9 +19,10 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
     public static class Builder {
 
         public ProcessAnalyzeWorkflowConfiguration configuration = new ProcessAnalyzeWorkflowConfiguration();
+
         private ProcessStepConfiguration processStepConfiguration = new ProcessStepConfiguration();
         private ProcessAccountStepConfiguration processAccountStepConfiguration = new ProcessAccountStepConfiguration();
-        private ConsolidateDataWorkflowConfiguration.Builder consolidateDataConfigurationBuilder = new ConsolidateDataWorkflowConfiguration.Builder();
+        private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
@@ -31,11 +31,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("consolidateAndPublishWorkflow", customerSpace,
-                    "consolidateAndPublishWorkflow");
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace,
+                    "processAnalyzeWorkflow");
             processStepConfiguration.setCustomerSpace(customerSpace);
             processAccountStepConfiguration.setCustomerSpace(customerSpace);
-            consolidateDataConfigurationBuilder.customer(customerSpace);
+            combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             return this;
         }
@@ -48,63 +48,13 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            consolidateDataConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            processAccountStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder hdfsToRedshiftConfiguration(HdfsToRedshiftConfiguration hdfsToRedshiftConfiguration) {
             redshiftPublishWorkflowConfigurationBuilder.hdfsToRedshiftConfiguration(hdfsToRedshiftConfiguration);
-            return this;
-        }
-
-        public Builder accountIdField(String idField) {
-            consolidateDataConfigurationBuilder.accountIdField(idField);
-            return this;
-        }
-
-        public Builder contactIdField(String idField) {
-            consolidateDataConfigurationBuilder.contactIdField(idField);
-            return this;
-        }
-
-        public Builder productIdField(String idField) {
-            consolidateDataConfigurationBuilder.productIdField(idField);
-            return this;
-        }
-
-        public Builder transactionIdField(String idField) {
-            consolidateDataConfigurationBuilder.transactionIdField(idField);
-            return this;
-        }
-
-        public Builder periodStrategy(PeriodStrategy periodStrategy) {
-            consolidateDataConfigurationBuilder.periodStrategy(periodStrategy);
-            return this;
-        }
-
-        public Builder bucketAccount(boolean bucketAccount) {
-            consolidateDataConfigurationBuilder.bucketAccount(bucketAccount);
-            return this;
-        }
-
-        public Builder bucketContact(boolean bucketContact) {
-            consolidateDataConfigurationBuilder.bucketContact(bucketContact);
-            return this;
-        }
-
-        public Builder bucketTransaction(boolean bucketTransaction) {
-            consolidateDataConfigurationBuilder.bucketTransaction(bucketTransaction);
-            return this;
-        }
-
-        public Builder bucketProduct(boolean bucketProduct) {
-            consolidateDataConfigurationBuilder.bucketProduct(bucketProduct);
-            return this;
-        }
-
-        public Builder matchKeyMap(Map<MatchKey, List<String>> matchKeyMap) {
-            consolidateDataConfigurationBuilder.matchKeyMap(matchKeyMap);
             return this;
         }
 
@@ -126,7 +76,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.add(processStepConfiguration);
             configuration.add(processAccountStepConfiguration);
-            configuration.add(consolidateDataConfigurationBuilder.build());
+            configuration.add(combineStatisticsConfiguration);
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;
         }

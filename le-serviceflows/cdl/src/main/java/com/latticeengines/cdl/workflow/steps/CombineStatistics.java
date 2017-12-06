@@ -27,16 +27,16 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
-@Component("updateStatsObjects")
-public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfiguration> {
+@Component("combineStatistics")
+public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateStatsObjects.class);
+    private static final Logger log = LoggerFactory.getLogger(CombineStatistics.class);
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -48,7 +48,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
 
     @Override
     public void execute() {
-        log.info("Inside UpdateStatsObjects execute()");
+        log.info("Inside CombineStatistics execute()");
         String customerSpaceStr = configuration.getCustomerSpace().toString();
         Map<BusinessEntity, String> entityTableNames = getMapObjectFromContext(SERVING_STORE_IN_STATS,
                 BusinessEntity.class, String.class);

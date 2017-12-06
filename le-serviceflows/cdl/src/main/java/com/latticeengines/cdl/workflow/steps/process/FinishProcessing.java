@@ -1,15 +1,76 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.lang.reflect.Method;
+
+import javax.inject.Inject;
+
+import org.springframework.batch.core.JobExecution;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.ProxyUtils;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("finishProcessing")
 public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration> {
 
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private SegmentProxy segmentProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private EntityProxy entityProxy;
+
+    @Inject
+    private MetadataProxy metadataProxy;
+
+    @Inject
+    private RedshiftService redshiftService;
+
+    private DataCollection.Version active;
+    private DataCollection.Version inactive;
+    private CustomerSpace customerSpace;
+
     @Override
     public void execute() {
+        customerSpace = configuration.getCustomerSpace();
+        active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+
+        log.info("Switch data collection to version " + inactive);
+        dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
+
+        // update segment and rating engine counts
+        SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
+        RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace.toString());
+    }
+
+    @Component("evictEntityKeyGenerator")
+    class EvictEntityKeyGenerator implements KeyGenerator {
+
+        @Override
+        public Object generate(Object target, Method method, Object... params) {
+            JobExecution jobExecution = (JobExecution) params[0];
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+            String customerSpace = job.getTenant().getId();
+            return ProxyUtils.shortenCustomerSpace(customerSpace) + "|.*";
+        }
+
     }
 
 }

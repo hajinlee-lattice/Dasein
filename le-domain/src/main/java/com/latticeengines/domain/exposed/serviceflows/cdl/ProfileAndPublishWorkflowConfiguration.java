@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculatePurchas
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortContactStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortProductStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 
 public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -20,7 +20,7 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         private ProfileAndPublishWorkflowConfiguration configuration = new ProfileAndPublishWorkflowConfiguration();
         private CalculateStatsStepConfiguration calculateStatsConfiguration = new CalculateStatsStepConfiguration();
-        private UpdateStatsObjectsConfiguration updateStatsObjectsConfiguration = new UpdateStatsObjectsConfiguration();
+        private CombineStatisticsConfiguration updateStatsObjectsConfiguration = new CombineStatisticsConfiguration();
         private SortContactStepConfiguration sortContactConfiguration = new SortContactStepConfiguration();
         private SortProductStepConfiguration sortProductStepConfiguration = new SortProductStepConfiguration();
         private CalculatePurchaseHistoryConfiguration calculatePurchaseHistoryConfiguration = new CalculatePurchaseHistoryConfiguration();

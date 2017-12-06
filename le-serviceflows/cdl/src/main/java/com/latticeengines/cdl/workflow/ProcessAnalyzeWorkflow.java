@@ -4,7 +4,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.choreographers.ProcessAnalyzeChoreographer;
 import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
+import com.latticeengines.cdl.workflow.steps.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
@@ -27,13 +29,25 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private ProcessAccountWorkflow processAccountWorkflow;
 
+    @Inject
+    private CombineStatistics combineStatistics;
+
+    @Inject
+    private RedshiftPublishWorkflow redshiftPublishWorkflow;
+
+    @Inject
+    private ProcessAnalyzeChoreographer choreographer;
+
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(startProcessing) //
                 .next(processAccountWorkflow) //
-                .next(finishProcessing)
+                .next(combineStatistics) //
+                .next(redshiftPublishWorkflow) //
+                .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
+                .choreographer(choreographer) //
                 .build();
     }
 

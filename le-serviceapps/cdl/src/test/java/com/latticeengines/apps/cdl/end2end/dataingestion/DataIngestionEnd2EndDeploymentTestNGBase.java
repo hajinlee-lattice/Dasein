@@ -622,6 +622,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         System.out.println(JsonUtils.pprint(segment2));
     }
 
+    void createTestSegment2() {
+        testMetadataSegmentProxy.createOrUpdate(constructTestSegment2());
+        MetadataSegment segment2 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2);
+        Assert.assertNotNull(segment2);
+        System.out.println(JsonUtils.pprint(segment2));
+    }
+
     private MetadataSegment constructTestSegment1() {
         Bucket websiteBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(".com"));
         BucketRestriction websiteRestriction = new BucketRestriction(

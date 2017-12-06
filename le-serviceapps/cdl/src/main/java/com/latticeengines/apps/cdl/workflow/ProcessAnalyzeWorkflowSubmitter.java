@@ -1,7 +1,12 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +23,15 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
 public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
@@ -39,10 +48,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final DataFeedProxy dataFeedProxy;
 
+    private final WorkflowProxy workflowProxy;
+
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy) {
+    public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
+                                           WorkflowProxy workflowProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
+        this.workflowProxy = workflowProxy;
     }
 
     public ApplicationId submit(String customerSpace) {
@@ -53,25 +66,67 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (dataCollection == null) {
             throw new LedpException(LedpCode.LEDP_37014);
         }
-        log.info("Found default data collection " + dataCollection.getName());
-        log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
-        //TODO: check data feed status for if process analyze is allowed
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
 
-        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus);
+        DataFeedExecution execution = datafeed.getActiveExecution();
+        //TODO: check data feed status for if process analyze is allowed
+        if (execution != null && DataFeedExecution.Status.Started.equals(execution.getStatus())) {
+            if (execution.getWorkflowId() == null) {
+                throw new RuntimeException(
+                        "We can't launch any consolidate workflow now as there is one still running.");
+            }
+            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()));
+            JobStatus status = job.getJobStatus();
+            if (!status.isTerminated()) {
+                throw new RuntimeException(
+                        "We can't launch any consolidate workflow now as there is one still running.");
+            } else if (JobStatus.FAILED.equals(status)) {
+                log.info(String.format(
+                        "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
+                        execution, datafeed));
+                dataFeedProxy.failExecution(customerSpace,
+                        job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
+            }
+        } else if (execution != null && DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
+            log.info("current execution failed, we will start a new one");
+        }
+
+        log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
+
+        execution = dataFeedProxy.startExecution(customerSpace);
+        log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
+        List<Long> importJobIds = getImportJobIds(customerSpace);
+        log.info(String.format("importJobIdsStr=%s", importJobIds));
+
+        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, importJobIds, datafeedStatus);
         return workflowJobService.submit(configuration);
     }
 
-    private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, Status status) {
+    private List<Long> getImportJobIds(String customerSpace) {
+        List<Job> importJobs = workflowProxy.getWorkflowJobs(customerSpace, null,
+                Collections.singletonList("cdlDataFeedImportWorkflow"), null, Boolean.FALSE);
+        List<Long> importJobIds = Collections.emptyList();
+        if (CollectionUtils.isEmpty(importJobs)) {
+            log.warn("No import jobs are associated with the current consolidate job");
+        } else {
+            importJobIds = importJobs.stream().map(job -> job.getId()).collect(Collectors.toList());
+            log.info(String.format("Import jobs that associated with the current consolidate job are: %s",
+                    importJobIds));
+        }
+        return importJobIds;
+    }
+
+    private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, List<Long> importJobIds, Status status) {
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .initialDataFeedStatus(status) //
+                .importJobIds(importJobIds) //
                 .inputProperties(ImmutableMap //
                         .of(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName())) //
                 .workflowContainerMem(workflowMemMb) //
