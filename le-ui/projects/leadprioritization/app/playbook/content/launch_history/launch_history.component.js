@@ -80,10 +80,10 @@ angular.module('lp.playbook.dashboard.launch_history', [])
 
         var playName = null;
 
-        if(play === undefined){
+        if(play === undefined || play.length == 0){
             playName = null;
         } else {
-            playName = play.undefined.name;
+            playName = play[0].name;
         }
 
         var params = {

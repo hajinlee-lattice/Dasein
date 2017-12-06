@@ -3,7 +3,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
     return {
         restrict: 'E',
         templateUrl: '/components/ai/chips.component.html',
-        scope: { placeholder: '@', datasource: '=', callback: '&callbackFunction', singleSelection: '=' },
+        scope: { placeholder: '@', datasource: '=', callback: '&callbackFunction', singleSelection: '=', id: '@', displayname: '@' },
         link: function (scope, element, attrs, ctrl) {
 
             scope.showClass = ''
@@ -15,6 +15,14 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.mouseOut = true;
             scope.blur = true;
             scope.showQueryList = false;
+            scope.id = scope.id || 'id';
+            scope.displayName = scope.displayname || 'displayName';
+
+            scope.getDisplayName = function(item){
+                if(item){
+                    return item[scope.displayName];
+                }
+            }
 
             scope.isSelectionDone = function(){
                 if(Object.keys(scope.chips).length > 0 && scope.singleSelection){
@@ -77,8 +85,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
             scope.chooseItem = function (item) {
                 if (item) {
-                    if (scope.chips[item.id] === undefined) {
-                        scope.chips[item.id] = item;
+                    if (scope.chips[item[scope.id]] === undefined) {
+                        scope.chips[item[scope.id]] = item;
                     }
                     if(scope.singleSelection){
                         scope.query = '';   
@@ -89,14 +97,15 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     }
                 }
             }
-            scope.removeItem = function (id) {
-                delete scope.chips[id];
+            scope.removeItem = function (val) {
+
+                delete scope.chips[val[scope.id]];
                 scope.callCallback();
             }
 
             scope.callCallback = function () {
                 if (typeof (scope.callback) != undefined) {
-                    scope.callback({args:scope.chips});
+                    scope.callback({args:Object.values(scope.chips)});
                 }
             }
 
