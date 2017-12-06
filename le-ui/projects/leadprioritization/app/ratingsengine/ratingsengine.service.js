@@ -75,6 +75,7 @@ angular.module('lp.ratingsengine')
             "rules": [
                 { 
                     hide: true,
+                    hideBack: true,
                     label: 'Add',
                     state: 'segment.attributes.add', 
                     nextLabel: 'Next, Rules'
