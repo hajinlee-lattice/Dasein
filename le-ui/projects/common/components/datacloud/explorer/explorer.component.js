@@ -68,7 +68,7 @@ angular.module('common.datacloud.explorer', [
         subcategoriesExclude: [],
         categories: [],
         topAttributes: [],
-        cube: [],
+        cube: null,
         selected_categories: {},
         metadata: DataCloudStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -1466,8 +1466,8 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-        if (!vm.cube.data.Stats) {
-            return false;
+        if (!vm.cube) {
+            return alert('Cube data not yet loaded. \nOne moment please.');
         }
         attribute.SegmentChecked = true;
 

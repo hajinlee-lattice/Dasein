@@ -97,8 +97,8 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
     }
 
     vm.clearSegment = function() {
-        alert('no worky yet')
-        //QueryStore.resetRestrictions();
+        QueryStore.resetRestrictions();
+        QueryStore.setPublicProperty('enableSaveSegmentButton', false);
     }
 
     vm.saveSegment = function() {
