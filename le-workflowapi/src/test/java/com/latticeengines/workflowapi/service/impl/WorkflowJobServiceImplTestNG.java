@@ -244,6 +244,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     }
 
     private void createWorkflowJobs() {
+        List<WorkflowJob> jobs = workflowJobEntityMgr.findByTenant(tenant);
+        jobs.forEach(job -> workflowJobEntityMgr.delete(job));
+
         jobInstanceDao = new MapJobInstanceDao();
         jobExecutionDao = new MapJobExecutionDao();
 
