@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.ProcessAccountWorkflow;
-import com.latticeengines.cdl.workflow.PublishToRedshiftWorkflow;
+import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
 import com.latticeengines.cdl.workflow.steps.CombineStatistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -37,7 +37,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private CombineStatistics combineStatistics;
 
     @Inject
-    private PublishToRedshiftWorkflow publishToRedshiftWorkflow;
+    private RedshiftPublishWorkflow redshiftPublishWorkflow;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -84,7 +84,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     private boolean inPublishWorkflow(int seq) {
         String namespace = getStepNamespace(seq);
-        return namespace.startsWith(publishToRedshiftWorkflow.name());
+        return namespace.startsWith(redshiftPublishWorkflow.name());
     }
 
     private boolean skipPublishWorkflow(AbstractStep<? extends BaseStepConfiguration> step) {
