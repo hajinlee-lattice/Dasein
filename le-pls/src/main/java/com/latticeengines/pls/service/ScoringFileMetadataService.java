@@ -19,6 +19,4 @@ public interface ScoringFileMetadataService {
 
     Set<String> getHeaderFields(String csvFileName);
 
-    Set<String> getValidateHeaders(InputStream stream, CloseableResourcePool closeableResourcePool);
-
 }

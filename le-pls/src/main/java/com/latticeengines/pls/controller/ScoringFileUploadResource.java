@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
@@ -99,7 +100,19 @@ public class ScoringFileUploadResource {
                         "file_" + DateTime.now().getMillis() + ".csv",
                         SchemaInterpretation.TestingData, null, displayName, stream);
             } else {
-                Set<String> headers = scoringFileMetadataService.getValidateHeaders(stream, closeableResourcePool);
+                if (!stream.markSupported()) {
+                    stream = new BufferedInputStream(stream);
+                }
+                stream.mark(
+                        ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+                Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream,
+                        closeableResourcePool);
+                try {
+                    stream.reset();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                    throw new LedpException(LedpCode.LEDP_00002, e);
+                }
                 sourceFile = fileUploadService.uploadFile(
                         "file_" + DateTime.now().getMillis() + ".csv",
                         SchemaInterpretation.TestingData, null, displayName, stream);

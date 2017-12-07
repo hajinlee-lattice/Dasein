@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.app.exposed.service.AttributeService;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -32,7 +29,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -76,16 +72,20 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     @Autowired
     private PlsFeatureFlagService plsFeatureFlagService;
 
-    @Autowired
-    private BatonService batonService;
-
-    @Autowired
-    private AttributeService attributeService;
-
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
             String displayName) {
-        Set<String> headerFields = getValidateHeaders(stream, closeableResourcePool);
+        if (!stream.markSupported()) {
+            stream = new BufferedInputStream(stream);
+        }
+        stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+        try {
+            stream.reset();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
         Collection<String> reservedWords = Arrays
                 .asList(new String[] { ReservedField.Percentile.displayName, ReservedField.Rating.displayName });
@@ -348,35 +348,4 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         return false;
     }
 
-    @Override
-    public Set<String> getValidateHeaders(InputStream stream, CloseableResourcePool closeableResourcePool) {
-        if (!stream.markSupported()) {
-            stream = new BufferedInputStream(stream);
-        }
-        stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
-        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
-        try {
-            stream.reset();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            throw new LedpException(LedpCode.LEDP_00002, e);
-        }
-
-        Tenant tenant = MultiTenantContext.getTenant();
-        boolean considerInternalAttributes = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
-        List<LeadEnrichmentAttribute> attributes = attributeService.getAttributes(tenant, null, null, null,
-                Boolean.TRUE, null, null, considerInternalAttributes);
-        log.info("enable considerInternalAttributes is " + considerInternalAttributes);
-        for (String header : headerFields) {
-            for (LeadEnrichmentAttribute attribute : attributes) {
-                log.info("user selected DataCloud Attribute is :" + attribute.getDisplayName());
-                if (header.toLowerCase().equals(attribute.getDisplayName().toLowerCase())) {
-                    throw new LedpException(LedpCode.LEDP_18109,
-                            new String[] { header + "conflict with DataCloud attribute." });
-                }
-            }
-        }
-        return headerFields;
-    }
 }
