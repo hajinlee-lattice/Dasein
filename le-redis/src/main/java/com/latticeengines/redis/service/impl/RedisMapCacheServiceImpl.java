@@ -1,5 +1,6 @@
 package com.latticeengines.redis.service.impl;
 
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -29,5 +30,10 @@ public class RedisMapCacheServiceImpl extends RedisMapServiceImpl implements Red
     public boolean fastPut(String mapName, Object key, Object value, long ttl, TimeUnit ttlUnit, long maxIdleTime,
             TimeUnit maxIdleUnit) {
         return getMapCache(mapName).fastPut(key, value, ttl, ttlUnit, maxIdleTime, maxIdleUnit);
+    }
+    
+    @Override
+    public Future<Long> deleteKeysAsync(String mapName, Object... keys) {
+        return getMapCache(mapName).fastRemoveAsync(keys);
     }
 }
