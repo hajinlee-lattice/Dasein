@@ -328,6 +328,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             case STRING:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
+                    if (fieldCsvValue.matches("[0-9]+")) {
+                        return fieldCsvValue;
+                    }
                     LOG.info("Timestamp value from csv: " + fieldCsvValue);
                     try {
                         return Long.toString(TimeStampConvertUtils.convertToLong(fieldCsvValue));
