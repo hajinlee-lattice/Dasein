@@ -31,7 +31,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                 items: [
                     { label: "All", action: {}, total: vm.totalLength },
                     { label: "Active", action: { status: 'ACTIVE' }, total: vm.activeCount },
-                    { label: "Inactive", action: { status: 'INACTIVE' }, total: vm.inactiveCount },
+                    { label: "Inactive", action: { status: 'INACTIVE' }, total: vm.inactiveCount }
                 ]
             }
         }
@@ -42,17 +42,15 @@ angular.module('lp.ratingsengine.ratingslist', [
     }
     
     vm.init = function($q, $filter) {
-
-        // console.log(vm.current.ratings);
-
         RatingsEngineStore.clear();
-
-        vm.header.filter.filtered = vm.current.ratings;
-        vm.header.filter.unfiltered = vm.current.ratings;
 
         vm.totalLength = vm.count();
         vm.activeCount = vm.count('ACTIVE');
         vm.inactiveCount = vm.count('INACTIVE');
+        
+        $scope.$watch('vm.current.ratings', function() {
+            vm.header.filter.unfiltered = vm.current.ratings;
+        });
 
         // angular.forEach(vm.current.ratings, function(rating) {
         //     vm.tileStates[rating.id] = {
