@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -131,26 +132,42 @@ public class ContactStatisticsTestNG extends AccountMasterBucketTestNG {
         uploadBaseSourceData(contact.getSourceName(), baseSourceVersion, columns, data);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         Object[][] expected = new Object[][] {
-                { "Title", 3L, "1:2|2:1", "{\"algo\":\"Categorical\",\"cats\":[\"CEO\",\"Manager\"]}" }, //
-                { "AccountId", 2L, "1:1|2:1", "{\"algo\":\"Categorical\",\"cats\":[\"Account1\",\"Account2\"]}" }, //
-                { "ContactId", 4L, "1:1|2:1|3:1|4:1",
-                        "{\"algo\":\"Categorical\",\"cats\":[\"Contact4\",\"Contact3\",\"Contact2\",\"Contact1\"]}" }, //
+                { "Title", 3L, "2|1", "CEO|Manager" }, //
+                { "AccountId", 2L, "1|1", "Account1|Account2" }, //
+                { "ContactId", 4L, "1|1|1|1", "Contact4|Contact3|Contact2|Contact1" }, //
         };
         Map<String, Object[]> expectedMap = new HashMap<>();
         for (Object[] data : expected) {
-            expectedMap.put((String) data[0], data);
+            Object[] cnts = new Object[2];
+            cnts[0] = data[1];
+            Map<String, String> bktCnts = new HashMap<>();
+            String[] bkts = ((String) data[3]).split("\\|");
+            String[] bktsCnts = ((String) data[2]).split("\\|");
+            for (int i = 0; i < bkts.length; i++) {
+                bktCnts.put(bkts[i], bktsCnts[i]);
+            }
+            cnts[1] = bktCnts;
+            expectedMap.put((String) data[0], cnts);
         }
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
             Assert.assertTrue(expectedMap.containsKey(record.get("AttrName").toString()));
-            Object[] data = expectedMap.get(record.get("AttrName").toString());
-            Assert.assertTrue(isObjEquals(record.get("AttrCount"), data[1]));
-            Assert.assertTrue(isObjEquals(record.get("BktCounts"), data[2]));
-            Assert.assertTrue(isObjEquals(record.get("BktAlgo"), data[3]));
+            Object[] cnts = expectedMap.get(record.get("AttrName").toString());
+            Assert.assertTrue(isObjEquals(record.get("AttrCount"), cnts[0]));
+            Map<String, String> expBktCnts = (Map<String, String>) cnts[1];
+            String[] bktsCnts = record.get("BktCounts").toString().split("\\|");
+            CategoricalBucket algo = JsonUtils.deserialize(record.get("BktAlgo").toString(), CategoricalBucket.class);
+            for (int i = 0; i < bktsCnts.length; i++) {
+                String cnt = bktsCnts[i].split(":")[1];
+                String bkt = algo.getCategories().get(i);
+                Assert.assertTrue(expBktCnts.containsKey(bkt));
+                Assert.assertEquals(cnt, expBktCnts.get(bkt));
+            }
         }
     }
 }
