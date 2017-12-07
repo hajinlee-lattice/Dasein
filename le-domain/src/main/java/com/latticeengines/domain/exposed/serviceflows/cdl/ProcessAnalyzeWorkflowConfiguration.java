@@ -8,7 +8,10 @@ import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -22,6 +25,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         private ProcessStepConfiguration processStepConfiguration = new ProcessStepConfiguration();
         private ProcessAccountStepConfiguration processAccountStepConfiguration = new ProcessAccountStepConfiguration();
+        private ProcessContactStepConfiguration processContactStepConfiguration = new ProcessContactStepConfiguration();
+        private ProcessProductStepConfiguration processProductStepConfiguration = new ProcessProductStepConfiguration();
+        private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
@@ -35,6 +41,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     "processAnalyzeWorkflow");
             processStepConfiguration.setCustomerSpace(customerSpace);
             processAccountStepConfiguration.setCustomerSpace(customerSpace);
+            processContactStepConfiguration.setCustomerSpace(customerSpace);
+            processProductStepConfiguration.setCustomerSpace(customerSpace);
+            processTransactionStepConfiguration.setCustomerSpace(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             return this;
@@ -49,6 +58,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processAccountStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processContactStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processProductStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processTransactionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -76,6 +88,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.add(processStepConfiguration);
             configuration.add(processAccountStepConfiguration);
+            configuration.add(processContactStepConfiguration);
+            configuration.add(processProductStepConfiguration);
+            configuration.add(processTransactionStepConfiguration);
             configuration.add(combineStatisticsConfiguration);
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;

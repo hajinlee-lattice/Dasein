@@ -14,6 +14,9 @@ import java.util.TreeMap;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -125,13 +128,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MATCH);
 
-        String sourceName = entity.name() + "Diff";
-        SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(sourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(sourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        useDiffTableAsSource(step);
 
         // Match Input
         MatchTransformerConfig config = new MatchTransformerConfig();
@@ -162,6 +159,10 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return step;
     }
 
+    protected TransformationStepConfig bucket(boolean heavyEngine) {
+        return bucket(-1, heavyEngine);
+    }
+
     protected TransformationStepConfig bucket(int inputStep, boolean heavyEngine) {
         TransformationStepConfig step = new TransformationStepConfig();
         String sourceName = entity.name() + "Profile";
@@ -171,7 +172,11 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(sourceName, sourceTable);
         step.setBaseTables(baseTables);
-        step.setInputSteps(Collections.singletonList(inputStep));
+        if (inputStep < 0) {
+            useDiffTableAsSource(step);
+        } else {
+            step.setInputSteps(Collections.singletonList(inputStep));
+        }
         step.setTransformer(TRANSFORMER_BUCKETER);
         String confStr = heavyEngine ? emptyStepConfig(heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
         step.setConfiguration(confStr);
@@ -230,6 +235,24 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         return step;
+    }
+
+    private void useDiffTableAsSource(TransformationStepConfig step) {
+        String sourceName = entity.name() + "Diff";
+        SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
+        List<String> baseSources = step.getBaseSources();
+        if (CollectionUtils.isEmpty(baseSources)) {
+            baseSources = Collections.singletonList(sourceName);
+        } else {
+            baseSources.add(sourceName);
+        }
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = step.getBaseTables();
+        if (MapUtils.isEmpty(baseTables)) {
+            baseTables = new HashMap<>();
+        }
+        baseTables.put(sourceName, sourceTable);
+        step.setBaseTables(baseTables);
     }
 
     protected abstract PipelineTransformationRequest getTransformRequest();

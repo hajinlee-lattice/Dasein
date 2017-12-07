@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,7 @@ import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProfileAndPublishWorkflowSubmitter;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,7 +72,8 @@ public class DataFeedController {
     @RequestMapping(value = "/processanalyze", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
-    public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace) {
+    public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace, //
+                                                   @RequestBody(required = false) ProcessAnalyzeRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace);
         return ResponseDocument.successResponse(appId.toString());

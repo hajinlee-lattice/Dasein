@@ -3,12 +3,14 @@ package com.latticeengines.cdl.workflow.choreographers;
 import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CDL_ACTIVE_VERSION;
 import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
 import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CUSTOMER_SPACE;
+import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
 
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private static final Logger log = LoggerFactory.getLogger(AbstractProcessEntityChoreographer.class);
 
     private boolean hasImports = false;
+    private boolean hasSchemaChange = false;
     private boolean hasActiveServingStore = false;
 
     private boolean rebuild = false;
@@ -47,19 +50,20 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         if (isCloneStep(step)) {
+            checkSchemaChange(step);
             rebuild = shouldRebuild();
             update = shouldUpdate();
             log.info("rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
             if (rebuild && update) {
                 throw new IllegalStateException("Rebuild and update cannot be both true");
             }
+            if (rebuild) {
+                log.info("Skip cloning " + mainEntity() + " because going to rebuild.");
+                return true;
+            }
         }
 
         if (belongsToUpdate(seq)) {
-            if (isCloneStep(step) && !rebuild) {
-                // as long as not rebuilding, need to clone stores
-                return false;
-            }
             if (!update) {
                 log.info(msg + ", because not in update mode.");
                 return true;
@@ -86,12 +90,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     private boolean belongsToUpdate(int seq) {
         String namespace = getStepNamespace(seq);
-        return namespace.contains(updateWorkflow().name());
+        return updateWorkflow() != null && namespace.contains(updateWorkflow().name());
     }
 
     private boolean belongsToRebuild(int seq) {
         String namespace = getStepNamespace(seq);
-        return namespace.contains(rebuildWorkflow().name());
+        return rebuildWorkflow() != null && namespace.contains(rebuildWorkflow().name());
     }
 
     private void initialize(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -107,6 +111,14 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("Found imports for " + mainEntity().name());
         } else {
             log.info("Found no imports for " + mainEntity().name());
+        }
+    }
+
+    private void checkSchemaChange(AbstractStep<? extends BaseStepConfiguration> step) {
+        List<BusinessEntity> entityList = step.getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE,
+                BusinessEntity.class);
+        if (CollectionUtils.isNotEmpty(entityList) && entityList.contains(mainEntity())) {
+            hasSchemaChange = true;
         }
     }
 
@@ -126,22 +138,27 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     private boolean shouldRebuild() {
-        if (hasImports && hasActiveServingStore) {
+        if (hasSchemaChange) {
+            log.info("Detected schema change in " + mainEntity() + ", going to rebuild");
+            return true;
+        } else if (hasImports && hasActiveServingStore) {
             log.info("Has imports and active serving store, not going to rebuild " + mainEntity());
             return false;
         } else if (!hasImports && !hasActiveServingStore) {
             log.info("No imports and no active serving store, not going to rebuild " + mainEntity());
             return false;
+        } else {
+            log.info("Going to rebuild " + mainEntity());
+            return true;
         }
-        log.info("Going to rebuild " + mainEntity());
-        return true;
     }
 
     private boolean shouldUpdate() {
-        if (hasImports && hasActiveServingStore) {
-            log.info("Has imports and has active serving store, going to update " + mainEntity());
+        if (!hasSchemaChange && hasImports && hasActiveServingStore) {
+            log.info("Has imports but no schema change, going to update " + mainEntity());
             return true;
         }
+        // TODO: cannot find a case that needs update instead of rebuild
         log.info("Not going to update " + mainEntity());
         return false;
     }

@@ -34,10 +34,10 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     protected Table masterTable;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    protected DataCollectionProxy dataCollectionProxy;
 
     @Inject
-    private MetadataProxy metadataProxy;
+    protected MetadataProxy metadataProxy;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -64,7 +64,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 
-    private void initializeConfiguration() {
+    protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);

@@ -34,6 +34,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.EncryptionZone;
+import org.apache.hadoop.tools.DistCp;
+import org.apache.hadoop.tools.DistCpOptions;
+import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -130,6 +133,16 @@ public class HdfsUtils {
                         ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream);
             }
         }
+    }
+
+    public static final void distcp(Configuration configuration, String srcPath, String tgtPath, String queue) throws Exception {
+        DistCpOptions options = new DistCpOptions(new Path(srcPath), new Path(tgtPath));
+        log.info("Running distcp from " + srcPath + " to " + tgtPath + " using queue " + queue);
+        ToolRunner.run(new DistCp(configuration, options), new String[]{
+                "-Dmapred.job.queue.name=" + queue, //
+                srcPath, tgtPath
+        });
+        log.info("Finished distcp from " + srcPath + " to " + tgtPath + ".");
     }
 
     public static FileSystem getFileSystem(Configuration configuration) throws IOException {

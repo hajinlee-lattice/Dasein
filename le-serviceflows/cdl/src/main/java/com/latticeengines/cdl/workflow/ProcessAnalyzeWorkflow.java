@@ -30,6 +30,12 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ProcessAccountWorkflow processAccountWorkflow;
 
     @Inject
+    private ProcessContactWorkflow processContactWorkflow;
+
+    @Inject
+    private ProcessProductWorkflow processProductWorkflow;
+
+    @Inject
     private CombineStatistics combineStatistics;
 
     @Inject
@@ -43,6 +49,8 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
         return new WorkflowBuilder() //
                 .next(startProcessing) //
                 .next(processAccountWorkflow) //
+                .next(processContactWorkflow) //
+                .next(processProductWorkflow) //
                 .next(combineStatistics) //
                 .next(redshiftPublishWorkflow) //
                 .next(finishProcessing) //

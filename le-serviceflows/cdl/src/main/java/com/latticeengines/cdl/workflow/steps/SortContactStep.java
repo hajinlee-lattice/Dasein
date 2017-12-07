@@ -107,7 +107,7 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
             TransformationStepConfig calc = calcStats(customerSpace, STATS_TABLE_PREFIX);
             TransformationStepConfig sort = sort(customerSpace);
             TransformationStepConfig sortProfile = sortProfile(customerSpace, PROFILE_TABLE_PREFIX);
-            TransformationStepConfig report = report(customerSpace, PROFILE_TABLE_PREFIX);
+            TransformationStepConfig report = report(customerSpace);
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
                     profile, //
@@ -125,7 +125,7 @@ public class SortContactStep extends ProfileStepBase<SortContactStepConfiguratio
         }
     }
 
-    private TransformationStepConfig report(CustomerSpace customerSpace, String profileTablePrefix) {
+    private TransformationStepConfig report(CustomerSpace customerSpace) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<Integer> inputSteps = Collections.singletonList(profileStep);
         step.setInputSteps(inputSteps);

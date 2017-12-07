@@ -170,7 +170,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
             if (!rebuild) {
                 TransformationStepConfig dailyRaw = collectDailyData();
                 TransformationStepConfig productAgr  = rollupProduct(productMap);
-                TransformationStepConfig perioded = addPeriod();
+                TransformationStepConfig periodAdded = addPeriod();
                 TransformationStepConfig dailyAgr  = aggregateDaily();
                 TransformationStepConfig dailyRetained = retainFields(dailyAgrStep, false);
                 TransformationStepConfig cleanDaily  = cleanupDailyHistory();
@@ -184,7 +184,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
                 steps.add(dailyRaw);
                 steps.add(productAgr);
-                steps.add(perioded);
+                steps.add(periodAdded);
                 steps.add(dailyAgr);
                 steps.add(dailyRetained);
                 steps.add(cleanDaily);

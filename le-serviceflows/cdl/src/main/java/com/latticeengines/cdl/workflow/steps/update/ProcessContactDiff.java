@@ -10,35 +10,31 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
-@Component(ProcessAccountDiff.BEAN_NAME)
-public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessAccountStepConfiguration> {
+@Component(ProcessContactDiff.BEAN_NAME)
+public class ProcessContactDiff extends BaseProcessSingleEntityDiffStep<ProcessContactStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(ProcessAccountDiff.class);
+    private static final Logger log = LoggerFactory.getLogger(ProcessContactDiff.class);
 
-    static final String BEAN_NAME = "processAccountDiff";
+    static final String BEAN_NAME = "processContactDiff";
 
-    int matchStep;
     int bucketStep;
     int retainStep;
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ConsolidateAccountDiff");
+        request.setName("ConsolidateContactDiff");
 
-        matchStep = 0;
-        bucketStep = 1;
-        retainStep = 2;
+        bucketStep = 0;
+        retainStep = 1;
 
-        TransformationStepConfig matchDiff = match();
-        TransformationStepConfig bucket = bucket(matchStep, true);
+        TransformationStepConfig bucket = bucket(false);
         TransformationStepConfig retainFields = retainFields(bucketStep, false);
-        TransformationStepConfig sort = sort(retainStep, 200);
+        TransformationStepConfig sort = sort(retainStep, 50);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(matchDiff);
         steps.add(bucket);
         steps.add(retainFields);
         steps.add(sort);
@@ -48,6 +44,6 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
 
     @Override
     protected TableRoleInCollection profileTableRole() {
-        return TableRoleInCollection.Profile;
+        return TableRoleInCollection.ContactProfile;
     }
 }

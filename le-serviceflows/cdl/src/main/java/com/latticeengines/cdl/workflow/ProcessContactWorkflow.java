@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
+import com.latticeengines.cdl.workflow.steps.merge.MergeContactWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import org.springframework.stereotype.Component;
 
@@ -14,16 +16,20 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class ProcessContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
 
     @Inject
-    private ConsolidateContactWrapper consolidateContactWrapper;
+    private MergeContactWrapper mergeContactWrapper;
 
     @Inject
-    private SortContactWrapper sortContactWrapper;
+    private UpdateContactWorkflow updateContactWorkflow;
+
+    @Inject
+    private RebuildContactWorkflow rebuildContactWorkflow;
 
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(consolidateContactWrapper) //
-                .next(sortContactWrapper)//
+                .next(mergeContactWrapper) //
+                .next(updateContactWorkflow) //
+                .next(rebuildContactWorkflow) //
                 .build();
     }
 }

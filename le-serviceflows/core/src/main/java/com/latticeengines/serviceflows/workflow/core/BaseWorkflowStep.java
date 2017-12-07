@@ -93,6 +93,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
     public static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";
+    public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     protected static final String APPEND_TO_REDSHIFT_TABLE = "APPEND_TO_REDSHIFT_TABLE";
     protected static final String REDSHIFT_EXPORT_REPORT = "REDSHIFT_EXPORT_REPORT";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";

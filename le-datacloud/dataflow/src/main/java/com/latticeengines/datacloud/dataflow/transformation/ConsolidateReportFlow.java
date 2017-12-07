@@ -74,7 +74,7 @@ public class ConsolidateReportFlow
     private Node reportMatchAccount(Node node, Node accountSource) {
         node = node.filter(String.format("%s != null", InterfaceName.AccountId.name()),
                 new FieldList(InterfaceName.AccountId.name()));
-        node = node.innerJoin(InterfaceName.AccountId.name(), accountSource, InterfaceName.Id.name());
+        node = node.innerJoin(InterfaceName.AccountId.name(), accountSource, InterfaceName.AccountId.name());
         node = node.count("__MATCH_COUNT__").rename(new FieldList("__MATCH_COUNT__"), new FieldList(REPORT_CONTENT))
                 .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_MATCH, String.class).renamePipe("MatchReport");
         return node;

@@ -4,10 +4,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
-import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
-import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
-import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
+import com.latticeengines.cdl.workflow.RebuildContactWorkflow;
+import com.latticeengines.cdl.workflow.UpdateContactWorkflow;
+import com.latticeengines.cdl.workflow.steps.merge.MergeContact;
+import com.latticeengines.cdl.workflow.steps.update.CloneContact;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -15,19 +15,19 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component
-public class ProcessAccountChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
+public class ProcessContactChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
 
     @Inject
-    private MergeAccount mergeAccount;
+    private MergeContact mergeContact;
 
     @Inject
-    private CloneAccount cloneAccount;
+    private CloneContact cloneContact;
 
     @Inject
-    private UpdateAccountWorkflow updateAccountWorkflow;
+    private UpdateContactWorkflow updateContactWorkflow;
 
     @Inject
-    private RebuildAccountWorkflow rebuildAccountWorkflow;
+    private RebuildContactWorkflow rebuildContactWorkflow;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -36,27 +36,27 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Override
     protected AbstractStep mergeStep() {
-        return mergeAccount;
+        return mergeContact;
     }
 
     @Override
     protected AbstractStep cloneStep() {
-        return cloneAccount;
+        return cloneContact;
     }
 
     @Override
     protected AbstractWorkflow updateWorkflow() {
-        return updateAccountWorkflow;
+        return updateContactWorkflow;
     }
 
     @Override
     protected AbstractWorkflow rebuildWorkflow() {
-        return rebuildAccountWorkflow;
+        return rebuildContactWorkflow;
     }
 
     @Override
     protected BusinessEntity mainEntity() {
-        return BusinessEntity.Account;
+        return BusinessEntity.Contact;
     }
 
 }

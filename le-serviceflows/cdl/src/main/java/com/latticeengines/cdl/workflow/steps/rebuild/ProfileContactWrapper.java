@@ -7,20 +7,20 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
-@Component("profileAccountWrapper")
-public class ProfileAccountWrapper extends BaseTransformationWrapper<ProfileAccount> {
+@Component("profileContactWrapper")
+public class ProfileContactWrapper extends BaseTransformationWrapper<ProfileContact> {
 
     @Inject
-    private ProfileAccount profileAccount;
+    private ProfileContact profileContact;
 
     @PostConstruct
     public void overrideTransformationStepBeanName() {
-        setTransformationStepBeanName(ProfileAccount.BEAN_NAME);
+        setTransformationStepBeanName(ProfileContact.BEAN_NAME);
     }
 
     @Override
-    protected ProfileAccount getWrapperStep() {
-        return profileAccount;
+    protected ProfileContact getWrapperStep() {
+        return profileContact;
     }
 
 }

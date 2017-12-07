@@ -991,4 +991,29 @@ public class AvroUtils {
         }
         AvroUtils.writeToHdfsFile(yarnConfiguration, schema, avroDir + "/" + fileName, records);
     }
+
+    public static void uploadAvro(Configuration yarnConfiguration, //
+                                  Object[][] data, //
+                                  List<Pair<String, Class<?>>> columns, //
+                                  String recordName, //
+                                  String dirPath) throws Exception {
+        Map<String, Class<?>> schemaMap = new HashMap<>();
+        for (Pair<String, Class<?>> column : columns) {
+            schemaMap.put(column.getKey(), column.getValue());
+        }
+        Schema schema = AvroUtils.constructSchema(recordName, schemaMap);
+        List<GenericRecord> records = new ArrayList<>();
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        for (Object[] tuple : data) {
+            for (int i = 0; i < columns.size(); i++) {
+                builder.set(columns.get(i).getKey(), tuple[i]);
+            }
+            records.add(builder.build());
+        }
+        String fileName = recordName + ".avro";
+        if (HdfsUtils.fileExists(yarnConfiguration, dirPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, dirPath);
+        }
+        writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records);
+    }
 }

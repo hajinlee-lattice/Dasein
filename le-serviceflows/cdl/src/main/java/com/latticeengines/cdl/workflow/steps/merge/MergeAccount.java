@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.cdl.workflow.steps.merge.MergeAccount.BEAN_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
@@ -24,9 +23,8 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.util.TableUtils;
 
-@Component(BEAN_NAME)
+@Component(MergeAccount.BEAN_NAME)
 public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(MergeAccount.class);
@@ -38,23 +36,11 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private int upsertMasterStep;
     private int diffStep;
 
-    @Override
-    protected void initializeConfiguration() {
-        super.initializeConfiguration();
-    }
-
-    @Override
-    protected void onPostTransformationCompleted() {
-        super.onPostTransformationCompleted();
-        metadataProxy.deleteTable(customerSpace.toString(),
-                TableUtils.getFullTableName(newRecordsTablePrefix, pipelineVersion));
-    }
-
     public PipelineTransformationRequest getConsolidateRequest() {
         try {
 
             PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("ConsolidatePipeline");
+            request.setName("MergeAccount");
 
             mergeStep = 0;
             matchStep = 1;

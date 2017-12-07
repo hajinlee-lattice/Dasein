@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessS
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -42,6 +44,9 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
     private DataCollection.Version active;
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
+
+    @Value("${dataplatform.queue.scheme}")
+    private String queueScheme;
 
     @Override
     public void execute() {
@@ -79,42 +84,36 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
         redshiftService.cloneTable(original, clone);
     }
 
-    // TODO: consider move this to a mapred job in eai
     private Table cloneDataTable(Table original, Table clone) {
         String cloneDataPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 customerSpace, original.getNamespace()).append(clone.getName()).toString();
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, cloneDataPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, cloneDataPath);
-            }
-            HdfsUtils.mkdir(yarnConfiguration, cloneDataPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to create table dir at " + cloneDataPath);
-        }
+
         Extract newExtract = new Extract();
         newExtract.setPath(cloneDataPath + "/*.avro");
         newExtract.setName(NamingUtils.uuid("Extract"));
         AtomicLong count = new AtomicLong(0);
         if (original.getExtracts() != null && original.getExtracts().size() > 0) {
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, cloneDataPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, cloneDataPath);
+                }
+                HdfsUtils.mkdir(yarnConfiguration, cloneDataPath);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create table dir at " + cloneDataPath);
+            }
+
             original.getExtracts().forEach(extract -> {
                 String srcPath = extract.getPath();
-                boolean singleFile = false;
-                if (!srcPath.endsWith("*.avro")) {
-                    if (srcPath.endsWith(".avro")) {
-                        singleFile = true;
-                    } else {
-                        srcPath = srcPath.endsWith("/") ? srcPath : srcPath + "/";
-                        srcPath += "*.avro";
-                    }
+                if (!srcPath.endsWith(".avro") && !srcPath.endsWith("*.avro")) {
+                    srcPath = srcPath.endsWith("/") ? srcPath : srcPath + "/";
+                    srcPath += "*.avro";
                 }
+                String srcDir = srcPath.substring(0, srcPath.lastIndexOf("/"));
                 try {
-                    if (singleFile) {
-                        log.info(String.format("Copying table data from %s to %s", srcPath, cloneDataPath));
-                        HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneDataPath);
-                    } else {
-                        log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneDataPath));
-                        HdfsUtils.copyGlobToDir(yarnConfiguration, srcPath, cloneDataPath);
-                    }
+                    String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+                    queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+                    log.info(String.format("Copying table data from %s to %s", srcDir, cloneDataPath));
+                    HdfsUtils.distcp(yarnConfiguration, srcDir, cloneDataPath, queue);
                 } catch (Exception e) {
                     throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", srcPath,
                             cloneDataPath), e);
@@ -132,6 +131,7 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
         String oldTableSchema = PathBuilder.buildDataTableSchemaPath(CamilleEnvironment.getPodId(),
                 MultiTenantContext.getCustomerSpace(), original.getNamespace()).append(original.getName()).toString();
         String cloneTableSchema = oldTableSchema.replace(original.getName(), clone.getName());
+
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, oldTableSchema)) {
                 HdfsUtils.copyFiles(yarnConfiguration, oldTableSchema, cloneTableSchema);

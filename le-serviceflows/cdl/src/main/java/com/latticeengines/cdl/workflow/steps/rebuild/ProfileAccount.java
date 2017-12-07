@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 
-import static com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccount.BEAN_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
@@ -51,7 +50,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
-@Component(BEAN_NAME)
+@Component(ProfileAccount.BEAN_NAME)
 public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountStepConfiguration> {
 
     static final String BEAN_NAME = "profileAccount";
@@ -75,7 +74,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         String masterTableName = masterTable.getName();
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("CalculateStatsStep");
+            request.setName("ProfileAccountStep");
             request.setSubmitter(customerSpace.getTenantId());
             request.setKeepTemp(false);
             request.setEnableSlack(false);

@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,7 +63,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     private String diffTablePrefix;
     protected String diffReportTablePrefix;
     protected String batchStorePrimaryKey;
-    protected String newRecordsTablePrefix;
     protected List<String> batchStoreSortKeys;
 
     protected List<String> inputTableNames = new ArrayList<>();
@@ -82,19 +83,34 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     @Override
     protected void onPostTransformationCompleted() {
-        Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
-        if (entity.getBatchStore() != null) {
-            if (newMasterTable == null) {
-                throw new IllegalStateException("Did not generate new master table for " + entity);
-            }
-            dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore,
-                    inactive);
-        }
+        registerBatchStore();
+        generateDiffReport();
 
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
 
+        if (hasSchemaChange()) {
+            List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE, BusinessEntity.class);
+            if (entityList == null) {
+                entityList = new ArrayList<>();
+            }
+            entityList.add(entity);
+            putObjectInContext(ENTITIES_WITH_SCHEMA_CHANGE, entityList);
+        }
+    }
+
+    private void registerBatchStore() {
+        Table table = metadataProxy.getTable(customerSpace.toString(),
+                TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
+        if (entity.getBatchStore() != null) {
+            if (table == null) {
+                throw new IllegalStateException("Did not generate new table for " + batchStore);
+            }
+            dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
+        }
+    }
+
+    private void generateDiffReport() {
         Table diffReport = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(diffReportTablePrefix, pipelineVersion));
         if (diffReport != null) {
@@ -106,6 +122,32 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         } else {
             log.warn("Didn't find ConsolidationSummaryReport table for entity " + entity);
         }
+    }
+
+    /**
+     * Detect schema changes that requires a rebuild
+     */
+    private boolean hasSchemaChange() {
+        Table oldBatchStore = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
+        if (oldBatchStore == null) {
+            return true;
+        }
+        Table newBatchStore = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, inactive);
+
+        // check attributes
+        Set<String> oldAttrs = new HashSet<>(Arrays.asList(oldBatchStore.getAttributeNames()));
+        Set<String> newAttrs = new HashSet<>(Arrays.asList(newBatchStore.getAttributeNames()));
+        // in new but not old
+        Set<String> diffAttrs1 = newAttrs.stream().filter(attr -> !oldAttrs.contains(attr)).collect(Collectors.toSet());
+        // in old but not new
+        Set<String> diffAttrs2 = oldAttrs.stream().filter(attr -> !newAttrs.contains(attr)).collect(Collectors.toSet());
+        if (!diffAttrs1.isEmpty() || !diffAttrs2.isEmpty()) {
+            log.info("These attributes are in the active batch store but not the inactive one: " + diffAttrs1);
+            log.info("These attributes are in the inactive batch store but not the active one: " + diffAttrs2);
+            return true;
+        }
+
+        return false;
     }
 
     private String updateReportPayload(Report report, Table diffReport) {
@@ -140,7 +182,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         }
         diffTablePrefix = entity.name() + "_Diff";
         diffReportTablePrefix = entity.name() + "_DiffReport";
-        newRecordsTablePrefix = entity.name() + "_NewRecords";
 
         @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
