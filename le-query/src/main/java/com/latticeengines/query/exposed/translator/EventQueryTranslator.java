@@ -29,7 +29,6 @@ import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -49,46 +48,9 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregateTimeWindow;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateTimeWindow;
 
-public class EventQueryTranslator {
-    private static final int NUM_ADDITIONAL_PERIOD = 2;
+public class EventQueryTranslator extends TranslatorCommon {
     private static final int ONE_LEG_BEHIND_OFFSET = 1;
-    private static final String ACCOUNT_ID = InterfaceName.AccountId.name();
-    private static final String PERIOD_ID = InterfaceName.PeriodId.name();
-    private static final String PERIOD_NAME = InterfaceName.PeriodName.name();
-    private static final String PRODUCT_ID = InterfaceName.ProductId.name();
-    private static final String TOTAL_AMOUNT = InterfaceName.TotalAmount.name();
-    private static final String TOTAL_QUANTITY = InterfaceName.TotalQuantity.name();
-    private static final String TXRN = "txrn";
-    private static final String APS = "aps";
-    private static final String AMOUNT_AGG = "amountagg";
-    private static final String QUANTITY_AGG = "quantityagg";
-    private static final String AMOUNT_VAL = "amountval";
-    private static final String QUANTITY_VAL = "quantityval";
-    private static final String MAX_PERIOD_ID = "maxperiodid";
-    private static final String KEYS = "keys";
-
-    private StringPath accountId = Expressions.stringPath(ACCOUNT_ID);
-    private StringPath periodId = Expressions.stringPath(PERIOD_ID);
-    private StringPath periodName = Expressions.stringPath(PERIOD_NAME);
-    private StringPath productId = Expressions.stringPath(PRODUCT_ID);
-    private StringPath amountVal = Expressions.stringPath(TOTAL_AMOUNT);
-    private StringPath quantityVal = Expressions.stringPath(TOTAL_QUANTITY);
-    private StringPath amountAggr = Expressions.stringPath(AMOUNT_AGG);
-    private StringPath quantityAggr = Expressions.stringPath(QUANTITY_AGG);
-
-    private EntityPath<String> keysPath = new PathBuilder<>(String.class, KEYS);
-    private EntityPath<String> trxnPath = new PathBuilder<>(String.class, TXRN);
-    private EntityPath<String> apsPath = new PathBuilder<>(String.class, APS);
-    private StringPath keysAccountId = Expressions.stringPath(keysPath, ACCOUNT_ID);
-    private StringPath trxnAccountId = Expressions.stringPath(trxnPath, ACCOUNT_ID);
-    private StringPath keysPeriodId = Expressions.stringPath(keysPath, PERIOD_ID);
-    private StringPath trxnPeriodId = Expressions.stringPath(trxnPath, PERIOD_ID);
-    private StringPath trxnAmountVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
-    private StringPath trxnQuantityVal = Expressions.stringPath(trxnPath, QUANTITY_VAL);
 
     public QueryBuilder translateForScoring(QueryFactory queryFactory,
                                             AttributeRepository repository,
@@ -129,23 +91,16 @@ public class EventQueryTranslator {
 
         String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
-        StringPath accountId = Expressions.stringPath("accountid");
-        StringPath periodId = Expressions.stringPath("periodid");
-        EntityPath<String> periodRange = new PathBuilder<>(String.class, "periodRange");
-        NumberPath minPid = Expressions.numberPath(BigDecimal.class, periodRange, "minpid");
-        StringPath periodAccountId = Expressions.stringPath(periodRange, "accountid");
+        NumberPath minPid = Expressions.numberPath(BigDecimal.class, periodRange, MIN_PID);
         SQLQuery periodRangeSubQuery = factory.query() //
-                .select(accountId, SQLExpressions.min(periodId).as("minpid")) //
+                .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
                 .from(tablePath) //
                 .where(periodName.eq(period)) //
                 .groupBy(accountId);
 
-        EntityPath<String> crossProd = new PathBuilder<>(String.class, "crossprod");
-        StringPath crossAccountId = Expressions.stringPath(crossProd, "accountid");
-        StringPath crossPeriodId = Expressions.stringPath(crossProd, "periodid");
         SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
-                factory.selectDistinct(accountId).from(tablePath).where(periodName.eq(period)).as("allaccounts"),
-                factory.selectDistinct(periodId).from(tablePath).where(periodName.eq(period)).as("allperiods"));
+                factory.selectDistinct(accountId).from(tablePath).where(periodName.eq(period)).as(ALL_ACCOUNTS),
+                factory.selectDistinct(periodId).from(tablePath).where(periodName.eq(period)).as(ALL_PERIODS));
 
         SQLQuery crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
                 .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
@@ -168,7 +123,7 @@ public class EventQueryTranslator {
 
         SQLQuery maxPeriodIdSubQuery = factory.query().from(tablePath) //
                 .where(periodName.eq(period)) //
-                .select(periodId.max().as(MAX_PERIOD_ID));
+                .select(periodId.max().as(MAX_PID));
         return maxPeriodIdSubQuery;
     }
 

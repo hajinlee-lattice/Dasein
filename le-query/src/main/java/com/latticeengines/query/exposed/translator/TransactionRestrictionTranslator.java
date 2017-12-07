@@ -33,58 +33,11 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregatePredicate;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateAggregateTimeWindow;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.translateTimeWindow;
 
-public class TransactionRestrictionTranslator {
-    public static final int NUM_ADDITIONAL_PERIOD = 2;
-    public static final String ACCOUNT_ID = InterfaceName.AccountId.name();
-    public static final String PERIOD_ID = InterfaceName.PeriodId.name();
-    public static final String PRODUCT_ID = InterfaceName.ProductId.name();
-    public static final String TOTAL_AMOUNT = InterfaceName.TotalAmount.name();
-    public static final String TOTAL_QUANTITY = InterfaceName.TotalQuantity.name();
-    public static final String TRXN = "trxn";
-    public static final String APS = "aps";
-    public static final String AMOUNT_AGG = "amountagg";
-    public static final String QUANTITY_AGG = "quantityagg";
-    public static final String AMOUNT_VAL = "amountval";
-    public static final String QUANTITY_VAL = "quantityval";
-    public static final String KEYS = "keys";
-    public static final String TRXN_PERIOD = "trxnbyperiod";
-    public static final String NUMBERS = "numbers";
-    public static final String NUMBER = "n";
-    public static final String DUMMY = "dummy";
-    public static final String ALL_ACCOUNTS = "allaccounts";
-    public static final String ALL_PERIODS = "allperiods";
-    public static final String MAX_PID = "maxpid";
+public class TransactionRestrictionTranslator extends TranslatorCommon {
 
-    private StringPath accountId = Expressions.stringPath(ACCOUNT_ID);
-    private StringPath periodId = Expressions.stringPath(PERIOD_ID);
-    private StringPath productId = Expressions.stringPath(PRODUCT_ID);
-    private StringPath amountVal = Expressions.stringPath(TOTAL_AMOUNT);
-    private StringPath quantityVal = Expressions.stringPath(TOTAL_QUANTITY);
-    private StringPath amountAggr = Expressions.stringPath(AMOUNT_AGG);
-    private StringPath quantityAggr = Expressions.stringPath(QUANTITY_AGG);
-
-    private EntityPath<String> periodRange = new PathBuilder<>(String.class, "periodRange");
-    private NumberPath periodRangeMaxPid = Expressions.numberPath(BigDecimal.class, periodRange, "maxpid");
-    private StringPath periodAccountId = Expressions.stringPath(periodRange, ACCOUNT_ID);
-    private EntityPath<String> crossProd = new PathBuilder<>(String.class, "crossprod");
-    private StringPath crossAccountId = Expressions.stringPath(crossProd, ACCOUNT_ID);
-    private StringPath crossPeriodId = Expressions.stringPath(crossProd, PERIOD_ID);
+    private NumberPath periodRangeMaxPid = Expressions.numberPath(BigDecimal.class, periodRange, MAX_PID);
     private StringPath numberTable = Expressions.stringPath("numbers");
-    private StringPath allPeriods = Expressions.stringPath(ALL_PERIODS);
-
-    private EntityPath<String> keysPath = new PathBuilder<>(String.class, KEYS);
-    private EntityPath<String> trxnPath = new PathBuilder<>(String.class, TRXN);
-    private EntityPath<String> apsPath = new PathBuilder<>(String.class, APS);
-    private StringPath keysAccountId = Expressions.stringPath(keysPath, ACCOUNT_ID);
-    private StringPath trxnAccountId = Expressions.stringPath(trxnPath, ACCOUNT_ID);
-    private StringPath keysPeriodId = Expressions.stringPath(keysPath, PERIOD_ID);
-    private StringPath trxnPeriodId = Expressions.stringPath(trxnPath, PERIOD_ID);
-    private StringPath trxnAmountVal = Expressions.stringPath(trxnPath, AMOUNT_VAL);
-    private StringPath trxnQuantityVal = Expressions.stringPath(trxnPath, QUANTITY_VAL);
 
     // for testing purpose
     private static String currentDate = "current_date";
