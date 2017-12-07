@@ -121,10 +121,9 @@ public class EventQueryTranslator extends TranslatorCommon {
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath periodId = Expressions.stringPath(PERIOD_ID);
 
-        SQLQuery maxPeriodIdSubQuery = factory.query().from(tablePath) //
+        return factory.query().from(tablePath) //
                 .where(periodName.eq(period)) //
                 .select(periodId.max().as(MAX_PID));
-        return maxPeriodIdSubQuery;
     }
 
     private BooleanExpression translateProductId(String productIdStr) {
@@ -154,13 +153,11 @@ public class EventQueryTranslator extends TranslatorCommon {
         StringPath qualifiedAccountId = Expressions.stringPath(accountViewPath, ACCOUNT_ID);
         BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
                 periodName);
-        SQLQuery accountQuery = factory.query().select(keysAccountId, keysPeriodId)
+        return factory.query().select(keysAccountId, keysPeriodId)
                 .from(keysPath)
                 .join(accountViewPath)
                 .on(keysAccountId.eq(qualifiedAccountId))
                 .where(periodIdPredicate);
-
-        return accountQuery;
     }
 
     @SuppressWarnings("unchecked")
@@ -183,10 +180,8 @@ public class EventQueryTranslator extends TranslatorCommon {
         String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
 
-        List<Expression> productSelectList = new ArrayList<>();
-        productSelectList.addAll(Arrays.asList(accountId, periodId));
-        List<Expression> apsSelectList = new ArrayList<>();
-        apsSelectList.addAll(Arrays.asList(keysAccountId, keysPeriodId));
+        List<Expression> productSelectList = new ArrayList(Arrays.asList(accountId, periodId));
+        List<Expression> apsSelectList = new ArrayList(Arrays.asList(keysAccountId, keysPeriodId));
 
         productSelectList.add(amountVal.as(AMOUNT_VAL));
         apsSelectList.add(trxnAmountVal);
@@ -231,10 +226,8 @@ public class EventQueryTranslator extends TranslatorCommon {
         BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
                                                                          period);
 
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+        return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(aggrValPredicate.and(periodIdPredicate));
-
-        return finalQuery;
 
     }
 
@@ -273,10 +266,8 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         int expectedResult = (returnPositive) ? 1 : 0;
 
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+        return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate));
-
-        return finalQuery;
 
     }
 
@@ -294,12 +285,11 @@ public class EventQueryTranslator extends TranslatorCommon {
             throw new RuntimeException("Invalid transaction restriction, no target product specified");
         }
 
-        TransactionRestriction oneLegBehind = new TransactionRestriction(targetProductId, //
-                                                                         timeFilter, //
-                                                                         false, //
-                                                                         null, //
-                                                                         null);
-        return oneLegBehind;
+        return new TransactionRestriction(targetProductId, //
+                                          timeFilter, //
+                                          false, //
+                                          null, //
+                                          null);
     }
 
 
@@ -357,13 +347,11 @@ public class EventQueryTranslator extends TranslatorCommon {
         TimeFilter timeFilter = new TimeFilter(
                 priorOnly.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
                 priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
-        TransactionRestriction prior = new TransactionRestriction( //
-                priorOnly.getProductId(), //
-                timeFilter, //
-                false, //
-                priorOnly.getSpentFilter(), //
-                priorOnly.getUnitFilter());
-        return prior;
+        return new TransactionRestriction(priorOnly.getProductId(), //
+                                          timeFilter, //
+                                          false, //
+                                          priorOnly.getSpentFilter(), //
+                                          priorOnly.getUnitFilter());
     }
 
     private TransactionRestriction translateToNotEngagedWithin(TransactionRestriction priorOnly) {
@@ -372,13 +360,11 @@ public class EventQueryTranslator extends TranslatorCommon {
                 priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
                 priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
-        TransactionRestriction notWithin = new TransactionRestriction( //
-                priorOnly.getProductId(), //
-                timeFilter, //
-                true, //
-                null, //
-                null);
-        return notWithin;
+        return new TransactionRestriction(priorOnly.getProductId(), //
+                                          timeFilter, //
+                                          true, //
+                                          null, //
+                                          null);
     }
 
     private TransactionRestriction translateToEngagedWithin(TransactionRestriction priorOnly) {
@@ -387,13 +373,11 @@ public class EventQueryTranslator extends TranslatorCommon {
                 priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
                 priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
-        TransactionRestriction engagedWithin = new TransactionRestriction( //
-                priorOnly.getProductId(), //
-                timeFilter, //
-                false, //
-                null, //
-                null);
-        return engagedWithin;
+        return new TransactionRestriction(priorOnly.getProductId(), //
+                                          timeFilter, //
+                                          false, //
+                                          null, //
+                                          null);
     }
 
     private TransactionRestriction translateToNotEngagedEver(TransactionRestriction priorOnly) {
@@ -402,13 +386,11 @@ public class EventQueryTranslator extends TranslatorCommon {
                 priorOnly.getTimeFilter().getLhs(), ComparisonType.EVER, //
                 priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
-        TransactionRestriction notEver = new TransactionRestriction( //
-                priorOnly.getProductId(), //
-                timeFilter, //
-                true, //
-                null, //
-                null);
-        return notEver;
+        return new TransactionRestriction(priorOnly.getProductId(), //
+                                          timeFilter, //
+                                          true, //
+                                          null, //
+                                          null);
     }
 
     private QueryBuilder translateRestriction(QueryFactory queryFactory,

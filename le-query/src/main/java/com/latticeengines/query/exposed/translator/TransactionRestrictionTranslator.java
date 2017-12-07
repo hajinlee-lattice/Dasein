@@ -118,8 +118,8 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
     }
 
     @SuppressWarnings("unchecked")
-    public SubQuery translateNumberSeries(QueryFactory queryFactory,
-                                          AttributeRepository repository) {
+    private SubQuery translateNumberSeries(QueryFactory queryFactory,
+                                           AttributeRepository repository) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
         String txTableName = getTransactionTableName(repository);
@@ -137,9 +137,9 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
     }
 
     @SuppressWarnings("unchecked")
-    public SubQuery translateAllPeriods(QueryFactory queryFactory,
-                                        AttributeRepository repository,
-                                        String period) {
+    private SubQuery translateAllPeriods(QueryFactory queryFactory,
+                                         AttributeRepository repository,
+                                         String period) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
         String txTableName = getTransactionTableName(repository);
@@ -163,9 +163,9 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
     }
 
     @SuppressWarnings("unchecked")
-    public SubQuery translatePeriodTransaction(QueryFactory queryFactory,
-                                               AttributeRepository repository,
-                                               String period) {
+    private SubQuery translatePeriodTransaction(QueryFactory queryFactory,
+                                                AttributeRepository repository,
+                                                String period) {
 
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
@@ -221,10 +221,8 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
         String txTableName = getPeriodTransactionTableName();
         StringPath tablePath = Expressions.stringPath(txTableName);
 
-        List<Expression> productSelectList = new ArrayList<>();
-        productSelectList.addAll(Arrays.asList(accountId, periodId));
-        List<Expression> apsSelectList = new ArrayList<>();
-        apsSelectList.addAll(Arrays.asList(keysAccountId, keysPeriodId));
+        List<Expression> productSelectList = new ArrayList<>(Arrays.asList(accountId, periodId));
+        List<Expression> apsSelectList = new ArrayList<>(Arrays.asList(keysAccountId, keysPeriodId));
 
         productSelectList.add(amountVal.as(AMOUNT_VAL));
         apsSelectList.add(trxnAmountVal);
@@ -267,10 +265,8 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
         }
         BooleanExpression periodIdPredicate = translatePeriodRestriction(periodId);
 
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+        return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(aggrValPredicate.and(periodIdPredicate));
-
-        return finalQuery;
 
     }
 
@@ -304,10 +300,8 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
 
         int expectedResult = 1;
 
-        SQLQuery finalQuery = factory.query().select(accountId, periodId).from(apsQuery, apsPath)
+        return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate));
-
-        return finalQuery;
 
     }
 
@@ -373,15 +367,15 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
         return translateRestriction(queryFactory, repository, businessEntity, notWithin, builder);
     }
 
-    public Restriction translateRestriction(QueryFactory queryFactory,
-                                            AttributeRepository repository,
-                                            BusinessEntity entity,
-                                            Restriction restriction,
-                                            QueryBuilder builder) {
+    private Restriction translateRestriction(QueryFactory queryFactory,
+                                             AttributeRepository repository,
+                                             BusinessEntity entity,
+                                             Restriction restriction,
+                                             QueryBuilder builder) {
 
 
         // translate restrictions to individual subqueries
-        Restriction translated = null;
+        Restriction translated;
         if (restriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) restriction;
 
