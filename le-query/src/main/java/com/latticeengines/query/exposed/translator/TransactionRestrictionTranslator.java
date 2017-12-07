@@ -257,12 +257,12 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
         BooleanExpression aggrQuantityPredicate =
                 (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter) : Expressions.TRUE;
 
-        BooleanExpression aggrValPredicate;
-        if (!txRestriction.isNegate()) {
-            aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
-        } else {
-            aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate).not();
+        BooleanExpression aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
+
+        if (txRestriction.isNegate()) {
+            aggrValPredicate = aggrValPredicate.not();
         }
+
         BooleanExpression periodIdPredicate = translatePeriodRestriction(periodId);
 
         return factory.query().select(accountId, periodId).from(apsQuery, apsPath)

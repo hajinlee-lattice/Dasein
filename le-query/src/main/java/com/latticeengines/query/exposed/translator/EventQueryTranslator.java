@@ -217,12 +217,12 @@ public class EventQueryTranslator extends TranslatorCommon {
         BooleanExpression aggrQuantityPredicate =
                 (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter) : Expressions.TRUE;
 
-        BooleanExpression aggrValPredicate;
-        if (!txRestriction.isNegate()) {
-            aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
-        } else {
-            aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate).not();
+        BooleanExpression aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
+
+        if (txRestriction.isNegate()) {
+            aggrValPredicate = aggrValPredicate.not();
         }
+
         BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
                                                                          period);
 
