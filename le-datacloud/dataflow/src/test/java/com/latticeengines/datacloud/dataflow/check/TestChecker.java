@@ -2,6 +2,9 @@ package com.latticeengines.datacloud.dataflow.check;
 
 import static com.latticeengines.datacloud.dataflow.check.TestChecker.DATAFLOW_BEAN;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.dataflow.transformation.ConsolidateBaseFlow;
@@ -17,9 +20,14 @@ public class TestChecker extends ConsolidateBaseFlow<TestCheckConfig> {
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node input = addSource(parameters.getBaseTables().get(0));
+        List<Node> inputNodes = new ArrayList<Node>();
+        inputNodes.add(addSource(parameters.getBaseTables().get(0)));
+        if (parameters.getBaseTables().size() > 1) {
+            System.out.println("Entered in size loop");
+            inputNodes.add(addSource(parameters.getBaseTables().get(1)));
+        }
         TestCheckConfig testCheckConfig = getTransformerConfig(parameters);
-        return CheckUtils.runCheck(input, testCheckConfig.getCheckParam());
+        return CheckUtils.runCheck(inputNodes, testCheckConfig.getCheckParam());
     }
 
     @Override

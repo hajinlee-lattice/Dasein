@@ -14,12 +14,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValuesWithStatusCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
-public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+public class DuplicatedValueWithStatusCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(DuplicatedValueCheckTestNG.class);
+    private static final Log log = LogFactory.getLog(DuplicatedValueWithStatusCheckTestNG.class);
 
     @Override
     protected String getFlowBeanName() {
@@ -36,25 +36,27 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
     private TransformationFlowParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("Id", Integer.class), //
+                Pair.of("Status", String.class), //
                 Pair.of("Key", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "key1" }, //
-                { 2, "key2" }, //
-                { 3, "key3" }, //
-                { 4, "key2" }, //
-                { 5, "key1" }, //
-                { 6, "key1" }, //
-                { 7, "key4" }, //
+                { 1, "ACTIVE", "key1" }, //
+                { 2, "NEW", "key2" }, //
+                { 3, "NEW", "key3" }, //
+                { 4, "ACTIVE", "key2" }, //
+                { 5, "ACTIVE", "key1" }, //
+                { 6, "ACTIVE", "key1" }, //
+                { 7, "ACTIVE", "key4" }, //
         };
 
         uploadDataToSharedAvroInput(data, fields);
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        DuplicatedValueCheckParam checkParam = new DuplicatedValueCheckParam();
+        DuplicatedValuesWithStatusCheckParam checkParam = new DuplicatedValuesWithStatusCheckParam();
         checkParam.setGroupByFields(Collections.singletonList("Key"));
         checkParam.setKeyField("Id");
+        checkParam.setStatus("Status");
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;
@@ -79,4 +81,5 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
             }
         }
     }
+
 }

@@ -14,12 +14,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.EmptyOrNullFieldCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
-public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-
-    private static final Log log = LogFactory.getLog(DuplicatedValueCheckTestNG.class);
+public class EmptyOrNullFieldCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(EmptyOrNullFieldCheckTestNG.class);
 
     @Override
     protected String getFlowBeanName() {
@@ -40,11 +39,11 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
         );
         Object[][] data = new Object[][] { //
                 { 1, "key1" }, //
-                { 2, "key2" }, //
+                { 2, null }, //
                 { 3, "key3" }, //
                 { 4, "key2" }, //
                 { 5, "key1" }, //
-                { 6, "key1" }, //
+                { 6, null }, //
                 { 7, "key4" }, //
         };
 
@@ -52,8 +51,8 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        DuplicatedValueCheckParam checkParam = new DuplicatedValueCheckParam();
-        checkParam.setGroupByFields(Collections.singletonList("Key"));
+        EmptyOrNullFieldCheckParam checkParam = new EmptyOrNullFieldCheckParam();
+        checkParam.setCheckNullField("Key");
         checkParam.setKeyField("Id");
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
@@ -62,6 +61,9 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
 
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
+        String[] expectedId = { "2", "6" };
+        String[] actualId = new String[2];
+        int i = 0;
         for (GenericRecord record : records) {
             log.info("Check Code : " + record.get(DataCloudConstants.CHK_ATTR_CHK_CODE) + " RowId : "
                     + record.get(DataCloudConstants.CHK_ATTR_ROW_ID) + " GroupId : "
@@ -69,14 +71,10 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_FIELD) + " CheckValue : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE) + " CheckMessage : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_MSG));
-            String groupId = record.get(DataCloudConstants.CHK_ATTR_GROUP_ID).toString();
-            long occurence = Long.valueOf(record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE).toString());
-            if ("key1".endsWith(groupId)) {
-                Assert.assertEquals(occurence, 3);
-            }
-            if ("key2".endsWith(groupId)) {
-                Assert.assertEquals(occurence, 2);
-            }
+            String rowId = record.get(DataCloudConstants.CHK_ATTR_ROW_ID).toString();
+            actualId[i++] = rowId;
         }
+        Assert.assertEquals(actualId[0], expectedId[0]);
+        Assert.assertEquals(actualId[1], expectedId[1]);
     }
 }

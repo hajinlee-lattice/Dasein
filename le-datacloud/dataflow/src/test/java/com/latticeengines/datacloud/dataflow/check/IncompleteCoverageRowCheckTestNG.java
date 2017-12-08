@@ -14,13 +14,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageRowCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
-public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-
-    private static final Log log = LogFactory.getLog(DuplicatedValueCheckTestNG.class);
-
+public class IncompleteCoverageRowCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(IncompleteCoverageRowCheckTestNG.class);
     @Override
     protected String getFlowBeanName() {
         return TestChecker.DATAFLOW_BEAN;
@@ -39,21 +37,24 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
                 Pair.of("Key", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "key1" }, //
-                { 2, "key2" }, //
-                { 3, "key3" }, //
-                { 4, "key2" }, //
-                { 5, "key1" }, //
-                { 6, "key1" }, //
-                { 7, "key4" }, //
+                { 1, "DnB" }, //
+                { 2, "Other" }, //
+                { 3, "HG" }, //
+                { 4, "Orb" }, //
+                { 5, "Manual" }, //
+                { 6, "RTS" }, //
+                { 7, null }, //
         };
 
         uploadDataToSharedAvroInput(data, fields);
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        DuplicatedValueCheckParam checkParam = new DuplicatedValueCheckParam();
+        IncompleteCoverageRowCheckParam checkParam = new IncompleteCoverageRowCheckParam();
         checkParam.setGroupByFields(Collections.singletonList("Key"));
+        String[] fieldsArray = new String[] { "DnB", "RTS", "HG", "Orb", "Manual" };
+        List<String> coverageFields = Arrays.asList(fieldsArray);
+        checkParam.setCoverageFields(coverageFields);
         checkParam.setKeyField("Id");
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
@@ -70,12 +71,15 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE) + " CheckMessage : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_MSG));
             String groupId = record.get(DataCloudConstants.CHK_ATTR_GROUP_ID).toString();
-            long occurence = Long.valueOf(record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE).toString());
-            if ("key1".endsWith(groupId)) {
-                Assert.assertEquals(occurence, 3);
+            Object outOfCoverageVal = record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE);
+            String value = null;
+            if (outOfCoverageVal != null)
+                value = outOfCoverageVal.toString();
+            if ("2".equals(groupId)) {
+                Assert.assertEquals(value, "Other");
             }
-            if ("key2".endsWith(groupId)) {
-                Assert.assertEquals(occurence, 2);
+            if ("7".equals(groupId)) {
+                Assert.assertEquals(value, null);
             }
         }
     }
