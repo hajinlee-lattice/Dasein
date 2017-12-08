@@ -55,25 +55,28 @@ public class EventQueryTranslator extends TranslatorCommon {
     public QueryBuilder translateForScoring(QueryFactory queryFactory,
                                             AttributeRepository repository,
                                             Restriction restriction,
+                                            String periodName,
                                             QueryBuilder queryBuilder) {
         return translateRestriction(queryFactory, repository, restriction, true, false,
-                                    queryBuilder);
+                                    periodName, queryBuilder);
     }
 
     public QueryBuilder translateForTraining(QueryFactory queryFactory,
                                              AttributeRepository repository,
                                              Restriction restriction,
+                                             String periodName,
                                              QueryBuilder queryBuilder) {
         return translateRestriction(queryFactory, repository, restriction, false, false,
-                                    queryBuilder);
+                                    periodName, queryBuilder);
     }
 
     public QueryBuilder translateForEvent(QueryFactory queryFactory,
                                           AttributeRepository repository,
                                           Restriction restriction,
+                                          String periodName,
                                           QueryBuilder queryBuilder) {
         return translateRestriction(queryFactory, repository, restriction, false, true,
-                                    queryBuilder);
+                                    periodName, queryBuilder);
     }
 
 
@@ -398,28 +401,18 @@ public class EventQueryTranslator extends TranslatorCommon {
                                               Restriction restriction,
                                               boolean isScoring,
                                               boolean isEvent,
+                                              String periodName,
                                               QueryBuilder builder) {
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
 
-        AtomicReference<String> periodRef = new AtomicReference<>(TimeFilter.Period.Month.name());
+        String period = StringUtils.isEmpty(periodName) ? getPeriodFromRestriction(rootRestriction) : periodName;
 
-        // set transaction entity
-        if (rootRestriction instanceof LogicalRestriction) {
-            BreadthFirstSearch bfs = new BreadthFirstSearch();
-            bfs.run(rootRestriction, (object, ctx) -> {
-                if (object instanceof TransactionRestriction) {
-                    TransactionRestriction txRestriction = (TransactionRestriction) object;
-                    updatePeriodName(txRestriction, periodRef);
-                }
-            });
-        } else if (rootRestriction instanceof TransactionRestriction) {
-            TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
-            updatePeriodName(txRestriction, periodRef);
+        if (StringUtils.isEmpty(period)) {
+            throw new RuntimeException("No period definition passed for event query.");
         }
 
-        String period = periodRef.get();
         builder.with(translateAllKeys(queryFactory, repository, period));
 
         // combine one leg behind restriction for event query, this is not needed for scoring and training
@@ -580,6 +573,26 @@ public class EventQueryTranslator extends TranslatorCommon {
             }, true);
         }
         return builder;
+    }
+
+    private String getPeriodFromRestriction(Restriction rootRestriction) {
+        AtomicReference<String> periodRef = new AtomicReference<>(TimeFilter.Period.Month.name());
+
+        // set transaction entity
+        if (rootRestriction instanceof LogicalRestriction) {
+            BreadthFirstSearch bfs = new BreadthFirstSearch();
+            bfs.run(rootRestriction, (object, ctx) -> {
+                if (object instanceof TransactionRestriction) {
+                    TransactionRestriction txRestriction = (TransactionRestriction) object;
+                    updatePeriodName(txRestriction, periodRef);
+                }
+            });
+        } else if (rootRestriction instanceof TransactionRestriction) {
+            TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
+            updatePeriodName(txRestriction, periodRef);
+        }
+
+        return periodRef.get();
     }
 
     private synchronized void updatePeriodName(TransactionRestriction txRestriction, AtomicReference<String> periodRef) {

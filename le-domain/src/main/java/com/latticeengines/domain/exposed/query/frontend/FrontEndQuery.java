@@ -62,6 +62,9 @@ public class FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.RESTRICT_HAS_TRANSACTION)
     private Boolean restrictHasTransaction;
 
+    @JsonProperty(FrontEndQueryConstants.PERIOD_NAME)
+    private String periodName;
+
     public FrontEndRestriction getAccountRestriction() {
         return accountRestriction;
     }
@@ -156,6 +159,14 @@ public class FrontEndQuery {
 
     public void setRestrictHasTransaction(Boolean restrictHasTransaction) {
         this.restrictHasTransaction = restrictHasTransaction;
+    }
+
+    public String getPeriodName() {
+        return periodName;
+    }
+
+    public void setPeriodName(String periodName) {
+        this.periodName = periodName;
     }
 
     public void addLookups(BusinessEntity businessEntity, String... attrNames) {

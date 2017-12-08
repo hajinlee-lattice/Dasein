@@ -9,6 +9,8 @@ public class FrontEndQueryConstants {
 
     public static final String RESTRICT_HAS_TRANSACTION = "restrict_has_transaction";
 
+    public static final String PERIOD_NAME = "period_name";
+
     public static final String RESTRICT_WITH_SFDCID = "restrict_with_sfdcid";
 
     public static final String RESTRICT_WITHOUT_SFDCID = "restrict_without_sfdcid";
