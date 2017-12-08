@@ -46,14 +46,14 @@
                                 <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.current.tileStates[rating.id].showCustomMenu }"></span>
                             </button>
                             <ul class="model-menu" ng-show="vm.current.tileStates[rating.id].showCustomMenu">
-                                <li data-ng-click="vm.editStatusClick($event, rating, !vm.hasRules(rating))" ng-disabled="!vm.hasRules(rating)">
+<!--                                 <li data-ng-click="vm.editStatusClick($event, rating, !vm.hasRules(rating))" ng-disabled="!vm.hasRules(rating)">
                                     <a href="javascript:void(0)">
                                         <span ng-if="rating.status === 'INACTIVE' && vm.hasRules(rating)">Activate</span>
                                         <span ng-if="rating.status === 'INACTIVE' && !vm.hasRules(rating)" title="Apply bucket rules to Activate ratings">Activate</span>
                                         <span ng-if="rating.status === 'ACTIVE'">Deactivate</span>
                                     </a>
                                     <i class="fa fa-power-off"></i>
-                                </li>
+                                </li> -->
                                 <li data-ng-click="vm.editRatingClick($event, rating)">
                                     <a href="javascript:void(0)">Rename</a>
                                     <i class="fa fa-edit"></i>
