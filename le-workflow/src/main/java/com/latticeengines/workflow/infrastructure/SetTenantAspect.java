@@ -21,8 +21,7 @@ public class SetTenantAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.workflow.service.impl.WorkflowServiceImpl.*(..)) " +
-            "&& @annotation(com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace)")
+    @Before("@annotation(com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace)")
     public void allMethodsWorkflowService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setSecurityContext(CustomerSpace.parse(customerSpace).toString());

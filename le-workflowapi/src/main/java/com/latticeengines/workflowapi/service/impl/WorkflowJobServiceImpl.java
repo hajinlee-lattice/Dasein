@@ -5,14 +5,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import com.google.common.annotations.VisibleForTesting;
 
+import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -56,11 +57,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
+    @WithCustomerSpace
     public List<JobStatus> getJobStatus(String customerSpace, List<Long> workflowIds) {
-        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
-        List<WorkflowJob> jobs = (workflowIds == null) ?
-                workflowJobEntityMgr.findByTenant(tenant) :
-                workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant, workflowIds);
+        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsWithFilter(workflowIds);
         jobs.removeIf(Objects::isNull);
         return jobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
     }
@@ -147,9 +146,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
+    @WithCustomerSpace
     public void updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId) {
-        Tenant tenant = tenantService.findByTenantId(CustomerSpace.parse(customerSpace).toString());
-        List<WorkflowJob> jobs = workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant, workflowIds);
+        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsWithFilter(workflowIds);
         jobs.removeIf(Objects::isNull);
         jobs.forEach(job -> {
             job.setParentJobId(parentJobId);

@@ -2,10 +2,10 @@ package com.latticeengines.workflowapi.service.impl;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,7 +22,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 import org.mockito.Mockito;
 
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
@@ -30,6 +29,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
@@ -57,6 +59,11 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     private WorkflowJob workflowJob12;
     private WorkflowJob workflowJob13;
     private WorkflowJob workflowJob2;
+    private WorkflowJob workflowJob3;
+    private WorkflowJob workflowJob31;
+
+    private CustomerSpace customerSpace3;
+    private Tenant tenant3;
 
     private Function<WorkflowJob, Job> workflowJobToJobMapper = (WorkflowJob workflowJob) -> {
         if (workflowJob == null) {
@@ -134,7 +141,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         mockWorkflowService();
         List<Long> workflowExecutionIds = new ArrayList<>(workflowIds.values());
         List<Job> jobs = workflowJobService.getJobs(workflowExecutionIds);
-        Assert.assertEquals(jobs.size(), 5);
+        Assert.assertEquals(jobs.size(), workflowJobEntityMgr.findAll().size());
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
         Assert.assertEquals(jobs.get(1).getApplicationId(), "application_10001");
         Assert.assertEquals(jobs.get(2).getApplicationId(), "application_10002");
@@ -234,6 +241,41 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(workflowjob2.getParentJobId(), parentJobId);
     }
 
+    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
+    public void testMultiTenantFilter() {
+        List<Long> testWorkflowIds1 = new ArrayList<>();
+        testWorkflowIds1.add(workflowIds.get(30000L));
+        testWorkflowIds1.add(workflowIds.get(30001L));
+        List<JobStatus> status1 = workflowJobService.getJobStatus(customerSpace3.toString(), testWorkflowIds1);
+        Assert.assertEquals(status1.size(), 2);
+        Assert.assertEquals(status1.get(0), JobStatus.PENDING);
+        Assert.assertEquals(status1.get(1), JobStatus.COMPLETED);
+
+        List<Long> testWorkflowIds2 = new ArrayList<>();
+        testWorkflowIds2.add(workflowIds.get(10000L));
+        testWorkflowIds2.add(workflowIds.get(10002L));
+        testWorkflowIds2.add(workflowIds.get(30001L));
+        List<JobStatus> status2 = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds2);
+        Assert.assertEquals(status2.size(), 2);
+        Assert.assertEquals(status2.get(0), JobStatus.PENDING);
+        Assert.assertEquals(status2.get(1), JobStatus.COMPLETED);
+
+        Long parentJobId = 30000L;
+        WorkflowJob workflowJob0 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(0));
+        WorkflowJob workflowJob1 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(1));
+        WorkflowJob workflowJob2 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(2));
+        Assert.assertNull(workflowJob0.getParentJobId());
+        Assert.assertEquals(workflowJob1.getParentJobId(), workflowIds.get(10000L));
+        Assert.assertNull(workflowJob2.getParentJobId());
+        workflowJobService.updateParentJobId(customerSpace3.toString(), testWorkflowIds2, parentJobId);
+        workflowJob0 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(0));
+        workflowJob1 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(1));
+        workflowJob2 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(2));
+        Assert.assertNull(workflowJob0.getParentJobId());
+        Assert.assertEquals(workflowJob1.getParentJobId(), workflowIds.get(10000L));
+        Assert.assertEquals(workflowJob2.getParentJobId(), parentJobId);
+    }
+
     @AfterClass(groups = "functional")
     private void cleanup() {
         workflowJobEntityMgr.delete(workflowJob1);
@@ -241,6 +283,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJobEntityMgr.delete(workflowJob12);
         workflowJobEntityMgr.delete(workflowJob13);
         workflowJobEntityMgr.delete(workflowJob2);
+        workflowJobEntityMgr.delete(workflowJob3);
+        workflowJobEntityMgr.delete(workflowJob31);
+        tenantEntityMgr.delete(tenant3);
     }
 
     private void createWorkflowJobs() {
@@ -341,6 +386,54 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob2.setType(jobInstance2.getJobName());
         workflowJobEntityMgr.create(workflowJob2);
         workflowIds.put(20000L, jobExecution2.getJobId());
+
+        createTenant();
+        applicationId = "application_30000";
+        Map<String, JobParameter> parameters3 = new HashMap<>();
+        parameters3.put("jobName", new JobParameter(applicationId, true));
+        JobParameters jobParameters3 = new JobParameters(parameters3);
+        JobInstance jobInstance3 = jobInstanceDao.createJobInstance(applicationId, jobParameters3);
+        JobExecution jobExecution3 = new JobExecution(jobInstance3, jobParameters3, null);
+        jobExecutionDao.saveJobExecution(jobExecution3);
+        workflowJob3 = new WorkflowJob();
+        workflowJob3.setApplicationId(applicationId);
+        workflowJob3.setInputContext(inputContext);
+        workflowJob3.setTenant(tenant3);
+        workflowJob3.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.UNDEFINED).name());
+        workflowJob3.setWorkflowId(jobExecution3.getJobId());
+        workflowJob3.setType(jobInstance3.getJobName());
+        workflowJobEntityMgr.create(workflowJob3);
+        workflowIds.put(30000L, jobExecution3.getJobId());
+
+        applicationId = "application_30001";
+        Map<String, JobParameter> parameters31 = new HashMap<>();
+        parameters31.put("jobName", new JobParameter(applicationId, true));
+        JobParameters jobParameters31 = new JobParameters(parameters31);
+        JobInstance jobInstance31 = jobInstanceDao.createJobInstance(applicationId, jobParameters31);
+        JobExecution jobExecution31 = new JobExecution(jobInstance31, jobParameters31, null);
+        jobExecutionDao.saveJobExecution(jobExecution31);
+        workflowJob31 = new WorkflowJob();
+        workflowJob31.setApplicationId(applicationId);
+        workflowJob31.setInputContext(inputContext);
+        workflowJob31.setTenant(tenant3);
+        workflowJob31.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.SUCCEEDED).name());
+        workflowJob31.setWorkflowId(jobExecution31.getJobId());
+        workflowJob31.setType(jobInstance31.getJobName());
+        workflowJobEntityMgr.create(workflowJob31);
+        workflowIds.put(30001L, jobExecution31.getJobId());
+    }
+
+    private void createTenant() {
+        customerSpace3 = CustomerSpace.parse("test3.test3.test3");
+        tenant3 = tenantEntityMgr.findByTenantId(customerSpace3.toString());
+        if (tenant3 != null) {
+            tenantEntityMgr.delete(tenant3);
+        }
+        tenant3 = new Tenant();
+        tenant3.setId(customerSpace3.toString());
+        tenant3.setName(customerSpace3.toString());
+        tenantEntityMgr.create(tenant3);
+        MultiTenantContext.setTenant(tenant3);
     }
 
     @SuppressWarnings("unchecked")

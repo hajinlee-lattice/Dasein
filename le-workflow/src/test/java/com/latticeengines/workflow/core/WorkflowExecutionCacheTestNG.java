@@ -57,5 +57,6 @@ public class WorkflowExecutionCacheTestNG extends WorkflowTestNGBase {
         Job job = workflowExecutionCache.getJob(new WorkflowExecutionId(1L));
 
         assertEquals(job.getJobStatus(), JobStatus.COMPLETED);
+        workflowJobEntityMgr.delete(workflowJob);
     }
 }

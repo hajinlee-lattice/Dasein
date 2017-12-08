@@ -64,6 +64,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowIdsWithFilter(List<Long> workflowIds) {
+        return workflowJobDao.findByWorkflowIds(workflowIds);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByTenant(Tenant tenant) {
         return workflowJobDao.findByTenant(tenant);
     }
