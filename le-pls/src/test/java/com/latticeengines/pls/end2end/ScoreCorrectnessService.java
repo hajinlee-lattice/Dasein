@@ -83,7 +83,7 @@ public class ScoreCorrectnessService {
 
     private Set<String> notPredictorFields = new HashSet<>();
 
-    private String[] investigateRecordIds = { "58889695", "53536866" }; // add ids which need to log detailed information
+    private String[] investigateRecordIds = { "61595394" }; // add ids which need to log detailed information
 
     @PostConstruct
     public void init() {
