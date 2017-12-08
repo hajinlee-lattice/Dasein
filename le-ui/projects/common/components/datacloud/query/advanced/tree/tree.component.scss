@@ -215,7 +215,7 @@ div.advanced-query-builder {
 
                 .query-section-item-category {
                     padding-bottom: .2em;
-                    font-size: .85em;
+                    font-size: 11px;
                     
                     strong {
                         max-width: 15em;
@@ -233,6 +233,7 @@ div.advanced-query-builder {
                     position: relative;
                     width: 100%; 
                     clear: both;
+                    font-size: 12px;
 
                     .item-bucket-data {
                         display: inline-block;
@@ -263,6 +264,8 @@ div.advanced-query-builder {
                             button {
                                 padding: 0;
                                 height: 1.65em;
+                                font-size: 11px;
+                                line-height: 1;
                             }
                         }
 
@@ -277,7 +280,8 @@ div.advanced-query-builder {
                         select {
                             height: 1.65em;
                             margin-right: 1em;
-                            max-width: 25em;
+                            max-width: 45em;
+                            font-size: 12px;
                         }
 
                         span.operation-and {
@@ -286,8 +290,9 @@ div.advanced-query-builder {
                         }
 
                         input {
-                            width: 5em;
+                            width: 10em;
                             cursor: text;
+                            font-size: 12px;
                         }
                     }
 
