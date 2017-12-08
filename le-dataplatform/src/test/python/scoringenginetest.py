@@ -7,6 +7,7 @@ import sys
 
 from testbase import TestBase
 from trainingtestbase import TrainingTestBase
+from leframework.argumentparser import ArgumentParser
 
 
 class ScoringEngineTest(TrainingTestBase):
@@ -35,7 +36,7 @@ class ScoringEngineTest(TrainingTestBase):
         traininglauncher.training
 
         # Retrieve the pickled model from the json file
-        jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*_model.json")[0]).read())
 
         for index in range(0, len(jsonDict["Model"]["CompressedSupportFiles"])):
             entry = jsonDict["Model"]["CompressedSupportFiles"][index]
@@ -46,11 +47,14 @@ class ScoringEngineTest(TrainingTestBase):
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
-        self.createCSVFromModel(modelDriver, "./results/scoreinputfile.txt")
+        #self.createCSVFromModel(modelDriver, "./results/scoreinputfile.txt")
+        parser = ArgumentParser(modelDriver, None)
+        schema = parser.getSchema()
+
         os.environ["PYTHONPATH"] = ''
         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", \
-                                 "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
-                                 stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+                                 self.stripPath(schema["test_data"]), "./results/scoreoutputfile.txt", "avro"], \
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = popen.communicate()
 
         if len(stderr) > 0:
