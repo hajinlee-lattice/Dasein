@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.ProcessAccountWorkflow;
 import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
+import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
 import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
 import com.latticeengines.cdl.workflow.steps.CombineStatistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -39,6 +40,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessProductChoreographer productChoreographer;
 
     @Inject
+    private ProcessTransactionChoreographer transactionChoreographer;
+
+    @Inject
     private ProcessAccountWorkflow accountWorkflow;
 
     @Inject
@@ -48,6 +52,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessProductWorkflow productWorkflow;
 
     @Inject
+    private ProcessTransactionWorkflow transactionWorkflow;
+
+    @Inject
     private CombineStatistics combineStatistics;
 
     @Inject
@@ -55,19 +62,22 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        boolean skip = false;
-        if (isAccountStep(seq)) {
-            skip = accountChoreographer.skipStep(step, seq);
+        if (super.skipStep(step, seq)) {
+            return true;
+        } else if (isAccountStep(seq)) {
+            return accountChoreographer.skipStep(step, seq);
         } else if (isContactStep(seq)) {
-            skip = contactChoreographer.skipStep(step, seq);
+            return contactChoreographer.skipStep(step, seq);
         } else if (isProductStep(seq)) {
-            skip = productChoreographer.skipStep(step, seq);
+            return productChoreographer.skipStep(step, seq);
+        } else if (isTransactionStep(seq)) {
+            return transactionChoreographer.skipStep(step, seq);
         } else if (isCombineStatsStep(step)) {
-            skip = skipCombineStatsStep();
+            return skipCombineStatsStep();
         } else if (inPublishWorkflow(seq)) {
-            skip = skipPublishWorkflow(step);
+            return skipPublishWorkflow(step);
         }
-        return skip || super.skipStep(step, seq);
+        return false;
     }
 
     @Override
@@ -76,6 +86,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         accountChoreographer.linkStepNamespaces(stepNamespaces);
         contactChoreographer.linkStepNamespaces(stepNamespaces);
         productChoreographer.linkStepNamespaces(stepNamespaces);
+        transactionChoreographer.linkStepNamespaces(stepNamespaces);
     }
 
     private boolean isAccountStep(int seq) {
@@ -91,6 +102,11 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private boolean isProductStep(int seq) {
         String namespace = getStepNamespace(seq);
         return namespace.startsWith(productWorkflow.name());
+    }
+
+    private boolean isTransactionStep(int seq) {
+        String namespace = getStepNamespace(seq);
+        return namespace.startsWith(transactionWorkflow.name());
     }
 
     private boolean isCombineStatsStep(AbstractStep<? extends BaseStepConfiguration> step) {

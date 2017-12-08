@@ -39,33 +39,43 @@ public class TableCloneUtils {
         newExtract.setName(NamingUtils.uuid("Extract"));
         AtomicLong count = new AtomicLong(0);
         if (original.getExtracts() != null && original.getExtracts().size() > 0) {
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, cloneDataPath)) {
-                    HdfsUtils.rmdir(yarnConfiguration, cloneDataPath);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to create table dir at " + cloneDataPath);
+            if (original.getExtracts().size() > 1) {
+                throw new UnsupportedOperationException("Can only clone single extract tables");
             }
 
-            original.getExtracts().forEach(extract -> {
-                String srcPath = extract.getPath();
-                if (!srcPath.endsWith(".avro") && !srcPath.endsWith("*.avro")) {
-                    srcPath = srcPath.endsWith("/") ? srcPath : srcPath + "/";
-                    srcPath += "*.avro";
+            Extract extract = original.getExtracts().get(0);
+            String srcPath = extract.getPath();
+            if (!srcPath.endsWith(".avro") && !srcPath.endsWith("*.avro")) {
+                srcPath = srcPath.endsWith("/") ? srcPath : srcPath + "/";
+                srcPath += "*.avro";
+            }
+            String srcDir = srcPath.substring(0, srcPath.lastIndexOf("/"));
+            try {
+                log.info(String.format("Copying table data from %s to %s", srcDir, cloneDataPath));
+                int retries = 0;
+                while (retries++ < 3) {
+                    try {
+                        if (HdfsUtils.fileExists(yarnConfiguration, cloneDataPath)) {
+                            HdfsUtils.rmdir(yarnConfiguration, cloneDataPath);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to clean up table dir at " + cloneDataPath);
+                    }
+                    try {
+                        HdfsUtils.distcp(yarnConfiguration, srcDir, cloneDataPath, distCpQueue);
+                        break;
+                    } catch (Exception e) {
+                        log.error("DistCp failed, retries=" + retries, e);
+                    }
                 }
-                String srcDir = srcPath.substring(0, srcPath.lastIndexOf("/"));
-                try {
-                    log.info(String.format("Copying table data from %s to %s", srcDir, cloneDataPath));
-                    HdfsUtils.distcp(yarnConfiguration, srcDir, cloneDataPath, distCpQueue);
-                } catch (Exception e) {
-                    throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", srcPath,
-                            cloneDataPath), e);
-                }
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", srcPath,
+                        cloneDataPath), e);
+            }
 
-                if (extract.getProcessedRecords() != null && extract.getProcessedRecords() > 0) {
-                    count.addAndGet(extract.getProcessedRecords());
-                }
-            });
+            if (extract.getProcessedRecords() != null && extract.getProcessedRecords() > 0) {
+                count.addAndGet(extract.getProcessedRecords());
+            }
         }
         newExtract.setProcessedRecords(count.get());
         newExtract.setExtractionTimestamp(System.currentTimeMillis());

@@ -219,11 +219,15 @@ public class CheckpointService {
     }
 
     private void cloneRedshiftTables(Map<String, String> redshiftTablesToClone) {
-        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("redshift-clone", 2);
+        if (MapUtils.isEmpty(redshiftTablesToClone)) {
+            return;
+        }
+        int poolSize = Math.max(2, redshiftTablesToClone.size());
+        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("redshift-clone", poolSize);
         List<Future<?>> futures = new ArrayList<>();
         redshiftTablesToClone.forEach((src, tgt) -> {
             Future future = executorService.submit(() -> {
-                String msg = "Cloning redshift table " + src + " to " + tgt;
+                String msg = "Clone redshift table " + src + " to " + tgt;
                 try (PerformanceTimer timer = new PerformanceTimer(msg)) {
                     redshiftService.cloneTable(src, tgt);
                 }
@@ -244,6 +248,7 @@ public class CheckpointService {
             });
             completed.forEach(futures::remove);
         }
+        executorService.shutdown();
     }
 
     private void unzipCheckpoint(String checkpoint) throws IOException {
@@ -268,7 +273,11 @@ public class CheckpointService {
         }
         logger.info("countRole " + role.name() + " Table " + table.getName() + " Path "
                 + table.getExtracts().get(0).getPath());
-        return table.getExtracts().get(0).getProcessedRecords();
+        String path = table.getExtracts().get(0).getPath();
+        if (!path.endsWith(".avro")) {
+            path += path.endsWith("/") ? "*.avro" : "/*.avro";
+        }
+        return AvroUtils.count(yarnConfiguration, path);
     }
 
     long countInRedshift(BusinessEntity entity) {
@@ -339,7 +348,7 @@ public class CheckpointService {
         logger.info("Parse check point " + checkpoint + " table " + tableName + "version" + version.name());
         String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
                 tableName);
-        logger.info("Parse check point file path" + jsonFilePath);
+        logger.info("Parse check point file path " + jsonFilePath);
         File jsonFile = new File(jsonFilePath);
         if (!jsonFile.exists()) {
             return null;
@@ -347,7 +356,7 @@ public class CheckpointService {
 
         JsonNode json = om.readTree(jsonFile);
         String hdfsPath = json.get("extracts_directory").asText();
-        logger.info("Parse extract path" + hdfsPath);
+        logger.info("Parse extract path " + hdfsPath);
         Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
         Matcher matcher = pattern.matcher(hdfsPath);
         String str = JsonUtils.serialize(json);

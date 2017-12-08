@@ -29,15 +29,17 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     private static final Logger log = LoggerFactory.getLogger(AbstractProcessEntityChoreographer.class);
 
-    private boolean hasImports = false;
+    private boolean initialized = false;
+
+    protected boolean hasImports = false;
     private boolean hasSchemaChange = false;
-    private boolean hasActiveServingStore = false;
+    protected boolean hasActiveServingStore = false;
 
     private boolean rebuild = false;
     private boolean update = false;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    protected DataCollectionProxy dataCollectionProxy;
 
     /**
      * Steps that can be skipped based on common entity processing pattern
@@ -47,6 +49,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
         if (isMergeStep(step)) {
             initialize(step);
+            return !shouldMerge();
         }
 
         if (isCloneStep(step)) {
@@ -60,6 +63,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             if (rebuild) {
                 log.info("Skip cloning " + mainEntity() + " because going to rebuild.");
                 return true;
+            } else {
+                return false;
             }
         }
 
@@ -99,8 +104,11 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     private void initialize(AbstractStep<? extends BaseStepConfiguration> step) {
-        checkImports(step);
-        checkActiveServingStore(step);
+        if (!initialized) {
+            checkImports(step);
+            checkActiveServingStore(step);
+            initialized = true;
+        }
     }
 
     private void checkImports(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -122,7 +130,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
-    private void checkActiveServingStore(AbstractStep<? extends BaseStepConfiguration> step) {
+    protected void checkActiveServingStore(AbstractStep<? extends BaseStepConfiguration> step) {
         TableRoleInCollection servingStore = mainEntity().getServingStore();
         if (servingStore != null) {
             DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
@@ -137,29 +145,28 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
-    private boolean shouldRebuild() {
+    private boolean shouldMerge() {
+        return hasImports;
+    }
+
+    protected boolean shouldRebuild() {
         if (hasSchemaChange) {
             log.info("Detected schema change in " + mainEntity() + ", going to rebuild");
             return true;
-        } else if (hasImports && hasActiveServingStore) {
-            log.info("Has imports and active serving store, not going to rebuild " + mainEntity());
-            return false;
-        } else if (!hasImports && !hasActiveServingStore) {
-            log.info("No imports and no active serving store, not going to rebuild " + mainEntity());
-            return false;
-        } else {
-            log.info("Going to rebuild " + mainEntity());
+        } else if (hasImports && !hasActiveServingStore) {
+            log.info("Has imports but no service store, going to rebuild " + mainEntity());
             return true;
         }
+        log.info("No reason to rebuild " + mainEntity());
+        return false;
     }
 
-    private boolean shouldUpdate() {
+    protected boolean shouldUpdate() {
         if (!hasSchemaChange && hasImports && hasActiveServingStore) {
             log.info("Has imports but no schema change, going to update " + mainEntity());
             return true;
         }
-        // TODO: cannot find a case that needs update instead of rebuild
-        log.info("Not going to update " + mainEntity());
+        log.info("No reason to update " + mainEntity());
         return false;
     }
 

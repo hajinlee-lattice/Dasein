@@ -208,51 +208,50 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     }
 
     private TransformationStepConfig addTrxDate() {
-
-        TransformationStepConfig step2 = new TransformationStepConfig();
-        step2.setTransformer(DataCloudConstants.PERIOD_DATE_CONVERTOR);
-        step2.setInputSteps(Collections.singletonList(inputMergeStep));
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.PERIOD_DATE_CONVERTOR);
+        step.setInputSteps(Collections.singletonList(inputMergeStep));
         PeriodDateConvertorConfig config = new PeriodDateConvertorConfig();
         config.setTrxTimeField(InterfaceName.TransactionTime.name());
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setTrxDayPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step2.setConfiguration(JsonUtils.serialize(config));
-        return step2;
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
     }
 
 
     private TransformationStepConfig collectDays() {
-        TransformationStepConfig step2 = new TransformationStepConfig();
-        step2.setTransformer(DataCloudConstants.PERIOD_COLLECTOR);
-        step2.setInputSteps(Collections.singletonList(dailyStep));
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.PERIOD_COLLECTOR);
+        step.setInputSteps(Collections.singletonList(dailyStep));
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step2.setConfiguration(JsonUtils.serialize(config));
-        return step2;
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
     }
 
 
     private TransformationStepConfig partitionDaily() {
-        TransformationStepConfig step2 = new TransformationStepConfig();
-        step2.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
         List<Integer> inputSteps = new ArrayList<Integer>();
         inputSteps.add(dayPeriodStep);
         inputSteps.add(dailyStep);
-        step2.setInputSteps(inputSteps);
+        step.setInputSteps(inputSteps);
 
         String tableSourceName = "CustomerUniverse";
         String sourceTableName = rawTable.getName();
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
         List<String> baseSources = Collections.singletonList(tableSourceName);
-        step2.setBaseSources(baseSources);
+        step.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
-        step2.setBaseTables(baseTables);
+        step.setBaseTables(baseTables);
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step2.setConfiguration(JsonUtils.serialize(config));
-        return step2;
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
     }
 
     private TransformationStepConfig collectDailyData() {

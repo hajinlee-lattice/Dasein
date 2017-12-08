@@ -4,27 +4,27 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.merge.InitializeTransaction;
-import com.latticeengines.cdl.workflow.steps.merge.MergeTransactionWrapper;
+import com.latticeengines.cdl.workflow.steps.update.ClonePurchaseHistory;
+import com.latticeengines.cdl.workflow.steps.update.ProcessTransactionDiff;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("processTransactionWorkflow")
-public class ProcessTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+@Component("updateTransactionWorkflow")
+public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
 
     @Inject
-    private InitializeTransaction initializeTransaction;
+    private ClonePurchaseHistory clonePurchaseHistory;
 
     @Inject
-    private MergeTransactionWrapper mergeTransactionWrapper;
+    private ProcessTransactionDiff processTransactionDiff;
 
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(initializeTransaction) //
-                .next(mergeTransactionWrapper) //
+                .next(clonePurchaseHistory) //
+                .next(processTransactionDiff) //
                 .build();
     }
 }

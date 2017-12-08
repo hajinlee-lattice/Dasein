@@ -56,8 +56,10 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
         BaseWrapperStepConfiguration stepConfig = getObjectFromContext(configuration.getClass().getName(),
                 configuration.getClass());
         log.info("Switch " + configuration.getClass().getName() + " to " + PRE_PROCESSING);
-        stepConfig.setPhase(PRE_PROCESSING);
-        putObjectInContext(configuration.getClass().getName(), stepConfig);
+        if (stepConfig != null) {
+            stepConfig.setPhase(PRE_PROCESSING);
+            putObjectInContext(configuration.getClass().getName(), stepConfig);
+        }
     }
 
     protected void report(ReportPurpose purpose, String name, String json) {
