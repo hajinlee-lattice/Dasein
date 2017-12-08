@@ -377,6 +377,8 @@ angular
             .state('home.ratingsengine.wizard.segment.attributes.add', {
                 url: '/add',
                 params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Rating Engines',
                     section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
