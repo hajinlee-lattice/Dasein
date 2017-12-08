@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,6 +153,14 @@ public class RedshiftServiceImpl implements RedshiftService {
         log.info("Clone table " + srcTable + " to " + tgtTable);
         redshiftJdbcTemplate.execute(String.format("CREATE TABLE %s (LIKE %s)", tgtTable, srcTable));
         redshiftJdbcTemplate.execute(String.format("INSERT INTO %s (SELECT * FROM %s)", tgtTable, srcTable));
+    }
+
+    @Override
+    public boolean hasTable(String tableName) {
+        String sql = "SELECT tablename FROM pg_table_def WHERE schemaname = 'public'" //
+                + " AND tablename = '" + tableName.toLowerCase() + "';";
+        List<Map<String, Object>> results = redshiftJdbcTemplate.queryForList(sql);
+        return CollectionUtils.isNotEmpty(results);
     }
 
     @Override

@@ -3,11 +3,18 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,6 +22,8 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -33,6 +42,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -49,11 +59,13 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -103,11 +115,17 @@ public class CheckpointService {
     @Inject
     private TestArtifactService testArtifactService;
 
+    @Inject
+    private RedshiftService redshiftService;
+
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
+
+    @Value("${common.le.stack}")
+    private String leStack;
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -115,14 +133,15 @@ public class CheckpointService {
 
     private String checkpointDir;
 
+    private Map<TableRoleInCollection, String> savedRedshiftTables =  new HashMap<>();
+
     void setMaintestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
     }
 
     void verifyFirstProfileCheckpoint() throws IOException {
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
-                TableRoleInCollection.ConsolidatedAccount, (long) ACCOUNT_IMPORT_SIZE_1,
-                TableRoleInCollection.ConsolidatedContact, (long) CONTACT_IMPORT_SIZE_1,
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(TableRoleInCollection.ConsolidatedAccount,
+                (long) ACCOUNT_IMPORT_SIZE_1, TableRoleInCollection.ConsolidatedContact, (long) CONTACT_IMPORT_SIZE_1,
                 TableRoleInCollection.ConsolidatedProduct, (long) PRODUCT_IMPORT_SIZE_1,
                 TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
         verifyCheckpoint(expectedCounts);
@@ -132,9 +151,8 @@ public class CheckpointService {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
         long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
-                TableRoleInCollection.ConsolidatedAccount, numAccounts,
-                TableRoleInCollection.ConsolidatedContact, numContacts,
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(TableRoleInCollection.ConsolidatedAccount,
+                numAccounts, TableRoleInCollection.ConsolidatedContact, numContacts,
                 TableRoleInCollection.ConsolidatedProduct, numProducts);
         verifyCheckpoint(expectedCounts);
     }
@@ -143,11 +161,10 @@ public class CheckpointService {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
         long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
-                TableRoleInCollection.ConsolidatedAccount, numAccounts,
-                TableRoleInCollection.ConsolidatedContact, numContacts,
-                TableRoleInCollection.ConsolidatedProduct, numProducts,
-                TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_2);
+        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(TableRoleInCollection.ConsolidatedAccount,
+                numAccounts, TableRoleInCollection.ConsolidatedContact, numContacts,
+                TableRoleInCollection.ConsolidatedProduct, numProducts, TableRoleInCollection.CalculatedPurchaseHistory,
+                (long) NUM_PURCHASE_HISTORY_2);
         verifyCheckpoint(expectedCounts);
     }
 
@@ -169,12 +186,18 @@ public class CheckpointService {
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
         String[] tenantNames = new String[1];
 
+        Map<String, String> redshiftTablesToClone = new HashMap<>();
+
         for (DataCollection.Version version : DataCollection.Version.values()) {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 Table table = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
                 if (table != null) {
                     metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                     dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
+                    String redshiftTable = checkpointRedshiftTableName(checkpoint, role, S3_CHECKPOINTS_VERSION);
+                    if (redshiftService.hasTable(redshiftTable)) {
+                        redshiftTablesToClone.put(redshiftTable, table.getName());
+                    }
                 }
             }
             StatisticsContainer statisticsContainer = parseCheckpointStatistics(checkpoint, version);
@@ -182,6 +205,8 @@ public class CheckpointService {
                 dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
             }
         }
+
+        cloneRedshiftTables(redshiftTablesToClone);
 
         uploadCheckpointHdfs(checkpoint);
 
@@ -193,10 +218,38 @@ public class CheckpointService {
         logger.info("Switch active version to " + activeVersion);
     }
 
+    private void cloneRedshiftTables(Map<String, String> redshiftTablesToClone) {
+        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("redshift-clone", 2);
+        List<Future<?>> futures = new ArrayList<>();
+        redshiftTablesToClone.forEach((src, tgt) -> {
+            Future future = executorService.submit(() -> {
+                String msg = "Cloning redshift table " + src + " to " + tgt;
+                try (PerformanceTimer timer = new PerformanceTimer(msg)) {
+                    redshiftService.cloneTable(src, tgt);
+                }
+            });
+            futures.add(future);
+        });
+        while (!futures.isEmpty()) {
+            List<Future<?>> completed = new ArrayList<>();
+            futures.forEach(future -> {
+                try {
+                    future.get(5, TimeUnit.SECONDS);
+                    completed.add(future);
+                } catch (TimeoutException e) {
+                    // ignore
+                } catch (InterruptedException|ExecutionException e) {
+                    throw new RuntimeException("Failed to clone redshift table.", e);
+                }
+            });
+            completed.forEach(futures::remove);
+        }
+    }
+
     private void unzipCheckpoint(String checkpoint) throws IOException {
         checkpointDir = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
-        File downloadedFile = testArtifactService
-                .downloadTestArtifact(S3_CHECKPOINTS_DIR, S3_CHECKPOINTS_VERSION, checkpoint + ".zip");
+        File downloadedFile = testArtifactService.downloadTestArtifact(S3_CHECKPOINTS_DIR, S3_CHECKPOINTS_VERSION,
+                checkpoint + ".zip");
         String zipFilePath = downloadedFile.getPath();
         try {
             ZipFile zipFile = new ZipFile(zipFilePath);
@@ -213,7 +266,8 @@ public class CheckpointService {
         if (table == null) {
             Assert.fail("Cannot find table in role " + role);
         }
-        logger.info("countRole " + role.name() + " Table " + table.getName() + " Path " + table.getExtracts().get(0).getPath());
+        logger.info("countRole " + role.name() + " Table " + table.getName() + " Path "
+                + table.getExtracts().get(0).getPath());
         return table.getExtracts().get(0).getProcessedRecords();
     }
 
@@ -279,8 +333,8 @@ public class CheckpointService {
         return DataCollection.Version.valueOf(version);
     }
 
-    private Table parseCheckpointTable(String checkpoint, String tableName, DataCollection.Version version, String[] tenantNames)
-            throws IOException {
+    private Table parseCheckpointTable(String checkpoint, String tableName, DataCollection.Version version,
+            String[] tenantNames) throws IOException {
 
         logger.info("Parse check point " + checkpoint + " table " + tableName + "version" + version.name());
         String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
@@ -423,12 +477,19 @@ public class CheckpointService {
             String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
             FileUtils.forceMkdir(new File(tablesDir));
 
+            DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpoint);
+                if (active.equals(version)) {
+                    saveRedshiftTableIfExists(role, version, checkpoint);
+                }
             }
 
             saveStatsIfExists(version, checkpoint);
         }
+
+        printSaveRedshiftStatements(checkpoint);
 
         saveCheckpointVersion(checkpoint);
     }
@@ -464,6 +525,25 @@ public class CheckpointService {
         }
     }
 
+    private void saveRedshiftTableIfExists(TableRoleInCollection role, DataCollection.Version version,
+            String checkpoint) {
+        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role, version);
+        if (table != null) {
+            List<String> redshiftTables = redshiftService.getTables(table.getName());
+            if (CollectionUtils.isNotEmpty(redshiftTables)) {
+                if (redshiftTables.size() != 1) {
+                    throw new IllegalStateException("There are " + redshiftTables.size()
+                            + " redshift tables prefixed by " + table.getName() + ": " + redshiftTables);
+                }
+                String oldTable = redshiftTables.get(0);
+                String newTable = String.format("cdlend2end_%s_%s_%s", checkpoint, role.name(), leStack);
+                redshiftService.dropTable(newTable);
+                redshiftService.renameTable(oldTable, newTable);
+                savedRedshiftTables.put(role, newTable);
+            }
+        }
+    }
+
     private void saveStatsIfExists(DataCollection.Version version, String checkpoint) throws IOException {
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId(), version);
         if (statisticsContainer != null) {
@@ -473,6 +553,32 @@ public class CheckpointService {
         } else {
             logger.info("There is no stats at version " + version);
         }
+    }
+
+    private void printSaveRedshiftStatements(String checkpoint) {
+        if (MapUtils.isNotEmpty(savedRedshiftTables)) {
+            String nextVersion = String.valueOf(Integer.valueOf(S3_CHECKPOINTS_VERSION) + 1);
+            String msg = "If you are going to save the checkpoint to version " + nextVersion;
+            msg += ", you can run following statements in redshift:\n\n";
+            List<String> dropTables = new ArrayList<>();
+            List<String> renameTables = new ArrayList<>();
+            savedRedshiftTables.forEach((role, table) -> {
+                String tgtTable = checkpointRedshiftTableName(checkpoint, role, nextVersion);
+                dropTables.add("drop table if exists " + tgtTable + ";");
+                renameTables.add(String.format("alter table %s rename to %s;", table, tgtTable));
+            });
+            for (String statement : dropTables) {
+                msg += statement + "\n";
+            }
+            for (String statement : renameTables) {
+                msg += statement + "\n";
+            }
+            logger.info(msg);
+        }
+    }
+
+    private String checkpointRedshiftTableName(String checkpoint, TableRoleInCollection role, String checkpointVersion) {
+        return String.format("cdlend2end_%s_%s_%s", checkpoint, role.name(), checkpointVersion);
     }
 
 }

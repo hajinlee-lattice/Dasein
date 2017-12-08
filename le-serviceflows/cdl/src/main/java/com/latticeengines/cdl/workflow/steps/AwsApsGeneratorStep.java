@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -25,7 +27,7 @@ import com.latticeengines.workflow.core.BaseAwsPythonBatchStep;
 @Component("awsApsGeneratorStep")
 public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchConfiguration> {
 
-    private static final String APS = "AnalyticPurchaseState";
+    private static final String APS = TableRoleInCollection.AnalyticPurchaseState.name();
 
     @Value("${cdl.aps.generate.enabled:false}")
     private boolean apsEnabled;
@@ -93,9 +95,15 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                     HdfsUtils.rename(yarnConfiguration, newHdfsPath, hdfsPath);
                 }
 
-                Table apsTable = MetaDataTableUtils.createTable(yarnConfiguration, APS, hdfsPath);
+                String tableName = NamingUtils.timestamp(APS);
+                String customerSpace = configuration.getCustomerSpace().toString();
+
+                Table apsTable = MetaDataTableUtils.createTable(yarnConfiguration, tableName, hdfsPath);
                 apsTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
-                metadataProxy.updateTable(configuration.getCustomerSpace().toString(), APS, apsTable);
+                metadataProxy.updateTable(customerSpace, tableName, apsTable);
+                DataCollection.Version inactive = dataCollectionProxy.getInactiveVersion(customerSpace);
+                dataCollectionProxy.upsertTable(customerSpace, tableName, TableRoleInCollection.AnalyticPurchaseState,
+                        inactive);
             } else {
                 throw new RuntimeException("There's no new APS file created!");
             }

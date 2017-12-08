@@ -9,8 +9,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -25,7 +27,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEven
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 
 @Component("createCdlEventTableStep")
 public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConfiguration> {
@@ -36,6 +40,11 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
+
+    @Value("${dataplatform.queue.scheme}")
+    private String queueScheme;
+
+    private String clonedApsTableName;
 
     @Override
     public void onConfigurationInitialized() {
@@ -77,11 +86,17 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     }
 
     private Table getAndSetApsTable() {
-        Table apsTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), "AnalyticPurchaseState");
+        String customerSpace = configuration.getCustomerSpace().toString();
+        Table apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState);
         if (apsTable == null) {
             throw new RuntimeException("There's no AnalyticPurchaseState table!");
         }
-        List<Attribute> attributes = apsTable.getAttributes();
+        clonedApsTableName = NamingUtils.timestamp(TableRoleInCollection.AnalyticPurchaseState.name());
+        String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+        Table clonedApsTable = TableCloneUtils.cloneDataTable(yarnConfiguration, configuration.getCustomerSpace(),
+                clonedApsTableName, apsTable, queue);
+        List<Attribute> attributes = clonedApsTable.getAttributes();
         for (Attribute attribute : attributes) {
             String name = attribute.getName();
             if ("LEAccount_ID".equalsIgnoreCase(name) || "Period_ID".equalsIgnoreCase(name)
@@ -100,9 +115,8 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
                 setDisplayNameAndOthers(attribute, name);
             }
         }
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), "AnalyticPurchaseState", apsTable);
-        return apsTable;
-
+        metadataProxy.createTable(customerSpace, clonedApsTableName, clonedApsTable);
+        return metadataProxy.getTable(customerSpace, clonedApsTableName);
     }
 
     private Table getAndSetInputTable() {
@@ -177,6 +191,8 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
                 configuration.getTargetTableName());
         putObjectInContext(configuration.getOutputTableName(), eventTable);
         putStringValueInContext(MATCH_FETCH_ONLY, "true");
+
+        metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), clonedApsTableName);
     }
 
 }

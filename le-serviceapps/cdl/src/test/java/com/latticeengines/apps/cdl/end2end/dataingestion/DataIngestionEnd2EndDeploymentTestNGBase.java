@@ -444,8 +444,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     boolean exportEntityToRedshift(BusinessEntity entity) {
         TableRoleInCollection role = entity.getServingStore();
-        logger.info("Started exporting " + role + " to redshift ...");
         Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role);
+
+        logger.info("Started exporting " + role + " to redshift ...");
         ExportConfiguration exportConfiguration = setupExportConfig(table, table.getName(), role);
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfiguration);
         int timeout = new Long(TimeUnit.MINUTES.toSeconds(60)).intValue();

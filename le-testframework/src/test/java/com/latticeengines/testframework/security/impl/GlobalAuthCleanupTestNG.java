@@ -242,7 +242,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         }
     }
 
-    private void cleanupRedshift() throws Exception {
+    private void cleanupRedshift() {
         try {
             List<String> tables = redshiftService.getTables(TestFrameworkUtils.TENANTID_PREFIX);
             if (tables != null && !tables.isEmpty()) {

@@ -25,6 +25,8 @@ public enum TableRoleInCollection {
     AggregatedPeriodTransaction, //
     CalculatedPurchaseHistory, //
 
+    AnalyticPurchaseState, //
+
     AccountMaster;
 
     private InterfaceName primaryKey;

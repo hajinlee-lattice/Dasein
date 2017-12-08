@@ -8,6 +8,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_2;
 
 import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -38,7 +39,7 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         verifySecondConsolidateCheckpoint();
 
         dataFeedProxy.rebuildTransaction(mainTestTenant.getId(), Boolean.FALSE);
-        dataFeedProxy.updateEarliestTransaction(mainTestTenant.getId(), new Integer(42967));
+        dataFeedProxy.updateEarliestTransaction(mainTestTenant.getId(), 42967);
         Table rawTable = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.ConsolidatedRawTransaction);
         Integer earliestDayPeriod = TimeSeriesUtils.getEarliestPeriod(yarnConfiguration, rawTable);
         dataFeedProxy.updateEarliestTransaction(mainTestTenant.getId(), earliestDayPeriod);
@@ -48,7 +49,6 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         verifyProfile();
 
         verifySecondProfileCheckpoint();
-        saveCheckpoint("profile2");
     }
 
     private void importData() throws Exception {

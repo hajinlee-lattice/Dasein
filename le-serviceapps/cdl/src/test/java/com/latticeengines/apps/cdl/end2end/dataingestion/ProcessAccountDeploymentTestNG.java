@@ -40,8 +40,8 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
 
         importData();
         processAnalyze();
-        saveCheckpoint("process1");
         verifyProcess();
+        // saveCheckpoint("process1");
     }
 
     private void importData() throws Exception {

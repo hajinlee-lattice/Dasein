@@ -138,10 +138,18 @@ public class HdfsUtils {
     public static final void distcp(Configuration configuration, String srcPath, String tgtPath, String queue) throws Exception {
         DistCpOptions options = new DistCpOptions(new Path(srcPath), new Path(tgtPath));
         log.info("Running distcp from " + srcPath + " to " + tgtPath + " using queue " + queue);
-        ToolRunner.run(new DistCp(configuration, options), new String[]{
-                "-Dmapred.job.queue.name=" + queue, //
-                srcPath, tgtPath
-        });
+        String[] args = new String[]{"-Dmapreduce.job.queuename=" + queue, srcPath, tgtPath};
+        EncryptionZone srcZone = getEncryptionZone(configuration, srcPath);
+        EncryptionZone dstZone = getEncryptionZone(configuration, tgtPath);
+        if (srcZone != null || dstZone != null) {
+            log.info("Encryption zone is involved, skipping checksum check.");
+            options.setSkipCRC(true);
+            args = new String[]{"-Dmapreduce.job.queuename=" + queue, "-skipcrccheck", "-update", srcPath, tgtPath};
+        }
+        int exit = ToolRunner.run(new DistCp(configuration, options), args);
+        if (exit != 0) {
+            throw new RuntimeException("DistCp exited with code " + exit);
+        }
         log.info("Finished distcp from " + srcPath + " to " + tgtPath + ".");
     }
 
@@ -512,26 +520,32 @@ public class HdfsUtils {
     }
 
     public static boolean moveFile(Configuration configuration, String src, String dst) throws IOException {
+        if (inDifferentEncryptionZone(configuration, src, dst)) {
+            log.info("Using copy instead of move.");
+            if (copyFiles(configuration, src, dst)) {
+                rmdir(configuration, src);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            return fs.rename(new Path(src), new Path(dst));
+        }
+    }
+
+    public static boolean inDifferentEncryptionZone(Configuration configuration, String src, String dst) throws IOException {
         EncryptionZone dstZone = getEncryptionZone(configuration, dst);
         if (dstZone != null) {
             EncryptionZone srcZone = getEncryptionZone(configuration, src);
             if (srcZone == null || !keyEquals(srcZone, dstZone)) {
                 String dstKey = "Key = " + dstZone.getKeyName();
                 String srcKey = srcZone == null ? "No Key" : srcZone.getKeyName();
-                log.info(String.format(
-                        "Destination (%s) is encrypted differently than source (%s). Use copy and rm instead of mv.",
-                        dstKey, srcKey));
-                if (copyFiles(configuration, src, dst)) {
-                    rmdir(configuration, src);
-                    return true;
-                } else {
-                    return false;
-                }
+                log.info(String.format("Destination (%s) is encrypted differently than source (%s).", dstKey, srcKey));
+                return true;
             }
         }
-        try (FileSystem fs = FileSystem.newInstance(configuration)) {
-            return fs.rename(new Path(src), new Path(dst));
-        }
+        return false;
     }
 
     public static boolean rename(Configuration configuration, String src, String dst) throws IOException {

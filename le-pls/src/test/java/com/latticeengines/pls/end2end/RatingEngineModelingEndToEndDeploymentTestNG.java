@@ -153,7 +153,9 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         Table accountTable = setupTable(customerSpace, accountFileName, accountTableName);
 
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace.toString());
-        dataCollectionProxy.upsertTable(customerSpace.toString(), accountTable.getName(),
+        dataCollectionProxy.upsertTable(customerSpace.toString(), apsTableName, //
+                TableRoleInCollection.AnalyticPurchaseState, version);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), accountTable.getName(), //
                 TableRoleInCollection.ConsolidatedAccount, version);
     }
 

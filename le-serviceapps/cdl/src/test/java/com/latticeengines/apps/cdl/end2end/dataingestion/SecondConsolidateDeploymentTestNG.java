@@ -55,8 +55,6 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         resumeCheckpoint("profile1");
         verifyFirstProfileCheckpoint();
 
-        uploadRedshift();
-
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
 
@@ -88,10 +86,9 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
         importData();
         consolidate();
+        // saveCheckpoint("consolidate2");
         verifyConsolidate();
-
         verifySecondConsolidateCheckpoint();
-        saveCheckpoint("consolidate2");
     }
 
     private void uploadRedshift() {

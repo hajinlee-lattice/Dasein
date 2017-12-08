@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class TableCloneUtils {
 
@@ -44,7 +43,6 @@ public class TableCloneUtils {
                 if (HdfsUtils.fileExists(yarnConfiguration, cloneDataPath)) {
                     HdfsUtils.rmdir(yarnConfiguration, cloneDataPath);
                 }
-                HdfsUtils.mkdir(yarnConfiguration, cloneDataPath);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to create table dir at " + cloneDataPath);
             }
@@ -74,7 +72,7 @@ public class TableCloneUtils {
         clone.setExtracts(Collections.singletonList(newExtract));
 
         String oldTableSchema = PathBuilder.buildDataTableSchemaPath(CamilleEnvironment.getPodId(),
-                MultiTenantContext.getCustomerSpace(), original.getNamespace()).append(original.getName()).toString();
+                customerSpace, original.getNamespace()).append(original.getName()).toString();
         String cloneTableSchema = oldTableSchema.replace(original.getName(), clone.getName());
 
         try {

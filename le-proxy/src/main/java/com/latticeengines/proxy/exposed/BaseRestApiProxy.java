@@ -183,11 +183,20 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <B> void put(final String method, final String url, final B body) {
+        put(method, url, body, true);
+    }
+
+    protected <B> void put(final String method, final String url, final B body, boolean logBody) {
         RetryTemplate retry = getRetryTemplate();
         retry.execute((RetryCallback<Void, RuntimeException>) context -> {
             try {
-                log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
-                        body, context.getRetryCount() + 1));
+                if (logBody) {
+                    log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
+                            body, context.getRetryCount() + 1));
+                } else {
+                    log.info(String.format("Invoking %s by putting to url %s.  (Attempt=%d)", method, url,
+                            context.getRetryCount() + 1));
+                }
                 restTemplate.put(url, body);
                 return null;
             } catch (LedpException e) {

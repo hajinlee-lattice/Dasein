@@ -43,7 +43,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     public void runTest() throws Exception {
         runPreCheckInTest();
         verifyFirstProfileCheckpoint();
-        saveCheckpoint("profile1");
+        // saveCheckpoint("profile1");
     }
 
     @Test(groups = "precheckin")
