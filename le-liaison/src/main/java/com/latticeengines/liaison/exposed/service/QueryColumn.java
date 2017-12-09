@@ -94,7 +94,7 @@ public abstract class QueryColumn {
 
     public void setTags(String value) throws BadMetadataValueException {
         if (!tagsValues.contains(value)) {
-            throw new BadMetadataValueException(String.format("Cannot set Tags to %s", value));
+            throw new BadMetadataValueException(String.format("Cannot set Tags to %s for column %s", value, this.name));
         }
         metadata.put("Tags", value);
     }
