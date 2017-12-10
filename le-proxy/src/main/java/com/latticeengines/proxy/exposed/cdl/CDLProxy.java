@@ -8,6 +8,7 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("cdlProxy")
@@ -63,9 +64,9 @@ public class CDLProxy extends MicroserviceRestApiProxy {
 
     @SuppressWarnings("unchecked")
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
-                                     String metadata) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks?source={source}" +
-                        "&feedtype={feedtype}&entity={entity}",
+                                           CDLImportConfig metadata) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create" +
+                        "?source={source}&feedtype={feedtype}&entity={entity}",
                 shortenCustomerSpace(customerSpace), source, feedType, entity);
         ResponseDocument<String> responseDoc = post("createDataFeedTask", url, metadata, ResponseDocument.class);
         if (responseDoc == null) {
@@ -80,8 +81,8 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId submitImportJob(String customerSpace, String taskIdentifier, String importConfig) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import" +
+    public ApplicationId submitImportJob(String customerSpace, String taskIdentifier, CDLImportConfig importConfig) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import/internal" +
                 "/{taskIdentifier}", customerSpace, taskIdentifier);
         ResponseDocument<String> responseDoc = post("submitImportJob", url, importConfig, ResponseDocument.class);
         if (responseDoc == null) {

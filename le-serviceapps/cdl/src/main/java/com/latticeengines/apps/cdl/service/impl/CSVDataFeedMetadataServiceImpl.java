@@ -12,9 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
-import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -35,12 +36,11 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         super(SourceType.FILE.getName());
     }
 
-    @Override
-    public Table getMetadata(String metadataStr, String entity) {
-        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
-        log.info("Template table name: " + importConfig.getTemplateName());
-        Table metaTable = metadataProxy.getTable(importConfig.getCustomerSpace().toString(),
-                importConfig.getTemplateName());
+    public Table getMetadata(CDLImportConfig importConfig, String entity) {
+        CSVImportConfig csvImportConfig = (CSVImportConfig) importConfig;
+        log.info("Template table name: " + csvImportConfig.getCsvToHdfsConfiguration().getTemplateName());
+        Table metaTable = metadataProxy.getTable(csvImportConfig.getCsvToHdfsConfiguration().getCustomerSpace().toString(),
+                csvImportConfig.getCsvToHdfsConfiguration().getTemplateName());
         if (BusinessEntity.getByName(entity) == BusinessEntity.Account) {
             List<ColumnSelection.Predefined> groups = new ArrayList<>();
             groups.add(ColumnSelection.Predefined.TalkingPoint);
@@ -106,16 +106,16 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public CustomerSpace getCustomerSpace(String metadataStr) {
-        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
-        return importConfig.getCustomerSpace();
+    public CustomerSpace getCustomerSpace(CDLImportConfig importConfig) {
+        CSVToHdfsConfiguration csvmportConfig = ((CSVImportConfig) importConfig).getCsvToHdfsConfiguration();
+        return csvmportConfig.getCustomerSpace();
     }
 
     @Override
-    public String getConnectorConfig(String metadataStr, String jobIdentifier) {
-        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
-        importConfig.setJobIdentifier(jobIdentifier);
-        return JsonUtils.serialize(importConfig);
+    public String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier) {
+        CSVToHdfsConfiguration csvmportConfig = ((CSVImportConfig) importConfig).getCsvToHdfsConfiguration();;
+        csvmportConfig.setJobIdentifier(jobIdentifier);
+        return JsonUtils.serialize(csvmportConfig);
     }
 
     @Override
@@ -128,24 +128,14 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public String getFileName(String metadataStr) {
-        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
-        return importConfig.getFileName();
+    public String getFileName(CDLImportConfig importConfig) {
+        CSVImportConfig csvImportConfig = (CSVImportConfig) importConfig;
+        return csvImportConfig.getReportFileName();
     }
 
     @Override
-    public String getFileDisplayName(String metadataStr) {
-        CSVToHdfsConfiguration importConfig = deserializeMetadataStrToConfig(metadataStr);
-        return importConfig.getFileDisplayName();
-    }
-
-    private CSVToHdfsConfiguration deserializeMetadataStrToConfig(String metadataStr) {
-        CSVToHdfsConfiguration importConfig;
-        try {
-            importConfig = JsonUtils.deserialize(metadataStr, CSVToHdfsConfiguration.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot deserialize CSV import metadata!");
-        }
-        return importConfig;
+    public String getFileDisplayName(CDLImportConfig importConfig) {
+        CSVImportConfig csvImportConfig = (CSVImportConfig) importConfig;
+        return csvImportConfig.getReportFileDisplayName();
     }
 }

@@ -19,6 +19,8 @@ import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
@@ -45,14 +47,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         super(SourceType.VISIDB.getName());
     }
 
-    @Override
-    public Table getMetadata(String metadataStr, String entity) {
-        VdbLoadTableConfig vdbLoadTableConfig = null;
-        try {
-            vdbLoadTableConfig = JsonUtils.deserialize(metadataStr, VdbLoadTableConfig.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot deserialize vdb table metadata!");
-        }
+    public Table getMetadata(CDLImportConfig importConfig, String entity) {
+        VdbLoadTableConfig vdbLoadTableConfig = ((VdbImportConfig) importConfig).getVdbLoadTableConfig();
         Table metaTable = new Table();
         for (VdbSpecMetadata metadata : vdbLoadTableConfig.getMetadataList()) {
             Attribute attr = VdbMetadataUtils.convertToAttribute(metadata, entity);
@@ -255,25 +251,15 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public CustomerSpace getCustomerSpace(String metadataStr) {
-        VdbLoadTableConfig vdbLoadTableConfig;
-        try {
-            vdbLoadTableConfig = JsonUtils.deserialize(metadataStr, VdbLoadTableConfig.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot deserialize vdb table metadata!");
-        }
-
+    public CustomerSpace getCustomerSpace(CDLImportConfig importConfig) {
+        log.info("Config:" + JsonUtils.serialize(importConfig));
+        VdbLoadTableConfig vdbLoadTableConfig = ((VdbImportConfig) importConfig).getVdbLoadTableConfig();
         return CustomerSpace.parse(vdbLoadTableConfig.getTenantId());
     }
 
     @Override
-    public String getConnectorConfig(String metadataStr, String jobIdentifier) {
-        VdbLoadTableConfig vdbLoadTableConfig = null;
-        try {
-            vdbLoadTableConfig = JsonUtils.deserialize(metadataStr, VdbLoadTableConfig.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot deserialize vdb table metadata!");
-        }
+    public String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier) {
+        VdbLoadTableConfig vdbLoadTableConfig = ((VdbImportConfig) importConfig).getVdbLoadTableConfig();
         VdbConnectorConfiguration vdbConnectorConfiguration = new VdbConnectorConfiguration();
         vdbConnectorConfiguration.setGetQueryDataEndpoint(vdbLoadTableConfig.getGetQueryDataEndpoint());
         vdbConnectorConfiguration.setReportStatusEndpoint(vdbLoadTableConfig.getReportStatusEndpoint());
@@ -334,13 +320,13 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public String getFileName(String metadataStr) {
+    public String getFileName(CDLImportConfig importConfig) {
         return String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
                 new SimpleDateFormat(DATE_FORMAT).format(new Date()));
     }
 
     @Override
-    public String getFileDisplayName(String metadataStr) {
+    public String getFileDisplayName(CDLImportConfig importConfig) {
         return String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
                 new SimpleDateFormat(DATE_FORMAT).format(new Date()));
     }

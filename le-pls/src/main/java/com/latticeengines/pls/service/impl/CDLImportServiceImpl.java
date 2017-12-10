@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -28,7 +29,7 @@ public class CDLImportServiceImpl implements CDLImportService {
     @Override
     public ApplicationId submitCSVImport(String customerSpace, String templateFileName, String dataFileName,
             String source, String entity, String feedType) {
-        String metaData = generateImportConfigStr(customerSpace.toString(), templateFileName, dataFileName);
+        CSVImportConfig metaData = generateImportConfig(customerSpace.toString(), templateFileName, dataFileName);
         String taskId = cdlProxy.createDataFeedTask(customerSpace.toString(), source, entity, feedType, metaData);
         if (StringUtils.isEmpty(taskId)) {
             throw new LedpException(LedpCode.LEDP_18162, new String[] {entity, source, feedType});
@@ -37,7 +38,7 @@ public class CDLImportServiceImpl implements CDLImportService {
     }
 
     @VisibleForTesting
-    String generateImportConfigStr(String customerSpace, String templateFileName, String dataFileName) {
+    CSVImportConfig generateImportConfig(String customerSpace, String templateFileName, String dataFileName) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         SourceFile templateSourceFile = getSourceFile(templateFileName);
         SourceFile dataSourceFile = getSourceFile(dataFileName);
@@ -47,11 +48,13 @@ public class CDLImportServiceImpl implements CDLImportService {
         importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         importConfig.setTemplateName(templateSourceFile.getTableName());
         importConfig.setFilePath(dataSourceFile.getPath());
-        importConfig.setFileDisplayName(dataSourceFile.getDisplayName());
-        importConfig.setFileName(dataSourceFile.getName());
         importConfig.setFileSource("HDFS");
+        CSVImportConfig csvImportConfig = new CSVImportConfig();
+        csvImportConfig.setCsvToHdfsConfiguration(importConfig);
+        csvImportConfig.setReportFileDisplayName(dataSourceFile.getDisplayName());
+        csvImportConfig.setReportFileName(dataSourceFile.getName());
 
-        return JsonUtils.serialize(importConfig);
+        return csvImportConfig;
     }
 
     @VisibleForTesting

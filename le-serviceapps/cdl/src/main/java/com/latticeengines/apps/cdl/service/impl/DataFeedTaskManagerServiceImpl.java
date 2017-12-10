@@ -22,6 +22,7 @@ import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -62,9 +63,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Override
     public String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source,
-            String metadata) {
+                                     CDLImportConfig importConfig) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
-        CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
+        CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(importConfig);
         if (dlTenantMappingEnabled) {
             log.info("DL tenant mapping is enabled");
             customerSpace = mapCustomerSpace(customerSpace);
@@ -74,7 +75,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
         }
         MultiTenantContext.setTenant(tenant);
-        Table newMeta = dataFeedMetadataService.getMetadata(metadata, entity);
+        Table newMeta = dataFeedMetadataService.getMetadata(importConfig, entity);
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
@@ -138,7 +139,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     @Override
-    public String submitImportJob(String customerSpaceStr, String taskIdentifier, String importConfig) {
+    public String submitImportJob(String customerSpaceStr, String taskIdentifier, CDLImportConfig importConfig) {
         CustomerSpace customerSpace = CustomerSpace.parse(customerSpaceStr);
         if (dlTenantMappingEnabled) {
             customerSpace = mapCustomerSpace(customerSpace);

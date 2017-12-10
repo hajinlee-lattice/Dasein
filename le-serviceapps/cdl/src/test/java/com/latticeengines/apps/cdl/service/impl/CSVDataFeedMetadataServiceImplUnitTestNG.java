@@ -6,9 +6,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 
 public class CSVDataFeedMetadataServiceImplUnitTestNG {
+
+    private CSVImportConfig csvImportConfig;
 
     private CSVToHdfsConfiguration importConfig;
 
@@ -30,32 +33,34 @@ public class CSVDataFeedMetadataServiceImplUnitTestNG {
         importConfig.setCustomerSpace(CUSTOMER_SPACE);
         importConfig.setTemplateName("templateName");
         importConfig.setFilePath("filePath");
-        importConfig.setFileDisplayName(FILE_DISPLAY_NAME);
-        importConfig.setFileName(FILE_NAME);
         importConfig.setFileSource("HDFS");
+        csvImportConfig = new CSVImportConfig();
+        csvImportConfig.setReportFileName(FILE_NAME);
+        csvImportConfig.setReportFileDisplayName(FILE_DISPLAY_NAME);
+        csvImportConfig.setCsvToHdfsConfiguration(importConfig);
         csvDataFeedMetadataServiceImpl = new CSVDataFeedMetadataServiceImpl();
     }
 
     @Test(groups = "unit")
     public void testgGetCustomerSpace() {
-        Assert.assertEquals(csvDataFeedMetadataServiceImpl.getCustomerSpace(JsonUtils.serialize(importConfig)),
+        Assert.assertEquals(csvDataFeedMetadataServiceImpl.getCustomerSpace(csvImportConfig),
                 CUSTOMER_SPACE);
     }
 
     @Test(groups = "unit")
     public void testGetFileName() {
-        Assert.assertEquals(csvDataFeedMetadataServiceImpl.getFileName(JsonUtils.serialize(importConfig)), FILE_NAME);
+        Assert.assertEquals(csvDataFeedMetadataServiceImpl.getFileName(csvImportConfig), FILE_NAME);
     }
 
     @Test(groups = "unit")
     public void testGetFileDisplayName() {
-        Assert.assertEquals(csvDataFeedMetadataServiceImpl.getFileDisplayName(JsonUtils.serialize(importConfig)),
+        Assert.assertEquals(csvDataFeedMetadataServiceImpl.getFileDisplayName(csvImportConfig),
                 FILE_DISPLAY_NAME);
     }
 
     @Test(groups = "unit")
     public void testGetConnectorConfig() {
-        String str = csvDataFeedMetadataServiceImpl.getConnectorConfig(JsonUtils.serialize(importConfig),
+        String str = csvDataFeedMetadataServiceImpl.getConnectorConfig(csvImportConfig,
                 JOB_IDENTIFIER);
         Assert.assertTrue(str.contains(JOB_IDENTIFIER));
     }

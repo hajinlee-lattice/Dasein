@@ -14,6 +14,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
+import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -28,9 +30,9 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     private static final Logger log = LoggerFactory.getLogger(VdbDataFeedMetadataServiceImplTestNG.class);
 
-    private String testVdbMetadata;
+    private VdbImportConfig testVdbMetadata;
 
-    private String errorVdbMetadata;
+    private VdbImportConfig errorVdbMetadata;
 
     private Table testTable;
 
@@ -42,11 +44,13 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     @BeforeClass(groups = "functional")
     private void setup() throws IOException {
         // setup test metadata string;
-        testVdbMetadata = IOUtils.toString(
+        testVdbMetadata = new VdbImportConfig();
+        errorVdbMetadata = new VdbImportConfig();
+        testVdbMetadata.setVdbLoadTableConfig(JsonUtils.deserialize(IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("metadata/vdb/testmetadata.json"),
-                "UTF-8");
-        errorVdbMetadata = IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("metadata/vdb/testmetadata_error.json"), "UTF-8");
+                "UTF-8"), VdbLoadTableConfig.class));
+        errorVdbMetadata.setVdbLoadTableConfig(JsonUtils.deserialize(IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("metadata/vdb/testmetadata_error.json"), "UTF-8"), VdbLoadTableConfig.class));
     }
 
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)

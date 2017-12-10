@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.avro.Schema.Type;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -21,19 +22,19 @@ public abstract class DataFeedMetadataService {
         return services.get(serviceName);
     }
 
-    public abstract Table getMetadata(String metadataStr, String entity);
+    public abstract Table getMetadata(CDLImportConfig importConfig, String entity);
 
     public abstract Table resolveMetadata(Table original, Table schemaTable);
 
     public abstract boolean compareMetadata(Table srcTable, Table targetTable, boolean needSameType);
 
-    public abstract CustomerSpace getCustomerSpace(String metadataStr);
+    public abstract CustomerSpace getCustomerSpace(CDLImportConfig importConfig);
 
-    public abstract String getFileName(String metadataStr);
+    public abstract String getFileName(CDLImportConfig importConfig);
 
-    public abstract String getFileDisplayName(String metadataStr);
+    public abstract String getFileDisplayName(CDLImportConfig importConfig);
 
-    public abstract String getConnectorConfig(String metadataStr, String jobIdentifier);
+    public abstract String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier);
 
     public boolean needUpdateDataFeedStatus() {
         return true;
