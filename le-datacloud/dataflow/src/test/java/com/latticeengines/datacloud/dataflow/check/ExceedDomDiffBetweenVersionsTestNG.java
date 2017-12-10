@@ -71,9 +71,9 @@ public class ExceedDomDiffBetweenVersionsTestNG extends DataCloudDataFlowFunctio
         parameters.setBaseTables(Arrays.asList(AVRO_INPUT, DATA2));
         ExceedDomDiffBetwenVersionChkParam checkParam = new ExceedDomDiffBetwenVersionChkParam();
         checkParam.setKeyField("LatticeID");
-        checkParam.setPrevVersionNotNullField("LDC_Domain");
-        checkParam.setPrevVersionNullField("LDC_DUNS");
-        checkParam.setCurrVersionNotNullField("LDC_Domain");
+        checkParam.setPrevVersionNotEmptyField("LDC_Domain");
+        checkParam.setPrevVersionEmptyField("LDC_DUNS");
+        checkParam.setCurrVersionNotEmptyField("LDC_Domain");
         checkParam.setCurrVersionNullField("LDC_DUNS");
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));

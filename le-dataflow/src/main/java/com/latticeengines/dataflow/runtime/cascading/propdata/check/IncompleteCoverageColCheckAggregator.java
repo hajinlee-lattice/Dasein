@@ -12,23 +12,22 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class IncompleteCoverageGroupCheckAggregator extends BaseAggregator<IncompleteCoverageGroupCheckAggregator.Context>
-        implements Aggregator<IncompleteCoverageGroupCheckAggregator.Context> {
+public class IncompleteCoverageColCheckAggregator extends BaseAggregator<IncompleteCoverageColCheckAggregator.Context>
+        implements Aggregator<IncompleteCoverageColCheckAggregator.Context> {
 
     private static final long serialVersionUID = -63265549792881813L;
 
-    private String checkField;
-    private List<String> coverageFieldList;
+    private Object checkField;
+    private List<Object> coverageFieldList;
 
-    public IncompleteCoverageGroupCheckAggregator(String checkField, List<String> coverageFieldList) {
+    public IncompleteCoverageColCheckAggregator(Object checkField, List<Object> coverageFieldList) {
         super(generateFieldDeclaration());
         this.checkField = checkField;
         this.coverageFieldList = coverageFieldList;
     }
 
     public static class Context extends BaseAggregator.Context {
-        HashSet<String> set = new HashSet<String>();
-        int count = 0;
+        HashSet<Object> set = new HashSet<Object>();
     }
 
     private static Fields generateFieldDeclaration() {
@@ -54,7 +53,7 @@ public class IncompleteCoverageGroupCheckAggregator extends BaseAggregator<Incom
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        String checkFieldVal = (String) arguments.getObject(checkField);
+        String checkFieldVal = (String) arguments.getObject(checkField.toString());
         if (checkFieldVal != null)
             context.set.add(checkFieldVal);
         return context;
@@ -62,29 +61,25 @@ public class IncompleteCoverageGroupCheckAggregator extends BaseAggregator<Incom
 
     @Override
     protected Tuple finalizeContext(Context context) {
-        String missingList = "";
-        Tuple result = null;
+        StringBuilder missingList = new StringBuilder("");
+        Tuple result = Tuple.size(getFieldDeclaration().size());
         if (!context.set.isEmpty()) {
-            for (String obj : coverageFieldList) {
-                System.out.println("coverageFieldList : " + obj);
+            for (Object obj : coverageFieldList) {
                 if (!((context.set).contains(obj))) {
-                    System.out.println("Entered inside : obj : " + obj);
-                    if (result == null) {
-                        result = Tuple.size(getFieldDeclaration().size());
-                        result.set(0, CheckCode.OutOfCoverageGroup.name());
-                        result.set(3, checkField);
-                    }
-                    if (missingList.isEmpty()) {
-                        missingList += obj;
+                    result = Tuple.size(getFieldDeclaration().size());
+                    result.set(0, CheckCode.OutOfCoverageValForCol.name());
+                    result.set(3, checkField);
+                    if (missingList.length() == 0) {
+                        missingList.append(obj);
                     } else {
-                        missingList += ", " + obj;
+                        missingList.append("," + obj);
                     }
 
                 }
             }
-            if (!missingList.isEmpty()) {
+            if (missingList.length() != 0) {
                 result.set(4, missingList);
-                result.set(5, CheckCode.OutOfCoverageGroup.getMessage(checkField, missingList));
+                result.set(5, CheckCode.OutOfCoverageValForCol.getMessage(checkField, missingList));
                 return result;
             }
         }

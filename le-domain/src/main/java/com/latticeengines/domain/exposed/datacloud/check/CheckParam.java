@@ -8,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "CheckCode")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DuplicatedValueCheckParam.class, name = "DuplicatedValue"),
-        @JsonSubTypes.Type(value = UnexpectedValueCheckParam.class, name = "ExceededCount"),
-        @JsonSubTypes.Type(value = EmptyOrNullFieldCheckParam.class, name = "EmptyOrNullField"),
+        @JsonSubTypes.Type(value = ExceededCountCheckParam.class, name = "ExceededCount"),
+        @JsonSubTypes.Type(value = EmptyFieldCheckParam.class, name = "EmptyOrNullField"),
         @JsonSubTypes.Type(value = UnderPopulatedFieldCheckParam.class, name = "UnderPopulatedField"),
-        @JsonSubTypes.Type(value = IncompleteCoverageGroupCheckParam.class, name = "OutOfCoverageGroup"),
-        @JsonSubTypes.Type(value = IncompleteCoverageRowCheckParam.class, name = "OutOfCoverageRow"),
+        @JsonSubTypes.Type(value = IncompleteCoverageForColCheckParam.class, name = "OutOfCoverageGroup"),
+        @JsonSubTypes.Type(value = IncompleteCoverageForRowCheckParam.class, name = "OutOfCoverageRow"),
         @JsonSubTypes.Type(value = DuplicatedValuesWithStatusCheckParam.class, name = "DuplicatedValuesWithStatus"),
         @JsonSubTypes.Type(value = ExceedDomDiffBetwenVersionChkParam.class, name = "ExceededVersionDiffForDomOnly"),
         @JsonSubTypes.Type(value = ExceedCntDiffBetwenVersionChkParam.class, name = "ExceededVersionDiffForNumOfBusinesses")

@@ -14,11 +14,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.EmptyOrNullFieldCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageForColCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
-public class EmptyOrNullFieldCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-    private static final Log log = LogFactory.getLog(EmptyOrNullFieldCheckTestNG.class);
+public class IncompleteColumnCoverageCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(IncompleteColumnCoverageCheckTestNG.class);
 
     @Override
     protected String getFlowBeanName() {
@@ -38,22 +38,24 @@ public class EmptyOrNullFieldCheckTestNG extends DataCloudDataFlowFunctionalTest
                 Pair.of("Key", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "key1" }, //
-                { 2, null }, //
-                { 3, "key3" }, //
-                { 4, "key2" }, //
-                { 5, "key1" }, //
-                { 6, null }, //
-                { 7, "key4" }, //
+                { 1, "RTS" }, //
+                { 2, "RTS" }, //
+                { 3, "HG" }, //
+                { 4, "Orb" }, //
+                { 5, "Orb" }, //
+                { 6, "RTS" }, //
+                { 7, "HG" }, //
         };
 
         uploadDataToSharedAvroInput(data, fields);
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        EmptyOrNullFieldCheckParam checkParam = new EmptyOrNullFieldCheckParam();
-        checkParam.setCheckNullField("Key");
-        checkParam.setKeyField("Id");
+        IncompleteCoverageForColCheckParam checkParam = new IncompleteCoverageForColCheckParam();
+        checkParam.setGroupByFields(Collections.singletonList("Key"));
+        Object[] fieldsArray = new Object[] { "DnB", "RTS", "HG", "Orb", "Manual" };
+        List<Object> expectedFieldValues = Arrays.asList(fieldsArray);
+        checkParam.setExpectedFieldValues(expectedFieldValues);
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;
@@ -61,9 +63,9 @@ public class EmptyOrNullFieldCheckTestNG extends DataCloudDataFlowFunctionalTest
 
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
-        String[] expectedId = { "2", "6" };
-        String[] actualId = new String[2];
-        int i = 0;
+        String[] expected = new String[2];
+        expected[0] = "DnB";
+        expected[1] = "Manual";
         for (GenericRecord record : records) {
             log.info("Check Code : " + record.get(DataCloudConstants.CHK_ATTR_CHK_CODE) + " RowId : "
                     + record.get(DataCloudConstants.CHK_ATTR_ROW_ID) + " GroupId : "
@@ -71,10 +73,11 @@ public class EmptyOrNullFieldCheckTestNG extends DataCloudDataFlowFunctionalTest
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_FIELD) + " CheckValue : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE) + " CheckMessage : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_MSG));
-            String rowId = record.get(DataCloudConstants.CHK_ATTR_ROW_ID).toString();
-            actualId[i++] = rowId;
+            String missingList = record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE).toString();
+            String[] missingArr = missingList.split(",");
+            Assert.assertEquals(missingArr[0].trim(), expected[0]);
+            Assert.assertEquals(missingArr[1].trim(), expected[1]);
         }
-        Assert.assertEquals(actualId[0], expectedId[0]);
-        Assert.assertEquals(actualId[1], expectedId[1]);
     }
+
 }

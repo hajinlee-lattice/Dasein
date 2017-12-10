@@ -1,8 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.check;
 
-public class UnexpectedValueCheckParam extends AbstractGroupCheckParam {
+public class ExceededCountCheckParam extends AbstractGroupCheckParam {
 
-    public UnexpectedValueCheckParam() {
+    public ExceededCountCheckParam() {
         setCheckCode(CheckCode.ExceededCount);
     }
 

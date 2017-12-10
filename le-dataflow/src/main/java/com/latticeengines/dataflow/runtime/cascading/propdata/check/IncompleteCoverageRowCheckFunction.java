@@ -22,11 +22,11 @@ public class IncompleteCoverageRowCheckFunction extends BaseOperation implements
 
     private static final long serialVersionUID = 2409292458923849875L;
     private static final Log log = LogFactory.getLog(IncompleteCoverageRowCheckFunction.class);
-    private String checkField;
-    private List<String> coverageFields;
-    private String keyField;
+    private Object checkField;
+    private List<Object> coverageFields;
+    private Object keyField;
 
-    public IncompleteCoverageRowCheckFunction(String checkField, List<String> coverageFields, String keyField) {
+    public IncompleteCoverageRowCheckFunction(Object checkField, List<Object> coverageFields, Object keyField) {
         super(generateFieldDeclaration());
         this.checkField = checkField;
         this.coverageFields = coverageFields;
@@ -38,26 +38,40 @@ public class IncompleteCoverageRowCheckFunction extends BaseOperation implements
         TupleEntry arguments = functionCall.getArguments();
         Tuple result = Tuple.size(getFieldDeclaration().size());
         try {
-            String checkCoverageField = (String) arguments.getObject(checkField);
-            int keyFieldVal = Integer.parseInt(arguments.getObject(keyField).toString());
-            if (StringUtils.isEmpty(checkCoverageField) || !coverageFields.contains(checkCoverageField)) {
-                // check code
-                result.set(0, CheckCode.OutOfCoverageRow.name());
-                // row id
-                result.set(2, keyFieldVal);
-                // check field
-                result.set(3, checkField);
-                // check value
-                result.set(4, checkCoverageField);
-                // check message
-                result.set(5, CheckCode.OutOfCoverageRow.getMessage(keyFieldVal, checkField, checkCoverageField));
-                functionCall.getOutputCollector().add(result);
+            Object checkCoverageField = arguments.getObject(checkField.toString());
+            Object keyFieldVal = arguments.getObject(keyField.toString());
+            if (checkCoverageField instanceof String) {
+                if (StringUtils.isEmpty(checkCoverageField.toString())
+                        || !coverageFields.contains(checkCoverageField)) {
+                    functionCall.getOutputCollector()
+                            .add(setTupleVal(result, keyFieldVal, checkField, checkCoverageField));
+                }
+            } else {
+                if (checkCoverageField == "" || checkCoverageField == null
+                        || !coverageFields.contains(checkCoverageField)) {
+                    functionCall.getOutputCollector()
+                            .add(setTupleVal(result, keyFieldVal, checkField, checkCoverageField));
+                }
             }
+
         } catch (Exception e) {
             log.info("Exception raised due to : " + e);
         }
     }
 
+    private static Tuple setTupleVal(Tuple result, Object keyFieldVal, Object checkField, Object checkCoverageField) {
+        // check code
+        result.set(0, CheckCode.OutOfCoverageValForRow.name());
+        // row id
+        result.set(2, keyFieldVal);
+        // check field
+        result.set(3, checkField);
+        // check value
+        result.set(4, checkCoverageField);
+        // check message
+        result.set(5, CheckCode.OutOfCoverageValForRow.getMessage(keyFieldVal, checkField, checkCoverageField));
+        return result;
+    }
     private static Fields generateFieldDeclaration() {
         return new Fields( //
                 DataCloudConstants.CHK_ATTR_CHK_CODE, //

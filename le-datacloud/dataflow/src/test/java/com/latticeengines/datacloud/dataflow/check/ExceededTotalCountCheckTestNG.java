@@ -14,11 +14,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageGroupCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.ExceededCountCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
-public class IncompleteCoverageGroupCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-    private static final Log log = LogFactory.getLog(IncompleteCoverageGroupCheckTestNG.class);
+public class ExceededTotalCountCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+
+    private static final Log log = LogFactory.getLog(ExceededTotalCountCheckTestNG.class);
 
     @Override
     protected String getFlowBeanName() {
@@ -38,24 +39,22 @@ public class IncompleteCoverageGroupCheckTestNG extends DataCloudDataFlowFunctio
                 Pair.of("Key", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "RTS" }, //
-                { 2, "RTS" }, //
-                { 3, "HG" }, //
-                { 4, "Orb" }, //
-                { 5, "Orb" }, //
-                { 6, "RTS" }, //
-                { 7, "HG" }, //
+                { 1, "key1" }, //
+                { 2, "key2" }, //
+                { 3, "key3" }, //
+                { 4, null }, //
+                { 5, "key1" }, //
+                { 6, "key1" }, //
+                { 7, "" }, //
         };
 
         uploadDataToSharedAvroInput(data, fields);
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        IncompleteCoverageGroupCheckParam checkParam = new IncompleteCoverageGroupCheckParam();
-        checkParam.setGroupByFields(Collections.singletonList("Key"));
-        String[] fieldsArray = new String[] { "DnB", "RTS", "HG", "Orb", "Manual" };
-        List<String> coverageFields = Arrays.asList(fieldsArray);
-        checkParam.setCoverageFields(coverageFields);
+        ExceededCountCheckParam checkParam = new ExceededCountCheckParam();
+        checkParam.setExceedCountThreshold(9);
+        checkParam.setCntLessThanThresholdFlag(false);
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;
@@ -63,9 +62,6 @@ public class IncompleteCoverageGroupCheckTestNG extends DataCloudDataFlowFunctio
 
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
-        String[] expected = new String[2];
-        expected[0] = "DnB";
-        expected[1] = "Manual";
         for (GenericRecord record : records) {
             log.info("Check Code : " + record.get(DataCloudConstants.CHK_ATTR_CHK_CODE) + " RowId : "
                     + record.get(DataCloudConstants.CHK_ATTR_ROW_ID) + " GroupId : "
@@ -73,10 +69,8 @@ public class IncompleteCoverageGroupCheckTestNG extends DataCloudDataFlowFunctio
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_FIELD) + " CheckValue : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE) + " CheckMessage : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_MSG));
-            String missingList = record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE).toString();
-            String[] missingArr = missingList.split(",");
-            Assert.assertEquals(missingArr[0].trim(), expected[0]);
-            Assert.assertEquals(missingArr[1].trim(), expected[1]);
+            long occurence = Long.valueOf(record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE).toString());
+            Assert.assertEquals(occurence, 7);
         }
     }
 

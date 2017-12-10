@@ -14,12 +14,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.UnexpectedValueCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.EmptyFieldCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
-public class UnexpectedValueCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-
-    private static final Log log = LogFactory.getLog(UnexpectedValueCheckTestNG.class);
+public class EmptyFieldCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(EmptyFieldCheckTestNG.class);
 
     @Override
     protected String getFlowBeanName() {
@@ -40,20 +39,21 @@ public class UnexpectedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
         );
         Object[][] data = new Object[][] { //
                 { 1, "key1" }, //
-                { 2, "key2" }, //
+                { 2, null }, //
                 { 3, "key3" }, //
-                { 4, null }, //
+                { 4, "key2" }, //
                 { 5, "key1" }, //
-                { 6, "key1" }, //
-                { 7, "" }, //
+                { 6, null }, //
+                { 7, "key4" }, //
         };
 
         uploadDataToSharedAvroInput(data, fields);
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        UnexpectedValueCheckParam checkParam = new UnexpectedValueCheckParam();
-        checkParam.setExceedCountThreshold(5);
+        EmptyFieldCheckParam checkParam = new EmptyFieldCheckParam();
+        checkParam.setCheckEmptyField("Key");
+        checkParam.setKeyField("Id");
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;
@@ -61,6 +61,9 @@ public class UnexpectedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
 
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
+        String[] expectedId = { "2", "6" };
+        String[] actualId = new String[2];
+        int i = 0;
         for (GenericRecord record : records) {
             log.info("Check Code : " + record.get(DataCloudConstants.CHK_ATTR_CHK_CODE) + " RowId : "
                     + record.get(DataCloudConstants.CHK_ATTR_ROW_ID) + " GroupId : "
@@ -68,9 +71,10 @@ public class UnexpectedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_FIELD) + " CheckValue : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE) + " CheckMessage : "
                     + record.get(DataCloudConstants.CHK_ATTR_CHK_MSG));
-            long occurence = Long.valueOf(record.get(DataCloudConstants.CHK_ATTR_CHK_VALUE).toString());
-            Assert.assertEquals(occurence, 7);
+            String rowId = record.get(DataCloudConstants.CHK_ATTR_ROW_ID).toString();
+            actualId[i++] = rowId;
         }
+        Assert.assertEquals(actualId[0], expectedId[0]);
+        Assert.assertEquals(actualId[1], expectedId[1]);
     }
-
 }

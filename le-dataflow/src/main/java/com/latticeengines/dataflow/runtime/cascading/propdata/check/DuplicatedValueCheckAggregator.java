@@ -16,14 +16,14 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
 
     private static final long serialVersionUID = 7863554582861435361L;
 
-    private String checkField;
+    private Object checkField;
 
     public static class Context extends BaseAggregator.Context {
         String value = null;
         long count = 0;
     }
 
-    public DuplicatedValueCheckAggregator(String keyField) {
+    public DuplicatedValueCheckAggregator(Object keyField) {
         super(generateFieldDeclaration());
         this.checkField = keyField;
     }
@@ -41,14 +41,14 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
 
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
-        Object grpObj = group.getObject(checkField);
+        Object grpObj = group.getObject(checkField.toString());
         return grpObj == null;
     }
 
     @Override
     protected Context initializeContext(TupleEntry group) {
         Context context = new Context();
-        Object grpObj = group.getObject(checkField);
+        Object grpObj = group.getObject(checkField.toString());
         if (grpObj == null) {
             return context;
         }

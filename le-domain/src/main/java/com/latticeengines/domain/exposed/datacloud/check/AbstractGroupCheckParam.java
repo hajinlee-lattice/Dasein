@@ -7,86 +7,89 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class AbstractGroupCheckParam extends CheckParam {
 
     @JsonProperty("GroupByFields")
-    private List<String> groupByFields;
+    private List<Object> groupByFields;
 
     @JsonProperty("Status")
-    private String status;
+    private Object status;
 
     @JsonProperty("CountByField")
-    private String countByField;
+    private Object countByField;
 
-    @JsonProperty("CheckNullField")
-    private String checkNullField;
+    @JsonProperty("CheckEmptyField")
+    private Object checkEmptyField;
 
-    @JsonProperty("PrevVersionNullField")
-    private String prevVersionNullField;
+    @JsonProperty("PrevVersionEmptyField")
+    private Object prevVersionEmptyField;
 
-    @JsonProperty("CurrVersionNullField")
-    private String currVersionNullField;
+    @JsonProperty("CurrVersionEmptyField")
+    private Object currVersionEmptyField;
 
     @JsonProperty("KeyField")
-    private String keyField;
+    private Object keyField;
 
     @JsonProperty("PopulationThreshold")
     private double threshold;
 
     @JsonProperty("ExceedCountThreshold")
-    private int exceedCountThreshold;
+    private long exceedCountThreshold;
 
-    @JsonProperty("CoverageFields")
-    private List<String> coverageFields;
+    @JsonProperty("ExpectedFieldValues")
+    private List<Object> expectedFieldValues;
 
-    @JsonProperty("PrevVersionNotNullField")
-    private String prevVersionNotNullField;
+    @JsonProperty("PrevVersionNotEmptyField")
+    private Object prevVersionNotEmptyField;
 
-    @JsonProperty("CurrVersionNotNullField")
-    private String currVersionNotNullField;
+    @JsonProperty("CurrVersionNotEmptyField")
+    private Object currVersionNotEmptyField;
 
-    public List<String> getGroupByFields() {
+    @JsonProperty("CntLessThanThresholdFlag") // indicates if cnt is less than threshold
+    private boolean cntLessThanFlagThreshold;
+
+    public List<Object> getGroupByFields() {
         return groupByFields;
     }
 
-    public void setGroupByFields(List<String> groupByFields) {
+    public void setGroupByFields(List<Object> groupByFields) {
         this.groupByFields = groupByFields;
     }
 
-    public String getStatus() {
+    public Object getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Object status) {
         this.status = status;
     }
 
-    public String getCountByField() {
+    public Object getCountByField() {
         return countByField;
     }
 
-    public void setCountByField(String countByField) {
+    public void setCountByField(Object countByField) {
         this.countByField = countByField;
     }
 
-    public String getPrevVersionNullField() {
-        return prevVersionNullField;
+    public Object getPrevVersionEmptyField() {
+        return prevVersionEmptyField;
     }
 
-    public void setPrevVersionNullField(String prevVersionNullField) {
-        this.prevVersionNullField = prevVersionNullField;
+    public void setPrevVersionEmptyField(Object prevVersionEmptyField) {
+        this.prevVersionEmptyField = prevVersionEmptyField;
     }
 
-    public String getCurrVersionNullField() {
-        return currVersionNullField;
+    public Object getCurrVersionEmptyField() {
+        return currVersionEmptyField;
     }
 
-    public void setCurrVersionNullField(String currVersionNullField) {
-        this.currVersionNullField = currVersionNullField;
+    public void setCurrVersionNullField(Object currVersionEmptyField) {
+        this.currVersionEmptyField = currVersionEmptyField;
     }
 
-    public String getKeyField() {
+    public Object getKeyField() {
         return keyField;
     }
 
-    public void setKeyField(String keyField) {
+    public void setKeyField(Object keyField) {
         this.keyField = keyField;
     }
 
@@ -98,44 +101,52 @@ public abstract class AbstractGroupCheckParam extends CheckParam {
         this.threshold = threshold;
     }
 
-    public List<String> getCoverageFields() {
-        return coverageFields;
+    public List<Object> getExpectedFieldValues() {
+        return expectedFieldValues;
     }
 
-    public void setCoverageFields(List<String> coverageFields) {
-        this.coverageFields = coverageFields;
+    public void setExpectedFieldValues(List<Object> expectedFieldValues) {
+        this.expectedFieldValues = expectedFieldValues;
     }
 
-    public int getExceedCountThreshold() {
+    public long getExceedCountThreshold() {
         return exceedCountThreshold;
     }
 
-    public void setExceedCountThreshold(int exceedCountThreshold) {
+    public void setExceedCountThreshold(long exceedCountThreshold) {
         this.exceedCountThreshold = exceedCountThreshold;
     }
 
-    public String getPrevVersionNotNullField() {
-        return prevVersionNotNullField;
+    public Object getPrevVersionNotEmptyField() {
+        return prevVersionNotEmptyField;
     }
 
-    public void setPrevVersionNotNullField(String prevVersionNotNullField) {
-        this.prevVersionNotNullField = prevVersionNotNullField;
+    public void setPrevVersionNotEmptyField(Object prevVersionNotEmptyField) {
+        this.prevVersionNotEmptyField = prevVersionNotEmptyField;
     }
 
-    public String getCurrVersionNotNullField() {
-        return currVersionNotNullField;
+    public Object getCurrVersionNotEmptyField() {
+        return currVersionNotEmptyField;
     }
 
-    public void setCurrVersionNotNullField(String currVersionNotNullField) {
-        this.currVersionNotNullField = currVersionNotNullField;
+    public void setCurrVersionNotEmptyField(Object currVersionNotEmptyField) {
+        this.currVersionNotEmptyField = currVersionNotEmptyField;
     }
 
-    public String getCheckNullField() {
-        return checkNullField;
+    public Object getCheckEmptyField() {
+        return checkEmptyField;
     }
 
-    public void setCheckNullField(String checkNullField) {
-        this.checkNullField = checkNullField;
+    public void setCheckEmptyField(Object checkEmptyField) {
+        this.checkEmptyField = checkEmptyField;
+    }
+
+    public boolean getCntLessThanThresholdFlag() {
+        return cntLessThanFlagThreshold;
+    }
+
+    public void setCntLessThanThresholdFlag(boolean cntLessThanThresholdFlag) {
+        this.cntLessThanFlagThreshold = cntLessThanThresholdFlag;
     }
 
 }

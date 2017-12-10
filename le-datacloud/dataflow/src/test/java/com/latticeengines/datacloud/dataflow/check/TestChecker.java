@@ -23,7 +23,6 @@ public class TestChecker extends ConsolidateBaseFlow<TestCheckConfig> {
         List<Node> inputNodes = new ArrayList<Node>();
         inputNodes.add(addSource(parameters.getBaseTables().get(0)));
         if (parameters.getBaseTables().size() > 1) {
-            System.out.println("Entered in size loop");
             inputNodes.add(addSource(parameters.getBaseTables().get(1)));
         }
         TestCheckConfig testCheckConfig = getTransformerConfig(parameters);
