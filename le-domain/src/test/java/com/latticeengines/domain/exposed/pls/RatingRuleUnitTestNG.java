@@ -30,8 +30,8 @@ public class RatingRuleUnitTestNG {
         int Cindex = ratingRule.indexOf("\"" + RuleBucketName.C.getName() + "\"");
         int Dindex = ratingRule.indexOf("\"" + RuleBucketName.D.getName() + "\"");
         int Findex = ratingRule.indexOf("\"" + RuleBucketName.F.getName() + "\"");
-        Assert.assertTrue(Aindex < AminusIndex //
-                && AplusIndex < Bindex //
+        Assert.assertTrue(AplusIndex < Aindex //
+                && Aindex < Bindex //
                 && Bindex < Cindex //
                 && Cindex < Dindex //
                 && Dindex < Findex);
