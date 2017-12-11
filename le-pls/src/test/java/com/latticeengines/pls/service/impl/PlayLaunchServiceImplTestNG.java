@@ -90,7 +90,7 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
 
         bucketsToLaunch2 = new TreeSet<>();
-        bucketsToLaunch2.add(RuleBucketName.A_MINUS);
+        bucketsToLaunch2.add(RuleBucketName.A_PLUS);
         bucketsToLaunch2.add(RuleBucketName.B);
 
         playLaunch2 = new PlayLaunch();

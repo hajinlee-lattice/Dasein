@@ -69,8 +69,8 @@ public class RatingRule {
     @VisibleForTesting
     static TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
         TreeMap<String, Map<String, Restriction>> map = new TreeMap<>();
+        map.put(RuleBucketName.A_PLUS.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RuleBucketName.A.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.A_MINUS.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RuleBucketName.B.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RuleBucketName.C.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RuleBucketName.D.getName(), generateDefaultAccountAndContactBuckets());

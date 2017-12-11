@@ -138,7 +138,7 @@ public class LpiPMRecommendationImplUnitTestNG {
     }
 
     private List<Map<String, Object>> createDummyRecommendationResult(int count) {
-        RuleBucketName[] buckets = new RuleBucketName[] { RuleBucketName.A, RuleBucketName.A_MINUS };
+        RuleBucketName[] buckets = new RuleBucketName[] { RuleBucketName.A_PLUS, RuleBucketName.A };
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {

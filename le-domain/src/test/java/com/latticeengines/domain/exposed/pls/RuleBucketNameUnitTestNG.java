@@ -12,8 +12,8 @@ public class RuleBucketNameUnitTestNG {
         Set<String> defaultRuleBucketNames = RuleBucketName.getDefaultRuleBucketNames();
         Assert.assertNotNull(defaultRuleBucketNames);
         Assert.assertEquals(defaultRuleBucketNames.size(), 6);
+        Assert.assertTrue(defaultRuleBucketNames.contains("A+"));
         Assert.assertTrue(defaultRuleBucketNames.contains("A"));
-        Assert.assertTrue(defaultRuleBucketNames.contains("A-"));
         Assert.assertTrue(defaultRuleBucketNames.contains("B"));
         Assert.assertTrue(defaultRuleBucketNames.contains("C"));
         Assert.assertTrue(defaultRuleBucketNames.contains("D"));
@@ -22,8 +22,8 @@ public class RuleBucketNameUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetRuleBucketName() {
+        Assert.assertEquals(RuleBucketName.getRuleBucketName("A+"), RuleBucketName.A_PLUS);        
         Assert.assertEquals(RuleBucketName.getRuleBucketName("A"), RuleBucketName.A);
-        Assert.assertEquals(RuleBucketName.getRuleBucketName("A-"), RuleBucketName.A_MINUS);
         Assert.assertEquals(RuleBucketName.getRuleBucketName("B"), RuleBucketName.B);
         Assert.assertEquals(RuleBucketName.getRuleBucketName("C"), RuleBucketName.C);
         Assert.assertEquals(RuleBucketName.getRuleBucketName("D"), RuleBucketName.D);

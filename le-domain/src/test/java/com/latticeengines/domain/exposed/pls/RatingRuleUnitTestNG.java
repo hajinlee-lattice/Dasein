@@ -24,14 +24,14 @@ public class RatingRuleUnitTestNG {
 
     @SuppressWarnings("unused")
     private void assertOrderOfRatingRuleString(String ratingRule) {
+        int AplusIndex = ratingRule.indexOf("\"" + RuleBucketName.A_PLUS.getName() + "\"");        
         int Aindex = ratingRule.indexOf("\"" + RuleBucketName.A.getName() + "\"");
-        int AminusIndex = ratingRule.indexOf("\"" + RuleBucketName.A_MINUS.getName() + "\"");
         int Bindex = ratingRule.indexOf("\"" + RuleBucketName.B.getName() + "\"");
         int Cindex = ratingRule.indexOf("\"" + RuleBucketName.C.getName() + "\"");
         int Dindex = ratingRule.indexOf("\"" + RuleBucketName.D.getName() + "\"");
         int Findex = ratingRule.indexOf("\"" + RuleBucketName.F.getName() + "\"");
         Assert.assertTrue(Aindex < AminusIndex //
-                && AminusIndex < Bindex //
+                && AplusIndex < Bindex //
                 && Bindex < Cindex //
                 && Cindex < Dindex //
                 && Dindex < Findex);
@@ -48,9 +48,9 @@ public class RatingRuleUnitTestNG {
     private boolean assertEachKey(String key, int count) {
         switch (count) {
         case 0:
-            return key.equals(RuleBucketName.A.getName());
+            return key.equals(RuleBucketName.A_PLUS.getName());
         case 1:
-            return key.equals(RuleBucketName.A_MINUS.getName());
+            return key.equals(RuleBucketName.A.getName());
         case 2:
             return key.equals(RuleBucketName.B.getName());
         case 3:

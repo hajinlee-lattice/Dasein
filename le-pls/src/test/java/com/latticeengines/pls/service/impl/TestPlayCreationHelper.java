@@ -235,7 +235,7 @@ public class TestPlayCreationHelper {
 
     private TreeMap<String, Map<String, Restriction>> populateBucketToRuleMap() {
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
-        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.A_MINUS, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.A_PLUS, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 ComparisonType.GTE_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "G");
         populateBucketInfo(bucketToRuleMap, true, RuleBucketName.C, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "h", "n");

@@ -22,8 +22,8 @@ public class PlayLaunchUnitTestNG {
         playLaunch = new PlayLaunch();
         playLaunch.setPlay(play);
         Set<RuleBucketName> selectedBuckets = new HashSet<>();
+        selectedBuckets.add(RuleBucketName.A_PLUS);        
         selectedBuckets.add(RuleBucketName.A);
-        selectedBuckets.add(RuleBucketName.A_MINUS);
         selectedBuckets.add(RuleBucketName.B);
         selectedBuckets.add(RuleBucketName.C);
         playLaunch.setBucketsToLaunch(selectedBuckets);

@@ -7,8 +7,8 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum RuleBucketName {
+    A_PLUS("A+"), //
     A("A"), //
-    A_MINUS("A-"), //
     B("B"), //
     C("C"), //
     D("D"), //

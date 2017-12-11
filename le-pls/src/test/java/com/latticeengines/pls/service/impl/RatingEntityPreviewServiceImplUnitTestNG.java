@@ -45,8 +45,8 @@ public class RatingEntityPreviewServiceImplUnitTestNG {
     public void testSetSelectedBuckets() {
         ratingEntityPreviewService.setSelectedBuckets(frontEndQuery, selectedBuckets, ratingModel);
         String restrictionStr = frontEndQuery.getAccountRestriction().getRestriction().toString();
-        Assert.assertTrue(restrictionStr.contains(RuleBucketName.A.getName()) && //
-                restrictionStr.contains(RuleBucketName.A_MINUS.getName()) && //
+        Assert.assertTrue(restrictionStr.contains(RuleBucketName.A_PLUS.getName()) && //
+                restrictionStr.contains(RuleBucketName.A.getName()) && //
                 restrictionStr.contains(RuleBucketName.C.getName()));
     }
 
@@ -86,8 +86,8 @@ public class RatingEntityPreviewServiceImplUnitTestNG {
 
     private List<String> createSelectedBuckets() {
         List<String> selectedBuckets = new ArrayList<>();
+        selectedBuckets.add(RuleBucketName.A_PLUS.getName());
         selectedBuckets.add(RuleBucketName.A.getName());
-        selectedBuckets.add(RuleBucketName.A_MINUS.getName());
         selectedBuckets.add(RuleBucketName.C.getName());
         return selectedBuckets;
     }
