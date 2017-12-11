@@ -113,6 +113,7 @@ public class ScoringFileUploadResource {
                     log.error(e.getMessage(), e);
                     throw new LedpException(LedpCode.LEDP_00002, e);
                 }
+                scoringFileMetadataService.validateHeadersWithDataCloudAttr(headers);
                 sourceFile = fileUploadService.uploadFile(
                         "file_" + DateTime.now().getMillis() + ".csv",
                         SchemaInterpretation.TestingData, null, displayName, stream);

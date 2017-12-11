@@ -2,6 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -28,14 +30,20 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.app.exposed.service.AttributeService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -268,4 +276,31 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         assertNotNull(table.getAttribute("C_2"));
     }
 
+    @Test(groups = "functional")
+    public void testValidateHeadersWithDataCloudAttr() {
+        Set<String> headers = new HashSet<String>();
+        headers.add("A");
+        headers.add("B");
+        headers.add("C");
+
+        Tenant t = new Tenant();
+        t.setId("tena");
+        MultiTenantContext.setTenant(t);
+        LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
+        attr.setDisplayName("A");
+        attr.setFieldName("A");
+
+        BatonService batonService = Mockito.mock(BatonService.class);
+        AttributeService attributeService = Mockito.mock(AttributeService.class);
+        when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(false);
+        when(attributeService.getAttributes(any(Tenant.class), anyString(), any(Category.class), anyString(),
+                anyBoolean(), anyInt(), anyInt(), anyBoolean())).thenReturn(Collections.singletonList(attr));
+        ReflectionTestUtils.setField(scoringFileMetadataService, "batonService", batonService);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "attributeService", attributeService);
+        try {
+            scoringFileMetadataService.validateHeadersWithDataCloudAttr(headers);
+        } catch (Exception e) {
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18109);
+        }
+    }
 }

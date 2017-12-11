@@ -19,4 +19,6 @@ public interface ScoringFileMetadataService {
 
     Set<String> getHeaderFields(String csvFileName);
 
+    void validateHeadersWithDataCloudAttr(Set<String> headers);
+
 }
