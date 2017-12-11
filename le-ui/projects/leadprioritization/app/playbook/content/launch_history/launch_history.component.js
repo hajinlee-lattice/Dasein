@@ -83,22 +83,16 @@ angular.module('lp.playbook.dashboard.launch_history', [])
     });
 
     vm.sort = function(header) {
-
         vm.sortBy = header;
-
         var params = {
             playName: $stateParams.play_name,
             sortby: header,
-            descending: vm.sortDesc
+            descending: vm.sortDesc,
+            offset: 0
         };
-
-        console.log(vm.sortBy, vm.sortDesc);
-
         PlaybookWizardStore.getPlayLaunches(params).then(function(result){
-            console.log(result);
             vm.launches = result;
         });
-
     }
 
     vm.playSelectChange = function(play){

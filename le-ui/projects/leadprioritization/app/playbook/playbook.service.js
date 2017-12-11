@@ -325,13 +325,24 @@ angular.module('lp.playbook')
         
         return deferred.promise;
     }
+
+    this.hasRules = function(play) {
+        try {
+            if (Object.keys(play.coverage).length) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch(err) {
+            return false;
+        }
+    }
+
     this.getPlayLaunches = function(params) {
         var deferred = $q.defer();
         if(this.playLaunches) {
             return this.playLaunches;
         } else {
-
-            console.log(params);
 
             var params = {
                 playName: params.playName,

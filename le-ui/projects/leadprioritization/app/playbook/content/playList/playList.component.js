@@ -47,7 +47,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
     vm.init = function($q) {
 
-        // console.log(vm.current);
+        console.log(vm.current);
         
         PlaybookWizardStore.clear();
         vm.header.filter.filtered = vm.current.plays;
@@ -55,6 +55,18 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
     }
 
     vm.init();
+
+    vm.getTallestBarHeight = function(bucket, play) {
+        var bucketArray = vm.current.bucketCountMap[rating.id].bucketCoverageCounts;
+
+        return Math.max.apply(Math, bucketArray.map(function(bkt) { 
+            return bkt.count; 
+        }))
+    }
+
+    vm.hasRules = function(play) {
+        return PlaybookWizardStore.hasRules(play);
+    }
 
     vm.customMenuClick = function ($event, play) {
 

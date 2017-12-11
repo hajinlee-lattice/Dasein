@@ -536,6 +536,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor),
                 foundMax = false;
 
+            // console.log(bucketName);
+
             if (isNumericRange && bucket.LowerInclusive !== null) {
                 if (maxBucket === null) {
                     maxBucket = {};
@@ -568,12 +570,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         billion = (bucketToDisplay.name.indexOf("B") >= 0),
                         number = parseFloat(removedLessThanCharacter.replace(/,/g, ''));
 
-                    if (toReturn.name === 'Revenue Range') {
-                        if (million === true) {
-                            sortValue = number * 1000000;
-                        } else if (billion === true) {
-                            sortValue = number * 1000000000;
-                        }
+                    if (million === true) {
+                        sortValue = number * 1000000;
+                    } else if (billion === true) {
+                        sortValue = number * 1000000000;
+                    } else {
+                        sortValue = number;
                     }
 
                     bucketToDisplay.SortProperty = sortValue;
@@ -585,12 +587,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         minValue = parseInt(values[0]),
                         maxValue = parseInt(values[1]);
 
-                    if (toReturn.name === 'Revenue Range') {
-                        if (million === true) {
-                            minValue = minValue * 1000000;
-                        } else if (billion === true) {
-                            minValue = minValue * 1000000000;
-                        }
+                    if (million === true) {
+                        minValue = minValue * 1000000;
+                    } else if (billion === true) {
+                        minValue = minValue * 1000000000;
+                    } else {
+                        minValue = minValue;
                     }
 
                     bucketToDisplay.SortProperty = minValue;
@@ -708,6 +710,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             // Push new bucket back to list
             toReturn.elementList.push(newCombinedBucket);    
         }
+
         return toReturn;
     };
 

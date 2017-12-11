@@ -78,6 +78,7 @@
                         </ul>
 
                     </div><!-- End .tile-metadata -->
+
                     <div class="tile-body" ng-if="!vm.current.tileStates[play.name].editPlay">
 
                         <div ng-if="play.launchHistory.mostRecentLaunch === null"><strong>This play was started but not finished.</strong> It can be launched after all steps are completed.</div>
@@ -91,7 +92,35 @@
 
                         <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Failed'" class="error-text">Your most recent launch, has failed.</div>
 
-                        <div ng-if="play.launchHistory.playLaunch != null && play.segment != null">
+
+
+                        <div>
+                        <!-- <div ng-if="play.launchHistory.playLaunch != null && play.segment != null"> -->
+                            <h4>Account Ratings</h4>
+                            <ul class="barChart ratings"
+                                ng-if="vm.current.bucketCountMap[play.name] && vm.current.bucketCountMap[play.name].bucketCoverageCounts">
+                                <li 
+                                    ng-repeat="bucket in vm.current.bucketCountMap[play.name].bucketCoverageCounts"
+                                    class="bucket-{{bucket.bucket|lowercase}}">
+
+                                    <div class="value">{{bucket.count|number}}</div>
+
+                                    <div 
+                                        class="rating-bar"
+                                        ng-attr-style="{{'height: '+ vm.ceil(((bucket.count / vm.getTallestBarHeight(bucket, play)) * 100) / 2) + 'px' }}">
+                                    </div>
+
+                                    <div class="meta">{{bucket.bucket}}</div>
+                                </li>
+                            </ul>
+                            <span 
+                                ng-if="!vm.current.bucketCountMap[play.name]" 
+                                class="bucket-loading">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </span>
+                        </div>
+
+                        <!-- <div ng-if="">
                             <h4>Account Ratings</h4>
                             <ul class="barChart ratings">
                                <li ng-repeat="rating in play.rating.bucketInformation">
@@ -100,7 +129,7 @@
                                     <div class="meta">{{rating.bucket}}</div>
                                 </li> 
                             </ul>
-                        </div>
+                        </div> -->
 
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">

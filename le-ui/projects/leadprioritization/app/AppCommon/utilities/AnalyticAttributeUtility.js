@@ -123,6 +123,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
     };
 
     this.GetAttributeBucketName = function (bucket, attributeMetadata) {
+
         if (bucket == null) {
             return "";
         }
@@ -138,6 +139,8 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
             // This is the Null bucket
             if (bucket.Values[0] == null) {
                 toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_NULL_VALUE_LABEL");
+            } else if (bucket.Values[0] === 'Other') {
+                toReturn = 'Other, Less Popular';
             } else {
                 if (attributeMetadata != null) {
                     var fundamentalType = attributeMetadata.FundamentalType != null ? attributeMetadata.FundamentalType.toUpperCase() : null;
