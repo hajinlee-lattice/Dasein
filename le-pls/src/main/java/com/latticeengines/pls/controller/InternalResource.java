@@ -870,7 +870,7 @@ public class InternalResource extends InternalResourceBase {
                                 emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName,
                                         false);
                             }
-                        } else {
+                        } else if (result.equals("FAILED")) {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                     || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
                                 emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName, modelName, true);
@@ -903,7 +903,7 @@ public class InternalResource extends InternalResourceBase {
                         if (result.equals("COMPLETED")) {
                             emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl, tenantName,
                                     modelName, true, emailInfo.getExtraInfoList());
-                        } else {
+                        } else if (result.equals("FAILED")) {
                             emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
                                     modelName, false, emailInfo.getExtraInfoList());
                         }

@@ -372,7 +372,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 log.info("user selected DataCloud Attribute is :" + attribute.getDisplayName());
                 if (header.toLowerCase().equals(attribute.getFieldName().toLowerCase())) {
                     throw new LedpException(LedpCode.LEDP_18109,
-                            new String[] { header + "conflict with DataCloud attribute." });
+                            new String[] { header + " conflicts with DataCloud attribute." });
                 }
             }
         }
