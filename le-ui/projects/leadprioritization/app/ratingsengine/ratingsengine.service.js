@@ -475,7 +475,7 @@ angular.module('lp.ratingsengine')
     }
 
     this.checkRatingsBuckets = function(map) {
-        var buckets = ['A','A-','B','C','D','F'];
+        var buckets = ['A+','A','B','C','D','F'];
         var generated = this.generateRatingsBuckets();
 
         buckets.forEach(function(key, value) {
@@ -501,8 +501,8 @@ angular.module('lp.ratingsengine')
         }
 
         return {
+            "A+": angular.copy(template),
             "A":  angular.copy(template),
-            "A-": angular.copy(template),
             "B":  angular.copy(template),
             "C":  angular.copy(template),
             "D":  angular.copy(template),
