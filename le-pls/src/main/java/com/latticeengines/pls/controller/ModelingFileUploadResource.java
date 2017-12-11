@@ -2,6 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -177,29 +180,23 @@ public class ModelingFileUploadResource {
         }
     }
 
-    @RequestMapping(value = "/cdlexternalsystemmappings", method = RequestMethod.GET)
+    @RequestMapping(value = "/cdlexternalsystems", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "return a map with all supported external systems.")
-    public ResponseDocument<Map<String, List<Enum>>> getCDLExternalSystemMap() {
-        return ResponseDocument.successResponse(CDLExternalSystem.EXTERNAL_SYSTEM);
-    }
-
-    @RequestMapping(value = "/cdlexternalsystem/{systemType}/accountinterface/{accountInterface}", method =
-            RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "create a CDL external system record.")
-    public void createCDLExternalSystem(@PathVariable String systemType, @PathVariable InterfaceName accountInterface) {
-        cdlExternalSystemProxy.createCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), systemType,
-                accountInterface);
-    }
-
-    @RequestMapping(value = "/cdlexternalsystem", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "create a CDL external system record.")
-    public void createCDLExternalSystem(@RequestParam(value = "crmAccount", required = false) InterfaceName crmAccountInt,
-                                        @RequestParam(value = "mapAccount", required = false) InterfaceName mapAccountInt,
-                                        @RequestParam(value = "erpAccount", required = false) InterfaceName erpAccountInt) {
-        cdlExternalSystemProxy.createCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), crmAccountInt,
-                mapAccountInt, erpAccountInt);
+    @ApiOperation(value = "return a map with all existed external systems.")
+    public ResponseDocument<Map<String, List<String>>> getCDLExternalSystemMap() {
+        CDLExternalSystem externalSystem = cdlExternalSystemProxy.getCDLExternalSystem(MultiTenantContext
+                .getCustomerSpace().toString());
+        Map<String, List<String>> result = new HashMap<>();
+        if (externalSystem == null) {
+            for (CDLExternalSystemType type : CDLExternalSystemType.values()) {
+                result.put(type.name(), new ArrayList<>());
+            }
+        } else {
+            result.put(CDLExternalSystemType.CRM.name(), externalSystem.getCRMIdList());
+            result.put(CDLExternalSystemType.MAP.name(), externalSystem.getMAPIdList());
+            result.put(CDLExternalSystemType.ERP.name(), externalSystem.getERPIdList());
+            result.put(CDLExternalSystemType.OTHER.name(), externalSystem.getOtherIdList());
+        }
+        return ResponseDocument.successResponse(result);
     }
 }

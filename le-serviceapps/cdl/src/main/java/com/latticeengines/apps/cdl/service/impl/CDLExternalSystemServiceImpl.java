@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("cdlExternalSystemService")
@@ -23,41 +22,22 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
     }
 
     @Override
-    public void createExternalSystem(String customerSpace, String systemType, InterfaceName accountInterface) {
-        CDLExternalSystem.CRMType crm = null;
-        CDLExternalSystem.MAPType map = null;
-        CDLExternalSystem.ERPType erp = null;
-        switch (systemType.toUpperCase()) {
-            case "CRM":
-                crm = CDLExternalSystem.CRMType.fromAccountInterface(accountInterface);
-                break;
-            case "MAP":
-                map = CDLExternalSystem.MAPType.fromAccountInterface(accountInterface);
-                break;
-            case "ERP":
-                erp = CDLExternalSystem.ERPType.fromAccountInterface(accountInterface);
-                break;
-            default:
-                throw new RuntimeException("Cannot recognize system type: " + systemType);
-        }
-        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-        cdlExternalSystem.setTenant(MultiTenantContext.getTenant());
-        cdlExternalSystem.setCRM(crm);
-        cdlExternalSystem.setMAP(map);
-        cdlExternalSystem.setERP(erp);
-        cdlExternalSystemEntityMgr.create(cdlExternalSystem);
+    public CDLExternalSystem getExternalSystem(String customerSpace) {
+        return cdlExternalSystemEntityMgr.findExternalSystem();
     }
 
     @Override
-    public void createExternalSystem(String customerSpace, InterfaceName crmAccountInt, InterfaceName mapAccountInt, InterfaceName erpAccountInt) {
-        CDLExternalSystem.CRMType crm = CDLExternalSystem.CRMType.fromAccountInterface(crmAccountInt);
-        CDLExternalSystem.MAPType map = CDLExternalSystem.MAPType.fromAccountInterface(mapAccountInt);
-        CDLExternalSystem.ERPType erp = CDLExternalSystem.ERPType.fromAccountInterface(erpAccountInt);
-        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-        cdlExternalSystem.setTenant(MultiTenantContext.getTenant());
-        cdlExternalSystem.setCRM(crm);
-        cdlExternalSystem.setMAP(map);
-        cdlExternalSystem.setERP(erp);
-        cdlExternalSystemEntityMgr.create(cdlExternalSystem);
+    public void createOrUpdateExternalSystem(String customerSpace, CDLExternalSystem cdlExternalSystem) {
+        CDLExternalSystem existingSystem = cdlExternalSystemEntityMgr.findExternalSystem();
+        if (existingSystem == null) {
+            cdlExternalSystem.setTenant(MultiTenantContext.getTenant());
+            cdlExternalSystemEntityMgr.create(cdlExternalSystem);
+        } else {
+            existingSystem.setCrmIds(cdlExternalSystem.getCrmIds());
+            existingSystem.setErpIds(cdlExternalSystem.getErpIds());
+            existingSystem.setMapIds(cdlExternalSystem.getMapIds());
+            existingSystem.setOtherIds(cdlExternalSystem.getOtherIds());
+            cdlExternalSystemEntityMgr.update(existingSystem);
+        }
     }
 }

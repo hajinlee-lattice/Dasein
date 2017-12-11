@@ -29,4 +29,15 @@ public class CDLExternalSystemEntityMgrImpl extends BaseEntityMgrImpl<CDLExterna
     public List<CDLExternalSystem> findAllExternalSystem() {
         return super.findAll();
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public CDLExternalSystem findExternalSystem() {
+        List<CDLExternalSystem> allExternalSystem = super.findAll();
+        if (allExternalSystem == null || allExternalSystem.size() == 0) {
+            return null;
+        } else {
+            return allExternalSystem.get(0);
+        }
+    }
 }

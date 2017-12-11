@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +31,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -49,6 +52,7 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -93,6 +97,9 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private DataFeedProxy dataFeedProxy;
 
     @Autowired
+    private CDLExternalSystemProxy cdlExternalSystemProxy;
+
+    @Autowired
     private Configuration yarnConfiguration;
 
     private SourceFile baseAccountFile;
@@ -114,6 +121,44 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+    }
+
+    @Test(groups = "deployment")
+    public void testExternalSystem() {
+        SourceFile accountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+        String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX + "ExternalSystem";
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
+                (accountFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+
+        FieldMapping crmID = new FieldMapping();
+        crmID.setUserField("ID");
+        crmID.setMappedField("SFDC_ID");
+        crmID.setFieldType(UserDefinedType.TEXT);
+        crmID.setCdlExternalSystemType(CDLExternalSystemType.CRM);
+
+        FieldMapping mapID = new FieldMapping();
+        mapID.setUserField("ID");
+        mapID.setMappedField("MAP_System");
+        mapID.setFieldType(UserDefinedType.TEXT);
+        mapID.setCdlExternalSystemType(CDLExternalSystemType.MAP);
+        fieldMappingDocument.getFieldMappings().addAll(Arrays.asList(crmID, mapID));
+
+        modelingFileMetadataService.resolveMetadata(accountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE, feedType);
+
+        ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, accountFile.getName(),
+                accountFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
+
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_ACCOUNT);
+        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("SFDC_ID"));
+        CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
+        Assert.assertNotNull(system);
+        Assert.assertEquals(system.getCRMIdList().size(), 1);
+        Assert.assertEquals(system.getCRMIdList().get(0), "SFDC_ID");
     }
 
     @Test(groups = "deployment")

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -29,35 +30,42 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Test(groups = "deployment")
     public void testCreateAndGet() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, "crm", InterfaceName.SalesforceAccountID);
-        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, "MAP", InterfaceName.MarketoAccountID);
-        List<CDLExternalSystem> systems = cdlExternalSystemProxy.getCDLExternalSystems(customerSpace);
-        Assert.assertNotNull(systems);
-        Assert.assertEquals(systems.size(), 2);
-        boolean containsSFDCProd = false;
-        boolean containsMKTO = false;
-        for (int i = 0; i < 2; i++) {
-            if (systems.get(i).getCRM() == CDLExternalSystem.CRMType.SFDC_Production) {
-                containsSFDCProd = true;
-            } else if (systems.get(i).getMAP() == CDLExternalSystem.MAPType.Marketo) {
-                containsMKTO = true;
-            }
-        }
-        Assert.assertTrue(containsSFDCProd);
-        Assert.assertTrue(containsMKTO);
+        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+        List<String> crmIds = new ArrayList<>();
+        crmIds.add("accountId");
+        crmIds.add("testId");
+        crmIds.add(InterfaceName.SalesforceSandboxAccountID.name());
+        cdlExternalSystem.setCRMIdList(crmIds);
+        cdlExternalSystem.setMapIds(InterfaceName.MarketoAccountID.name() + "," + InterfaceName.EloquaAccountID);
+        cdlExternalSystem.setErpIds("TestERPId");
+        cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(customerSpace, cdlExternalSystem);
+
+        CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
+        Assert.assertNotNull(system);
+
+        Assert.assertEquals(system.getCRMIdList().size(), 3);
+        Assert.assertEquals(system.getMAPIdList().size(), 2);
+        Assert.assertEquals(system.getERPIdList().size(), 1);
+        Assert.assertEquals(system.getOtherIdList().size(), 0);
+
+        Assert.assertTrue(system.getCrmIds().contains(InterfaceName.SalesforceSandboxAccountID.name()));
+        Assert.assertTrue(system.getMapIds().contains(InterfaceName.MarketoAccountID.name()));
+        Assert.assertTrue(system.getErpIds().contains("TestERPId"));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
-    public void testCreateAndGet2() {
+    public void testUpdate() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemProxy.createCDLExternalSystem(customerSpace, InterfaceName.SalesforceSandboxAccountID, InterfaceName
-                .EloquaAccountID, null);
-        List<CDLExternalSystem> systems = cdlExternalSystemProxy.getCDLExternalSystems(customerSpace);
-        Assert.assertNotNull(systems);
-        Assert.assertEquals(systems.size(), 3);
-        Assert.assertEquals(systems.get(2).getCRM(), CDLExternalSystem.CRMType.SFDC_Sandbox);
-        Assert.assertEquals(systems.get(2).getMAP(), CDLExternalSystem.MAPType.Eloqua);
-        Assert.assertNull(systems.get(2).getERP());
+        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+        cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(customerSpace, cdlExternalSystem);
 
+        CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
+        Assert.assertNotNull(system);
+
+        Assert.assertEquals(system.getCRMIdList().size(), 0);
+        Assert.assertEquals(system.getMAPIdList().size(), 0);
+        Assert.assertEquals(system.getERPIdList().size(), 0);
+        Assert.assertEquals(system.getOtherIdList().size(), 0);
     }
+
 }

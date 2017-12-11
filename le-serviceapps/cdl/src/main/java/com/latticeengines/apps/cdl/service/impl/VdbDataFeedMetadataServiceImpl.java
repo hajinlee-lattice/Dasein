@@ -15,16 +15,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
@@ -317,6 +320,20 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         }
         return type;
+    }
+
+    @Override
+    public void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
+                                         String customerSpace) {
+        if (cdlExternalSystemService == null || table == null) {
+            return;
+        }
+        Attribute crmAttr = table.getAttribute(InterfaceName.SalesforceAccountID);
+        if (crmAttr != null) {
+            CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+            cdlExternalSystem.setCrmIds(crmAttr.getName());
+            cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
+        }
     }
 
     @Override

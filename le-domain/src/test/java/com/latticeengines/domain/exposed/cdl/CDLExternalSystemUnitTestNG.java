@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -11,20 +14,18 @@ public class CDLExternalSystemUnitTestNG {
     @Test(groups = "unit")
     public void testExternalSystem() {
         CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-        cdlExternalSystem.setCRM(CDLExternalSystem.CRMType.SFDC_Sandbox);
+        List<String> crmIds = new ArrayList<>();
+        crmIds.add("accountId");
+        crmIds.add("testId");
+        crmIds.add(InterfaceName.SalesforceSandboxAccountID.name());
+        cdlExternalSystem.setCRMIdList(crmIds);
+
         cdlExternalSystem.setPid(1L);
         String cdlExternalSystemStr = JsonUtils.serialize(cdlExternalSystem);
         Assert.assertNotNull(cdlExternalSystemStr);
         Assert.assertTrue(cdlExternalSystemStr.contains(InterfaceName.SalesforceSandboxAccountID.name()));
 
-        String allSystem = JsonUtils.serialize(CDLExternalSystem.EXTERNAL_SYSTEM);
-        Assert.assertTrue(allSystem.contains(InterfaceName.SalesforceAccountID.name()));
-        Assert.assertTrue(allSystem.contains(InterfaceName.SalesforceSandboxAccountID.name()));
-        Assert.assertTrue(allSystem.contains(InterfaceName.MarketoAccountID.name()));
-        Assert.assertTrue(allSystem.contains(InterfaceName.EloquaAccountID.name()));
 
-        CDLExternalSystem.CRMType crmType = CDLExternalSystem.CRMType.fromAccountInterface(InterfaceName
-                .SalesforceSandboxAccountID);
-        Assert.assertTrue(crmType == CDLExternalSystem.CRMType.SFDC_Sandbox);
+        Assert.assertTrue(cdlExternalSystem.getCrmIds().contains(InterfaceName.SalesforceSandboxAccountID.name()));
     }
 }

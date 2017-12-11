@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -26,35 +27,28 @@ public class CDLExternalSystemServiceImplTestNG extends CDLFunctionalTestNGBase 
     @Test(groups = "functional")
     public void testCreateAndGet() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemService.createExternalSystem(customerSpace, "crm", InterfaceName.SalesforceAccountID);
-        cdlExternalSystemService.createExternalSystem(customerSpace, "MAP", InterfaceName.MarketoAccountID);
+        CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+        List<String> crmIds = new ArrayList<>();
+        crmIds.add("accountId");
+        crmIds.add("testId");
+        crmIds.add(InterfaceName.SalesforceSandboxAccountID.name());
+        cdlExternalSystem.setCRMIdList(crmIds);
+        cdlExternalSystem.setMapIds(InterfaceName.MarketoAccountID.name() + "," + InterfaceName.EloquaAccountID);
+        cdlExternalSystem.setErpIds("TestERPId");
+        cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
+
         List<CDLExternalSystem> systems = cdlExternalSystemService.getAllExternalSystem(customerSpace);
         Assert.assertNotNull(systems);
-        Assert.assertEquals(systems.size(), 2);
-        boolean containsSFDCProd = false;
-        boolean containsMKTO = false;
-        for (int i = 0; i < 2; i++) {
-            if (systems.get(i).getCRM() == CDLExternalSystem.CRMType.SFDC_Production) {
-                containsSFDCProd = true;
-            } else if (systems.get(i).getMAP() == CDLExternalSystem.MAPType.Marketo) {
-                containsMKTO = true;
-            }
-        }
-        Assert.assertTrue(containsSFDCProd);
-        Assert.assertTrue(containsMKTO);
+        Assert.assertEquals(systems.size(), 1);
+
+        Assert.assertEquals(systems.get(0).getCRMIdList().size(), 3);
+        Assert.assertEquals(systems.get(0).getMAPIdList().size(), 2);
+        Assert.assertEquals(systems.get(0).getERPIdList().size(), 1);
+        Assert.assertEquals(systems.get(0).getOtherIdList().size(), 0);
+
+        Assert.assertTrue(systems.get(0).getCrmIds().contains(InterfaceName.SalesforceSandboxAccountID.name()));
+        Assert.assertTrue(systems.get(0).getMapIds().contains(InterfaceName.MarketoAccountID.name()));
+        Assert.assertTrue(systems.get(0).getErpIds().contains("TestERPId"));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreateAndGet")
-    public void testCreateAndGet2() {
-        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlExternalSystemService.createExternalSystem(customerSpace, InterfaceName.SalesforceSandboxAccountID, InterfaceName
-                .EloquaAccountID, null);
-        List<CDLExternalSystem> systems = cdlExternalSystemService.getAllExternalSystem(customerSpace);
-        Assert.assertNotNull(systems);
-        Assert.assertEquals(systems.size(), 3);
-        Assert.assertEquals(systems.get(2).getCRM(), CDLExternalSystem.CRMType.SFDC_Sandbox);
-        Assert.assertEquals(systems.get(2).getMAP(), CDLExternalSystem.MAPType.Eloqua);
-        Assert.assertNull(systems.get(2).getERP());
-
-    }
 }

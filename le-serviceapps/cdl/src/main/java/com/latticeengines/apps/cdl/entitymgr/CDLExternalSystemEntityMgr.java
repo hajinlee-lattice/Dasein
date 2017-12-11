@@ -8,4 +8,6 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 public interface CDLExternalSystemEntityMgr extends BaseEntityMgr<CDLExternalSystem> {
 
     List<CDLExternalSystem> findAllExternalSystem();
+
+    CDLExternalSystem findExternalSystem();
 }

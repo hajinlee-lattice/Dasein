@@ -11,9 +11,11 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
@@ -41,9 +43,13 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     @Autowired
     private VdbDataFeedMetadataServiceImpl vdbDataFeedMetadataService;
 
+    @Autowired
+    private CDLExternalSystemService cdlExternalSystemService;
+
     @BeforeClass(groups = "functional")
     private void setup() throws IOException {
         // setup test metadata string;
+        super.setupTestEnvironmentWithDummySegment();
         testVdbMetadata = new VdbImportConfig();
         errorVdbMetadata = new VdbImportConfig();
         testVdbMetadata.setVdbLoadTableConfig(JsonUtils.deserialize(IOUtils.toString(
@@ -102,6 +108,12 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(resolvedTable);
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.AccountId));
         Assert.assertNotNull(resolvedTable.getAttribute(InterfaceName.SalesforceAccountID));
+        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        vdbDataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, resolvedTable, customerSpace);
+        CDLExternalSystem system = cdlExternalSystemService.getExternalSystem(customerSpace);
+        Assert.assertNotNull(system);
+        Assert.assertEquals(system.getCRMIdList().size(), 1);
+        Assert.assertEquals(system.getCRMIdList().get(0), InterfaceName.SalesforceAccountID.name());
     }
 
     @Test(groups = "functional", dependsOnMethods = "testResolveMetadata", expectedExceptions = RuntimeException.class)

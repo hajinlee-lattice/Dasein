@@ -42,6 +42,7 @@ public class MetadataResolver {
     private String csvPath;
     private FieldMappingDocument fieldMappingDocument;
     private Configuration yarnConfiguration;
+    private boolean cdlResolve = false;
 
     private static class Result {
         public List<FieldMapping> fieldMappings;
@@ -52,6 +53,15 @@ public class MetadataResolver {
 
     public MetadataResolver() {
         super();
+    }
+
+    public MetadataResolver(String csvPath, Configuration yarnConfiguration,
+                            FieldMappingDocument fieldMappingDocument, boolean cdlResolve) {
+        this.csvPath = csvPath;
+        this.yarnConfiguration = yarnConfiguration;
+        this.fieldMappingDocument = fieldMappingDocument;
+        this.result = new Result();
+        this.cdlResolve = cdlResolve;
     }
 
     public MetadataResolver(String csvPath, Configuration yarnConfiguration,
@@ -126,7 +136,8 @@ public class MetadataResolver {
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
-                attributes.add(getAttributeFromFieldName(fieldMapping.getUserField(), fieldMapping.getFieldType()));
+                attributes.add(getAttributeFromFieldName(fieldMapping.getMappedField(), fieldMapping.getUserField(),
+                        fieldMapping.getFieldType()));
             }
         }
 
@@ -298,7 +309,7 @@ public class MetadataResolver {
         return false;
     }
 
-    private Attribute getAttributeFromFieldName(String fieldName, UserDefinedType userDefinedType) {
+    private Attribute getAttributeFromFieldName(String attrName, String fieldName, UserDefinedType userDefinedType) {
         Attribute attribute = new Attribute();
 
         String fieldType;
@@ -307,8 +318,11 @@ public class MetadataResolver {
         } else {
             fieldType = userDefinedType.getAvroType().toString().toLowerCase();
         }
-
-        attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldName));
+        if (cdlResolve) {
+            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(attrName));
+        } else {
+            attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldName));
+        }
         attribute.setPhysicalDataType(fieldType);
         attribute.setDisplayName(fieldName);
         attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -125,6 +126,12 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         } else {
             return Type.valueOf(attribute.getPhysicalDataType().toUpperCase());
         }
+    }
+
+    @Override
+    public void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
+                                         String customerSpace) {
+        return;
     }
 
     @Override

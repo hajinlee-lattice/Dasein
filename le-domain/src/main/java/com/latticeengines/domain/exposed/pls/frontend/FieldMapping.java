@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls.frontend;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 
 public class FieldMapping {
@@ -14,6 +15,9 @@ public class FieldMapping {
 
     @JsonProperty
     private UserDefinedType fieldType;
+
+    @JsonProperty
+    private CDLExternalSystemType cdlExternalSystemType = null;
 
     @JsonProperty
     private boolean mappedToLatticeField;
@@ -40,6 +44,14 @@ public class FieldMapping {
 
     public UserDefinedType getFieldType() {
         return this.fieldType;
+    }
+
+    public CDLExternalSystemType getCdlExternalSystemType() {
+        return cdlExternalSystemType;
+    }
+
+    public void setCdlExternalSystemType(CDLExternalSystemType cdlExternalSystemType) {
+        this.cdlExternalSystemType = cdlExternalSystemType;
     }
 
     public void setMappedToLatticeField(boolean mappedToLatticeField) {

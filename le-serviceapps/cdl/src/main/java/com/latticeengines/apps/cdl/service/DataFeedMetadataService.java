@@ -42,4 +42,7 @@ public abstract class DataFeedMetadataService {
 
     public abstract Type getAvroType(Attribute attribute);
 
+    public abstract void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
+                                                  String customerSpace);
+
 }
