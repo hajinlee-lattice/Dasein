@@ -253,7 +253,11 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                         long testTime = TestFrameworkUtils.getTestTimestamp(tenant);
                         if (testTime > 0 && (System.currentTimeMillis() - testTime) > redshiftCleanupThreshold) {
                             log.info("Dropping redshift table " + table);
-                            redshiftService.dropTable(table);
+                            try {
+                                redshiftService.dropTable(table);
+                            } catch (Exception e) {
+                                log.error("Failed to drop redshift table " + table, e);
+                            }
                         }
                     }
                 }
