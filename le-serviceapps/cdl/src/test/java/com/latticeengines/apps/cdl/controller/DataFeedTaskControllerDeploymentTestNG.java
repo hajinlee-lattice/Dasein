@@ -30,6 +30,7 @@ public class DataFeedTaskControllerDeploymentTestNG extends CDLDeploymentTestNGB
         VdbLoadTableConfig testVdbMetadata = JsonUtils.deserialize(IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("metadata/vdb/testmetadata.json"),
                 "UTF-8"), VdbLoadTableConfig.class);
+        testVdbMetadata.setTenantId(mainTestTenant.getId());
         VdbImportConfig vdbImportConfig = new VdbImportConfig();
         vdbImportConfig.setVdbLoadTableConfig(testVdbMetadata);
         String taskId = cdlProxy.createDataFeedTask(mainTestTenant.getId(), "VisiDB", "Account", "testQuery",
