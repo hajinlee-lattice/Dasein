@@ -84,16 +84,17 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         profileStep = 1;
         bucketStep = 2;
 
-        TransformationStepConfig aggregate = aggregate(customerSpace, servingStoreTablePrefix, dailyTableName,
-                accountTableName, productMap);
+        TransformationStepConfig aggregate = aggregate(customerSpace, dailyTableName, accountTableName, productMap);
         TransformationStepConfig profile = profile();
         TransformationStepConfig bucket = bucket();
         TransformationStepConfig calc = calcStats(customerSpace, statsTablePrefix);
+        TransformationStepConfig sort = sort();
         TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
         steps.add(aggregate);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
+        steps.add(sort);
         steps.add(sortProfile);
 
         // -----------
@@ -122,8 +123,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         productMap = TimeSeriesUtils.loadProductMap(yarnConfiguration, productTable);
     }
 
-    private TransformationStepConfig aggregate(CustomerSpace customerSpace, String masterTablePrefix,
-            String transactionTableName, String accountTableName, Map<String, Product> productMap) {
+    private TransformationStepConfig aggregate(CustomerSpace customerSpace, String transactionTableName, //
+                                               String accountTableName, Map<String, Product> productMap) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
 
@@ -139,11 +140,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         baseTables.put(transactionSourceName, transactionTable);
         baseTables.put(accountSourceName, accountTable);
         step.setBaseTables(baseTables);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(masterTablePrefix);
-        step.setTargetTable(targetTable);
 
         TransactionAggregateConfig conf = new TransactionAggregateConfig();
         conf.setProductMap(productMap);
@@ -205,6 +201,30 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
         step.setConfiguration(appendEngineConf(conf, heavyEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig sort() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(bucketStep);
+        step.setInputSteps(inputSteps);
+
+        step.setTransformer(TRANSFORMER_SORTER);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        targetTable.setExpandBucketedAttrs(true);
+        step.setTargetTable(targetTable);
+
+        SorterConfig conf = new SorterConfig();
+        conf.setPartitions(50);
+        conf.setSplittingThreads(maxSplitThreads);
+        conf.setSplittingChunkSize(10000L);
+        conf.setCompressResult(true);
+        conf.setSortingField(servingStoreSortKey);
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        step.setConfiguration(confStr);
         return step;
     }
 

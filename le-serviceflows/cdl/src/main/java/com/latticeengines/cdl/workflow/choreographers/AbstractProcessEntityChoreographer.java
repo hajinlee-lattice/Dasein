@@ -33,7 +33,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private boolean initialized = false;
 
     private boolean enforceRebuild = false;
-    protected boolean hasImports = false;
+    private boolean hasImports = false;
     private boolean hasSchemaChange = false;
     protected boolean hasActiveServingStore = false;
 
@@ -51,7 +51,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
         if (isMergeStep(step)) {
             initialize(step);
-            return !shouldMerge();
+            return false;
         }
 
         if (isCloneStep(step)) {
@@ -146,10 +146,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         } else {
             log.info("No active serving store for entity " + mainEntity());
         }
-    }
-
-    private boolean shouldMerge() {
-        return hasImports;
     }
 
     private boolean shouldClone() {

@@ -13,18 +13,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessS
 public class CloneProduct extends BaseCloneEntityStep<ProcessStepConfiguration> {
 
     @Override
-    protected List<TableRoleInCollection> tablesGeneratedViaRebuild() {
+    protected List<TableRoleInCollection> tablesToClone() {
         return Collections.singletonList(BusinessEntity.Product.getServingStore());
-    }
-
-    @Override
-    public List<TableRoleInCollection> tablesGeneratedViaMerge() {
-        return Collections.singletonList(BusinessEntity.Product.getBatchStore());
-    }
-
-    @Override
-    public BusinessEntity importEntity() {
-        return BusinessEntity.Product;
     }
 
 }

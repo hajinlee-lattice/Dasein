@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -47,9 +46,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private Table rawTable;
     private int mergeStep, dailyStep, dayPeriodStep;
-
-    @Value("${dataplatform.queue.scheme}")
-    private String queueScheme;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -212,6 +208,10 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         log.info("Upsert table " + table.getName() + " to role " + role + "version" + inactive);
 
         return table;
+    }
+
+    @Override
+    protected void cloneBatchStore() {
     }
 
 }

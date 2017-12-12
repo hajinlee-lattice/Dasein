@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.steps;
+package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
 import java.util.Collections;

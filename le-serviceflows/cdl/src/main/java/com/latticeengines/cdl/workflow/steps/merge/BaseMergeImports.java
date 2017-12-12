@@ -13,14 +13,17 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -41,7 +44,9 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
+import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 
 public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseTransformWrapperStep<T> {
@@ -70,10 +75,18 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
 
+    @Value("${dataplatform.queue.scheme}")
+    protected String queueScheme;
+
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
-        return generateWorkflowConf();
+        if (CollectionUtils.isNotEmpty(inputTableNames)) {
+            return generateWorkflowConf();
+        } else {
+            cloneBatchStore();
+            return null;
+        }
     }
 
     @Override
@@ -109,17 +122,19 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                 BusinessEntity.class, List.class);
 
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
-        List<Table> inputTables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(imports)) {
+            List<Table> inputTables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
 
-        if (inputTables == null || inputTables.isEmpty()) {
-            throw new RuntimeException("There is no input tables to consolidate.");
-        }
-        inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
-                : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
-                : t.getLastModifiedKey().getLastModifiedTimestamp())
-                .reversed());
-        for (Table table : inputTables) {
-            inputTableNames.add(table.getName());
+            if (inputTables == null || inputTables.isEmpty()) {
+                throw new RuntimeException("There is no input tables to consolidate.");
+            }
+            inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
+                    : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
+                    : t.getLastModifiedKey().getLastModifiedTimestamp())
+                    .reversed());
+            for (Table table : inputTables) {
+                inputTableNames.add(table.getName());
+            }
         }
     }
 
@@ -215,6 +230,21 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         entityValueMap.put(entity, value);
         putObjectInContext(key, entityValueMap);
+    }
+
+    protected void cloneBatchStore() {
+        String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
+        if (StringUtils.isNotBlank(activeTableName)) {
+            log.info("Cloning " + batchStore + " from  " + active + " to " + inactive);
+            Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
+            String cloneName = NamingUtils.timestamp(batchStore.name());
+            String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+            queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+            Table inactiveTable = TableCloneUtils //
+                    .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
+            metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, batchStore, inactive);
+        }
     }
 
     protected abstract PipelineTransformationRequest getConsolidateRequest();

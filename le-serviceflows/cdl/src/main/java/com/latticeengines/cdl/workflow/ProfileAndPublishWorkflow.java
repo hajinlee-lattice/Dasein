@@ -11,7 +11,7 @@ import com.latticeengines.cdl.workflow.listeners.ProfileAndPublishListener;
 import com.latticeengines.cdl.workflow.steps.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.FinishProfile;
 import com.latticeengines.cdl.workflow.steps.StartProfile;
-import com.latticeengines.cdl.workflow.steps.CombineStatistics;
+import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProfileAndPublishWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;

@@ -14,21 +14,11 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessS
 public class CloneContact extends BaseCloneEntityStep<ProcessStepConfiguration> {
 
     @Override
-    public List<TableRoleInCollection> tablesGeneratedViaMerge() {
-        return Collections.singletonList(BusinessEntity.Contact.getBatchStore());
-    }
-
-    @Override
-    protected List<TableRoleInCollection> tablesGeneratedViaRebuild() {
+    protected List<TableRoleInCollection> tablesToClone() {
         return Arrays.asList( //
                 BusinessEntity.Contact.getServingStore(), //
                 TableRoleInCollection.ContactProfile //
         );
-    }
-
-    @Override
-    public BusinessEntity importEntity() {
-        return BusinessEntity.Contact;
     }
 
 }

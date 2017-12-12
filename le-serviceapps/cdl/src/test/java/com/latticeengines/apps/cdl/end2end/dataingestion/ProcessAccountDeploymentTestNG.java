@@ -5,6 +5,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import org.slf4j.Logger;
@@ -36,6 +37,12 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
+        runPreCheckin();
+        // saveCheckpoint(CHECK_POINT);
+    }
+
+    @Test(groups = "precheckin")
+    public void runPreCheckin() throws Exception {
         Assert.assertEquals(ACCOUNT_IMPORT_SIZE_1_1 + ACCOUNT_IMPORT_SIZE_1_2, ACCOUNT_IMPORT_SIZE_1);
         Assert.assertEquals(CONTACT_IMPORT_SIZE_1_1 + CONTACT_IMPORT_SIZE_1_2, CONTACT_IMPORT_SIZE_1);
         Assert.assertEquals(PRODUCT_IMPORT_SIZE_1_1 + PRODUCT_IMPORT_SIZE_1_2, PRODUCT_IMPORT_SIZE_1);
@@ -43,7 +50,6 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         importData();
         processAnalyze();
         verifyProcess();
-        // saveCheckpoint(CHECK_POINT);
     }
 
     private void importData() throws Exception {
@@ -61,6 +67,9 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
     private void verifyProcess() {
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
+
+        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
+        Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
         Assert.assertEquals(numAccounts, ACCOUNT_IMPORT_SIZE_1);

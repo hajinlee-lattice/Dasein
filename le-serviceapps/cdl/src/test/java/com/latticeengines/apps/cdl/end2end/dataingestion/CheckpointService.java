@@ -345,7 +345,7 @@ public class CheckpointService {
     private Table parseCheckpointTable(String checkpoint, String tableName, DataCollection.Version version,
             String[] tenantNames) throws IOException {
 
-        logger.info("Parse check point " + checkpoint + " table " + tableName + "version" + version.name());
+        logger.info("Parse check point " + checkpoint + " table " + tableName + " of version " + version.name());
         String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
                 tableName);
         logger.info("Parse check point file path " + jsonFilePath);

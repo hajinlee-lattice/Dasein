@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.choreographers.ProcessAnalyzeChoreographer;
 import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
-import com.latticeengines.cdl.workflow.steps.CombineStatistics;
+import com.latticeengines.cdl.workflow.steps.process.CloneStatistics;
+import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
@@ -42,6 +43,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private CombineStatistics combineStatistics;
 
     @Inject
+    private CloneStatistics cloneStatistics;
+
+    @Inject
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
 
     @Inject
@@ -56,6 +60,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processProductWorkflow) //
                 .next(processTransactionWorkflow) //
                 .next(combineStatistics) //
+                .next(cloneStatistics) //
                 .next(redshiftPublishWorkflow) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
