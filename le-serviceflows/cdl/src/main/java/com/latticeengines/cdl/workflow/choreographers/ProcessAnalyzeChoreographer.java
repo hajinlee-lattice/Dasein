@@ -62,22 +62,21 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        if (super.skipStep(step, seq)) {
-            return true;
-        } else if (isAccountStep(seq)) {
-            return accountChoreographer.skipStep(step, seq);
+        boolean skip = false;
+        if (isAccountStep(seq)) {
+            skip = accountChoreographer.skipStep(step, seq);
         } else if (isContactStep(seq)) {
-            return contactChoreographer.skipStep(step, seq);
+            skip = contactChoreographer.skipStep(step, seq);
         } else if (isProductStep(seq)) {
-            return productChoreographer.skipStep(step, seq);
+            skip = productChoreographer.skipStep(step, seq);
         } else if (isTransactionStep(seq)) {
-            return transactionChoreographer.skipStep(step, seq);
+            skip = transactionChoreographer.skipStep(step, seq);
         } else if (isCombineStatsStep(step)) {
-            return skipCombineStatsStep();
+            skip = skipCombineStatsStep();
         } else if (inPublishWorkflow(seq)) {
-            return skipPublishWorkflow(step);
+            skip = skipPublishWorkflow(step);
         }
-        return false;
+        return super.skipStep(step, seq) || skip;
     }
 
     @Override

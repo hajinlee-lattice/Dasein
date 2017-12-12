@@ -6,22 +6,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -31,16 +24,13 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseMergeImports<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseSingleEntityMergeImports.class);
 
-    private String diffTablePrefix;
-    protected String inputMasterTableName;
+    private String inputMasterTableName;
     protected Table masterTable;
 
     @Override
@@ -110,7 +100,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         log.info("Set inputMasterTableName=" + inputMasterTableName);
     }
 
-    protected TransformationStepConfig mergeMaster(int mergeStep) {
+    TransformationStepConfig mergeMaster(int mergeStep) {
         TargetTable targetTable;
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step);
@@ -143,7 +133,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
-    protected void setupMasterTable(TransformationStepConfig step) {
+    void setupMasterTable(TransformationStepConfig step) {
         List<String> baseSources;
         Map<String, SourceTable> baseTables;
         if (StringUtils.isNotBlank(inputMasterTableName)) {

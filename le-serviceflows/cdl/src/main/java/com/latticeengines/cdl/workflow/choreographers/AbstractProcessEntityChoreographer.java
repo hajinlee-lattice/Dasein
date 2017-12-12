@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -31,6 +32,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     private boolean initialized = false;
 
+    private boolean enforceRebuild = false;
     protected boolean hasImports = false;
     private boolean hasSchemaChange = false;
     protected boolean hasActiveServingStore = false;
@@ -60,12 +62,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             if (rebuild && update) {
                 throw new IllegalStateException("Rebuild and update cannot be both true");
             }
-            if (rebuild) {
-                log.info("Skip cloning " + mainEntity() + " because going to rebuild.");
-                return true;
-            } else {
-                return false;
-            }
+            return !shouldClone();
         }
 
         if (belongsToUpdate(seq)) {
@@ -105,10 +102,16 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     private void initialize(AbstractStep<? extends BaseStepConfiguration> step) {
         if (!initialized) {
+            checkEnforcedRebuild(step);
             checkImports(step);
             checkActiveServingStore(step);
             initialized = true;
         }
+    }
+
+    private void checkEnforcedRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
+        BaseProcessEntityStepConfiguration configuration = (BaseProcessEntityStepConfiguration) step.getConfiguration();
+        enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
     }
 
     private void checkImports(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -149,8 +152,20 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return hasImports;
     }
 
-    protected boolean shouldRebuild() {
-        if (hasSchemaChange) {
+    private boolean shouldClone() {
+        if (rebuild) {
+            log.info("Skip cloning " + mainEntity() + " because going to rebuild and merge is enabled.");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean shouldRebuild() {
+        if (enforceRebuild) {
+            log.info("Enforced to rebuild " + mainEntity());
+            return true;
+        } else if (hasSchemaChange) {
             log.info("Detected schema change in " + mainEntity() + ", going to rebuild");
             return true;
         } else if (hasImports && !hasActiveServingStore) {
@@ -161,9 +176,9 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return false;
     }
 
-    protected boolean shouldUpdate() {
-        if (!hasSchemaChange && hasImports && hasActiveServingStore) {
-            log.info("Has imports but no schema change, going to update " + mainEntity());
+    private boolean shouldUpdate() {
+        if (!rebuild && hasImports) {
+            log.info("No going to rebuild but has imports, going to update " + mainEntity());
             return true;
         }
         log.info("No reason to update " + mainEntity());

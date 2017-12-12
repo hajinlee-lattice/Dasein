@@ -68,7 +68,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        entity = configuration.getMainEntity();
+        entity = getEntityToBeProfiled();
 
         TableRoleInCollection servingStore = entity.getServingStore();
         profileTablePrefix = entity.name() + "Profile";
@@ -76,9 +76,11 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         servingStoreTablePrefix = servingStore.name();
         servingStoreSortKey = servingStore.getPrimaryKey().name();
 
-        masterTable = dataCollectionProxy.getTable(customerSpace.toString(), entity.getBatchStore(), inactive);
-        if (masterTable == null) {
-            throw new IllegalStateException("Cannot find the master table in default collection");
+        if (entity.getBatchStore() != null) {
+            masterTable = dataCollectionProxy.getTable(customerSpace.toString(), entity.getBatchStore(), inactive);
+            if (masterTable == null) {
+                throw new IllegalStateException("Cannot find the master table in default collection");
+            }
         }
     }
 
@@ -116,6 +118,10 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         }
         entityValueMap.put(entity, value);
         putObjectInContext(key, entityValueMap);
+    }
+
+    protected BusinessEntity getEntityToBeProfiled() {
+        return configuration.getMainEntity();
     }
 
     protected abstract TableRoleInCollection profileTableRole();

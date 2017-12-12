@@ -54,34 +54,18 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             log.info("No active " + servingStore);
         }
         checkActivePeriodStores(step);
-    }
-
-    @Override
-    protected boolean shouldRebuild() {
-        if (hasImports && !(hasActiveServingStore && hasActivePeriodStores)) {
-            log.info("Has imports but no serving or period stores, going to rebuild " + mainEntity());
-            return false;
-        }
-        log.info("No reason to rebuild " + mainEntity());
-        return false;
-    }
-
-    @Override
-    protected boolean shouldUpdate() {
-        if (hasImports && hasActiveServingStore && hasActivePeriodStores) {
-            log.info("Has imports but no schema change, going to update " + mainEntity());
-            return true;
-        }
-        log.info("No reason to update " + mainEntity());
-        return false;
+        hasActiveServingStore = hasActiveServingStore && hasActivePeriodStores;
     }
 
     private void checkActivePeriodStores(AbstractStep<? extends BaseStepConfiguration> step) {
         DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
-        String rawTableName = dataCollectionProxy.getTableName(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction, active);
-        String dailyTableName = dataCollectionProxy.getTableName(customerSpace, TableRoleInCollection.ConsolidatedDailyTransaction, active);
-        String periodTableName = dataCollectionProxy.getTableName(customerSpace, TableRoleInCollection.ConsolidatedPeriodTransaction, active);
+        String rawTableName = dataCollectionProxy.getTableName(customerSpace, //
+                TableRoleInCollection.ConsolidatedRawTransaction, active);
+        String dailyTableName = dataCollectionProxy.getTableName(customerSpace, //
+                TableRoleInCollection.ConsolidatedDailyTransaction, active);
+        String periodTableName = dataCollectionProxy.getTableName(customerSpace, //
+                TableRoleInCollection.ConsolidatedPeriodTransaction, active);
 
         hasActivePeriodStores = StringUtils.isNotBlank(rawTableName)
                 && StringUtils.isNotBlank(dailyTableName)

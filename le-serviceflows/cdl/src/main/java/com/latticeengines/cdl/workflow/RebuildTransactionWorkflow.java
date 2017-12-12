@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.rebuild.AggregateTransactionWrapper;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfileTransactionWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -15,7 +15,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class RebuildTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
 
     @Inject
-    private AggregateTransactionWrapper aggregateTransactionWrapper;
+    private ProfileTransactionWrapper profileTransactionWrapper;
 
     @Inject
     private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
@@ -23,7 +23,7 @@ public class RebuildTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeW
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(aggregateTransactionWrapper) //
+                .next(profileTransactionWrapper) //
                 .next(profilePurchaseHistoryWrapper) //
                 .build();
     }

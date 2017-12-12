@@ -12,16 +12,17 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -186,7 +187,7 @@ public class TimeSeriesUtils {
          }
     }
 
-    public static Map<String, Product> loadProductMap(YarnConfiguration yarnConfiguration, Table productTable) {
+    public static Map<String, Product> loadProductMap(Configuration yarnConfiguration, Table productTable) {
         Map<String, Product> productMap = new HashMap<>();
         for (Extract extract : productTable.getExtracts()) {
             List<GenericRecord> recordList = AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath());

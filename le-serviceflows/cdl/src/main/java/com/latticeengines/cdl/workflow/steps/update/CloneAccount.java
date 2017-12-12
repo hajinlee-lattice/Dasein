@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -13,12 +14,21 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessS
 public class CloneAccount extends BaseCloneEntityStep<ProcessStepConfiguration> {
 
     @Override
-    protected List<TableRoleInCollection> tablesToClone() {
+    public List<TableRoleInCollection> tablesGeneratedViaMerge() {
+        return Collections.singletonList(BusinessEntity.Account.getBatchStore());
+    }
+
+    @Override
+    protected List<TableRoleInCollection> tablesGeneratedViaRebuild() {
         return Arrays.asList( //
-                BusinessEntity.Account.getBatchStore(), //
                 BusinessEntity.Account.getServingStore(), //
                 TableRoleInCollection.Profile //
         );
+    }
+
+    @Override
+    public BusinessEntity importEntity() {
+        return BusinessEntity.Account;
     }
 
 }

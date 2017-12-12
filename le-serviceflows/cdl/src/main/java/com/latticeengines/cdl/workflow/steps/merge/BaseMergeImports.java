@@ -79,6 +79,13 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     @Override
     protected void onPostTransformationCompleted() {
         generateDiffReport();
+
+        List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_NEW_BATCH_MASTER, BusinessEntity.class);
+        if (entityList == null) {
+            entityList = new ArrayList<>();
+        }
+        entityList.add(entity);
+        putObjectInContext(ENTITIES_WITH_NEW_BATCH_MASTER, entityList);
     }
 
     protected void initializeConfiguration() {

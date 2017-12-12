@@ -3,9 +3,12 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
@@ -82,6 +85,24 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder importJobIds(List<Long> importJobIds) {
             processStepConfiguration.setImportJobIds(importJobIds);
+            return this;
+        }
+
+        public Builder rebuildEntities(List<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities)) {
+                if (entities.contains(BusinessEntity.Account)) {
+                    processAccountStepConfiguration.setRebuild(true);
+                }
+                if (entities.contains(BusinessEntity.Contact)) {
+                    processContactStepConfiguration.setRebuild(true);
+                }
+                if (entities.contains(BusinessEntity.Product)) {
+                    processProductStepConfiguration.setRebuild(true);
+                }
+                if (entities.contains(BusinessEntity.Transaction)) {
+                    processTransactionStepConfiguration.setRebuild(true);
+                }
+            }
             return this;
         }
 

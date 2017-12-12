@@ -61,7 +61,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public void deleteTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
-        delete("deleteImportTable", url);
+        delete("deleteTable", url);
     }
 
     public void deleteImportTable(String customerSpace, String tableName) {

@@ -1,11 +1,15 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddCompositeColumnFuction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddPeriodColumnFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -28,6 +32,8 @@ public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig
 
         result = addPeriodIdColumn(config, result);
 
+        result = addCompositeIdColumn(result);
+
         return result;
     }
 
@@ -40,6 +46,17 @@ public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig
                 new FieldMetadata(InterfaceName.PeriodId.name(), Integer.class));
         result = result.discard(new FieldList(MIN_COLUMN));
         return result;
+    }
+
+    private Node addCompositeIdColumn(Node node) {
+        List<String> keys = Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
+        List<String> fieldNames = node.getFieldNames();
+        if (fieldNames.contains(COMPOSITE_KEY)) {
+            return node;
+        }
+        node = node.apply(new ConsolidateAddCompositeColumnFuction(keys, COMPOSITE_KEY), new FieldList(keys),
+                new FieldMetadata(COMPOSITE_KEY, String.class));
+        return node;
     }
 
     @Override

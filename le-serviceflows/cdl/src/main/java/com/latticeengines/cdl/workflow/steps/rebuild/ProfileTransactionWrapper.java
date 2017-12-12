@@ -7,19 +7,19 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
-@Component("aggregateTransactionWrapper")
-public class AggregateTransactionWrapper extends BaseTransformationWrapper<AggregateTransaction> {
+@Component("profileTransactionWrapper")
+public class ProfileTransactionWrapper extends BaseTransformationWrapper<ProfileTransaction> {
 
     @Inject
-    private AggregateTransaction aggregateTransaction;
+    private ProfileTransaction aggregateTransaction;
 
     @PostConstruct
     public void overrideTransformationStepBeanName() {
-        setTransformationStepBeanName(AggregateTransaction.BEAN_NAME);
+        setTransformationStepBeanName(ProfileTransaction.BEAN_NAME);
     }
 
     @Override
-    protected AggregateTransaction getWrapperStep() {
+    protected ProfileTransaction getWrapperStep() {
         return aggregateTransaction;
     }
 

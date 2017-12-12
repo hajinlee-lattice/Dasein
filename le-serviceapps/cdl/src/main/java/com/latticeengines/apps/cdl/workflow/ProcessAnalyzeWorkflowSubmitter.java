@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -52,13 +53,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-                                           WorkflowProxy workflowProxy) {
+            WorkflowProxy workflowProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
     }
 
-    public ApplicationId submit(String customerSpace) {
+    public ApplicationId submit(String customerSpace, ProcessAnalyzeRequest request) {
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
@@ -72,7 +73,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
 
         DataFeedExecution execution = datafeed.getActiveExecution();
-        //TODO: check data feed status for if process analyze is allowed
+        // TODO: check data feed status for if process analyze is allowed
         if (execution != null && DataFeedExecution.Status.Started.equals(execution.getStatus())) {
             if (execution.getWorkflowId() == null) {
                 throw new RuntimeException(
@@ -101,7 +102,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Long> importJobIds = getImportJobIds(customerSpace);
         log.info(String.format("importJobIdsStr=%s", importJobIds));
 
-        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, importJobIds, datafeedStatus);
+        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, importJobIds,
+                datafeedStatus);
         return workflowJobService.submit(configuration);
     }
 
@@ -119,7 +121,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return importJobIds;
     }
 
-    private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, List<Long> importJobIds, Status status) {
+    private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
+            ProcessAnalyzeRequest request, List<Long> importJobIds, Status status) {
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -127,6 +130,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .initialDataFeedStatus(status) //
                 .importJobIds(importJobIds) //
+                .rebuildEntities(request.getRebuildEntities()) //
                 .inputProperties(ImmutableMap //
                         .of(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName())) //
                 .workflowContainerMem(workflowMemMb) //

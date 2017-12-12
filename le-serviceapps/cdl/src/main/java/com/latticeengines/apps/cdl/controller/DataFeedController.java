@@ -75,7 +75,14 @@ public class DataFeedController {
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace, //
                                                    @RequestBody(required = false) ProcessAnalyzeRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace);
+        if (request == null) {
+            request = defaultProcessAnalyzeRequest();
+        }
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request);
         return ResponseDocument.successResponse(appId.toString());
+    }
+
+    private ProcessAnalyzeRequest defaultProcessAnalyzeRequest() {
+        return new ProcessAnalyzeRequest();
     }
 }

@@ -1,9 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -45,7 +47,13 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
-        for (TableRoleInCollection role: tablesToClone()) {
+        List<TableRoleInCollection> rolesToClone = new ArrayList<>(tablesGeneratedViaRebuild());
+
+        if (!hasNewBatchMaster()) {
+            rolesToClone.addAll(tablesGeneratedViaMerge());
+        }
+
+        for (TableRoleInCollection role: rolesToClone) {
             String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
             if (StringUtils.isNotBlank(activeTableName)) {
                 cloneToInactiveTable(role);
@@ -53,6 +61,7 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
         }
 
     }
+
     private void cloneToInactiveTable(TableRoleInCollection role) {
         log.info("Cloning " + role + " from  " + active + " to " + inactive);
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
@@ -83,6 +92,16 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
         return false;
     }
 
-    protected abstract List<TableRoleInCollection> tablesToClone();
+    private boolean hasNewBatchMaster() {
+        List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_NEW_BATCH_MASTER,
+                BusinessEntity.class);
+        return CollectionUtils.isNotEmpty(entityList) && entityList.contains(importEntity());
+    }
+
+    protected abstract BusinessEntity importEntity();
+
+    protected abstract List<TableRoleInCollection> tablesGeneratedViaMerge();
+
+    protected abstract List<TableRoleInCollection> tablesGeneratedViaRebuild();
 
 }

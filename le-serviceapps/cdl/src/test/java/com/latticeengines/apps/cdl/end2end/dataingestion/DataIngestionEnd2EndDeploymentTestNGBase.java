@@ -623,6 +623,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         System.out.println(JsonUtils.pprint(segment2));
     }
 
+    void createTestSegment1() {
+        testMetadataSegmentProxy.createOrUpdate(constructTestSegment1());
+        MetadataSegment segment1 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_1);
+        Assert.assertNotNull(segment1);
+        System.out.println(JsonUtils.pprint(segment1));
+    }
+
     void createTestSegment2() {
         testMetadataSegmentProxy.createOrUpdate(constructTestSegment2());
         MetadataSegment segment2 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2);

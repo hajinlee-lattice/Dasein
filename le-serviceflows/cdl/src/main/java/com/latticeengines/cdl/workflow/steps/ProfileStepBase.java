@@ -26,11 +26,11 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     @Inject
     protected TransformationProxy transformationProxy;
 
-    <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
+    protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
         updateEntityValueMapInContext(getEntity(), key, value, clz);
     }
 
-    <V> void updateEntityValueMapInContext(BusinessEntity entity, String key, V value, Class<V> clz) {
+    protected <V> void updateEntityValueMapInContext(BusinessEntity entity, String key, V value, Class<V> clz) {
         Map<BusinessEntity, V> entityValueMap = getMapObjectFromContext(key, BusinessEntity.class, clz);
         if (entityValueMap == null) {
             entityValueMap = new HashMap<>();

@@ -25,6 +25,8 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountDeploymentTestNG.class);
 
+    static final String CHECK_POINT = "process1";
+
     private static final int ACCOUNT_IMPORT_SIZE_1_1 = 350;
     private static final int ACCOUNT_IMPORT_SIZE_1_2 = 150;
     private static final int CONTACT_IMPORT_SIZE_1_1 = 600;
@@ -41,7 +43,7 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         importData();
         processAnalyze();
         verifyProcess();
-        // saveCheckpoint("process1");
+        // saveCheckpoint(CHECK_POINT);
     }
 
     private void importData() throws Exception {

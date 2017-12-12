@@ -1,12 +1,17 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
+
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -18,17 +23,19 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
 
     private static final Logger log = LoggerFactory.getLogger(ProcessTransactionDeploymentTestNG.class);
 
+    static final String CHECK_POINT = "process2";
+
     private static final int TRANSACTION_IMPORT_SIZE_1_1 = 20000;
     private static final int TRANSACTION_IMPORT_SIZE_1_2 = 10000;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         Assert.assertEquals(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2, TRANSACTION_IMPORT_SIZE_1);
-        resumeCheckpoint("process1");
+        resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
         importData();
         processAnalyze();
         verifyProcess();
-        // saveCheckpoint("process2");
+        // saveCheckpoint(CHECK_POINT);
     }
 
     private void importData() throws Exception {
@@ -41,9 +48,15 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
 
     private void verifyProcess() {
         verifyDataFeedStatus(DataFeed.Status.Active);
-        // verifyActiveVersion(DataCollection.Version.Green);
+        verifyActiveVersion(DataCollection.Version.Blue);
         long numTransactions = countTableRole(TableRoleInCollection.ConsolidatedRawTransaction);
         Assert.assertEquals(numTransactions, TRANSACTION_IMPORT_SIZE_1);
+        createTestSegment1();
+        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_1,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_1,
+                BusinessEntity.Product, (long) PRODUCT_IMPORT_SIZE_1);
+        verifyTestSegment1Counts(segment1Counts);
     }
 
 }

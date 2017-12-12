@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-import static com.latticeengines.datacloud.etl.transformation.transformer.impl.PeriodDataDistributor.TRANSFORMER_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PERIOD_DATA_DISTRIBUTOR;
 
 import java.util.List;
@@ -12,14 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 
-@Component(TRANSFORMER_NAME)
+@Component(PeriodDataDistributor.TRANSFORMER_NAME)
 public class PeriodDataDistributor
         extends AbstractTransformer<PeriodDataDistributorConfig> {
     private static final Logger log = LoggerFactory.getLogger(PeriodDataDistributor.class);
@@ -32,9 +31,12 @@ public class PeriodDataDistributor
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         PeriodDataDistributorConfig config = getConfiguration(step.getConfig());
 
-        String periodDir = getSourceHdfsDir(step, 0);
-        String inputDir = getSourceHdfsDir(step, 1);
-        String transactionDir = getSourceHdfsDir(step, 2);
+        int periodIdx = config.getPeriodIdx() == null ? 0 : config.getPeriodIdx();
+        int inputIdx = config.getInputIdx() == null ? 1 : config.getInputIdx();
+        int transactionIdx = config.getTransactinIdx() == null ? 2 : config.getTransactinIdx();
+        String periodDir = getSourceHdfsDir(step, periodIdx);
+        String inputDir = getSourceHdfsDir(step, inputIdx);
+        String transactionDir = getSourceHdfsDir(step, transactionIdx);
 
         Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir, config.getPeriodField());
         for (Integer period : periods) {

@@ -47,7 +47,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntityStepConfiguration>
-        extends BaseTransformWrapperStep<T> {
+        extends BaseProcessDiffStep<T> {
 
     protected CustomerSpace customerSpace;
     protected DataCollection.Version active;
@@ -99,12 +99,11 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
     }
 
-    private void initializeConfiguration() {
-        customerSpace = configuration.getCustomerSpace();
-        active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        entity = configuration.getMainEntity();
+    @Override
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
 
+        entity = configuration.getMainEntity();
         servingStore = entity.getServingStore();
         if (servingStore != null) {
             servingStorePrimaryKey = servingStore.getPrimaryKey().name();
@@ -254,8 +253,6 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         baseTables.put(sourceName, sourceTable);
         step.setBaseTables(baseTables);
     }
-
-    protected abstract PipelineTransformationRequest getTransformRequest();
 
     protected abstract TableRoleInCollection profileTableRole();
 
