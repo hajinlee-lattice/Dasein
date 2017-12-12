@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.testng.annotations.AfterClass;
@@ -58,6 +59,7 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
         pipelineEntityMgr.delete(pipeline);
+        step.setPipelines(Collections.emptyList());
         pipelineStepEntityMgr.delete(step);
         super.tearDown();
     }
