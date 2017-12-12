@@ -376,7 +376,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         // only get scores for A+, A and B
         Restriction selectedScores = Restriction.builder().let(BusinessEntity.Rating, model.getId()).inCollection(
-                RuleBucketName.A_PLUS.getName(), Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.B.getName()))
+                Arrays.asList(RuleBucketName.A_PLUS.getName(), RuleBucketName.A.getName(), RuleBucketName.B.getName()))
                 .build();
         Restriction restriction2 = Restriction.builder().and(restriction, selectedScores).build();
         frontEndRestriction.setRestriction(restriction2);
