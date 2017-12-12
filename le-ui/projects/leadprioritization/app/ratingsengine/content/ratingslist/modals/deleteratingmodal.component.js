@@ -5,7 +5,7 @@ angular.module('mainApp.ratingsengine.deleteratingmodal', [
 .service('DeleteRatingModal', function ($compile, $templateCache, $rootScope, $http) {
     var self = this;
     this.show = function (rating) {
-        $http.get('app/ratingsengine/content/ratingslist/deleteratingmodal.component.html', { cache: $templateCache }).success(function (html) {
+        $http.get('app/ratingsengine/content/ratingslist/modals/deleteratingmodal.component.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
             scope.ratingId = rating.id;
 

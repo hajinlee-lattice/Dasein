@@ -1,185 +1,77 @@
-
-
-/*
-===========================================================
-This is the tile system used in PD
-===========================================================
-*/
-
-
-.tile-list {
-	display: -webkit-flex;
-	display: flex;
-  	-webkit-flex-direction: row;
-    flex-direction: row;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
-    -webkit-justify-content: flex-start;
-    justify-content: flex-start;
-    -webkit-align-items: flex-start;
-    align-items: flex-start;
-    -webkit-align-content: flex-start;
-    align-content: flex-start;
-}
-.tile-head {
-	&:after {
-		display: table;
-		content: "";
-		clear: both;
-	}
-	.pull-left {
-		width: 70%;
-	}
-}
-.tile-body {
-  overflow: hidden;
-  &.wrap-body {
-    overflow: auto;
-    font-size: 16px;
-    word-wrap: break-word;
-    line-height: 1.5;
-  }
-}
-.list-item {
-    -webkit-order: 0;
-    order: 0;
-    -webkit-flex-grow: 0;
-    flex-grow: 0;
-    -webkit-flex-shrink: 1;
-    flex-shrink: 1;
-    -webkit-flex-basis: auto;
-    flex-basis: auto;
-    -webkit-align-self: auto;
-    align-self: auto;
-    margin-right: 14px;
-	border: #d0d0d0 solid 1px;
-	padding: 0.75em;
-	margin-bottom: 14px;
-	width: 100%;
-	background: #e7e7e7;
-	transition: background 150ms ease;
-	height: 240px;
-	@include media(">medium") {
-		width: calc(50% - 14px);
-	}
-	@include media(">large") {
-		width: calc(33.333% - 14px);
-	}
-	&.filter-checked {
-		display: none;
-	}
-	&.selected {
-		background: #fff;
-		&.filter-checked {
-			display: block;
-		}
-	}
-	&:hover {
-		cursor: pointer;
-	}
-}
-.tile {
-	min-height: auto !important;
-	background: none !important;
-	transition: none !important;
-	label {
-		font-size: 20px;
-	    line-height: 23px;
-	    padding-top: 5px;
-	}
-	.lift {
-		color: $dark-gray;
-		font-size: 40px;
-		line-height: 40px;
-		margin: 0;
-	}
-	label:hover, input[type=checkbox]:hover {
-		cursor: pointer;
-	}
-	.stats {
-		margin-bottom: 1em;
-	}
-	.stats dt {
-		font-size: 0.6em
-	}
-	.stats dd {
-		font-size: 1.25em;
-		&.in-database {
-			color: $gun-metal;
-		}
-		&.your-customers {
-			color: $onyx;
-		}
-	}
-}
-
-
-
-
-
-
-
-/*
-===================================================================================
-This is the standardized version of a tile system (select attribute list).
-Should be incorporated across PD and LP (models list, campaigns list).
-===================================================================================
-*/
-.no-tiles {
-    padding: 10em 0 6em;
-    margin-bottom: 10em;
-    background: url(/lp/assets/images/bg_no_models.png) no-repeat center center;
-}
 .tiles {
     margin: 0 0 3px;
     padding: 0;
     & > li {
-      position: relative;
-      //min-height: 300px;
-      padding: 13px;
-      margin-bottom: 26px;
-      vertical-align: top;
-      background-color: #fff;
-      border-style: solid;
-      border-color: #d0d0d0;
-      border-width: 1px;
-      border-top-right-radius: 4px;
-      border-top-left-radius: 4px;
-      border-bottom-right-radius: 6px;
-      border-bottom-left-radius: 6px;
-      &:hover {
-          transition: all 0ms ease 0s;
-          border-color: #6A9ACE;
-          -webkit-box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
-          -moz-box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
-          box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
-          cursor: pointer;
-      }
-      &:active {
-        border-color: #72b8e8;
-      }
-      &.no-style {
-      	background: none;
-      	border: none;
-        padding: 0;
-      }
-      &.create-tile {
-        background: transparent;
-        border: #7b7b7b dashed 1px;
+        padding: 13px 0 60px;
+        position: relative;
+        margin-bottom: 26px;
+        vertical-align: top;
+        background-color: #fff;
+        border-style: solid;
+        border-color: #d0d0d0;
+        border-width: 1px;
+        border-top-right-radius: 4px;
+        border-top-left-radius: 4px;
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
         &:hover {
-            border-color: #457eba;
-            border-style: solid;
+            transition: all 0ms ease 0s;
+            border-color: #6A9ACE;
+            -webkit-box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
+            -moz-box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
+            box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
+            cursor: pointer;
         }
-        .form-group {
-            margin-bottom: 10px;
+        &:active {
+            border-color: #72b8e8;
         }
-        .actions {
-            position: absolute;
-            bottom: 13px;
-            width: 90%;
+        &.no-style {
+            background: none;
+            border: none;
+            padding: 0;
         }
-      }
+        &.create-tile {
+            background: transparent;
+            border: #7b7b7b dashed 1px;
+            &:hover {
+                border-color: #457eba;
+                border-style: solid;
+            }
+            .form-group {
+                margin-bottom: 10px;
+            }
+            .actions {
+                position: absolute;
+                bottom: 13px;
+                width: 90%;
+            }
+        }
+        &.editing {
+            &:hover {
+                border-color:#d0d0d0;
+            }
+            .tile-footer {
+                border-top-color: #e7e7e7;
+                span {
+                    color: #bbb;
+                }
+                .button {
+                    cursor: default;
+                    border: #b7b7b7 solid 1px;
+                    background-color: #e4e4e4;
+                    color: #656565;
+                    box-shadow: none;
+                }
+            }
+        }
+        form {
+          padding: 0 13px 13px;
+        }
     }
+}
+
+.tile-header, .tile-metadata, .tile-body, .tile-footer {
+    padding: 0 13px;
 }
 
 .tile-header {
@@ -187,6 +79,10 @@ Should be incorporated across PD and LP (models list, campaigns list).
     margin-bottom: 20px;
     margin-top: 10px;
     h2 {
+        background-size: 15px;
+        background-repeat: no-repeat;
+        background-position: left;
+        padding-left: 22px;
         margin: 0;
         color: #333333;
         font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
@@ -209,7 +105,7 @@ Should be incorporated across PD and LP (models list, campaigns list).
         button {
             padding: 0.5em 0.75em 0.35em 0.8em;
             margin-right: 0;
-            font-size: larger;
+            font-size: 20px;
             transition: all 0s linear;
             background-color: transparent;
             border: 0;
@@ -236,367 +132,156 @@ Should be incorporated across PD and LP (models list, campaigns list).
         }
     }
 }
-
+.tile-metadata {
+    padding: 12px;
+    border-color: #ddd;
+    border-style: solid;
+    border-width: 1px 0;
+    font-size: 12px;
+    line-height: 1.25;
+}
 .tile-body {
-
-}
-.tile-footer {
-  border-top: #ddd solid 1px;
-  padding-top: 13px;
-  width: 100%;
-  &:after {
-    display: table;
-    content: "";
-    clear: both;
-  }
-}
-
-
-
-
-
-.meta-data {
-    position: absolute;
-    bottom: 0;
-    padding: 13px;
-    width: 94%;
-    .stats, .status {
-        display: inline-block;
-    }
-    .status {
-        padding-left: 16px;
-        vertical-align: text-bottom;
-        margin-left: 16px;
-        border-left: #ddd solid 1px;
-        font-size: 1.45em;
-    }
-    div.stats {
-        font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
-        div {
-          text-transform: uppercase;
-          font-size: 1em;
-          &.small {
-            font-size: 0.8em;
-            margin-bottom: -2px;
-          }
-        }
-    }
-
-}
-.delete-tile {
-    position: absolute;
-    bottom: 0px;
-    right: 8px;
-    z-index: 1;
-    padding: 2px 6px;
-    background: transparent;
-    border: none;
-    color: #bfbfbf;
-    font-size: 2em;
-}
-.delete-tile:hover {
-    color: #477cba;
-}
-
-.tile-title h2 {
-  background: transparent;
-}
-
-.tile-title h2:hover {
-    background: transparent;
-}
-
-.tile-title h2.tile-name-editable {
-  background: url(../images/ico-pencil.png) no-repeat top right;
-}
-
-.tile-title h2.tile-name-editable:hover {
-    background: url(../images/ico-pencil-hover.png) no-repeat top right;
-}
-
-.tile-title h2.edit {
-  right: 0px;
-  top: 0px;
-  padding-right: 0;
-}
-
-
-
-
-/* Model Tile Actions Menu */
-.tile-menu {
-  position: absolute;
-  right: 0;
-  background: #222;
-  padding: 10px 0;
-  font-size: 16px;
-  -webkit-border-bottom-left-radius: 6px;
-  -moz-border-bottom-left-radius: 6px;
-  border-bottom-left-radius: 6px;
-  -webkit-border-top-left-radius: 6px;
-  -moz-border-top-left-radius: 6px;
-  border-top-left-radius: 6px;
-  font-family:'ProximaNova-Regular','Open Sans',sans-serif;
-  li {
-    display: block;
-    list-style: none;
-    padding: 0.3em 1em;
-    text-align: right;
-    color: #eee;
-    white-space: nowrap;
-    &:hover {
-      background: #444;
-      transition: none;
-      color: #f16a22;
-    }
-    i {
-      color: #999;
-      margin-left: .5em;
-      width: 1em;
-      text-align: center;
-      vertical-align: middle;
-    }
-    &:last-of-type {
-      margin-bottom: 0;
-    }
-  }
-  a:link, a:visited {
-    color: #fff;
-  }
-}
-
-.tile-title .edit button {
-    padding: 0.5em 0.75em 0.35em 0.8em;
-    margin-right: 0;
-    font-size: larger;
-    transition: all 0s linear;
-    background-color: transparent;
-    border: 0;
-    border-bottom-width: 1px;
-
-  &:hover {
-    * {
-      color: #f16a22;
-    }
-  }
-
-  span, span:after, span:before {
-    transition: background 0s linear, color 0s linear;
-  }
-}
-
-.tile-title .edit button.open {
-    background: #222;
-    color: #fff;
-    border-radius: 4px;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-    border-top-left-radius: 0;
-
-    &:hover * {
-      color: #fff;
-    }
-}
-
-.tile-title .editableform {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-}
-
-.tile-title .editableform .control-group {
-  -webkit-border-radius: 4px 4px 0 0;
-  -moz-border-radius: 4px 4px 0 0;
-  border-radius: 4px 4px 0 0;
-  border: #486d99 solid 2px;
-}
-
-.tile-title .popover-title {
-  margin: -10px -16px 8px -16px;
-}
-
-
-.tile-error {
-  border-radius: 4px 4px 4px 4px;
-  margin-top: 0.5em;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.play-list {
-  .tile-header h2 {
-    background: url('/assets/images/ico-insights.png') no-repeat left;
-  }
-}
-
-
-.segments-list {
-  .tile-header h2 {
-    background: url('/assets/images/ico-segments.png') no-repeat left;
-  }
-}
-
-
-.play-list, .segments-list {
-  .tiles > li {
-    padding: 13px 0 60px;
-    &.no-style {
-      padding: 0;
-    }
-    .tile-header, .tile-metadata, .tile-body, .tile-footer {
-      padding: 0 13px;
-    }
-    .tile-header {
-      h2 {
-          background-size: 16px;
-          padding-left: 22px;
-      }
-      .edit button {
-        font-size: 20px;
-      }
-    }
-    .tile-metadata {
-      padding: 12px;
-      border-color: #ddd;
-      border-style: solid;
-      border-width: 1px 0;
-      font-size: 12px;
-      line-height: 1.25;
-    }
-    .tile-body {
-      padding-top: 16px;
-	  padding-bottom: 16px;
-      overflow: auto;
-      strong {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    overflow: auto;
+    strong {
         font-weight: bold;
-      }
-      h4 {
+    }
+    h4 {
         text-align: center;
         font-size: 16px;
-      }
-      .barChart.ratings {
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        & > li {
-          width: 15%;
-          margin: 0 2px;
-          text-align: center;
-          .rating-bar {
-            background-color: rgba(0,0,0,.5);
-                }
-          &:nth-child(1) {
-            .value {
-              color: #70bf4a;
-            }
-            .rating-bar {
-                      border-bottom-color: #0f9e4d;
-                      background-color: #70bf4a;
-            }
-          }
-          &:nth-child(2) {
-            .value {
-              color: #33bdb7;
-            }
-            .rating-bar {
-                    border-bottom-color: #149188;
-                    background-color: #33bdb7;
-            }
-          }
-
-          &:nth-child(3) {
-            .value {
-              color: #cd80bc;
-            }
-            .rating-bar {
-                      border-bottom-color: #aa5299;
-                      background-color: #cd80bc;
-            }
-          }
-          &:nth-child(4) {
-            .value {
-              color: #8e71b2;
-            }
-            .rating-bar {
-                    border-bottom-color: #7851a1;
-                    background-color: #8e71b2;
-            }
-          }
-          &:nth-child(5) {
-            .value {
-              color: #457eba;
-            }
-            .rating-bar {
-                    border-bottom-color: #26649b;
-                    background-color: #457eba;
-            }
-          }
-        }
-      }
     }
-    form {
-      padding: 0 13px 13px;
+    .bucket-loading {
+        color: #bfbfbf;
+        font-size: 24px;
+        text-align: center;
+        display: block;
+        margin-top: 15px;
     }
-    .tile-footer {
-      padding-top: 13px;
-      padding-bottom: 13px;
-      position: absolute;
-      bottom: 0;
-      .button {
+}
+.tile-footer {
+    position: absolute;
+    bottom: 0;
+    border-top: #ddd solid 1px;
+    padding: 13px;
+    width: 100%;
+    &:after {
+        display: table;
+        content: "";
+        clear: both;
+    }
+    .button {
         font-size: 12px;
         padding: 0px 10px;
         text-transform: none;
-      }
-      .launch-success i {
+    }
+    .launch-success i {
         color: #70bf4a;
         display: inline-block;
         margin-left: 4px;
         font-size: 17px;
-      }
     }
-    &.editing {
-      &:hover {
-        border-color:#d0d0d0;
-      }
-      .tile-footer {
-        border-top-color: #e7e7e7;
-        span {
-          color: #bbb;
-        }
-        .button {
-          cursor: default;
-          border: #b7b7b7 solid 1px;
-          background-color: #e4e4e4;
-          color: #656565;
-          box-shadow: none;
-        }
-      }
-    }
-  }
 }
 
 
-
-
-
-
-
-
-
-
-
-
+/* Bar Charts in tiles */
+.barChart.ratings {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 120px;
+    & > li {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-direction: column;
+        height: 100%;
+        width: 15%;
+        margin: 0 2px;
+        text-align: center;
+        & > div {
+            flex: 0 0 1;
+            &:nth-child(1), &:nth-child(3){
+                height: 22px;
+            }
+        }
+        .rating-bar {
+            background-color: rgba(0,0,0,.5);
+            width: 100%;
+            min-height: 2px;
+        }
+        &.bucket-a {
+            .value {
+                color: #70bf4a;
+            }
+            .rating-bar {
+                background-color: #70bf4a;
+            }
+        }
+        &.bucket-a- {
+            .value {
+                color: #33bdb7;
+            }
+            .rating-bar {
+                background-color: #33bdb7;
+            }
+        }
+        &.bucket-b {
+            .value {
+                color: #cd80bc;
+            }
+            .rating-bar {
+                background-color: #cd80bc;
+            }
+        }
+        &.bucket-c {
+            .value {
+                color: #8e71b2;
+            }
+            .rating-bar {
+                background-color: #8e71b2;
+            }
+        }
+        &.bucket-d {
+            .value {
+                color: #457eba;
+            }
+            .rating-bar {
+                background-color: #457eba;
+            }
+        }
+        &.bucket-e {
+            .value {
+                color: #70bf4a;
+            }
+            .rating-bar {
+                background-color: #70bf4a;
+            }
+        }
+        &.bucket-f {
+            .value {
+                color: #33bdb7;
+            }
+            .rating-bar {
+                background-color: #33bdb7;
+            }
+        }
+    }
+}
+.inactive {
+    h4 {
+        color: #bbb;
+    }
+    .barChart.ratings > li {
+        .value {
+            color: #bbb;
+        }
+        .rating-bar {
+            border-bottom-color: #ddd;
+            background-color: #ddd;
+        }
+    }
+}
 
 
 

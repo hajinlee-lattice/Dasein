@@ -70,7 +70,7 @@ angular.module('common.datacloud.query.results', [
                 // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
                     vm.selectedBuckets.push(bucket.bucket);
-                    bucket.percentage = Math.round(bucket.count / numAccounts);
+                    bucket.percentage = bucket.count / numAccounts;
                 });
 
             } else if (vm.section === 'dashboard.targets') {

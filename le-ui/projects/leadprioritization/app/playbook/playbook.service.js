@@ -451,11 +451,9 @@ angular.module('lp.playbook')
     this.host = '/pls'; //default
 
     this.getPlays = function() {
-
         var deferred = $q.defer(),
             result,
             url = '/pls/play';
-
         $http({
             method: 'GET',
             url: url,
@@ -466,12 +464,10 @@ angular.module('lp.playbook')
             function onSuccess(response) {
                 result = response.data;
                 deferred.resolve(result);
-
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
-
                 var errorMsg = response.data.errorMsg || 'unspecified error';
                 deferred.reject(errorMsg);
             }
@@ -480,11 +476,9 @@ angular.module('lp.playbook')
     }
 
     this.deletePlay = function(playName) {
-
         var deferred = $q.defer(),
             result,
             url = '/pls/play/' + playName;
-
         $http({
             method: 'DELETE',
             url: url,
@@ -500,14 +494,12 @@ angular.module('lp.playbook')
                 if (!response.data) {
                     response.data = {};
                 }
-
                 var errorMsg = response.data.errorMsg || 'unspecified error';
                 deferred.reject(errorMsg);
             }
         );
         return deferred.promise;
     }
-
 
     this.setHost = function(value) {
         this.host = value;

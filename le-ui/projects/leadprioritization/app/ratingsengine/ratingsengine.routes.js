@@ -41,7 +41,7 @@ angular
                     "summary@": {
                         controller: 'RatingsEngineTabsController',
                         controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ratingslist/ratingsenginetabs.component.html'
+                        templateUrl: 'app/ratingsengine/content/ratingslist/tabs/ratingsenginetabs.component.html'
                     }
                 },
                 redirectTo: 'home.ratingsengine.list.ratings'
@@ -70,7 +70,7 @@ angular
                     "main@": {
                         controller: 'RatingsEngineCreationHistory',
                         controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ratingslist/creationhistory.component.html'
+                        templateUrl: 'app/ratingsengine/content/creationhistory/creationhistory.component.html'
                     }
                 }
             })

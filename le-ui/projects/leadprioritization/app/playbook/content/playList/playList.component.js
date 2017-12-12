@@ -14,6 +14,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility,
         lockLaunching: false,
+        ceil: window.Math.ceil,
         query: '',
         header: {
             sort: {
@@ -44,10 +45,9 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         }
     });
 
-
     vm.init = function($q) {
 
-        console.log(vm.current);
+        // console.log(vm.current);
         
         PlaybookWizardStore.clear();
         vm.header.filter.filtered = vm.current.plays;
@@ -56,16 +56,8 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
     vm.init();
 
-    vm.getTallestBarHeight = function(bucket, play) {
-        var bucketArray = vm.current.bucketCountMap[rating.id].bucketCoverageCounts;
-
-        return Math.max.apply(Math, bucketArray.map(function(bkt) { 
-            return bkt.count; 
-        }))
-    }
-
-    vm.hasRules = function(play) {
-        return PlaybookWizardStore.hasRules(play);
+    vm.getTallestBarHeight = function(bucketsObject) {
+        return Object.values(bucketsObject).reduce(function(a, b){ return bucketsObject[a] > bucketsObject[b] ? a : b });
     }
 
     vm.customMenuClick = function ($event, play) {
@@ -98,7 +90,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         $event.preventDefault();
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
         PlaybookWizardStore.setPlay(play);
-        console.log(play);
+        
         if(launchedStatus.hasLaunched) {
             $state.go('home.playbook.dashboard', {play_name: play.name} );
         } else {

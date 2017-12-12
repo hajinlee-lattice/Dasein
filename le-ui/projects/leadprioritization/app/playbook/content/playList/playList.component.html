@@ -1,4 +1,4 @@
-<section id="main-content" class="container tile-list play-list">
+<section id="main-content" class="container play-list">
 
     <div class="row">
         
@@ -71,7 +71,6 @@
                             </li>
                             <li>
                                 Insights: 
-
                                 <span class="red-text" ng-if="!play.ratingEngine.lastRefreshedDate">No refresh data yet</span></span>
                                 <span class="blue-text" ng-if="play.ratingEngine.lastRefreshedDate">{{play.ratingEngine.lastRefreshedDate | date}}</span></span>
                             </li>
@@ -81,55 +80,39 @@
 
                     <div class="tile-body" ng-if="!vm.current.tileStates[play.name].editPlay">
 
+                        <!-- Created Play with no previous launch history -->
                         <div ng-if="play.launchHistory.mostRecentLaunch === null"><strong>This play was started but not finished.</strong> It can be launched after all steps are completed.</div>
 
-                        <div ng-if="
+                        <!-- Created Play with no previous launch history -->
+                        <!-- <div ng-if="
                             play.launchHistory.playLaunch == null && 
                             play.segment != null && 
-                            vm.current.tileStates[play.name].launching == false && play.launchHistory.mostRecentLaunch.launchState != 'Failed'">Play has been created and is ready for launch.</div>
+                            vm.current.tileStates[play.name].launching == false && play.launchHistory.mostRecentLaunch.launchState != 'Failed'">Play has been created and is ready for launch.</div> -->
 
+                        <!-- Launching messaging -->
                         <div ng-if="vm.current.tileStates[play.name].launching == true">Launching...</div>
 
+                        <!-- Failed Launch messaging -->
                         <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Failed'" class="error-text">Your most recent launch, has failed.</div>
 
-
-
-                        <div>
-                        <!-- <div ng-if="play.launchHistory.playLaunch != null && play.segment != null"> -->
-                            <h4>Account Ratings</h4>
-                            <ul class="barChart ratings"
-                                ng-if="vm.current.bucketCountMap[play.name] && vm.current.bucketCountMap[play.name].bucketCoverageCounts">
-                                <li 
-                                    ng-repeat="bucket in vm.current.bucketCountMap[play.name].bucketCoverageCounts"
-                                    class="bucket-{{bucket.bucket|lowercase}}">
-
-                                    <div class="value">{{bucket.count|number}}</div>
-
-                                    <div 
-                                        class="rating-bar"
-                                        ng-attr-style="{{'height: '+ vm.ceil(((bucket.count / vm.getTallestBarHeight(bucket, play)) * 100) / 2) + 'px' }}">
-                                    </div>
-
-                                    <div class="meta">{{bucket.bucket}}</div>
-                                </li>
-                            </ul>
-                            <span 
-                                ng-if="!vm.current.bucketCountMap[play.name]" 
-                                class="bucket-loading">
-                                <i class="fa fa-spinner fa-spin"></i>
-                            </span>
-                        </div>
-
-                        <!-- <div ng-if="">
+                        <!-- Ratings chart if play has Launched -->
+                        <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launched'">
                             <h4>Account Ratings</h4>
                             <ul class="barChart ratings">
-                               <li ng-repeat="rating in play.rating.bucketInformation">
-                                    <div class="value">{{rating.bucketCount}}</div>
-                                    <div class="rating-bar" ng-style="{ height: ((10 / rating.bucketCount) * 1000) }"></div>
-                                    <div class="meta">{{rating.bucket}}</div>
-                                </li> 
+                                <li 
+                                    ng-repeat="(key, value) in play.ratingEngine.counts"
+                                    class="bucket-{{key|lowercase}}">
+
+                                    <div class="value">{{value|number}}</div>
+                                    <div 
+                                        class="rating-bar"
+                                        ng-attr-style="{{'height: '+ vm.ceil(((value / vm.getTallestBarHeight(play.ratingEngine.counts)) * 50) / 2) + 'px' }}">
+                                    </div>
+                                    <div class="meta">{{key}}</div>
+
+                                </li>
                             </ul>
-                        </div> -->
+                        </div>
 
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
@@ -236,7 +219,10 @@
     </div><!-- End .row -->
     <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
         <div class="twelve columns">
-            <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
+            <pd-pagination-controls 
+                current="current" 
+                max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize"
+                class="pull-right">
             </pd-pagination-controls>
         </div>
     </div>
