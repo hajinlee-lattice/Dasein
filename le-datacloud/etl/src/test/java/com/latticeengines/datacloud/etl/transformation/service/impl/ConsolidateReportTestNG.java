@@ -141,7 +141,7 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
     private void prepareAccount() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(InterfaceName.LatticeAccountId.name(), String.class));
-        schema.add(Pair.of(InterfaceName.Id.name(), String.class));
+        schema.add(Pair.of(InterfaceName.AccountId.name(), String.class));
         schema.add(Pair.of(InterfaceName.CDLCreatedTime.name(), Long.class));
 
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
