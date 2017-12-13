@@ -71,8 +71,6 @@ public abstract class AvroTypeConverter {
                     DateTime dateTime = dtf.parseDateTime((String) value);
                     return dateTime.getMillis();
                 } catch (Exception e) {
-                    log.warn(String.format("Error parsing date using ISODateTimeFormat for column %s with value %s.",
-                                attr.getName(), value));
                     try {
                         return TimeStampConvertUtils.convertToLong((String) value);
                     } catch (Exception exp) {
