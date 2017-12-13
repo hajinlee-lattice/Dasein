@@ -122,7 +122,7 @@
 
             <ul id="bucketTiles" class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}">
             	<li ng-repeat="bucket in vm.workingBuckets">
-            		<div class="bucket-label">{{bucket.bucket_name}}</div>
+            		<div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{bucket.bucket_name}}</div>
             		<dl>
             			<dt>Lift</dt>
             			<dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
@@ -141,7 +141,7 @@
             <refresher condition="vm.updateContent">
             <ul class="bucket-tiles published buckets-{{vm.workingBuckets.length}}">
                 <li ng-repeat="bucket in ::vm.currentConfiguration">
-                    <div class="bucket-label">{{::bucket.bucket_name}}</div>
+                    <div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{::bucket.bucket_name}}</div>
                     <dl>
                         <dt>Lift</dt>
                         <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>

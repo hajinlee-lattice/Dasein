@@ -96,7 +96,8 @@
                                 ng-if="vm.current.bucketCountMap[rating.id] && vm.current.bucketCountMap[rating.id].bucketCoverageCounts">
                                 <li 
                                     ng-repeat="bucket in vm.current.bucketCountMap[rating.id].bucketCoverageCounts"
-                                    class="bucket-{{bucket.bucket|lowercase}}">
+                                    class="bucket-{{bucket.bucket|lowercase}}"
+                                    ng-class="{'bucket-aplus': bucket.bucket === 'A+'}">
 
                                     <div class="value">{{bucket.count|number}}</div>
 

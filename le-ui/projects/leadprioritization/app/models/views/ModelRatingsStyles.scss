@@ -445,6 +445,9 @@
     	.bucket-label {
 	    	padding: 5px 13px 3px;
 	    	font-size: 18px;
+	    	&.aplus {
+	    		padding: 5px 9px 3px;
+	    	}
 	    }
 	    dt {
 			font-size: 14px;
@@ -457,15 +460,6 @@
 			font-size: 30px;
 	    }	
     }
-    &.six-buckets {
-    	li {
-	    	&:nth-child(1){
-	    		.bucket-label{
-	    			padding: 4px 8px 3px;
-	    		}
-	    	}
-	    }
-    }
     .bucket-label {
     	display: inline-block;
     	margin-bottom: 8px;
@@ -473,7 +467,10 @@
     	color: #fff;
     	font-size: 12px;
     	font-weight: bold;
-    	border-radius: 50%;
+    	border-radius: 50%;    	
+    	&.aplus {
+    		padding: 4px 7px;
+    	}
     }
     dt, dd {
     	display: block;

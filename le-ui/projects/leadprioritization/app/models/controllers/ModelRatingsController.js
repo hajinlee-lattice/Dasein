@@ -41,7 +41,6 @@ angular.module('lp.models.ratings', [
         workingBuckets: CurrentConfiguration,
         ratingsSummary: RatingsSummary,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
-        bucketTiles: document.getElementById("bucketTiles"),
         slidersContainer: document.getElementById("sliders"),
         barColors: document.getElementById("barColors")
     });
@@ -103,11 +102,9 @@ angular.module('lp.models.ratings', [
 
         if (vm.buckets.length === 6) {
             vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
-            vm.bucketTiles.classList.add('six-buckets');
             vm.canAddBucket = false;
         } else if (vm.buckets.length < 6) {
             vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
-            vm.bucketTiles.classList.remove('six-buckets');
             vm.canAddBucket = true;
         };
 

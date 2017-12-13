@@ -5,7 +5,7 @@ angular
     'lp.playbook.playlisttabs',
     'lp.playbook.plays',
     'lp.playbook.dashboard',
-    'lp.playbook.dashboard.launch_history',
+    'lp.playbook.dashboard.launchhistory',
     'lp.playbook.dashboard.sidebar',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.rating',
@@ -37,7 +37,7 @@ angular
                 "summary@": {
                     controller: 'PlayListTabsController',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/playList/tabs/playlisttabs.component.html'
+                    templateUrl: 'app/playbook/content/playlist/tabs/playlisttabs.component.html'
                 }
             },
             redirectTo: 'home.playbook.plays.list'
@@ -63,12 +63,12 @@ angular
                 "main@": {
                     controller: 'PlayListController',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/playList/playList.component.html'
+                    templateUrl: 'app/playbook/content/playlist/playlist.component.html'
                 }
             }
         })
-        .state('home.playbook.plays.launch_history', {
-            url: '/launch_history',
+        .state('home.playbook.plays.launchhistory', {
+            url: '/launchhistory',
             resolve: {
                 LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
                     var deferred = $q.defer(),
@@ -101,7 +101,7 @@ angular
                 'main@': {
                     controller: 'PlaybookDashboardLaunchHistory',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/launch_history/launch_history.component.html'
+                    templateUrl: 'app/playbook/content/launchhistory/launchhistory.component.html'
                 }
             }
         })
@@ -384,12 +384,12 @@ angular
                 }
             }
         })
-        .state('home.playbook.dashboard.launch_history', {
-            url: '/launch_history',
+        .state('home.playbook.dashboard.launchhistory', {
+            url: '/launchhistory',
             params: {
                 pageIcon: 'ico-refine',
                 pageTitle: 'Launch History',
-                section: 'dashboard.launch_history'
+                section: 'dashboard.launchhistory'
             },
             resolve: {
                 LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
@@ -425,7 +425,7 @@ angular
                 'main@': {
                     controller: 'PlaybookDashboardLaunchHistory',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/launch_history/launch_history.component.html'
+                    templateUrl: 'app/playbook/content/launchhistory/launchhistory.component.html'
                 }
             }
         })
