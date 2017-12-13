@@ -89,18 +89,45 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             throw new IllegalArgumentException("Must specify data collection version.");
         }
 
-        List<Table> existingTables = dataCollectionEntityMgr.getTablesOfRole(collectionName, role, version);
-        for (Table existingTable : existingTables) {
+        List<String> existingTableNames = dataCollectionEntityMgr.getTableNamesOfRole(collectionName, role, version);
+        for (String existingTableName : existingTableNames) {
             log.info("There are already table(s) of role " + role + " in data collection " + collectionName
                     + ". Remove it from collection and delete it.");
-            if (!existingTable.getName().equals(tableName)) {
+            if (!existingTableName.equals(tableName)) {
                 log.info("Remove it from collection and delete it.");
-                dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTable.getName());
-                tableEntityMgr.deleteTableAndCleanupByName(existingTable.getName());
+                dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName);
+                tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
             }
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role, version);
+    }
+
+    @Override
+    public void removeTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role,
+                            DataCollection.Version version) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+
+        Table table = tableEntityMgr.findByName(tableName);
+        if (table == null) {
+            throw new IllegalArgumentException(
+                    "Cannot find table named " + tableName + " for customer " + customerSpace);
+        }
+
+        if (version == null) {
+            throw new IllegalArgumentException("Must specify data collection version.");
+        }
+
+        List<String> existingTableNames = dataCollectionEntityMgr.getTableNamesOfRole(collectionName, role, version);
+        for (String existingTableName : existingTableNames) {
+            if (existingTableName.equals(tableName)) {
+                log.info("Removing " + tableName + " as " + role + " in " + version + " from collection.");
+                dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName);
+            }
+        }
     }
 
     @Override
@@ -110,12 +137,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             collectionName = collection.getName();
         }
 
-        List<Table> existingTables = dataCollectionEntityMgr.getTablesOfRole(collectionName, role, null);
-        for (Table existingTable : existingTables) {
+        List<String> existingTableNames = dataCollectionEntityMgr.getTableNamesOfRole(collectionName, role, null);
+        for (String existingTableName : existingTableNames) {
             log.info("There are already table(s) of role " + role + " in data collection " + collectionName
                     + ". Remove it from collection and delete it.");
-            dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTable.getName());
-            tableEntityMgr.deleteTableAndCleanupByName(existingTable.getName());
+            dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName);
+            tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
         }
     }
 

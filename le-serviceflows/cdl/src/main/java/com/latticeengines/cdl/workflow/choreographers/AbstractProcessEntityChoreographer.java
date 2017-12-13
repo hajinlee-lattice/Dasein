@@ -51,7 +51,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
         if (isMergeStep(step)) {
             initialize(step);
-            return false;
+            return !shouldMerge();
         }
 
         if (isCloneStep(step)) {
@@ -62,7 +62,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             if (rebuild && update) {
                 throw new IllegalStateException("Rebuild and update cannot be both true");
             }
-            return !shouldClone();
         }
 
         if (belongsToUpdate(seq)) {
@@ -148,13 +147,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
-    private boolean shouldClone() {
-        if (rebuild) {
-            log.info("Skip cloning " + mainEntity() + " because going to rebuild and merge is enabled.");
-            return false;
-        } else {
-            return true;
-        }
+    private boolean shouldMerge() {
+        return hasImports;
     }
 
     private boolean shouldRebuild() {

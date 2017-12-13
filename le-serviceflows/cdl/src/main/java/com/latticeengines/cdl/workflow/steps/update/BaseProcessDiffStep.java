@@ -48,7 +48,7 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
     }
 
     protected void initializeConfiguration() {
-        customerSpace = configuration.getCustomerSpace();
+        customerSpace = CustomerSpace.parse(getObjectFromContext(CUSTOMER_SPACE, String.class));
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
     }

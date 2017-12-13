@@ -129,6 +129,18 @@ public class DefaultDataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create or insert a table into the collection")
+    public SimpleBooleanResponse removeTable(@PathVariable String customerSpace, //
+                                             @PathVariable String tableName, //
+                                             @RequestParam(value = "role") TableRoleInCollection role,
+                                             @RequestParam(value = "version") DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.removeTable(customerSpace, null, tableName, role, version);
+        return SimpleBooleanResponse.successResponse();
+    }
+
     @RequestMapping(value = "/reset", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")

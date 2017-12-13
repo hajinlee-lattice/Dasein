@@ -7,8 +7,6 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -18,6 +16,8 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /**
@@ -57,17 +57,18 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
 
-        long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
-        Assert.assertEquals(numAccounts, ACCOUNT_IMPORT_SIZE_1);
-        long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
-        Assert.assertEquals(numContacts, CONTACT_IMPORT_SIZE_1);
-        long numProducts = countTableRole(BusinessEntity.Product.getBatchStore());
-        Assert.assertEquals(numProducts, PRODUCT_IMPORT_SIZE_1);
-        long numTransactions = countTableRole(TableRoleInCollection.ConsolidatedRawTransaction);
-        Assert.assertEquals(numTransactions, TRANSACTION_IMPORT_SIZE_1);
+        long numAccounts = ACCOUNT_IMPORT_SIZE_1;
+        long numContacts = CONTACT_IMPORT_SIZE_1;
+        long numProducts = PRODUCT_IMPORT_SIZE_1;
+        long numTransactions = TRANSACTION_IMPORT_SIZE_1;
 
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
+        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
+        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
+        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), numProducts);
+        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedRawTransaction), numTransactions);
+
+        Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
         createTestSegment1();
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //

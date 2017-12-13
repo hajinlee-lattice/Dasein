@@ -88,13 +88,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         TransformationStepConfig profile = profile();
         TransformationStepConfig bucket = bucket();
         TransformationStepConfig calc = calcStats(customerSpace, statsTablePrefix);
-        TransformationStepConfig sort = sort();
         TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
         steps.add(aggregate);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
-        steps.add(sort);
         steps.add(sortProfile);
 
         // -----------
@@ -106,10 +104,31 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         loadProductMap();
+
         dailyTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
-        accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+        if (StringUtils.isBlank(dailyTableName)) {
+            throw new IllegalStateException("Cannot find daily table.");
+        }
+
+        accountTableName = getAccountTableName();
+        if (StringUtils.isBlank(accountTableName)) {
+            throw new IllegalStateException("Cannot find account master table.");
+        }
+
+        // TODO: not ready to publish purchase history to redshift
+        publishToRedshift = false;
+    }
+
+    private String getAccountTableName() {
+        String accountTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedAccount, inactive);
+        if (StringUtils.isBlank(accountTableName)) {
+            // might because the merge account step was skipped
+            accountTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedAccount, active);
+        }
+        return accountTableName;
     }
 
     private void loadProductMap() {
@@ -132,7 +151,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         String accountSourceName = "Account";
         SourceTable transactionTable = new SourceTable(transactionTableName, customerSpace);
         SourceTable accountTable = new SourceTable(accountTableName, customerSpace);
-        List<String> baseSources = new ArrayList<String>();
+        List<String> baseSources = new ArrayList<>();
         baseSources.add(transactionSourceName);
         baseSources.add(accountSourceName);
         step.setBaseSources(baseSources);
@@ -165,6 +184,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setPeriods(periods);
         conf.setMetrics(metrics);
 
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        step.setTargetTable(targetTable);
+
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -176,7 +200,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
@@ -185,7 +209,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(aggregateStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
-        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
+        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
     }
 
@@ -200,31 +224,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         step.setTargetTable(targetTable);
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
-        step.setConfiguration(appendEngineConf(conf, heavyEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig sort() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(bucketStep);
-        step.setInputSteps(inputSteps);
-
-        step.setTransformer(TRANSFORMER_SORTER);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(servingStoreTablePrefix);
-        targetTable.setExpandBucketedAttrs(true);
-        step.setTargetTable(targetTable);
-
-        SorterConfig conf = new SorterConfig();
-        conf.setPartitions(50);
-        conf.setSplittingThreads(maxSplitThreads);
-        conf.setSplittingChunkSize(10000L);
-        conf.setCompressResult(true);
-        conf.setSortingField(servingStoreSortKey);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
-        step.setConfiguration(confStr);
+        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
         return step;
     }
 

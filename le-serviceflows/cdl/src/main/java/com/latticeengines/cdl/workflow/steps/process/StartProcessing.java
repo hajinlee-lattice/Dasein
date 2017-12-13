@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -46,6 +49,13 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private MetadataProxy metadataProxy;
+
+    private CustomerSpace customerSpace;
+    private DataCollection.Version activeVersion;
+    private DataCollection.Version inactiveVersion;
 
     @Override
     public void execute() {
@@ -71,12 +81,13 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Job> importJobs = getJobs(configuration.getImportJobIds());
         createReport(importJobs);
         updateImportJobs();
+        cleanupInactiveVersion();
     }
 
     private void determineVersions() {
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
-        DataCollection.Version inactiveVersion = activeVersion.complement();
+        customerSpace = configuration.getCustomerSpace();
+        activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
+        inactiveVersion = activeVersion.complement();
         putObjectInContext(CDL_ACTIVE_VERSION, activeVersion);
         putObjectInContext(CDL_INACTIVE_VERSION, inactiveVersion);
         putObjectInContext(CUSTOMER_SPACE, customerSpace.toString());
@@ -135,6 +146,16 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         Report report = createReport(json.toString(), ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY,
                 UUID.randomUUID().toString());
         registerReport(configuration.getCustomerSpace(), report);
+    }
+
+    private void cleanupInactiveVersion() {
+        for (TableRoleInCollection role: TableRoleInCollection.values()) {
+            String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactiveVersion);
+            if (StringUtils.isNotBlank(tableName)) {
+                log.info("Removing table " + tableName + " as " + role + " in " + inactiveVersion);
+                metadataProxy.deleteTable(customerSpace.toString(), tableName);
+            }
+        }
     }
 
 }

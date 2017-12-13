@@ -186,17 +186,21 @@ public class CheckpointService {
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
         String[] tenantNames = new String[1];
 
-        Map<String, String> redshiftTablesToClone = new HashMap<>();
+        DataCollection.Version activeVersion = getCheckpointVersion(checkpoint);
 
+        Map<String, String> redshiftTablesToClone = new HashMap<>();
         for (DataCollection.Version version : DataCollection.Version.values()) {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 Table table = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
                 if (table != null) {
+                    logger.info("Creating table " + table.getName() + " for " + role + " in version " + version);
                     metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                     dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
-                    String redshiftTable = checkpointRedshiftTableName(checkpoint, role, S3_CHECKPOINTS_VERSION);
-                    if (redshiftService.hasTable(redshiftTable)) {
-                        redshiftTablesToClone.put(redshiftTable, table.getName());
+                    if (activeVersion.equals(version)) {
+                        String redshiftTable = checkpointRedshiftTableName(checkpoint, role, S3_CHECKPOINTS_VERSION);
+                        if (redshiftService.hasTable(redshiftTable)) {
+                            redshiftTablesToClone.put(redshiftTable, table.getName());
+                        }
                     }
                 }
             }
@@ -213,7 +217,6 @@ public class CheckpointService {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
         resumeDbState();
 
-        DataCollection.Version activeVersion = getCheckpointVersion(checkpoint);
         dataCollectionProxy.switchVersion(mainTestTenant.getId(), activeVersion);
         logger.info("Switch active version to " + activeVersion);
     }
@@ -342,20 +345,25 @@ public class CheckpointService {
         return DataCollection.Version.valueOf(version);
     }
 
-    private Table parseCheckpointTable(String checkpoint, String tableName, DataCollection.Version version,
+    private Table parseCheckpointTable(String checkpoint, String roleName, DataCollection.Version version,
             String[] tenantNames) throws IOException {
-
-        logger.info("Parse check point " + checkpoint + " table " + tableName + " of version " + version.name());
         String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
-                tableName);
-        logger.info("Parse check point file path " + jsonFilePath);
+                roleName);
+        logger.info("Checking table json file path " + jsonFilePath);
         File jsonFile = new File(jsonFilePath);
         if (!jsonFile.exists()) {
             return null;
         }
 
+        logger.info("Parse check point " + checkpoint + " table " + roleName + " of version " + version.name());
         JsonNode json = om.readTree(jsonFile);
         String hdfsPath = json.get("extracts_directory").asText();
+        if (StringUtils.isBlank(hdfsPath)) {
+            hdfsPath = json.get("extracts").get(0).get("path").asText();
+            if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
+                hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
+            }
+        }
         logger.info("Parse extract path " + hdfsPath);
         Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
         Matcher matcher = pattern.matcher(hdfsPath);
@@ -369,7 +377,19 @@ public class CheckpointService {
         }
 
         if (tenantNames[0] != null) {
-            str = str.replaceAll(tenantNames[0], CustomerSpace.parse(mainTestTenant.getId()).getTenantId());
+            String testTenant = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
+            String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
+            String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
+            if (hdfsPathSegment2.contains(tenantNames[0])) {
+                String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
+                        + "/$$TABLE_DATA_DIR$$";
+                String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
+                str = str.replaceAll(hdfsPath, hdfsPathIntermediatePattern);
+                str = str.replaceAll(tenantNames[0], testTenant);
+                str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
+            } else {
+                str = str.replaceAll(tenantNames[0], testTenant);
+            }
         }
 
         return JsonUtils.deserialize(str, Table.class);

@@ -8,11 +8,13 @@ import java.io.InputStream;
 
 import javax.inject.Inject;
 
+import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -20,6 +22,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.S3Object;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
@@ -27,7 +30,10 @@ import com.latticeengines.testframework.exposed.service.TestArtifactService;
 public class TestArtifactServiceImpl implements TestArtifactService {
 
     private static final Logger log = LoggerFactory.getLogger(TestArtifactServiceImpl.class);
+
     private static final String S3_BUCKET = "latticeengines-test-artifacts";
+    private static final Region S3_REGION = Region.US_Standard;
+
     private static final String DOWNLOAD_DIR = "s3downloads";
     private static final int BUFFER_SIZE = 1024 * 1024; // 1M
     private static final int DOWNLOAD_LOG_INTERVAL = 10 * 1024 * 1024; // 10M
@@ -36,8 +42,16 @@ public class TestArtifactServiceImpl implements TestArtifactService {
 
     @Inject
     public TestArtifactServiceImpl(BasicAWSCredentials basicAWSCredentials) {
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+        clientConfiguration.setSocketTimeout(120000);
         this.S3 = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials)).withRegion("us-east-1").build();
+                .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials)) //
+                .withRegion(S3_REGION.name()) //
+                .withClientConfiguration(clientConfiguration) //
+                .enableAccelerateMode() //
+                .build();
+        String accelerateStatus = this.S3.getBucketAccelerateConfiguration(new GetBucketAccelerateConfigurationRequest(S3_BUCKET)).getStatus();
+        log.info("Acceleration status of bucket " + S3_BUCKET + " is " + accelerateStatus);
     }
 
     public InputStream readTestArtifactAsStream(String objectDir, String version, String fileName) {

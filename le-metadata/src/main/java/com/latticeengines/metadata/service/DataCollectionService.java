@@ -22,6 +22,9 @@ public interface DataCollectionService {
     void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole,
             DataCollection.Version version);
 
+    void removeTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole,
+                     DataCollection.Version version);
+
     List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
             DataCollection.Version version);
 

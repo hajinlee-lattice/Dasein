@@ -91,31 +91,6 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         verifySecondConsolidateCheckpoint();
     }
 
-    private void uploadRedshift() {
-        log.info("Exporting checkpoint data to redshift. This may take more than 20 min ...");
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
-        List<Future<Boolean>> futures = new ArrayList<>();
-        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Account)));
-        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Contact)));
-        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Transaction)));
-        futures.add(executorService.submit(() -> exportEntityToRedshift(BusinessEntity.Product)));
-        while (!futures.isEmpty()) {
-            List<Future<Boolean>> toDelete = new ArrayList<>();
-            futures.forEach(future -> {
-                try {
-                    future.get(5, TimeUnit.SECONDS);
-                    toDelete.add(future);
-                } catch (TimeoutException e) {
-                    // ignore
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to upload to redshift.", e);
-                }
-            });
-            futures.removeAll(toDelete);
-        }
-        executorService.shutdown();
-    }
-
     private void importData() throws Exception {
         mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, ACCOUNT_IMPORT_SIZE_2);
         mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);

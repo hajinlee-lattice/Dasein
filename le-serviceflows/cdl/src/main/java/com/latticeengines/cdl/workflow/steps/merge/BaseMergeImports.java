@@ -81,28 +81,16 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
-        if (CollectionUtils.isNotEmpty(inputTableNames)) {
-            return generateWorkflowConf();
-        } else {
-            cloneBatchStore();
-            return null;
-        }
+        return generateWorkflowConf();
     }
 
     @Override
     protected void onPostTransformationCompleted() {
         generateDiffReport();
-
-        List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_NEW_BATCH_MASTER, BusinessEntity.class);
-        if (entityList == null) {
-            entityList = new ArrayList<>();
-        }
-        entityList.add(entity);
-        putObjectInContext(ENTITIES_WITH_NEW_BATCH_MASTER, entityList);
     }
 
     protected void initializeConfiguration() {
-        customerSpace = configuration.getCustomerSpace();
+        customerSpace = CustomerSpace.parse(getObjectFromContext(CUSTOMER_SPACE, String.class));
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
@@ -230,21 +218,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         entityValueMap.put(entity, value);
         putObjectInContext(key, entityValueMap);
-    }
-
-    protected void cloneBatchStore() {
-        String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
-        if (StringUtils.isNotBlank(activeTableName)) {
-            log.info("Cloning " + batchStore + " from  " + active + " to " + inactive);
-            Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
-            String cloneName = NamingUtils.timestamp(batchStore.name());
-            String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-            queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
-            Table inactiveTable = TableCloneUtils //
-                    .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
-            metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
-            dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, batchStore, inactive);
-        }
     }
 
     protected abstract PipelineTransformationRequest getConsolidateRequest();

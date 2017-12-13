@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
@@ -63,13 +62,8 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             }
             entityTableMap.put(entity, table);
         });
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpaceStr);
-        Table profileTable = dataCollectionProxy.getTable(customerSpaceStr, TableRoleInCollection.Profile,
-                inactiveVersion);
-        if (profileTable == null) {
-            throw new NullPointerException("Profile table for stats object calculation is not found.");
-        }
-
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpaceStr);
+        DataCollection.Version inactiveVersion = activeVersion.complement();
         Map<BusinessEntity, String> statsTableNames = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
                 String.class);
         if (statsTableNames != null) {
@@ -90,8 +84,9 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             activeCubeMap.forEach((entity, cube) -> {
                 if (!statsTableMap.containsKey(entity)) {
                     cubeMap.put(entity, cube);
+                    // use active serving store, because it is the active statistics
                     Table servingTable = dataCollectionProxy.getTable(customerSpaceStr, entity.getServingStore(),
-                            inactiveVersion);
+                            activeVersion);
                     if (servingTable == null) {
                         throw new IllegalStateException("Serving store for entity " + entity + " cannot be found.");
                     }

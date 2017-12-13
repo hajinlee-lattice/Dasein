@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
@@ -46,12 +45,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private Table rawTable;
     private int mergeStep, dailyStep, dayPeriodStep;
-
-    @Override
-    protected TransformationWorkflowConfiguration executePreTransformation() {
-        initializeConfiguration();
-        return generateWorkflowConf();
-    }
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -69,11 +62,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             throw new IllegalStateException("Cannot find raw period store");
         }
         log.info("Found rawTable " + rawTable.getName());
-    }
-
-    private TransformationWorkflowConfiguration generateWorkflowConf() {
-        PipelineTransformationRequest request = getConsolidateRequest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -174,7 +162,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private void clonePeriodStore(TableRoleInCollection role) {
-        log.info("Cloning " + role + " from  " + active + " to " + inactive);
         Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
         String cloneName = NamingUtils.timestamp(role.name());
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
@@ -187,13 +174,15 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private Table buildPeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
         Table table = SchemaRepository.instance().getSchema(schema);
+        String tableName = NamingUtils.timestamp(role.name());
+        table.setName(tableName);
         String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();
 
         try {
-            log.info("Initialize period store " + hdfsPath + "/" + schema);
-            HdfsUtils.mkdir(yarnConfiguration, hdfsPath + "/" + schema);
+            log.info("Initialize period store " + hdfsPath + "/" + tableName);
+            HdfsUtils.mkdir(yarnConfiguration, hdfsPath + "/" + tableName);
         } catch (Exception e) {
-            log.error("Failed to initialize period store " + hdfsPath + "/" + schema);
+            log.error("Failed to initialize period store " + hdfsPath + "/" + tableName);
             throw new RuntimeException("Failed to create period store " + role);
         }
 
@@ -201,17 +190,13 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         extract.setName("extract_target");
         extract.setExtractionTimestamp(DateTime.now().getMillis());
         extract.setProcessedRecords(1L);
-        extract.setPath(hdfsPath + "/" + schema + "/");
+        extract.setPath(hdfsPath + "/" + tableName + "/");
         table.setExtracts(Collections.singletonList(extract));
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
         dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), role, inactive);
         log.info("Upsert table " + table.getName() + " to role " + role + "version" + inactive);
 
         return table;
-    }
-
-    @Override
-    protected void cloneBatchStore() {
     }
 
 }

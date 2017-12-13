@@ -41,7 +41,7 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
 
     @Override
     public void execute() {
-        customerSpace = configuration.getCustomerSpace();
+        customerSpace = CustomerSpace.parse(getObjectFromContext(CUSTOMER_SPACE, String.class));
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
@@ -63,25 +63,35 @@ public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> ex
         queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
         Table inactiveTable = TableCloneUtils //
                 .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
+        metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
         if (isServingStore(role)) {
+            BusinessEntity entity = servingStoreEntity(role);
+            String prefix = String.join("_", customerSpace.getTenantId(), entity.name());
+            cloneName = NamingUtils.timestamp(prefix);
+            metadataProxy.updateTable(customerSpace.toString(), cloneName, inactiveTable);
             copyRedshiftTable(activeTableName, cloneName);
         }
-        metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
         dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, role, inactive);
     }
 
     private void copyRedshiftTable(String original, String clone) {
         redshiftService.dropTable(clone);
-        redshiftService.cloneTable(original, clone);
+        if (redshiftService.hasTable(original)) {
+            redshiftService.cloneTable(original, clone);
+        }
     }
 
     private boolean isServingStore(TableRoleInCollection role) {
+        return servingStoreEntity(role) != null;
+    }
+
+    private BusinessEntity servingStoreEntity(TableRoleInCollection role) {
         for (BusinessEntity entity: BusinessEntity.values()) {
             if (role.equals(entity.getServingStore())) {
-                return true;
+                return entity;
             }
         }
-        return false;
+        return null;
     }
 
     protected abstract List<TableRoleInCollection> tablesToClone();

@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +20,6 @@ import org.apache.commons.collections4.MapUtils;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -44,14 +43,9 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntityStepConfiguration>
         extends BaseProcessDiffStep<T> {
-
-    protected CustomerSpace customerSpace;
-    protected DataCollection.Version active;
-    protected DataCollection.Version inactive;
 
     protected BusinessEntity entity;
 
@@ -239,7 +233,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     private void useDiffTableAsSource(TransformationStepConfig step) {
         String sourceName = entity.name() + "Diff";
         SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
-        List<String> baseSources = step.getBaseSources();
+        List<String> baseSources = new ArrayList<>(step.getBaseSources());
         if (CollectionUtils.isEmpty(baseSources)) {
             baseSources = Collections.singletonList(sourceName);
         } else {

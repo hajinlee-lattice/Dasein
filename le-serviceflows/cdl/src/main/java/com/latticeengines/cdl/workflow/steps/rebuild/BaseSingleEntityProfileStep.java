@@ -5,6 +5,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.cdl.workflow.steps.ProfileStepBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -16,10 +21,11 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntityStepConfiguration>
-        extends BaseTransformWrapperStep<T> {
+        extends ProfileStepBase<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseSingleEntityProfileStep.class);
 
     protected CustomerSpace customerSpace;
     protected DataCollection.Version active;
@@ -32,6 +38,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     protected BusinessEntity entity;
     protected Table masterTable;
+    protected boolean publishToRedshift = true;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -53,19 +60,23 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
         upsertProfileTable(profileTableName, profileTableRole());
 
-        Table servingStoreTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), servingStoreTableName);
+        Table servingStoreTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                servingStoreTableName);
         enrichTableSchema(servingStoreTable);
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), servingStoreTableName, servingStoreTable);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), servingStoreTableName,
+                servingStoreTable);
 
-        updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, servingStoreTableName, String.class);
-        updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        if (publishToRedshift) {
+            updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, servingStoreTableName, String.class);
+            updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        }
 
         updateEntityValueMapInContext(SERVING_STORE_IN_STATS, servingStoreTableName, String.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 
     protected void initializeConfiguration() {
-        customerSpace = configuration.getCustomerSpace();
+        customerSpace = CustomerSpace.parse(getObjectFromContext(CUSTOMER_SPACE, String.class));
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         entity = getEntityToBeProfiled();
@@ -77,11 +88,21 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         servingStoreSortKey = servingStore.getPrimaryKey().name();
 
         if (entity.getBatchStore() != null) {
+            String masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(),
+                    inactive);
+            if (StringUtils.isNotBlank(masterTableName)) {
+                cloneBatchStore();
+            }
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), entity.getBatchStore(), inactive);
             if (masterTable == null) {
                 throw new IllegalStateException("Cannot find the master table in default collection");
             }
         }
+    }
+
+    private void cloneBatchStore() {
+        TableRoleInCollection batchStore = entity.getBatchStore();
+        super.cloneBatchStore(customerSpace, batchStore, active);
     }
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
@@ -122,6 +143,11 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     protected BusinessEntity getEntityToBeProfiled() {
         return configuration.getMainEntity();
+    }
+
+    @Override
+    protected BusinessEntity getEntity() {
+        return getEntityToBeProfiled();
     }
 
     protected abstract TableRoleInCollection profileTableRole();

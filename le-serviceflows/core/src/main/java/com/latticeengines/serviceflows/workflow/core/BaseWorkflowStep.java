@@ -94,7 +94,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
     public static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
-    protected static final String ENTITIES_WITH_NEW_BATCH_MASTER = "ENTITIES_WITH_NEW_BATCH_MASTER";
     protected static final String DAILY_AGG_TXN_TABLE_NAME = "DAILY_AGG_TXN_TABLE_NAME";
     protected static final String PERIOD_AGG_TXN_TABLE_NAME = "PERIOD_AGG_TXN_TABLE_NAME";
     protected static final String APPEND_TO_REDSHIFT_TABLE = "APPEND_TO_REDSHIFT_TABLE";
