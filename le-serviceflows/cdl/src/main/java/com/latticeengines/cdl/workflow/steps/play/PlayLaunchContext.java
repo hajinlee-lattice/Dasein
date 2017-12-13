@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -39,6 +40,8 @@ public class PlayLaunchContext {
 
     private String modelId;
 
+    private RatingModel activeModel;
+
     private FrontEndQuery accountFrontEndQuery;
 
     private FrontEndQuery contactFrontEndQuery;
@@ -53,9 +56,10 @@ public class PlayLaunchContext {
 
     public PlayLaunchContext(CustomerSpace customerSpace, Tenant tenant, String playName, String playLaunchId,
             PlayLaunch playLaunch, Play play, long launchTimestampMillis, RatingEngine ratingEngine,
-            MetadataSegment segment, String segmentName, String modelId, FrontEndQuery accountFrontEndQuery,
-            FrontEndQuery contactFrontEndQuery, List<Object> modifiableAccountIdCollectionForContacts, Counter counter,
-            Table recommendationTable, Schema schema) {
+            MetadataSegment segment, String segmentName, String modelId, RatingModel activeModel,
+            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
+            List<Object> modifiableAccountIdCollectionForContacts, Counter counter, Table recommendationTable,
+            Schema schema) {
         super();
         this.customerSpace = customerSpace;
         this.tenant = tenant;
@@ -68,6 +72,7 @@ public class PlayLaunchContext {
         this.segment = segment;
         this.segmentName = segmentName;
         this.modelId = modelId;
+        this.activeModel = activeModel;
         this.accountFrontEndQuery = accountFrontEndQuery;
         this.contactFrontEndQuery = contactFrontEndQuery;
         this.modifiableAccountIdCollectionForContacts = modifiableAccountIdCollectionForContacts;
@@ -114,6 +119,10 @@ public class PlayLaunchContext {
 
     public String getSegmentName() {
         return segmentName;
+    }
+
+    public RatingModel getActiveModel() {
+        return activeModel;
     }
 
     public String getModelId() {
@@ -174,6 +183,8 @@ public class PlayLaunchContext {
         private String segmentName;
 
         private String modelId;
+
+        private RatingModel activeModel;
 
         private FrontEndQuery accountFrontEndQuery;
 
@@ -245,6 +256,11 @@ public class PlayLaunchContext {
             return this;
         }
 
+        public PlayLaunchContextBuilder activeModel(RatingModel activeModel) {
+            this.activeModel = activeModel;
+            return this;
+        }
+
         public PlayLaunchContextBuilder accountFrontEndQuery(FrontEndQuery accountFrontEndQuery) {
             this.accountFrontEndQuery = accountFrontEndQuery;
             return this;
@@ -278,9 +294,9 @@ public class PlayLaunchContext {
 
         public PlayLaunchContext build() {
             return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
-                    launchTimestampMillis, ratingEngine, segment, segmentName, modelId, accountFrontEndQuery,
-                    contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter, recommendationTable,
-                    schema);
+                    launchTimestampMillis, ratingEngine, segment, segmentName, modelId, activeModel,
+                    accountFrontEndQuery, contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter,
+                    recommendationTable, schema);
         }
     }
 

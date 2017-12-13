@@ -3,10 +3,8 @@ package com.latticeengines.proxy.exposed.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -67,11 +65,11 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("rawtypes")
-    public Set<RatingModel> getRatingModels(String customerSpace, String ratingEngineId) {
+    public List<RatingModel> getRatingModels(String customerSpace, String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
         List list = get("get rating models", url, List.class);
-        return new HashSet<>(JsonUtils.convertList(list, RatingModel.class));
+        return JsonUtils.convertList(list, RatingModel.class);
     }
 
     public RatingModel getRatingModel(String customerSpace, String ratingEngineId, String ratingModelId) {

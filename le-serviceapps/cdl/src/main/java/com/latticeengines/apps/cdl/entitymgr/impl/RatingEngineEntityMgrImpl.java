@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.dao.AIModelDao;
 import com.latticeengines.apps.cdl.dao.RatingEngineDao;
+import com.latticeengines.apps.cdl.dao.RuleBasedModelDao;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
@@ -55,6 +57,12 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     private RatingEngineDao ratingEngineDao;
 
     @Inject
+    private RuleBasedModelDao ruleBasedModelDao;
+
+    @Inject
+    private AIModelDao aiModelDao;
+
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override
@@ -83,14 +91,39 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public RatingEngine findById(String id) {
-        return ratingEngineDao.findById(id);
+        return findById(id, false);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public RatingEngine findById(String id, boolean withActiveModel) {
+        RatingEngine ratingEngine = ratingEngineDao.findById(id);
+        if (withActiveModel && ratingEngine != null) {
+            Long activeModelPid = ratingEngine.getActiveModelPid();
+            if (activeModelPid != null) {
+                switch (ratingEngine.getType()) {
+                case RULE_BASED:
+                    RatingModel ruleBasedModel = ruleBasedModelDao.findByKey(RuleBasedModel.class, activeModelPid);
+                    ratingEngine.setActiveModel(ruleBasedModel);
+                    break;
+                case AI_BASED:
+                    RatingModel aiModel = aiModelDao.findByKey(AIModel.class, activeModelPid);
+                    ratingEngine.setActiveModel(aiModel);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+        return ratingEngine;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteById(String id) {
-    		// Old implementation was loading entire object into memory with all dependencies and then deleting it. 
-    		ratingEngineDao.deleteById(id);
+        // Old implementation was loading entire object into memory with all
+        // dependencies and then deleting it.
+        ratingEngineDao.deleteById(id);
     }
 
     @Override
@@ -173,7 +206,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         if (segment == null || segment.getName() == null) {
             throw new LedpException(LedpCode.LEDP_18153, new String[] { ratingEngine.toString() });
         }
-        
+
         if (ratingEngine.getStatus() == null) {
             ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
         }
@@ -191,36 +224,32 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             ratingEngineNote.setId(UUID.randomUUID().toString());
             ratingEngine.addRatingEngineNote(ratingEngineNote);
         }
-        
+        ratingEngineDao.create(ratingEngine);
+
         switch (type) {
         case RULE_BASED:
             RuleBasedModel ruleBasedModel = new RuleBasedModel();
             ruleBasedModel.setId(RuleBasedModel.generateIdStr());
-            updateBaseRatingModel(ratingEngine, ruleBasedModel);
-            
+            ruleBasedModel.setRatingEngine(ratingEngine);
             ruleBasedModel.setRatingRule(new RatingRule());
             List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
             ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
-            
-            ratingEngineDao.create(ratingEngine);
+            ruleBasedModelDao.create(ruleBasedModel);
+            ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
+            ratingEngineDao.update(ratingEngine);
+
             break;
         case AI_BASED:
             AIModel aiModel = new AIModel();
             aiModel.setId(AIModel.generateIdStr());
-            updateBaseRatingModel(ratingEngine, aiModel);
-            
-            ratingEngineDao.create(ratingEngine);
+            aiModel.setRatingEngine(ratingEngine);
+            aiModelDao.create(aiModel);
+
             break;
         default:
             break;
         }
     }
-
-	protected void updateBaseRatingModel(RatingEngine ratingEngine, RatingModel ruleBasedModel) {
-		ruleBasedModel.setCreated(new Date());
-		ruleBasedModel.setUpdated(new Date());
-		ratingEngine.addRatingModel(ruleBasedModel);
-	}
 
     @VisibleForTesting
     List<String> findUsedAttributes(MetadataSegment segment) {
@@ -267,5 +296,4 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
         return attribute;
     }
-
 }

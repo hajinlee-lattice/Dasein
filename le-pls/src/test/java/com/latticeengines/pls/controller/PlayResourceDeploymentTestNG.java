@@ -7,7 +7,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -31,9 +32,8 @@ import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
-import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
-import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component
@@ -50,18 +50,15 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    @Autowired
+    @Inject
     private SegmentService segmentService;
 
     private RatingEngine ratingEngine1;
     private MetadataSegment segment;
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
-    @Autowired
-    private RatingEngineEntityMgr ratingEngineEntityMgr;
-
-    @Autowired
-    private RuleBasedModelEntityMgr ruleBasedModelEntityMgr;
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     private boolean shouldSkipAutoTenantCreation = false;
 
@@ -89,21 +86,19 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
 
-        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine1,
-                tenant.getId());
+        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
 
-        Set<RatingModel> models = createdRatingEngine.getRatingModels();
+        List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
         for (RatingModel model : models) {
             if (model instanceof RuleBasedModel) {
                 ((RuleBasedModel) model).setRatingRule(ratingRule);
-                ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel((RuleBasedModel) model,
-                        createdRatingEngine.getId());
+                ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngine1.getId(), model.getId(), model);
             }
         }
 
-        ratingEngine1 = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
+        ratingEngine1 = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngine1.getId());
         return ratingEngine1;
     }
 

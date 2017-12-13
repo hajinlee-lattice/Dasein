@@ -16,6 +16,8 @@ public interface RatingEngineEntityMgr {
 
     RatingEngine findById(String id);
 
+    RatingEngine findById(String id, boolean withActiveModel);
+
     void deleteById(String id);
 
     void deleteRatingEngine(RatingEngine ratingEngine);

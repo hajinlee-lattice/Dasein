@@ -47,7 +47,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.RatingCoverageService;
-import com.latticeengines.pls.service.RatingEngineService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -65,7 +65,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     private Integer thresholdForParallelProcessing;
 
     @Autowired
-    private RatingEngineService ratingEngineService;
+    private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;
@@ -389,7 +389,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         try {
             MultiTenantContext.setTenant(tenent);
 
-            RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
+            RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenent.getId(), ratingEngineId);
 
             if (ratingEngine == null || ratingEngine.getSegment() == null) {
                 logInErrorMap(errorMap, ratingEngineId, "Invalid rating engine");
@@ -691,8 +691,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     @VisibleForTesting
-    void setRatingEngineService(RatingEngineService ratingEngineService) {
-        this.ratingEngineService = ratingEngineService;
+    void setRatingEngineProxy(RatingEngineProxy ratingEngineProxy) {
+        this.ratingEngineProxy = ratingEngineProxy;
     }
 
     @VisibleForTesting

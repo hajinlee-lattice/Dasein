@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -29,8 +28,8 @@ import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.pls.service.RatingCoverageService;
-import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
@@ -48,7 +47,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     private RatingCoverageService ratingCoverageService;
 
     @Autowired
-    private RatingEngineService ratingEngineService;
+    private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
     private TestPlayCreationHelper testPlayCreationHelper;
@@ -73,18 +72,21 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
         ((RatingEntityPreviewServiceImpl) ratingEntityPreviewService).setEntityProxy(entityProxy);
 
-        ratingEngine = ratingEngineService.getRatingEngineById(play.getRatingEngine().getId(), false);
+        ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
+                play.getRatingEngine().getId());
 
         Assert.assertNotNull(ratingEngine);
         Assert.assertNotNull(ratingEngine.getSegment());
         Assert.assertNotNull(ratingEngine.getSegment().getAccountRestriction());
         Assert.assertNotNull(ratingEngine.getSegment().getContactRestriction());
 
-        Set<RatingModel> ratingModels = ratingEngine.getRatingModels();
+        List<RatingModel> ratingModels = ratingEngineProxy.getRatingModels(testPlayCreationHelper.getTenant().getId(),
+                play.getRatingEngine().getId());
         Assert.assertNotNull(ratingModels);
         Assert.assertTrue(ratingModels.size() > 0);
-        Assert.assertTrue(new ArrayList<>(ratingModels).get(0) instanceof RuleBasedModel);
+        Assert.assertTrue(ratingModels.get(0) instanceof RuleBasedModel);
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
+        Assert.assertNotNull(ruleBasedModel);
 
         ratingRule = ruleBasedModel.getRatingRule();
 

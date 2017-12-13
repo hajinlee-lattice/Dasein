@@ -43,11 +43,13 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
@@ -76,6 +78,9 @@ public class PlayLaunchProcessor {
 
     @Autowired
     private SqoopProxy sqoopProxy;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -295,7 +300,9 @@ public class PlayLaunchProcessor {
 
         Schema schema = TableUtils.createSchema(playLaunch.getTableName(), recommendationTable);
 
-        String modelId = ratingEngine.getActiveModel().getId();
+        ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
+        RatingModel activeModel = ratingEngine.getActiveModel();
+        String modelId = activeModel.getId();
         String segmentName = segment.getName();
         log.info(String.format("Processing segment: %s", segmentName));
 
@@ -313,6 +320,7 @@ public class PlayLaunchProcessor {
                 .accountFrontEndQuery(new FrontEndQuery()) //
                 .contactFrontEndQuery(new FrontEndQuery()) //
                 .modelId(modelId) //
+                .activeModel(activeModel) //
                 .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
                 .counter(new Counter()) //
                 .recommendationTable(recommendationTable) //

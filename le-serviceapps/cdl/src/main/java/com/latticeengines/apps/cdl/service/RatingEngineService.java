@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -18,6 +17,8 @@ public interface RatingEngineService {
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName);
 
+    RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate, boolean populateActiveModel);
+
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate);
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId);
@@ -26,7 +27,7 @@ public interface RatingEngineService {
 
     void deleteById(String Id);
 
-    Set<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId);
+    List<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId);
 
     RatingModel getRatingModel(String ratingEngineId, String ratingModelId);
 

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -79,7 +78,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public Map<String, Long> updateRatingEngineCounts(String engineId) {
-        RatingEngine ratingEngine = getRatingEngineById(engineId, false);
+        RatingEngine ratingEngine = getRatingEngineById(engineId, false, true);
         if (ratingEngine != null) {
             RatingModel ratingModel = ratingEngine.getActiveModel();
             Map<String, Long> counts = updateRatingCount(ratingEngine, ratingModel);
@@ -92,13 +91,24 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate) {
+    public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate,
+            boolean populateActiveModel) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
+        RatingEngine ratingEngine = null;
+        if (populateActiveModel) {
+            ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId, true);
+        } else {
+            ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
+        }
         if (populateRefreshedDate) {
             updateLastRefreshedDate(tenant.getId(), ratingEngine);
         }
         return ratingEngine;
+    }
+
+    @Override
+    public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate) {
+        return getRatingEngineById(ratingEngineId, populateRefreshedDate, false);
     }
 
     @Override
@@ -125,10 +135,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         ratingEngineEntityMgr.deleteById(id);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Set<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId) {
+    public List<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId) {
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
-        return ratingEngine.getRatingModels();
+        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
+                .getRatingModelService(ratingEngine.getType());
+        return ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngineId);
     }
 
     @SuppressWarnings("unchecked")

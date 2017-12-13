@@ -64,7 +64,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     public RatingEngine() {
     }
 
-    @JsonIgnore
+    @JsonProperty("pid")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -118,11 +118,20 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
-    @JsonProperty("ratingModels")
+    @Deprecated
+    @JsonIgnore
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE,
-            CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.EAGER, orphanRemoval = true)
+            CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RatingModel> ratingModels = new HashSet<>();
+
+    @JsonIgnore
+    @Column(name = "ACTIVE_MODEL_PID")
+    private Long activeModelPid;
+
+    @JsonProperty("activeModel")
+    @Transient
+    private RatingModel activeModel;
 
     @JsonIgnore
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH,
@@ -236,14 +245,17 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return this.createdBy;
     }
 
+    @Deprecated
     public void setRatingModels(Set<RatingModel> ratingModels) {
         this.ratingModels = ratingModels;
     }
 
+    @Deprecated
     public Set<RatingModel> getRatingModels() {
         return this.ratingModels;
     }
 
+    @Deprecated
     public void addRatingModel(RatingModel ratingModel) {
         if (this.ratingModels == null) {
             this.ratingModels = new HashSet<>();
@@ -313,7 +325,19 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     public RatingModel getActiveModel() {
-        return getRatingModels().stream().findFirst().orElse(null);
+        return this.activeModel;
+    }
+
+    public void setActiveModel(RatingModel model) {
+        this.activeModel = model;
+    }
+
+    public Long getActiveModelPid() {
+        return this.activeModelPid;
+    }
+
+    public void setActiveModelPid(Long pid) {
+        this.activeModelPid = pid;
     }
 
     public FrontEndQuery toFrontEndQuery(BusinessEntity mainEntity) {

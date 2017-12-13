@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
-import com.latticeengines.pls.service.RatingEngineService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("ratingEngineDashboardService")
@@ -27,7 +27,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
     private static Logger log = LoggerFactory.getLogger(RatingEngineDashboardServiceImpl.class);
 
     @Inject
-    private RatingEngineService ratingEngineService;
+    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private RatingCoverageService ratingCoverageService;
@@ -44,7 +44,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         RatingEngineDashboard dashboard = new RatingEngineDashboard();
 
         // get rating engine summary
-        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true);
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
         RatingEngineSummary ratingEngineSummary = constructRatingEngineSummary(ratingEngine, tenant.getId());
         log.info(String.format("Step 1 - Loading rating engine summary completed for : %s", ratingEngineId));
 

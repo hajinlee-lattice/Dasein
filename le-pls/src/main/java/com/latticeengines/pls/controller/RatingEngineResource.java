@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -149,7 +148,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
-    public Set<RatingModel> getRatingModels(@PathVariable String ratingEngineId) {
+    public List<RatingModel> getRatingModels(@PathVariable String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         return ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngineId);
     }

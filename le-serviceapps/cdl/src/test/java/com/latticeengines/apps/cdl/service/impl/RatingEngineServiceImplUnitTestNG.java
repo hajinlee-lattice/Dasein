@@ -4,8 +4,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,8 +19,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
-import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
 public class RatingEngineServiceImplUnitTestNG {
@@ -32,7 +28,6 @@ public class RatingEngineServiceImplUnitTestNG {
     private static final String DISPLAY_NAME = "rating engine";
     private static final String CREATED_BY = "testuser@lattice-engines.com";
     private static final Date DATE = new Date();
-    private static final Set<RatingModel> ratingModels = new HashSet<>();
 
     @Mock
     private DataFeedProxy dataFeedProxy;
@@ -44,7 +39,6 @@ public class RatingEngineServiceImplUnitTestNG {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mockDataFeedProxy();
-        ratingModels.add(new RuleBasedModel());
     }
 
     @Test(groups = "unit")
@@ -53,14 +47,14 @@ public class RatingEngineServiceImplUnitTestNG {
                 .constructRatingEngineSummary(createDefaultRatingEngine(), TENANT);
         validateRatingEngineSummary(ratingEngineSummary);
     }
-    
+
     @Test(groups = "unit")
     public void testAIRatingModel() {
-    		AIModel aiModel = new AIModel();
-    		aiModel.setId(AIModel.generateIdStr());
-    		aiModel.setWorkflowType(ModelWorkflowType.CROSS_SELL);
-        
-    		System.out.println(aiModel);
+        AIModel aiModel = new AIModel();
+        aiModel.setId(AIModel.generateIdStr());
+        aiModel.setWorkflowType(ModelWorkflowType.CROSS_SELL);
+
+        System.out.println(aiModel);
     }
 
     private void mockDataFeedProxy() {
@@ -80,7 +74,6 @@ public class RatingEngineServiceImplUnitTestNG {
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setCreated(DATE);
         ratingEngine.setUpdated(DATE);
-        ratingEngine.setRatingModels(ratingModels);
         return ratingEngine;
     }
 

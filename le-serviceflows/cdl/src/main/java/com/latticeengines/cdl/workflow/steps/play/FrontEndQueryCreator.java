@@ -142,7 +142,7 @@ public class FrontEndQueryCreator {
                     prepareContactRestriction(extractedContactRestriction, modifiableAccountIdCollectionForContacts));
         }
 
-        List<RatingModel> ratingModels = Collections.singletonList(ratingEngine.getActiveModel());
+        List<RatingModel> ratingModels = Collections.singletonList(playLaunchContext.getActiveModel());
         accountFrontEndQuery.setRatingModels(ratingModels);
 
         List<Lookup> lookups = accountFrontEndQuery.getLookups();

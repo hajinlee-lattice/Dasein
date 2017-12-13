@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -68,7 +67,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "/ids", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get ids for Rating Engines. Can be filtered by segment name.")
-    public List<String> getRatingEngineTypes(@PathVariable String customerSpace,
+    public List<String> getRatingEngineIds(@PathVariable String customerSpace,
             @RequestParam(value = "segment", required = false) String segment) {
         return ratingEngineService.getAllRatingEngineIdsInSegment(segment);
     }
@@ -77,7 +76,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get a Rating Engine given its id")
     public RatingEngine getRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
-        return ratingEngineService.getRatingEngineById(ratingEngineId, true);
+        return ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -115,7 +114,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
-    public Set<RatingModel> getRatingModels(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+    public List<RatingModel> getRatingModels(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
     }
 

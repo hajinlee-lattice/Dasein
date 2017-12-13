@@ -65,7 +65,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
             boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
-        Tenant tenent = MultiTenantContext.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
 
         FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
         setBasicInfo(ratingEngine, entityType, entityFrontEndQuery, restrictNotNullSalesforceId, freeFormTextSearch);
@@ -83,7 +83,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
         DataPage cachedDataPage = entityProxy.getData( //
-                tenent.getId(), //
+                tenant.getId(), //
                 entityFrontEndQuery);
 
         DataPage resultDataPage = cachedDataPage;
@@ -170,9 +170,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     private RatingModel setModelInfo(RatingEngine ratingEngine, FrontEndQuery entityFrontEndQuery) {
         List<RatingModel> ratingModels = new ArrayList<>();
-        // todo - anoop -this is only valid for rule based model, make it more
-        // generic
-        RatingModel model = ratingEngine.getRatingModels().iterator().next();
+        RatingModel model = ratingEngine.getActiveModel();
         ratingModels.add(model);
         entityFrontEndQuery.setRatingModels(ratingModels);
         return model;

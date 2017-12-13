@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -151,14 +151,10 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         log.info("After loading, ratingEngine is " + ratingEngine);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
 
-        Set<RatingModel> ratingModels = ratingEngine.getRatingModels();
-        Assert.assertNotNull(ratingModels);
-        Assert.assertEquals(ratingModels.size(), 1);
-        Iterator<RatingModel> it = ratingModels.iterator();
-        RatingModel rm = it.next();
-        Assert.assertTrue(rm instanceof RuleBasedModel);
-        Assert.assertEquals(rm.getIteration(), 1);
-        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
+        RatingModel ratingModel = ratingEngine.getActiveModel();
+        Assert.assertNotNull(ratingModel);
+        Assert.assertTrue(ratingModel instanceof RuleBasedModel);
+        Assert.assertEquals(((RuleBasedModel) ratingModel).getRatingRule().getDefaultBucketName(),
                 RatingRule.DEFAULT_BUCKET_NAME);
     }
 
@@ -213,9 +209,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummaries.size(), 2);
 
         // test update rule based model
-        Set<?> ratingModelObjects = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "/ratingmodels", Set.class);
-        Set<RatingModel> ratingModels = JsonUtils.convertSet(ratingModelObjects, RatingModel.class);
+        List<?> ratingModelObjects = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "/ratingmodels", List.class);
+        List<RatingModel> ratingModels = JsonUtils.convertList(ratingModelObjects, RatingModel.class);
         Assert.assertNotNull(ratingModels);
         Assert.assertEquals(ratingModels.size(), 1);
         Iterator<RatingModel> it = ratingModels.iterator();
@@ -269,13 +265,20 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 RatingEngine.class);
         Assert.assertNotNull(createdRe);
         re.setId(createdRe.getId());
-        Assert.assertNotNull(createdRe.getRatingModels());
-        Assert.assertNotNull(new ArrayList<>(createdRe.getRatingModels()));
+        Assert.assertNull(createdRe.getActiveModel());
+        RatingEngine retrievedRe = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + createdRe.getId(), RatingEngine.class);
 
-        RuleBasedModel ruModel = (RuleBasedModel) createdRe.getActiveModel();
-        Assert.assertNotNull(ruModel);
-        Assert.assertNotNull(ruModel.getSelectedAttributes());
-        Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
+        if (retrievedRe.getActiveModel() instanceof RuleBasedModel) {
+            Assert.assertNotNull(retrievedRe.getActiveModel());
+            RuleBasedModel ruModel = (RuleBasedModel) retrievedRe.getActiveModel();
+            Assert.assertNotNull(ruModel);
+            Assert.assertNotNull(ruModel.getSelectedAttributes());
+            Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
+        } else if (retrievedRe.getActiveModel() instanceof AIModel) {
+            AIModel ruModel = (AIModel) retrievedRe.getActiveModel();
+            Assert.assertNull(ruModel);
+        }
     }
 
     private List<String> generateSeletedAttributes() {

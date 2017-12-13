@@ -35,7 +35,7 @@ import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.RatingCoverageService;
-import com.latticeengines.pls.service.RatingEngineService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -65,7 +65,7 @@ public class PlayServiceImpl implements PlayService {
     private RatingCoverageService ratingCoverageService;
 
     @Autowired
-    private RatingEngineService ratingEngineService;
+    private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -107,11 +107,12 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public List<Play> getAllFullPlays(boolean shouldLoadCoverage, String ratingEngineId) {
+        Tenant tenant = MultiTenantContext.getTenant();
         List<Play> plays = null;
         if (ratingEngineId == null) {
             plays = getAllPlays();
         } else {
-            RatingEngine ratingEngine = validateRatingEngineId(ratingEngineId);
+            RatingEngine ratingEngine = validateRatingEngineId(tenant, ratingEngineId);
             plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid());
         }
 
@@ -119,7 +120,6 @@ public class PlayServiceImpl implements PlayService {
         innerPlays.addAll(plays);
 
         Date lastRefreshedDate = findLastRefreshedDate();
-        Tenant tenant = MultiTenantContext.getTenant();
         // to make loading of play list efficient and faster we need to run full
         // play loading in parallel
         tpForParallelStream.submit(//
@@ -135,8 +135,8 @@ public class PlayServiceImpl implements PlayService {
         return innerPlays;
     }
 
-    private RatingEngine validateRatingEngineId(String ratingEngineId) {
-        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
+    private RatingEngine validateRatingEngineId(Tenant tenant, String ratingEngineId) {
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
         if (ratingEngine == null || ratingEngine.getPid() == null) {
             throw new NullPointerException(
                     String.format("Rating Engine %s has not been fully specified", ratingEngine));
