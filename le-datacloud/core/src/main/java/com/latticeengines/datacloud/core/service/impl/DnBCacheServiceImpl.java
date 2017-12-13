@@ -54,7 +54,6 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     @Autowired
     private FabricDataService dataService;
 
-    @SuppressWarnings("unchecked")
     private final List<DnBCache> cacheQueue = Collections.synchronizedList(new ArrayList<>());
 
     @Autowired
@@ -105,11 +104,11 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     public DnBCache lookupCache(DnBMatchContext context) {
         DnBCache input = initCacheEntity(context, true);
         DnBCache output = getCacheMgr().findByKey(input);
-        if (expire(output)) {
-            return null;
-        }
         if (output != null) {
             output.parseCacheContext();
+        }
+        if (expire(output)) {
+            return null;
         }
         return output;
     }
@@ -293,7 +292,6 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                     "Cache is expired: Id=%s, IsWhiteCache=%b, IsDunsInAM=%s, Cache Timestamp (in day)=%d, Current Timestamp (in day)=%d, Calculated expire factor=%f",
                     cache.getId(), cache.isWhiteCache(), cache.isDunsInAMString(), cache.getTimestamp().longValue(),
                     System.currentTimeMillis() / DnBCache.DAY_IN_MILLIS, factor));
-            removeCache(cache);
             return true;
         } else {
             return false;
