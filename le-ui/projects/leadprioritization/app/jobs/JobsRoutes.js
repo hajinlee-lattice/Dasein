@@ -85,8 +85,9 @@ angular
             url: '/status',
             views: {
                 "main@": {
-                    controller: 'DataImportJobsCtrl',
-                    templateUrl: 'app/jobs/views/DataImportJobsView.html'
+                    controller: 'DataProcessingComponent',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/jobs/processing/dataprocessing.component.html'
                 }
             }
         })

@@ -322,6 +322,21 @@ angular
         });
     };
 
+    /**
+     * 
+     * @param {*} jobId 
+     */
+    this.runJob = function(jobId){
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: '/pls/jobs/' + jobId+ '/restart'
+        }).then(function(response) {
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
     function getStepFailed(job) {
         if (job.steps) {
             for (var i = 0; i < job.steps.length; i++) {

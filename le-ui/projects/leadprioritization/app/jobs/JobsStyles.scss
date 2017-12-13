@@ -336,3 +336,57 @@
 .flat div span:last-child, .flat div span:nth-last-child(2) {
     right: 15px;
 }
+
+section.jobs-processing.container{
+    display: flex;
+    flex-direction: column;
+
+    .table-toolbar {
+        display: flex;
+        padding-bottom: 20px;
+        flex-direction: row;
+        // border: 1px solid blue;
+        .left-container{
+            // border: 1px solid green;
+            width: 100%;
+        }
+        .rigth-container {
+            width: 30%;
+            flex-direction: row;
+            align-content: flex-end;
+            margin-right: -3px;
+
+    
+            @media screen and (max-width: 1228px) {
+                width: 50%;
+                margin-right: -60px;
+            }
+
+            @media screen and (max-width: 1161px) {
+                margin-right: -50px;
+            }
+            @media screen and (max-width: 1127px) {
+                margin-right: -40px;
+            }
+            @media screen and (max-width: 1073px) {
+                margin-right: -30px;
+            }
+            @media screen and (max-width: 1010px) {
+                margin-right: -4px;
+            }
+        }
+       
+    }
+
+    .icon-failed {
+        padding: 10px;
+        color: #F16A24;
+    }
+    tr{
+        height: 50px;
+        // border: 1px solid green;
+        vertical-align: middle;
+    }
+
+    
+}

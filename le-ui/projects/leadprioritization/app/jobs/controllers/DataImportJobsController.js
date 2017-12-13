@@ -1,7 +1,8 @@
 angular.module('lp.jobs')
-.controller('DataImportJobsCtrl', function($scope, $http, JobsStore) {
-    $scope.jobs = JobsStore.data.dataImportJobs;
-
+.controller('DataImportJobsCtrl', function($scope, $http, JobsStore, $filter) {
+    // filter:{jobType:'dataProcessingWorkflow'}
+    $scope.jobs = JobsStore.data.jobs;
+    $scope.jobs = $filter('filter')( $scope.jobs, { jobType: 'dataProcessingWorkflow' }, true)
     $scope.loadingJobs = true;
     JobsStore.getDataImportJobs().then(function(jobs) {
         $scope.loadingJobs = false;

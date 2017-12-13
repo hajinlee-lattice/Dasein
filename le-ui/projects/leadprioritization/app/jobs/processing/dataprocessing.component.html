@@ -1,0 +1,79 @@
+<section class="jobs-processing container">
+
+        <div class="table-toolbar">
+            <!-- <div class="row list-header"> -->
+                <div class="left-container">
+                    <menu-dropdown config="vm.header.maxperpage"></menu-dropdown>
+                    <menu-filter-by config="vm.header.filter"></menu-filter-by>
+                    <menu-sort-by config="vm.header.sort"></menu-sort-by>
+                    <search-filter query="vm.query"></search-filter>
+                </div>
+                <!-- <div class="rigth-container" ng-init="current = 1"> -->
+                    <div class="rigth-container" ng-init="vm.current = 1" ng-show="vm.max > 1">
+                        <pd-pagination-controls current="vm.current" max="vm.max = (vm.header.filter.filtered | filter: vm.query).length / vm.pagesize">
+                        </pd-pagination-controls>
+                    </div>
+                <!-- </div> -->
+            <!-- </div> -->
+        </div>
+
+
+        <div class="row jobs-table">
+            <div class="columns twelve panel panel-default box-outline">
+                <div class="section-body">
+                    <table>
+                        <thead>
+                            <tr class="row">
+                                <th class="columns two">Timestamp</th>
+                                <th class="columns two">Type</th>
+                                <th class="columns two">Actions</th>
+                                <th class="columns two">Status</th>
+                                <th class="columns two">&nbsp;</th>
+                                <th class="columns one">&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="job in vm.header.filter.filtered |
+                            filter: vm.query |
+                            orderBy: vm.header.sort.order + vm.header.sort.property |
+                            startFrom: (current - 1) * vm.pagesize |
+                            limitTo: vm.pagesize">
+                                <td class="columns two">{{job.timestamp ? (job.timestamp | date : 'MM/dd/yyyy h:mma') : ''}}</td>
+                                <td class="columns two">{{job.jobType}}</td>
+                                <td class="columns two">-</td>
+                                <td class="columns two job-status ">
+                                    {{job.status}}
+                                    <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="vm.isJobRunning(job)"></i>
+                                    <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="vm.isJobFailed(job) && !vm.isJobRunning(job)"></i>
+                                </td>
+                                <td class="columns two">
+                                    <span ng-if="!job.timestamp && !vm.isJobRunning(job) && vm.canRunJob">Schedule Time 6:30 pm </span>
+                                </td>
+                                <td class="columns one">
+                                    <button class="button blue-button" ng-if="!job.timestamp" ng-disabled="!vm.canRunJob" ng-click="vm.runJob(job)">Run Now</button>
+                                    <a href="javascript:void(0)" ng-if="job.timestamp">
+                                        Report
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section-actions" ng-if="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
+                    There are no jobs to show at the moment
+                </div>
+                <div class="section-actions" ng-if="loadingJobs && header.filter.filtered.length == 0">
+                    Loading...
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-init="current = 1" ng-show="max > 1">
+            <div class="twelve columns">
+                <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
+                </pd-pagination-controls>
+            </div>
+        </div>
+
+</section>
