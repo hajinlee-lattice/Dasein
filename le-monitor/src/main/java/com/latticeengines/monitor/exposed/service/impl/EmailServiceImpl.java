@@ -33,7 +33,7 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 @Component
 public class EmailServiceImpl implements EmailService {
 
-    private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
+    public static Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     private static final String COMMA = ", ";
 
@@ -552,6 +552,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
             String emailAddress, EmailSettings settings) {
         try {
+            log.info("Sending global auth forget creds email to " + emailAddress + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
                     EmailTemplateBuilder.Template.SECURITY_GLOBALAUTH_EMAIL_TEMPLATE);
 

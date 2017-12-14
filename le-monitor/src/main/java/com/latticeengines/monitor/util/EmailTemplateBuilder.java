@@ -42,7 +42,7 @@ public class EmailTemplateBuilder {
         mp.addBodyPart(htmlPart);
         MimeBodyPart logoPart = new MimeBodyPart();
         DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("com/latticeengines/security/email_header_with_logo.png"), "image/png");
+                .getResourceAsStream("com/latticeengines/monitor/email_header_with_logo.png"), "image/png");
         logoPart.setDisposition(MimeBodyPart.INLINE);
         logoPart.setDataHandler(new DataHandler(fds));
         logoPart.setHeader("Content-ID", "<banner>");
@@ -53,7 +53,7 @@ public class EmailTemplateBuilder {
     private static void appendImagesToMultipart(Multipart mp) throws IOException, MessagingException {
         MimeBodyPart logoPart = new MimeBodyPart();
         DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("com/latticeengines/security/email_logo.jpg"), "image/jpeg");
+                .getResourceAsStream("com/latticeengines/monitor/email_logo.jpg"), "image/jpeg");
         logoPart.setDisposition(MimeBodyPart.INLINE);
         logoPart.setDataHandler(new DataHandler(fds));
         logoPart.setHeader("Content-ID", "<logo>");
@@ -61,7 +61,7 @@ public class EmailTemplateBuilder {
 
         logoPart = new MimeBodyPart();
         fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("com/latticeengines/security/email_banner.jpg"), "image/jpeg");
+                .getResourceAsStream("com/latticeengines/monitor/email_banner.jpg"), "image/jpeg");
         logoPart.setDisposition(MimeBodyPart.INLINE);
         logoPart.setDataHandler(new DataHandler(fds));
         logoPart.setHeader("Content-ID", "<banner>");
@@ -92,7 +92,7 @@ public class EmailTemplateBuilder {
         PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_SEGMENT_ERROR(
                 "pls_export_segment_error.html");
 
-        private final static String templateRoot = "com/latticeengines/security/";
+        private final static String templateRoot = "com/latticeengines/monitor/";
         private final String templateFile;
 
         Template(String tmpFile) {
