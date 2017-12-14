@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 
 @Configuration
 @EnableCaching
@@ -64,14 +64,14 @@ public class CacheBeansConfiguration {
         CacheConfig sessionCacheConfig = new CacheConfig(5 * 60 * 1000, 15 * 60 * 1000);
 
         Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
-        config.put(CacheNames.DataLakeCMCache.name(), dataLakeCMCacheConfig);
-        config.put(CacheNames.DataLakeStatsCache.name(), dataLakeStatsCacheConfig);
+        config.put(CacheName.DataLakeCMCache.name(), dataLakeCMCacheConfig);
+        config.put(CacheName.DataLakeStatsCache.name(), dataLakeStatsCacheConfig);
 
-        config.put(CacheNames.EntityCountCache.name(), entityCountCacheConfig);
-        config.put(CacheNames.EntityDataCache.name(), entityDataCacheConfig);
-        config.put(CacheNames.EntityRatingCountCache.name(), entityRatingCountCacheConfig);
-        config.put(CacheNames.MetadataCache.name(), metadataCacheConfig);
-        config.put(CacheNames.SessionCache.name(), sessionCacheConfig);
+        config.put(CacheName.EntityCountCache.name(), entityCountCacheConfig);
+        config.put(CacheName.EntityDataCache.name(), entityDataCacheConfig);
+        config.put(CacheName.EntityRatingCountCache.name(), entityRatingCountCacheConfig);
+        config.put(CacheName.MetadataCache.name(), metadataCacheConfig);
+        config.put(CacheName.SessionCache.name(), sessionCacheConfig);
 
         return new RedissonSpringCacheManager(redisson, config);
     }
@@ -79,10 +79,10 @@ public class CacheBeansConfiguration {
     private CacheManager gaCacheManager() {
         CacheConfig sessionCacheConfig = new CacheConfig(5 * 60 * 1000, 5 * 60 * 1000);
         Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
-        config.put(CacheNames.SessionCache.name(), sessionCacheConfig);
+        config.put(CacheName.SessionCache.name(), sessionCacheConfig);
 
         RedissonSpringCacheManager manager = new RedissonSpringCacheManager(redisson, config);
-        manager.setCacheNames(Collections.singletonList(CacheNames.SessionCache.name()));
+        manager.setCacheNames(Collections.singletonList(CacheName.SessionCache.name()));
         return manager;
     }
 

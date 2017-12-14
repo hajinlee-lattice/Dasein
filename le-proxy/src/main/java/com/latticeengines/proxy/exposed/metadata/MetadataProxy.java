@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
@@ -24,7 +24,7 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-@CacheConfig(cacheNames = CacheNames.Constants.MetadataCacheName)
+@CacheConfig(cacheNames = CacheName.Constants.MetadataCacheName)
 public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public MetadataProxy() {

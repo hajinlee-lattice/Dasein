@@ -56,11 +56,14 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private Map<BusinessEntity, Boolean> appendFlagMap;
 
     private String customerSpace;
+    private boolean upsertToInactiveVersion = false;
 
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();
+
+        log.info("upsertToInactiveVersion=" + upsertToInactiveVersion);
 
         Map<BusinessEntity, String> entityTableNames = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
                 BusinessEntity.class, String.class);
@@ -168,15 +171,18 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                 // create for inactive version
                 targetVersion = inactiveVersion;
             } else {
-                // upserting to active version
+                DataCollection.Version upsertVersion = inactiveVersion.complement();
+                if (upsertToInactiveVersion) {
+                    upsertVersion = inactiveVersion;
+                }
+                log.info("Trying to upsert to version " + upsertVersion);
                 Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore(),
-                        inactiveVersion.complement());
+                        upsertVersion);
                 if (oldTable == null) {
-                    log.warn("Table for " + entity.getServingStore() + " at version " + inactiveVersion.complement()
+                    log.warn("Table for " + entity.getServingStore() + " at version " + targetVersion
                             + " does not exists. Switch to not append.");
                     createNew = true; // it is essentially creating new
-                    // create for active version
-                    targetVersion = inactiveVersion.complement();
+                    targetVersion = upsertVersion;
                 } else {
                     log.info("Mering to the the existing table " + oldTable.getName());
                     goodName = oldTable.getName();
@@ -232,6 +238,10 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                     String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
             return exportConfig;
         }
+    }
+
+    public void upsertToInactiveVersion() {
+        upsertToInactiveVersion = true;
     }
 
 }

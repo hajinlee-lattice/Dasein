@@ -75,9 +75,7 @@ public class NodeWatcher {
     }
 
     public static void notifyCacheWatchersAsync(String watcherName, String signal) {
-        new Thread(() -> {
-            NodeWatcher.updateWatchedData(watcherName, signal);
-        }).run();
+        new Thread(() -> NodeWatcher.updateWatchedData(watcherName, signal)).run();
     }
 
     public static synchronized String getWatchedData(String watcherName) {

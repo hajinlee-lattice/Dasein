@@ -90,19 +90,19 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         if (entity.getBatchStore() != null) {
             String masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(),
                     inactive);
-            if (StringUtils.isNotBlank(masterTableName)) {
-                cloneBatchStore();
+            if (StringUtils.isBlank(masterTableName)) {
+                masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(), active);
+                if (StringUtils.isNotBlank(masterTableName)) {
+                    log.info("Found the batch store in active version " + active);
+                }
+            } else {
+                log.info("Found the batch store in inactive version " + inactive);
             }
-            masterTable = dataCollectionProxy.getTable(customerSpace.toString(), entity.getBatchStore(), inactive);
+            masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
             if (masterTable == null) {
                 throw new IllegalStateException("Cannot find the master table in default collection");
             }
         }
-    }
-
-    private void cloneBatchStore() {
-        TableRoleInCollection batchStore = entity.getBatchStore();
-        super.cloneBatchStore(customerSpace, batchStore, active);
     }
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {

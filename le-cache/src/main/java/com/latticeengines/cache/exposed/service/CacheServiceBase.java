@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cache.CacheType;
 
 @Component("cacheService")
@@ -38,6 +38,6 @@ public abstract class CacheServiceBase implements CacheService {
         return registry.get(cacheType);
     }
 
-    public abstract void refreshKeysByPattern(String pattern, CacheNames... cacheNames);
+    public abstract void refreshKeysByPattern(String pattern, CacheName... cacheNames);
 
 }

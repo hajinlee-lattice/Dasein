@@ -9,7 +9,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -19,7 +19,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementSer
 import com.latticeengines.security.exposed.service.SessionService;
 
 @Component("sessionService")
-@CacheConfig(cacheNames = CacheNames.Constants.SessionCacheName)
+@CacheConfig(cacheNames = CacheName.Constants.SessionCacheName)
 public class SessionServiceImpl implements SessionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionServiceImpl.class);

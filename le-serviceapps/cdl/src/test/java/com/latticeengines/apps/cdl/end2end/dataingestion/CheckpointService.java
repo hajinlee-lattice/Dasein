@@ -67,6 +67,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -332,6 +333,7 @@ public class CheckpointService {
     }
 
     private void uploadCheckpointHdfs(String checkpoint) throws IOException {
+        logger.info("Start uploading checkpoint " + checkpoint + " to hdfs.");
         String localDir = checkpointDir + "/" + checkpoint + "/hdfs/Data";
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
         String targetPath = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data").toString();
@@ -565,7 +567,8 @@ public class CheckpointService {
                             + " redshift tables prefixed by " + table.getName() + ": " + redshiftTables);
                 }
                 String oldTable = redshiftTables.get(0);
-                String newTable = String.format("cdlend2end_%s_%s_%s", checkpoint, role.name(), leStack);
+                String newTable = String.format("%s_%s", TestFrameworkUtils.generateTenantName(), role.name());
+                newTable = NamingUtils.timestamp(newTable);
                 redshiftService.dropTable(newTable);
                 redshiftService.renameTable(oldTable, newTable);
                 savedRedshiftTables.put(role, newTable);

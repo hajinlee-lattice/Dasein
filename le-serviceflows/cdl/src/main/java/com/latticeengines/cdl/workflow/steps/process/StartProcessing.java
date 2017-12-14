@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshift;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -53,6 +54,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private ExportDataToRedshift exportDataToRedshift;
+
     private CustomerSpace customerSpace;
     private DataCollection.Version activeVersion;
     private DataCollection.Version inactiveVersion;
@@ -82,6 +86,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         createReport(importJobs);
         updateImportJobs();
         cleanupInactiveVersion();
+        exportDataToRedshift.upsertToInactiveVersion();
     }
 
     private void determineVersions() {

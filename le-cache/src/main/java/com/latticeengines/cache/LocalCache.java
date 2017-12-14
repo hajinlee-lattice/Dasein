@@ -16,7 +16,7 @@ import org.springframework.cache.support.SimpleValueWrapper;
 
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 import com.latticeengines.domain.exposed.util.CacheUtils;
 
@@ -27,7 +27,7 @@ public class LocalCache<K, V> implements Cache {
     private WatcherCache<K, V> cache;
 
     @SuppressWarnings("unchecked")
-    public LocalCache(CacheNames cacheName, Function<K, V> load, int capacity) {
+    public LocalCache(CacheName cacheName, Function<K, V> load, int capacity) {
         cache = WatcherCache.builder() //
                 .name(cacheName.name()) //
                 .watch(cacheName.name()) //
@@ -43,6 +43,10 @@ public class LocalCache<K, V> implements Cache {
     @Override
     public Object getNativeCache() {
         return cache.getNativeCache();
+    }
+
+    public WatcherCache<K, V> getWatcherCache() {
+        return cache;
     }
 
     @SuppressWarnings("unchecked")

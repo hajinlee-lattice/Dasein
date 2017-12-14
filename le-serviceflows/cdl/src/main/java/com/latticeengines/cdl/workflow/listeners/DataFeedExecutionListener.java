@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
@@ -67,7 +67,7 @@ public class DataFeedExecutionListener extends LEJobListener {
             // refresh caches
             CacheService cacheService = CacheServiceBase.getCacheService();
             cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                    CacheNames.getCdlConsolidateCacheGroup());
+                    CacheName.getCdlConsolidateCacheGroup());
             // update segment and rating engine counts
             SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace);
             RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace);

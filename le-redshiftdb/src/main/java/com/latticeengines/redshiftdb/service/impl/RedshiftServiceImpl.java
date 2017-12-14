@@ -149,6 +149,12 @@ public class RedshiftServiceImpl implements RedshiftService {
     }
 
     @Override
+    public Long countTable(String tableName) {
+        log.info("Count table " + tableName);
+        return redshiftJdbcTemplate.queryForObject(String.format("SELECT COUNT(1) FROM %s", tableName), Long.class);
+    }
+
+    @Override
     public void cloneTable(String srcTable, String tgtTable) {
         log.info("Clone table " + srcTable + " to " + tgtTable);
         redshiftJdbcTemplate.execute(String.format("CREATE TABLE %s (LIKE %s)", tgtTable, srcTable));

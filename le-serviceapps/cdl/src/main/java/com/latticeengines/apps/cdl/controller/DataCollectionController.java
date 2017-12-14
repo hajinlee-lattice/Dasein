@@ -13,7 +13,7 @@ import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -58,7 +58,7 @@ public class DataCollectionController {
     public ResponseDocument<String> clearCache(@PathVariable String customerSpace) {
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                CacheNames.getCdlProfileCacheGroup());
+                CacheName.getCdlProfileCacheGroup());
         return ResponseDocument.successResponse("Success");
     }
 }

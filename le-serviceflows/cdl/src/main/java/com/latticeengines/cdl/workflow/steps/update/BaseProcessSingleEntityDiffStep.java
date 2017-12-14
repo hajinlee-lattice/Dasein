@@ -233,10 +233,11 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     private void useDiffTableAsSource(TransformationStepConfig step) {
         String sourceName = entity.name() + "Diff";
         SourceTable sourceTable = new SourceTable(diffTableName, customerSpace);
-        List<String> baseSources = new ArrayList<>(step.getBaseSources());
+        List<String> baseSources = step.getBaseSources();
         if (CollectionUtils.isEmpty(baseSources)) {
             baseSources = Collections.singletonList(sourceName);
         } else {
+            baseSources = new ArrayList<>(baseSources);
             baseSources.add(sourceName);
         }
         step.setBaseSources(baseSources);

@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
@@ -17,29 +16,31 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
+public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateContactDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateAccountDeploymentTestNG.class);
 
-    static final String CHECK_POINT = "update2";
+    static final String CHECK_POINT = "update1";
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
 
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
 
         importData();
         processAnalyze();
+
         try {
             verifyProcess();
         } finally {
             saveCheckpoint(CHECK_POINT);
         }
+
     }
 
     private void importData() throws Exception {
-        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, ACCOUNT_IMPORT_SIZE_2);
         Thread.sleep(2000);
     }
 
@@ -51,7 +52,7 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
-        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numContacts = CONTACT_IMPORT_SIZE_1;
         long numProducts = PRODUCT_IMPORT_SIZE_1;
         long numTransactions = TRANSACTION_IMPORT_SIZE_1;
 

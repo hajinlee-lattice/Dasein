@@ -27,6 +27,8 @@ public interface RedshiftService {
 
     void vacuumTable(String tableName);
 
+    Long countTable(String tableName);
+
     boolean hasTable(String tableName);
 
     List<String> getTables(String prefix);

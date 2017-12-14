@@ -1,9 +1,9 @@
 package com.latticeengines.cache.exposed.service;
 
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 
 public interface CacheService {
 
-    void refreshKeysByPattern(String pattern, CacheNames... cacheNames);
+    void refreshKeysByPattern(String pattern, CacheName... cacheNames);
 
 }

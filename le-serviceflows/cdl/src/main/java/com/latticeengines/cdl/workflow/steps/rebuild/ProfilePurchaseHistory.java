@@ -127,6 +127,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             // might because the merge account step was skipped
             accountTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedAccount, active);
+            if (StringUtils.isNotBlank(accountTableName)) {
+                log.info("Found account batch store in active version " + active);
+            }
+        } else {
+            log.info("Found account batch store in inactive version " + inactive);
         }
         return accountTableName;
     }

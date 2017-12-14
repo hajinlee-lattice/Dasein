@@ -29,7 +29,7 @@ import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -84,14 +84,14 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Autowired
     public DataLakeServiceImpl(DataLakeService dataLakeService) {
         _dataLakeService = dataLakeService;
-        statsCache = new LocalCacheManager<>(CacheNames.DataLakeStatsCache, o -> {
+        statsCache = new LocalCacheManager<>(CacheName.DataLakeStatsCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
             String customerSpace = tokens[0];
             return getStatistics(customerSpace);
         }, 100); //
 
-        cmCache = new LocalCacheManager<>(CacheNames.DataLakeCMCache, o -> {
+        cmCache = new LocalCacheManager<>(CacheName.DataLakeCMCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
             TableRoleInCollection role = TableRoleInCollection.valueOf(tokens[1]);
@@ -250,7 +250,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.DataLakeStatsCacheName, key = "T(java.lang.String).format(\"%s|stats\", "
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCacheName, key = "T(java.lang.String).format(\"%s|stats\", "
             + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public Statistics getStatistics() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
@@ -290,7 +290,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         return subcatStats;
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
             + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id, #role)")
     public List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role) {
         if (role == null) {

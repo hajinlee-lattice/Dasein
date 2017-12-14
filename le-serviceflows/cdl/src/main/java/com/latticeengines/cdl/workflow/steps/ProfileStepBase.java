@@ -5,13 +5,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -20,9 +17,7 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
-import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 
 public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
 
@@ -65,23 +60,6 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         profileTable = dataCollectionProxy.getTable(customerSpace, profileRole, inactiveVersion);
         if (profileTable == null) {
             throw new IllegalStateException("Cannot find the upserted " + profileRole + " table in data collection.");
-        }
-    }
-
-    protected void cloneBatchStore(CustomerSpace customerSpace, TableRoleInCollection batchStore,
-            DataCollection.Version active) {
-        DataCollection.Version inactive = active.complement();
-        String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
-        if (StringUtils.isNotBlank(activeTableName)) {
-            log.info("Cloning " + batchStore + " from  " + active + " to " + inactive);
-            Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
-            String cloneName = NamingUtils.timestamp(batchStore.name());
-            String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-            queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
-            Table inactiveTable = TableCloneUtils //
-                    .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
-            metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
-            dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, batchStore, inactive);
         }
     }
 

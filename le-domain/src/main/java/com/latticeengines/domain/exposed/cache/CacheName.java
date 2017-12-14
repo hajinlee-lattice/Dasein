@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.cache;
 
-public enum CacheNames {
+public enum CacheName {
 
     PLSCache(Constants.PLSCacheName), //
     DataLakeCMCache(Constants.DataLakeCMCacheName), //
@@ -8,13 +8,14 @@ public enum CacheNames {
     EntityCountCache(Constants.EntityCountCacheName), //
     EntityDataCache(Constants.EntityDataCacheName), //
     EntityRatingCountCache(Constants.EntityRatingCountCacheName), //
+    AttrRepoCache(Constants.AttrRepoCacheName), //
     JobsCache(Constants.JobsCacheName), //
     MetadataCache(Constants.MetadataCacheName), //
     SessionCache(Constants.SessionCacheName);//
 
     private String name;
 
-    CacheNames(String name) {
+    CacheName(String name) {
         this.name = name;
     }
 
@@ -22,12 +23,12 @@ public enum CacheNames {
         return this.name;
     }
 
-    public static CacheNames[] getCdlConsolidateCacheGroup() {
-        return new CacheNames[] { EntityDataCache, EntityCountCache, EntityRatingCountCache };
+    public static CacheName[] getCdlConsolidateCacheGroup() {
+        return new CacheName[] { EntityDataCache, EntityCountCache, EntityRatingCountCache };
     }
 
-    public static CacheNames[] getCdlProfileCacheGroup() {
-        return new CacheNames[] { DataLakeStatsCache, DataLakeCMCache, EntityCountCache, EntityDataCache,
+    public static CacheName[] getCdlProfileCacheGroup() {
+        return new CacheName[] { DataLakeStatsCache, DataLakeCMCache, EntityCountCache, EntityDataCache,
                 EntityRatingCountCache };
     }
 
@@ -41,5 +42,6 @@ public enum CacheNames {
         public static final String JobsCacheName = "JobsCache";
         public static final String MetadataCacheName = "MetadataCache";
         public static final String SessionCacheName = "SessionCache";
+        public static final String AttrRepoCacheName = "AttrRepoCache";
     }
 }

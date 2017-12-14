@@ -126,6 +126,32 @@ public abstract class BaseRestApiProxy {
         });
     }
 
+    protected <T, B> T postWithRetries(final String method, final String url, final B body, final Class<T> returnValueClazz) {
+        return postWithRetries(method, url, body, returnValueClazz, true);
+    }
+
+    protected <T, B> T postWithRetries(final String method, final String url, final B body, final Class<T> returnValueClazz,
+                            final boolean logBody) {
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(context -> {
+            try {
+                String msg;
+                if (logBody) {
+                    msg = String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
+                            body, context.getRetryCount() + 1);
+                } else {
+                    msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
+                            context.getRetryCount() + 1);
+                }
+                log.info(msg);
+                return restTemplate.postForObject(url, body, returnValueClazz);
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
+            }
+        });
+    }
+
     protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts, final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {

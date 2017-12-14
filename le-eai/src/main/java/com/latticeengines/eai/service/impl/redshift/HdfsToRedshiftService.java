@@ -113,8 +113,14 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
             createRedshiftTableIfNotExist(configuration);
             redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(),
                     s3Prefix(tableName), redshiftTableConfig.getJsonPathPrefix());
+            Long countStage = redshiftService.countTable(tableName);
+            log.info("After staging, there are " + countStage + " rows in " + stagingTableName);
+            redshiftService.dropTable(stagingTableName);
             redshiftService.analyzeTable(stagingTableName);
             redshiftService.replaceTable(stagingTableName, tableName);
+            Long countAfter = redshiftService.countTable(tableName);
+            log.info("After creation, there are " + countAfter + " rows in " + tableName);
+            redshiftService.dropTable(stagingTableName);
         } else {
             redshiftService.loadTableFromAvroInS3(tableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),
                     redshiftTableConfig.getJsonPathPrefix());
@@ -130,11 +136,17 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         redshiftService.createStagingTable(stagingTableName, tableName);
         redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),
                 redshiftTableConfig.getJsonPathPrefix());
+        Long countStage = redshiftService.countTable(stagingTableName);
+        log.info("After staging, there are " + countStage + " rows in " + stagingTableName);
+        Long countBefore = redshiftService.countTable(tableName);
+        log.info("Before update, there are " + countBefore + " rows in " + tableName);
         redshiftService.updateExistingRowsFromStagingTable(stagingTableName, tableName,
                 redshiftTableConfig.getDistKey()); // we would use dist key as
                                                    // join field
         // redshiftService.vacuumTable(tableName);
         redshiftService.analyzeTable(tableName);
+        Long countAfter = redshiftService.countTable(tableName);
+        log.info("After update, there are " + countAfter + " rows in " + tableName);
         redshiftService.dropTable(stagingTableName);
     }
 

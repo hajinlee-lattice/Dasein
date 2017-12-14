@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -61,8 +61,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                CacheNames.getCdlProfileCacheGroup());
-
+                CacheName.getCdlProfileCacheGroup());
         return newVersion;
     }
 

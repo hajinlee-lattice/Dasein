@@ -4,17 +4,16 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -28,7 +27,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionProxy.class);
 
-    private LoadingCache<String, AttributeRepository> attrRepoCache = null;
+    private LocalCacheManager<String, AttributeRepository> attrRepoCache = null;
 
     protected DataCollectionProxy() {
         super("metadata");
@@ -46,11 +45,13 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("get default dataCollection", url, ResponseDocument.class);
     }
 
+    @SuppressWarnings("unchecked")
     public AttributeRepository getAttrRepo(String customerSpace) {
         if (attrRepoCache == null) {
             initializeAttrRepoCache();
         }
-        return attrRepoCache.get(customerSpace);
+        String key = shortenCustomerSpace(customerSpace);
+        return attrRepoCache.getWatcherCache().get(key);
     }
 
     public StatisticsContainer getStats(String customerSpace) {
@@ -152,16 +153,25 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
+    @SuppressWarnings("unchecked")
     private void initializeAttrRepoCache() {
-        attrRepoCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(5, TimeUnit.MINUTES)
-                .refreshAfterWrite(1, TimeUnit.MINUTES).build(this::getAttrRepoViaRestCall);
+        attrRepoCache = new LocalCacheManager<>( //
+                CacheName.AttrRepoCache, //
+                this::getAttrRepoViaRestCall, //
+                100); //
         log.info("Initialized loading cache attrRepoCache.");
     }
 
     private void evictAttrRepoCache(String customerSpace) {
         if (attrRepoCache != null) {
-            attrRepoCache.invalidate(customerSpace);
-            log.info("Invalidated attr repo cache for customer " + shortenCustomerSpace(customerSpace));
+            String pattern = shortenCustomerSpace(customerSpace);
+            log.info("Refreshing attr repo cache for pattern " + pattern);
+            attrRepoCache.getCache(CacheName.AttrRepoCache.name()).evict(pattern);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                log.warn("Thread sleep interrupted.", e);
+            }
         }
     }
 

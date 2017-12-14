@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cache.CacheNames;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -47,19 +47,19 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     public EntityProxy(CacheManager cacheManager) {
         super("objectapi/customerspaces");
         this.cacheManager = cacheManager;
-        countCache = new LocalCacheManager<>(CacheNames.EntityCountCache, o -> {
+        countCache = new LocalCacheManager<>(CacheName.EntityCountCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
             return getCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
         }, 2000); //
 
-        dataCache = new LocalCacheManager<>(CacheNames.EntityDataCache, o -> {
+        dataCache = new LocalCacheManager<>(CacheName.EntityDataCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
             return getDataFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
         }, 200); //
 
-        ratingCache = new LocalCacheManager<>(CacheNames.EntityRatingCountCache, o -> {
+        ratingCache = new LocalCacheManager<>(CacheName.EntityRatingCountCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
             return getRatingCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
@@ -74,7 +74,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheName.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -82,14 +82,14 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return getCountFromCache(customerSpace, frontEndQuery);
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheName.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         DataPage page = getDataFromCache(customerSpace, frontEndQuery);
         return page;
     }
 
-    @Cacheable(cacheNames = CacheNames.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheName.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -141,7 +141,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/entity/count", tenantId);
-        return post("getCount", url, frontEndQuery, Long.class);
+        return postWithRetries("getCount", url, frontEndQuery, Long.class);
     }
 
     private DataPage getDataFromObjectApi(String serializedKey) {
@@ -149,7 +149,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/entity/data", tenantId);
-        return post("getData", url, frontEndQuery, DataPage.class);
+        return postWithRetries("getData", url, frontEndQuery, DataPage.class);
     }
 
     @SuppressWarnings({ "rawtypes" })
@@ -158,7 +158,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
-        Map map = post("getRatingCount", url, frontEndQuery, Map.class);
+        Map map = postWithRetries("getRatingCount", url, frontEndQuery, Map.class);
         if (map == null) {
             return null;
         } else {

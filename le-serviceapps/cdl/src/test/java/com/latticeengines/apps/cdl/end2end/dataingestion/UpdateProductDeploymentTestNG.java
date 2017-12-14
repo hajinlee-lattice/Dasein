@@ -5,6 +5,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
 import org.slf4j.Logger;
@@ -17,17 +18,21 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateContactDeploymentTestNG.class);
+public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
-    static final String CHECK_POINT = "update2";
+    private static final Logger log = LoggerFactory.getLogger(UpdateProductDeploymentTestNG.class);
+
+    static final String CHECK_POINT = "update3";
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
 
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
+        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
+        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
+        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
 
         importData();
         processAnalyze();
@@ -39,7 +44,7 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void importData() throws Exception {
-        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, PRODUCT_IMPORT_SIZE_2);
         Thread.sleep(2000);
     }
 
@@ -52,7 +57,7 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
-        long numProducts = PRODUCT_IMPORT_SIZE_1;
+        long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
         long numTransactions = TRANSACTION_IMPORT_SIZE_1;
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
