@@ -38,8 +38,11 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
         importData();
         processAnalyze();
-        verifyProcess();
-        // saveCheckpoint(CHECK_POINT);
+        try {
+            verifyProcess();
+        } finally {
+            saveCheckpoint(CHECK_POINT);
+        }
     }
 
     private void importData() throws Exception {

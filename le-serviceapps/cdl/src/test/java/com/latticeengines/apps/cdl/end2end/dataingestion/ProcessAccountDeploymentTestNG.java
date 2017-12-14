@@ -38,8 +38,11 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        runPreCheckin();
-        // saveCheckpoint(CHECK_POINT);
+        try {
+            runPreCheckin();
+        } finally {
+            saveCheckpoint(CHECK_POINT);
+        }
     }
 
     @Test(groups = "precheckin")

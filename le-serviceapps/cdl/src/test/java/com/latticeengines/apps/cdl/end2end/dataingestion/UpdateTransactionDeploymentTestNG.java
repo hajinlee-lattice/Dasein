@@ -49,10 +49,9 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         processAnalyze();
         try {
             verifyProcess();
-        } catch (AssertionError e) {
-            log.warn("Verification failed", e);
+        } finally {
+            saveCheckpoint(CHECK_POINT);
         }
-        saveCheckpoint(CHECK_POINT);
     }
 
     private void importData() throws Exception {
