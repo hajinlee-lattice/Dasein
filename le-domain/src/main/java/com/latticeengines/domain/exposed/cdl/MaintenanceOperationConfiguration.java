@@ -12,4 +12,11 @@ public class MaintenanceOperationConfiguration {
     @JsonProperty("operation_type")
     private MaintenanceOperationType operationType;
 
+    public MaintenanceOperationType getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(MaintenanceOperationType operationType) {
+        this.operationType = operationType;
+    }
 }

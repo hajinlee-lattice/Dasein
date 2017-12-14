@@ -19,4 +19,20 @@ public class CleanupOperationConfiguration extends MaintenanceOperationConfigura
 
     @JsonProperty("cleanup_operation_type")
     private CleanupOperationType cleanupOperationType;
+
+    public List<BusinessEntity> getEntityList() {
+        return entityList;
+    }
+
+    public void setEntityList(List<BusinessEntity> entityList) {
+        this.entityList = entityList;
+    }
+
+    public CleanupOperationType getCleanupOperationType() {
+        return cleanupOperationType;
+    }
+
+    public void setCleanupOperationType(CleanupOperationType cleanupOperationType) {
+        this.cleanupOperationType = cleanupOperationType;
+    }
 }
