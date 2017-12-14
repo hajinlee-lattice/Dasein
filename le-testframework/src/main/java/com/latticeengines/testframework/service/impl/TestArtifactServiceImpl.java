@@ -8,7 +8,6 @@ import java.io.InputStream;
 
 import javax.inject.Inject;
 
-import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +19,9 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.S3Object;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
@@ -32,7 +31,6 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     private static final Logger log = LoggerFactory.getLogger(TestArtifactServiceImpl.class);
 
     private static final String S3_BUCKET = "latticeengines-test-artifacts";
-    private static final Region S3_REGION = Region.US_Standard;
 
     private static final String DOWNLOAD_DIR = "s3downloads";
     private static final int BUFFER_SIZE = 1024 * 1024; // 1M
@@ -46,7 +44,7 @@ public class TestArtifactServiceImpl implements TestArtifactService {
         clientConfiguration.setSocketTimeout(120000);
         this.S3 = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials)) //
-                .withRegion(S3_REGION.name()) //
+                .withRegion("us-east-1") //
                 .withClientConfiguration(clientConfiguration) //
                 .enableAccelerateMode() //
                 .build();
