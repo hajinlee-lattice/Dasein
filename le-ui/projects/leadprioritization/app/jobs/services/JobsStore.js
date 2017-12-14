@@ -60,7 +60,7 @@ angular
             JobsService.getAllJobs().then(function(response) {
                 var res = response.resultObj;
                 /**TO BE REMOVED once api will support dataProcessingWorkflow */
-                JobsStore.tmpModifyJobsDemo(res);
+                // JobsStore.tmpModifyJobsDemo(res);
                 if (modelId) {
                     if (!JobsStore.data.models[modelId]) {
                         JobsStore.data.models[modelId] = [];
