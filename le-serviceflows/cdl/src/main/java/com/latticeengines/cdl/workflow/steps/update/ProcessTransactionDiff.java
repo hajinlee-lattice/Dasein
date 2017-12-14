@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
@@ -60,6 +62,10 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Override
     protected void initializeConfiguration() {
@@ -88,6 +94,21 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
     @Override
     protected void onPostTransformationCompleted() {
+        String sortedDailyTableName = TableUtils.getFullTableName(dailyTablePrefix, pipelineVersion);
+        String sortedPeriodTableName = TableUtils.getFullTableName(periodTablePrefix, pipelineVersion);
+        putObjectInContext(DAILY_AGG_TXN_TABLE_NAME, sortedDailyTableName);
+        putObjectInContext(PERIOD_AGG_TXN_TABLE_NAME, sortedPeriodTableName);
+        updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+
+        DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
+        Integer earliestDayPeriod = TimeSeriesUtils.getEarliestPeriod(yarnConfiguration, rawTable);
+        Integer currentEarliest = feed.getEarliestTransaction();
+        if ((currentEarliest == null) || (earliestDayPeriod < currentEarliest)) {
+            dataFeedProxy.updateEarliestTransaction(customerSpace.toString(), earliestDayPeriod);
+        }
     }
 
     @Override

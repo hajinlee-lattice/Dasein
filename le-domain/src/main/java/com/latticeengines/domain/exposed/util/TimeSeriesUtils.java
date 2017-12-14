@@ -172,7 +172,7 @@ public class TimeSeriesUtils {
         }
     }
 
-    public static Integer getEarliestPeriod(YarnConfiguration yarnConfiguration, Table transactionTable) {
+    public static Integer getEarliestPeriod(Configuration yarnConfiguration, Table transactionTable) {
         try {
             String avroDir = transactionTable.getExtracts().get(0).getPath();
             avroDir = getPath(avroDir);

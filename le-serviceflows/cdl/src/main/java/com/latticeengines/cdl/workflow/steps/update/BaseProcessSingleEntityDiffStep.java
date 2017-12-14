@@ -76,21 +76,8 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         if (redshiftTable == null) {
             throw new RuntimeException("Diff table has not been created.");
         }
-        Map<BusinessEntity, String> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
-                BusinessEntity.class, String.class);
-        if (entityTableMap == null) {
-            entityTableMap = new HashMap<>();
-        }
-        entityTableMap.put(entity, redshiftTableName);
-        putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
-
-        Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,
-                BusinessEntity.class, Boolean.class);
-        if (appendTableMap == null) {
-            appendTableMap = new HashMap<>();
-        }
-        appendTableMap.put(entity, true);
-        putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
+        updateEntityValueMapInContext(entity, TABLE_GOING_TO_REDSHIFT, redshiftTableName, String.class);
+        updateEntityValueMapInContext(entity, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
     }
 
     @Override

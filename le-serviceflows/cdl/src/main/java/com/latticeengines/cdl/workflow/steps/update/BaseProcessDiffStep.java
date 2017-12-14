@@ -3,7 +3,9 @@ package com.latticeengines.cdl.workflow.steps.update;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CONSOLIDATE_RETAIN;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -45,6 +47,15 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
 
     @Override
     protected void onPostTransformationCompleted() {
+    }
+
+    protected <V> void updateEntityValueMapInContext(BusinessEntity entity, String key, V value, Class<V> clz) {
+        Map<BusinessEntity, V> entityValueMap = getMapObjectFromContext(key, BusinessEntity.class, clz);
+        if (entityValueMap == null) {
+            entityValueMap = new HashMap<>();
+        }
+        entityValueMap.put(entity, value);
+        putObjectInContext(key, entityValueMap);
     }
 
     protected void initializeConfiguration() {
