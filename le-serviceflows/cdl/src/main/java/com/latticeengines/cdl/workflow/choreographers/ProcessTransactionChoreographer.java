@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
-import com.latticeengines.cdl.workflow.steps.update.ClonePurchaseHistory;
+import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -21,6 +21,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Choreographer;
+
+import java.util.Arrays;
 
 @Component
 public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
@@ -31,7 +33,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private MergeTransaction mergeTransaction;
 
     @Inject
-    private ClonePurchaseHistory clonePurchaseHistory;
+    private CloneTransaction cloneTransaction;
 
     @Inject
     private UpdateTransactionWorkflow updateTransactionWorkflow;
@@ -43,15 +45,26 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
     @Override
     protected void checkActiveServingStore(AbstractStep<? extends BaseStepConfiguration> step) {
-        TableRoleInCollection servingStore = TableRoleInCollection.CalculatedPurchaseHistory;
         DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
-        String tableName = dataCollectionProxy.getTableName(customerSpace, servingStore, active);
-        hasActiveServingStore = StringUtils.isNotBlank(tableName);
+        hasActiveServingStore = true;
+        for (TableRoleInCollection servingStore: Arrays.asList( //
+                BusinessEntity.Transaction.getServingStore(), //
+                BusinessEntity.PeriodTransaction.getServingStore() //
+        )) {
+            String tableName = dataCollectionProxy.getTableName(customerSpace, servingStore, active);
+            boolean hasServingStore = StringUtils.isNotBlank(tableName);
+            if (hasServingStore) {
+                log.info("Found " + servingStore + " in active version.");
+            } else {
+                log.info("No active " + servingStore);
+            }
+            hasActiveServingStore = hasActiveServingStore && hasServingStore;
+        }
         if (hasActiveServingStore) {
-            log.info("Found " + servingStore + " in active version.");
+            log.info("Found all serving stores in active version.");
         } else {
-            log.info("No active " + servingStore);
+            log.info("Not all serving stores exists in active version.");
         }
         checkActivePeriodStores(step);
         hasActiveServingStore = hasActiveServingStore && hasActivePeriodStores;
@@ -90,7 +103,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
     @Override
     protected AbstractStep cloneStep() {
-        return clonePurchaseHistory;
+        return cloneTransaction;
     }
 
     @Override

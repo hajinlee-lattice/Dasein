@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.ClonePurchaseHistory;
@@ -15,6 +16,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
 
     @Inject
+    private CloneTransaction cloneTransaction;
+
+    @Inject
     private ClonePurchaseHistory clonePurchaseHistory;
 
     @Inject
@@ -23,6 +27,7 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWo
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
+                .next(cloneTransaction)
                 .next(clonePurchaseHistory) //
                 .next(processTransactionDiff) //
                 .build();

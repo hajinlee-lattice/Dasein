@@ -39,7 +39,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
@@ -61,11 +60,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-
-    @Override
-    protected TransformationWorkflowConfiguration executePreTransformation() {
-        throw new UnsupportedOperationException("Update mode is not supported for transaction, because it does not support version isolation.");
-    }
 
     @Override
     protected void initializeConfiguration() {

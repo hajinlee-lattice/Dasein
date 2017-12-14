@@ -136,7 +136,7 @@ public class CheckpointService {
 
     private Map<TableRoleInCollection, String> savedRedshiftTables =  new HashMap<>();
 
-    void setMaintestTenant(Tenant mainTestTenant) {
+    void setMainTestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
     }
 
@@ -226,7 +226,7 @@ public class CheckpointService {
         if (MapUtils.isEmpty(redshiftTablesToClone)) {
             return;
         }
-        int poolSize = Math.max(2, redshiftTablesToClone.size());
+        int poolSize = Math.min(2, redshiftTablesToClone.size());
         ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("redshift-clone", poolSize);
         List<Future<?>> futures = new ArrayList<>();
         redshiftTablesToClone.forEach((src, tgt) -> {
