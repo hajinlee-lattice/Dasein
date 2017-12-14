@@ -6,8 +6,8 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 public interface IngestionInterface {
-    public IngestionProgress ingestInternal(String ingestionName, IngestionRequest ingestionRequest,
+    IngestionProgress ingestInternal(String ingestionName, IngestionRequest ingestionRequest,
             String hdfsPod);
 
-    public List<IngestionProgress> scan(String hdfsPod);
+    List<IngestionProgress> scan(String hdfsPod);
 }
