@@ -29,6 +29,7 @@ public enum ReportPurpose {
      */
     CONSOLIDATE_RECORDS_SUMMARY("ConsolidateRecordsSummary"), //
     PROCESS_ANALYZE_RECORDS_SUMMARY("ProcessAnalyzeRecordsSummary"), //
+    MAINTENANCE_OPERATION_SUMMARY("MaintenanceOperationSummary"),
     /**
      * Generic
      */
