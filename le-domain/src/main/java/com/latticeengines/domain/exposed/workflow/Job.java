@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.workflow;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -36,6 +37,8 @@ public class Job implements HasId<Long>, HasName {
     private LedpCode errorCode;
     private String errorMsg;
     private Integer numDisplayedSteps;
+    private String note;
+    private List<Job> subJobs;
 
     @Override
     @JsonProperty
@@ -209,6 +212,33 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setNumDisplayedSteps(Integer numDisplayedSteps) {
         this.numDisplayedSteps = numDisplayedSteps;
+    }
+
+    @JsonProperty("note")
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    @JsonProperty("note")
+    public String getNote() {
+        return this.note;
+    }
+
+    @JsonProperty("subJobs")
+    public List<Job> getSubJobs() {
+        return this.subJobs;
+    }
+
+    @JsonProperty("subJobs")
+    public void setSubJobs(List<Job> subJobs) {
+        this.subJobs = subJobs;
+    }
+
+    public void addSubJobs(Job job) {
+        if (this.subJobs == null) {
+            this.subJobs = new ArrayList<>();
+        }
+        this.subJobs.add(job);
     }
 
     @Override
