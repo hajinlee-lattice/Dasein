@@ -159,6 +159,12 @@ angular.module('common.datacloud.query.service',[
     this.getContactRestriction = function() {
         return this.contactRestriction;
     };
+
+    // this.setPurchaseHistoryRestriction = function(purchaseRestriction){
+    //     if (purchaseRestriction) {
+    //         this.purchaseRestriction = purchaseRestriction;
+    //     }
+    // }
     this.updateContactRestriction = function(contactRestriction) {
         //contactRestriction = contactRestriction.all;
     };
@@ -212,6 +218,15 @@ angular.module('common.datacloud.query.service',[
                     }
                 }
             });
+
+            // this.setPurchaseHistoryRestriction({
+            //     "restriction": {
+            //         "logicalRestriction": {
+            //             "operator": "AND",
+            //             "restrictions": purchaseRestriction 
+            //         }
+            //     }
+            // });
 
             accountRestrictionsString = JSON.stringify(this.getAccountRestriction());
             contactRestrictionsString = JSON.stringify(this.getContactRestriction());
@@ -366,6 +381,33 @@ angular.module('common.datacloud.query.service',[
         });
     };
 
+    this.addPurchaseHistoryRestriction = function(attribute){
+        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
+        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
+
+        var treeRoot = this.getAddBucketTreeRoot(),
+            restrictions = treeRoot 
+                ? treeRoot.logicalRestriction.restrictions 
+                : this.accountRestriction.restriction.logicalRestriction.restrictions;
+        
+        restrictions.push({
+            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
+        });
+
+        this.setAccountRestriction(this.accountRestriction);
+
+        var self = this;
+        this.GetCountByQuery('accounts').then(function(data){
+            self.setResourceTypeCount('accounts', false, data);
+            self.counts.accounts.loading = false;
+        });
+        this.GetCountByQuery('contacts').then(function(data){
+            self.setResourceTypeCount('contacts', false, data);
+            self.counts.contacts.loading = false;
+        });
+    }
+
+    
     this.findAttributes = function(columnName) {
         var groupKey = null;
         var attributes = [];
@@ -505,6 +547,7 @@ angular.module('common.datacloud.query.service',[
 
     this.generateBucketLabel = function(bkt) {
         switch (bkt.Cmp) {
+            case 'Yes': bkt.Lbl = 'Yes'; break;
             case 'empty': bkt.Lbl = ''; break;
             case 'between': bkt.Lbl = bkt.Vals[0] + ' - ' + bkt.Vals[1]; break;
             case 'IS_NULL': bkt.Lbl = ''; break;
@@ -518,7 +561,7 @@ angular.module('common.datacloud.query.service',[
             case 'GT_AND_LTE': bkt.Lbl = '> ' + bkt.Vals[0] + ' and <= ' + bkt.Vals[1]; break;
             case 'GT_AND_LT': bkt.Lbl = '> ' + bkt.Vals[0] + ' and < ' + bkt.Vals[1]; break;
             default:
-                bkt.Lbl = bkt.Vals[0] ? bkt.Vals[0] : 'empty';
+                bkt.Lbl = (bkt.Vals && bkt.Vals.length>0) ? bkt.Vals[0] : 'empty';
         }
 
         return bkt;
