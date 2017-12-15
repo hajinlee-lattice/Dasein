@@ -111,7 +111,8 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         ratingModel.setCreated(null);
         ratingModel.setIteration(-1);
         ratingModel.setRatingEngine(null);
-        ratingModel.setParentEngine(null);
+       // TODO - yintao to fix this compilation issue
+       // ratingModel.setParentEngine(null);
         return ratingModel;
     }
 
