@@ -87,8 +87,7 @@ public class JobResource {
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedFakeActionIds.toString());
             unfinishedPnAJob.setInputs(unfinishedInputContext);
             DateTime dateTime = new DateTime();
-            dateTime.plusDays(1);
-            unfinishedPnAJob.setStartTimestamp(dateTime.toDate());
+            unfinishedPnAJob.setStartTimestamp(dateTime.plusDays(1).toDate());
 
             existingJobs.add(completedPnAJob);
             existingJobs.add(unfinishedPnAJob);
