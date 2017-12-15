@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 
 import java.util.Map;
@@ -76,7 +75,7 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
-        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numContacts = CONTACT_IMPORT_SIZE_1;
         long numProducts = PRODUCT_IMPORT_SIZE_1;
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
