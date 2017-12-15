@@ -1,8 +1,8 @@
-package com.latticeengines.apps.cdl.service.impl;
+package com.latticeengines.cdl.operationflow.service.impl;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.service.MaintenanceOperationService;
+import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 
 @Component("cleanupByDateRangeService")

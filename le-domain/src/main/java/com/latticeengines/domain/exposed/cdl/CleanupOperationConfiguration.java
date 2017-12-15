@@ -1,8 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -14,18 +12,18 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
         @JsonSubTypes.Type(value = CleanupByUploadConfiguration.class, name = "CleanupByUploadConfiguration") })
 public class CleanupOperationConfiguration extends MaintenanceOperationConfiguration {
 
-    @JsonProperty("entity_list")
-    private List<BusinessEntity> entityList;
+    @JsonProperty("entity")
+    private BusinessEntity entity;
 
     @JsonProperty("cleanup_operation_type")
     private CleanupOperationType cleanupOperationType;
 
-    public List<BusinessEntity> getEntityList() {
-        return entityList;
+    public BusinessEntity getEntity() {
+        return entity;
     }
 
-    public void setEntityList(List<BusinessEntity> entityList) {
-        this.entityList = entityList;
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
     }
 
     public CleanupOperationType getCleanupOperationType() {

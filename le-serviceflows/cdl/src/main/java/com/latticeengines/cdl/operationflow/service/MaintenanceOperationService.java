@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service;
+package com.latticeengines.cdl.operationflow.service;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.OperationExecuteConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
 
@@ -32,6 +33,12 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         public Builder microServiceHostPort(String microServiceHostPort) {
             startMaintenanceConfiguration.setMicroServiceHostPort(microServiceHostPort);
             operationExecuteConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            return this;
+        }
+
+        public Builder maintenanceOperationConfiguration(
+                MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+            operationExecuteConfiguration.setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
             return this;
         }
 
