@@ -55,6 +55,9 @@ public class RatingEngineSummary {
     @JsonProperty("coverage")
     private Map<String, Long> coverage;
 
+    @JsonProperty("activeModelId")
+    private String activeModelId;
+
     public String getId() {
         return this.id;
     }
@@ -165,6 +168,14 @@ public class RatingEngineSummary {
 
     public void setCoverage(Map<String, Long> coverage) {
         this.coverage = coverage;
+    }
+
+    public String getActiveModelId() {
+        return activeModelId;
+    }
+
+    public void setActiveModelId(String activeModelId) {
+        this.activeModelId = activeModelId;
     }
 
     @Override

@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
 @Component("cloneContact")
-public class CloneContact extends BaseCloneEntityStep<ProcessStepConfiguration> {
+public class CloneContact extends BaseCloneEntityStep<ProcessContactStepConfiguration> {
 
     @Override
     protected List<TableRoleInCollection> tablesToClone() {

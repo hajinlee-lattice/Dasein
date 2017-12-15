@@ -29,40 +29,33 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
-@Component("entityProxy")
+@Component("ratingProxy")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class EntityProxy extends MicroserviceRestApiProxy {
+public class RatingProxy extends MicroserviceRestApiProxy {
 
-    private static final Logger log = LoggerFactory.getLogger(EntityProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingProxy.class);
 
     private final CacheManager cacheManager;
 
-    private LocalCacheManager<String, Long> countCache;
-
     private LocalCacheManager<String, DataPage> dataCache;
 
-    private LocalCacheManager<String, Map<String, Long>> ratingCache;
+    private LocalCacheManager<String, Map<String, Long>> coverageCache;
 
     @Inject
-    public EntityProxy(CacheManager cacheManager) {
+    public RatingProxy(CacheManager cacheManager) {
         super("objectapi/customerspaces");
         this.cacheManager = cacheManager;
-        countCache = new LocalCacheManager<>(CacheName.EntityCountCache, o -> {
-            String str = (String) o;
-            String[] tokens = str.split("\\|");
-            return getCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
-        }, 2000); //
 
-        dataCache = new LocalCacheManager<>(CacheName.EntityDataCache, o -> {
+        dataCache = new LocalCacheManager<>(CacheName.RatingDataCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
             return getDataFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
         }, 200); //
 
-        ratingCache = new LocalCacheManager<>(CacheName.EntityRatingCountCache, o -> {
+        coverageCache = new LocalCacheManager<>(CacheName.RatingCoverageCache, o -> {
             String str = (String) o;
             String[] tokens = str.split("\\|");
-            return getRatingCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
+            return getCoverageFromApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
         }, 2000); //
     }
 
@@ -70,39 +63,29 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     public void addCacheManager() {
         if (cacheManager instanceof CompositeCacheManager) {
             log.info("adding local entity cache manager to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(countCache, dataCache, ratingCache));
+            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(dataCache, coverageCache));
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
-    public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
-        frontEndQuery.setPageFilter(null);
-        frontEndQuery.setSort(null);
-        return getCountFromCache(customerSpace, frontEndQuery);
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheName.Constants.RatingDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         DataPage page = getDataFromCache(customerSpace, frontEndQuery);
         return page;
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
-    public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
+    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    public Map<String, Long> getCoverage(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
         if (CollectionUtils.isEmpty(frontEndQuery.getRatingModels()) || frontEndQuery.getRatingModels().size() != 1) {
             throw new UnsupportedOperationException("Rating count api only works with single rating model.");
         }
-
         // normalize rating model to increase cache hit
         RatingModel ratingModel = normalizeRatingModel(frontEndQuery.getRatingModels().get(0));
         frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
-
-        return getRatingCountFromCache(customerSpace, frontEndQuery);
+        return getCoverageFromCache(customerSpace, frontEndQuery);
     }
 
     private RatingModel normalizeRatingModel(RatingModel ratingModel) {
@@ -115,50 +98,34 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return ratingModel;
     }
 
-    private Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
-        frontEndQuery.setPageFilter(null);
-        frontEndQuery.setSort(null);
-        return getCountFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
-    }
-
     private DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         return getDataFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
     }
 
-    private Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    private Map<String, Long> getCoverageFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return getRatingCountFromObjectApi(
+        return getCoverageFromApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
-    }
-
-    private Long getCountFromObjectApi(String serializedKey) {
-        String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
-        String serializedQuery = serializedKey.substring(tenantId.length() + 1);
-        FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        return getCountFromObjectApi(tenantId, frontEndQuery);
-    }
-
-    public Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
-        String url = constructUrl("/{customerSpace}/entity/count", tenantId);
-        return postWithRetries("getCount", url, frontEndQuery, Long.class);
     }
 
     private DataPage getDataFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
+        return getDataFromObjectApi(tenantId, frontEndQuery);
+    }
+
+    public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/entity/data", tenantId);
         return postWithRetries("getData", url, frontEndQuery, DataPage.class);
     }
 
     @SuppressWarnings({ "rawtypes" })
-    private Map<String, Long> getRatingCountFromObjectApi(String serializedKey) {
+    private Map<String, Long> getCoverageFromApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);

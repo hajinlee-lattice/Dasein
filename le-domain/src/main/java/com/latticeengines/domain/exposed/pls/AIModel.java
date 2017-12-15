@@ -15,6 +15,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToOne;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -41,7 +42,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel("Represents AIModel JSON Object")
 public class AIModel extends RatingModel {
 
-	public static final String AI_MODEL_PREFIX = "ai_model";
+	public static final String AI_MODEL_PREFIX = "ai";
     public static final String AI_MODEL_FORMAT = "%s__%s";
     
     @JsonIgnore
@@ -103,7 +104,8 @@ public class AIModel extends RatingModel {
 	}
 
     public static String generateIdStr() {
-        return String.format(AI_MODEL_FORMAT, AI_MODEL_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
+		String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+		return String.format(AI_MODEL_FORMAT, AI_MODEL_PREFIX, uuid);
     }
 
 	public ModelingMethod getModelingMethod() {

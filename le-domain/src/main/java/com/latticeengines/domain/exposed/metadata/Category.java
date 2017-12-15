@@ -27,6 +27,7 @@ public enum Category {
     ACCOUNT_ATTRIBUTES("My Attributes"), //
     CONTACT_ATTRIBUTES("Contact Attributes"), //
     PRODUCT_SPEND("Product Spend Profile"), //
+    RATING("Rating"), //
     DEFAULT("Default");
 
     private final String name;

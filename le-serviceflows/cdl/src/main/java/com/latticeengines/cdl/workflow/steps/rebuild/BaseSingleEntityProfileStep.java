@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.cdl.workflow.steps.ProfileStepBase;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -27,7 +26,6 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     private static final Logger log = LoggerFactory.getLogger(BaseSingleEntityProfileStep.class);
 
-    protected CustomerSpace customerSpace;
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
 
@@ -91,7 +89,8 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
             String masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(),
                     inactive);
             if (StringUtils.isBlank(masterTableName)) {
-                masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(), active);
+                masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(),
+                        active);
                 if (StringUtils.isNotBlank(masterTableName)) {
                     log.info("Found the batch store in active version " + active);
                 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("cdlProxy")
@@ -30,9 +31,9 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId processAnalyze(String customerSpace) {
+    public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze", shortenCustomerSpace(customerSpace));
-        ResponseDocument<String> responseDoc = post("process and analyze", url, null, ResponseDocument.class);
+        ResponseDocument<String> responseDoc = post("process and analyze", url, request, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }

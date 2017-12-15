@@ -38,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -321,7 +322,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     public static String generateIdStr() {
-        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
+        return AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
     }
 
     public RatingModel getActiveModel() {

@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -32,6 +33,9 @@ public class ProcessAnalyzeListener extends LEJobListener {
 
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     private String customerSpace;
 
@@ -53,23 +57,19 @@ public class ProcessAnalyzeListener extends LEJobListener {
             log.info(String.format("Workflow completed. Update datafeed status for customer %s with status of %s",
                     customerSpace, Status.Active.getName()));
             dataFeedProxy.updateDataFeedStatus(customerSpace, Status.Active.getName());
+            cleanupInactiveVersion();
         } else {
             log.warn("Workflow ended in an unknown state.");
         }
     }
 
-    private void swapMissingTableRoles() {
-        DataCollection.Version active = dataCollectionProxy.getActiveVersion(customerSpace);
-        DataCollection.Version inactive = active.complement();
-        for (TableRoleInCollection role: TableRoleInCollection.values()) {
-            String inactiveTableName = dataCollectionProxy.getTableName(customerSpace, role, inactive);
-            if (StringUtils.isBlank(inactiveTableName)) {
-                String activeTableName = dataCollectionProxy.getTableName(customerSpace, role, active);
-                if (StringUtils.isNotBlank(activeTableName)) {
-                    log.info("Swapping table " + activeTableName + " from " + active + " to " + inactive + " as " + role);
-                    dataCollectionProxy.unlinkTable(customerSpace, activeTableName, role, active);
-                    dataCollectionProxy.upsertTable(customerSpace, activeTableName, role, inactive);
-                }
+    private void cleanupInactiveVersion() {
+        DataCollection.Version inactive = dataCollectionProxy.getInactiveVersion(customerSpace);
+        for (TableRoleInCollection role : TableRoleInCollection.values()) {
+            String tableName = dataCollectionProxy.getTableName(customerSpace, role, inactive);
+            if (StringUtils.isNotBlank(tableName)) {
+                log.info("Removing table " + tableName + " as " + role + " in " + inactive);
+                metadataProxy.deleteTable(customerSpace, tableName);
             }
         }
     }

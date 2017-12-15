@@ -48,6 +48,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
@@ -227,8 +228,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     void processAnalyze() {
+        processAnalyze(null);
+    }
+
+    void processAnalyze(ProcessAnalyzeRequest request) {
         logger.info("Start processing and analyzing ...");
-        ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId());
+        ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
         processAnalyzeAppId = appId.toString();
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
                 false);
@@ -727,6 +732,17 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         ratingEngine.setCreatedBy("test@lattice-engines.com");
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        newEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
+
+        Assert.assertNotNull(newEngine);
+        Assert.assertNotNull(newEngine.getActiveModel(), JsonUtils.pprint(newEngine));
 
         String modelId = newEngine.getActiveModel().getId();
         RuleBasedModel model = constructRuleModel(modelId);

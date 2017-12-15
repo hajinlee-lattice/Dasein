@@ -154,7 +154,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void cleanupInactiveVersion() {
-        for (TableRoleInCollection role: TableRoleInCollection.values()) {
+        for (TableRoleInCollection role : TableRoleInCollection.values()) {
             String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactiveVersion);
             if (StringUtils.isNotBlank(tableName)) {
                 log.info("Removing table " + tableName + " as " + role + " in " + inactiveVersion);

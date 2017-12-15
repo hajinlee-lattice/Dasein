@@ -2,11 +2,11 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.choreographers.ProcessAnalyzeChoreographer;
 import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
+import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.process.CloneStatistics;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
@@ -41,6 +41,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ProcessTransactionWorkflow processTransactionWorkflow;
 
     @Inject
+    private ProcessRatingWorkflow processRatingWorkflow;
+
+    @Inject
     private AwsApsGeneratorStep awsApsGeneratorStep;
 
     @Inject
@@ -63,9 +66,10 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processContactWorkflow) //
                 .next(processProductWorkflow) //
                 .next(processTransactionWorkflow) //
+                .next(redshiftPublishWorkflow) //
+                .next(processRatingWorkflow) //
                 .next(combineStatistics) //
                 .next(cloneStatistics) //
-                .next(redshiftPublishWorkflow) //
                 .next(awsApsGeneratorStep) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //

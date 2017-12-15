@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +16,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.ProcessAccountWorkflow;
 import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
+import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
 import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
+import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.process.CloneStatistics;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
+import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 
@@ -45,6 +47,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessTransactionChoreographer transactionChoreographer;
 
     @Inject
+    private ProcessRatingChoreographer ratingChoreographer;
+
+    @Inject
     private ProcessAccountWorkflow accountWorkflow;
 
     @Inject
@@ -55,6 +60,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Inject
     private ProcessTransactionWorkflow transactionWorkflow;
+
+    @Inject
+    private ProcessRatingWorkflow ratingWorkflow;
 
     @Inject
     private AwsApsGeneratorStep awsApsGeneratorStep;
@@ -87,6 +95,8 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = skipCloneStatsStep();
         } else if (inPublishWorkflow(seq)) {
             skip = skipPublishWorkflow(step);
+        } else if (isRatingStep(seq)) {
+            skip = ratingChoreographer.skipStep(step, seq);
         }
         return super.skipStep(step, seq) || skip;
     }
@@ -98,26 +108,32 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         contactChoreographer.linkStepNamespaces(stepNamespaces);
         productChoreographer.linkStepNamespaces(stepNamespaces);
         transactionChoreographer.linkStepNamespaces(stepNamespaces);
+        ratingChoreographer.linkStepNamespaces(stepNamespaces);
     }
 
     private boolean isAccountStep(int seq) {
-        String namespace = getStepNamespace(seq);
-        return namespace.startsWith(accountWorkflow.name());
+        return inWorkflow(seq, accountWorkflow);
     }
 
     private boolean isContactStep(int seq) {
-        String namespace = getStepNamespace(seq);
-        return namespace.startsWith(contactWorkflow.name());
+        return inWorkflow(seq, contactWorkflow);
     }
 
     private boolean isProductStep(int seq) {
-        String namespace = getStepNamespace(seq);
-        return namespace.startsWith(productWorkflow.name());
+        return inWorkflow(seq, productWorkflow);
     }
 
     private boolean isTransactionStep(int seq) {
+        return inWorkflow(seq, transactionWorkflow);
+    }
+
+    private boolean isRatingStep(int seq) {
+        return inWorkflow(seq, ratingWorkflow);
+    }
+
+    private boolean inWorkflow(int seq, AbstractWorkflow workflow) {
         String namespace = getStepNamespace(seq);
-        return namespace.startsWith(transactionWorkflow.name());
+        return namespace.startsWith(workflow.name());
     }
 
     private boolean isCombineStatsStep(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -159,8 +175,12 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     }
 
     private boolean skipApsGeneration() {
-        log.info("Skip APS generation because there is no change in Transaction data.");
-        return !transactionChoreographer.update && !transactionChoreographer.rebuild;
+        boolean skip = false;
+        if (!transactionChoreographer.update && !transactionChoreographer.rebuild) {
+            log.info("Skip APS generation because there is no change in Transaction data.");
+            skip = true;
+        }
+        return skip;
     }
 
 

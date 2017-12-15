@@ -8,6 +8,8 @@ public enum CacheName {
     EntityCountCache(Constants.EntityCountCacheName), //
     EntityDataCache(Constants.EntityDataCacheName), //
     EntityRatingCountCache(Constants.EntityRatingCountCacheName), //
+    RatingDataCache(Constants.RatingDataCacheName), //
+    RatingCoverageCache(Constants.RatingCoverageCacheName), //
     AttrRepoCache(Constants.AttrRepoCacheName), //
     JobsCache(Constants.JobsCacheName), //
     MetadataCache(Constants.MetadataCacheName), //
@@ -39,6 +41,8 @@ public enum CacheName {
         public static final String EntityCountCacheName = "EntityCountCache";
         public static final String EntityDataCacheName = "EntityDataCache";
         public static final String EntityRatingCountCacheName = "EntityRatingCountCache";
+        public static final String RatingDataCacheName = "RatingDataCache";
+        public static final String RatingCoverageCacheName = "RatingCoverageCache";
         public static final String JobsCacheName = "JobsCache";
         public static final String MetadataCacheName = "MetadataCache";
         public static final String SessionCacheName = "SessionCache";

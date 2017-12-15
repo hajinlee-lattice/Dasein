@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -21,7 +22,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 
-public abstract class BaseCloneEntityStep<T extends ProcessStepConfiguration> extends BaseWorkflowStep<T> {
+public abstract class BaseCloneEntityStep<T extends BaseProcessEntityStepConfiguration> extends BaseWorkflowStep<T> {
 
     @Inject
     private RedshiftService redshiftService;

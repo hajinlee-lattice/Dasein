@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -14,8 +13,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatistic
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -32,6 +33,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ProcessContactStepConfiguration processContactStepConfiguration = new ProcessContactStepConfiguration();
         private ProcessProductStepConfiguration processProductStepConfiguration = new ProcessProductStepConfiguration();
         private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
+        private ProcessRatingStepConfiguration processRatingStepConfiguration = new ProcessRatingStepConfiguration();
+        private GenerateRatingWorkflowConfiguration.Builder generateRatingWorfklowConfigurationBuilder = new GenerateRatingWorkflowConfiguration.Builder();
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
@@ -49,7 +52,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactStepConfiguration.setCustomerSpace(customerSpace);
             processProductStepConfiguration.setCustomerSpace(customerSpace);
             processTransactionStepConfiguration.setCustomerSpace(customerSpace);
+            processRatingStepConfiguration.setCustomerSpace(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
+            generateRatingWorfklowConfigurationBuilder.customer(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             return this;
@@ -58,6 +63,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder microServiceHostPort(String microServiceHostPort) {
             processStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
+            generateRatingWorfklowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -68,6 +74,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processProductStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processTransactionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processRatingStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -107,6 +114,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 if (entities.contains(BusinessEntity.Transaction)) {
                     processTransactionStepConfiguration.setRebuild(true);
                 }
+                if (entities.contains(BusinessEntity.Rating)) {
+                    processRatingStepConfiguration.setRebuild(true);
+                }
             }
             return this;
         }
@@ -117,7 +127,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processContactStepConfiguration);
             configuration.add(processProductStepConfiguration);
             configuration.add(processTransactionStepConfiguration);
+            configuration.add(processRatingStepConfiguration);
             configuration.add(combineStatisticsConfiguration);
+            configuration.add(generateRatingWorfklowConfigurationBuilder.build());
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             configuration.add(awsPythonDataConfiguration);
             return configuration;

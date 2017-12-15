@@ -360,6 +360,18 @@ public class AvroUtils {
         return schema;
     }
 
+    public static Schema constructSchema(String tableName, List<Pair<String, Class<?>>> columns) {
+        RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(tableName);
+        FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
+        FieldBuilder<Schema> fieldBuilder;
+        for (Pair<String, Class<?>> pair : columns) {
+            fieldBuilder = fieldAssembler.name(pair.getLeft());
+            Type type = getAvroType(pair.getRight());
+            fieldAssembler = constructFieldWithType(fieldAssembler, fieldBuilder, type);
+        }
+        return fieldAssembler.endRecord();
+    }
+
     public static Schema constructSchemaWithProperties(String tableName, Map<String, Class<?>> classMap,
             Map<String, Map<String, String>> propertyMap) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(tableName);

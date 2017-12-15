@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -28,7 +29,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel("Represents RuleBasedModel JSON Object")
 public class RuleBasedModel extends RatingModel {
 
-    public static final String RULE_BASED_MODEL_PREFIX = "rule_based_model";
+    public static final String RULE_BASED_MODEL_PREFIX = "rule";
     public static final String RULE_BASED_MODEL_FORMAT = "%s__%s";
 
     public RuleBasedModel() {
@@ -76,6 +77,7 @@ public class RuleBasedModel extends RatingModel {
     }
 
     public static String generateIdStr() {
-    	    return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
+    	    String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+    	    return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX, uuid);
     }
 }
