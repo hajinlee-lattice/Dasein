@@ -117,7 +117,6 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
             redshiftService.replaceTable(stagingTableName, tableName);
             Long countAfter = redshiftService.countTable(tableName);
             log.info("Created a table with " + countAfter + " rows: " + tableName);
-            redshiftService.dropTable(stagingTableName);
         } else {
             redshiftService.loadTableFromAvroInS3(tableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),
                     redshiftTableConfig.getJsonPathPrefix());
