@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,6 +86,9 @@ public class JobResource {
             unfinishedFakeActionIds.add(106L);
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedFakeActionIds.toString());
             unfinishedPnAJob.setInputs(unfinishedInputContext);
+            DateTime dateTime = new DateTime();
+            dateTime.plusDays(1);
+            unfinishedPnAJob.setStartTimestamp(dateTime.toDate());
 
             existingJobs.add(completedPnAJob);
             existingJobs.add(unfinishedPnAJob);
