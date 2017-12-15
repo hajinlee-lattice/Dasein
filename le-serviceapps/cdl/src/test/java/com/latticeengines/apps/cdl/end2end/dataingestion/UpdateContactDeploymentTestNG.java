@@ -7,14 +7,19 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
@@ -23,11 +28,16 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     static final String CHECK_POINT = "update2";
 
+    private RatingEngine ratingEngine;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
+
+        createTestSegment2();
+        ratingEngine = createRuleBasedRatingEngine();
 
         importData();
         processAnalyze();
@@ -62,6 +72,18 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+
+        Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
+                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
+                BusinessEntity.Product, numProducts);
+        verifyTestSegment2Counts(segment2Counts);
+        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RuleBucketName.A, RATING_A_COUNT_2, //
+                RuleBucketName.D, RATING_D_COUNT_2, //
+                RuleBucketName.F, RATING_F_COUNT_2
+        );
+        verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
 }

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.ProfileAndPublishListener;
-import com.latticeengines.cdl.workflow.steps.AwsApsGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.FinishProfile;
 import com.latticeengines.cdl.workflow.steps.StartProfile;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;

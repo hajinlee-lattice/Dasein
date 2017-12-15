@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.steps;
+package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +27,10 @@ import com.latticeengines.workflow.core.BaseAwsPythonBatchStep;
 @Component("awsApsGeneratorStep")
 public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchConfiguration> {
 
+    private static final Logger log = LoggerFactory.getLogger(AwsApsGeneratorStep.class);
     private static final String APS = TableRoleInCollection.AnalyticPurchaseState.name();
 
-    @Value("${cdl.aps.generate.enabled:false}")
+    @Value("${cdl.aps.generate.enabled}")
     private boolean apsEnabled;
 
     @Autowired
@@ -41,10 +42,12 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     @Autowired
     private Configuration yarnConfiguration;
 
-    private static final Logger log = LoggerFactory.getLogger(AwsApsGeneratorStep.class);
+    private DataCollection.Version active;
+    private DataCollection.Version inactive;
+
 
     @Override
-    protected String getAcondaEnv() {
+    protected String getCondaEnv() {
         return "v01";
     }
 
@@ -55,8 +58,10 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
 
     @Override
     protected void setupConfig(AWSPythonBatchConfiguration config) {
+        active = dataCollectionProxy.getActiveVersion(config.getCustomerSpace().toString());
+        inactive = active.complement();
         Table periodTable = dataCollectionProxy.getTable(config.getCustomerSpace().toString(),
-                TableRoleInCollection.AggregatedPeriodTransaction);
+                TableRoleInCollection.AggregatedPeriodTransaction, inactive);
         if (!apsEnabled || periodTable == null) {
             log.warn("Aps generation is disabled or there's not metadata table for period aggregated table!");
             return;
@@ -101,7 +106,6 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
                 Table apsTable = MetaDataTableUtils.createTable(yarnConfiguration, tableName, hdfsPath);
                 apsTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
                 metadataProxy.updateTable(customerSpace, tableName, apsTable);
-                DataCollection.Version inactive = dataCollectionProxy.getInactiveVersion(customerSpace);
                 dataCollectionProxy.upsertTable(customerSpace, tableName, TableRoleInCollection.AnalyticPurchaseState,
                         inactive);
             } else {

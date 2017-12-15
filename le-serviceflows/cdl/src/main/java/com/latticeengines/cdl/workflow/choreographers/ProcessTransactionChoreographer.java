@@ -41,6 +41,12 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Inject
     private RebuildTransactionWorkflow rebuildTransactionWorkflow;
 
+    @Inject
+    private ProcessAccountChoreographer accountChoreographer;
+
+    @Inject
+    private ProcessProductChoreographer productChoreographer;
+
     private boolean hasActivePeriodStores = false;
 
     @Override
@@ -119,6 +125,22 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected BusinessEntity mainEntity() {
         return BusinessEntity.Transaction;
+    }
+
+    @Override
+    protected boolean shouldRebuild() {
+        boolean should = super.shouldRebuild();
+        if (!should) {
+            if (accountChoreographer.update || accountChoreographer.rebuild) {
+                log.info("Need to rebuild " + mainEntity() + " due to Account changes.");
+                return true;
+            }
+            if (productChoreographer.update || productChoreographer.rebuild) {
+                log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
+                return true;
+            }
+        }
+        return should;
     }
 
 }

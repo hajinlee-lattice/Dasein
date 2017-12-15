@@ -83,7 +83,7 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         Map<String, String> envs = new HashMap<>();
         config.setRunInAws(false);
         envs.put(WorkflowProperty.STEPFLOWCONFIG, config.toString());
-        envs.put("CONDA_ENV", getAcondaEnv());
+        envs.put("CONDA_ENV", getCondaEnv());
         envs.put("PYTHON_APP", getPythonScript());
          envs.put("SHDP_HD_FSWEB", webHdfs);
         // envs.put("SHDP_HD_FSWEB",
@@ -93,7 +93,7 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         return jobRequest;
     }
 
-    protected abstract String getAcondaEnv();
+    protected abstract String getCondaEnv();
 
     protected abstract String getPythonScript();
 

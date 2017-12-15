@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessTransactionWorkflow transactionWorkflow;
 
     @Inject
+    private AwsApsGeneratorStep awsApsGeneratorStep;
+
+    @Inject
     private CombineStatistics combineStatistics;
 
     @Inject
@@ -75,6 +79,8 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = productChoreographer.skipStep(step, seq);
         } else if (isTransactionStep(seq)) {
             skip = transactionChoreographer.skipStep(step, seq);
+        } else if (isApsGenerationStep(step)) {
+            skip = skipApsGeneration();
         } else if (isCombineStatsStep(step)) {
             skip = skipCombineStatsStep();
         } else if (isCloneStatsStep(step)) {
@@ -115,11 +121,11 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     }
 
     private boolean isCombineStatsStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().endsWith(combineStatistics.name());
+        return step.name().equals(combineStatistics.name());
     }
 
     private boolean isCloneStatsStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().endsWith(cloneStatistics.name());
+        return step.name().equals(cloneStatistics.name());
     }
 
     private boolean skipCombineStatsStep() {
@@ -147,5 +153,15 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
                 BusinessEntity.class, String.class);
         return MapUtils.isEmpty(entityTableNames);
     }
+
+    private boolean isApsGenerationStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().equals(awsApsGeneratorStep.name());
+    }
+
+    private boolean skipApsGeneration() {
+        log.info("Skip APS generation because there is no change in Transaction data.");
+        return !transactionChoreographer.update && !transactionChoreographer.rebuild;
+    }
+
 
 }

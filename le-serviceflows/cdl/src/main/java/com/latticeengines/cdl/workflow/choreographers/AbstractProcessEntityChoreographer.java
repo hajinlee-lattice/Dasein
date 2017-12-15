@@ -37,8 +37,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private boolean hasSchemaChange = false;
     protected boolean hasActiveServingStore = false;
 
-    private boolean rebuild = false;
-    private boolean update = false;
+    boolean rebuild = false;
+    boolean update = false;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -151,7 +151,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return hasImports;
     }
 
-    private boolean shouldRebuild() {
+    protected boolean shouldRebuild() {
         if (enforceRebuild) {
             log.info("Enforced to rebuild " + mainEntity());
             return true;

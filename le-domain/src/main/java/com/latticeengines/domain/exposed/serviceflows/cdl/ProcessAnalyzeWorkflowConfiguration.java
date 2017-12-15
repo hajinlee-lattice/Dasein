@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -33,6 +34,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
+        private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
@@ -49,12 +51,14 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionStepConfiguration.setCustomerSpace(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
+            awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             processStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
+            awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -65,6 +69,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processProductStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processTransactionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -114,6 +119,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processTransactionStepConfiguration);
             configuration.add(combineStatisticsConfiguration);
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
+            configuration.add(awsPythonDataConfiguration);
             return configuration;
         }
     }

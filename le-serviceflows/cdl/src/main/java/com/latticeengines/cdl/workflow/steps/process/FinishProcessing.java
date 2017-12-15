@@ -36,7 +36,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     @Override
     public void execute() {
-        customerSpace = CustomerSpace.parse(getObjectFromContext(CUSTOMER_SPACE, String.class));
+        customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
