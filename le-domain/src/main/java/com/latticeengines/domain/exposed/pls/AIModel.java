@@ -43,7 +43,7 @@ import io.swagger.annotations.ApiModel;
 public class AIModel extends RatingModel {
 
 	public static final String AI_MODEL_PREFIX = "ai";
-    public static final String AI_MODEL_FORMAT = "%s__%s";
+    public static final String AI_MODEL_FORMAT = "%s_%s";
     
     @JsonIgnore
     @Column(name = "TARGET_PRODUCTS", length=10000)

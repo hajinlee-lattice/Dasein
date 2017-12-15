@@ -30,7 +30,7 @@ import io.swagger.annotations.ApiModel;
 public class RuleBasedModel extends RatingModel {
 
     public static final String RULE_BASED_MODEL_PREFIX = "rule";
-    public static final String RULE_BASED_MODEL_FORMAT = "%s__%s";
+    public static final String RULE_BASED_MODEL_FORMAT = "%s_%s";
 
     public RuleBasedModel() {
     }
