@@ -130,7 +130,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
-        if (!should) {
+        if (!should && hasActivePeriodStores) {
             if (accountChoreographer.update || accountChoreographer.rebuild) {
                 log.info("Need to rebuild " + mainEntity() + " due to Account changes.");
                 return true;
