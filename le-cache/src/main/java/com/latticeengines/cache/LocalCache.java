@@ -153,12 +153,8 @@ public class LocalCache<K, V> implements Cache {
                 }
             }
         });
-        log.info(getName() + ": updateSignal=" + updateSignal);
         log.info(String.format("Local cache %s received %s %s signal for %s, resolved to %d keys.", getName(),
                 opStr, mode, keyPattern, keysToReturn.size()));
-        if (keysToReturn.size() == 0) {
-            existingKeys.forEach(k -> log.info(getName() + ": " + k.toString()));
-        }
         return keysToReturn;
     }
 
