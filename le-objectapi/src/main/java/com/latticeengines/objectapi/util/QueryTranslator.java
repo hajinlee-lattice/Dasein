@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ public class QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
 
     public static final int MAX_ROWS = 250;
+    private static final int MAX_CARDINALITY = 20000;
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
     private QueryFactory queryFactory;
@@ -139,16 +141,6 @@ public class QueryTranslator {
             restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction, ruleBasedModels, //
                                                     queryBuilder, false);
             restriction = addHasTransactionRestriction(frontEndQuery, restriction);
-
-            if (frontEndQuery.getPageFilter() == null) {
-                frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
-            } else {
-                if (frontEndQuery.getPageFilter().getNumRows() > MAX_ROWS) {
-                    log.warn(String.format("Refusing to accept a query requesting more than %s rows."
-                            + " Currently specified page filter: %s", MAX_ROWS, frontEndQuery.getPageFilter()));
-                    frontEndQuery.getPageFilter().setNumRows(MAX_ROWS);
-                }
-            }
         }
 
         queryBuilder.from(mainEntity).where(restriction) //
@@ -174,6 +166,20 @@ public class QueryTranslator {
             }
             queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
                     decorator.getFreeTextSearchAttrs());
+        }
+
+        if (!BusinessEntity.Product.equals(mainEntity)) {
+            if (frontEndQuery.getPageFilter() == null) {
+                frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
+            } else {
+                int rowSize = CollectionUtils.isNotEmpty(frontEndQuery.getLookups()) ? frontEndQuery.getLookups().size() : 1;
+                int maxRows = Math.floorDiv(MAX_CARDINALITY, rowSize);
+                if (frontEndQuery.getPageFilter().getNumRows() > maxRows) {
+                    log.warn(String.format("Refusing to accept a query requesting more than %s rows."
+                            + " Currently specified page filter: %s", maxRows, frontEndQuery.getPageFilter()));
+                    frontEndQuery.getPageFilter().setNumRows(maxRows);
+                }
+            }
         }
 
         return queryBuilder.build();

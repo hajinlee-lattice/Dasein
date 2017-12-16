@@ -36,8 +36,10 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
 
-        createTestSegment2();
-        ratingEngine = createRuleBasedRatingEngine();
+        new Thread(() -> {
+            createTestSegment2();
+            ratingEngine = createRuleBasedRatingEngine();
+        }).start();
 
         importData();
         processAnalyze();

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -80,13 +81,15 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     private void deleteOrphanTables() {
         Map<BusinessEntity, String> entityTableNames = getMapObjectFromContext(SERVING_STORE_IN_STATS,
                 BusinessEntity.class, String.class);
-        entityTableNames.forEach((entity, tableName) -> {
-            String servingStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive);
-            if (StringUtils.isBlank(servingStoreName)) {
-                log.info("Removing orphan table " + tableName);
-                metadataProxy.deleteTable(customerSpace.toString(), tableName);
-            }
-        });
+        if (MapUtils.isNotEmpty(entityTableNames)) {
+            entityTableNames.forEach((entity, tableName) -> {
+                String servingStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive);
+                if (StringUtils.isBlank(servingStoreName)) {
+                    log.info("Removing orphan table " + tableName);
+                    metadataProxy.deleteTable(customerSpace.toString(), tableName);
+                }
+            });
+        }
     }
 
 }

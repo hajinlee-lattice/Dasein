@@ -172,7 +172,7 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
 
     private class RedshiftIngest implements Callable<RatingModel> {
 
-        private final int PAGE_SIZE = 250;
+        private final int PAGE_SIZE = 10000;
         private final RatingModel ratingModel;
         private final RatingEngineSummary engineSummary;
         private final RatingEngineType engineType;
@@ -198,11 +198,10 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
 
         private void ingestPageByPage() {
             boolean firstPage = true;
-            long offset = 0;
             FrontEndQuery frontEndQuery = dataQuery();
             List<Map<String, Object>> data;
             do {
-                frontEndQuery.setPageFilter(new PageFilter(offset, PAGE_SIZE));
+                frontEndQuery.setPageFilter(new PageFilter(ingestedCount, PAGE_SIZE));
                 DataPage dataPage = ratingProxy.getDataFromObjectApi(customerSpace.getTenantId(), frontEndQuery);
                 data = dataPage.getData();
                 if (CollectionUtils.isNotEmpty(data)) {
@@ -236,7 +235,6 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
                     log.info(String.format("Ingested %d / %d records for rating model %s", ingestedCount, totalCount,
                             ratingModel.getId()));
                 }
-                offset += PAGE_SIZE;
             } while (CollectionUtils.isNotEmpty(data));
         }
 

@@ -64,7 +64,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         segment.setDataCollection(dataCollection);
         segment.setName("Segment_" + UUID.randomUUID().toString().replace("-", ""));
         segment.setDisplayName("Customer Universe");
-        segment.setDescription("Master segment of the collection " + dataCollection.getName());
+        segment.setDescription("Master segment of the data collection.");
         segment.setUpdated(new Date());
         segment.setCreated(new Date());
         segment.setMasterSegment(true);

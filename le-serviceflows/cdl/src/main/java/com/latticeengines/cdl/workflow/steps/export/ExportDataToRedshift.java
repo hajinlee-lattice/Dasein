@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,9 +192,18 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             if (createNew) {
                 log.info("Renaming table " + table.getName() + " to " + goodName);
                 metadataProxy.updateTable(customerSpace, goodName, table);
+                updateEntityValueMapInContext(entity, SERVING_STORE_IN_STATS, goodName, String.class);
                 table.setName(goodName);
             }
             return goodName;
+        }
+
+        private  <V> void updateEntityValueMapInContext(BusinessEntity entity, String key, V value, Class<V> clz) {
+            Map<BusinessEntity, V> entityValueMap = getMapObjectFromContext(key, BusinessEntity.class, clz);
+            if (MapUtils.isNotEmpty(entityValueMap) && entityValueMap.containsKey(entity)) {
+                entityValueMap.put(entity, value);
+                putObjectInContext(key, entityValueMap);
+            }
         }
 
         private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,

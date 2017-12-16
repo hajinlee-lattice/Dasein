@@ -12,7 +12,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
@@ -57,21 +56,18 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
 
     @Override
     protected void onPostTransformationCompleted() {
-        String ratingTableName = TableUtils.getFullTableName(ratingTablePrefix, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
 
         Table servingStoreTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                ratingTableName);
+                masterTableName);
         enrichTableSchema(servingStoreTable);
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), ratingTableName, servingStoreTable);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), masterTableName, servingStoreTable);
 
 //        updateEntityValueMapInContext(BusinessEntity.Rating, TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
 //        updateEntityValueMapInContext(BusinessEntity.Rating, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
 
-        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, ratingTableName, String.class);
+        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, masterTableName, String.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
-
-        metadataProxy.deleteTable(customerSpace.toString(), masterTableName);
     }
 
     @Override
@@ -88,17 +84,13 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         int profileStep = 0;
         int bucketStep = 1;
 
-        String sortKey = InterfaceName.AccountId.name();
-
         TransformationStepConfig profile = profile(masterTableName);
         TransformationStepConfig bucket = bucket(profileStep, masterTableName);
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, null);
-        TransformationStepConfig sort = sort(bucketStep, ratingTablePrefix, sortKey, 200);
 
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
-        steps.add(sort);
 
         request.setSteps(steps);
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());

@@ -2,6 +2,9 @@ package com.latticeengines.pls.controller.datacollection;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
@@ -30,22 +35,28 @@ public class EntityResource extends BaseFrontEndEntityResource {
 
     private static final Logger log = LoggerFactory.getLogger(EntityResource.class);
 
+    private ExecutorService executorService = //
+            ThreadPoolUtils.getFixedSizeThreadPool("entity-count", BusinessEntity.COUNT_ENTITIES.size());
+
     @Inject
     public EntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
         super(entityProxy, segmentProxy);
+
     }
 
     @RequestMapping(value = "/counts", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Map<BusinessEntity, Long> getCounts(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
+        Map<BusinessEntity, Future<Long>> futures = new HashMap<>();
+        for (BusinessEntity entity: BusinessEntity.COUNT_ENTITIES) {
+            futures.put(entity, executorService.submit(new CountFetcher(entity, frontEndQuery)));
+        }
         Map<BusinessEntity, Long> counts = new HashMap<>();
         for (BusinessEntity entity: BusinessEntity.COUNT_ENTITIES) {
             try {
-                Long count = getCount(frontEndQuery, entity);
-                if (count != null) {
-                    counts.put(entity, count);
-                }
+                Long count = futures.get(entity).get();
+                counts.put(entity, count);
             } catch (Exception e) {
                 log.warn("Failed to get count of " + entity + ": " + e.getMessage());
             }
@@ -56,6 +67,35 @@ public class EntityResource extends BaseFrontEndEntityResource {
     @Override
     BusinessEntity getMainEntity() {
         return null;
+    }
+
+    private class CountFetcher implements Callable<Long> {
+
+        private final BusinessEntity entity;
+        private final FrontEndQuery frontEndQuery;
+
+        CountFetcher(BusinessEntity entity, FrontEndQuery frontEndQuery) {
+            this.entity = entity;
+            this.frontEndQuery = JsonUtils.deserialize(JsonUtils.serialize(frontEndQuery), FrontEndQuery.class);
+        }
+
+        @Override
+        public Long call() {
+            try {
+                if (BusinessEntity.Product.equals(entity)) {
+                    frontEndQuery.setAccountRestriction(null);
+                    frontEndQuery.setContactRestriction(null);
+                }
+                Long count = getCount(frontEndQuery, entity);
+                if (count != null) {
+                    return count;
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get count of " + entity + ": " + e.getMessage());
+            }
+            return 0L;
+        }
+
     }
 
 }

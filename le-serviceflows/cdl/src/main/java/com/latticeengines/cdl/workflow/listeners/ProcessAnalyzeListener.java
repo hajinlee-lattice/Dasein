@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
@@ -66,12 +67,26 @@ public class ProcessAnalyzeListener extends LEJobListener {
     private void cleanupInactiveVersion() {
         DataCollection.Version inactive = dataCollectionProxy.getInactiveVersion(customerSpace);
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
-            String tableName = dataCollectionProxy.getTableName(customerSpace, role, inactive);
-            if (StringUtils.isNotBlank(tableName)) {
-                log.info("Removing table " + tableName + " as " + role + " in " + inactive);
-                metadataProxy.deleteTable(customerSpace, tableName);
+            if (!isServingStore(role)) {
+                String tableName = dataCollectionProxy.getTableName(customerSpace, role, inactive);
+                if (StringUtils.isNotBlank(tableName)) {
+                    log.info("Removing table " + tableName + " as " + role + " in " + inactive);
+                    metadataProxy.deleteTable(customerSpace, tableName);
+                }
             }
         }
+    }
+
+    private boolean isServingStore(TableRoleInCollection role) {
+        if (TableRoleInCollection.AnalyticPurchaseState.equals(role)) {
+            return true;
+        }
+        for (BusinessEntity entity: BusinessEntity.values()) {
+            if (role.equals(entity.getServingStore())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,11 +83,14 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        if (Boolean.TRUE.equals(segment.getMasterSegment())) {
+            throw new UnsupportedOperationException("Cannot change master segment.");
+        }
         updateEntityCounts(segment);
         translateForBackend(segment);
         MetadataSegment updatedSegment = translateForFrontend(
                 segmentProxy.createOrUpdateSegment(customerSpace, segment));
-        updateRatingEngineCounts(updatedSegment.getName());
+        updateRatingEngineCounts(customerSpace, updatedSegment.getName());
         return updatedSegment;
     }
 
@@ -126,6 +130,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 accountFrontEndRestriction.setRestriction(accountRestriction);
                 segment.setAccountFrontEndRestriction(accountFrontEndRestriction);
                 segment.setAccountRestriction(null);
+            } else {
+                segment.setAccountFrontEndRestriction(emptyFrontEndRestriction());
             }
             Restriction contactRestriction = segment.getContactRestriction();
             if (contactRestriction != null) {
@@ -134,7 +140,6 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 segment.setContactFrontEndRestriction(contactFrontEndRestriction);
                 segment.setContactRestriction(null);
             }
-
             if (Boolean.FALSE.equals(segment.getMasterSegment())) {
                 segment.setMasterSegment(null);
             }
@@ -142,7 +147,13 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             log.error("Encountered error translating backend restriction for segment with name  " + segment.getName(),
                     e);
         }
+
         return segment;
+    }
+
+    private FrontEndRestriction emptyFrontEndRestriction() {
+        Restriction restriction = Restriction.builder().and(Collections.emptyList()).build();
+        return new FrontEndRestriction(restriction);
     }
 
     private void updateEntityCounts(MetadataSegment segment) {
@@ -189,8 +200,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         return entityProxy.getCount(customerSpace, frontEndQuery);
     }
 
-    private void updateRatingEngineCounts(String segmentName) {
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+    private void updateRatingEngineCounts(String customerSpace, String segmentName) {
         List<String> engineIds = ratingEngineProxy.getRatingEngineIdsInSegment(customerSpace, segmentName);
         if (CollectionUtils.isNotEmpty(engineIds)) {
             log.info("There are " + engineIds.size() + " rating engines to update counts: "

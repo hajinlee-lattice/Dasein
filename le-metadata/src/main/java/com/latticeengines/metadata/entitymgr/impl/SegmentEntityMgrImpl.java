@@ -52,8 +52,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<MetadataSegment> findAll() {
-        return super.findAll().stream()
-                .filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment()))
+        return super.findAll().stream().filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment()))
                 .collect(Collectors.toList());
     }
 
@@ -72,11 +71,16 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
             DataCollection defaultCollection = dataCollectionEntityMgr.getOrCreateDefaultCollection();
             segment.setDataCollection(defaultCollection);
         }
+        MetadataSegment master = findMasterSegment(segment.getDataCollection().getName());
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
-            MetadataSegment master = findMasterSegment(segment.getDataCollection().getName());
             if (master != null && !master.getName().equals(segment.getName())) {
                 // master exists and not the incoming one
                 segment.setMasterSegment(false);
+            }
+        } else {
+            if (master != null && master.getName().equals(segment.getName())) {
+                throw new IllegalArgumentException(
+                        "Segment " + segment.getName() + " is the master segment, cannot change it to non-master.");
             }
         }
         if (StringUtils.isBlank(segment.getName())) {

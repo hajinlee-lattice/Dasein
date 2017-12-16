@@ -164,9 +164,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     private void evictAttrRepoCache(String customerSpace) {
         if (attrRepoCache != null) {
-            String pattern = shortenCustomerSpace(customerSpace);
-            log.info("Refreshing attr repo cache for pattern " + pattern);
-            attrRepoCache.getCache(CacheName.AttrRepoCache.name()).evict(pattern);
+            String key = shortenCustomerSpace(customerSpace);
+            log.info("Refreshing attr repo cache for key " + key);
+            AttributeRepository attrRepo = getAttrRepoViaRestCall(customerSpace);
+            attrRepoCache.getCache(CacheName.AttrRepoCache.name()).put(key, attrRepo);
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
