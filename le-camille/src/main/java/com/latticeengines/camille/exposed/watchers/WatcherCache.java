@@ -137,7 +137,7 @@ public class WatcherCache<K, V> {
     private void refresh(String watchedData) {
         if (cache != null) {
             long startTime = System.currentTimeMillis();
-            log.info("Start refreshing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
+            log.info("Received a signal " + String.valueOf(watchedData));
             Collection<K> keysToEvict = new ArrayList<>(evictKeyResolver.apply(watchedData, cache.asMap().keySet()));
             if (!keysToEvict.isEmpty()) {
                 log.info("Going to evict " + keysToEvict.size() + " keys.");
@@ -157,6 +157,9 @@ public class WatcherCache<K, V> {
     }
 
     public synchronized void put(K key, V value) {
+        if (cache == null) {
+            initialize();
+        }
         cache.put(key, value);
     }
 

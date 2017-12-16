@@ -47,9 +47,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     @SuppressWarnings("unchecked")
     public AttributeRepository getAttrRepo(String customerSpace) {
-        if (attrRepoCache == null) {
-            initializeAttrRepoCache();
-        }
+        initializeAttrRepoCache();
         String key = shortenCustomerSpace(customerSpace);
         return attrRepoCache.getWatcherCache().get(key);
     }
@@ -155,24 +153,24 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     @SuppressWarnings("unchecked")
     private void initializeAttrRepoCache() {
-        attrRepoCache = new LocalCacheManager<>( //
-                CacheName.AttrRepoCache, //
-                this::getAttrRepoViaRestCall, //
-                100); //
-        log.info("Initialized loading cache attrRepoCache.");
+        if (attrRepoCache == null) {
+            attrRepoCache = new LocalCacheManager<>( //
+                    CacheName.AttrRepoCache, //
+                    this::getAttrRepoViaRestCall, //
+                    100); //
+            log.info("Initialized loading cache attrRepoCache.");
+        }
     }
 
     private void evictAttrRepoCache(String customerSpace) {
-        if (attrRepoCache != null) {
-            String key = shortenCustomerSpace(customerSpace);
-            log.info("Refreshing attr repo cache for key " + key);
-            AttributeRepository attrRepo = getAttrRepoViaRestCall(customerSpace);
-            attrRepoCache.getCache(CacheName.AttrRepoCache.name()).put(key, attrRepo);
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                log.warn("Thread sleep interrupted.", e);
-            }
+        initializeAttrRepoCache();
+        String key = shortenCustomerSpace(customerSpace);
+        log.info("Evicting attr repo cache for key " + key);
+        attrRepoCache.getCache(CacheName.AttrRepoCache.name()).evict(key);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.warn("Thread sleep interrupted.", e);
         }
     }
 

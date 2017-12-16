@@ -133,24 +133,32 @@ public class LocalCache<K, V> implements Cache {
 
     public List<K> getDefaultKeyResolver(String updateSignal, Set<K> existingKeys, CacheOperation expectedOp) {
         String[] tokens = updateSignal.split("\\|");
-        String opStr = tokens[0];
+        String timestamp = tokens[0];
+        String opStr = tokens[1];
+        String mode = tokens[2];
         CacheOperation op = CacheOperation.valueOf(opStr);
         if (op != expectedOp) {
             return Collections.emptyList();
         }
+        final String keyPattern = updateSignal.replace(String.format("%s|%s|%s|", timestamp, opStr, mode), "");
         List<K> keysToReturn = new ArrayList<>();
         existingKeys.forEach(key -> {
-            String cacheKey = tokens[2];
-            if (tokens[1].equals("key")) {
-                if (key.toString().equals(cacheKey)) {
+            if (mode.equals("key")) {
+                if (key.toString().equals(keyPattern)) {
                     keysToReturn.add(key);
                 }
-            } else if (tokens[1].equals("all")) {
-                if (key.toString().startsWith(cacheKey)) {
+            } else if (mode.equals("all")) {
+                if (key.toString().startsWith(keyPattern)) {
                     keysToReturn.add(key);
                 }
             }
         });
+        log.info(getName() + ": updateSignal=" + updateSignal);
+        log.info(String.format("Local cache %s received %s %s signal for %s, resolved to %d keys.", getName(),
+                opStr, mode, keyPattern, keysToReturn.size()));
+        if (keysToReturn.size() == 0) {
+            existingKeys.forEach(k -> log.info(getName() + ": " + k.toString()));
+        }
         return keysToReturn;
     }
 

@@ -31,7 +31,7 @@ public enum CacheName {
 
     public static CacheName[] getCdlProfileCacheGroup() {
         return new CacheName[] { DataLakeStatsCache, DataLakeCMCache, EntityCountCache, EntityDataCache,
-                EntityRatingCountCache };
+                EntityRatingCountCache, RatingDataCache, RatingCoverageCache };
     }
 
     public static class Constants {
