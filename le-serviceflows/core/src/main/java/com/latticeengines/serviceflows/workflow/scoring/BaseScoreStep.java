@@ -65,8 +65,8 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
                 if (HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
                     HdfsUtils.copyFiles(yarnConfiguration, importErrorPath, targetDir);
 
-                    saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(), targetDir
-                            + "/error.csv");
+                    saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(),
+                            targetDir + "/error.csv");
                 }
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
@@ -116,9 +116,8 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
 
     private String getUniqueKeyColumn() {
         String uniqueKeyColumn = getStringValueFromContext(SCORING_UNIQUEKEY_COLUMN);
-        if (uniqueKeyColumn == null) {
+        if (StringUtils.isNotEmpty(configuration.getUniqueKeyColumn()))
             uniqueKeyColumn = configuration.getUniqueKeyColumn();
-        }
         return uniqueKeyColumn;
     }
 }

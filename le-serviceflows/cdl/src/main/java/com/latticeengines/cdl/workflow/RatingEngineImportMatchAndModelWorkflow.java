@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
+import com.latticeengines.cdl.workflow.steps.SetCdlConfigurationForScoring;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
-import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -32,7 +32,10 @@ public class RatingEngineImportMatchAndModelWorkflow
     private CdlModelWorkflow modelWorkflow;
 
     @Autowired
-    private ExportData exportData;
+    private SetCdlConfigurationForScoring setCdlConfigurationForScoring;
+
+    @Autowired
+    private CdlScoreWorkflow scoreWorkflow;
 
     @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
@@ -49,7 +52,8 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow) //
                 .next(modelWorkflow) //
-                .next(exportData) //
+                .next(setCdlConfigurationForScoring) //
+                .next(scoreWorkflow) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

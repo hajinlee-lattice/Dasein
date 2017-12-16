@@ -10,6 +10,9 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     private FrontEndQuery trainFilterQuery;
 
     @JsonProperty
+    private FrontEndQuery eventFilterQuery;
+
+    @JsonProperty
     private FrontEndQuery targetFilterQuery;
 
     @JsonProperty
@@ -17,6 +20,9 @@ public class RatingEngineModelingParameters extends ModelingParameters {
 
     @JsonProperty
     private String trainFilterTableName;
+
+    @JsonProperty
+    private String eventFilterTableName;
 
     @JsonProperty
     private String targetFilterTableName;
@@ -37,6 +43,14 @@ public class RatingEngineModelingParameters extends ModelingParameters {
         this.trainFilterTableName = trainFilterTableName;
     }
 
+    public String getEventFilterTableName() {
+        return eventFilterTableName;
+    }
+
+    public void setEventFilterTableName(String eventFilterTableName) {
+        this.eventFilterTableName = eventFilterTableName;
+    }
+
     public String getTargetFilterTableName() {
         return targetFilterTableName;
     }
@@ -51,6 +65,14 @@ public class RatingEngineModelingParameters extends ModelingParameters {
 
     public void setTrainFilterQuery(FrontEndQuery trainFilterQuery) {
         this.trainFilterQuery = trainFilterQuery;
+    }
+
+    public FrontEndQuery getEventFilterQuery() {
+        return eventFilterQuery;
+    }
+
+    public void setEventFilterQuery(FrontEndQuery eventFilterQuery) {
+        this.eventFilterQuery = eventFilterQuery;
     }
 
     public FrontEndQuery getTargetFilterQuery() {

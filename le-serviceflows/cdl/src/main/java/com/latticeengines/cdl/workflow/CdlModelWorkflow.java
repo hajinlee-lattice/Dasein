@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.CdlMatchAndModelWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
 import com.latticeengines.serviceflows.workflow.modeling.CreateNote;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
@@ -41,6 +42,9 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
     @Autowired
     private CreateNote createNote;
 
+    @Autowired
+    private ExportData exportData;
+
     @Bean
     public Job modelWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -49,6 +53,7 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(sample) //
+                .next(exportData) //
                 .next(setMatchSelection) //
                 .next(writeMetadataFiles) //
                 .next(profile) //

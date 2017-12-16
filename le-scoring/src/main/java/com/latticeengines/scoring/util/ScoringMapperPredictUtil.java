@@ -23,12 +23,12 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.MapContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -99,7 +99,13 @@ public class ScoringMapperPredictUtil {
         File outputFile = new File(fileName);
 
         String uniqueKeyColumn = configuration.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
-        if (!uniqueKeyColumn.equals(InterfaceName.Id.name())) {
+        if (uniqueKeyColumn.equals(InterfaceName.Id.name())
+                || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())) {
+            DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
+            DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter);
+            ScoringJobUtil.writeScoreResultToAvroRecord(dataFileWriter, resultList, outputFile, uniqueKeyColumn);
+            dataFileWriter.close();
+        } else {
             DatumWriter<ScoreOutput> userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
             DataFileWriter<ScoreOutput> dataFileWriter = new DataFileWriter<ScoreOutput>(userDatumWriter);
             for (int i = 0; i < resultList.size(); i++) {
@@ -109,11 +115,6 @@ public class ScoringMapperPredictUtil {
                 }
                 dataFileWriter.append(result);
             }
-            dataFileWriter.close();
-        } else {
-            DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
-            DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter);
-            ScoringJobUtil.writeScoreResultToAvroRecord(dataFileWriter, resultList, outputFile);
             dataFileWriter.close();
         }
         HdfsUtils.copyLocalToHdfs(configuration, fileName, outputPath + "/" + fileName);

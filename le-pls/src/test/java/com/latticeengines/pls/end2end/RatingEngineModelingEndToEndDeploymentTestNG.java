@@ -90,6 +90,8 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
 
     private String trainFilterTableName = "TrainFilter";
     private String trainFilterFileName = "trainFilter.avro";
+    private String eventFilterTableName = "EventFilter";
+    private String eventFilterFileName = "eventFilter.avro";
     private String targetFilterTableName = "TargetFilter";
     private String targetFilterFileName = "targetFilter.avro";
     private String apsTableName = "AnalyticPurchaseState";
@@ -118,6 +120,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         parameters.setActivateModelSummaryByDefault(true);
 
         parameters.setTrainFilterTableName(trainFilterTableName);
+        parameters.setEventFilterTableName(eventFilterTableName);
         parameters.setTargetFilterTableName(targetFilterTableName);
 
         log.info("Test environment setup finished.");
@@ -137,8 +140,10 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
         FrontEndQuery query = getQuery(txn);
         parameters.setTrainFilterQuery(query);
+        parameters.setEventFilterQuery(query);
         parameters.setTargetFilterQuery(query);
         parameters.setTrainFilterTableName(null);
+        parameters.setEventFilterTableName(null);
         parameters.setTargetFilterTableName(null);
         createModel();
         retrieveModelSummary();
@@ -148,6 +153,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     private void setupTables() throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(firstTenant.getName());
         setupTable(customerSpace, trainFilterFileName, trainFilterTableName);
+        setupTable(customerSpace, eventFilterFileName, eventFilterTableName);
         setupTable(customerSpace, targetFilterFileName, targetFilterTableName);
         setupTable(customerSpace, apsFileName, apsTableName);
         Table accountTable = setupTable(customerSpace, accountFileName, accountTableName);

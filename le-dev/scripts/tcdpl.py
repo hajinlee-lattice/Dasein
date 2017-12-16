@@ -30,7 +30,7 @@ PRESETS = {
     },
     'cdl': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses'],
-        'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'datacloudapi', 'lp', 'quartz', 'cdl', 'dante',
+        'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'lp', 'quartz', 'cdl', 'dante',
                     'objectapi', 'sqoop']
     },
     'etl': {

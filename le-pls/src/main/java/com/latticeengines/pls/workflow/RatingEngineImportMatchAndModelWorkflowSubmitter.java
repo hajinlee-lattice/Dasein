@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
@@ -47,6 +48,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "RatingEngineImportMatchAndModelWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, parameters.getName());
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
@@ -67,8 +69,10 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .matchInputTableName(tableName) //
-                .filterTableNames(parameters.getTrainFilterTableName(), parameters.getTargetFilterTableName()) //
-                .filterQueries(parameters.getTrainFilterQuery(), parameters.getTargetFilterQuery()) //
+                .filterTableNames(parameters.getTrainFilterTableName(), parameters.getEventFilterTableName(),
+                        parameters.getTargetFilterTableName()) //
+                .filterQueries(parameters.getTrainFilterQuery(), parameters.getEventFilterQuery(),
+                        parameters.getTargetFilterQuery()) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .userId(parameters.getUserId()) //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
@@ -99,6 +103,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
                 .matchDestTables("DerivedColumnsCache") //
                 .setRetainLatticeAccountId(true) //
                 .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
+                .setUniqueKeyColumn(InterfaceName.AnalyticPurchaseState_ID.name()) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

@@ -22,16 +22,11 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
 
     @Override
     public Node construct(CreateCdlEventTableParameters parameters) {
-        List<String> retainFields = new ArrayList<>();
         Node inputTable = addSource(parameters.inputTable);
         Node apsTable = addSource(parameters.apsTable);
         Node accountTable = addSource(parameters.accountTable);
 
-        retainFields.addAll(apsTable.getFieldNames());
-        retainFields.addAll(accountTable.getFieldNames());
-        retainFields.add(InterfaceName.Train.name());
-        retainFields.add(InterfaceName.Target.name());
-        retainFields.removeAll(Arrays.asList(InterfaceName.AccountId.name(), "CREATION_DATE", "UPATE_DATE"));
+        List<String> retainFields = buildRetainFields(inputTable, apsTable, accountTable);
 
         FieldList inputGroupFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
         Node result = apsTable.join(new FieldList("LEAccount_ID", "Period_ID"), inputTable, inputGroupFields,
@@ -42,6 +37,19 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         result = result.retain(new FieldList(retainFields));
         log.info("Cdl event table's columns=", retainFields);
         return result;
+    }
+
+    private List<String> buildRetainFields(Node inputTable, Node apsTable, Node accountTable) {
+        List<String> retainFields = new ArrayList<>();
+        retainFields.addAll(apsTable.getFieldNames());
+        retainFields.addAll(accountTable.getFieldNames());
+        if (inputTable.getFieldNames().contains(InterfaceName.Train.name()))
+            retainFields.add(InterfaceName.Train.name());
+        if (inputTable.getFieldNames().contains(InterfaceName.Target.name()))
+            retainFields.add(InterfaceName.Target.name());
+        retainFields.removeAll(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.CDLCreatedTime.name(),
+                InterfaceName.CDLUpdatedTime.name()));
+        return retainFields;
     }
 
 }

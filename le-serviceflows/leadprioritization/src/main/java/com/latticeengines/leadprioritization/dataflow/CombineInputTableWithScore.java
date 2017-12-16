@@ -13,6 +13,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.leadprioritization.AddRatingColumnFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
@@ -28,24 +29,27 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         Node scoreTable = addSource(parameters.getScoreResultsTableName());
 
         Node scoreWithRating = scoreTable;
-        boolean noRatingColumnInScoreTable = scoreWithRating.getSourceAttribute(ScoreResultField.Rating.displayName) == null ? true
-                : false;
-        boolean notPMMLModel = parameters.getModelType() == null ? true : parameters.getModelType().equals(
-                ModelType.PYTHONMODEL.getModelType());
+        boolean noRatingColumnInScoreTable = scoreWithRating
+                .getSourceAttribute(ScoreResultField.Rating.displayName) == null ? true : false;
+        boolean notPMMLModel = parameters.getModelType() == null ? true
+                : parameters.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
 
         if (noRatingColumnInScoreTable && notPMMLModel) {
-            scoreWithRating = scoreTable.apply(new AddRatingColumnFunction(ScoreResultField.Percentile.displayName,
-                    ScoreResultField.Rating.displayName, parameters.getBucketMetadata()), new FieldList(
-                    ScoreResultField.Percentile.displayName), new FieldMetadata(ScoreResultField.Rating.displayName,
-                    String.class));
+            scoreWithRating = scoreTable.apply(
+                    new AddRatingColumnFunction(ScoreResultField.Percentile.displayName,
+                            ScoreResultField.Rating.displayName, parameters.getBucketMetadata()),
+                    new FieldList(ScoreResultField.Percentile.displayName),
+                    new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
         }
 
         Node combinedResultTable = null;
         String idColumn;
         if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
             idColumn = InterfaceName.Id.name();
-        } else {
+        } else if (inputTable.getSourceAttribute(InterfaceName.InternalId.name()) != null) {
             idColumn = InterfaceName.InternalId.name();
+        } else {
+            idColumn = inputTable.getSourceSchema().getAttributes(LogicalDataType.InternalId).get(0).getName();
         }
 
         List<String> retainFields = new ArrayList<>(inputTable.getFieldNames());
@@ -56,7 +60,7 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         });
 
         combinedResultTable = inputTable.leftJoin(idColumn, scoreWithRating, idColumn);
-        combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(InterfaceName.InternalId.name()), 1);
+        combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(idColumn), 1);
         combinedResultTable = combinedResultTable.retain(new FieldList(retainFields));
         return combinedResultTable;
     }

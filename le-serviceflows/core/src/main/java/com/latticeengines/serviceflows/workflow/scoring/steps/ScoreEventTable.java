@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.workflow.steps;
+package com.latticeengines.serviceflows.workflow.scoring.steps;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;

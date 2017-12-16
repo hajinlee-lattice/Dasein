@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
@@ -49,12 +51,17 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     @Override
     public void onConfigurationInitialized() {
         CreateCdlEventTableConfiguration configuration = getConfiguration();
+        String eventTargetName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
+        if (StringUtils.isNotEmpty(eventTargetName)) {
+            configuration.setTargetTableName(eventTargetName);
+        } else {
+            configuration.setTargetTableName(configuration.getOutputTableName());
+        }
         configuration.setApplyTableProperties(true);
         configuration.setDataFlowParams(createDataFlowParameters());
     }
 
     private DataFlowParameters createDataFlowParameters() {
-        configuration.setTargetTableName(configuration.getOutputTableName());
         Table inputTable = getAndSetInputTable();
         Table apsTable = getAndSetApsTable();
         Table accountTable = getAndSetAccountTable();
@@ -78,9 +85,14 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
                 changedCount++;
             }
         }
-        if (changedCount > 0)
+        if (changedCount > 0) {
             metadataProxy.updateTable(configuration.getCustomerSpace().toString(), accountTable.getName(),
                     accountTable);
+            DataCollection.Version version = dataCollectionProxy
+                    .getActiveVersion(configuration.getCustomerSpace().toString());
+            dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
+                    TableRoleInCollection.ConsolidatedAccount, version);
+        }
         log.info("The number of attributes having no Tags is=" + changedCount);
         return accountTable;
     }
@@ -189,7 +201,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     public void onExecutionCompleted() {
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
-        putObjectInContext(configuration.getOutputTableName(), eventTable);
+        putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
         putStringValueInContext(MATCH_FETCH_ONLY, "true");
 
         metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), clonedApsTableName);

@@ -5,30 +5,29 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 public class CreateCdlEventTableFilterConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private String trainFilterTableName;
-    private String targetFilterTableName;
+    private String eventFilterTableName;
 
     private FrontEndQuery trainQuery;
-    private FrontEndQuery targetQuery;
+    private FrontEndQuery eventQuery;
 
     public CreateCdlEventTableFilterConfiguration() {
         setBeanName("createCdlEventTableFilterFlow");
-        setTargetTableName("CreateCdlEventTableFilter_" + System.currentTimeMillis());
     }
 
     public void setTrainFilterTableName(String trainFilterTableName) {
         this.trainFilterTableName = trainFilterTableName;
     }
 
-    public void setTargetFilterTableName(String targetFilterTableName) {
-        this.targetFilterTableName = targetFilterTableName;
+    public void setEventFilterTableName(String eventFilterTableName) {
+        this.eventFilterTableName = eventFilterTableName;
     }
 
     public String getTrainFilterTableName() {
         return trainFilterTableName;
     }
 
-    public String getTargetFilterTableName() {
-        return targetFilterTableName;
+    public String getEventFilterTableName() {
+        return eventFilterTableName;
     }
 
     public void setTrainQuery(FrontEndQuery trainQuery) {
@@ -39,11 +38,12 @@ public class CreateCdlEventTableFilterConfiguration extends BaseCDLDataFlowStepC
         return trainQuery;
     }
 
-    public void setTargetQuery(FrontEndQuery targetQuery) {
-        this.targetQuery = targetQuery;
+    public void setEventQuery(FrontEndQuery eventQuery) {
+        this.eventQuery = eventQuery;
     }
 
-    public FrontEndQuery getTargetQuery() {
-        return targetQuery;
+    public FrontEndQuery getEventQuery() {
+        return eventQuery;
     }
+
 }

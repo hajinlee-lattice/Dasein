@@ -14,14 +14,17 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTagetTableFilterConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.transform.TransformationGroup;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 
 public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -34,6 +37,11 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
+        private SetCdlConfigurationForScoringConfiguration setConfigForScoring = new SetCdlConfigurationForScoringConfiguration();
+        private CreateCdlTagetTableFilterConfiguration cdlScoingTableTupleFilter = new CreateCdlTagetTableFilterConfiguration();
+        private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+
         public Builder microServiceHostPort(String microServiceHostPort) {
             model.setMicroServiceHostPort(microServiceHostPort);
             match.setMicroServiceHostPort(microServiceHostPort);
@@ -41,6 +49,10 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
+            setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
+            cdlScoingTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
+            score.setMicroServiceHostPort(microServiceHostPort);
+            combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -53,6 +65,10 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
+            setConfigForScoring.setCustomerSpace(customerSpace);
+            cdlScoingTableTupleFilter.setCustomerSpace(customerSpace);
+            score.setCustomerSpace(customerSpace);
+            combineInputWithScores.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -62,15 +78,18 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
-        public Builder filterTableNames(String trainFilterTableName, String targetFilterTableName) {
+        public Builder filterTableNames(String trainFilterTableName, String eventFilterTableName,
+                String targetFilterTableName) {
             cdlEventTableTupleFilter.setTrainFilterTableName(trainFilterTableName);
-            cdlEventTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
+            cdlEventTableTupleFilter.setEventFilterTableName(eventFilterTableName);
+            cdlScoingTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
             return this;
         }
 
-        public Builder filterQueries(FrontEndQuery trainQuery, FrontEndQuery targetQuery) {
+        public Builder filterQueries(FrontEndQuery trainQuery, FrontEndQuery eventQuery, FrontEndQuery targetQuery) {
             cdlEventTableTupleFilter.setTrainQuery(trainQuery);
-            cdlEventTableTupleFilter.setTargetQuery(targetQuery);
+            cdlEventTableTupleFilter.setEventQuery(eventQuery);
+            cdlScoingTableTupleFilter.setTargetQuery(targetQuery);
             return this;
         }
 
@@ -80,6 +99,10 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTable.setInternalResourceHostPort(internalResourceHostPort);
             cdlEventTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
+            setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
+            cdlScoingTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
+            score.setInternalResourceHostPort(internalResourceHostPort);
+            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -90,6 +113,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+            setConfigForScoring.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;
         }
 
@@ -149,6 +173,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder trainingTableName(String trainingTableName) {
             model.setTrainingTableName(trainingTableName);
+            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, trainingTableName));
             return this;
         }
 
@@ -164,12 +189,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
-            return this;
-        }
-
-        public Builder transformationGroup(TransformationGroup transformationGroup,
-                List<TransformDefinition> stdTransformDefns) {
-            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
+            setConfigForScoring.setInputProperties(inputProperties);
             return this;
         }
 
@@ -242,6 +262,11 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
+        public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
+            score.setUniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+
         public RatingEngineImportMatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);
@@ -253,6 +278,10 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(model);
             configuration.add(matchResult);
             configuration.add(export);
+            configuration.add(setConfigForScoring);
+            configuration.add(cdlScoingTableTupleFilter);
+            configuration.add(score);
+            configuration.add(combineInputWithScores);
 
             return configuration;
         }

@@ -77,7 +77,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private Long progressUpdated;
     private MatchOutput matchOutput;
     private Random random = new Random(System.currentTimeMillis());
-    private List<DataCloudJobConfiguration> jobConfigurations = new ArrayList<>();
+    private List<DataCloudJobConfiguration> jobConfigurations;
     private List<DataCloudJobConfiguration> remainingJobs;
     private int totalRetries = 0;
 
@@ -87,6 +87,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.info("Inside ParallelBlockExecution execute()");
             initializeYarnClient();
 
+            jobConfigurations = new ArrayList<>();
             Object listObj = executionContext.get(BulkMatchContextKey.YARN_JOB_CONFIGS);
             if (listObj instanceof List) {
                 @SuppressWarnings("rawtypes")
@@ -97,10 +98,9 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     }
                 }
             }
+
             HdfsPodContext.changeHdfsPodId(getConfiguration().getPodId());
-
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
-
             remainingJobs = new ArrayList<DataCloudJobConfiguration>(jobConfigurations);
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
                 submitMatchBlocks();
@@ -128,8 +128,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private void submitMatchBlocks() {
         while ((remainingJobs.size() > 0) && (applicationIds.size() < maxNumBlocks)) {
             DataCloudJobConfiguration jobConfiguration = remainingJobs.remove(0);
-            ApplicationId appId = ConverterUtils.toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration)
-                    .getApplicationIds().get(0));
+            ApplicationId appId = ConverterUtils
+                    .toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
             blockUuidMap.put(appId.toString(), jobConfiguration.getBlockOperationUid());
             applicationIds.add(appId);
 
@@ -148,15 +148,14 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 updateProgress(reports);
                 checkTerminatedApplications(reports);
             }
-        }  catch (Exception e) {
+        } catch (Exception e) {
             // ignore
         }
     }
 
     private void finalizeMatch() {
         try {
-            matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f)
-                    .commit();
+            matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f).commit();
 
             Long startTime = matchOutput.getReceivedAt().getTime();
             matchOutput.getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
@@ -178,7 +177,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             Long count = 0L;
             List<MatchBlock> blocks = matchCommandService.getBlocks(rootOperationUid);
             if (blocks != null && !blocks.isEmpty()) {
-                for (MatchBlock block: blocks) {
+                for (MatchBlock block : blocks) {
                     count += block.getMatchedRows() != null ? block.getMatchedRows() : 0;
                 }
             }
@@ -301,8 +300,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.info(errorMsg + ". Retry the block.");
             for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
                 if (jobConfiguration.getBlockOperationUid().equals(blockUid)) {
-                    ApplicationId newAppId = ConverterUtils.toApplicationId(matchInternalProxy
-                            .submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+                    ApplicationId newAppId = ConverterUtils.toApplicationId(
+                            matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
                     blockUuidMap.remove(appId.toString());
                     blockUuidMap.put(newAppId.toString(), jobConfiguration.getBlockOperationUid());
                     applicationIds.add(newAppId);
@@ -332,9 +331,9 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 useRemoteDnB = true;
             }
             useRemoteDnB = useRemoteDnB
-                    && MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion())
+                    && MatchUtils
+                            .isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion())
                     && zkConfigurationService.useRemoteDnBGlobal();
-
 
             if (useRemoteDnB) {
                 return false;
@@ -344,7 +343,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             return false;
         }
 
-        boolean retryBlock =  matchCommandService.blockIsRetriable(blockUid);
+        boolean retryBlock = matchCommandService.blockIsRetriable(blockUid);
         if (retryBlock) {
             totalRetries++;
         }

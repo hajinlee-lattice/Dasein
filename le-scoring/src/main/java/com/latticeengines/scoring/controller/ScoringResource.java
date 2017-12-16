@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.exposed.service.ScoringService;
+import com.latticeengines.scoring.service.ScoringJobService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,7 +25,17 @@ import io.swagger.annotations.ApiOperation;
 public class ScoringResource {
 
     @Autowired
+    private ScoringJobService scoringJobService;
+
+    @Autowired
     private ScoringService scoringService;
+
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a scoring job")
+    public AppSubmission createScoringJob(@RequestBody ScoringConfiguration scoringConfig) {
+        return new AppSubmission(Arrays.<ApplicationId> asList(scoringJobService.score(scoringConfig)));
+    }
 
     @RequestMapping(value = "/rtsbulkscore", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

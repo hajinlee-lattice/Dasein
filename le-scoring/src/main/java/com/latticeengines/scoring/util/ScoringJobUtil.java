@@ -111,14 +111,18 @@ public class ScoringJobUtil {
         return jsonObj;
     }
 
-    public static Table createGenericOutputSchema() {
+    public static Table createGenericOutputSchema(String uniqueKeyColumn) {
         Table scoreResultTable = new Table();
         String tableName = "ScoreResult";
         scoreResultTable.setName(tableName);
         Attribute id = new Attribute();
-        id.setName(InterfaceName.Id.name());
-        id.setDisplayName(InterfaceName.Id.name());
-        id.setPhysicalDataType(Type.STRING.name());
+        id.setName(uniqueKeyColumn);
+        id.setDisplayName(uniqueKeyColumn);
+        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)) {
+            id.setPhysicalDataType(Type.LONG.name());
+        } else {
+            id.setPhysicalDataType(Type.STRING.name());
+        }
         id.setSourceLogicalDataType(InterfaceName.Id.name());
 
         Attribute percentile = new Attribute();
@@ -138,14 +142,18 @@ public class ScoringJobUtil {
     }
 
     public static void writeScoreResultToAvroRecord(DataFileWriter<GenericRecord> dataFileWriter,
-            List<ScoreOutput> resultList, File outputFile) throws IOException {
-        Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema();
+            List<ScoreOutput> resultList, File outputFile, String uniqueKeyColumn) throws IOException {
+        Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn);
         Schema schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
 
         dataFileWriter.create(schema, outputFile);
         for (ScoreOutput scoreOutput : resultList) {
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-            builder.set(InterfaceName.Id.name(), String.valueOf(scoreOutput.getLeadID()));
+            if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)) {
+                builder.set(uniqueKeyColumn, Long.valueOf(scoreOutput.getLeadID()));
+            } else {
+                builder.set(uniqueKeyColumn, String.valueOf(scoreOutput.getLeadID()));
+            }
             builder.set(ScoreResultField.Percentile.displayName, scoreOutput.getPercentile());
             builder.set(ScoreResultField.RawScore.name(), scoreOutput.getRawScore());
             dataFileWriter.append(builder.build());

@@ -75,8 +75,10 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
     @Override
     public void skipStep() {
         log.info("Skip matching step and register event table now.");
-        Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getInputTableName());
+        Table table = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
+        if (table == null)
+            table = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                    configuration.getInputTableName());
         putObjectInContext(EVENT_TABLE, table);
         putObjectInContext(MATCH_RESULT_TABLE, table);
         log.info("Skip embedded bulk match workflow.");
@@ -84,8 +86,10 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
     }
 
     private Table preMatchEventTable() {
-        Table preMatchEventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getInputTableName());
+        Table preMatchEventTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
+        if (preMatchEventTable == null)
+            preMatchEventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                    configuration.getInputTableName());
         preMatchEventTable.setName(preMatchEventTable.getName() + "_" + System.currentTimeMillis());
         return preMatchEventTable;
     }
