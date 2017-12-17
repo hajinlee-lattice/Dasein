@@ -33,22 +33,21 @@ public class SourceVersionDiff extends TransformationFlowBase<BasicTransformatio
 
     @Override
     public Node construct(AMValidatorParams parameters) {
-        Node src = parameters.getBaseTables().size() == 2 ? addSource(parameters.getBaseTables().get(0))
-                : addSource(getTableName(parameters.getBaseTables().get(0), parameters.getDiffVersion()));
-        Node srcCompared = parameters.getBaseTables().size() == 2 ? addSource(parameters.getBaseTables().get(1))
-                : addSource(getTableName(parameters.getBaseTables().get(0), parameters.getDiffVersionCompared()));
+        Node src = addSource(getTableName(parameters.getBaseTables().get(0), parameters.getDiffVersion()));
+        Node srcCompared = addSource(
+                getTableName(parameters.getBaseTables().get(0), parameters.getDiffVersionCompared()));
         List<Node> nodeList = new ArrayList<Node>();
         nodeList.add(srcCompared);
         nodeList.add(src);
-        ExceedCntDiffBetwenVersionChkParam utilParams1 = new ExceedCntDiffBetwenVersionChkParam();
-        utilParams1.setThreshold(parameters.getThreshold());
-        Node resultNode1 = CheckUtils.runCheck(nodeList, utilParams1);
-        ExceedDomDiffBetwenVersionChkParam utilParams2 = new ExceedDomDiffBetwenVersionChkParam();
-        utilParams2.setPrevVersionNotEmptyField(parameters.getCheckNotNullField());
-        utilParams2.setCurrVersionNotEmptyField(parameters.getCheckNotNullField());
-        utilParams2.setPrevVersionEmptyField(parameters.getCheckNullField());
-        utilParams2.setCurrVersionNullField(parameters.getCheckNullField());
-        Node resultNode2 = CheckUtils.runCheck(nodeList, utilParams2);
+        ExceedCntDiffBetwenVersionChkParam cntDiffVersParam = new ExceedCntDiffBetwenVersionChkParam();
+        cntDiffVersParam.setThreshold(parameters.getThreshold());
+        Node resultNode1 = CheckUtils.runCheck(nodeList, cntDiffVersParam);
+        ExceedDomDiffBetwenVersionChkParam domDiffVersParam = new ExceedDomDiffBetwenVersionChkParam();
+        domDiffVersParam.setPrevVersionNotEmptyField(parameters.getCheckNotNullField());
+        domDiffVersParam.setCurrVersionNotEmptyField(parameters.getCheckNotNullField());
+        domDiffVersParam.setPrevVersionEmptyField(parameters.getCheckNullField());
+        domDiffVersParam.setCurrVersionNullField(parameters.getCheckNullField());
+        Node resultNode2 = CheckUtils.runCheck(nodeList, domDiffVersParam);
         Node resultNode = resultNode1 //
                 .merge(resultNode2);
         return resultNode;

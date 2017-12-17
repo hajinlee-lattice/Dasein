@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.check;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +54,9 @@ public class EmptyFieldCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase
 
         EmptyFieldCheckParam checkParam = new EmptyFieldCheckParam();
         checkParam.setCheckEmptyField("Key");
-        checkParam.setKeyField("Id");
+        List<String> keyFields = new ArrayList<String>();
+        keyFields.add("Id");
+        checkParam.setIdentifierFields(keyFields);
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;

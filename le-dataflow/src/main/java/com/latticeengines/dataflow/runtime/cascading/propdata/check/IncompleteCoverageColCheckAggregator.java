@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata.check;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -17,10 +18,10 @@ public class IncompleteCoverageColCheckAggregator extends BaseAggregator<Incompl
 
     private static final long serialVersionUID = -63265549792881813L;
 
-    private Object checkField;
+    private String checkField;
     private List<Object> coverageFieldList;
 
-    public IncompleteCoverageColCheckAggregator(Object checkField, List<Object> coverageFieldList) {
+    public IncompleteCoverageColCheckAggregator(String checkField, List<Object> coverageFieldList) {
         super(generateFieldDeclaration());
         this.checkField = checkField;
         this.coverageFieldList = coverageFieldList;
@@ -53,7 +54,7 @@ public class IncompleteCoverageColCheckAggregator extends BaseAggregator<Incompl
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        String checkFieldVal = (String) arguments.getObject(checkField.toString());
+        String checkFieldVal = (String) arguments.getObject(checkField);
         if (checkFieldVal != null)
             context.set.add(checkFieldVal);
         return context;
@@ -61,25 +62,21 @@ public class IncompleteCoverageColCheckAggregator extends BaseAggregator<Incompl
 
     @Override
     protected Tuple finalizeContext(Context context) {
-        StringBuilder missingList = new StringBuilder("");
+        List<String> missingList = new ArrayList<String>();
         Tuple result = Tuple.size(getFieldDeclaration().size());
         if (!context.set.isEmpty()) {
             for (Object obj : coverageFieldList) {
                 if (!((context.set).contains(obj))) {
                     result = Tuple.size(getFieldDeclaration().size());
-                    result.set(0, CheckCode.OutOfCoverageValForCol.name());
+                    result.set(0, CheckCode.IncompleteCoverageForCol.name());
                     result.set(3, checkField);
-                    if (missingList.length() == 0) {
-                        missingList.append(obj);
-                    } else {
-                        missingList.append("," + obj);
-                    }
-
+                    missingList.add(String.valueOf(obj));
                 }
             }
-            if (missingList.length() != 0) {
-                result.set(4, missingList);
-                result.set(5, CheckCode.OutOfCoverageValForCol.getMessage(checkField, missingList));
+            if (missingList.size() != 0) {
+                String joinedList = String.join(",", missingList);
+                result.set(4, joinedList);
+                result.set(5, CheckCode.IncompleteCoverageForCol.getMessage(checkField, joinedList));
                 return result;
             }
         }

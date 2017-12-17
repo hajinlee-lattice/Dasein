@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.check;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,16 +37,17 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
     private TransformationFlowParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("Id", Integer.class), //
-                Pair.of("Key", String.class) //
+                Pair.of("Key", String.class), //
+                Pair.of("Domain", String.class), //
+                Pair.of("DUNS", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "key1" }, //
-                { 2, "key2" }, //
-                { 3, "key3" }, //
-                { 4, "key2" }, //
-                { 5, "key1" }, //
-                { 6, "key1" }, //
-                { 7, "key4" }, //
+                { 1, "key1", "netapp.com", "DUNS11" }, //
+                { 2, "key2", "netapp.com", null }, //
+                { 3, "key1", "netapp.com", "DUNS11" }, //
+                { 4, "key2", null, "DUNS14" }, //
+                { 5, "key1", null, "DUNS14" }, //
+                { 6, "key2", null, null }, //
         };
 
         uploadDataToSharedAvroInput(data, fields);
@@ -53,7 +55,9 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
         DuplicatedValueCheckParam checkParam = new DuplicatedValueCheckParam();
-        checkParam.setGroupByFields(Collections.singletonList("Key"));
+        List<String> fieldList = new ArrayList<String>();
+        fieldList.add("Key");
+        checkParam.setGroupByFields(fieldList);
         checkParam.setKeyField("Id");
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
@@ -75,7 +79,7 @@ public class DuplicatedValueCheckTestNG extends DataCloudDataFlowFunctionalTestN
                 Assert.assertEquals(occurence, 3);
             }
             if ("key2".endsWith(groupId)) {
-                Assert.assertEquals(occurence, 2);
+                Assert.assertEquals(occurence, 3);
             }
         }
     }

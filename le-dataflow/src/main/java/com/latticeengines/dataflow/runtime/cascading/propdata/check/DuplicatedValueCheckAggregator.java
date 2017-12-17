@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata.check;
 
+import java.util.List;
+
 import org.apache.avro.util.Utf8;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
@@ -16,16 +18,19 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
 
     private static final long serialVersionUID = 7863554582861435361L;
 
-    private Object checkField;
+    private List<String> checkField;
+    private Boolean withStatusFlag;
 
     public static class Context extends BaseAggregator.Context {
         String value = null;
+        String code = null;
         long count = 0;
     }
 
-    public DuplicatedValueCheckAggregator(Object keyField) {
+    public DuplicatedValueCheckAggregator(List<String> keyField, Boolean withStatusFlag) {
         super(generateFieldDeclaration());
         this.checkField = keyField;
+        this.withStatusFlag = withStatusFlag;
     }
 
     private static Fields generateFieldDeclaration() {
@@ -41,21 +46,47 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
 
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
-        Object grpObj = group.getObject(checkField.toString());
-        return grpObj == null;
+        boolean returnVal = true;
+        for (int i = 0; i < checkField.size(); i++) {
+            returnVal = returnVal && (group.getObject(checkField.get(i)) == null);
+        }
+        return returnVal;
     }
 
     @Override
     protected Context initializeContext(TupleEntry group) {
         Context context = new Context();
-        Object grpObj = group.getObject(checkField.toString());
-        if (grpObj == null) {
+        boolean returnVal = true;
+        Object grpObjVal = "";
+        for(int i = 0; i < checkField.size(); i++) {
+            if (i == 0 && (grpObjVal != "")) {
+                grpObjVal = String.valueOf(group.getObject(checkField.get(i)));
+            } else {
+                if (grpObjVal != "") {
+                    grpObjVal = grpObjVal + "," + String.valueOf(group.getObject(checkField.get(i)));
+                }
+                if (grpObjVal == "") {
+                    grpObjVal = String.valueOf(group.getObject(checkField.get(i)));
+                }
+            }
+            returnVal = returnVal && (String.valueOf(group.getObject(checkField.get(i))) == null);
+        }
+        if (returnVal) {
             return context;
         }
-        if (grpObj instanceof Utf8) {
-            context.value = grpObj.toString();
-        } else if (grpObj instanceof String) {
-            context.value = (String) grpObj;
+        if (grpObjVal instanceof Utf8) {
+            context.value = grpObjVal.toString();
+        } else if (grpObjVal instanceof String) {
+            context.value = (String) grpObjVal;
+        }
+        if (withStatusFlag != null) {
+            if (withStatusFlag) {
+                context.code = CheckCode.DuplicatedValuesWithStatus.name();
+            } else {
+                context.code = CheckCode.DuplicatedValue.name();
+            }
+        } else {
+            context.code = CheckCode.DuplicatedValue.name();
         }
         return context;
     }
@@ -71,7 +102,7 @@ public class DuplicatedValueCheckAggregator extends BaseAggregator<DuplicatedVal
         if (context.count > 1) {
             Tuple result = Tuple.size(getFieldDeclaration().size());
             // check code
-            result.set(0, CheckCode.DuplicatedValue.name());
+            result.set(0, context.code);
             // group id
             result.set(2, context.value);
             // check field

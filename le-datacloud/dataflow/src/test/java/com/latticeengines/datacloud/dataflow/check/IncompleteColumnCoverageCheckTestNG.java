@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageForColCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageForColChkParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class IncompleteColumnCoverageCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
@@ -51,7 +51,7 @@ public class IncompleteColumnCoverageCheckTestNG extends DataCloudDataFlowFuncti
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        IncompleteCoverageForColCheckParam checkParam = new IncompleteCoverageForColCheckParam();
+        IncompleteCoverageForColChkParam checkParam = new IncompleteCoverageForColChkParam();
         checkParam.setGroupByFields(Collections.singletonList("Key"));
         Object[] fieldsArray = new Object[] { "DnB", "RTS", "HG", "Orb", "Manual" };
         List<Object> expectedFieldValues = Arrays.asList(fieldsArray);

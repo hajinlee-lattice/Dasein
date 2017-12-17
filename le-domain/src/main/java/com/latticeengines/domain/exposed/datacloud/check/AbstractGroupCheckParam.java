@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class AbstractGroupCheckParam extends CheckParam {
 
     @JsonProperty("GroupByFields")
-    private List<Object> groupByFields;
+    private List<String> groupByFields;
 
     @JsonProperty("Status")
     private Object status;
@@ -25,7 +25,7 @@ public abstract class AbstractGroupCheckParam extends CheckParam {
     private Object currVersionEmptyField;
 
     @JsonProperty("KeyField")
-    private Object keyField;
+    private String keyField;
 
     @JsonProperty("PopulationThreshold")
     private double threshold;
@@ -45,11 +45,25 @@ public abstract class AbstractGroupCheckParam extends CheckParam {
     @JsonProperty("CntLessThanThresholdFlag") // indicates if cnt is less than threshold
     private boolean cntLessThanFlagThreshold;
 
-    public List<Object> getGroupByFields() {
+    @JsonProperty("IdentifierFields")
+    List<String> identifierFields;
+
+    @JsonProperty("checkDupWithStatus") // check if check is on particular status
+    private Boolean checkDupWithStatus;
+
+    public Boolean getCheckDupWithStatus() {
+        return checkDupWithStatus;
+    }
+
+    public void setCheckDupWithStatus(Boolean checkDupWithStatus) {
+        this.checkDupWithStatus = checkDupWithStatus;
+    }
+
+    public List<String> getGroupByFields() {
         return groupByFields;
     }
 
-    public void setGroupByFields(List<Object> groupByFields) {
+    public void setGroupByFields(List<String> groupByFields) {
         this.groupByFields = groupByFields;
     }
 
@@ -85,11 +99,11 @@ public abstract class AbstractGroupCheckParam extends CheckParam {
         this.currVersionEmptyField = currVersionEmptyField;
     }
 
-    public Object getKeyField() {
+    public String getKeyField() {
         return keyField;
     }
 
-    public void setKeyField(Object keyField) {
+    public void setKeyField(String keyField) {
         this.keyField = keyField;
     }
 
@@ -147,6 +161,14 @@ public abstract class AbstractGroupCheckParam extends CheckParam {
 
     public void setCntLessThanThresholdFlag(boolean cntLessThanThresholdFlag) {
         this.cntLessThanFlagThreshold = cntLessThanThresholdFlag;
+    }
+
+    public List<String> getIdentifierFields() {
+        return identifierFields;
+    }
+
+    public void setIdentifierFields(List<String> identifierFields) {
+        this.identifierFields = identifierFields;
     }
 
 }

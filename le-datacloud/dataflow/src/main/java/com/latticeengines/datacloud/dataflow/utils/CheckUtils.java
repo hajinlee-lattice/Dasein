@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -18,20 +19,16 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.check.CheckCode;
 import com.latticeengines.domain.exposed.datacloud.check.CheckParam;
 import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckParam;
-import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValuesWithStatusCheckParam;
 import com.latticeengines.domain.exposed.datacloud.check.EmptyFieldCheckParam;
 import com.latticeengines.domain.exposed.datacloud.check.ExceedCntDiffBetwenVersionChkParam;
 import com.latticeengines.domain.exposed.datacloud.check.ExceedDomDiffBetwenVersionChkParam;
 import com.latticeengines.domain.exposed.datacloud.check.ExceededCountCheckParam;
-import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageForColCheckParam;
-import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageForRowCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.IncompleteCoverageForColChkParam;
+import com.latticeengines.domain.exposed.datacloud.check.OutOfCoverageForRowChkParam;
 import com.latticeengines.domain.exposed.datacloud.check.UnderPopulatedFieldCheckParam;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.microsoft.sqlserver.jdbc.StringUtils;
 
 public final class CheckUtils {
-
-    private final static String STATUS_ACTIVE = "ACTIVE";
     private final static String TOTAL_COUNT = "__COUNT__";
     private final static String PREV_TOTAL_COUNT = "__PREV_COUNT__";
     private final static String POPULATED_COUNT = "__POPULATED_COUNT__";
@@ -50,12 +47,10 @@ public final class CheckUtils {
                 return checkEmptyField(input.get(0), (EmptyFieldCheckParam) param);
             case UnderPopulatedField:
                 return checkUnderPopulatedField(input.get(0), (UnderPopulatedFieldCheckParam) param);
-            case OutOfCoverageValForCol:
-                return checkOutOfCoverageValForCol(input.get(0), (IncompleteCoverageForColCheckParam) param);
+            case IncompleteCoverageForCol:
+                return checkIncompleteCoverageForCol(input.get(0), (IncompleteCoverageForColChkParam) param);
             case OutOfCoverageValForRow:
-                return checkOutOfCoverageValForRow(input.get(0), (IncompleteCoverageForRowCheckParam) param);
-            case DuplicatedValuesWithStatus:
-                return checkDuplicatedValueWithStatus(input.get(0), (DuplicatedValuesWithStatusCheckParam) param);
+                return checkOutOfCoverageValForRow(input.get(0), (OutOfCoverageForRowChkParam) param);
             case ExceededVersionDiffForDomOnly:
                 return checkDiffVersionDomOnlyCount(input, (ExceedDomDiffBetwenVersionChkParam) param);
             case ExceededVersionDiffForNumOfBusinesses:
@@ -77,31 +72,36 @@ public final class CheckUtils {
 
     private static Node checkDuplicatedValue(Node input, DuplicatedValueCheckParam param) {
         List<FieldMetadata> fms = fieldMetadataPrep(input, param);
-        Object targetField = param.getGroupByFields().get(0);
-        DuplicatedValueCheckAggregator aggregator = new DuplicatedValueCheckAggregator(targetField);
-        return input.groupByAndAggregate(new FieldList((String) targetField), aggregator, fms);
-    }
+        List<String> targetFields = param.getGroupByFields();
+        Boolean dupValWithStatusFlag = param.getCheckDupWithStatus();
 
-    private static Node checkDuplicatedValueWithStatus(Node input, DuplicatedValuesWithStatusCheckParam param) {
-        List<FieldMetadata> fms = fieldMetadataPrep(input, param);
-        Object statusField = param.getStatus();
-        Object targetField = param.getGroupByFields().get(0);
-        // filtering records with status = "ACTIVE"
-        String checkStatusExpression = String.format("%s.equals(\"%s\")", statusField, STATUS_ACTIVE);
-        Node resultNode = input //
-                .filter(checkStatusExpression, new FieldList(input.getFieldNames())) //
-                .retain(new FieldList((String) param.getKeyField(), (String) targetField));
-        // checking duplicates check for the filtered records
-        DuplicatedValueCheckAggregator aggregator = new DuplicatedValueCheckAggregator(targetField);
-        return resultNode.groupByAndAggregate(new FieldList((String) targetField), aggregator, fms);
+        // filter null values for fields to check duplicates for
+        String checkNullExpression = null;
+        if (targetFields.size() > 1) {
+            checkNullExpression = String.format("(%s != null && %s !=\"\") || (%s != null && %s !=\"\")",
+                    targetFields.get(0), targetFields.get(0), targetFields.get(1), targetFields.get(1));
+        } else {
+            if (targetFields.get(0) instanceof String) {
+                checkNullExpression = String.format("(%s != null && %s !=\"\")", targetFields.get(0),
+                        targetFields.get(0));
+            } else {
+                checkNullExpression = targetFields.get(0) + " != null  && " + "!" + targetFields.get(0)
+                        + ".equals(\"\")";
+            }
+        }
+        Node filterNullNode = input //
+                .filter(checkNullExpression, new FieldList(targetFields));
+        DuplicatedValueCheckAggregator aggregator = new DuplicatedValueCheckAggregator(targetFields,
+                dupValWithStatusFlag);
+        return filterNullNode.groupByAndAggregate(new FieldList(targetFields), aggregator, fms);
     }
 
     private static Node checkExceededCount(Node input, ExceededCountCheckParam param) {
         List<FieldMetadata> fms = fieldMetadataPrep(input, param);
-        boolean lessThanCntFlag = param.getCntLessThanThresholdFlag();
+        boolean isMaxThreshold = param.getCntLessThanThresholdFlag();
         long threshold = param.getExceedCountThreshold();
         Node inputNodeCount = input.count(TOTAL_COUNT);
-        inputNodeCount = inputNodeCount.apply(new ExceededCountCheckFunction(TOTAL_COUNT, threshold, lessThanCntFlag),
+        inputNodeCount = inputNodeCount.apply(new ExceededCountCheckFunction(TOTAL_COUNT, threshold, isMaxThreshold),
                 new FieldList(TOTAL_COUNT), fms,
                 new FieldList(DataCloudConstants.CHK_ATTR_CHK_CODE, DataCloudConstants.CHK_ATTR_ROW_ID,
                         DataCloudConstants.CHK_ATTR_GROUP_ID, DataCloudConstants.CHK_ATTR_CHK_FIELD,
@@ -112,10 +112,17 @@ public final class CheckUtils {
 
     private static Node checkEmptyField(Node input, EmptyFieldCheckParam param) {
         List<FieldMetadata> fms = fieldMetadataPrep(input, param);
-        Object keyField = param.getKeyField();
-        Object checkNullField = param.getCheckEmptyField();
-        Node nullFieldCheck = input.apply(new CheckFieldNotEmptyFunction(checkNullField, keyField),
-                new FieldList((String) checkNullField, (String) keyField), fms,
+        List<String> keyField = param.getIdentifierFields();
+        String checkEmptyField = param.getCheckEmptyField().toString();
+        List<String> listOfFields = new ArrayList<String>();
+        listOfFields.add((String) checkEmptyField);
+        for (int i = 0; i < keyField.size(); i++) {
+            if (!listOfFields.contains(keyField.get(i))) {
+                listOfFields.add(keyField.get(i));
+            }
+        }
+        Node nullFieldCheck = input.apply(new CheckFieldNotEmptyFunction(checkEmptyField, keyField),
+                new FieldList(listOfFields), fms,
                 new FieldList(DataCloudConstants.CHK_ATTR_CHK_CODE, DataCloudConstants.CHK_ATTR_ROW_ID,
                         DataCloudConstants.CHK_ATTR_GROUP_ID, DataCloudConstants.CHK_ATTR_CHK_FIELD,
                         DataCloudConstants.CHK_ATTR_CHK_VALUE, DataCloudConstants.CHK_ATTR_CHK_MSG));
@@ -124,13 +131,10 @@ public final class CheckUtils {
 
     private static Node checkUnderPopulatedField(Node input, UnderPopulatedFieldCheckParam param) {
         List<FieldMetadata> fms = fieldMetadataPrep(input, param);
-        Object targetField = param.getGroupByFields().get(0);
+        String targetField = param.getGroupByFields().get(0);
         double threshold = param.getThreshold();
         Node inputTotalCount = input.count(TOTAL_COUNT) //
                 .renamePipe("TotalCount");
-        if (StringUtils.isEmpty("")) {
-
-        }
         // filtering required field to check having empty/null value
         String checkStatusExpression = String.format("%s != null && %s !=\"\"", targetField, targetField);
         Node resultNode = input //
@@ -148,26 +152,36 @@ public final class CheckUtils {
         return combinedResult;
     }
 
-    private static Node checkOutOfCoverageValForCol(Node input, IncompleteCoverageForColCheckParam param) {
+    private static Node checkIncompleteCoverageForCol(Node input, IncompleteCoverageForColChkParam param) {
         List<FieldMetadata> fms = fieldMetadataPrep(input, param);
-        Object targetField = param.getGroupByFields().get(0);
+        String targetField = param.getGroupByFields().get(0);
         List<Object> expectedValues = param.getExpectedFieldValues();
         Node groupedInput = input //
-                .groupByAndLimit(new FieldList((String) targetField), 1) //
+                .groupByAndLimit(new FieldList(targetField), 1) //
                 .addColumnWithFixedValue(DUMMY_GROUP, DUMMY_VALUE, String.class);
         IncompleteCoverageColCheckAggregator aggregator = new IncompleteCoverageColCheckAggregator(targetField,
                 expectedValues);
         return groupedInput.groupByAndAggregate(new FieldList(DUMMY_GROUP), aggregator, fms);
     }
 
-    private static Node checkOutOfCoverageValForRow(Node input, IncompleteCoverageForRowCheckParam param) {
+    private static Node checkOutOfCoverageValForRow(Node input, OutOfCoverageForRowChkParam param) {
         List<FieldMetadata> fms = fieldMetadataPrep(input, param);
-        Object keyField = param.getKeyField();
-        Object targetField = param.getGroupByFields().get(0);
+        String keyField = param.getKeyField();
+        List<String> listOfFields = new ArrayList<String>();
+        String targetField = param.getGroupByFields().get(0);
+        listOfFields.add(targetField.toString());
+        if (keyField.contains(",")) {
+            String[] keyFieldList = keyField.split(",");
+            for(int i = 0; i < keyFieldList.length; i++) {
+                if (!listOfFields.contains(keyFieldList[i])) {
+                    listOfFields.add(keyFieldList[i]);
+                }
+            }
+        }
         List<Object> expectedFieldValues = param.getExpectedFieldValues();
         Node outOfCoverageRows = input.apply(
                 new IncompleteCoverageRowCheckFunction(targetField, expectedFieldValues, keyField),
-                new FieldList((String) targetField, (String) keyField), fms,
+                new FieldList(listOfFields), fms,
                 new FieldList(DataCloudConstants.CHK_ATTR_CHK_CODE, DataCloudConstants.CHK_ATTR_ROW_ID,
                         DataCloudConstants.CHK_ATTR_GROUP_ID, DataCloudConstants.CHK_ATTR_CHK_FIELD,
                         DataCloudConstants.CHK_ATTR_CHK_VALUE, DataCloudConstants.CHK_ATTR_CHK_MSG));
@@ -176,10 +190,10 @@ public final class CheckUtils {
 
     private static Node checkDiffVersionDomOnlyCount(List<Node> input, ExceedDomDiffBetwenVersionChkParam param) {
         List<FieldMetadata> fms = fieldMetadataPrep(input.get(0), param);
-        Object prevNotNullField = param.getPrevVersionNotEmptyField();
-        Object currNotNullField = param.getCurrVersionNotEmptyField();
-        Object prevNullField = param.getPrevVersionEmptyField();
-        Object currNullField = param.getCurrVersionEmptyField();
+        String prevNotNullField = param.getPrevVersionNotEmptyField().toString();
+        String currNotNullField = param.getCurrVersionNotEmptyField().toString();
+        String prevNullField = param.getPrevVersionEmptyField().toString();
+        String currNullField = param.getCurrVersionEmptyField().toString();
         String checkPrevVersionDomainOnly = String.format(
                 "(%s != \"\") && (%s != null) && ((%s == null) || (%s == \"\"))", prevNotNullField, prevNotNullField,
                 prevNullField, prevNullField);

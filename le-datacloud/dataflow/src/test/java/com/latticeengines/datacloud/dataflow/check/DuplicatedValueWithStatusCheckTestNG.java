@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValuesWithStatusCheckParam;
+import com.latticeengines.domain.exposed.datacloud.check.DuplicatedValueCheckParam;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class DuplicatedValueWithStatusCheckTestNG extends DataCloudDataFlowFunctionalTestNGBase {
@@ -53,10 +53,11 @@ public class DuplicatedValueWithStatusCheckTestNG extends DataCloudDataFlowFunct
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
 
-        DuplicatedValuesWithStatusCheckParam checkParam = new DuplicatedValuesWithStatusCheckParam();
+        DuplicatedValueCheckParam checkParam = new DuplicatedValueCheckParam();
         checkParam.setGroupByFields(Collections.singletonList("Key"));
         checkParam.setKeyField("Id");
         checkParam.setStatus("Status");
+        checkParam.setCheckDupWithStatus(true);
         TestCheckConfig config = new TestCheckConfig(checkParam);
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;

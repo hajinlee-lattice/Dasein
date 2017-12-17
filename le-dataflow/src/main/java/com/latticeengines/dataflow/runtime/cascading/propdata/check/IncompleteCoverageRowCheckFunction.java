@@ -22,11 +22,11 @@ public class IncompleteCoverageRowCheckFunction extends BaseOperation implements
 
     private static final long serialVersionUID = 2409292458923849875L;
     private static final Log log = LogFactory.getLog(IncompleteCoverageRowCheckFunction.class);
-    private Object checkField;
+    private String checkField;
     private List<Object> coverageFields;
-    private Object keyField;
+    private String keyField;
 
-    public IncompleteCoverageRowCheckFunction(Object checkField, List<Object> coverageFields, Object keyField) {
+    public IncompleteCoverageRowCheckFunction(String checkField, List<Object> coverageFields, String keyField) {
         super(generateFieldDeclaration());
         this.checkField = checkField;
         this.coverageFields = coverageFields;
@@ -38,19 +38,32 @@ public class IncompleteCoverageRowCheckFunction extends BaseOperation implements
         TupleEntry arguments = functionCall.getArguments();
         Tuple result = Tuple.size(getFieldDeclaration().size());
         try {
-            Object checkCoverageField = arguments.getObject(checkField.toString());
-            Object keyFieldVal = arguments.getObject(keyField.toString());
-            if (checkCoverageField instanceof String) {
-                if (StringUtils.isEmpty(checkCoverageField.toString())
-                        || !coverageFields.contains(checkCoverageField)) {
+            Object chkCoveragFieldVal = arguments.getObject(checkField);
+            Object keyFieldVal = "";
+            if (!keyField.contains(",")) {
+                keyFieldVal = arguments.getObject(keyField);
+            } else {
+                String[] keyFieldList = keyField.split(",");
+                for (int i = 0; i < keyFieldList.length; i++) {
+                    if ((arguments.getObject(keyFieldList[i]) != null) && (arguments.getObject(keyFieldList[i]) != ""))
+                        if (keyFieldVal == "") {
+                            keyFieldVal = keyFieldVal + arguments.getObject(keyFieldList[i]).toString();
+                        } else {
+                            keyFieldVal = keyFieldVal + "," + arguments.getObject(keyFieldList[i]).toString();
+                        }
+                }
+            }
+            if (chkCoveragFieldVal instanceof String) {
+                if (StringUtils.isEmpty(chkCoveragFieldVal.toString())
+                        || !coverageFields.contains(chkCoveragFieldVal)) {
                     functionCall.getOutputCollector()
-                            .add(setTupleVal(result, keyFieldVal, checkField, checkCoverageField));
+                            .add(setTupleVal(result, keyFieldVal, checkField, chkCoveragFieldVal));
                 }
             } else {
-                if (checkCoverageField == "" || checkCoverageField == null
-                        || !coverageFields.contains(checkCoverageField)) {
+                if (chkCoveragFieldVal == "" || chkCoveragFieldVal == null
+                        || !coverageFields.contains(chkCoveragFieldVal)) {
                     functionCall.getOutputCollector()
-                            .add(setTupleVal(result, keyFieldVal, checkField, checkCoverageField));
+                            .add(setTupleVal(result, keyFieldVal, checkField, chkCoveragFieldVal));
                 }
             }
 

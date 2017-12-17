@@ -1,5 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata.check;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.check.CheckCode;
 
@@ -17,12 +20,13 @@ public class CheckFieldPopulationThresholdFunction extends BaseOperation impleme
     private static final long serialVersionUID = 1798670131716639327L;
     private String numOfRecords;
     private double populatePercentThreshold;
-    private Object checkField;
+    private String checkField;
     private String numOfPopulatedRec;
+    private static final Log log = LogFactory.getLog(CheckFieldPopulationThresholdFunction.class);
 
     public CheckFieldPopulationThresholdFunction(String numOfRecords, String numOfPopulatedRec,
             double populatePercentThreshold,
-            Object checkField) {
+            String checkField) {
         super(generateFieldDeclaration());
         this.numOfRecords = numOfRecords;
         this.populatePercentThreshold = populatePercentThreshold;
@@ -62,6 +66,7 @@ public class CheckFieldPopulationThresholdFunction extends BaseOperation impleme
                 functionCall.getOutputCollector().add(result);
             }
         } catch (Exception e) {
+            log.info("Exception raised due to : " + e);
         }
     }
 

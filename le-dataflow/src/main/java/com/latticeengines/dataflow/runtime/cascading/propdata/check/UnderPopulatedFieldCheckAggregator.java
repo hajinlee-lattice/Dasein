@@ -50,15 +50,15 @@ public class UnderPopulatedFieldCheckAggregator extends BaseAggregator<UnderPopu
     @Override
     protected Context initializeContext(TupleEntry group) {
         Context context = new Context();
-        Object grpObj = group.getObject(checkField);
-        if (grpObj == null) {
+        Object grpObjVal = group.getObject(checkField);
+        if (grpObjVal == null) {
             return context;
         }
-        if (grpObj instanceof Utf8) {
-            context.value = grpObj.toString();
+        if (grpObjVal instanceof Utf8) {
+            context.value = grpObjVal.toString();
             context.count += 1;
-        } else if (grpObj instanceof String) {
-            context.value = (String) grpObj;
+        } else if (grpObjVal instanceof String) {
+            context.value = (String) grpObjVal;
             context.count += 1;
         }
         return context;

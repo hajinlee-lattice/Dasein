@@ -8,7 +8,7 @@ public enum CheckCode {
     BelowExpectedCount("Total count of records below [%s]"), //
     EmptyField("Field [%s] should not be null or empty."), //
     UnderPopulatedField("Population of field [%s] is [%s] percent, lower than [%s] percent"), //
-    OutOfCoverageValForCol("No record found for field [%s] with group value [%s]."), //
+    IncompleteCoverageForCol("No record found for field [%s] with group value [%s]."), //
     OutOfCoverageValForRow("Row with id [%s] for field [%s] has value [%s] and it doesnt cover expected group values."), //
     DuplicatedValuesWithStatus("Found duplicated value [%s] in the the field [%s] for status [%s]"), //
     ExceededVersionDiffForDomOnly(
