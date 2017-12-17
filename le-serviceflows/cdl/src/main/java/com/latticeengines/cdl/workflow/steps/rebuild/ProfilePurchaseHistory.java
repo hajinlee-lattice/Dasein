@@ -138,9 +138,14 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     private void loadProductMap() {
         Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedProduct);
+                TableRoleInCollection.ConsolidatedProduct, inactive);
         if (productTable == null) {
-            throw new IllegalStateException("Cannot find the product table in default collection");
+            log.info("Did not find product table in inactive version.");
+            productTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedProduct, active);
+            if (productTable == null) {
+                throw new IllegalStateException("Cannot find the product table in both versions");
+            }
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));

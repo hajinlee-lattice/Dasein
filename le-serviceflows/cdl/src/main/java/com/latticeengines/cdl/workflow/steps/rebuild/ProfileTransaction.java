@@ -51,6 +51,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     public static final String BEAN_NAME = "profileTransaction";
 
     private CustomerSpace customerSpace;
+    private DataCollection.Version inactive;
+    private DataCollection.Version active;
     private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep;
     private Table rawTable, dailyTable, periodTable;
     private Map<String, Product> productMap;
@@ -71,15 +73,15 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
-        DataCollection.Version inactiveVersion = getObjectFromContext(CDL_INACTIVE_VERSION,
-                DataCollection.Version.class);
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
 
         rawTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedRawTransaction, inactiveVersion);
+                TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         dailyTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedDailyTransaction, inactiveVersion);
+                TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
         periodTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedPeriodTransaction, inactiveVersion);
+                TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
 
         sortedDailyTablePrefix = TableRoleInCollection.AggregatedTransaction.name();
         sortedPeriodTablePrefix = TableRoleInCollection.AggregatedPeriodTransaction.name();
@@ -144,9 +146,14 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private void loadProductMap() {
         Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedProduct);
+                TableRoleInCollection.ConsolidatedProduct, inactive);
         if (productTable == null) {
-            throw new IllegalStateException("Cannot find the product table in default collection");
+            log.info("Did not find product table in inactive version.");
+            productTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedProduct, active);
+            if (productTable == null) {
+                throw new IllegalStateException("Cannot find the product table in both versions");
+            }
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
