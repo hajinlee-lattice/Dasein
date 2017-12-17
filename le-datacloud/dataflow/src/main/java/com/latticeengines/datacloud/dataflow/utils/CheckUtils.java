@@ -81,13 +81,7 @@ public final class CheckUtils {
             checkNullExpression = String.format("(%s != null && %s !=\"\") || (%s != null && %s !=\"\")",
                     targetFields.get(0), targetFields.get(0), targetFields.get(1), targetFields.get(1));
         } else {
-            if (targetFields.get(0) instanceof String) {
-                checkNullExpression = String.format("(%s != null && %s !=\"\")", targetFields.get(0),
-                        targetFields.get(0));
-            } else {
-                checkNullExpression = targetFields.get(0) + " != null  && " + "!" + targetFields.get(0)
-                        + ".equals(\"\")";
-            }
+            checkNullExpression = targetFields.get(0) + " != null  && " + "!" + targetFields.get(0) + ".equals(\"\")";
         }
         Node filterNullNode = input //
                 .filter(checkNullExpression, new FieldList(targetFields));

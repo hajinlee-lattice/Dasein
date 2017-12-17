@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
@@ -141,7 +140,7 @@ public class AccountMasterSeedCheckTestNG
                     "Row with id [DUNS17] for field [DomainSource] has value [null] and it doesnt cover expected group values." }, //
             { "OutOfCoverageValForRow", null, "", "DomainSource", "Other",
                     "Row with id [] for field [DomainSource] has value [Other] and it doesnt cover expected group values." }, //
-            { "OutOfCoverageValForCol", null, null, "DomainSource", "Orb,Manual",
+            { "IncompleteCoverageForCol", null, null, "DomainSource", "Orb,Manual",
                     "No record found for field [DomainSource] with group value [Orb,Manual]." }, //
             { "EmptyField", "null,DUNS16", null, "Domain", null, "Field [Domain] should not be null or empty." }, //
             { "EmptyField", "null,DUNS17", null, "Domain", null, "Field [Domain] should not be null or empty." }, //
