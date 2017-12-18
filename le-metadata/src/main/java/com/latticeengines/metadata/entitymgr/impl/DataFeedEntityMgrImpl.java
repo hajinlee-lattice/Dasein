@@ -153,7 +153,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
         datafeed.setActiveExecutionId(execution.getPid());
         datafeed.setActiveExecution(execution);
-        datafeed.setStatus(Status.Consolidating);
+        datafeed.setStatus(Status.ProcessAnalyzing);
         tasks = datafeed.getTasks();
         tasks.forEach(task -> {
             datafeedTaskEntityMgr.update(task, new Date());
@@ -191,7 +191,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         log.info(String.format("restarting execution %s", execution));
         datafeedExecutionEntityMgr.update(execution);
 
-        datafeed.setStatus(Status.Consolidating);
+        datafeed.setStatus(Status.ProcessAnalyzing);
         log.info(String.format("restarting execution: updating data feed to %s", datafeed));
         update(datafeed);
         return execution;
@@ -211,7 +211,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setStatus(datafeedStatus);
-        if (DataFeedExecution.Status.Consolidated == status && Status.Active == datafeedStatus) {
+        if (DataFeedExecution.Status.ProcessAnalyzed == status && Status.Active == datafeedStatus) {
             datafeed.setLastPublished(new Date());
         }
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));
@@ -246,24 +246,24 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         }
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public DataFeedProfile startProfile(String datafeedName) {
-        DataFeed datafeed = findByNameInflated(datafeedName);
-        if (datafeed == null) {
-            return null;
-        }
-        Long executionId = datafeed.getActiveExecutionId();
-        DataFeedProfile profile = new DataFeedProfile();
-        profile.setDataFeed(datafeed);
-        profile.setLatestDataFeedExecutionId(executionId);
-        datafeedProfileEntityMgr.create(profile);
-        datafeed.setActiveProfileId(profile.getPid());
-        datafeed.setActiveProfile(profile);
-        datafeed.setStatus(Status.Profiling);
-        update(datafeed);
-        return profile;
-    }
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRED)
+//    public DataFeedProfile startProfile(String datafeedName) {
+//        DataFeed datafeed = findByNameInflated(datafeedName);
+//        if (datafeed == null) {
+//            return null;
+//        }
+//        Long executionId = datafeed.getActiveExecutionId();
+//        DataFeedProfile profile = new DataFeedProfile();
+//        profile.setDataFeed(datafeed);
+//        profile.setLatestDataFeedExecutionId(executionId);
+//        datafeedProfileEntityMgr.create(profile);
+//        datafeed.setActiveProfileId(profile.getPid());
+//        datafeed.setActiveProfile(profile);
+//        datafeed.setStatus(Status.Profiling);
+//        update(datafeed);
+//        return profile;
+//    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)

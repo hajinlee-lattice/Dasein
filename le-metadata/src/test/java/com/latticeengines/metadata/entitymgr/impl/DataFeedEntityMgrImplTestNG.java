@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
@@ -132,7 +131,7 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
         assertEquals(df.getExecutions().size(), 1);
-        assertEquals(df.getStatus(), Status.Consolidating);
+        assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
         DataFeedExecution exec = df.getExecutions().get(0);
         assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
@@ -143,17 +142,15 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
     @Test(groups = "functional", dependsOnMethods = "startExecution")
     public void finishExecution() {
         DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(DATA_FEED_NAME,
-                DataFeedExecution.Status.Consolidated, Status.InitialConsolidated);
-        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Consolidated);
+                DataFeedExecution.Status.ProcessAnalyzed, Status.Active);
+        assertEquals(exec1.getStatus(), DataFeedExecution.Status.ProcessAnalyzed);
 
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
         assertEquals(df.getExecutions().size(), 1);
-        assertEquals(df.getStatus(), Status.InitialConsolidated);
-        assertNull(df.getLastPublished());
+        assertEquals(df.getStatus(), Status.Active);
         assertEquals(exec1.getStatus(), df.getExecutions().get(0).getStatus());
         assertEquals(exec1.getImports().size(), df.getTasks().size());
-
     }
 
     @Test(groups = "functional", dependsOnMethods = "finishExecution")
@@ -167,21 +164,12 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
         assertEquals(df.getExecutions().size(), 1);
-        assertEquals(df.getStatus(), Status.Consolidating);
+        assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
         DataFeedExecution exec = df.getExecutions().get(0);
         assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
         assertEquals(exec.getImports().size(), exec1.getImports().size());
         assertEquals(exec.getImports().get(0).getDataTable().getAttributes().size(), 1);
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "retryLatestExecution")
-    public void startProfile() {
-        DataFeedProfile profile = datafeedEntityMgr.startProfile(DATA_FEED_NAME);
-        DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
-        assertEquals(df.getStatus(), Status.Profiling);
-        assertEquals(df.getActiveProfileId(), profile.getPid());
-        assertEquals(df.getActiveExecutionId(), profile.getLatestDataFeedExecutionId());
     }
 
 }

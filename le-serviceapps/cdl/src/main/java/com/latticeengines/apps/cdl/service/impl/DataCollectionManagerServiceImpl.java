@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -44,7 +43,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
             return true;
         }
 
-        if ((status == DataFeed.Status.Consolidating) || (status == DataFeed.Status.Profiling)) {
+        if ((status == DataFeed.Status.ProcessAnalyzing)) {
             quiesceDataFeed(customerSpaceStr, df);
         }
 
@@ -66,7 +65,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         if ((status == DataFeed.Status.Deleting) || (status == DataFeed.Status.Initing)
                 || (status == DataFeed.Status.InitialLoaded)) {
             return true;
-        } else if ((df.getStatus() == DataFeed.Status.Profiling) || (df.getStatus() == DataFeed.Status.Consolidating)) {
+        } else if (df.getStatus() == DataFeed.Status.ProcessAnalyzing) {
             return false;
         }
         resetBatchStore(customerSpaceStr, entity);
@@ -93,11 +92,6 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         if (exec != null) {
             stopWorkflow(customerSpaceStr, exec.getWorkflowId());
             dataFeedProxy.finishExecution(customerSpaceStr, DataFeed.Status.Active.getName());
-        }
-
-        DataFeedProfile profile = df.getActiveProfile();
-        if (profile != null) {
-            stopWorkflow(customerSpaceStr, profile.getWorkflowId());
         }
     }
 

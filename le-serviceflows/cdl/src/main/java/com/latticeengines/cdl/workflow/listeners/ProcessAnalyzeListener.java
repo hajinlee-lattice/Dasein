@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -53,11 +54,18 @@ public class ProcessAnalyzeListener extends LEJobListener {
         if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.info(String.format("Workflow failed. Update datafeed status for customer %s with status of %s",
                     customerSpace, initialDataFeedStatus));
-            dataFeedProxy.updateDataFeedStatus(customerSpace, initialDataFeedStatus);
+            DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);
+            if (execution.getStatus() != DataFeedExecution.Status.Failed) {
+                throw new RuntimeException("Can't fail execution");
+            }
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info(String.format("Workflow completed. Update datafeed status for customer %s with status of %s",
                     customerSpace, Status.Active.getName()));
-            dataFeedProxy.updateDataFeedStatus(customerSpace, Status.Active.getName());
+            DataFeedExecution execution = dataFeedProxy.finishExecution(customerSpace, initialDataFeedStatus);
+            log.info(String.format("trying to finish running execution %s", execution));
+            if (execution.getStatus() != DataFeedExecution.Status.ProcessAnalyzed) {
+                throw new RuntimeException("Can't finish execution");
+            }
             cleanupInactiveVersion();
         } else {
             log.warn("Workflow ended in an unknown state.");
@@ -81,7 +89,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
         if (TableRoleInCollection.AnalyticPurchaseState.equals(role)) {
             return true;
         }
-        for (BusinessEntity entity: BusinessEntity.values()) {
+        for (BusinessEntity entity : BusinessEntity.values()) {
             if (role.equals(entity.getServingStore())) {
                 return true;
             }

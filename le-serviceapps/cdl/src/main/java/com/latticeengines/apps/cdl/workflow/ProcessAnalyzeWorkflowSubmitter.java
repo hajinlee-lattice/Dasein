@@ -73,7 +73,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
 
         DataFeedExecution execution = datafeed.getActiveExecution();
-        // TODO: check data feed status for if process analyze is allowed
         if (execution != null && DataFeedExecution.Status.Started.equals(execution.getStatus())) {
             if (execution.getWorkflowId() == null) {
                 throw new RuntimeException(

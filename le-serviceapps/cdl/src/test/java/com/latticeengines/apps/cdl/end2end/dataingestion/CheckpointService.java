@@ -454,7 +454,7 @@ public class CheckpointService {
     private Long createExecution(long feedPid, long workflowPid) {
         String sql = "INSERT INTO `DATAFEED_EXECUTION` ";
         sql += "(`FK_FEED_ID`, `WORKFLOW_ID`, `STATUS`) VALUES ";
-        sql += String.format("(%d, %d, '%s')", feedPid, workflowPid, DataFeedExecution.Status.Consolidated.name());
+        sql += String.format("(%d, %d, '%s')", feedPid, workflowPid, DataFeedExecution.Status.ProcessAnalyzed.name());
         jdbcTemplate.execute(sql);
 
         sql = "SELECT `PID` FROM `DATAFEED_EXECUTION` WHERE `FK_FEED_ID` = " + feedPid;

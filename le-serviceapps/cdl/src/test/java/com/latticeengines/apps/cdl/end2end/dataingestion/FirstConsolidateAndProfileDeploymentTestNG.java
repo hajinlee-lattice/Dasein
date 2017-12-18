@@ -89,7 +89,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(
                 BusinessEntity.Product.getServingStore(), (long) PRODUCT_IMPORT_SIZE_1);
         verifyConsolidateReport(consolidateAppId, expectedCounts);
-        verifyDataFeedStatus(DataFeed.Status.InitialConsolidated);
+        verifyDataFeedStatus(DataFeed.Status.Active);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
         Assert.assertEquals(numAccounts, ACCOUNT_IMPORT_SIZE_1);

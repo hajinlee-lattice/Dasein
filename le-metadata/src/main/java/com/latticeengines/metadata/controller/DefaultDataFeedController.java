@@ -103,13 +103,13 @@ public class DefaultDataFeedController {
         return datafeedService.retryLatestExecution(customerSpace, null);
     }
 
-    @RequestMapping(value = "/startprofile", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "start data feed profile")
-    public DataFeedProfile startProfile(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.startProfile(customerSpace, "");
-    }
+//    @RequestMapping(value = "/startprofile", method = RequestMethod.POST, headers = "Accept=application/json")
+//    @ResponseBody
+//    @ApiOperation(value = "start data feed profile")
+//    public DataFeedProfile startProfile(@PathVariable String customerSpace) {
+//        customerSpace = CustomerSpace.parse(customerSpace).toString();
+//        return datafeedService.startProfile(customerSpace, "");
+//    }
 
     @RequestMapping(value = "/status/{initialDataFeedStatus}/finishprofile", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

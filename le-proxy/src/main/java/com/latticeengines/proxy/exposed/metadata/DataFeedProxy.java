@@ -113,7 +113,6 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return get("getDataFeedTaskById", url, DataFeedTask.class);
     }
 
-    @SuppressWarnings("unchecked")
     public List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{entity}/list",
                 shortenCustomerSpace(customerSpace), entity);
