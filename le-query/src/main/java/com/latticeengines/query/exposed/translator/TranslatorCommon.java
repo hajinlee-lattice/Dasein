@@ -30,6 +30,7 @@ public class TranslatorCommon {
     static final String TOTAL_QUANTITY = InterfaceName.TotalQuantity.name();
     static final String TRXN = "trxn";
     static final String APS = "aps";
+    static final String TRXN_REVENUE = "trxnrevenue";
     static final String AMOUNT_AGG = "amountagg";
     static final String QUANTITY_AGG = "quantityagg";
     static final String AMOUNT_VAL = "amountval";
@@ -37,6 +38,7 @@ public class TranslatorCommon {
     static final String KEYS = "keys";
     static final String TRXN_PERIOD = "trxnbyperiod";
     static final String NUMBERS = "numbers";
+    static final String REVENUE = "revenue";
     static final String NUMBER = "n";
     static final String DUMMY = "dummy";
     static final String PERIOD_RANGE = "periodRange";
@@ -72,6 +74,11 @@ public class TranslatorCommon {
     static final EntityPath<String> keysPath = new PathBuilder<>(String.class, KEYS);
     static final StringPath keysAccountId = Expressions.stringPath(keysPath, ACCOUNT_ID);
     static final StringPath keysPeriodId = Expressions.stringPath(keysPath, PERIOD_ID);
+
+    static final EntityPath<String> revenuePath = new PathBuilder<>(String.class, TRXN_REVENUE);
+    static final StringPath revenueAccountId = Expressions.stringPath(revenuePath, ACCOUNT_ID);
+    static final StringPath revenuePeriodId = Expressions.stringPath(revenuePath, PERIOD_ID);
+    static final StringPath revenueRevenue = Expressions.stringPath(revenuePath, REVENUE);
 
     BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
         AggregationType aggregateType = aggregationFilter.getAggregationType();

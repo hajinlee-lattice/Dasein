@@ -56,27 +56,30 @@ public class EventQueryTranslator extends TranslatorCommon {
                                             AttributeRepository repository,
                                             Restriction restriction,
                                             String periodName,
+                                            int periodCount,
                                             QueryBuilder queryBuilder) {
         return translateRestriction(queryFactory, repository, restriction, true, false,
-                                    periodName, queryBuilder);
+                                    periodName, periodCount, queryBuilder);
     }
 
     public QueryBuilder translateForTraining(QueryFactory queryFactory,
                                              AttributeRepository repository,
                                              Restriction restriction,
                                              String periodName,
+                                             int periodCount,
                                              QueryBuilder queryBuilder) {
         return translateRestriction(queryFactory, repository, restriction, false, false,
-                                    periodName, queryBuilder);
+                                    periodName, periodCount, queryBuilder);
     }
 
     public QueryBuilder translateForEvent(QueryFactory queryFactory,
                                           AttributeRepository repository,
                                           Restriction restriction,
                                           String periodName,
+                                          int periodCount,
                                           QueryBuilder queryBuilder) {
         return translateRestriction(queryFactory, repository, restriction, false, true,
-                                    periodName, queryBuilder);
+                                    periodName, periodCount, queryBuilder);
     }
 
 
@@ -88,8 +91,13 @@ public class EventQueryTranslator extends TranslatorCommon {
         return repository.getTableName(AggregatedPeriodTransaction);
     }
 
+    protected BooleanExpression limitPeriodByNameAndCount(String period, int periodCount) {
+        return periodName.eq(period);
+    }
+
     @SuppressWarnings({"unchecked", "rawtype"})
-    private SubQuery translateAllKeys(QueryFactory queryFactory, AttributeRepository repository, String period) {
+    private SubQuery translateAllKeys(QueryFactory queryFactory, AttributeRepository repository, String period,
+                                      int periodCount) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
         String txTableName = getPeriodTransactionTableName(repository);
@@ -98,7 +106,7 @@ public class EventQueryTranslator extends TranslatorCommon {
         SQLQuery periodRangeSubQuery = factory.query() //
                 .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
                 .from(tablePath) //
-                .where(periodName.eq(period)) //
+                .where(limitPeriodByNameAndCount(period, periodCount)) //
                 .groupBy(accountId);
 
         SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
@@ -402,6 +410,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                                               boolean isScoring,
                                               boolean isEvent,
                                               String periodName,
+                                              int periodCount,
                                               QueryBuilder builder) {
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
@@ -413,7 +422,7 @@ public class EventQueryTranslator extends TranslatorCommon {
             throw new RuntimeException("No period definition passed for event query.");
         }
 
-        builder.with(translateAllKeys(queryFactory, repository, period));
+        builder.with(translateAllKeys(queryFactory, repository, period, periodCount));
 
         // combine one leg behind restriction for event query, this is not needed for scoring and training
         if (isEvent) {

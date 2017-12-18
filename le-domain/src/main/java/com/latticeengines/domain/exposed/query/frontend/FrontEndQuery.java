@@ -65,6 +65,9 @@ public class FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.PERIOD_NAME)
     private String periodName;
 
+    @JsonProperty(FrontEndQueryConstants.PERIOD_COUNT)
+    private int periodCount = -1;
+
     public FrontEndRestriction getAccountRestriction() {
         return accountRestriction;
     }
@@ -167,6 +170,14 @@ public class FrontEndQuery {
 
     public void setPeriodName(String periodName) {
         this.periodName = periodName;
+    }
+
+    public int getPeriodCount() {
+        return periodCount;
+    }
+
+    public void setPeriodCount(int periodCount) {
+        this.periodCount = periodCount;
     }
 
     public void addLookups(BusinessEntity businessEntity, String... attrNames) {
