@@ -119,15 +119,15 @@ public enum JobStatus {
         switch (status) {
             case COMPLETED:
                 return JobStatus.COMPLETED;
-            case STARTING:
             case STARTED:
-                return JobStatus.RUNNING;
             case STOPPING:
+                return JobStatus.RUNNING;
             case STOPPED:
                 return JobStatus.CANCELLED;
             case ABANDONED:
             case FAILED:
                 return JobStatus.FAILED;
+            case STARTING:
             case UNKNOWN:
             default:
                 return JobStatus.PENDING;

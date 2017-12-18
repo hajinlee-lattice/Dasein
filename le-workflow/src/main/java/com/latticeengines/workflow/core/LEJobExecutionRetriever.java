@@ -23,8 +23,7 @@ public class LEJobExecutionRetriever {
 
     @Bean
     public LEJobExecutionRetriever leJobExecutionRetriever() {
-        LEJobExecutionRetriever leJobExecutionRetriever = new LEJobExecutionRetriever();
-        return leJobExecutionRetriever;
+        return new LEJobExecutionRetriever();
     }
 
     public void setJobInstanceDao(JobInstanceDao jobInstanceDao){
@@ -43,7 +42,11 @@ public class LEJobExecutionRetriever {
         this.executionContextDao = executionContextDao;
     }
 
-    public JobExecution getJobExecution(Long executionId){
+    public JobExecution getJobExecution(Long executionId) {
+        return getJobExecution(executionId, true);
+    }
+
+    public JobExecution getJobExecution(Long executionId, Boolean includeJobSteps) {
         if (executionId == null) {
             return null;
         }
@@ -52,9 +55,10 @@ public class LEJobExecutionRetriever {
             return null;
         }
         JobInstance jobInstance = jobInstanceDao.getJobInstance(jobExecution);
-        stepExecutionDao.addStepExecutions(jobExecution);
+        if (includeJobSteps) {
+            stepExecutionDao.addStepExecutions(jobExecution);
+        }
         jobExecution.setJobInstance(jobInstance);
         return jobExecution;
     }
-
 }

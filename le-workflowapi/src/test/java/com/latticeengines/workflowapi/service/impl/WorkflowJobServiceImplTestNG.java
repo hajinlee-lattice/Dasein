@@ -1,20 +1,12 @@
 package com.latticeengines.workflowapi.service.impl;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.repository.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -32,6 +24,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
@@ -53,6 +46,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     private JobInstanceDao jobInstanceDao;
 
     private JobExecutionDao jobExecutionDao;
+
+    private StepExecutionDao stepExecutionDao;
 
     private WorkflowJob workflowJob1;
     private WorkflowJob workflowJob11;
@@ -122,7 +117,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
     public void testGetJobsByTenant() {
         mockWorkflowContainerService();
-        List<Job> jobs = workflowJobService.getJobsByTenant(tenant.getPid());
+        List<Job> jobs = workflowJobService.getJobsByTenantPid(tenant.getPid());
         Assert.assertEquals(jobs.size(), 5);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
         Assert.assertEquals(jobs.get(0).getJobType(), "application_10000");
@@ -136,27 +131,47 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(4).getJobType(), "application_20000");
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobsByTenant" })
+    @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobsByTenant" },
+            expectedExceptions = { RuntimeException.class },
+            expectedExceptionsMessageRegExp = "No tenant found with id .*")
     public void testGetJobs() {
         mockWorkflowService();
+        setupLEJobExecutionRetriever();
         List<Long> workflowExecutionIds = new ArrayList<>(workflowIds.values());
         List<Job> jobs = workflowJobService.getJobs(workflowExecutionIds);
         Assert.assertEquals(jobs.size(), workflowJobEntityMgr.findAll().size());
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
+        Assert.assertEquals(jobs.get(0).getSteps().size(), 2);
+        Assert.assertEquals(jobs.get(0).getSteps().get(0).getJobStepType(), "step1_2");
         Assert.assertEquals(jobs.get(1).getApplicationId(), "application_10001");
+        Assert.assertEquals(jobs.get(1).getSteps().size(), 3);
+        Assert.assertEquals(jobs.get(1).getSteps().get(1).getJobStepType(), "step11_2");
         Assert.assertEquals(jobs.get(2).getApplicationId(), "application_10002");
+        Assert.assertEquals(jobs.get(2).getSteps().size(), 1);
+        Assert.assertEquals(jobs.get(2).getSteps().get(0).getJobStepType(), "step12_1");
         Assert.assertEquals(jobs.get(3).getApplicationId(), "application_10003");
+        Assert.assertEquals(jobs.get(3).getSteps().size(), 3);
+        Assert.assertEquals(jobs.get(3).getSteps().get(2).getJobStepType(), "step13_1");
         Assert.assertEquals(jobs.get(4).getApplicationId(), "application_20000");
+        Assert.assertEquals(jobs.get(4).getSteps().size(), 9);
+        Assert.assertEquals(jobs.get(4).getSteps().get(1).getJobStepType(), "step2_8");
+        Assert.assertEquals(jobs.get(5).getApplicationId(), "application_30000");
+        Assert.assertEquals(jobs.get(5).getSteps().size(), 1);
+        Assert.assertEquals(jobs.get(5).getSteps().get(0).getJobStepType(), "step3_1");
+        Assert.assertEquals(jobs.get(6).getApplicationId(), "application_30001");
+        Assert.assertEquals(jobs.get(6).getSteps().size(), 4);
+        Assert.assertEquals(jobs.get(6).getSteps().get(3).getJobStepType(), "step31_1");
 
         jobs = workflowJobService.getJobs(workflowExecutionIds, "application_10002");
         Assert.assertEquals(jobs.size(), 1);
         Assert.assertEquals(jobs.get(0).getJobType(), "application_10002");
-        jobs = workflowJobService.getJobs(workflowExecutionIds, "application_20000");
+        Assert.assertEquals(jobs.get(0).getSteps().size(), 1);
+        jobs = workflowJobService.getJobs(workflowExecutionIds, "application_20000", false);
         Assert.assertEquals(jobs.size(), 1);
         Assert.assertEquals(jobs.get(0).getJobType(), "application_20000");
+        Assert.assertNull(jobs.get(0).getSteps());
 
-        jobs = workflowJobService.getJobs(StringUtils.EMPTY, null, null, false, false,0L);
-        Assert.assertNull(jobs);
+        workflowJobService.getJobs(StringUtils.EMPTY, null, null, false, false, 0L);
         jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), null, null, false, false, 0L);
         Assert.assertEquals(jobs.size(), 5);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
@@ -165,7 +180,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(3).getApplicationId(), "application_10003");
         Assert.assertEquals(jobs.get(4).getApplicationId(), "application_20000");
 
-        Set<Long> testWorkflowIds1 = new HashSet<>();
+        List<Long> testWorkflowIds1 = new ArrayList<>();
         testWorkflowIds1.add(workflowIds.get(10000L));
         testWorkflowIds1.add(workflowIds.get(10001L));
         testWorkflowIds1.add(workflowIds.get(10002L));
@@ -207,13 +222,16 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
     public void testGetStepNames() {
         mockWorkflowService();
-        WorkflowExecutionId executionId = new WorkflowExecutionId(workflowIds.get(10000L));
-        List<String> stepNames = workflowJobService.getStepNames(executionId);
+        setupLEJobExecutionRetriever();
+        Long workflowId = workflowIds.get(10000L);
+        List<String> stepNames = workflowJobService.getStepNames(workflowId);
         Assert.assertNotNull(stepNames);
-        Assert.assertEquals(stepNames.size(), 0);
+        Assert.assertEquals(stepNames.size(), 2);
+        Assert.assertEquals(stepNames.get(0), "step1_2");
+        Assert.assertEquals(stepNames.get(1), "step1_1");
 
-        executionId = new WorkflowExecutionId(workflowIds.getOrDefault(90000L, 90000L));
-        Assert.assertNull(workflowJobService.getStepNames(executionId));
+        workflowId = workflowIds.getOrDefault(90000L, 90000L);
+        Assert.assertNull(workflowJobService.getStepNames(workflowId));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobs" })
@@ -289,11 +307,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     }
 
     private void createWorkflowJobs() {
-        List<WorkflowJob> jobs = workflowJobEntityMgr.findByTenant(tenant);
-        jobs.forEach(job -> workflowJobEntityMgr.delete(job));
-
         jobInstanceDao = new MapJobInstanceDao();
         jobExecutionDao = new MapJobExecutionDao();
+        stepExecutionDao = new MapStepExecutionDao();
 
         Map<String, String> inputContext = new HashMap<>();
         inputContext.put(WorkflowContextConstants.Inputs.JOB_TYPE, "testJob");
@@ -305,6 +321,10 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance1 = jobInstanceDao.createJobInstance(applicationId, jobParameters1);
         JobExecution jobExecution1 = new JobExecution(jobInstance1, jobParameters1, null);
         jobExecutionDao.saveJobExecution(jobExecution1);
+        List<StepExecution> steps = new ArrayList<>();
+        steps.add(new StepExecution("step1_1", jobExecution1));
+        steps.add(new StepExecution("step1_2", jobExecution1));
+        stepExecutionDao.saveStepExecutions(steps);
         workflowJob1 = new WorkflowJob();
         workflowJob1.setApplicationId(applicationId);
         workflowJob1.setInputContext(inputContext);
@@ -323,6 +343,11 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance11 = jobInstanceDao.createJobInstance(applicationId, jobParameters11);
         JobExecution jobExecution11 = new JobExecution(jobInstance11, jobParameters11, null);
         jobExecutionDao.saveJobExecution(jobExecution11);
+        steps.clear();
+        steps.add(new StepExecution("step11_1", jobExecution11));
+        steps.add(new StepExecution("step11_2", jobExecution11));
+        steps.add(new StepExecution("step11_3", jobExecution11));
+        stepExecutionDao.saveStepExecutions(steps);
         workflowJob11 = new WorkflowJob();
         workflowJob11.setApplicationId(applicationId);
         workflowJob11.setInputContext(inputContext);
@@ -341,6 +366,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance12 = jobInstanceDao.createJobInstance(applicationId, jobParameters12);
         JobExecution jobExecution12 = new JobExecution(jobInstance12, jobParameters12, null);
         jobExecutionDao.saveJobExecution(jobExecution12);
+        steps.clear();
+        steps.add(new StepExecution("step12_1", jobExecution12));
+        stepExecutionDao.saveStepExecutions(steps);
         workflowJob12 = new WorkflowJob();
         workflowJob12.setApplicationId(applicationId);
         workflowJob12.setInputContext(inputContext);
@@ -359,6 +387,11 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance13 = jobInstanceDao.createJobInstance(applicationId, jobParameters13);
         JobExecution jobExecution13 = new JobExecution(jobInstance13, jobParameters13, null);
         jobExecutionDao.saveJobExecution(jobExecution13);
+        steps.clear();
+        steps.add(new StepExecution("step13_1", jobExecution13));
+        steps.add(new StepExecution("step13_2", jobExecution13));
+        steps.add(new StepExecution("step13_3", jobExecution13));
+        stepExecutionDao.saveStepExecutions(steps);
         workflowJob13 = new WorkflowJob();
         workflowJob13.setApplicationId(applicationId);
         workflowJob13.setInputContext(inputContext);
@@ -377,6 +410,17 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance2 = jobInstanceDao.createJobInstance(applicationId, jobParameters2);
         JobExecution jobExecution2 = new JobExecution(jobInstance2, jobParameters2, null);
         jobExecutionDao.saveJobExecution(jobExecution2);
+        steps.clear();
+        steps.add(new StepExecution("step2_1", jobExecution2));
+        steps.add(new StepExecution("step2_2", jobExecution2));
+        steps.add(new StepExecution("step2_3", jobExecution2));
+        steps.add(new StepExecution("step2_4", jobExecution2));
+        steps.add(new StepExecution("step2_5", jobExecution2));
+        steps.add(new StepExecution("step2_6", jobExecution2));
+        steps.add(new StepExecution("step2_7", jobExecution2));
+        steps.add(new StepExecution("step2_8", jobExecution2));
+        steps.add(new StepExecution("step2_9", jobExecution2));
+        stepExecutionDao.saveStepExecutions(steps);
         workflowJob2 = new WorkflowJob();
         workflowJob2.setApplicationId(applicationId);
         workflowJob2.setInputContext(inputContext);
@@ -395,6 +439,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance3 = jobInstanceDao.createJobInstance(applicationId, jobParameters3);
         JobExecution jobExecution3 = new JobExecution(jobInstance3, jobParameters3, null);
         jobExecutionDao.saveJobExecution(jobExecution3);
+        steps.clear();
+        steps.add(new StepExecution("step3_1", jobExecution3));
+        stepExecutionDao.saveStepExecutions(steps);
         workflowJob3 = new WorkflowJob();
         workflowJob3.setApplicationId(applicationId);
         workflowJob3.setInputContext(inputContext);
@@ -412,6 +459,12 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         JobInstance jobInstance31 = jobInstanceDao.createJobInstance(applicationId, jobParameters31);
         JobExecution jobExecution31 = new JobExecution(jobInstance31, jobParameters31, null);
         jobExecutionDao.saveJobExecution(jobExecution31);
+        steps.clear();
+        steps.add(new StepExecution("step31_1", jobExecution31));
+        steps.add(new StepExecution("step31_2", jobExecution31));
+        steps.add(new StepExecution("step31_3", jobExecution31));
+        steps.add(new StepExecution("step31_4", jobExecution31));
+        stepExecutionDao.saveStepExecutions(steps);
         workflowJob31 = new WorkflowJob();
         workflowJob31.setApplicationId(applicationId);
         workflowJob31.setInputContext(inputContext);
@@ -434,6 +487,14 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         tenant3.setName(customerSpace3.toString());
         tenantEntityMgr.create(tenant3);
         MultiTenantContext.setTenant(tenant3);
+    }
+
+    private void setupLEJobExecutionRetriever() {
+        LEJobExecutionRetriever leJobExecutionRetriever = new LEJobExecutionRetriever();
+        leJobExecutionRetriever.setJobInstanceDao(jobInstanceDao);
+        leJobExecutionRetriever.setJobExecutionDao(jobExecutionDao);
+        leJobExecutionRetriever.setStepExecutionDao(stepExecutionDao);
+        ((WorkflowJobServiceImpl) workflowJobService).setLeJobExecutionRetriever(leJobExecutionRetriever);
     }
 
     @SuppressWarnings("unchecked")

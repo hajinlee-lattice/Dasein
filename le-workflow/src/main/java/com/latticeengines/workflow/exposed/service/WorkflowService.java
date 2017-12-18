@@ -28,6 +28,7 @@ public interface WorkflowService {
 
     WorkflowStatus getStatus(WorkflowExecutionId workflowId);
 
+    @Deprecated
     WorkflowStatus getStatus(JobExecution jobExecution);
 
     List<String> getStepNames(WorkflowExecutionId workflowId);

@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
@@ -189,10 +190,12 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             throw new LedpException(LedpCode.LEDP_28023, new String[] { applicationId });
         }
 
+        MultiTenantContext.setTenant(workflowJob.getTenant());
         WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
         if (workflowId == null) {
             return getJobFromWorkflowJobAndYarn(workflowJob);
         }
+
         return workflowService.getJob(workflowId);
     }
 

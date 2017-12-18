@@ -11,8 +11,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import javax.annotation.PostConstruct;
+
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +29,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
@@ -37,6 +38,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -124,7 +126,7 @@ public class WorkflowExecutionCache {
             }
             JobInstance jobInstance = jobExecution.getJobInstance();
             WorkflowStatus workflowStatus = workflowService.getStatus(jobExecution);
-            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowIdWithFilter(workflowId.getId());
 
             Job job = new Job();
             job.setId(workflowId.getId());
@@ -177,16 +179,14 @@ public class WorkflowExecutionCache {
     private List<Job> loadMissingJobs(List<WorkflowExecutionId> workflowIds) throws Exception {
         List<Job> missingJobs = new ArrayList<>();
         Set<Callable<Job>> callables = new HashSet<>();
-
+        Tenant currentTenant = MultiTenantContext.getTenant();
         for (final WorkflowExecutionId workflowId : workflowIds) {
-            callables.add(new Callable<Job>() {
-                @Override
-                public Job call() throws Exception {
-                    try {
-                        return getJob(workflowId);
-                    } catch (Exception e) {
-                        return null;
-                    }
+            callables.add(() -> {
+                try {
+                    MultiTenantContext.setTenant(currentTenant);
+                    return getJob(workflowId);
+                } catch (Exception e) {
+                    return null;
                 }
             });
         }
@@ -202,7 +202,7 @@ public class WorkflowExecutionCache {
         return missingJobs;
     }
 
-    public List<JobStep> getJobSteps(JobExecution jobExecution) {
+    private List<JobStep> getJobSteps(JobExecution jobExecution) {
         List<JobStep> steps = new ArrayList<>();
 
         for (StepExecution stepExecution : jobExecution.getStepExecutions()) {

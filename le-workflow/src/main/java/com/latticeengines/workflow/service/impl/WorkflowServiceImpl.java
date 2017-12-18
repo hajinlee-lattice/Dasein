@@ -39,12 +39,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -161,6 +156,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflowJob.setTenant(tenant);
         workflowJob.setUserId(user);
         workflowJob.setWorkflowId(jobExecutionId);
+        workflowJob.setStatus(JobStatus.RUNNING.name());
         workflowJobEntityMgr.create(workflowJob);
 
         return new WorkflowExecutionId(jobExecutionId);
@@ -243,6 +239,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         return workflowStatus;
     }
 
+    @Deprecated
     @Override
     public WorkflowStatus getStatus(JobExecution jobExecution) {
         WorkflowStatus workflowStatus = new WorkflowStatus();
@@ -358,6 +355,11 @@ public class WorkflowServiceImpl implements WorkflowService {
                 if (--retryOnException == 0)
                     throw e;
             } finally {
+                if (status != null) {
+                    WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
+                    workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
+                    workflowJobEntityMgr.updateWorkflowJob(workflowJob);
+                }
                 Thread.sleep(checkInterval);
             }
         } while (System.currentTimeMillis() - start < maxWaitTime);
