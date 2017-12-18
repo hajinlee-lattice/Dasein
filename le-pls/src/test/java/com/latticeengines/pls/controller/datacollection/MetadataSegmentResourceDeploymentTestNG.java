@@ -161,8 +161,8 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         ratingEngine.setSegment(segment);
         ratingEngine.setCreatedBy("test@lattice-engines.com");
         ratingEngine.setType(RatingEngineType.RULE_BASED);
-        testRatingEngineProxy.createOrUpdate(ratingEngine);
-        RatingEngine newEngine = testRatingEngineProxy.getRatingEngine(ratingEngineId);
+        RatingEngine retrievedRatingEngine = testRatingEngineProxy.createOrUpdate(ratingEngine);
+        RatingEngine newEngine = testRatingEngineProxy.getRatingEngine(retrievedRatingEngine.getId());
         String modelId = newEngine.getActiveModel().getId();
         RuleBasedModel model = constructRuleModel(modelId);
         testRatingEngineProxy.updateRatingModel(newEngine.getId(), modelId, model);
