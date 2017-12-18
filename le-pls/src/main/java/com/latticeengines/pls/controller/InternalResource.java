@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -23,7 +24,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,6 +62,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -95,6 +96,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
@@ -136,83 +138,87 @@ public class InternalResource extends InternalResourceBase {
     private static final String adUsername = "testuser1";
     private static final String adPassword = "Lattice1";
     private static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
+    private static final String NULL_STRING = "null";
     private static final Integer BUCKET_0 = 99;
     private static final Integer BUCKET_1 = 95;
     private static final Integer BUCKET_2 = 85;
     private static final Integer BUCKET_3 = 50;
     private static final Integer BUCKET_4 = 5;
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @Autowired
+    @Inject
     private ModelMetadataService modelMetadataService;
 
-    @Autowired
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelSummaryService modelSummaryService;
 
-    @Autowired
+    @Inject
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
-    @Autowired
+    @Inject
     private AttributeService attributeService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private CrmCredentialService crmCredentialService;
 
-    @Autowired
+    @Inject
     private TenantConfigService tenantConfigService;
 
-    @Autowired
+    @Inject
     private InternalTestUserService internalTestUserService;
 
-    @Autowired
+    @Inject
     private TargetMarketService targetMarketService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private ReportService reportService;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     private EmailService emailService;
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
 
-    @Autowired
+    @Inject
     private BucketedScoreService bucketedScoreService;
 
-    @Autowired
+    @Inject
     private ModelNoteService modelNoteService;
 
-    @Autowired
+    @Inject
     private PlayLaunchService playLaunchService;
 
-    @Autowired
+    @Inject
     private PlayService playService;
 
-    @Autowired
+    @Inject
     private MetadataSegmentService metadataSegmentService;
 
-    @Autowired
+    @Inject
     private MetadataSegmentExportService metadataSegmentExportService;
 
-    @Autowired
+    @Inject
     private DataLakeService dataLakeService;
+
+    @Inject
+    private ActionService actionService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1475,6 +1481,81 @@ public class InternalResource extends InternalResourceBase {
         // Todo: jlm Uncomment when attribute groups are supported
         return dataLakeService.getAttributes(0, 50).stream().filter(col -> col.getEntity() == BusinessEntity.Account)
                 .collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/actions/all/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get actions for a tenant")
+    public List<Action> getAllActions( //
+            @PathVariable("tenantId") String customerSpace, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Retrieve Actions for tenant: %s", customerSpace));
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        return actionService.findAll();
+    }
+
+    @RequestMapping(value = "/actions/ownerid/{ownerId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get actions for a tenant given tenant Id")
+    public List<Action> getActionsByOwnerId( //
+            @PathVariable("tenantId") String customerSpace, //
+            @PathVariable("ownerId") String ownerId, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Retrieve Actions for tenant: %s with ownerId: %s", customerSpace, ownerId));
+        Long ownerIdLong = null;
+        if (!ownerId.equals(NULL_STRING)) {
+            ownerIdLong = Long.parseLong(ownerId);
+        }
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        return actionService.findByOwnerId(ownerIdLong, null);
+    }
+
+    @RequestMapping(value = "/actions/" + TENANT_ID_PATH, method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "create an action")
+    public Action createAction( //
+            @PathVariable("tenantId") String customerSpace, //
+            @RequestBody Action action, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Create action for tenant: %s", customerSpace));
+        Tenant tenant = manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        action.setTenant(tenant);
+        return actionService.create(action);
+    }
+
+    @RequestMapping(value = "/actions/" + TENANT_ID_PATH, method = RequestMethod.PUT)
+    @ResponseBody
+    @ApiOperation(value = "Update an action")
+    public Action updateAction( //
+            @PathVariable("tenantId") String customerSpace, //
+            @RequestBody Action action, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Update action for tenant: %s", customerSpace));
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        Tenant tenant = manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        action.setTenant(tenant);
+        return actionService.update(action);
+    }
+
+    @RequestMapping(value = "/actions/{pid}/" + TENANT_ID_PATH, method = RequestMethod.DELETE)
+    @ResponseBody
+    @ApiOperation(value = "Delete an action")
+    public void deleteAction( //
+            @PathVariable("pid") Long pid, //
+            @PathVariable("tenantId") String customerSpace, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Delete action for tenant: %s, with pid=%d", customerSpace, pid));
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        Action action = actionService.findByPid(pid);
+        if (action == null) {
+            throw new NullPointerException(String.format("Action with Pid = %d cannot be found", pid));
+        }
+        actionService.delete(action);
     }
 
 }

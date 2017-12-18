@@ -33,7 +33,7 @@ public class JobResource {
 
     private static final String CDLNote = "Scheduled at 6:30 PM PST.";
 
-    private static final Long UNCOMPLETED_PROCESS_ANALYZE_ID = -1L;
+    private static final Long UNCOMPLETED_PROCESS_ANALYZE_ID = 0L;
 
     @Autowired
     private WorkflowJobService workflowJobService;

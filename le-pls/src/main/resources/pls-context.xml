@@ -32,7 +32,5 @@
              since the servlet container instances are not available when running tests. -->
         <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig"/>
     </context:component-scan>
-
-	<jpa:repositories base-package="com.latticeengines.pls.repository" />
 	
 </beans>

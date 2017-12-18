@@ -27,13 +27,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "ACTION")
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class Action implements HasPid, HasTenant {
+public class Action implements HasPid, HasTenant, HasAuditingFields {
 
     @JsonProperty("pid")
     @Id
@@ -46,11 +47,6 @@ public class Action implements HasPid, HasTenant {
     @Column(name = "TYPE", nullable = false)
     @Enumerated(EnumType.STRING)
     private ActionType type;
-
-    @JsonProperty("initiateTime")
-    @Column(name = "INITIATE_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date initiateTime;
 
     @JsonProperty("ownerId")
     @Column(name = "OWNER_ID", nullable = true)
@@ -69,6 +65,16 @@ public class Action implements HasPid, HasTenant {
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
+
+    @JsonProperty("created")
+    @Column(name = "CREATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
+
+    @JsonProperty("updated")
+    @Column(name = "UPDATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated;
 
     @JsonProperty("description")
     @Column(name = "DESCRIPTION")
@@ -91,14 +97,6 @@ public class Action implements HasPid, HasTenant {
 
     public void setType(ActionType type) {
         this.type = type;
-    }
-
-    public Date getInitiateTime() {
-        return this.initiateTime;
-    }
-
-    public void setInitiateTime(Date time) {
-        this.initiateTime = time;
     }
 
     public Long getOwnerId() {
@@ -141,6 +139,26 @@ public class Action implements HasPid, HasTenant {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public void setCreated(Date time) {
+        this.created = time;
+    }
+
+    @Override
+    public Date getCreated() {
+        return this.created;
+    }
+
+    @Override
+    public void setUpdated(Date time) {
+        this.updated = time;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return this.updated;
     }
 
     @Override

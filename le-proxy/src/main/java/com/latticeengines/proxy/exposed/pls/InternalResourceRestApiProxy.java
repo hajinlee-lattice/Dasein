@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -604,6 +606,56 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             return restTemplate.getForObject(url, List.class);
         } catch (Exception e) {
             throw new RuntimeException("getReport: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Action> getAllActions(String customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/actions/all/" + customerSpace);
+            List<?> listObj = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(listObj, Action.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getAllActions: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Action> getActionsByOwnerId(String customerSpace, Long ownerId) {
+        try {
+            String url = constructUrl("pls/internal/actions/ownerid/" + ownerId + "/" + customerSpace);
+            List<?> listObj = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(listObj, Action.class);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format("getActionsByOnwerId for ownerId=%s: Remote call failure: ", ownerId)
+                            + e.getMessage(),
+                    e);
+        }
+    }
+
+    public Action createAction(String customerSpace, Action action) {
+        try {
+            String url = constructUrl("pls/internal/actions/" + customerSpace);
+            return restTemplate.postForObject(url, action, Action.class);
+        } catch (Exception e) {
+            throw new RuntimeException("createAction: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public void updateAction(String customerSpace, Action action) {
+        try {
+            String url = constructUrl("pls/internal/actions/" + customerSpace);
+            restTemplate.put(url, action);
+        } catch (Exception e) {
+            throw new RuntimeException("updateAction: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public void deleteAction(String customerSpace, @NonNull Long pid) {
+        try {
+            String url = constructUrl("pls/internal/actions/" + pid + "/" + customerSpace);
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            throw new RuntimeException("deleteAction: Remote call failure: " + e.getMessage(), e);
         }
     }
 }
