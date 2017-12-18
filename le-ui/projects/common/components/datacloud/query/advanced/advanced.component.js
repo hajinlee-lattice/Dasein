@@ -173,7 +173,9 @@ angular.module('common.datacloud.query.builder', [
 
     vm.pushItem = function(item, tree) {
         if (item) {
-            var cube = vm.cube[item.ColumnId];
+
+            var attributeEntity = item.Entity,
+                cube = vm.cube[attributeEntity].Stats[item.ColumnId];
 
             item.cube = cube;
             item.topbkt = tree.bkt;

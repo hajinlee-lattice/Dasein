@@ -43,7 +43,7 @@
                 ng-click="vm.bucketClick(bucket); selectedBucket = !selectedBucket">
                 <h3>{{bucket.bucket}}</h3>
                 <h4>Accounts</h4>
-                <p>{{bucket.count | number}} ({{ ::bucket.percentage | percentage: 0 }})</p>
+                <p>{{bucket.count | number}} ({{ ::bucket.percentage | percentage: 1 }})</p>
             </li>
         </ul>
 

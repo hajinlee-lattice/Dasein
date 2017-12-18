@@ -542,7 +542,7 @@ angular.module('common.datacloud')
 
     this.getCube = function(opts){
         var deferred = $q.defer(),
-            url = this.url('/statistics/cube','/stats/cube');
+            url = this.url('/statistics/cubes','/stats/cubes');
 
         // FIXME: temporary disable Cube API in Data Cloud Explorer, bad data -lazarus
         // if (url == '/pls/latticeinsights/stats/cube') { 

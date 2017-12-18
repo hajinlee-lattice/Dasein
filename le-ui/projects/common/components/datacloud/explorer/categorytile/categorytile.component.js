@@ -106,11 +106,11 @@ angular
             }
 
             vm.getAttributeStat = function(attribute) {
-
                 var enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     index = vm.enrichmentsMap[enrichmentKey],
                     enrichment = vm.enrichments[index],
-                    stats = (vm.cube.data.Stats[enrichmentKey] && vm.cube.data.Stats[enrichmentKey] && vm.cube.data.Stats[enrichmentKey].Bkts && vm.cube.data.Stats[enrichmentKey].Bkts.List ? vm.cube.data.Stats[enrichmentKey].Bkts.List : null),
+                    attributeEntity = attribute.Entity,
+                    stats = (vm.cube.data[attributeEntity].Stats[enrichmentKey] && vm.cube.data[attributeEntity].Stats[enrichmentKey] && vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts && vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts.List ? vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts.List : null),
                     segmentRangeKey = null;
 
                 var stat = (stats && stats.length ? stats[0] : null);
@@ -143,7 +143,8 @@ angular
             vm.displayAttributeValue = function(attribute, property) {
                 var property = property || 'Lbl',
                     enrichmentKey = attribute.Attribute || attribute.ColumnId,
-                    stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].Bkts && vm.cube.Stats[enrichmentKey].Bkts.List ? vm.cube.Stats[enrichmentKey].Bkts.List : null);
+                    attributeEntity = attribute.Entity,
+                    stats = (vm.cube.data[attributeEntity].Stats[enrichmentKey] && vm.cube.data[attributeEntity].Stats[enrichmentKey] && vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts && vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts.List ? vm.cube.data[attributeEntity].Stats[enrichmentKey].Bkts.List : null);
 
                 /**
                  * sort stats by record count if there are more then 1

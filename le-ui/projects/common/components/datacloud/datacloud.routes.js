@@ -400,7 +400,7 @@ angular
 
                     DataCloudStore.getCube().then(function(result) {
                         if (result.data) {
-                            deferred.resolve(result.data.Stats);
+                            deferred.resolve(result.data);
                         }
                     });
                     

@@ -103,11 +103,10 @@
                                     ng-repeat="(key, value) in play.ratingEngine.counts"
                                     class="bucket-{{key|lowercase}}"
                                     ng-class="{'bucket-aplus': key === 'A+'}">
-
                                     <div class="value">{{value|number}}</div>
                                     <div 
                                         class="rating-bar"
-                                        ng-attr-style="{{'height: '+ vm.ceil(((value / vm.getTallestBarHeight(play.ratingEngine.counts)) * 50) / 2) + 'px' }}">
+                                        ng-attr-style="{{'height: '+ (value / vm.sumValuesOfObject(play.ratingEngine.counts))*100 + '%'}}">
                                     </div>
                                     <div class="meta">{{key}}</div>
 

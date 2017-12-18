@@ -56,8 +56,12 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
 
     vm.init();
 
-    vm.getTallestBarHeight = function(bucketsObject) {
-        return Object.values(bucketsObject).reduce(function(a, b){ return bucketsObject[a] > bucketsObject[b] ? a : b });
+    vm.sumValuesOfObject = function(object) {
+        var sum = 0;
+        for(var i=0; i < Object.values(object).length; i++){
+            sum += Object.values(object)[i];
+        }
+        return sum;
     }
 
     vm.customMenuClick = function ($event, play) {

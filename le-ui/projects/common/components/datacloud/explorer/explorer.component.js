@@ -1466,6 +1466,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
+
         if (!vm.cube) {
             return alert('Cube data not yet loaded. \nOne moment please.');
         }
@@ -1475,9 +1476,11 @@ angular.module('common.datacloud.explorer', [
             attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {},
             attributeRangeKey = (stat.Lbl ? vm.makeSegmentsRangeKey(attribute, stat.Rng, stat.Lbl) : ''),
+            
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
-            entity = enrichment.Entity,
+            
+            entity = attribute.Entity,
             topBkt = attribute.TopBkt,
             segmentName = $stateParams.segment;
 

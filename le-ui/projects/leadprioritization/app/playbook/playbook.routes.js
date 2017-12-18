@@ -590,6 +590,13 @@ angular
                     return deferred.promise;
 
                 }],
+                //
+                //
+                //
+                // Keep this commented out code for future use with the "Exclude accounts without SalesForce ID checkbox"
+                //
+                //
+                //
                 // NoSFIdsCount: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
                     
                 //     var deferred = $q.defer();

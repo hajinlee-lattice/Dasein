@@ -70,6 +70,15 @@ angular.module('common.datacloud.query.results', [
                 // to be used when launching play, and assign percentage to the bucket for display purposes
                 vm.accountsCoverage.bucketCoverageCounts.forEach(function(bucket){
                     vm.selectedBuckets.push(bucket.bucket);
+
+                    // Use this if you want to round up to nearest integer percentage
+                    // If you do use this, use this in the view HTML ({{ ::bucket.percentage }}%)
+                    // result is (1%) for 0.3%
+                    // bucket.percentage = Math.ceil((bucket.count / numAccounts) * 100);
+
+                    // Use this if you want more precise percentage in the display
+                    // If you do use this, use this in the view HTML ({{ ::bucket.percentage | percentage: 1 }})
+                    // result is (0.3%) for 0.3%
                     bucket.percentage = bucket.count / numAccounts;
                 });
 

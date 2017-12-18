@@ -326,10 +326,10 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, $rootScope, Model, ModelStore) {
+                    controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'))($scope);
-
+                        console.log($stateParams);
                         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
                     },

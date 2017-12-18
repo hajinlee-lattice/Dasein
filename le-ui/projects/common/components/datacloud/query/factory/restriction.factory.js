@@ -19,7 +19,6 @@ angular.module('common.datacloud.query.factory.restriction', [])
 
     };
 
-
     // // used to convert bucket range in old data object
     // function oldFormatRangeToBkt(range) {
 
