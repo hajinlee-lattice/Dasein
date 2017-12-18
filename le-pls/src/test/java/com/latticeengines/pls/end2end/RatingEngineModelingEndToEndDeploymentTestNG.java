@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AwsApsGeneratorUtils;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -192,6 +193,9 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
 
         Table table = MetaDataTableUtils.createTable(yarnConfiguration, tableName, hdfsDir);
         table.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
+        if (tableName.equals(apsTableName)) {
+            AwsApsGeneratorUtils.setupMetaData(table);
+        }
         metadataProxy.updateTable(customerSpace.toString(), tableName, table);
         return table;
     }
