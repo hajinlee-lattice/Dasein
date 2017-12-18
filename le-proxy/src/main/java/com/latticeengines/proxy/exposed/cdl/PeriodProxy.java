@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -25,5 +26,13 @@ public class PeriodProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, String.class);
     }
 
+    public Integer getCurrentPerioddId(@PathVariable String customerSpace, String periodName) {
+        if ("Month".equals(periodName)) {
+            CalendarMonthPeriodBuilder periodBuilder = new CalendarMonthPeriodBuilder();
+            return periodBuilder.currentPeriod();
+        } else {
+            throw new UnsupportedOperationException("Only support Month period for now.");
+        }
+    }
 
 }
