@@ -105,8 +105,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         super.initializeConfiguration();
         loadProductMap();
 
-        dailyTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+        dailyTableName = getDailyTableName();
         if (StringUtils.isBlank(dailyTableName)) {
             throw new IllegalStateException("Cannot find daily table.");
         }
@@ -120,11 +119,25 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         publishToRedshift = false;
     }
 
+    private String getDailyTableName() {
+        String dailyTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+                TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+        if (StringUtils.isBlank(dailyTableName)) {
+            dailyTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedDailyTransaction, active);
+            if (StringUtils.isNotBlank(dailyTableName)) {
+                log.info("Found daily table in active version " + active);
+            }
+        } else {
+            log.info("Found daily table in inactive version " + inactive);
+        }
+        return dailyTableName;
+    }
+
     private String getAccountTableName() {
         String accountTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedAccount, inactive);
         if (StringUtils.isBlank(accountTableName)) {
-            // might because the merge account step was skipped
             accountTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedAccount, active);
             if (StringUtils.isNotBlank(accountTableName)) {

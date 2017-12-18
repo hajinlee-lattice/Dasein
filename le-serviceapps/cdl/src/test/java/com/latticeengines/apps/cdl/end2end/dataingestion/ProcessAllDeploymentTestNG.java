@@ -29,13 +29,17 @@ public class ProcessAllDeploymentTestNG extends DataIngestionEnd2EndDeploymentTe
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAllDeploymentTestNG.class);
 
-    static final String CHECK_POINT = "process3";
+    static final String CHECK_POINT = "process";
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         importData();
         processAnalyze();
-        verifyProcess();
+        try {
+            verifyProcess();
+        } finally {
+            saveCheckpoint(CHECK_POINT);
+        }
     }
 
     private void importData() throws Exception {

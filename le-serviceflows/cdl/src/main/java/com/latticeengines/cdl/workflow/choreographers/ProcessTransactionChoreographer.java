@@ -3,6 +3,8 @@ package com.latticeengines.cdl.workflow.choreographers;
 import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CDL_ACTIVE_VERSION;
 import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CUSTOMER_SPACE;
 
+import java.util.Arrays;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapper;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -21,8 +24,6 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Choreographer;
-
-import java.util.Arrays;
 
 @Component
 public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
@@ -46,6 +47,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
     @Inject
     private ProcessProductChoreographer productChoreographer;
+
+    @Inject
+    private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
 
     private boolean hasActivePeriodStores = false;
 
@@ -99,7 +103,11 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        return isCommonSkip(step, seq);
+        boolean skip = isCommonSkip(step, seq);
+        if (skip && isProfilePurchaseHistory(seq)) {
+            return !shouldCalculatePurchaseHistory();
+        }
+        return skip;
     }
 
     @Override
@@ -130,17 +138,30 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
-        if (!should && hasActivePeriodStores) {
-            if (accountChoreographer.update || accountChoreographer.rebuild) {
-                log.info("Need to rebuild " + mainEntity() + " due to Account changes.");
-                return true;
-            }
+        if (!should) {
             if (productChoreographer.update || productChoreographer.rebuild) {
                 log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
                 return true;
             }
         }
         return should;
+    }
+
+    private boolean isProfilePurchaseHistory(int seq) {
+        String namespace = getStepNamespace(seq);
+        return namespace.contains("." + profilePurchaseHistoryWrapper.name());
+    }
+
+    private boolean shouldCalculatePurchaseHistory() {
+        if (accountChoreographer.update || accountChoreographer.rebuild) {
+            log.info("Need to rebuild purchase history due to Account changes.");
+            return true;
+        }
+        if (update) {
+            log.info("Need to rebuild purchase history due to Transaction changes.");
+            return true;
+        }
+        return false;
     }
 
 }

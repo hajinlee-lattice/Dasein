@@ -11,13 +11,19 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.ProfileStepBase;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -32,10 +38,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
@@ -76,8 +85,14 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
 
-        rawTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedRawTransaction, inactive);
+        String rawTableName = getRawTableName();
+        rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
+        if (rawTable == null) {
+            throw new RuntimeException("Cannot find raw transaction table.");
+        }
+
+        buildPeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction);
+        buildPeriodStore(TableRoleInCollection.ConsolidatedPeriodTransaction);
         dailyTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
         periodTable = dataCollectionProxy.getTable(customerSpace.toString(),
@@ -87,6 +102,58 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         sortedPeriodTablePrefix = TableRoleInCollection.AggregatedPeriodTransaction.name();
 
         loadProductMap();
+    }
+
+    private String getRawTableName() {
+        String rawTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+                TableRoleInCollection.ConsolidatedRawTransaction, inactive);
+        if (StringUtils.isBlank(rawTableName)) {
+            rawTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedRawTransaction, active);
+            if (StringUtils.isNotBlank(rawTableName)) {
+                log.info("Found raw transaction table in active version " + active);
+            }
+        } else {
+            log.info("Found raw transaction table in inactive version " + inactive);
+        }
+        return rawTableName;
+    }
+
+    private void buildPeriodStore(TableRoleInCollection role) {
+        SchemaInterpretation schema;
+        switch (role) {
+            case ConsolidatedDailyTransaction:
+                schema = SchemaInterpretation.TransactionDailyAggregation;
+                break;
+            case ConsolidatedPeriodTransaction:
+                schema = SchemaInterpretation.TransactionPeriodAggregation;
+                break;
+            default:
+                throw new UnsupportedOperationException(role + " is not a supported period store.");
+        }
+
+        Table table = SchemaRepository.instance().getSchema(schema);
+        String tableName = NamingUtils.timestamp(role.name());
+        table.setName(tableName);
+        String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();
+
+        try {
+            log.info("Initialize period store " + hdfsPath + "/" + tableName);
+            HdfsUtils.mkdir(yarnConfiguration, hdfsPath + "/" + tableName);
+        } catch (Exception e) {
+            log.error("Failed to initialize period store " + hdfsPath + "/" + tableName);
+            throw new RuntimeException("Failed to create period store " + role);
+        }
+
+        Extract extract = new Extract();
+        extract.setName("extract_target");
+        extract.setExtractionTimestamp(DateTime.now().getMillis());
+        extract.setProcessedRecords(1L);
+        extract.setPath(hdfsPath + "/" + tableName + "/");
+        table.setExtracts(Collections.singletonList(extract));
+        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), role, inactive);
+        log.info("Upsert table " + table.getName() + " to role " + role + "version" + inactive);
     }
 
     @Override

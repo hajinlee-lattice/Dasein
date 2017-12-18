@@ -55,7 +55,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        initializePeriodStores();
+        initOrClonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
         rawTable = dataCollectionProxy.getTable(customerSpace.toString(), //
                 TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         if (rawTable == null) {
@@ -140,15 +140,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
-
-    private void initializePeriodStores() {
-        initOrClonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
-        initOrClonePeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction,
-                SchemaInterpretation.TransactionDailyAggregation);
-        initOrClonePeriodStore(TableRoleInCollection.ConsolidatedPeriodTransaction,
-                SchemaInterpretation.TransactionPeriodAggregation);
-    }
-
 
     private void initOrClonePeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);

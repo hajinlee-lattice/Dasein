@@ -115,8 +115,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
     static final long SEGMENT_1_CONTACT_1 = 23;
-    static final long SEGMENT_1_ACCOUNT_2 = 54;
-    static final long SEGMENT_1_CONTACT_2 = 63;
+    static final long SEGMENT_1_ACCOUNT_2 = 58;
+    static final long SEGMENT_1_CONTACT_2 = 68;
     static final long SEGMENT_1_ACCOUNT_3 = 58;
     static final long SEGMENT_1_CONTACT_3 = 68;
 
