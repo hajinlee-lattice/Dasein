@@ -189,7 +189,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         PeriodDataFilterConfig config = new PeriodDataFilterConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         config.setEarliestTransactionDate(earliestTransaction);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -201,7 +201,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductMap(productMap);
 
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -213,7 +213,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -235,7 +235,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setInputSteps(Collections.singletonList(productAgrStep));
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -254,12 +254,15 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("Quantity"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
-        config.setGoupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
-                InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
-                InterfaceName.TransactionDate.name(),
-                InterfaceName.PeriodId.name(),
+        config.setGoupByFields(Arrays.asList( //
+                InterfaceName.AccountId.name(), //
+                InterfaceName.ContactId.name(), //
+                InterfaceName.ProductId.name(), //
+                InterfaceName.TransactionType.name(), //
+                InterfaceName.TransactionDate.name(), //
+                InterfaceName.PeriodId.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -283,7 +286,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setInputIdx(0);
         config.setPeriodIdx(1);
         config.setTransactinIdx(2);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -302,10 +305,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("TotalQuantity"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
-        config.setGoupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
-                InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
+        config.setGoupByFields(Arrays.asList( //
+                InterfaceName.AccountId.name(), //
+                InterfaceName.ContactId.name(), //
+                InterfaceName.ProductId.name(), //
+                InterfaceName.TransactionType.name(), //
                 InterfaceName.PeriodId.name()));
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -316,7 +322,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setInputSteps(Collections.singletonList(dailyAgrStep));
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -338,7 +344,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         config.setEarliestTransactionDate(earliestTransaction);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -357,7 +363,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setBaseTables(baseTables);
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -380,7 +386,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
