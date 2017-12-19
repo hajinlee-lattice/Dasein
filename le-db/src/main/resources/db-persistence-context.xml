@@ -16,7 +16,6 @@
         <property name="minPoolSize" value="0"/>
         <property name="maxPoolSize" value="8"/>
         <property name="acquireIncrement" value="1"/>
-        <property name="statementCacheNumDeferredCloseThreads" value="1"/>
     </bean>
 
    <!-- 
