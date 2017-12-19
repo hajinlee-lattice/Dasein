@@ -74,7 +74,7 @@ public class RatingProxy extends MicroserviceRestApiProxy {
         return page;
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Map<String, Long> getCoverage(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
