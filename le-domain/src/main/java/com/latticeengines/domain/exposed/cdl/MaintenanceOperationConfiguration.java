@@ -12,11 +12,22 @@ public class MaintenanceOperationConfiguration {
     @JsonProperty("operation_type")
     private MaintenanceOperationType operationType;
 
+    @JsonProperty("customer_space")
+    private String customerSpace;
+
     public MaintenanceOperationType getOperationType() {
         return operationType;
     }
 
     public void setOperationType(MaintenanceOperationType operationType) {
         this.operationType = operationType;
+    }
+
+    public String getCustomerSpace() {
+        return customerSpace;
+    }
+
+    public void setCustomerSpace(String customerSpace) {
+        this.customerSpace = customerSpace;
     }
 }
