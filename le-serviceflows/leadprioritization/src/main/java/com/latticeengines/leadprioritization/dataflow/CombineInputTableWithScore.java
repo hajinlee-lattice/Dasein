@@ -44,12 +44,14 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
 
         Node combinedResultTable = null;
         String idColumn;
+        String groupByColumn = InterfaceName.InternalId.name();
         if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
             idColumn = InterfaceName.Id.name();
         } else if (inputTable.getSourceAttribute(InterfaceName.InternalId.name()) != null) {
             idColumn = InterfaceName.InternalId.name();
         } else {
             idColumn = inputTable.getSourceSchema().getAttributes(LogicalDataType.InternalId).get(0).getName();
+            groupByColumn = idColumn;
         }
 
         List<String> retainFields = new ArrayList<>(inputTable.getFieldNames());
@@ -60,7 +62,7 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         });
 
         combinedResultTable = inputTable.leftJoin(idColumn, scoreWithRating, idColumn);
-        combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(idColumn), 1);
+        combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(groupByColumn), 1);
         combinedResultTable = combinedResultTable.retain(new FieldList(retainFields));
         return combinedResultTable;
     }
