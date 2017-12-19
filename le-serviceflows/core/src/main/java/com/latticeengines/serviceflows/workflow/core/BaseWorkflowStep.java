@@ -98,8 +98,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
     protected static final String RAW_RATING_TABLE_NAME = "RAW_RATING_TABLE_NAME";
-    protected static final String DAILY_AGG_TXN_TABLE_NAME = "DAILY_AGG_TXN_TABLE_NAME";
-    protected static final String PERIOD_AGG_TXN_TABLE_NAME = "PERIOD_AGG_TXN_TABLE_NAME";
     protected static final String APPEND_TO_REDSHIFT_TABLE = "APPEND_TO_REDSHIFT_TABLE";
     protected static final String REDSHIFT_EXPORT_REPORT = "REDSHIFT_EXPORT_REPORT";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";

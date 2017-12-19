@@ -160,8 +160,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     protected void onPostTransformationCompleted() {
         String sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
         String sortedPeriodTableName = TableUtils.getFullTableName(sortedPeriodTablePrefix, pipelineVersion);
-        putObjectInContext(DAILY_AGG_TXN_TABLE_NAME, sortedDailyTableName);
-        putObjectInContext(PERIOD_AGG_TXN_TABLE_NAME, sortedPeriodTableName);
         updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName, String.class);
         updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
         updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName, String.class);

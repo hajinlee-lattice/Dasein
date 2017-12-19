@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTagetTableFilterConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("createCdlTargetTableFilterStep")
-public class CreateCdlTargetTableFilterStep extends BaseWorkflowStep<CreateCdlTagetTableFilterConfiguration> {
+public class CreateCdlTargetTableFilterStep extends BaseWorkflowStep<CreateCdlTargetTableFilterConfiguration> {
 
     @Autowired
     private CreateCdlTableHelper createCdlTableHelper;

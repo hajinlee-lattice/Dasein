@@ -87,8 +87,12 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
         Map<BusinessEntity, Long> exportReportMap = new HashMap<>();
         entityTableMap.forEach((entity, table) -> {
-            Long count = table.getExtracts().get(0).getProcessedRecords();
-            exportReportMap.put(entity, count);
+            try {
+                Long count = table.getExtracts().get(0).getProcessedRecords();
+                exportReportMap.put(entity, count);
+            } catch (Exception e) {
+                log.error("Failed to get number of records from table " + JsonUtils.pprint(table));
+            }
         });
         putObjectInContext(REDSHIFT_EXPORT_REPORT, exportReportMap);
 

@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
@@ -45,7 +45,7 @@ public class CreateCdlTableHelper {
     protected Configuration yarnConfiguration;
 
     public Table getFilterTable(CustomerSpace customerSpace, String recordType, String tableSuffix, String tableName,
-            FrontEndQuery query, InterfaceName type, String targetTableName) {
+                                EventFrontEndQuery query, InterfaceName type, String targetTableName) {
         Table filterTable = null;
         log.info("Table Name:" + tableName);
         if (StringUtils.isNotBlank(tableName)) {
@@ -65,7 +65,7 @@ public class CreateCdlTableHelper {
     }
 
     private Table runQueryToTable(CustomerSpace customerSpace, Schema schema, String tableName, String filePath,
-            FrontEndQuery query, InterfaceName type) {
+                                  EventFrontEndQuery query, InterfaceName type) {
 
         String accountIdKey = InterfaceName.AccountId.name().toLowerCase();
         String periodIdKey = InterfaceName.PeriodId.name().toLowerCase();
