@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import org.junit.Assert;
 import org.springframework.stereotype.Component;
 import org.testng.annotations.Test;
@@ -68,6 +69,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends MetadataFunctio
         InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, "stats_container.json");
         ObjectMapper om = new ObjectMapper();
         StatisticsContainer container = om.readValue(is, StatisticsContainer.class);
+        container.setName(NamingUtils.timestamp("Stats"));
         container.setVersion(collection.getVersion());
         dataCollectionService.addStats(customerSpace, collection.getName(), container);
     }

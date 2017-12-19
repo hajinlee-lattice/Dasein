@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CONSOLIDATE_RETAIN;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -32,7 +30,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataFilterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProductMapperConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -65,7 +62,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-
 
     @Inject
     private Configuration yarnConfiguration;
@@ -176,23 +172,25 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     }
 
     private TransformationStepConfig collectDailyData() {
-        TransformationStepConfig step2 = new TransformationStepConfig();
-        step2.setTransformer(DataCloudConstants.PERIOD_DATA_FILTER);
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.PERIOD_DATA_FILTER);
 
-        String tableSourceName = "DailyRaw";
-        String sourceTableName = rawTable.getName();
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step2.setBaseSources(baseSources);
+        String rawDiffSource = "RawDiff";
+        SourceTable diffSourceTable = new SourceTable(diffTableName, customerSpace);
+        String rawTableSource = "RawMaster";
+        SourceTable masterSourceTable = new SourceTable(rawTable.getName(), customerSpace);
+        List<String> baseSources = Arrays.asList(rawDiffSource, rawTableSource);
+        step.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step2.setBaseTables(baseTables);
+        baseTables.put(rawDiffSource, diffSourceTable);
+        baseTables.put(rawTableSource, masterSourceTable);
+        step.setBaseTables(baseTables);
 
         PeriodDataFilterConfig config = new PeriodDataFilterConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         config.setEarliestTransactionDate(earliestTransaction);
-        step2.setConfiguration(JsonUtils.serialize(config));
-        return step2;
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
     }
 
     private TransformationStepConfig rollupProduct(Map<String, Product> productMap) {
