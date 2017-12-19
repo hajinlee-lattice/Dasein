@@ -26,16 +26,16 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     public Long getCount(FrontEndQuery frontEndQuery) {
-        return getCount(frontEndQuery, getMainEntity());
+        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
+        return getCount(tenantId, frontEndQuery, getMainEntity());
     }
 
-    protected Long getCount(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
+    protected Long getCount(String tenantId, FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
         if (frontEndQuery == null) {
             frontEndQuery = new FrontEndQuery();
         }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(mainEntity);
-        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getCount(tenantId, frontEndQuery);
     }
 

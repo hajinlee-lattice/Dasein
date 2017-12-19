@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,8 +50,9 @@ public class EntityResource extends BaseFrontEndEntityResource {
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Map<BusinessEntity, Long> getCounts(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         Map<BusinessEntity, Future<Long>> futures = new HashMap<>();
+        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         for (BusinessEntity entity: BusinessEntity.COUNT_ENTITIES) {
-            futures.put(entity, executorService.submit(new CountFetcher(entity, frontEndQuery)));
+            futures.put(entity, executorService.submit(new CountFetcher(tenantId, entity, frontEndQuery)));
         }
         Map<BusinessEntity, Long> counts = new HashMap<>();
         for (BusinessEntity entity: BusinessEntity.COUNT_ENTITIES) {
@@ -71,10 +73,12 @@ public class EntityResource extends BaseFrontEndEntityResource {
 
     private class CountFetcher implements Callable<Long> {
 
+        private final String tenantId;
         private final BusinessEntity entity;
         private final FrontEndQuery frontEndQuery;
 
-        CountFetcher(BusinessEntity entity, FrontEndQuery frontEndQuery) {
+        CountFetcher(String tenantId, BusinessEntity entity, FrontEndQuery frontEndQuery) {
+            this.tenantId = tenantId;
             this.entity = entity;
             this.frontEndQuery = JsonUtils.deserialize(JsonUtils.serialize(frontEndQuery), FrontEndQuery.class);
         }
@@ -86,12 +90,12 @@ public class EntityResource extends BaseFrontEndEntityResource {
                     frontEndQuery.setAccountRestriction(null);
                     frontEndQuery.setContactRestriction(null);
                 }
-                Long count = getCount(frontEndQuery, entity);
+                Long count = getCount(tenantId, frontEndQuery, entity);
                 if (count != null) {
                     return count;
                 }
             } catch (Exception e) {
-                log.warn("Failed to get count of " + entity + ": " + e.getMessage());
+                log.error("Failed to get count of " + entity, e);
             }
             return 0L;
         }
