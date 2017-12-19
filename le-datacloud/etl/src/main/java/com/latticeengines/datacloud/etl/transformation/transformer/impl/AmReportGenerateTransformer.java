@@ -37,7 +37,8 @@ public class AmReportGenerateTransformer
     @Autowired
     private SlackService slackService;
 
-    @Value("${datacloud.notification.email}")
+    //TODO: remove default value after fixing properties file
+    @Value("${datacloud.notification.email:}")
     private String email;
 
     @Value("${datacloud.slack.webhook.url}")
@@ -105,12 +106,14 @@ public class AmReportGenerateTransformer
                     slackService.sendSlack(
                             new SlackSettings(slackWebHookUrl, title, pretext, message, SLACK_BOT, SLACK_COLOR_DANGER));
                 }
-                log.info("Send email notification");
-                emailService.sendSimpleEmail("AccountMaster validation failed",
-                        String.format("Please check hive table %s for reference",
-                                "LDC_" + step.getTarget().getSourceName() + "_"
-                                        + step.getTargetVersion().replace("-", "_")),
-                        "text/plain", Collections.singleton(email));
+                if (StringUtils.isNotBlank(email)) {
+                    log.info("Send email notification");
+                    emailService.sendSimpleEmail("AccountMaster validation failed",
+                            String.format("Please check hive table %s for reference",
+                                    "LDC_" + step.getTarget().getSourceName() + "_"
+                                            + step.getTargetVersion().replace("-", "_")),
+                            "text/plain", Collections.singleton(email));
+                }
             }
         } catch (Exception e) {
             log.error("Failed to update parameters", e);
