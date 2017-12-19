@@ -401,7 +401,7 @@ angular
                         var deferred = $q.defer();
 
                         DataCloudStore.getCube().then(function (result) {
-                            deferred.resolve(result.data.Stats);
+                            deferred.resolve(result.data);
                         });
 
                         return deferred.promise;
