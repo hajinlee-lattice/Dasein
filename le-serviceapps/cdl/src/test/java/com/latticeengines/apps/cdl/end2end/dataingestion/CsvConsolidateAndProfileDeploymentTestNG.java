@@ -3,11 +3,11 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import java.io.IOException;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -21,8 +21,7 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         importData();
-        consolidate();
-        profile();
+        processAnalyze();
         verifyProfile();
     }
 

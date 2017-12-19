@@ -6,6 +6,8 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -15,6 +17,8 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+
+import java.util.Map;
 
 public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
@@ -27,6 +31,8 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
+
+        new Thread(this::createTestSegment1).start();
 
         importData();
         processAnalyze();
@@ -63,6 +69,12 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+
+        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
+                BusinessEntity.Product, numProducts);
+        verifyTestSegment1Counts(segment1Counts);
     }
 
 }

@@ -141,7 +141,7 @@ public class TimeSeriesUtils {
     public static boolean distributePeriodData(YarnConfiguration yarnConfiguration, String inputDir, String targetDir, Set<Integer> periods, String periodField) {
         inputDir = getPath(inputDir) + "/*.avro";
         targetDir = getPath(targetDir);
-        log.info("Dritribute period data from " + inputDir + " to " + targetDir);
+        log.info("Distribute period data from " + inputDir + " to " + targetDir);
         Map<Integer, String> periodFileMap = new HashMap<Integer, String>();
         for (Integer period : periods) {
             periodFileMap.put(period, targetDir + "/" + getFileNameFromPeriod(period));

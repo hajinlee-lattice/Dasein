@@ -31,8 +31,6 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
     static final String CHECK_POINT = "update4";
 
-    private RatingEngine ratingEngine;
-
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateProductDeploymentTestNG.CHECK_POINT);
@@ -44,7 +42,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
         new Thread(() -> {
             createTestSegments();
-            ratingEngine = createRuleBasedRatingEngine();
+            createRuleBasedRatingEngine();
         }).start();
 
         importData();
@@ -82,8 +80,8 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_3,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_3,
                 BusinessEntity.Product, numProducts);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //

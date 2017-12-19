@@ -121,7 +121,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     private TransformationStepConfig partitionDaily() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(dayPeriodStep);
         inputSteps.add(dailyStep);
         step.setInputSteps(inputSteps);

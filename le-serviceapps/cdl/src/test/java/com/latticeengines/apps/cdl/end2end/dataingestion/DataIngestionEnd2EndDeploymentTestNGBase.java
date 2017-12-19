@@ -115,8 +115,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
     static final long SEGMENT_1_CONTACT_1 = 23;
-    static final long SEGMENT_1_ACCOUNT_2 = 58;
-    static final long SEGMENT_1_CONTACT_2 = 68;
+    static final long SEGMENT_1_ACCOUNT_2 = 54;
+    static final long SEGMENT_1_CONTACT_2 = 63;
     static final long SEGMENT_1_ACCOUNT_3 = 58;
     static final long SEGMENT_1_CONTACT_3 = 68;
 
@@ -180,6 +180,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     protected String profileAppId;
     protected String processAnalyzeAppId;
     protected DataCollection.Version initialVersion;
+
+    protected RatingEngine ratingEngine;;
 
     @BeforeClass(groups = { "end2end", "precheckin" })
     public void setup() throws Exception {
@@ -748,7 +750,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         RuleBasedModel model = constructRuleModel(modelId);
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), modelId, model);
 
-        return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
+        this.ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
+        return this.ratingEngine;
     }
 
     private RuleBasedModel constructRuleModel(String modelId) {

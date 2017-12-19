@@ -18,7 +18,6 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -28,8 +27,6 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     static final String CHECK_POINT = "update2";
 
-    private RatingEngine ratingEngine;
-
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
@@ -37,8 +34,8 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
 
         new Thread(() -> {
-            createTestSegment2();
-            ratingEngine = createRuleBasedRatingEngine();
+            createTestSegments();
+            createRuleBasedRatingEngine();
         }).start();
 
         importData();
@@ -75,6 +72,11 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
+        Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_3,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_3,
+                BusinessEntity.Product, numProducts);
+        verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
                 BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
