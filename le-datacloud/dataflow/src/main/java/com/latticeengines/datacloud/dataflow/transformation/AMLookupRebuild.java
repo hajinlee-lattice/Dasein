@@ -8,6 +8,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMLookupKeyFunction;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -91,7 +92,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 new FieldList(config.getDomainField(), config.getCountryField(), config.getZipCodeField()));
         node = node.groupByAndLimit(
                 new FieldList(config.getDomainField(), config.getCountryField(), config.getZipCodeField()),
-                new FieldList(config.getIsPrimaryLocationField()), 1, true, true);
+                new FieldList(DataCloudConstants.ATTR_IS_ZIP_PRIMARY_LOCATION), 1, true, true);
         node = node.apply(
                 new AMLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), null, config.getZipCodeField()),
@@ -105,7 +106,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 new FieldList(config.getDomainField(), config.getCountryField(), config.getStateField()));
         node = node.groupByAndLimit(
                 new FieldList(config.getDomainField(), config.getCountryField(), config.getStateField()),
-                new FieldList(config.getIsPrimaryLocationField()), 1, true, true);
+                new FieldList(DataCloudConstants.ATTR_IS_ST_PRIMARY_LOCATION), 1, true, true);
         node = node.apply(
                 new AMLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), config.getStateField(), null),
@@ -117,7 +118,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
         node = node.filter(String.format("%s != null && %s != null", config.getDomainField(), config.getCountryField()),
                 new FieldList(config.getDomainField(), config.getCountryField()));
         node = node.groupByAndLimit(new FieldList(config.getDomainField(), config.getCountryField()),
-                new FieldList(config.getIsPrimaryLocationField()), 1, true, true);
+                new FieldList(DataCloudConstants.ATTR_IS_CTY_PRIMARY_LOCATION), 1, true, true);
         node = node.apply(
                 new AMLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), null, null),

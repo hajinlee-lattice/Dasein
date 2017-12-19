@@ -26,6 +26,20 @@ public final class DataCloudConstants {
     public static final String ATTR_LDC_NAME = "LDC_Name";
     public static final String ATTR_LDC_DOMAIN = "LDC_Domain";
     public static final String ATTR_LDC_INDUSTRY = "LDC_PrimaryIndustry";
+    public static final String ATTR_IS_PRIMARY_ACCOUNT = "IsPrimaryAccount";
+    public static final String ATTR_DU_DUNS = "LE_PRIMARY_DUNS";
+    public static final String ATTR_GU_DUNS = "GLOBAL_ULTIMATE_DUNS_NUMBER";
+    public static final String ATTR_SALES_VOL_US = "SALES_VOLUME_US_DOLLARS";
+    public static final String ATTR_EMPLOYEE_HERE = "EMPLOYEES_HERE";
+    public static final String ATTR_IS_CTY_PRIMARY_LOCATION = "IsCountryPrimaryLocation";
+    public static final String ATTR_IS_ST_PRIMARY_LOCATION = "IsStatePrimaryLocation";
+    public static final String ATTR_IS_ZIP_PRIMARY_LOCATION = "IsZipPrimaryLocation";
+
+    public static final String AMS_ATTR_DOMAIN = "Domain";
+    public static final String AMS_ATTR_DUNS = "DUNS";
+    public static final String AMS_ATTR_COUNTRY = "Country";
+    public static final String AMS_ATTR_STATE = "State";
+    public static final String AMS_ATTR_ZIP = "ZipCode";
 
     public static final String PROFILE_STAGE_SEGMENT = "SEGMENT";
     public static final String PROFILE_STAGE_ENRICH = "ENRICH";

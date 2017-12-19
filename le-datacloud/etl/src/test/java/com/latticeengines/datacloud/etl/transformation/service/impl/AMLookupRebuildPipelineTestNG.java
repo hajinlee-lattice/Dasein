@@ -26,7 +26,6 @@ import com.latticeengines.datacloud.dataflow.transformation.AMSeedPriActFix;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedPriActConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedSecondDomainCleanupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -99,8 +98,7 @@ public class AMLookupRebuildPipelineTestNG
             inputSteps.add(0);
             step2.setInputSteps(inputSteps);
             step2.setTransformer(AMSeedPriActFix.TRANSFORMER_NAME);
-            String confParamStr2 = getAMSeedPriActFixConfig();
-            step2.setConfiguration(confParamStr2);
+            step2.setConfiguration("{}");
             step2.setTargetSource(targetSeedName);
 
             // -----------
@@ -134,21 +132,6 @@ public class AMLookupRebuildPipelineTestNG
         conf.setDomainField("Domain");
         conf.setSecondDomainField("SecondaryDomain");
         conf.setDunsField("DUNS");
-        return om.writeValueAsString(conf);
-    }
-
-    private String getAMSeedPriActFixConfig() throws JsonProcessingException {
-        AMSeedPriActConfig conf = new AMSeedPriActConfig();
-        conf.setCountryField("Country");
-        conf.setDomainField("Domain");
-        conf.setDuDunsField("LE_PRIMARY_DUNS");
-        conf.setDunsField("DUNS");
-        conf.setEmployeeField("EMPLOYEES_HERE");
-        conf.setGuDunsField("GLOBAL_ULTIMATE_DUNS_NUMBER");
-        conf.setIsPriLocField("LE_IS_PRIMARY_LOCATION");
-        conf.setIsPriActField("IsPrimaryAccount");
-        conf.setLatticeIdField("LatticeID");
-        conf.setSalesVolUSField("SALES_VOLUME_US_DOLLARS");
         return om.writeValueAsString(conf);
     }
 
