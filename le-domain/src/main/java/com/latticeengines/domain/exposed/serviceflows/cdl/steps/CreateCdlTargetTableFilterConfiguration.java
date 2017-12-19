@@ -2,13 +2,13 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
-public class CreateCdlTagetTableFilterConfiguration extends BaseCDLDataFlowStepConfiguration {
+public class CreateCdlTargetTableFilterConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private String targetFilterTableName;
 
     private FrontEndQuery targetQuery;
 
-    public CreateCdlTagetTableFilterConfiguration() {
+    public CreateCdlTargetTableFilterConfiguration() {
         setBeanName("createCdlTargetTableFilterFlow");
     }
 
