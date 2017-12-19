@@ -176,6 +176,13 @@ angular
 
                 return bkt.Lbl || 'empty';
             }
+
+            vm.getTitleTooltip = function(attribute) {
+                console.log(attribute);
+                if(attribute.Entity === 'PurchaseHistory'){
+                    return attribute.Subcategory;
+                }
+            }
         }
     };
 });

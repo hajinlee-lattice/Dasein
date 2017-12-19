@@ -67,7 +67,8 @@
                             'show-tooltip': vm.section == 'segment.analysis'
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)"
-                        ng-style="{'pointer-events': (vm.section == 'segment.analysis' ? 'all' : 'none')}">
+                        ng-style="{'pointer-events': (vm.section == 'segment.analysis' ? 'all' : 'none')}"
+                        title="{{vm.getTitleTooltip(attribute)}}">
 
                     <!--input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" /-->
                     <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis'">
