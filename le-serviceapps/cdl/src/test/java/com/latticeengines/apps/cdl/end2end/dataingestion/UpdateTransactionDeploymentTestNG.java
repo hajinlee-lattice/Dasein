@@ -43,7 +43,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
         new Thread(() -> {
-            createTestSegment2();
+            createTestSegments();
             ratingEngine = createRuleBasedRatingEngine();
         }).start();
 

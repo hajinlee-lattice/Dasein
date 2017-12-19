@@ -99,9 +99,9 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         putObjectInContext(DAILY_AGG_TXN_TABLE_NAME, sortedDailyTableName);
         putObjectInContext(PERIOD_AGG_TXN_TABLE_NAME, sortedPeriodTableName);
         updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName, String.class);
-        updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
         updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName, String.class);
-        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
 
         DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
         Integer earliestDayPeriod = TimeSeriesUtils.getEarliestPeriod(yarnConfiguration, rawTable);
