@@ -108,3 +108,61 @@ Content Panels
             user-select: none; /* Non-prefixed version, currently
                                   not supported by any browser */
 }
+
+.expanding-bars-spinner {
+    width:117px;
+    height: 50px;
+
+    & > div {
+        height: 1em;
+        overflow: hidden;
+        background-color: #bbb;
+        border-radius: 3px;
+        color: #bbb;
+        display:inline-block;
+        margin-right: 0em;
+        -webkit-animation: expanding-bars-animation .7s infinite;
+        animation: expanding-bars-animation .7s infinite;
+        filter: blur(2px);
+                        -webkit-transition: all 1s ease 0;
+                        transition: all 1s ease 0;
+
+        &:nth-child(1) {
+            -webkit-animation-delay: 0.1s;
+            animation-delay: 0.1s;
+        }
+        &:nth-child(2) {
+            -webkit-animation-delay: 0.2s;
+            animation-delay: 0.2s;
+        }
+        &:nth-child(3) {
+            -webkit-animation-delay: 0.3s;
+            animation-delay: 0.3s;
+        }
+        &:nth-child(4) {
+            -webkit-animation-delay: 0.4s;
+            animation-delay: 0.4s;
+        }
+        &:nth-child(5) {
+            -webkit-animation-delay: 0.5s;
+            animation-delay: 0.5s;
+        }
+        &:nth-child(6) {
+            -webkit-animation-delay: 0.6s;
+            animation-delay: 0.6s;
+        }
+        &:nth-child(7) {
+            -webkit-animation-delay: 0.7s;
+            animation-delay: 0.7s;
+        }
+    }
+}
+
+@keyframes expanding-bars-animation {
+    30% {
+        transform: scaleY(.50) scaleX(.50);
+        background-color: #aaa;
+        color: #aaa;
+        filter: blur(1px);
+    }
+}

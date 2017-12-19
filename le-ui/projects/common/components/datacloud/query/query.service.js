@@ -4,13 +4,13 @@ angular.module('common.datacloud.query.service',[
     var QueryStore = this;
 
     angular.extend(this, {});
-    this.validResourceTypes = ['accounts', 'contacts'];
+    this.validResourceTypes = ['accounts', 'contacts', 'products'];
     this.segment = null;
 
     // for Adanced Query Builder
     this.history = [];
 
-    this.validContexts = ['accounts', 'contacts'];
+    this.validContexts = ['accounts', 'contacts', 'products'];
 
     this.counts = {
         accounts: {
@@ -18,6 +18,10 @@ angular.module('common.datacloud.query.service',[
             loading: false
         },
         contacts: {
+            value: 0,
+            loading: false
+        },
+        product: {
             value: 0,
             loading: false
         }
@@ -57,15 +61,24 @@ angular.module('common.datacloud.query.service',[
         };
     }
 
+    this.setEntitiesProperty = function(property, value) {
+        for (var key in this.counts) {
+            this.counts[key][property] = value;
+        }
+    }
+
     this.setBucketsToLaunch = function(buckets) {
         this.bucketsToLaunch = buckets;
     }
+
     this.getBucketsToLaunch = function() {
         return this.bucketsToLaunch;
     }
+
     this.setRatedTargetsLimit = function(limit) {
         this.ratedTargetsLimit = limit;
     }
+
     this.getRatedTargetsLimit = function() {
         return this.ratedTargetsLimit;
     }
@@ -238,8 +251,7 @@ angular.module('common.datacloud.query.service',[
         }
 
         return deferred.promise;
-
-    };
+    }
 
     this.getSegmentProperty = function(properties, propertyName) {
         for (var i = 0; i < properties.length; i++) {
@@ -250,7 +262,7 @@ angular.module('common.datacloud.query.service',[
         }
 
         return null;
-    };
+    }
 
     this.setAddBucketTreeRoot = function(tree) {
         if (tree === null) {
@@ -265,149 +277,76 @@ angular.module('common.datacloud.query.service',[
     }
 
     this.addAccountRestriction = function(attribute) {
-        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
-        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
-
-        var treeRoot = this.getAddBucketTreeRoot(),
-            restrictions = treeRoot 
-                ? treeRoot.logicalRestriction.restrictions 
-                : this.accountRestriction.restriction.logicalRestriction.restrictions;
-        
-        restrictions.push({
-            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
-        });
-
-        this.setAccountRestriction(this.accountRestriction);
-
-        var self = this;
-        this.GetCountByQuery('accounts').then(function(data){
-            self.setResourceTypeCount('accounts', false, data);
-            self.counts.accounts.loading = false;
-        });
-        this.GetCountByQuery('contacts').then(function(data){
-            self.setResourceTypeCount('contacts', false, data);
-            self.counts.contacts.loading = false;
-        });
-
-    };
-
-    this.removeAccountRestriction = function(attribute) {
-        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
-        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
-
-        var searchTerm = attribute.attr,
-            index = -1,
-            retrictions = this.accountRestriction.restriction.logicalRestriction.restrictions;
-
-        for (var i = 0, len = retrictions.length; i < len; i++) {
-            if (retrictions[i].bucketRestriction && retrictions[i].bucketRestriction.attr === searchTerm) {
-                var index = i;
-                break;
-            }
-        }
-
-        if (index >= 0) {
-            retrictions.splice(index, 1);
-        }
-
-        this.setAccountRestriction(this.accountRestriction);
-
-        var self = this;
-        this.GetCountByQuery('accounts').then(function(data){
-            self.setResourceTypeCount('accounts', false, data);
-            self.counts.accounts.loading = false;
-        });
-        this.GetCountByQuery('contacts').then(function(data){
-            self.setResourceTypeCount('contacts', false, data);
-            self.counts.contacts.loading = false;
-        });
-    };
-
-    this.addContactRestriction = function(attribute) {
-        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
-        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
-
-        var treeRoot = this.getAddBucketTreeRoot(),
-            restrictions = treeRoot 
-                ? treeRoot.logicalRestriction.restrictions 
-                : this.contactRestriction.restriction.logicalRestriction.restrictions;
-        
-        restrictions.push({
-            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
-        });
-
-        this.setContactRestriction(this.contactRestriction);
-
-        var self = this;
-        this.GetCountByQuery('accounts').then(function(data){
-            self.setResourceTypeCount('accounts', false, data);
-            self.counts.accounts.loading = false;
-        });
-        this.GetCountByQuery('contacts').then(function(data){
-            self.setResourceTypeCount('contacts', false, data);
-            self.counts.contacts.loading = false;
-        });
-    };
-
-    this.removeContactRestriction = function(attribute) {
-        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
-        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
-
-        var searchTerm = attribute.attr,
-            index = -1,
-            retrictions = this.contactRestriction.restriction.logicalRestriction.restrictions;
-
-        for (var i = 0, len = retrictions.length; i < len; i++) {
-            if (retrictions[i].bucketRestriction && retrictions[i].bucketRestriction.attr === searchTerm) {
-                var index = i;
-                break;
-            }
-        }
-
-        if (index >= 0) {
-            retrictions.splice(index, 1);
-        }
-
-        this.setContactRestriction(this.contactRestriction);
-
-        var self = this;
-        this.GetCountByQuery('accounts').then(function(data){
-            self.setResourceTypeCount('accounts', false, data);
-            self.counts.accounts.loading = false;
-        });
-        this.GetCountByQuery('contacts').then(function(data){
-            self.setResourceTypeCount('contacts', false, data);
-            self.counts.contacts.loading = false;
-        });
-    };
-
-    this.addPurchaseHistoryRestriction = function(attribute){
-        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
-        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
-
-        var treeRoot = this.getAddBucketTreeRoot(),
-            restrictions = treeRoot 
-                ? treeRoot.logicalRestriction.restrictions 
-                : this.accountRestriction.restriction.logicalRestriction.restrictions;
-        
-        restrictions.push({
-            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
-        });
-
-        this.setAccountRestriction(this.accountRestriction);
-
-        var self = this;
-        this.GetCountByQuery('accounts').then(function(data){
-            self.setResourceTypeCount('accounts', false, data);
-            self.counts.accounts.loading = false;
-        });
-        this.GetCountByQuery('contacts').then(function(data){
-            self.setResourceTypeCount('contacts', false, data);
-            self.counts.contacts.loading = false;
-        });
+        this.addRestriction('account', attribute);
     }
 
-    
+    this.addContactRestriction = function(attribute) {
+        this.addRestriction('contact', attribute);
+    }
+
+    this.addPurchaseHistoryRestriction = function(attribute) {
+        this.addRestriction('account', attribute);
+    }
+
+    this.removeAccountRestriction = function(attribute) {
+        this.removeRestriction('account', attribute);
+    }
+
+    this.removeContactRestriction = function(attribute) {
+        this.removeRestriction('contact', attribute);
+    }
+
+    this.addRestriction = function(type, attribute) {
+        attribute = this.setAttributeAttr(type, attribute);
+
+        var treeRoot = this.getAddBucketTreeRoot(),
+            restrictions = treeRoot 
+                ? treeRoot.logicalRestriction.restrictions 
+                : this[type + 'Restriction'].restriction.logicalRestriction.restrictions;
+                
+        restrictions.push({
+            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
+        });
+
+        this.setRestrictions(type);
+    }
+
+    this.removeRestriction = function(type, attribute) {
+        attribute = this.setAttributeAttr(type, attribute);
+
+        var searchTerm = attribute.attr,
+            index = -1,
+            retrictions = this[type + 'Restriction'].restriction.logicalRestriction.restrictions;
+            
+        for (var i = 0, len = retrictions.length; i < len; i++) {
+            if (retrictions[i].bucketRestriction && retrictions[i].bucketRestriction.attr === searchTerm) {
+                var index = i;
+                break;
+            }
+        }
+
+        if (index >= 0) {
+            retrictions.splice(index, 1);
+        }
+
+        this.setRestrictions(type);
+    }
+
+    this.setAttributeAttr = function(type, attribute) {
+        var resourceType = type == 'contact' ? 'Contact' : 'LatticeAccount';
+        attribute.resourceType = attribute.resourceType || resourceType;
+        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
+        return attribute;
+    }
+
+    this.setRestrictions = function(type) {
+        type == 'account'
+            ? this.setAccountRestriction(this.accountRestriction)
+            : this.setContactRestriction(this.contactRestriction);
+
+        this.getEntitiesCounts();
+    }
+
     this.findAttributes = function(columnName) {
         var groupKey = null;
         var attributes = [];
@@ -437,18 +376,77 @@ angular.module('common.datacloud.query.service',[
         return results;
     };
 
+    this.getEntitiesCounts = function() {
+        var deferred = $q.defer();
+
+        this.GetEntitiesCountsByQuery().then(function(data){
+            QueryStore.setResourceTypeCount('accounts', false, data['Account']);
+            QueryStore.setResourceTypeCount('contacts', false, data['Contact']);
+            QueryStore.setEntitiesProperty('loading', false);
+
+            deferred.resolve(data);
+        });
+
+        return deferred.promise;
+    };
+
+    this.GetEntitiesCountsByQuery = function(query) {  
+        var deferred = $q.defer(),
+            accountRestriction = this.getAccountRestriction(),
+            contactRestriction = this.getContactRestriction();
+
+        if (query === undefined || query === ''){
+            var queryWithRestriction = { 
+                'free_form_text_search': '',
+                'account_restriction': accountRestriction,
+                'contact_restriction': contactRestriction,
+                'restrict_without_sfdcid': false,
+                'page_filter': {
+                    'num_rows': 10,
+                    'row_offset': 0
+                }
+            };
+
+        } else {
+            var queryWithRestriction = { 
+                'free_form_text_search': query.free_form_text_search || '',
+                'account_restriction': query.account_restriction || {},
+                'contact_restriction': query.contact_restriction || {},
+                'preexisting_segment_name': query.preexisting_segment_name,
+                'page_filter': {
+                    'num_rows': query.page_filter.num_rows,
+                    'row_offset': query.page_filter.row_offset
+                },
+                'restrict_without_sfdcid': query.restrict_without_sfdcid
+            };
+        };
+
+        queryWithRestriction = SegmentStore.sanitizeSegment(queryWithRestriction);
+
+        QueryService.GetEntitiesCounts(queryWithRestriction).then(function(data) {
+            deferred.resolve(data);
+        });
+
+        return deferred.promise;
+    };
+
     this.GetCountByQuery = function(resourceType, query) {  
         if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
-            deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
+            
+            deferred.resolve({
+                error: {
+                   errMsg:'Invalid resourceType: ' + resourceType
+                }
+            });
+
             return deferred.promise;
         } else {
-
             var deferred = $q.defer(),
                 accountRestriction = this.getAccountRestriction(),
                 contactRestriction = this.getContactRestriction();
 
-            if(query === undefined || query === ''){
+            if (query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
                     'account_restriction': accountRestriction,
@@ -476,7 +474,10 @@ angular.module('common.datacloud.query.service',[
 
             queryWithRestriction = SegmentStore.sanitizeSegment(queryWithRestriction);
 
-            deferred.resolve(QueryService.GetCountByQuery(resourceType, queryWithRestriction));
+            QueryService.GetCountByQuery(resourceType, queryWithRestriction).then(function(data) {
+                deferred.resolve(data[resourceType == 'account' ? 'Account' : 'Contact']);
+            });
+
             return deferred.promise;
         }
     };
@@ -585,6 +586,34 @@ angular.module('common.datacloud.query.service',[
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count',
+            data: query,
+            timeout: this.canceler.promise,
+            headers: {
+                'ErrorDisplayMethod': 'none'
+            }
+        }).success(function(result) {
+            deferred.resolve(result);
+        }).error(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
+    this.GetEntitiesCounts = function(query, cancelPrevious) {
+        var deferred = $q.defer();
+
+        if (this.canceler && cancelPrevious) {
+            this.canceler.resolve("cancelled");
+        }
+        
+        this.canceler = $q.defer(); 
+
+        SegmentStore.sanitizeSegment(query);
+
+        $http({
+            method: 'POST',
+            url: '/pls/entities/counts',
             data: query,
             timeout: this.canceler.promise,
             headers: {

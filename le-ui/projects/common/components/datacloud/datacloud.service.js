@@ -134,21 +134,29 @@ angular.module('common.datacloud')
         this.subcategories[category] = item;
     }
 
-    this.getAllEnrichmentsConcurrently = function(count){
+    this.getAllEnrichmentsConcurrently = function(total_count){
         var deferred = $q.defer(),
-            max = Math.ceil(count / 5), // six concurrent connections (IE only supports two)
-            iterations = Math.ceil(count / max);
+            /*  
+             *  Most browsers support 6 concurrent connections, older IE supports two
+             *  Setting this to 5 to make room for topn call -lazarus
+             */
+            connections = 5,
+            item_count = Math.ceil(total_count / connections),
+            iterations = Math.ceil(total_count / item_count);
         
-        this.concurrent = 0;
+        this.concurrent_count = 0;
 
-        if (this.enrichments && this.enrichments.length == count) {
+        if (this.enrichments && this.enrichments.length == total_count) {
             deferred.resolve(this.enrichments, true);
         } else {
             for (var j=0; j<iterations; j++) {
-                this.getEnrichments({ max: max, offset: j * max }, true).then(function(result) {
-                    DataCloudStore.concurrent++;
+                this.getEnrichments({ 
+                    max: item_count, 
+                    offset: j * item_count 
+                }, true).then(function(result) {
+                    DataCloudStore.concurrent_count++;
 
-                    if (DataCloudStore.concurrent == iterations) {
+                    if (DataCloudStore.concurrent_count == iterations) {
                         deferred.resolve(DataCloudStore.enrichments);
                     }
                 });
@@ -160,6 +168,7 @@ angular.module('common.datacloud')
 
     this.getEnrichments = function(opts, concatEnrichments){
         var deferred = $q.defer();
+
         if (this.enrichments) {
             deferred.resolve(this.enrichments);
         } else {
@@ -169,6 +178,7 @@ angular.module('common.datacloud')
                 deferred.resolve(response);
             });
         }
+
         return deferred.promise;
     }
 

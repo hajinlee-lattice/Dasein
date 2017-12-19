@@ -75,7 +75,7 @@ angular.module('insightsApp')
                 }
             }
         });
-}); 
+});
 
 function ShowSpinner(LoadingString, type) {
     // state change spinner

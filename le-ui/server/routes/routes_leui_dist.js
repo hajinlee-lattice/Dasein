@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = [{
+    redirect: {
+        '/': '/login'
+    }
+},{
     path: '/projects/common',
     folders: {
         '/app/modules/': '/app/modules/',
@@ -12,9 +16,8 @@ module.exports = [{
     }
 },{
     path: '/projects/login',
+    html5mode: true,
     pages: {
-        '/': 'assets/index.html',
-        '/index': 'assets/index.html',
         '/login/': 'assets/index.html',
         '/login/index': 'assets/index.html'
     },

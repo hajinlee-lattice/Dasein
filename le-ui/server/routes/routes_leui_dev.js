@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = [{
+    redirect: {
+        '/': '/login'
+    }
+},{
     path: '/projects/common',
     folders: {
         '/app': '/app',
@@ -18,15 +22,13 @@ module.exports = [{
         '/ng2': 'index.html'
     },
     folders: {
-        '/': '/',
         '/ng2/lib': '/src/assets/lib'
     }
 },{
     path: '/projects/login',
+    html5mode: true,
     pages: {
-        '/': 'index.html',
-        '/index': 'index.html',
-        '/login/': 'index.html',
+        '/login': 'index.html',
         '/login/index': 'index.html'
     },
     folders: {

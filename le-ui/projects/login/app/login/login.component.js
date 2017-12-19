@@ -33,14 +33,15 @@ angular.module('login')
                             $state.go('login.form');
                         }
                         break;
+                    case 'login':
+                        $state.go('login.form');
+                        break;
                 }
             }
 
             LoginStore.set(LoginDocument, ClientSession);
 
-            $timeout(function() {
-                angular.element('body').addClass('initialized');
-            },1);
+            angular.element('body').addClass('initialized');
         }
 
         vm.getHistory = function(username) {

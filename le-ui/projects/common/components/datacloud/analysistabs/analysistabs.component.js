@@ -20,12 +20,14 @@ angular.module('common.datacloud.analysistabs', [])
     vm.init = function() {
         QueryStore.history = [];
 
-        ['accounts','contacts'].forEach(function(source) {
-            QueryStore.GetCountByQuery(source).then(function(data){ 
-                vm.counts[source].value = data;
-                vm.counts[source].loading = false;
-            });
-        });
+        QueryStore.getEntitiesCounts();
+
+        // ['accounts','contacts'].forEach(function(source) {
+        //     QueryStore.GetCountByQuery(source).then(function(data){ 
+        //         vm.counts[source].value = data;
+        //         vm.counts[source].loading = false;
+        //     });
+        // });
 
         var attributesUrl = "home.segment.explorer.attributes({segment:'" + vm.segment + "'})";
 

@@ -7,9 +7,6 @@ angular.module('login', [
     'mainApp.core.services.ResourceStringsService'
 ])
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
-    //$locationProvider.html5Mode(true);
-    $urlRouterProvider.otherwise('/form');
-
     $stateProvider
         .state('login', {
             url: '/',
@@ -26,9 +23,6 @@ angular.module('login', [
                 }
             },
             views: {
-                "header": {
-                    template: ''
-                },
                 "main": {
                     resolve: {
                         LoginDocument: function(BrowserStorageUtility) {

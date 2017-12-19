@@ -57,13 +57,9 @@ angular.module('common.datacloud.query.builder', [
             RatingsEngineStore.setRule(RatingEngineModel)
 
             vm.initCoverageMap();
+            vm.getRatingsAndRecordCounts(RatingEngineModel, CurrentRatingEngine.segment.name);
 
-            RatingsEngineStore.getCoverageMap(RatingEngineModel, CurrentRatingEngine.segment.name).then(function(result) {
-                CoverageMap = vm.initCoverageMap(result);
-                console.log('[AQB] CoverageMap:', CoverageMap);
-            }); 
-
-            vm.getRuleRecordCounts();
+            console.log('[AQB] CoverageMap:', CoverageMap);
         }
 
         DataCloudStore.getEnrichments().then(function(enrichments) {
@@ -255,6 +251,24 @@ angular.module('common.datacloud.query.builder', [
 
         return filtered.length;
     }
+
+    vm.getRatingsAndRecordCounts = function(model, segmentName) {
+        var rulesForCounts = vm.getRuleRecordCounts();
+                console.log('getRatingsAndRecordCounts', segmentName, rulesForCounts, model);
+
+        RatingsEngineStore.getCoverageMap(model, segmentName, rulesForCounts).then(function(result) {
+            CoverageMap = vm.initCoverageMap(result);
+
+            var buckets = result.segmentIdAndSingleRulesCoverageMap;
+            
+            Object.keys(buckets).forEach(function(key) {
+                var label = vm.RuleRecordMap[key].bucketRestriction.attr,
+                    type = label.split('.')[0] == 'Contact' ? 'contact' : 'account';
+                
+                vm.RuleRecordMap[key].bucketRestriction.bkt.Cnt = buckets[key][type + 'Count'];
+            });
+        });
+    }
     
     vm.clickUndo = function() {
         var lastState;
@@ -269,7 +283,6 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.setState = function(newState) {
-        //console.log('set',newState);
         if (!vm.compareTree(newState, angular.copy(vm.tree))) {
             vm.labelIncrementor = 0;
             
@@ -290,6 +303,7 @@ angular.module('common.datacloud.query.builder', [
     vm.updateCount = function() {
         vm.prevBucketCountAttr = null;
         QueryStore.setPublicProperty('enableSaveSegmentButton', true);
+
         if (vm.mode == 'rules') {
             QueryStore.counts[vm.treeMode + 's'].loading = true;
 
@@ -309,19 +323,12 @@ angular.module('common.datacloud.query.builder', [
             });
 
             $timeout(function() {
-                RatingsEngineStore.getCoverageMap(RatingEngineCopy, CurrentRatingEngine.segment.name).then(function(result) {
-                    vm.initCoverageMap(result);
-                }); 
+                console.log('updateCounts');
+                vm.getRatingsAndRecordCounts(RatingEngineCopy, CurrentRatingEngine.segment.name);
             }, 250);
         } else {
-            if (QueryStore.counts['accounts']) {
-                QueryStore.counts['accounts'].loading = true;
-            }
-
-            if (QueryStore.counts['contacts']) {
-                QueryStore.counts['contacts'].loading = true;
-            }
-
+            QueryStore.setEntitiesProperty('loading', true);
+console.log(1);
             $timeout(function() {
                 var segment = { 
                     'free_form_text_search': "",
@@ -330,16 +337,15 @@ angular.module('common.datacloud.query.builder', [
                         'row_offset': 0
                     }
                 };
+console.log(2);
 
                 segment['account_restriction'] = angular.copy(QueryStore.accountRestriction);
                 segment['contact_restriction'] = angular.copy(QueryStore.contactRestriction);
 
-                QueryService.GetCountByQuery('accounts', SegmentStore.sanitizeSegment(segment)).then(function(result) {
-                    QueryStore.setResourceTypeCount('accounts', false, result);
-                });
-
-                QueryService.GetCountByQuery('contacts', SegmentStore.sanitizeSegment(segment)).then(function(result) {
-                    QueryStore.setResourceTypeCount('contacts', false, result);
+                QueryStore.getEntitiesCounts(SegmentStore.sanitizeSegment(segment)).then(function(result) {
+console.log(3);
+                    QueryStore.setResourceTypeCount('accounts', false, result['Account']);
+                    QueryStore.setResourceTypeCount('contacts', false, result['Contact']);
                 });
             }, 250);
         }
@@ -373,25 +379,17 @@ angular.module('common.datacloud.query.builder', [
 
     vm.getRuleRecordCounts = function(restrictions) {
         var restrictions = restrictions || vm.getAllBucketRestrictions(),
-            segmentId = CurrentRatingEngine.segment.name,
-            map = {};
+            segmentId = CurrentRatingEngine.segment.name;
+        
+        vm.RuleRecordMap = {};
 
         restrictions.forEach(function(bucket, index) {
             bucket.bucketRestriction.bkt.Cnt = -1;
 
-            map[bucket.bucketRestriction.attr + '_' + index] = bucket;
+            vm.RuleRecordMap[bucket.bucketRestriction.attr + '_' + index] = bucket;
         })
 
-        RatingsEngineStore.getBucketRuleCounts(angular.copy(restrictions), segmentId).then(function(result) {
-            var buckets = result.segmentIdAndSingleRulesCoverageMap;
-            
-            Object.keys(buckets).forEach(function(key) {
-                var label = map[key].bucketRestriction.attr,
-                    type = label.split('.')[0] == 'Contact' ? 'contact' : 'account';
-                
-                map[key].bucketRestriction.bkt.Cnt = buckets[key][type + 'Count'];
-            });
-        }); 
+        return RatingsEngineStore.getBucketRuleCounts(angular.copy(restrictions), segmentId); 
     }
 
     vm.getAllBucketRestrictions = function() {

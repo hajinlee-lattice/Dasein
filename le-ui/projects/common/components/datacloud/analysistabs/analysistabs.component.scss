@@ -16,6 +16,19 @@ section.analysis-tabs.tabs.interior {
                     margin: 0;
                     padding: 0;
                     border: none;
+                    
+                    &,& * {
+                        -webkit-transition: all 1s ease 0;
+                        transition: all 1s ease 0;
+                    }
+
+                    div {
+                        display: inline-block;
+                        color: #222;
+                        background: transparent;
+                        letter-spacing: -0.1em;
+                        vertical-align: baseline;
+                    }
                 }
             }
         }

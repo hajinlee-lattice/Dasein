@@ -391,24 +391,22 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     };
 
-    this.getCoverageMap = function(CurrentRatingsEngine, segmentId){
+    this.getCoverageMap = function(CurrentRatingsEngine, segmentId, CoverageMap){
         var deferred = $q.defer();
+        var CoverageMap = CoverageMap || {};
 
         SegmentStore.sanitizeRuleBuckets(CurrentRatingsEngine.rule, true);
 
-        var CoverageMap = {
-            "restrictNotNullSalesforceId":false,
-            "segmentIdModelRules": [{
-                "segmentId": segmentId,
-                "ratingRule": {
-                    "bucketToRuleMap": CurrentRatingsEngine.rule.ratingRule.bucketToRuleMap,
-                    "defaultBucketName": CurrentRatingsEngine.rule.ratingRule.defaultBucketName
-                }
-            }]
-        };
+        CoverageMap.restrictNotNullSalesforceId = false;
+        CoverageMap.segmentIdModelRules = [{
+            segmentId: segmentId,
+            ratingRule: {
+                bucketToRuleMap: CurrentRatingsEngine.rule.ratingRule.bucketToRuleMap,
+                defaultBucketName: CurrentRatingsEngine.rule.ratingRule.defaultBucketName
+            }
+        }];
 
         RatingsEngineService.getRatingsChartData(CoverageMap).then(function(response){
-            //RatingsEngineStore.setCoverage(response);
             deferred.resolve(response);
         });
 
@@ -416,8 +414,6 @@ angular.module('lp.ratingsengine')
     };
 
     this.getBucketRuleCounts = function(restrictions, segmentId){
-        var deferred = $q.defer();
-
         var buckets = restrictions.map(function(bucket, index) {
             var label = bucket.bucketRestriction.attr,
                 type = label.split('.')[0] == 'Contact' ? 'contact' : 'account',
@@ -431,16 +427,10 @@ angular.module('lp.ratingsengine')
             return object;
         });
 
-        var CoverageMap = {
+        return {
             "restrictNotNullSalesforceId": false,
             "segmentIdAndSingleRules": buckets
         };
-
-        RatingsEngineService.getRatingsChartData(CoverageMap).then(function(response){
-            deferred.resolve(response);
-        });
-
-        return deferred.promise;
     };
 
     this.getCoverage = function() {

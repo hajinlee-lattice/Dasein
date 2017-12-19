@@ -260,10 +260,26 @@ class Server {
     }
 
     setAppRoutes(routes) {
+        //this.app.use('/', (req, res) => res.redirect(301, '/login'));
         routes.forEach(route => {
             const dir = this.options.config.APP_ROOT + route.path;
             var displayString = '';
-            // set up the static routes for app files
+
+            /*
+             * Redirect the user to a different url
+             */
+            if (route.redirect) {
+                Object.keys(route.redirect).forEach(redirect => {
+                    this.app.all(
+                        redirect,
+                        (req, res) => res.redirect(route.redirect[redirect])
+                    );
+                });
+            }
+
+            /*
+             * Static routes for app files
+             */
             if (route.folders) {
                 Object.keys(route.folders).forEach(folder => {
                     displayString += (displayString ? ', ' : '') + route.folders[folder];
@@ -273,14 +289,12 @@ class Server {
                     );
                 });
             }
-/*
-            console.log(
-                chalk.white('>') + ' ROUTE\t'+route.path.replace(this.options.SRC_PATH,''),
-                '\n\t[ '+displayString+' ]'
-            );
-*/
+
             displayString = '';
-            // users will see the desired render page when entering these routes
+
+            /*
+             * Webapp entry points
+             */
             if (route.pages) {
                 const html5mode = route.html5mode === true;
                 Object.keys(route.pages).forEach(page => {

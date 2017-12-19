@@ -2,13 +2,19 @@
     <ul class="noselect-children">
         <li ui-sref="{{vm.attributes}}" ng-class="{'active':vm.checkState('builder') || vm.checkState('attributes')}">
             <div class="tab-container">
-                <h2>Attributes
-                    <span class="more-info left">&#105;
+
+                <h2>
+                    Attributes
+                    <span class="more-info show-tooltip bottom left delay">
+                        &#105;
                         <div class="tooltip_">
                             <div class="cover">
-                                <h3>Attributes</h3>
+                                <h3>
+                                    Attributes
+                                </h3>
                                 <p>
-                                    Select the attributes which contacts/accounts in the segment must have.  In query language these are AND conditions.
+                                    Select the attributes which contacts/accounts in the segment 
+                                    must have.  In query language these are AND conditions.
                                 </p>
                                 <p>
                                     You can further refine the segment using [ Refine Query ]
@@ -17,6 +23,7 @@
                         </div>
                     </span>
                 </h2>
+
                 <div class="enrichmentCounts">
                     <span class="count">{{(vm.DataCloudStore.metadata.enrichmentsTotal || 0) | number}}</span>
                     <span class="count">{{ vm.getRuleCount() }}</span>
@@ -24,12 +31,23 @@
                 </div>
             </div>
         </li>
-        <li ui-sref="{{vm.accounts}}" ng-class="{'active':vm.checkState('accounts')}">
+        <li  ng-class="{'active':vm.checkState('accounts')}">
             <div class="tab-container">
                 <h2>Accounts</h2>
-                <div class="enrichmentCounts">
-                    <span ng-if="!vm.counts.accounts.loading" class="count">{{vm.counts.accounts.value|number}}</span>
-                    <span ng-if="vm.counts.accounts.loading" class="count"><i class="fa fa-spinner fa-spin"></i></span>
+                <div class="enrichmentCounts" ng-click="vm.counts.accounts.loading = !vm.counts.accounts.loading">
+                    <!--span ng-if="!vm.counts.accounts.loading" class="count">{{vm.counts.accounts.value|number}}</span-->
+                    <span class="count">
+                        <!--i class="fa fa-spinner fa-spin"></i-->
+                        <div ng-class="{'expanding-bars-spinner':vm.counts.accounts.loading}">
+                            <div>{{(vm.counts.accounts.value|number).toString()[0]}}</div>
+                            <div>{{(vm.counts.accounts.value|number).toString()[1]}}</div>
+                            <div>{{(vm.counts.accounts.value|number).toString()[2]}}</div>
+                            <div>{{(vm.counts.accounts.value|number).toString()[3]}}</div>
+                            <div>{{(vm.counts.accounts.value|number).toString()[4]}}</div>
+                            <div>{{(vm.counts.accounts.value|number).toString()[5]}}</div>
+                            <div>{{(vm.counts.accounts.value|number).toString()[6]}}</div>
+                        </div>
+                    </span>
                 </div>
             </div>
         </li>
@@ -37,8 +55,18 @@
             <div class="tab-container">
                 <h2>Contacts</h2>
                 <div class="enrichmentCounts">
-                    <span ng-if="!vm.counts.contacts.loading" class="count">{{vm.counts.contacts.value|number}}</span>
-                    <span ng-if="vm.counts.contacts.loading" class="count"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span class="count">
+                        <!--i class="fa fa-spinner fa-spin"></i-->
+                        <div ng-class="{'expanding-bars-spinner':vm.counts.accounts.loading}">
+                            <div>{{(vm.counts.contacts.value|number).toString()[0]}}</div>
+                            <div>{{(vm.counts.contacts.value|number).toString()[1]}}</div>
+                            <div>{{(vm.counts.contacts.value|number).toString()[2]}}</div>
+                            <div>{{(vm.counts.contacts.value|number).toString()[3]}}</div>
+                            <div>{{(vm.counts.contacts.value|number).toString()[4]}}</div>
+                            <div>{{(vm.counts.contacts.value|number).toString()[5]}}</div>
+                            <div>{{(vm.counts.contacts.value|number).toString()[6]}}</div>
+                        </div>
+                    </span>
                 </div>
             </div>
         </li>
