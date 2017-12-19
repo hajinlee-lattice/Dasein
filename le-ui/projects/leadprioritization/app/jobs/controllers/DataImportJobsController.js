@@ -4,9 +4,9 @@ angular.module('lp.jobs')
     $scope.jobs = JobsStore.data.jobs;
     $scope.jobs = $filter('filter')( $scope.jobs, { jobType: 'dataProcessingWorkflow' }, true)
     $scope.loadingJobs = true;
-    JobsStore.getDataImportJobs().then(function(jobs) {
-        $scope.loadingJobs = false;
-    });
+    // JobsStore.getDataImportJobs().then(function(jobs) {
+    //     $scope.loadingJobs = false;
+    // });
 
     $scope.successMsg = null;
     $scope.errorMsg = null;

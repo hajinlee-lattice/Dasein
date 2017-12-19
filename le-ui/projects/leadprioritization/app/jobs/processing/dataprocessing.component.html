@@ -1,79 +1,139 @@
-<section class="jobs-processing container">
+<div class="jobs-page container">
 
-        <div class="table-toolbar">
-            <!-- <div class="row list-header"> -->
-                <div class="left-container">
-                    <menu-dropdown config="vm.header.maxperpage"></menu-dropdown>
-                    <menu-filter-by config="vm.header.filter"></menu-filter-by>
-                    <menu-sort-by config="vm.header.sort"></menu-sort-by>
-                    <search-filter query="vm.query"></search-filter>
+    <div class="row">
+        <div class="twelve columns">
+            <div ng-if="successMsg" class="job-success-message">
+                <div>Success Message
+                    <a href="javascript:void(0)">
+                        <i class="fa fa-times fa-inverse" ng-click="clearMessages()"></i>
+                    </a>
                 </div>
-                <!-- <div class="rigth-container" ng-init="current = 1"> -->
-                    <div class="rigth-container" ng-init="vm.current = 1" ng-show="vm.max > 1">
-                        <pd-pagination-controls current="vm.current" max="vm.max = (vm.header.filter.filtered | filter: vm.query).length / vm.pagesize">
-                        </pd-pagination-controls>
-                    </div>
-                <!-- </div> -->
-            <!-- </div> -->
+                <span>Sucess Message Sub</span>
+            </div>
+            <div ng-if="queuedMsg" class="job-success-message">
+                <div>Queued job
+                    <a href="javascript:void(0)">
+                        <i class="fa fa-times fa-inverse" ng-click="clearMessages()"></i>
+                    </a>
+                </div>
+                <span>It will start running shortly, which will allow you to track the progress</span>
+            </div>
+            <div ng-if="errorMsg" class="job-creation-failed">
+                <div>Error Message
+                    <a href="javascript:void(0)">
+                        <i class="fa fa-times fa-inverse" ng-click="clearMessages()"></i>
+                    </a>
+                </div>
+                <span>Please retry or wait for a fix</span>
+            </div>
         </div>
+    </div>
+
+    <div class="table-header">
+        <div class="row list-header">
+            <div class="pull-left">
+                <menu-dropdown config="vm.header.maxperpage"></menu-dropdown>
+                <menu-filter-by config="vm.header.filter"></menu-filter-by>
+                <menu-sort-by config="vm.header.sort"></menu-sort-by>
+                <search-filter query="vm.query"></search-filter>
+            </div>
+            <div class="row jobs-pagination-controls" ng-init="vm.current = 1" ng-show="vm.max > 1">
+                <div class="twelve columns">
+                    <pd-pagination-controls current="vm.current" max="vm.max = (header.filter.filtered | filter: vm.query).length / vm.pagesize">
+                    </pd-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-        <div class="row jobs-table">
-            <div class="columns twelve panel panel-default box-outline">
-                <div class="section-body">
-                    <table>
-                        <thead>
-                            <tr class="row">
-                                <th class="columns two">Timestamp</th>
-                                <th class="columns two">Type</th>
-                                <th class="columns two">Actions</th>
-                                <th class="columns two">Status</th>
-                                <th class="columns two">&nbsp;</th>
-                                <th class="columns one">&nbsp;</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="job in vm.header.filter.filtered |
+    <div class="row jobs-table jobs-import-container">
+        <div class="columns twelve panel panel-default box-outline">
+            <div class="section-body">
+                <table class="import-jobs-table">
+                    <thead>
+                        <tr class="row">
+                            <th class="columns two">Timestamp</th>
+                            <th class="columns two">Type</th>
+                            <th class="columns one">Actions</th>
+                            <th class="columns two">Status</th>
+                            <th class="columns three">&nbsp;</th>
+                            <th class="columns three">&nbsp;</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="jobs-table-content import-jobs" ng-if="!vm.loadingJobs">
+                <div class="job-list-item job-td-row" ng-repeat="job in vm.header.filter.filtered |
                             filter: vm.query |
                             orderBy: vm.header.sort.order + vm.header.sort.property |
                             startFrom: (current - 1) * vm.pagesize |
                             limitTo: vm.pagesize">
-                                <td class="columns two">{{job.timestamp ? (job.timestamp | date : 'MM/dd/yyyy h:mma') : ''}}</td>
-                                <td class="columns two">{{job.jobType}}</td>
-                                <td class="columns two">-</td>
-                                <td class="columns two job-status ">
-                                    {{job.status}}
-                                    <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="vm.isJobRunning(job)"></i>
-                                    <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="vm.isJobFailed(job) && !vm.isJobRunning(job)"></i>
-                                </td>
-                                <td class="columns two">
-                                    <span ng-if="!job.timestamp && !vm.isJobRunning(job) && vm.canRunJob">Schedule Time 6:30 pm </span>
-                                </td>
-                                <td class="columns one">
-                                    <button class="button blue-button" ng-if="!job.timestamp" ng-disabled="!vm.canRunJob" ng-click="vm.runJob(job)">Run Now</button>
-                                    <a href="javascript:void(0)" ng-if="job.timestamp">
-                                        Report
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    <span class="columns two" ng-if="!vm.showRunButton(job)">
+                        <span class="cell">
+                            {{job.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
+                        </span>
+                    </span>
+                    <span class="columns two transparent" ng-if="vm.showRunButton(job)">
+                        <span class="cell">--</span>
+                    </span>
+                    <span class="columns two">
+                        <span class="cell">
+                            {{job.displayName}}
+                        </span>
+                    </span>
+                    <span class="columns one">
+                        <span class="cell">
+                            {{job.actionsCount}}
+                        </span>
+                    </span>
+                    <span class="columns two">
+                        <span class="cell">
+                            {{job.status}}
+                            <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="vm.isJobRunning(job)"></i>
+                            <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="vm.isJobFailed(job) && !vm.isJobRunning(job)"></i>
+                        </span>
+                    </span>
+                    <span class="columns three">
+                        <span class="cell">
+                            <span ng-if="!vm.isJobRunning(job) && vm.showRunButton(job)" class="contact">
+                                Schedule at {{job.startTimestamp ? (job.startTimestamp | date : 'MM/dd/yyyy h:mma') : ''}}
+                            </span>
+                            <span ng-if="!vm.showRunButton(job) && !vm.isJobRunning(job) && !vm.isJobFailed(job)" class="transparent">--</span>
+                        </span>
+                    </span>
+                    <span class="columns three">
+                        <span class="cell">
+                            <button class="button blue-button" ng-if="vm.showRunButton(job)" ng-click="vm.runJob(job)" ng-disabled="!vm.canLastJobRun()">
+                                Run Now
+                            </button>
 
-                <div class="section-actions" ng-if="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
-                    There are no jobs to show at the moment
-                </div>
-                <div class="section-actions" ng-if="loadingJobs && header.filter.filtered.length == 0">
-                    Loading...
+                            <a href="javascript:void(0)" ng-if="!vm.showRunButton(job) && !vm.isJobRunning(job) && !vm.isJobFailed(job)">
+                                Report
+                            </a>
+
+                            <span ng-if="vm.isJobFailed(job)">Please Contact Lattice Support</span>
+                        </span>
+                    </span>
+
+                    </span>
+
                 </div>
             </div>
-        </div>
-
-        <div class="row" ng-init="current = 1" ng-show="max > 1">
-            <div class="twelve columns">
-                <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
-                </pd-pagination-controls>
+            <div class="section-actions" ng-if="(header.filter.filtered | filter: query).length == 0 && ! vm.loadingJobs">
+                There are no jobs to show at the moment
+            </div>
+            <div class="section-actions" ng-if="vm.loadingJobs && header.filter.filtered.length == 0">
+                Loading...
             </div>
         </div>
+    </div>
 
-</section>
+    <div class="row" ng-init="vm.current = 1" ng-show="vm.max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="vm.current" max="vm.max = (vm.header.filter.filtered | filter: vm.query).length / vm.pagesize">
+            </pd-pagination-controls>
+        </div>
+    </div>
+
+</div>

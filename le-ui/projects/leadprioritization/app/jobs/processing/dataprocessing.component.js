@@ -1,6 +1,7 @@
 angular.module('lp.jobs')
     .controller('DataProcessingComponent', function ($scope, $http, JobsStore, $filter) {
         var vm = this;
+        vm.loadingJobs = JobsStore.data.loadingJobs;
         vm.pagesize = 10;
         vm.query = '';
         vm.header = {
@@ -45,38 +46,70 @@ angular.module('lp.jobs')
             }
         }
         angular.extend(vm, {
-            jobs: JobsStore.data.jobs,
+            jobs: [],
             successMsg: null,
             errorMsg: null,
             queuedMsg: null,
-            canRunJob: true,
             runningJob: {}
         });
 
-        vm.canLastJobRun = function(){
+        vm.tmpCount = 0; //TO BE REMOVED
+       
+
+        vm.init = function () {
+            // vm.jobs = tmpManipolation(); // TO BE REMOVED
+            console.log('INIT', vm.jobs);
+            vm.jobs = JobsStore.data.dataImportJobs;
+
+            vm.header.filter.unfiltered = vm.jobs;
+            vm.header.filter.filtered = vm.jobs;
+
+        }
+
+        this.init();
+
+
+        vm.canLastJobRun = function () {
             var canRun = true;
-            if(this.jobs.length >=2 && this.jobs[1].status === 'Failed'){
+            if (this.jobs.length >= 2 && this.jobs[1].status === 'Failed') {
                 canRun = false;
             }
 
             return canRun;
         }
 
-        vm.init = function () {
-            vm.jobs = $filter('filter')(vm.jobs, { jobType: 'dataProcessingWorkflow' }, true);
-            JobsStore.getDataImportJobs().then(function (jobs) {
-                vm.loadingJobs = false;
-            });
+        vm.showRunButton = function (job) {
+            if (job.status === 'Pending') {
+                return true;
+            } else {
+                return false;
+            }
+        }
 
-            vm.header.filter.unfiltered= vm.jobs;
-            vm.header.filter.filtered = vm.jobs;
-            
-            vm.canRunJob = vm.canLastJobRun();
+        vm.showReport = function (job) {
+
+            if (job.status === 'Completed' || job.status === 'Failed') {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        vm.isJobPending = function (job) {
+            if (job.jobStatus === 'Pending') {
+                return true;
+            } else {
+                return false;
+            }
 
         }
-        this.init();
-
-        
+        vm.isJobCompleted = function (job) {
+            if ('Completed' === job.status) {
+                return true;
+            } else {
+                return true;
+            }
+        }
 
         vm.isJobFailed = function (job) {
             if (job.status === 'Failed') {
@@ -85,7 +118,7 @@ angular.module('lp.jobs')
                 return false;
             }
         }
-        vm.isJobRunning = function(job) {
+        vm.isJobRunning = function (job) {
             if (job.status === 'Running') {
                 return true;
             } else {
@@ -93,11 +126,14 @@ angular.module('lp.jobs')
             }
         }
 
-        vm.runJob = function(job) {
-
-            JobsStore.runJob(job).then(function(updatedJob){
-                vm.runningJob = updatedJob; 
-            });
+        vm.runJob = function (job) {
+            job.status = 'Running';
+            setTimeout(function () {
+                job.status = 'Failed';
+            }, 5000);
+            // JobsStore.runJob(job).then(function (updatedJob) {
+            //     vm.runningJob = updatedJob;
+            // });
         }
 
         vm.clearMessages = function () {

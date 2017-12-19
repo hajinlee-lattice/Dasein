@@ -285,6 +285,41 @@
     }
 }
 
+.jobs-table.jobs-import-container{
+    .jobs-table-content.import-jobs{
+        font-size: 12px;
+        line-height: 3;
+        margin-top: -18px;
+        .job-list-item.job-td-row{
+            float: none;
+        }
+    }
+    .cell{
+        padding-left: 10px;
+    }
+    
+    .transparent{
+        opacity: 0;
+    }
+
+    .contact{
+        font-size: 12px;
+        padding: 1em;
+    }
+    .icon-failed {
+        padding: 10px;
+        color: #F16A24;
+    }
+
+
+
+    th.columns{
+        margin: 4px 0 0 0;
+    }
+    .columns{
+        margin: 4px 0 0 0;
+    }
+}
 .data-import-jobs-table {
     margin-bottom: 0;
 }
@@ -375,12 +410,6 @@ section.jobs-processing.container{
                 margin-right: -4px;
             }
         }
-       
-    }
-
-    .icon-failed {
-        padding: 10px;
-        color: #F16A24;
     }
     tr{
         height: 50px;

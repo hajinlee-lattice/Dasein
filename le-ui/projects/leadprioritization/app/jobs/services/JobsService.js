@@ -99,9 +99,11 @@ angular
                     var stepRunning = getStepRunning(job);
                     var stepsCompleted = getStepsCompleted(job);
                     var stepFailed = getStepFailed(job);
+                    var actionsCount = getActionsCount(job);
                     return {
                         id: job.id,
                         applicationId: job.applicationId,
+                        actionsCount: actionsCount,
                         timestamp: job.startTimestamp,
                         errorCode: job.errorCode,
                         errorMsg: job.errorMsg,
@@ -387,6 +389,15 @@ angular
         }
 
         return stepsCompleted;
+    }
+
+    function getActionsCount(job) {
+        if(!job.inputs || !job.inputs.ACTION_IDS){
+            return 0;
+        }else {
+            var actions = JSON.parse(job.inputs.ACTION_IDS);
+            return actions.length;
+        }
     }
 
     function clearNumSteps() {

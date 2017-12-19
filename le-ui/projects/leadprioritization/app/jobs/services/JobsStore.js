@@ -19,11 +19,12 @@ angular
         }
     }, 45 * 1000);
 })
-.service('JobsStore', function($q, JobsService) {
+.service('JobsStore', function($q, $filter, JobsService) {
     var JobsStore = this;
 
     this.data = {
         jobs: [],
+        loadingJobs: false,
         models: {},
         jobsMap: {},
         dataImportJobs: [],
@@ -43,6 +44,7 @@ angular
     };
 
     this.getJobs = function(use_cache, modelId) {
+        JobsStore.loadingJobs = true;
         var deferred = $q.defer(),
             isModelState = modelId ? true : false,
             jobs = modelId
@@ -56,11 +58,10 @@ angular
                 this.data.models[modelId] = [];
                 deferred.resolve([]);
             }
+            JobsStore.setDataImportJobs();
         } else {
             JobsService.getAllJobs().then(function(response) {
                 var res = response.resultObj;
-                /**TO BE REMOVED once api will support dataProcessingWorkflow */
-                // JobsStore.tmpModifyJobsDemo(res);
                 if (modelId) {
                     if (!JobsStore.data.models[modelId]) {
                         JobsStore.data.models[modelId] = [];
@@ -86,7 +87,8 @@ angular
                         }
                     }
                 }
-
+                JobsStore.setDataImportJobs();
+                
                 deferred.resolve(JobsStore.data.jobs);
             });
         }
@@ -110,14 +112,21 @@ angular
         delete this.data.jobsMap[jobId];
     };
 
-    this.getDataImportJobs = function() {
-        var defer = $q.defer();
-        defer.resolve(this.data.dataImportJobs)
-        return defer.promise;
+    this.setDataImportJobs = function() {
+        this.data.dataImportJobs = $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true);
+        JobsStore.data.dataImportJobs.forEach(function(job) {
+            if(job.jobType === 'processAnalyzeWorkflow') {
+                job.displayName = 'Data Processing & Analysis';
+            }
+        });
+        JobsStore.loadingJobs = false;
+        // var defer = $q.defer();
+        // defer.resolve(this.data.dataImportJobs)
+        // return defer.promise;
     };
 
     this.runJob = function(job) {
-        vm.dataProcessingRunningJob = job;
+        dataProcessingRunningJob = job;
         var deferred = $q.defer();
 
         JobsService.runJob(job.id).then(function(resp){
@@ -135,16 +144,7 @@ angular
         
     };
 
-    this.tmpModifyJobsDemo = function(res){
-        var i = 0;
 
-        res.forEach(function(element){
-            if(i % 2 !==0){
-                element.jobType = 'dataProcessingWorkflow';
-            }
-            i++;
-        });
-    }
     this.data.dataImportJobs = [{"timestamp":1490971665695,"fileName":"Lattice_Full_location_20170331.csv","jobType":"Data Import","status":"Completed"},
                                 {"timestamp":1491075500934,"fileName":"Lattice_Full_location_20170401.csv","jobType":"Data Import","status":"Pending"},
                                 {"timestamp":1491257578363,"fileName":"Lattice_Full_location_20170403.csv","jobType":"Data Import","status":"Running"},
