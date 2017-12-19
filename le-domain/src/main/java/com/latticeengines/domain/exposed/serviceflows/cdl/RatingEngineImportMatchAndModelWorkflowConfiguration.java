@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTagetTableFilterConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
@@ -38,7 +38,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         private SetCdlConfigurationForScoringConfiguration setConfigForScoring = new SetCdlConfigurationForScoringConfiguration();
-        private CreateCdlTagetTableFilterConfiguration cdlScoingTableTupleFilter = new CreateCdlTagetTableFilterConfiguration();
+        private CreateCdlTargetTableFilterConfiguration cdlScoringTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
 
@@ -50,7 +50,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             export.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
-            cdlScoingTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
+            cdlScoringTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -66,7 +66,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
-            cdlScoingTableTupleFilter.setCustomerSpace(customerSpace);
+            cdlScoringTableTupleFilter.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             return this;
@@ -82,14 +82,15 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
                 String targetFilterTableName) {
             cdlEventTableTupleFilter.setTrainFilterTableName(trainFilterTableName);
             cdlEventTableTupleFilter.setEventFilterTableName(eventFilterTableName);
-            cdlScoingTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
+            cdlScoringTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
             return this;
         }
 
-        public Builder filterQueries(FrontEndQuery trainQuery, FrontEndQuery eventQuery, FrontEndQuery targetQuery) {
+        public Builder filterQueries(FrontEndQuery trainQuery, FrontEndQuery eventQuery,
+                                     FrontEndQuery targetQuery) {
             cdlEventTableTupleFilter.setTrainQuery(trainQuery);
             cdlEventTableTupleFilter.setEventQuery(eventQuery);
-            cdlScoingTableTupleFilter.setTargetQuery(targetQuery);
+            cdlScoringTableTupleFilter.setTargetQuery(targetQuery);
             return this;
         }
 
@@ -100,7 +101,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
-            cdlScoingTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
+            cdlScoringTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -279,7 +280,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(matchResult);
             configuration.add(export);
             configuration.add(setConfigForScoring);
-            configuration.add(cdlScoingTableTupleFilter);
+            configuration.add(cdlScoringTableTupleFilter);
             configuration.add(score);
             configuration.add(combineInputWithScores);
 

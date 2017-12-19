@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTagetTableFilterConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -41,7 +41,7 @@ public class CdlScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
-        private CreateCdlTagetTableFilterConfiguration cdlScoingTableTupleFilter = new CreateCdlTagetTableFilterConfiguration();
+        private CreateCdlTargetTableFilterConfiguration cdlScoingTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlScoreWorkflow", customerSpace, "cdlScoreWorkflow");
