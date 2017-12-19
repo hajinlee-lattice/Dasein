@@ -41,7 +41,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Component(SourceBucketer.TRANSFORMER_NAME)
 public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConfig, BucketEncodeParameters> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SourceBucketer.class);
 
     public static final String TRANSFORMER_NAME = TRANSFORMER_BUCKETER;

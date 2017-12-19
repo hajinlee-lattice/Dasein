@@ -71,13 +71,14 @@ public class ConsolidateReportFlow
         return merge(reports);
     }
 
-    private Node reportMatchAccount(Node node, Node accountSource) {
-        node = node.filter(String.format("%s != null", InterfaceName.AccountId.name()),
+    private Node reportMatchAccount(Node contact, Node account) {
+        contact = contact.filter(String.format("%s != null", InterfaceName.AccountId.name()),
                 new FieldList(InterfaceName.AccountId.name()));
-        node = node.innerJoin(InterfaceName.AccountId.name(), accountSource, InterfaceName.AccountId.name());
-        node = node.count("__MATCH_COUNT__").rename(new FieldList("__MATCH_COUNT__"), new FieldList(REPORT_CONTENT))
+        contact = contact.innerJoin(InterfaceName.AccountId.name(), account, InterfaceName.AccountId.name());
+        contact = contact.count("__MATCH_COUNT__")
+                .rename(new FieldList("__MATCH_COUNT__"), new FieldList(REPORT_CONTENT))
                 .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_MATCH, String.class).renamePipe("MatchReport");
-        return node;
+        return contact;
     }
 
     private Node reportTotal(Node node) {
