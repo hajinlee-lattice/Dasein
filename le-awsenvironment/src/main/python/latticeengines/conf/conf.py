@@ -121,3 +121,6 @@ class AwsEnvironment:
 
     def chef_bucket(self):
         return self._props['s3.chef.bucket']
+
+    def iam_ssh_group(self):
+        return self._props['iam.ssh.group']

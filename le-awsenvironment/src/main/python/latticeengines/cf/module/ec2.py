@@ -18,6 +18,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
     lerepo = config.le_repo()
     bucket = config.cf_bucket()
     chefbucket= config.chef_bucket()
+    ssh_group = config.iam_ssh_group()
     cert = "star.lattice.local"
 
     assert isinstance(instance_role_name, Parameter)
@@ -218,7 +219,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                     "06_ssh_user" : {
                         "command" : { "Fn::Join": [ "\n", [
                             "#!/bin/bash",
-                            "bash /etc/ledp/createSSHAccounts.sh Developers || true"
+                            "bash /etc/ledp/createSSHAccounts.sh %s || true" % ssh_group
                         ] ] }
                     },
                     "07_concat_tls" : {
