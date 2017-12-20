@@ -308,9 +308,19 @@ angular.module('lp.ratingsengine')
                     editRating: false,
                     saveEnabled: false
                 };
-            });
 
-            RatingsEngineStore.getChartDataConcurrently(ids.reverse());
+                var coverage = [];
+                for(var bucket in rating.coverage) {
+                    coverage.push({bucket: bucket, count: rating.coverage[bucket]})
+                }
+
+                RatingsEngineStore.current.bucketCountMap[id] = 
+                { 
+                    accountCount: rating.accountsInSegment,
+                    contactCount: rating.contactsInSegment,
+                    bucketCoverageCounts: coverage
+                };
+            });
         }
     }
     
@@ -339,41 +349,6 @@ angular.module('lp.ratingsengine')
         RatingsEngineService.getSegmentsCounts(segmentIds).then(function(response){
             deferred.resolve(response);
         });
-
-        return deferred.promise;
-    };
-
-    this.getChartDataConcurrently = function(all){
-        var deferred = $q.defer();
-        var chunks = [], size = Math.max(1, Math.floor(all.length / 5));
-
-        while (all.length > 0) {
-            chunks.push(all.splice(0, size));
-        }
-
-        var incrementor = 0;
-        var maxConcurrent = chunks.length;
-        var bucketCountMap = {};
-        var rating = null;
-        
-        $timeout(function() {
-            chunks.forEach(function(ids) {
-                RatingsEngineService.getRatingsChartData({
-                    ratingEngineIds: ids
-                }).then(function(response) {
-                    incrementor++;
-
-                    Object.keys(response.ratingEngineIdCoverageMap).reverse().forEach(function(key) {
-                        rating = response.ratingEngineIdCoverageMap[key];
-                        RatingsEngineStore.current.bucketCountMap[key] = rating;
-                    })
-
-                    if (incrementor >= maxConcurrent) {
-                        deferred.resolve(bucketCountMap);
-                    }
-                });
-            });
-        }, 100);
 
         return deferred.promise;
     };
