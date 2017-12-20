@@ -32,11 +32,11 @@ section.ratingsengine.dashboard-layout.dashboard.container {
                     top: -25px;
                     color: inherit;
                 }
-                &.bucket-a {
+                &.bucket-a\+ {
                     background-color: #70bf4a;
                 }
-                &.bucket-a- {
-                    background-color: #33bdb7;
+                &.bucket-a {
+                    background-color: #33bdb7;                                        
                 }
                 &.bucket-b {
                     background-color: #cd80bc;
