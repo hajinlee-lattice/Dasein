@@ -82,7 +82,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
 
     @Override
     public JobExplorer getJobExplorer() throws Exception {
-        LEJobExplorerFactoryBean leJobExplorerFactoryBean = new LEJobExplorerFactoryBean(jdbcTemplate);
+        LEJobExplorerFactoryBean leJobExplorerFactoryBean = new LEJobExplorerFactoryBean(jdbcTemplate, WORKFLOW_PREFIX);
         leJobExplorerFactoryBean.setDataSource(dataSource);
         leJobExplorerFactoryBean.setSerializer(new Jackson2ExecutionContextStringSerializer());
         leJobExplorerFactoryBean.setTablePrefix(WORKFLOW_PREFIX);

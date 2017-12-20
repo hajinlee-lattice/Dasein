@@ -3,7 +3,6 @@ package com.latticeengines.workflow.core;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.explore.support.SimpleJobExplorer;
-import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
 import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.batch.core.repository.dao.JdbcExecutionContextDao;
@@ -17,9 +16,12 @@ public class LEJobExplorerFactoryBean extends JobExplorerFactoryBean {
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
     private JdbcTemplate jdbcTemplate;
+    
+    private String tablePrefix;
 
-    public LEJobExplorerFactoryBean(JdbcTemplate jdbcTemplate) {
+    public LEJobExplorerFactoryBean(JdbcTemplate jdbcTemplate, String tablePrefix) {
         this.jdbcTemplate = jdbcTemplate;
+        this.tablePrefix = tablePrefix; 
     }
 
     public void setJobExecutionRetriever(LEJobExecutionRetriever leJobExecutionRetriever) {
@@ -31,7 +33,7 @@ public class LEJobExplorerFactoryBean extends JobExplorerFactoryBean {
         JdbcExecutionContextDao dao = new Uft8JdbcExecutionContextDao();
         dao.setJdbcTemplate(jdbcTemplate);
         dao.setLobHandler(null);
-        dao.setTablePrefix(AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
+        dao.setTablePrefix(tablePrefix);
         dao.setSerializer(new Jackson2ExecutionContextStringSerializer());
         dao.afterPropertiesSet();
         return dao;
