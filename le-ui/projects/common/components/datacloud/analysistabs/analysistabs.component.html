@@ -31,7 +31,7 @@
                 </div>
             </div>
         </li>
-        <li  ng-class="{'active':vm.checkState('accounts')}">
+        <li ui-sref="{{vm.accounts}}" ng-class="{'active':vm.checkState('accounts')}">
             <div class="tab-container">
                 <h2>Accounts</h2>
                 <div class="enrichmentCounts" ng-click="vm.counts.accounts.loading = !vm.counts.accounts.loading">
