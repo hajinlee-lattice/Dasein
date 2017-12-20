@@ -2,18 +2,18 @@ package com.latticeengines.domain.exposed.pls;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public class RatingEngineModelingParameters extends ModelingParameters {
 
     @JsonProperty
-    private FrontEndQuery trainFilterQuery;
+    private EventFrontEndQuery trainFilterQuery;
 
     @JsonProperty
-    private FrontEndQuery eventFilterQuery;
+    private EventFrontEndQuery eventFilterQuery;
 
     @JsonProperty
-    private FrontEndQuery targetFilterQuery;
+    private EventFrontEndQuery targetFilterQuery;
 
     @JsonProperty
     private String tableName;
@@ -59,27 +59,27 @@ public class RatingEngineModelingParameters extends ModelingParameters {
         this.targetFilterTableName = targetFilterTableName;
     }
 
-    public FrontEndQuery getTrainFilterQuery() {
+    public EventFrontEndQuery getTrainFilterQuery() {
         return trainFilterQuery;
     }
 
-    public void setTrainFilterQuery(FrontEndQuery trainFilterQuery) {
+    public void setTrainFilterQuery(EventFrontEndQuery trainFilterQuery) {
         this.trainFilterQuery = trainFilterQuery;
     }
 
-    public FrontEndQuery getEventFilterQuery() {
+    public EventFrontEndQuery getEventFilterQuery() {
         return eventFilterQuery;
     }
 
-    public void setEventFilterQuery(FrontEndQuery eventFilterQuery) {
+    public void setEventFilterQuery(EventFrontEndQuery eventFilterQuery) {
         this.eventFilterQuery = eventFilterQuery;
     }
 
-    public FrontEndQuery getTargetFilterQuery() {
+    public EventFrontEndQuery getTargetFilterQuery() {
         return targetFilterQuery;
     }
 
-    public void setTargetFilterQuery(FrontEndQuery targetFilterQuery) {
+    public void setTargetFilterQuery(EventFrontEndQuery targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
     }
 

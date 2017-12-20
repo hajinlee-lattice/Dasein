@@ -1,18 +1,18 @@
 package com.latticeengines.objectapi.service;
 
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public interface EventQueryService {
-    long getScoringCount(FrontEndQuery frontEndQuery);
+    long getScoringCount(EventFrontEndQuery frontEndQuery);
 
-    long getTrainingCount(FrontEndQuery frontEndQuery);
+    long getTrainingCount(EventFrontEndQuery frontEndQuery);
 
-    long getEventCount(FrontEndQuery frontEndQuery);
+    long getEventCount(EventFrontEndQuery frontEndQuery);
 
-    DataPage getScoringTuples(FrontEndQuery frontEndQuery);
+    DataPage getScoringTuples(EventFrontEndQuery frontEndQuery);
 
-    DataPage getTrainingTuples(FrontEndQuery frontEndQuery);
+    DataPage getTrainingTuples(EventFrontEndQuery frontEndQuery);
 
-    DataPage getEventTuples(FrontEndQuery frontEndQuery);
+    DataPage getEventTuples(EventFrontEndQuery frontEndQuery);
 }

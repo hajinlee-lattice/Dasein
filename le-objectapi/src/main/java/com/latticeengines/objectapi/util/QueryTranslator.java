@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -61,7 +64,7 @@ public class QueryTranslator {
         this.repository = repository;
     }
 
-    public Query translateModelingEvent(FrontEndQuery frontEndQuery, EventType eventType) {
+    public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, EventType eventType) {
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
 
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
@@ -80,6 +83,7 @@ public class QueryTranslator {
         restriction = translateSalesforceIdRestriction(frontEndQuery, BusinessEntity.Account, restriction);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction, null, //
                                                 queryBuilder, true);
+        setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
 
         switch (eventType) {
         case Scoring:
@@ -235,7 +239,7 @@ public class QueryTranslator {
 
     private Restriction addHasTransactionRestriction(FrontEndQuery frontEndQuery, Restriction restriction) {
         // only apply has transaction restriction to account entity
-        if (BusinessEntity.Account.equals(frontEndQuery.getMainEntity())) {
+        if (BusinessEntity.Account.equals(frontEndQuery.getMainEntity()) && !hasTransactionRestriction(restriction)) {
             if (Boolean.TRUE.equals(frontEndQuery.getRestrictHasTransaction())) {
                 BusinessEntity innerEntity = BusinessEntity.Transaction;
                 Restriction innerRestriction = Restriction.builder()
@@ -249,6 +253,21 @@ public class QueryTranslator {
             }
         }
         return restriction;
+    }
+
+    private boolean hasTransactionRestriction(Restriction rootRestriction) {
+        AtomicBoolean hasTxn = new AtomicBoolean(false);
+        if (rootRestriction instanceof LogicalRestriction) {
+            BreadthFirstSearch bfs = new BreadthFirstSearch();
+            bfs.run(rootRestriction, (object, ctx) -> {
+                if (object instanceof TransactionRestriction) {
+                    hasTxn.set(true);
+                }
+            });
+        } else if (rootRestriction instanceof TransactionRestriction) {
+            hasTxn.set(true);
+        }
+        return hasTxn.get();
     }
 
     private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
@@ -497,6 +516,24 @@ public class QueryTranslator {
             }
         } else {
             throw new RuntimeException("Cannot find a rating model with id=" + lookup.getAttribute());
+        }
+    }
+
+    private void setTargetProducts(Restriction rootRestriction, List<String> targetProducts) {
+        if (CollectionUtils.isNotEmpty(targetProducts)) {
+            String concatenated = StringUtils.join(targetProducts, ",");
+            if (rootRestriction instanceof LogicalRestriction) {
+                BreadthFirstSearch bfs = new BreadthFirstSearch();
+                bfs.run(rootRestriction, (object, ctx) -> {
+                    if (object instanceof TransactionRestriction) {
+                        TransactionRestriction txRestriction = (TransactionRestriction) object;
+                        txRestriction.setTargetProductId(concatenated);
+                    }
+                });
+            } else if (rootRestriction instanceof TransactionRestriction) {
+                TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
+                txRestriction.setTargetProductId(concatenated);
+            }
         }
     }
 

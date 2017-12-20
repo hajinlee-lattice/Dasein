@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.objectapi.service.EventQueryService;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -28,42 +29,42 @@ public class EventResource {
     @RequestMapping(value = "/count/scoring", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getScoringCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+    public long getScoringCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery) {
         return eventQueryService.getScoringCount(frontEndQuery);
     }
 
     @RequestMapping(value = "/count/training", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getTrainingCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+    public long getTrainingCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery) {
         return eventQueryService.getTrainingCount(frontEndQuery);
     }
 
     @RequestMapping(value = "/count/event", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getEventCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+    public long getEventCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery) {
         return eventQueryService.getEventCount(frontEndQuery);
     }
 
     @RequestMapping(value = "/data/scoring", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getScoringTuples(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+    public DataPage getScoringTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery) {
         return eventQueryService.getScoringTuples(frontEndQuery);
     }
 
     @RequestMapping(value = "/data/training", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getTrainingTuples(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+    public DataPage getTrainingTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery) {
         return eventQueryService.getTrainingTuples(frontEndQuery);
     }
 
     @RequestMapping(value = "/data/event", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getEventTuples(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+    public DataPage getEventTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery) {
         return eventQueryService.getEventTuples(frontEndQuery);
     }
 

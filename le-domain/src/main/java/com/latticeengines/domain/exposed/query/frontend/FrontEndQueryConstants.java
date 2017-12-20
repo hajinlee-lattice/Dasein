@@ -28,4 +28,6 @@ public class FrontEndQueryConstants {
     public static final String CONTACT_RESTRICTION = "contact_restriction";
 
     public static final String ACCOUNT_RESTRICTION = "account_restriction";
+
+    public static final String TARGET_PRODUCT_IDS = "target_product_ids";
 }

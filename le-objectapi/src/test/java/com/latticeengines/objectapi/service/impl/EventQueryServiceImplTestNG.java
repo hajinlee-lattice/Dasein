@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Collections;
 
-import com.latticeengines.domain.exposed.exception.LedpException;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -12,6 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
@@ -72,7 +72,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         Bucket.Transaction txn2 = new Bucket.Transaction(PRODUCT_ID, timeFilter, null, null, false);
 
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction restriction1 = new BucketRestriction(attrLookup, Bucket.txnBkt(txn1));
         Restriction restriction2 = new BucketRestriction(attrLookup, Bucket.txnBkt(txn2));
@@ -96,7 +96,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
@@ -111,7 +111,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     private long countTxnBktForScoring(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
@@ -125,7 +125,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     private long countTxnBktForTraining(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
@@ -138,7 +138,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     private long countTxnBktForEvent(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);

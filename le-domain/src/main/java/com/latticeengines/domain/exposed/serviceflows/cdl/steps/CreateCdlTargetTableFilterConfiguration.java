@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public class CreateCdlTargetTableFilterConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private String targetFilterTableName;
 
-    private FrontEndQuery targetQuery;
+    private EventFrontEndQuery targetQuery;
 
     public CreateCdlTargetTableFilterConfiguration() {
         setBeanName("createCdlTargetTableFilterFlow");
@@ -20,11 +20,11 @@ public class CreateCdlTargetTableFilterConfiguration extends BaseCDLDataFlowStep
         return targetFilterTableName;
     }
 
-    public void setTargetQuery(FrontEndQuery targetQuery) {
+    public void setTargetQuery(EventFrontEndQuery targetQuery) {
         this.targetQuery = targetQuery;
     }
 
-    public FrontEndQuery getTargetQuery() {
+    public EventFrontEndQuery getTargetQuery() {
         return targetQuery;
     }
 }

@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
@@ -82,7 +82,7 @@ public class CdlScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
             return this;
         }
 
-        public Builder setScoringQuery(FrontEndQuery scoringQuery) {
+        public Builder setScoringQuery(EventFrontEndQuery scoringQuery) {
             cdlScoingTableTupleFilter.setTargetQuery(scoringQuery);
             return this;
         }

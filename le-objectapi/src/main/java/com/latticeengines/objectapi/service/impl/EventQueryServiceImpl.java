@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.service.impl;
 
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,44 +27,44 @@ public class EventQueryServiceImpl implements EventQueryService {
     }
 
     @Override
-    public DataPage getScoringTuples(FrontEndQuery frontEndQuery) {
+    public DataPage getScoringTuples(EventFrontEndQuery frontEndQuery) {
         return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring);
     }
 
     @Override
-    public DataPage getTrainingTuples(FrontEndQuery frontEndQuery) {
+    public DataPage getTrainingTuples(EventFrontEndQuery frontEndQuery) {
         return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training);
     }
 
     @Override
-    public DataPage getEventTuples(FrontEndQuery frontEndQuery) {
+    public DataPage getEventTuples(EventFrontEndQuery frontEndQuery) {
         return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event);
     }
 
     @Override
-    public long getScoringCount(FrontEndQuery frontEndQuery) {
+    public long getScoringCount(EventFrontEndQuery frontEndQuery) {
         return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring);
     }
 
     @Override
-    public long getTrainingCount(FrontEndQuery frontEndQuery) {
+    public long getTrainingCount(EventFrontEndQuery frontEndQuery) {
         return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training);
     }
 
     @Override
-    public long getEventCount(FrontEndQuery frontEndQuery) {
+    public long getEventCount(EventFrontEndQuery frontEndQuery) {
         return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event);
     }
 
 
-    private long getCount(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, EventType eventType) {
+    private long getCount(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
         QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
         return queryEvaluatorService.getCount(customerSpace.toString(), query);
     }
 
-    private DataPage getData(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, EventType eventType) {
+    private DataPage getData(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
         QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);

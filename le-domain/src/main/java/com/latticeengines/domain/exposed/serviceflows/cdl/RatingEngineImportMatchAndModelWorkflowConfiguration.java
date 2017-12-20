@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
@@ -86,8 +86,8 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
-        public Builder filterQueries(FrontEndQuery trainQuery, FrontEndQuery eventQuery,
-                                     FrontEndQuery targetQuery) {
+        public Builder filterQueries(EventFrontEndQuery trainQuery, EventFrontEndQuery eventQuery,
+                EventFrontEndQuery targetQuery) {
             cdlEventTableTupleFilter.setTrainQuery(trainQuery);
             cdlEventTableTupleFilter.setEventQuery(eventQuery);
             cdlScoringTableTupleFilter.setTargetQuery(targetQuery);

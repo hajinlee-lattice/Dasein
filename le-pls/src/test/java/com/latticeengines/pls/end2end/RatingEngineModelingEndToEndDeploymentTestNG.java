@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -139,7 +140,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     public void testWithQueries() throws Exception {
         String prodId = "A78DF03BAC196BE9A08508FFDB433A31";
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
-        FrontEndQuery query = getQuery(txn);
+        EventFrontEndQuery query = getQuery(txn);
         parameters.setTrainFilterQuery(query);
         parameters.setEventFilterQuery(query);
         parameters.setTargetFilterQuery(query);
@@ -148,7 +149,6 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         parameters.setTargetFilterTableName(null);
         createModel();
         retrieveModelSummary();
-
     }
 
     private void setupTables() throws IOException {
@@ -166,9 +166,9 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
                 TableRoleInCollection.ConsolidatedAccount, version);
     }
 
-    private FrontEndQuery getQuery(Bucket.Transaction txn) {
+    private EventFrontEndQuery getQuery(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);

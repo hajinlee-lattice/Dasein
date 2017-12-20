@@ -1,14 +1,14 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public class CreateCdlEventTableFilterConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private String trainFilterTableName;
     private String eventFilterTableName;
 
-    private FrontEndQuery trainQuery;
-    private FrontEndQuery eventQuery;
+    private EventFrontEndQuery trainQuery;
+    private EventFrontEndQuery eventQuery;
 
     public CreateCdlEventTableFilterConfiguration() {
         setBeanName("createCdlEventTableFilterFlow");
@@ -30,19 +30,19 @@ public class CreateCdlEventTableFilterConfiguration extends BaseCDLDataFlowStepC
         return eventFilterTableName;
     }
 
-    public void setTrainQuery(FrontEndQuery trainQuery) {
+    public void setTrainQuery(EventFrontEndQuery trainQuery) {
         this.trainQuery = trainQuery;
     }
 
-    public FrontEndQuery getTrainQuery() {
+    public EventFrontEndQuery getTrainQuery() {
         return trainQuery;
     }
 
-    public void setEventQuery(FrontEndQuery eventQuery) {
+    public void setEventQuery(EventFrontEndQuery eventQuery) {
         this.eventQuery = eventQuery;
     }
 
-    public FrontEndQuery getEventQuery() {
+    public EventFrontEndQuery getEventQuery() {
         return eventQuery;
     }
 

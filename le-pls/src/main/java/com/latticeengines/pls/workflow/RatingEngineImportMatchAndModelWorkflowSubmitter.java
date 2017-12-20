@@ -3,6 +3,7 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;

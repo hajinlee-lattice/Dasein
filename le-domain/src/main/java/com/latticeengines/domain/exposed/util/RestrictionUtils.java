@@ -55,14 +55,22 @@ public class RestrictionUtils {
 
         AggregationFilter unitFilterInTxn = transaction.getUnitFilter();
         if (unitFilterInTxn != null) {
-            AggregationFilter unitFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM, //
+            AggregationType agg = AggregationType.SUM;
+            if (unitFilterInTxn.getAggregationType() != null) {
+                agg = unitFilterInTxn.getAggregationType();
+            }
+            AggregationFilter unitFilter = new AggregationFilter(AggregationSelector.UNIT, agg, //
                     unitFilterInTxn.getComparisonType(), unitFilterInTxn.getValues());
             transactionRestriction.setUnitFilter(unitFilter);
         }
 
         AggregationFilter spentFilterInTxn = transaction.getSpentFilter();
         if (spentFilterInTxn != null) {
-            AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM, //
+            AggregationType agg = AggregationType.SUM;
+            if (spentFilterInTxn.getAggregationType() != null) {
+                agg = spentFilterInTxn.getAggregationType();
+            }
+            AggregationFilter spentFilter = new AggregationFilter(AggregationSelector.SPENT, agg, //
                     spentFilterInTxn.getComparisonType(), spentFilterInTxn.getValues());
             transactionRestriction.setSpentFilter(spentFilter);
         }
