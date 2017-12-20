@@ -106,12 +106,13 @@ public class EventQueryTranslator extends TranslatorCommon {
         SQLQuery periodRangeSubQuery = factory.query() //
                 .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
                 .from(tablePath) //
-                .where(limitPeriodByNameAndCount(period, periodCount)) //
+                .where(periodName.eq(period)) //
                 .groupBy(accountId);
 
         SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
                 factory.selectDistinct(accountId).from(tablePath).where(periodName.eq(period)).as(ALL_ACCOUNTS),
-                factory.selectDistinct(periodId).from(tablePath).where(periodName.eq(period)).as(ALL_PERIODS));
+                factory.selectDistinct(periodId).from(tablePath).where(limitPeriodByNameAndCount(period, periodCount))
+                        .as(ALL_PERIODS));
 
         SQLQuery crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
                 .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
@@ -122,6 +123,21 @@ public class EventQueryTranslator extends TranslatorCommon {
         subQuery.setSubQueryExpression(minusProdSubQuery);
         subQuery.setAlias(KEYS);
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SubQueryExpression translateValidPeriodId(QueryFactory queryFactory,
+                                                      AttributeRepository repository,
+                                                      String period,
+                                                      int periodCount) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
+        String txTableName = getPeriodTransactionTableName(repository);
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
+
+        return factory.query().from(tablePath) //
+                .where(periodName.eq(period)) //
+                .select(periodId.max().subtract(periodCount).as(MAX_PID));
     }
 
     private SQLQuery translateMaxPeriodId(QueryFactory queryFactory,
@@ -487,6 +503,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                     builder.with(accountViewSubquery);
                     SubQuery subQuery = translateAccountViewWithJoinedPeriods(queryFactory, repository,
                                                                               accountViewSubquery.getAlias(), period, isScoring);
+                    builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     List<String> childSubQueryList = subQueryTableMap.get(parent);
                     childSubQueryList.add(subQuery.getAlias());

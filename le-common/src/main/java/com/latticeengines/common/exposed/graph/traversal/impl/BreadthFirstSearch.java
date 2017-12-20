@@ -38,7 +38,7 @@ public class BreadthFirstSearch extends AbstractTraversalAlgorithm {
             postRun(visitor);
             Collection<? extends GraphNode> children = n.getChildren();
             for (GraphNode child : children) {
-                if (!seenNodes.contains(child)) {
+                if (!seenNodes.contains(child) && child != null) {
                     queue.offer(Pair.<GraphNode, GraphNode> of(child, n));
                 }
             }

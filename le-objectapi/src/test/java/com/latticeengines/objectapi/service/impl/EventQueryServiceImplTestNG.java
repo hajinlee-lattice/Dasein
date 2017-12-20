@@ -48,7 +48,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         MultiTenantContext.setTenant(new Tenant("LocalTest"));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testScoringCount() {
         // Ever, Amount > 0 and Quantity > 0
         AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN, Collections.singletonList(0));
@@ -79,19 +79,19 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
         // only account restriction
         verifyScoringQuery(accRestriction1, 9L);
-        verifyScoringQuery(accRestriction, 12345L); // -- failing
+        verifyScoringQuery(accRestriction, 17L);
 
         // only contact restriction
         verifyScoringQuery(cntRestriction1, 23L);
-        verifyScoringQuery(cntRestriction, 12345L); // -- failing
+        verifyScoringQuery(cntRestriction, 73L);
 
         // account + transaction
         Restriction restriction = Restriction.builder().and(accRestriction, txnRestriction).build();
-        verifyScoringQuery(restriction, 12345L); // failing
+        verifyScoringQuery(restriction, 11L);
 
         // account + contact + transaction
         restriction = Restriction.builder().and(accRestriction, cntRestriction, txnRestriction).build();
-        verifyScoringQuery(restriction, 12345L);
+        verifyScoringQuery(restriction, 1L);
     }
 
     private void verifyScoringQuery(Restriction restriction, long expectedCount) {
