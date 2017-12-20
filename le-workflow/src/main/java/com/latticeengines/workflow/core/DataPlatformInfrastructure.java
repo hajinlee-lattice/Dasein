@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -28,6 +29,9 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
 
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -45,6 +49,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
     public JobRepository getJobRepository() throws Exception {
         LEJobRepositoryFactoryBean factory = new LEJobRepositoryFactoryBean();
         factory.setDataSource(dataSource);
+        factory.setJdbcOperations(jdbcTemplate);
         factory.setTransactionManager(getTransactionManager());
         factory.setDatabaseType(databaseType);
         factory.setIsolationLevelForCreate("ISOLATION_REPEATABLE_READ");
@@ -77,7 +82,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
 
     @Override
     public JobExplorer getJobExplorer() throws Exception {
-        LEJobExplorerFactoryBean leJobExplorerFactoryBean = new LEJobExplorerFactoryBean();
+        LEJobExplorerFactoryBean leJobExplorerFactoryBean = new LEJobExplorerFactoryBean(jdbcTemplate);
         leJobExplorerFactoryBean.setDataSource(dataSource);
         leJobExplorerFactoryBean.setSerializer(new Jackson2ExecutionContextStringSerializer());
         leJobExplorerFactoryBean.setTablePrefix(WORKFLOW_PREFIX);
