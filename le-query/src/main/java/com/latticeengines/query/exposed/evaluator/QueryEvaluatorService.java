@@ -26,7 +26,8 @@ public class QueryEvaluatorService {
     private static final Logger log = LoggerFactory.getLogger(QueryEvaluatorService.class);
 
     @Autowired
-    private DataCollectionProxy dataCollectionProxy; // attr repo cached in this proxy
+    private DataCollectionProxy dataCollectionProxy; // attr repo cached in this
+                                                     // proxy
 
     @Autowired
     private QueryEvaluator queryEvaluator;
@@ -48,6 +49,10 @@ public class QueryEvaluatorService {
 
     public long getCount(AttributeRepository attrRepo, Query query) {
         long count = -1;
+        if (query != null && query.getMainEntity() != null && query.getMainEntity().getServingStore() != null
+                && attrRepo.getTableName(query.getMainEntity().getServingStore()) == null) {
+            return 0;
+        }
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
             count = sqlQuery.fetchCount();
@@ -62,7 +67,7 @@ public class QueryEvaluatorService {
     public DataPage getData(AttributeRepository attrRepo, Query query) {
         DataPage dataPage = null;
         List<Lookup> filteredLookups = new ArrayList<>();
-        for (Lookup lookup: query.getLookups()) {
+        for (Lookup lookup : query.getLookups()) {
             if (lookup instanceof AttributeLookup) {
                 AttributeLookup attrLookup = (AttributeLookup) lookup;
                 if (BusinessEntity.Rating.equals(attrLookup.getEntity()) || attrRepo.hasAttribute(attrLookup)) {
