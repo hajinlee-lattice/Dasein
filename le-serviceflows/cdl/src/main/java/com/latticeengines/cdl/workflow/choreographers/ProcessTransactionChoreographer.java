@@ -51,7 +51,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Inject
     private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
 
-    private boolean hasActivePeriodStores = false;
+    private boolean hasRawStore = false;
+
+    private boolean hasProducts = false;
 
     @Override
     protected void checkActiveServingStore(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -77,7 +79,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             log.info("Not all serving stores exists in active version.");
         }
         checkActivePeriodStores(step);
-        hasActiveServingStore = hasActiveServingStore && hasActivePeriodStores;
+        checkHasProducts(step);
+        hasActiveServingStore = hasActiveServingStore && hasRawStore && hasProducts;
     }
 
     private void checkActivePeriodStores(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -85,19 +88,28 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
         String rawTableName = dataCollectionProxy.getTableName(customerSpace, //
                 TableRoleInCollection.ConsolidatedRawTransaction, active);
-        String dailyTableName = dataCollectionProxy.getTableName(customerSpace, //
-                TableRoleInCollection.ConsolidatedDailyTransaction, active);
-        String periodTableName = dataCollectionProxy.getTableName(customerSpace, //
-                TableRoleInCollection.ConsolidatedPeriodTransaction, active);
-
-        hasActivePeriodStores = StringUtils.isNotBlank(rawTableName)
-                && StringUtils.isNotBlank(dailyTableName)
-                && StringUtils.isNotBlank(periodTableName);
-
-        if (hasActivePeriodStores) {
-            log.info("Found period stores.");
+        hasRawStore = StringUtils.isNotBlank(rawTableName);
+        if (hasRawStore) {
+            log.info("Found raw period store.");
         } else {
-            log.info("No active period stores");
+            log.info("No raw period store");
+        }
+    }
+
+    private void checkHasProducts(AbstractStep<? extends BaseStepConfiguration> step) {
+        DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
+        String rawTableName = dataCollectionProxy.getTableName(customerSpace, //
+                TableRoleInCollection.ConsolidatedProduct, active.complement());
+        if (StringUtils.isBlank(rawTableName)) {
+            rawTableName = dataCollectionProxy.getTableName(customerSpace, //
+                    TableRoleInCollection.ConsolidatedProduct, active);
+        }
+        hasProducts = StringUtils.isNotBlank(rawTableName);
+        if (hasProducts) {
+            log.info("Found product batch store.");
+        } else {
+            log.info("No product batch store.");
         }
     }
 
@@ -138,7 +150,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
-        if (hasActivePeriodStores && !should) {
+        if (hasRawStore && hasProducts && !should) {
             if (productChoreographer.update || productChoreographer.rebuild) {
                 log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
                 return true;
@@ -153,7 +165,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean shouldCalculatePurchaseHistory() {
-        if (hasActivePeriodStores) {
+        if (hasRawStore && hasProducts) {
             if (accountChoreographer.update || accountChoreographer.rebuild) {
                 log.info("Need to rebuild purchase history due to Account changes.");
                 return true;
