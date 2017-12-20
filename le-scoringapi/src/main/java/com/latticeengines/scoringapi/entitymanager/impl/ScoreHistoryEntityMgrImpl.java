@@ -84,6 +84,13 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
     @Override
     public void publish(String tenantId, ScoreRequest request, ScoreResponse response) {
+        String modelId = request.getModelId();
+        if (modelId == null) {
+            // to avoid issues in serialization with null key, we are using this
+            // default model id
+            modelId = "_NO_MODEL_ID_";
+        }
+
         Record record = new Record();
         record.setRecordId(response.getId());
         record.setIdType("Unknown");
@@ -92,7 +99,7 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
         record.setRule(request.getRule());
         record.setRequestTimestamp(response.getTimestamp());
         Map<String, Map<String, Object>> attrMap = new HashMap<String, Map<String, Object>>();
-        attrMap.put(request.getModelId(), request.getRecord());
+        attrMap.put(modelId, request.getRecord());
         record.setModelAttributeValuesMap(attrMap);
 
         RecordScoreResponse recordRsp = new RecordScoreResponse();
@@ -100,7 +107,7 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
         recordRsp.setLatticeId(response.getLatticeId());
         List<RecordScoreResponse.ScoreModelTuple> scores = new ArrayList<RecordScoreResponse.ScoreModelTuple>();
         RecordScoreResponse.ScoreModelTuple tuple = new RecordScoreResponse.ScoreModelTuple();
-        tuple.setModelId(request.getModelId());
+        tuple.setModelId(modelId);
         tuple.setScore(response.getScore());
         tuple.setError("");
         tuple.setErrorDescription("");
