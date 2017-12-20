@@ -154,8 +154,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
             ObjectNode json = report != null && StringUtils.isNotBlank(report.getJson().getPayload())
-                    ? (ObjectNode) om.readTree(report.getJson().getPayload())
-                    : om.createObjectNode();
+                    ? (ObjectNode) om.readTree(report.getJson().getPayload()) : om.createObjectNode();
             String path = diffReport.getExtracts().get(0).getPath();
             Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path);
             ObjectNode newItem = (ObjectNode) om
@@ -192,6 +191,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         if (inputTables == null || inputTables.isEmpty()) {
             throw new RuntimeException("There is no input tables to consolidate.");
         }
+        Collections.reverse(inputTables);
         inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
                 : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
                         : t.getLastModifiedKey().getLastModifiedTimestamp())
@@ -301,7 +301,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         return retainFields(previousStep, useTargetTable, servingStore);
     }
 
-    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable, TableRoleInCollection role) {
+    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable,
+            TableRoleInCollection role) {
 
         if (!isBucketing()) {
             return null;
