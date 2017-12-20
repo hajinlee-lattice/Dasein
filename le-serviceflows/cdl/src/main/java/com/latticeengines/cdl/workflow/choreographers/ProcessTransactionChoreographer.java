@@ -138,7 +138,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
-        if (!should) {
+        if (hasActivePeriodStores && !should) {
             if (productChoreographer.update || productChoreographer.rebuild) {
                 log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
                 return true;
@@ -153,13 +153,15 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean shouldCalculatePurchaseHistory() {
-        if (accountChoreographer.update || accountChoreographer.rebuild) {
-            log.info("Need to rebuild purchase history due to Account changes.");
-            return true;
-        }
-        if (update) {
-            log.info("Need to rebuild purchase history due to Transaction changes.");
-            return true;
+        if (hasActivePeriodStores) {
+            if (accountChoreographer.update || accountChoreographer.rebuild) {
+                log.info("Need to rebuild purchase history due to Account changes.");
+                return true;
+            }
+            if (update) {
+                log.info("Need to rebuild purchase history due to Transaction changes.");
+                return true;
+            }
         }
         return false;
     }
