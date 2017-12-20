@@ -1,18 +1,15 @@
 package com.latticeengines.domain.exposed.query;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedProduct;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedRawTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedDailyTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedPeriodTransaction;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedProduct;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedProduct;
 
@@ -51,6 +48,9 @@ public enum BusinessEntity implements GraphNode {
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating);
 
     public static Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact, Product);
+
+    public static Set<BusinessEntity> TRANSACTION_ENTITIES = ImmutableSet.of(PurchaseHistory, Transaction,
+            PeriodTransaction);
 
     static {
         // Storage

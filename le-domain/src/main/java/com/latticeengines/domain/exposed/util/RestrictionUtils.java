@@ -27,10 +27,10 @@ public class RestrictionUtils {
             throw new IllegalArgumentException("cannot convert null bucket restriction");
         }
 
-        if (BusinessEntity.PurchaseHistory.equals(attr.getEntity())) {
+        if (BusinessEntity.TRANSACTION_ENTITIES.contains(attr.getEntity())) {
             Bucket.Transaction transaction = bkt.getTransaction();
             if (transaction == null) {
-                throw new IllegalArgumentException("A purchase history bucket must have transaction (Txn) field.");
+                throw new IllegalArgumentException("A " + attr.getEntity() + " bucket must have transaction (Txn) field.");
             } else {
                 return convertTxnBucket(transaction);
             }

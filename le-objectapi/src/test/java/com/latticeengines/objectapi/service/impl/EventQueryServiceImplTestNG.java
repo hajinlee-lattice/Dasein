@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Collections;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -12,6 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -47,21 +49,60 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = false)
-    public void testScoring() {
-        String prodId = "A78DF03BAC196BE9A08508FFDB433A31";
-
-        // Ever Purchased
-        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
-        long totalCount = countTxnBktForScoringFromDataPage(txn);
-        Assert.assertEquals(totalCount, 21199L);
-        long scoringCount = countTxnBktForScoring(txn);
-        Assert.assertEquals(totalCount, scoringCount);
-
+    public void testScoringCount() {
         // Ever, Amount > 0 and Quantity > 0
         AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN, Collections.singletonList(0));
-        txn = new Bucket.Transaction(prodId, TimeFilter.ever(), greaterThan0, greaterThan0, false);
-        long count = countTxnBktForScoringFromDataPage(txn);
-        Assert.assertEquals(count, 21197L);
+        Bucket.Transaction txn = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), greaterThan0, greaterThan0, false);
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
+        Restriction txnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
+        Restriction accRestriction1 = Restriction.builder() //
+                .let(BusinessEntity.Account, InterfaceName.City.name()) //
+                .eq("HOUSTON") //
+                .build();
+        Restriction accRestriction2 = Restriction.builder() //
+                .let(BusinessEntity.Account, InterfaceName.City.name()) //
+                .eq("CHICAGO") //
+                .build();
+        Restriction accRestriction = Restriction.builder().or(accRestriction1, accRestriction2).build();
+        Restriction cntRestriction1 = Restriction.builder() //
+                .let(BusinessEntity.Contact, InterfaceName.Title.name()) //
+                .contains("Vice") //
+                .build();
+        Restriction cntRestriction2 = Restriction.builder() //
+                .let(BusinessEntity.Contact, InterfaceName.Title.name()) //
+                .contains("Professor") //
+                .build();
+        Restriction cntRestriction = Restriction.builder().or(cntRestriction1, cntRestriction2).build();
+
+        // only transaction restriction
+        verifyScoringQuery(txnRestriction, 832L);
+
+        // only account restriction
+        verifyScoringQuery(accRestriction1, 9L);
+        verifyScoringQuery(accRestriction, 12345L); // -- failing
+
+        // only contact restriction
+        verifyScoringQuery(cntRestriction1, 23L);
+        verifyScoringQuery(cntRestriction, 12345L); // -- failing
+
+        // account + transaction
+        Restriction restriction = Restriction.builder().and(accRestriction, txnRestriction).build();
+        verifyScoringQuery(restriction, 12345L); // failing
+
+        // account + contact + transaction
+        restriction = Restriction.builder().and(accRestriction, cntRestriction, txnRestriction).build();
+        verifyScoringQuery(restriction, 12345L);
+    }
+
+    private void verifyScoringQuery(Restriction restriction, long expectedCount) {
+        long count = countRestrictionForScoring(restriction);
+        Assert.assertEquals(count, expectedCount);
+        int numTuples = (int) Math.min(5L, expectedCount);
+        if (numTuples > 0) {
+            DataPage dataPage = retrieveScoringDataByRestriction(restriction, numTuples);
+            Assert.assertTrue(CollectionUtils.isNotEmpty(dataPage.getData()));
+            Assert.assertEquals(dataPage.getData().size(), numTuples);
+        }
     }
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
@@ -111,16 +152,33 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     private long countTxnBktForScoring(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
-        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        return countRestrictionForScoring(restriction);
+    }
+
+    private long countRestrictionForScoring(Restriction restriction) {
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-
+        frontEndQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
+        frontEndQuery.setPeriodName("Month");
         return eventQueryService.getScoringCount(frontEndQuery);
+    }
+
+    private DataPage retrieveScoringDataByRestriction(Restriction restriction, int numTuples) {
+        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setPageFilter(new PageFilter(0, numTuples));
+        frontEndQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
+        frontEndQuery.setPeriodName("Month");
+        return eventQueryService.getScoringTuples(frontEndQuery);
     }
 
     private long countTxnBktForTraining(Bucket.Transaction txn) {
