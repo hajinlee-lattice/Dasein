@@ -14,11 +14,11 @@ public class LoginValidationResponse {
         this.isValidated = isValidated;
     }
 
-    String getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    void setUserId(String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
