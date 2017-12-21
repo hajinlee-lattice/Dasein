@@ -110,59 +110,66 @@ Content Panels
 }
 
 .expanding-bars-spinner {
-    width:117px;
-    height: 50px;
 
     & > div {
         height: 1em;
-        overflow: hidden;
-        background-color: #ccc;
-        border-radius: 3px;
+        background-color: #888;
         color: transparent;
         display:inline-block;
+        border-radius: 0;
         margin-top: .3em;
         margin-right: 0em;
         -webkit-animation: expanding-bars-animation .6s infinite;
-        animation: expanding-bars-animation .6s infinite;
+        animation: expanding-bars-animation .8s infinite;
         transition: none;
-        filter: blur(1px);
+        transform: scaleY(.1) scaleX(1.5);
+        //filter: blur(1px);
 
         &:nth-child(1) {
             -webkit-animation-delay: 0.1s;
-            animation-delay: 0s;
+            animation-delay: 0.3s;
         }
         &:nth-child(2) {
             -webkit-animation-delay: 0.2s;
-            animation-delay: 0.1s;
+            animation-delay: 0.5s;
         }
         &:nth-child(3) {
             -webkit-animation-delay: 0.3s;
-            animation-delay: 0.2s;
+            animation-delay: 0.8s;
         }
         &:nth-child(4) {
             -webkit-animation-delay: 0.4s;
-            animation-delay: 0.3s;
+            animation-delay: 0s;
         }
         &:nth-child(5) {
             -webkit-animation-delay: 0.5s;
-            animation-delay: 0.4s;
+            animation-delay: 0.6s;
         }
         &:nth-child(6) {
             -webkit-animation-delay: 0.6s;
-            animation-delay: 0.5s;
+            animation-delay: 0.2s;
         }
         &:nth-child(7) {
             -webkit-animation-delay: 0.7s;
-            animation-delay: 0.6s;
+            animation-delay: 0.7s;
         }
     }
 }
 
 @keyframes expanding-bars-animation {
-    30% {
-        transform: scaleY(0.333) scaleX(1.2);
-        background-color: #aaa;
-        filter: blur(0px);
-        border-radius: 0px;
+    15% {
+        transform: scaleY(.1) scaleX(1.5);
+        border-radius: 0;
+        background-color: #888;
+    }
+    33% {
+        transform: scaleY(1) scaleX(.5);
+        border-radius: 3px;
+        background-color: #ccc;
+    }
+    85% {
+        transform: scaleY(.1) scaleX(1.5);
+        border-radius: 0;
+        background-color: #888;
     }
 }
