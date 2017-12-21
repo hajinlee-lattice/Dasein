@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -155,8 +156,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             GenericRecordRequest recordRequest = new GenericRecordRequest();
             recordRequest.setId(UUID.randomUUID().toString());
             matchHistory.setId(recordRequest.getId());
-            recordRequest.setStores(Arrays.asList(FabricStoreEnum.HDFS))
-                    .setRepositories(Arrays.asList(FABRIC_MATCH_HISTORY)).setBatchId(FABRIC_MATCH_HISTORY);
+            recordRequest.setStores(Collections.singletonList(FabricStoreEnum.HDFS))
+                    .setRepositories(Collections.singletonList(FABRIC_MATCH_HISTORY))
+                    .setBatchId(FABRIC_MATCH_HISTORY);
             fabricEntityManager.publishEntity(recordRequest, matchHistory, MatchHistory.class);
         }
     }
@@ -229,6 +231,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
                     value = true;
+                } else if (field.toLowerCase().contains("ismatched")) {
+                    value = StringUtils.isNotEmpty(internalRecord.getLatticeAccountId());
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);
@@ -315,5 +319,4 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
         return matchContext;
     }
-
 }
