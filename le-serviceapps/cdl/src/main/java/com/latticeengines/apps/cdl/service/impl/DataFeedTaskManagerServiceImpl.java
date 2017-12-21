@@ -171,7 +171,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo);
-        registerImportAction(customerSpaceStr, appId, csvImportFileInfo);
+        registerImportAction(customerSpace.toString(), appId, csvImportFileInfo);
         return appId.toString();
     }
 
