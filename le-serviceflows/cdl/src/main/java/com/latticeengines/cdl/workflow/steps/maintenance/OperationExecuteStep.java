@@ -20,7 +20,7 @@ public class OperationExecuteStep extends BaseReportStep<OperationExecuteConfigu
                 (maintenanceOperationConfiguration.getClass());
         if (maintenanceOperationService == null) {
             throw new RuntimeException(
-                    String.format("Cannot find maintenance service for class: %s", configuration.getClass()));
+                    String.format("Cannot find maintenance service for class: %s", maintenanceOperationConfiguration.getClass()));
         }
         maintenanceOperationService.invoke(maintenanceOperationConfiguration);
         super.execute();

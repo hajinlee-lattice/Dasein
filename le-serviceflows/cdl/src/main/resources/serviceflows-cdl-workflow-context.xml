@@ -6,6 +6,7 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <context:component-scan base-package="com.latticeengines.cdl.workflow"/>
+    <context:component-scan base-package="com.latticeengines.cdl.operationflow"/>
     <import resource="classpath:serviceflows-core-workflow-context.xml"/>
     <import resource="classpath:redshiftdb-context.xml" />
     <import resource="classpath:playmakercore-context.xml"/>

@@ -139,6 +139,10 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("auto_scheduling")
     private boolean autoScheduling = false;
 
+    @Column(name = "MAINTENANCE_MODE")
+    @JsonProperty("maintenance_mode")
+    private boolean maintenanceMode = false;
+
     @Transient
     @JsonIgnore
     private Map<String, Map<String, Map<String, DataFeedTask>>> taskMap = new HashMap<>();
@@ -318,6 +322,14 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setAutoScheduling(boolean autoScheduling) {
         this.autoScheduling = autoScheduling;
+    }
+
+    public boolean isMaintenanceMode() {
+        return maintenanceMode;
+    }
+
+    public void setMaintenanceMode(boolean maintenanceMode) {
+        this.maintenanceMode = maintenanceMode;
     }
 
     public Integer getEarliestTransaction() {

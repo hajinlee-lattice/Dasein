@@ -102,6 +102,17 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
+    public void updateDataFeedMaintenanceMode(String customerSpace, boolean maintenanceMode) {
+        DataFeed datafeed = findDataFeedByName(customerSpace, "");
+        if (datafeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot update maintenance mode.");
+        } else {
+            datafeed.setMaintenanceMode(maintenanceMode);
+            datafeedEntityMgr.update(datafeed);
+        }
+    }
+
+    @Override
     public void updateDataFeed(String customerSpace, String datafeedName, String statusStr) {
         DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
         if (datafeed == null) {

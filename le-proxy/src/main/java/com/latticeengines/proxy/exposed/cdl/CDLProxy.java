@@ -2,6 +2,10 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("cdlProxy")
@@ -105,6 +110,65 @@ public class CDLProxy extends MicroserviceRestApiProxy {
                 "/customerspaces/{customerSpace}/datacollection/datafeed/consolidate?" + "draining={draining}",
                 shortenCustomerSpace(customerSpace), "true");
         ResponseDocument<String> responseDoc = post("consolidate", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        String appIdStr = responseDoc.getResult();
+        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId cleanupAll(String customerSpace, BusinessEntity entity) {
+        List<Object> args = new ArrayList<>();
+        args.add(customerSpace);
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/all";
+
+        if (entity != null) {
+            args.add(entity);
+            urlPattern += "?BusinessEntity={BusinessEntity}";
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        ResponseDocument<String> responseDoc = post("cleanup all", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        String appIdStr = responseDoc.getResult();
+        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId cleanupAllData(String customerSpace, BusinessEntity entity) {
+        List<Object> args = new ArrayList<>();
+        args.add(customerSpace);
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/alldata";
+
+        if (entity != null) {
+            args.add(entity);
+            urlPattern += "?BusinessEntity={BusinessEntity}";
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        ResponseDocument<String> responseDoc = post("cleanup all data", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        String appIdStr = responseDoc.getResult();
+        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId cleanupByTimeRange(String customerSpace, Date startTime, Date endTime, BusinessEntity entity) {
+        List<Object> args = new ArrayList<>();
+        args.add(customerSpace);
+        args.add(startTime);
+        args.add(endTime);
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/bytimerange?startTime={startTime}&endTime={endTime}";
+
+        if (entity != null) {
+            args.add(entity);
+            urlPattern += "&BusinessEntity={BusinessEntity}";
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        ResponseDocument<String> responseDoc = post("cleanup by time range", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }

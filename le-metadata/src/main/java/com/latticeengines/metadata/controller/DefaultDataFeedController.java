@@ -52,6 +52,16 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedDrainingStatus(customerSpace, drainingStatus);
     }
 
+    @RequestMapping(value = "/maintenance/{maintenanceMode}", method = RequestMethod.PUT, headers =
+            "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "update data feed status by name")
+    public void updateDataFeedMaintenanceMode(@PathVariable String customerSpace,
+                                              @PathVariable boolean maintenanceMode) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        datafeedService.updateDataFeedMaintenanceMode(customerSpace, maintenanceMode);
+    }
+
     @RequestMapping(value = "/startexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")

@@ -22,6 +22,8 @@ public interface DataFeedService {
 
     void updateDataFeedDrainingStatus(String customerSpace, String drainingStatusStr);
 
+    void updateDataFeedMaintenanceMode(String customerSpace, boolean maintenanceMode);
+
     void updateDataFeed(String customerSpace, String datafeedName, String status);
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
