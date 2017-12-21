@@ -173,10 +173,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         switch (datafeedStatus) {
         case InitialLoaded:
             return Status.InitialLoaded;
-        case InitialConsolidated:
-            return Status.InitialConsolidated;
         case Active:
-        case Consolidating:
         case ProcessAnalyzing:
             return Status.Active;
         default:

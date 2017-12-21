@@ -123,7 +123,6 @@ public class DataFeedExecution implements HasPid, Serializable {
         Inited("inited"), //
         Active("active"), //
         Started("started"), //
-        Consolidated("consolidated"), //
         ProcessAnalyzed("processAnalyzed"), //
         Failed("failed");
 
