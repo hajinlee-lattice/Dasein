@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
@@ -82,6 +83,7 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
 
         identifiers.add(taskUniqueId);
         importConfig.setProperty(ImportProperty.COLLECTION_IDENTIFIERS, JsonUtils.serialize(identifiers));
+        importConfig.setBusinessEntity(BusinessEntity.getByName(dataFeedTask.getEntity()));
 
         return importConfig;
     }

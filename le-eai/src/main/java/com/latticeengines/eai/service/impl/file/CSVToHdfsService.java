@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
@@ -80,7 +81,11 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             context.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
             context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
             context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
-            context.setProperty(ImportProperty.DEDUP_ENABLE, Boolean.TRUE.toString());
+            if(config.getBusinessEntity() != null && config.getBusinessEntity().equals(BusinessEntity.Transaction)) {
+                context.setProperty(ImportProperty.DEDUP_ENABLE, Boolean.FALSE.toString());
+            } else {
+                context.setProperty(ImportProperty.DEDUP_ENABLE, Boolean.TRUE.toString());
+            }
             //CDL import won't update the attribute name to interface name.
             context.setProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, Boolean.TRUE.toString());
             context.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());

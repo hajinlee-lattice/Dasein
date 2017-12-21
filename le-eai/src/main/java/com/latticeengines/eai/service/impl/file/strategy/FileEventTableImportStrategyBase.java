@@ -110,7 +110,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             props.put("eai.id.column.name", idColumnName);
         }
         String dedupEnable = ctx.getProperty(ImportProperty.DEDUP_ENABLE, String.class);
-        if (StringUtils.isEmpty(dedupEnable)) {
+        if (StringUtils.isEmpty(dedupEnable) || !Boolean.parseBoolean(dedupEnable)) {
             props.put("eai.dedup.enable", "false");
         } else {
             props.put("eai.dedup.enable", "true");

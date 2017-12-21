@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
@@ -17,6 +18,18 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public class ImportConfiguration extends EaiJobConfiguration {
 
     private List<SourceImportConfiguration> sourceConfigurations = new ArrayList<>();
+
+    private BusinessEntity businessEntity;
+
+    @JsonProperty("business_entity")
+    public BusinessEntity getBusinessEntity() {
+        return businessEntity;
+    }
+
+    @JsonProperty("business_entity")
+    public void setBusinessEntity(BusinessEntity businessEntity) {
+        this.businessEntity = businessEntity;
+    }
 
     @JsonProperty("sources")
     public List<SourceImportConfiguration> getSourceConfigurations() {

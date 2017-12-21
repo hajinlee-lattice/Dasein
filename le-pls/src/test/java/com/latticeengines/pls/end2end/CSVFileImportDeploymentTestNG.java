@@ -254,28 +254,49 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void importBase() {
-        prepareBaseData();
-        getDataFeedTask();
+        prepareBaseData(ENTITY_ACCOUNT);
+        prepareBaseData(ENTITY_CONTACT);
+        prepareBaseData(ENTITY_TRANSACTION);
+        getDataFeedTask(ENTITY_ACCOUNT);
+        getDataFeedTask(ENTITY_CONTACT);
+        getDataFeedTask(ENTITY_TRANSACTION);
     }
 
-    private void prepareBaseData() {
-        baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
-        Assert.assertNotNull(baseAccountFile);
-        startCDLImport(baseAccountFile, ENTITY_ACCOUNT);
-        baseContactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
-        Assert.assertNotNull(baseContactFile);
-        startCDLImport(baseContactFile, ENTITY_CONTACT);
-        baseTransactionFile = uploadSourceFile(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
-        startCDLImport(baseTransactionFile, ENTITY_TRANSACTION);
+    private void prepareBaseData(String entity) {
+        switch(entity) {
+            case ENTITY_ACCOUNT:
+                baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
+                Assert.assertNotNull(baseAccountFile);
+                startCDLImport(baseAccountFile, ENTITY_ACCOUNT);
+                break;
+            case ENTITY_CONTACT:
+                baseContactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
+                Assert.assertNotNull(baseContactFile);
+                startCDLImport(baseContactFile, ENTITY_CONTACT);
+                break;
+            case ENTITY_TRANSACTION:
+                baseTransactionFile = uploadSourceFile(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
+                Assert.assertNotNull(baseTransactionFile);
+                startCDLImport(baseTransactionFile, ENTITY_TRANSACTION);
+                break;
+        }
     }
 
-    private void getDataFeedTask() {
-        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX,
-                ENTITY_ACCOUNT);
-        contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_CONTACT + FEED_TYPE_SUFFIX,
-                ENTITY_CONTACT);
-        transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                ENTITY_TRANSACTION + FEED_TYPE_SUFFIX, ENTITY_TRANSACTION);
+    private void getDataFeedTask(String entity) {
+        switch(entity) {
+            case ENTITY_ACCOUNT:
+                accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT +
+                        FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
+                break;
+            case ENTITY_CONTACT:
+                contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_CONTACT +
+                        FEED_TYPE_SUFFIX, ENTITY_CONTACT);
+                break;
+            case ENTITY_TRANSACTION:
+                transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_TRANSACTION +
+                        FEED_TYPE_SUFFIX, ENTITY_TRANSACTION);
+                break;
+        }
     }
 
     private SourceFile uploadSourceFile(String csvFileName, String entity) {
@@ -328,7 +349,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(avroFiles.size(), 1);
         String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
         long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
-        Assert.assertEquals(rowCount, 100);
+        Assert.assertEquals(rowCount, 101);
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
         Assert.assertEquals(schema.getField("TransactionTime").schema().getTypes().get(0).getType(),
                 Schema.Type.STRING);
