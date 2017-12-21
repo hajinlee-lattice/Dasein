@@ -152,7 +152,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
 
             return om.readTree(content);
         }catch (Exception e) {
-            log.error("Get json node from zk failed.", e);
+            log.error("Get json node from zk failed.");
             return null;
         }
     }
