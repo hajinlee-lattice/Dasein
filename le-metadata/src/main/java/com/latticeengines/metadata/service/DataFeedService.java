@@ -32,7 +32,7 @@ public interface DataFeedService {
 
     DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName);
 
-    //DataFeedProfile startProfile(String customerSpace, String datafeedName);
+    DataFeedProfile startProfile(String customerSpace, String datafeedName);
 
     DataFeedProfile updateProfileWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 

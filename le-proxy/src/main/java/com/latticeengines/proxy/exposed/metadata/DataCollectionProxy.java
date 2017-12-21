@@ -45,7 +45,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("get default dataCollection", url, ResponseDocument.class);
     }
 
-    @SuppressWarnings("unchecked")
     public AttributeRepository getAttrRepo(String customerSpace) {
         initializeAttrRepoCache();
         String key = shortenCustomerSpace(customerSpace);
@@ -151,7 +150,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
-    @SuppressWarnings("unchecked")
     private void initializeAttrRepoCache() {
         if (attrRepoCache == null) {
             attrRepoCache = new LocalCacheManager<>( //

@@ -158,6 +158,8 @@ public class DataFeedServiceImpl implements DataFeedService {
         Status datafeedStatus = Status.fromName(initialDataFeedStatus);
         switch (datafeedStatus) {
         case InitialLoaded:
+        case InitialConsolidated:
+            return Status.InitialConsolidated;
         case Active:
             return Status.Active;
         default:
@@ -171,7 +173,11 @@ public class DataFeedServiceImpl implements DataFeedService {
         switch (datafeedStatus) {
         case InitialLoaded:
             return Status.InitialLoaded;
+        case InitialConsolidated:
+            return Status.InitialConsolidated;
         case Active:
+        case Consolidating:
+        case ProcessAnalyzing:
             return Status.Active;
         default:
             throw new RuntimeException(
@@ -189,10 +195,10 @@ public class DataFeedServiceImpl implements DataFeedService {
         return datafeedEntityMgr.retryLatestExecution(datafeed.getName());
     }
 
-//    @Override
-//    public DataFeedProfile startProfile(String customerSpace, String datafeedName) {
-//        return datafeedEntityMgr.startProfile(datafeedName);
-//    }
+    @Override
+    public DataFeedProfile startProfile(String customerSpace, String datafeedName) {
+        return datafeedEntityMgr.startProfile(datafeedName);
+    }
 
     @Override
     public DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr) {

@@ -353,12 +353,13 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         Initialized("initialized", false, false), // import is ready to run
         InitialLoaded("initialLoaded", true, false), // initial import data
                                                      // loaded
-        //InitialConsolidated("initialConsolidated", true, true), // initial data
+        InitialConsolidated("initialConsolidated", true, true), // initial data
                                                                 // consolidated
         Active("active", true, true), // master table has formed and pushed to
                                       // data store
+        Consolidating("consolidating", true, false), //
         ProcessAnalyzing("processAnalyzing", true, false), //
-        //Profiling("profiling", false, true), //
+        Profiling("profiling", false, true), //
         Deleting("deleting", false, false);
 
         private final String name;

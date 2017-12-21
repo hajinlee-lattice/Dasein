@@ -61,7 +61,7 @@ public class DataFeedExecutionListener extends LEJobListener {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             DataFeedExecution execution = dataFeedProxy.finishExecution(customerSpace, initialDataFeedStatus);
             log.info(String.format("trying to finish running execution %s", execution));
-            if (execution.getStatus() != Status.ProcessAnalyzed) {
+            if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
             // refresh caches

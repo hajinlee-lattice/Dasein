@@ -246,24 +246,24 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         }
     }
 
-//    @Override
-//    @Transactional(propagation = Propagation.REQUIRED)
-//    public DataFeedProfile startProfile(String datafeedName) {
-//        DataFeed datafeed = findByNameInflated(datafeedName);
-//        if (datafeed == null) {
-//            return null;
-//        }
-//        Long executionId = datafeed.getActiveExecutionId();
-//        DataFeedProfile profile = new DataFeedProfile();
-//        profile.setDataFeed(datafeed);
-//        profile.setLatestDataFeedExecutionId(executionId);
-//        datafeedProfileEntityMgr.create(profile);
-//        datafeed.setActiveProfileId(profile.getPid());
-//        datafeed.setActiveProfile(profile);
-//        datafeed.setStatus(Status.Profiling);
-//        update(datafeed);
-//        return profile;
-//    }
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public DataFeedProfile startProfile(String datafeedName) {
+        DataFeed datafeed = findByNameInflated(datafeedName);
+        if (datafeed == null) {
+            return null;
+        }
+        Long executionId = datafeed.getActiveExecutionId();
+        DataFeedProfile profile = new DataFeedProfile();
+        profile.setDataFeed(datafeed);
+        profile.setLatestDataFeedExecutionId(executionId);
+        datafeedProfileEntityMgr.create(profile);
+        datafeed.setActiveProfileId(profile.getPid());
+        datafeed.setActiveProfile(profile);
+        datafeed.setStatus(Status.Profiling);
+        update(datafeed);
+        return profile;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
