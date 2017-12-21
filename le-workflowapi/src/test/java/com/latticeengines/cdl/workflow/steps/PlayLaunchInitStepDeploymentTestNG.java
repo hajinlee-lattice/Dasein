@@ -45,7 +45,8 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
-        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml" })
+        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml",
+        "classpath:proxy-context.xml", "classpath:test-workflowapi-context.xml" })
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStepDeploymentTestNG.class);
