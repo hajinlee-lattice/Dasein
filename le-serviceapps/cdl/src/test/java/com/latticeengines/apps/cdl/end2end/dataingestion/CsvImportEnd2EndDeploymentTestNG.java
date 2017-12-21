@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
+public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private long importedAccounts;
     private long importedContacts;
@@ -40,7 +40,7 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
         Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of( //
                 TableRoleInCollection.BucketedAccount, importedAccounts + importedAccounts2,
                 TableRoleInCollection.SortedContact, importedContacts + importedContacts2);
-        verifyProfileReport(profileAppId, expectedCounts);
+        verifyProfileReport(processAnalyzeAppId, expectedCounts);
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
 
