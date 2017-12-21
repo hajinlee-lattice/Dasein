@@ -91,8 +91,13 @@ public class EventQueryTranslator extends TranslatorCommon {
         return repository.getTableName(AggregatedPeriodTransaction);
     }
 
-    protected BooleanExpression limitPeriodByNameAndCount(String period, int periodCount) {
-        return periodName.eq(period);
+    @SuppressWarnings("unchecked")
+    private BooleanExpression limitPeriodByNameAndCount(QueryFactory queryFactory, AttributeRepository repository,
+                                                        String period, int periodCount) {
+        BooleanExpression matchedPeriod = periodName.eq(period);
+        return (periodCount <= 0)
+                ? matchedPeriod
+                : matchedPeriod.and(periodId.gt(translateValidPeriodId(queryFactory, repository, period, periodCount)));
     }
 
     @SuppressWarnings({"unchecked", "rawtype"})
@@ -106,12 +111,13 @@ public class EventQueryTranslator extends TranslatorCommon {
         SQLQuery periodRangeSubQuery = factory.query() //
                 .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
                 .from(tablePath) //
-                .where(periodName.eq(period)) //
+                .where(limitPeriodByNameAndCount(queryFactory, repository, period, periodCount)) //
                 .groupBy(accountId);
 
         SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
                 factory.selectDistinct(accountId).from(tablePath).where(periodName.eq(period)).as(ALL_ACCOUNTS),
-                factory.selectDistinct(periodId).from(tablePath).where(limitPeriodByNameAndCount(period, periodCount))
+                factory.selectDistinct(periodId).from(tablePath)
+                        .where(periodName.eq(period))
                         .as(ALL_PERIODS));
 
         SQLQuery crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
@@ -138,6 +144,7 @@ public class EventQueryTranslator extends TranslatorCommon {
         return factory.query().from(tablePath) //
                 .where(periodName.eq(period)) //
                 .select(periodId.max().subtract(periodCount).as(MAX_PID));
+
     }
 
     private SQLQuery translateMaxPeriodId(QueryFactory queryFactory,

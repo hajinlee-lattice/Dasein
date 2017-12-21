@@ -968,6 +968,20 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testAvgQuantityBetweenPeriodsWithLimitedPeriods() {
+        TransactionRestriction txRestriction = getAvgQuantityBetweenPeriods();
+
+        EventQueryTranslator eventTranslator = getEventQueryTranslator();
+        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
+                                                          null, 10, Query.builder()).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        System.out.println("sqlQuery = " + sqlQuery);
+        long count = queryEvaluatorService.getCount(attrRepo, query);
+        //Assert.assertEquals(count, 57807);
+        Assert.assertEquals(count, 783);
+    }
+
+    @Test(groups = "functional")
     public void testPriorOnly() {
         TransactionRestriction txRestriction = getPriorSevenEngaged();
 
