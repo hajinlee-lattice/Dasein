@@ -126,7 +126,7 @@ public class WorkflowExecutionCache {
             }
             JobInstance jobInstance = jobExecution.getJobInstance();
             WorkflowStatus workflowStatus = workflowService.getStatus(jobExecution);
-            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowIdWithFilter(workflowId.getId());
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
 
             Job job = new Job();
             job.setId(workflowId.getId());
