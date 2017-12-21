@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -44,9 +43,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
-import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 
 public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseTransformWrapperStep<T> {
@@ -116,6 +113,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             if (inputTables == null || inputTables.isEmpty()) {
                 throw new RuntimeException("There is no input tables to consolidate.");
             }
+            Collections.reverse(inputTables);
             inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
                     : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
                     : t.getLastModifiedKey().getLastModifiedTimestamp())
