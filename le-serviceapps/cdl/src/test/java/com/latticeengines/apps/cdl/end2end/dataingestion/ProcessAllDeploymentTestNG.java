@@ -78,8 +78,8 @@ public class ProcessAllDeploymentTestNG extends DataIngestionEnd2EndDeploymentTe
 
         createTestSegments();
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_1_ACCOUNT_4,
-                BusinessEntity.Contact, SEGMENT_1_CONTACT_4,
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_3,
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_3,
                 BusinessEntity.Product, numProducts);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
