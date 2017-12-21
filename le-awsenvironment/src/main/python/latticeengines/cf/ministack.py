@@ -104,6 +104,7 @@ def create_infra_template(environment, stackname, instances, apps):
     return stack
 
 def swagger_task(stackname, apps, ecr):
+    ledp = Volume("ledp", "/etc/ledp")
     container = ContainerDefinition("httpd", ecr + "/latticeengines/swagger") \
         .mem_mb("256") \
         .publish_port(80, 8080) \
@@ -114,9 +115,11 @@ def swagger_task(stackname, apps, ecr):
             "awslogs-region": { "Ref": "AWS::Region" },
             "awslogs-stream-prefix": "swagger"
         }}) \
-        .set_env("SWAGGER_APPS", apps)
+        .set_env("SWAGGER_APPS", apps) \
+        .mount("/etc/ledp", ledp)
     task = TaskDefinition("swaggertask")
     task.add_container(container)
+    task.add_volume(ledp)
     return task
 
 def haproxy_task(stackname, ec2s, ecr):

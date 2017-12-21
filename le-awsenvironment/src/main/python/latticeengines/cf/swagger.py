@@ -6,7 +6,7 @@ import argparse
 import boto3
 import os
 
-from .module.ecs import ContainerDefinition, TaskDefinition
+from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import *
 from .module.stack import ECSStack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
 from ..conf import AwsEnvironment
@@ -58,8 +58,13 @@ def swagger_task(environment):
         }}) \
         .set_env("SWAGGER_APPS", PARAM_SWAGGER_APPS.ref()) \
         .set_env("JVMFLAGS", "-Xms1g -Xmx1700m")
+
+    ledp = Volume("ledp", "/etc/ledp")
+    container = container.mount("/etc/ledp", ledp)
+
     task = TaskDefinition("swaggertask")
     task.add_container(container)
+    task.add_volume(ledp)
     return task
 
 def provision_cli(args):

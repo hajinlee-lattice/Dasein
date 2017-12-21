@@ -35,8 +35,6 @@ RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 ADD le-ui.tar.gz /opt/node
 ENV APP_ROOT /opt/node/le-ui
 
-COPY server.key /etc/pki/tls/private/private.key
-COPY server.crt /etc/pki/tls/star.lattice.local.crt
 COPY start.sh /start.sh
 
 WORKDIR ${APP_ROOT}
