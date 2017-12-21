@@ -7,16 +7,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -28,6 +34,7 @@ import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -37,6 +44,9 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
 
+    public static final String CDLNote = "Scheduled at 6:30 PM PST.";
+    public static final Long UNCOMPLETED_PROCESS_ANALYZE_ID = 0L;
+
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
     private static final String[] NON_DISPLAYED_JOB_TYPE_VALUES = new String[] { //
             "bulkmatchworkflow", //
@@ -45,17 +55,20 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceFileEntityMgr sourceFileEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelSummaryService modelSummaryService;
+
+    @Inject
+    private ActionService actionService;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -126,7 +139,34 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         jobs.removeIf(job -> NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
         updateAllJobsAndStepsWithModelSummaries(jobs);
+        Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob();
+        if (unstartedPnAJob != null) {
+            jobs.add(unstartedPnAJob);
+        }
         return jobs;
+    }
+
+    @VisibleForTesting
+    Job generateUnstartedProcessAnalyzeJob() {
+        Job job = null;
+        List<Action> actions = actionService.findByOwnerId(null, null);
+        if (CollectionUtils.isNotEmpty(actions)) {
+            job = new Job();
+            job.setNote(CDLNote);
+            job.setId(UNCOMPLETED_PROCESS_ANALYZE_ID);
+            job.setName("processAnalyzeWorkflow");
+            job.setJobStatus(JobStatus.PENDING);
+            job.setJobType("processAnalyzeWorkflow");
+            Map<String, String> unfinishedInputContext = new HashMap<>();
+            List<Long> unfinishedActionIds = actions.stream().map(action -> action.getPid())
+                    .collect(Collectors.toList());
+            unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
+            job.setInputs(unfinishedInputContext);
+            DateTime dateTime = new DateTime();
+            // set the start time to be in the future for UI sorting purpose
+            job.setStartTimestamp(dateTime.plusDays(1).toDate());
+        }
+        return job;
     }
 
     private void updateStepDisplayNameAndNumSteps(Job job) {

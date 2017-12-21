@@ -49,9 +49,15 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Action> findByOwnerId(@Nullable Long ownerId, Pageable pageable) {
+    public List<Action> findByOwnerId(@Nullable String ownerId, Pageable pageable) {
         if (pageable == null) {
-            return actionRepository.findByOwnerId(ownerId);
+            // TODO change back to use JPA repository after PLS-6214 is done
+            // return actionRepository.findByOwnerId(ownerId);
+            if (ownerId != null) {
+                return actionDao.findAllByField("OWNER_ID", ownerId);
+            } else {
+                return actionDao.findAllWithNullOwnerId();
+            }
         }
         return actionRepository.findByOwnerId(ownerId, pageable);
     }
@@ -59,7 +65,9 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Action findByPid(Long pid) {
-        return actionRepository.findByPid(pid);
+        // TODO change back to use JPA repository after PLS-6214 is done
+        // return actionRepository.findByPid(pid);
+        return actionDao.findByField("pid", pid);
     }
 
     @Override

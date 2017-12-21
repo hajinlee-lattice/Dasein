@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.Set;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
-import org.python.icu.text.SimpleDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -41,6 +42,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     public final String DEFAULT_FILE_FORMAT = "%s_%s.csv";
 
     public final String DATE_FORMAT = "MM-dd-yyyy";
+
+    public final static String DEFAULT_VISIDB_USER = "Default VisiDB User";
 
     private static final String[] VDB_ATTR_FIELDS = { "DisplayName", "SourceLogicalDataType", "Description",
             "FundamentalType", "StatisticalType", "DisplayDiscretizationStrategy", "DataQuality", "DataSource",
@@ -324,7 +327,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     @Override
     public void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
-                                         String customerSpace) {
+            String customerSpace) {
         if (cdlExternalSystemService == null || table == null) {
             return;
         }
@@ -337,14 +340,14 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public String getFileName(CDLImportConfig importConfig) {
-        return String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
-                new SimpleDateFormat(DATE_FORMAT).format(new Date()));
-    }
-
-    @Override
-    public String getFileDisplayName(CDLImportConfig importConfig) {
-        return String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
-                new SimpleDateFormat(DATE_FORMAT).format(new Date()));
+    // Implement this method for VisiDB import purely for UI purpose
+    public CSVImportFileInfo getImportFileInfo(CDLImportConfig importConfig) {
+        CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
+        csvImportFileInfo.setReportFileDisplayName(String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
+                new SimpleDateFormat(DATE_FORMAT).format(new Date())));
+        csvImportFileInfo.setReportFileName(String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
+                new SimpleDateFormat(DATE_FORMAT).format(new Date())));
+        csvImportFileInfo.setFileUploadInitiator(DEFAULT_VISIDB_USER);
+        return csvImportFileInfo;
     }
 }

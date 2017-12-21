@@ -7,29 +7,18 @@ import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CSVImportConfig extends CDLImportConfig {
 
-    @JsonProperty("report_file_name")
-    private String reportFileName;
-
-    @JsonProperty("report_file_display_name")
-    private String reportFileDisplayName;
+    @JsonProperty("csv_inport_file_info")
+    private CSVImportFileInfo csvImportFileInfo;
 
     @JsonProperty("csv_to_hdfs_configuration")
     private CSVToHdfsConfiguration csvToHdfsConfiguration;
 
-    public String getReportFileName() {
-        return reportFileName;
+    public CSVImportFileInfo getCSVImportFileInfo() {
+        return this.csvImportFileInfo;
     }
 
-    public void setReportFileName(String reportFileName) {
-        this.reportFileName = reportFileName;
-    }
-
-    public String getReportFileDisplayName() {
-        return reportFileDisplayName;
-    }
-
-    public void setReportFileDisplayName(String reportFileDisplayName) {
-        this.reportFileDisplayName = reportFileDisplayName;
+    public void setCSVImportFileInfo(CSVImportFileInfo info) {
+        this.csvImportFileInfo = info;
     }
 
     public CSVToHdfsConfiguration getCsvToHdfsConfiguration() {

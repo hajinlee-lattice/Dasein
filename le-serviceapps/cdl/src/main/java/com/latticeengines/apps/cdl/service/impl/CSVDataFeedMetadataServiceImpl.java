@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -40,7 +41,8 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     public Table getMetadata(CDLImportConfig importConfig, String entity) {
         CSVImportConfig csvImportConfig = (CSVImportConfig) importConfig;
         log.info("Template table name: " + csvImportConfig.getCsvToHdfsConfiguration().getTemplateName());
-        Table metaTable = metadataProxy.getTable(csvImportConfig.getCsvToHdfsConfiguration().getCustomerSpace().toString(),
+        Table metaTable = metadataProxy.getTable(
+                csvImportConfig.getCsvToHdfsConfiguration().getCustomerSpace().toString(),
                 csvImportConfig.getCsvToHdfsConfiguration().getTemplateName());
         if (BusinessEntity.getByName(entity) == BusinessEntity.Account) {
             List<ColumnSelection.Predefined> groups = new ArrayList<>();
@@ -114,7 +116,8 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     @Override
     public String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier) {
-        CSVToHdfsConfiguration csvmportConfig = ((CSVImportConfig) importConfig).getCsvToHdfsConfiguration();;
+        CSVToHdfsConfiguration csvmportConfig = ((CSVImportConfig) importConfig).getCsvToHdfsConfiguration();
+        ;
         csvmportConfig.setJobIdentifier(jobIdentifier);
         return JsonUtils.serialize(csvmportConfig);
     }
@@ -130,19 +133,13 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     @Override
     public void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
-                                         String customerSpace) {
+            String customerSpace) {
         return;
     }
 
     @Override
-    public String getFileName(CDLImportConfig importConfig) {
+    public CSVImportFileInfo getImportFileInfo(CDLImportConfig importConfig) {
         CSVImportConfig csvImportConfig = (CSVImportConfig) importConfig;
-        return csvImportConfig.getReportFileName();
-    }
-
-    @Override
-    public String getFileDisplayName(CDLImportConfig importConfig) {
-        CSVImportConfig csvImportConfig = (CSVImportConfig) importConfig;
-        return csvImportConfig.getReportFileDisplayName();
+        return csvImportConfig.getCSVImportFileInfo();
     }
 }

@@ -16,14 +16,15 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
-import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -52,11 +53,15 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         super.setupTestEnvironmentWithDummySegment();
         testVdbMetadata = new VdbImportConfig();
         errorVdbMetadata = new VdbImportConfig();
-        testVdbMetadata.setVdbLoadTableConfig(JsonUtils.deserialize(IOUtils.toString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("metadata/vdb/testmetadata.json"),
-                "UTF-8"), VdbLoadTableConfig.class));
-        errorVdbMetadata.setVdbLoadTableConfig(JsonUtils.deserialize(IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("metadata/vdb/testmetadata_error.json"), "UTF-8"), VdbLoadTableConfig.class));
+        testVdbMetadata
+                .setVdbLoadTableConfig(JsonUtils.deserialize(
+                        IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                                .getResourceAsStream("metadata/vdb/testmetadata.json"), "UTF-8"),
+                        VdbLoadTableConfig.class));
+        errorVdbMetadata.setVdbLoadTableConfig(JsonUtils.deserialize(
+                IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("metadata/vdb/testmetadata_error.json"), "UTF-8"),
+                VdbLoadTableConfig.class));
     }
 
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)
@@ -137,12 +142,15 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     }
 
     @Test(groups = "functional")
-    public void testGetFileNames() {
-        String fileDisplayName = vdbDataFeedMetadataService.getFileDisplayName(testVdbMetadata);
-        Assert.assertNotNull(fileDisplayName);
-        String fileName = vdbDataFeedMetadataService.getFileName(testVdbMetadata);
-        Assert.assertNotNull(fileName);
-        log.info(String.format("fileName=%s, fileDisplayName=%s", fileName, fileDisplayName));
+    public void testGetImportFileInfo() {
+        CSVImportFileInfo csvImportFileInfo = vdbDataFeedMetadataService.getImportFileInfo(testVdbMetadata);
+        Assert.assertNotNull(csvImportFileInfo);
+        Assert.assertEquals(csvImportFileInfo.getFileUploadInitiator(),
+                VdbDataFeedMetadataServiceImpl.DEFAULT_VISIDB_USER);
+        Assert.assertNotNull(csvImportFileInfo.getReportFileDisplayName());
+        Assert.assertNotNull(csvImportFileInfo.getReportFileName());
+        log.info(String.format("fileName=%s, fileDisplayName=%s, initiator=%s", csvImportFileInfo.getReportFileName(),
+                csvImportFileInfo.getReportFileDisplayName(), csvImportFileInfo.getFileUploadInitiator()));
     }
 
 }

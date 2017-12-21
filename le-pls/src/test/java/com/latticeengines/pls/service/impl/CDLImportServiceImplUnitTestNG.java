@@ -9,8 +9,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
@@ -24,6 +24,8 @@ public class CDLImportServiceImplUnitTestNG {
     private String DISPLAY_NAME = "displayName";
 
     private String FILE_NAME = "fileName";
+
+    private String INITIATOR = "test@lattice-engines.com";
 
     @BeforeClass(groups = "unit")
     public void setup() {
@@ -39,10 +41,13 @@ public class CDLImportServiceImplUnitTestNG {
     public void testGenerateImportConfigStr() {
         doReturn(sourceFile).when(cdlImportServiceImpl).getSourceFile(any(String.class));
         CSVImportConfig csvImportConfig = cdlImportServiceImpl.generateImportConfig("customerSpace", "templateName",
-                "dataFileName");
+                "dataFileName", INITIATOR);
         Assert.assertNotNull(csvImportConfig);
         CSVToHdfsConfiguration importConfig = csvImportConfig.getCsvToHdfsConfiguration();
-        Assert.assertEquals(csvImportConfig.getReportFileDisplayName(), DISPLAY_NAME);
-        Assert.assertEquals(csvImportConfig.getReportFileName(), FILE_NAME);
+        CSVImportFileInfo csvImportFileInfo = csvImportConfig.getCSVImportFileInfo();
+        Assert.assertNotNull(csvImportFileInfo);
+        Assert.assertEquals(csvImportFileInfo.getReportFileDisplayName(), DISPLAY_NAME);
+        Assert.assertEquals(csvImportFileInfo.getReportFileName(), FILE_NAME);
+        Assert.assertEquals(csvImportFileInfo.getFileUploadInitiator(), INITIATOR);
     }
 }

@@ -13,6 +13,6 @@ public interface ActionEntityMgr extends BaseEntityMgrRepository<Action, Long> {
 
     Action findByPid(@NonNull Long pid);
 
-    List<Action> findByOwnerId(@Nullable Long ownerId, Pageable pageable);
+    List<Action> findByOwnerId(@Nullable String ownerId, Pageable pageable);
 
 }

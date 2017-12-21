@@ -22,7 +22,7 @@ public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     private static final String ACTION_INITIATOR = "test@lattice-engines.com";
 
-    private static final Long OWNER_ID = 10002L;;
+    private static final String OWNER_ID = "application_10002";
 
     private List<Action> actions;
 
@@ -47,7 +47,7 @@ public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         action.setTenant(mainTestTenant);
         Random r = new Random();
         int trackingId = r.ints(0, (10000 + 1)).findFirst().getAsInt();
-        action.setTrackingId((long) trackingId);
+        action.setTrackingId(String.valueOf(trackingId));
         return action;
     }
 
@@ -98,7 +98,7 @@ public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         return actionEntityMgr.findAll();
     }
 
-    protected List<Action> findByOwnerId(Long ownerId) {
+    protected List<Action> findByOwnerId(String ownerId) {
         return actionEntityMgr.findByOwnerId(ownerId, null);
     }
 

@@ -9,10 +9,12 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -21,18 +23,23 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class WorkflowJobServiceImplUnitTestNG {
+
     @Mock
     private WorkflowProxy workflowProxy;
 
@@ -44,6 +51,9 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Mock
     private TenantEntityMgr tenantEntityMgr;
+
+    @Mock
+    private ActionService actionService;
 
     @InjectMocks
     private WorkflowJobServiceImpl workflowJobService;
@@ -59,6 +69,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         mockSourceFileEntityManager();
         mockModelSummaryService();
         mockTenantEntityManager();
+        mockActionService();
     }
 
     @Test(groups = "unit")
@@ -97,6 +108,27 @@ public class WorkflowJobServiceImplUnitTestNG {
         assertEquals(jobs.size(), jobIds.length);
     }
 
+    @SuppressWarnings("unchecked")
+    @Test(groups = "unit")
+    public void testGenerateUnstartedProcessAnalyzeJob() {
+        Job job = workflowJobService.generateUnstartedProcessAnalyzeJob();
+        Assert.assertNotNull(job);
+        Assert.assertEquals(job.getNote(), WorkflowJobServiceImpl.CDLNote);
+        Assert.assertEquals(job.getName(), "processAnalyzeWorkflow");
+        Assert.assertEquals(job.getJobType(), "processAnalyzeWorkflow");
+        Assert.assertEquals(job.getJobStatus(), JobStatus.PENDING);
+        Assert.assertEquals(job.getId(), WorkflowJobServiceImpl.UNCOMPLETED_PROCESS_ANALYZE_ID);
+        Assert.assertNotNull(job.getInputs());
+        Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));
+        List<Object> listObj = JsonUtils.deserialize(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS),
+                List.class);
+        Assert.assertEquals(listObj.size(), 2);
+        log.info(String.format("listObj is %s", listObj));
+        when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
+        job = workflowJobService.generateUnstartedProcessAnalyzeJob();
+        Assert.assertNull(job);
+    }
+
     private void mockWorkflowProxy() {
         when(workflowProxy.getWorkflowExecution(anyString())).thenReturn(createJob(jobIds[0]));
 
@@ -119,6 +151,21 @@ public class WorkflowJobServiceImplUnitTestNG {
         Tenant tenant = new Tenant();
         tenant.setId("tenant");
         when(tenantEntityMgr.findByTenantId(anyString())).thenReturn(tenant);
+    }
+
+    private void mockActionService() {
+        when(actionService.findByOwnerId(null, null)).thenReturn(generateActions());
+    }
+
+    private List<Action> generateActions() {
+        List<Action> actions = new ArrayList<>();
+        Action action1 = new Action();
+        action1.setPid(1L);
+        Action action2 = new Action();
+        action2.setPid(2L);
+        actions.add(action1);
+        actions.add(action2);
+        return actions;
     }
 
     private Job createJob(Long jobId) {

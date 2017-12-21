@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -14,15 +15,15 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
-            String fileName, String fileDisplayName) {
+            CSVImportFileInfo csvImportFileInfo) {
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
-                connectorConfig, fileName, fileDisplayName);
+                connectorConfig, csvImportFileInfo);
 
         return workflowJobService.submit(configuration);
     }
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
-            DataFeedTask dataFeedTask, String connectorConfig, String fileName, String fileDisplayName) {
+            DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo) {
 
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
@@ -32,8 +33,9 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .importConfig(connectorConfig) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER, dataFeedTask.getUniqueId()) //
-                        .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
-                        .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, csvImportFileInfo.getReportFileName()) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
+                                csvImportFileInfo.getReportFileDisplayName()) //
                         .build())
                 .build();
     }

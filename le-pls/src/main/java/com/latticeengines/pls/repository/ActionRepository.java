@@ -13,8 +13,8 @@ public interface ActionRepository extends BaseJpaRepository<Action, Long> {
 
     public Action findByPid(@NonNull Long pid);
 
-    public List<Action> findByOwnerId(@Nullable Long ownerId);
+    public List<Action> findByOwnerId(@Nullable String ownerId);
 
-    public List<Action> findByOwnerId(@Nullable Long ownerId, Pageable pageable);
+    public List<Action> findByOwnerId(@Nullable String ownerId, Pageable pageable);
 
 }

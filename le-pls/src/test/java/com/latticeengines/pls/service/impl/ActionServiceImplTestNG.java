@@ -24,7 +24,7 @@ public class ActionServiceImplTestNG extends ActionEntityMgrImplTestNG {
     }
 
     @Override
-    protected List<Action> findByOwnerId(Long ownerId) {
+    protected List<Action> findByOwnerId(String ownerId) {
         return actionService.findByOwnerId(ownerId, null);
     }
 

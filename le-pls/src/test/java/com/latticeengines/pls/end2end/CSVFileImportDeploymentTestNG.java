@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -29,6 +30,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
@@ -41,10 +43,12 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.CDLDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLImportService;
@@ -55,6 +59,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -99,6 +104,11 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -121,6 +131,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     @Test(groups = "deployment")
@@ -129,8 +140,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
         String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX + "ExternalSystem";
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
-                (accountFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
 
         FieldMapping crmID = new FieldMapping();
         crmID.setUserField("ID");
@@ -145,13 +156,18 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         mapID.setCdlExternalSystemType(CDLExternalSystemType.MAP);
         fieldMappingDocument.getFieldMappings().addAll(Arrays.asList(crmID, mapID));
 
-        modelingFileMetadataService.resolveMetadata(accountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE, feedType);
+        modelingFileMetadataService.resolveMetadata(accountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
+                feedType);
 
         ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, accountFile.getName(),
                 accountFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        List<Action> actions = internalResourceProxy.getAllActions(customerSpace);
+        validateImportAction(actions);
+        validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_ACCOUNT);
         Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("SFDC_ID"));
@@ -161,20 +177,33 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(system.getCRMIdList().get(0), "SFDC_ID");
     }
 
+    private void validateImportAction(List<Action> actions) {
+        Assert.assertNotNull(actions);
+        log.info(String.format("Actions are %s", Arrays.toString(actions.toArray())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void validateJobsPage() {
+        List<Object> listObj = restTemplate.getForObject( //
+                String.format("%s/pls/jobs", getRestAPIHostPort()), List.class);
+        List<Job> jobs = JsonUtils.convertList(listObj, Job.class);
+        log.info(String.format("jobs are %s", Arrays.toString(jobs.toArray())));
+        Assert.assertTrue(jobs.size() >= 1);
+    }
+
     @Test(groups = "deployment")
     public void testSchemaUpdate() {
         SourceFile firstFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Small_Account.csv"));
 
-
         String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX + "TestSchemaUpdate";
         boolean cityExist = false;
         boolean countryExist = false;
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
-                (firstFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(firstFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if(fieldMapping.getUserField().equalsIgnoreCase("city")) {
+            if (fieldMapping.getUserField().equalsIgnoreCase("city")) {
                 cityExist = true;
             }
             if (fieldMapping.getUserField().equalsIgnoreCase("country")) {
@@ -188,7 +217,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertFalse(cityExist);
         Assert.assertFalse(countryExist);
 
-        modelingFileMetadataService.resolveMetadata(firstFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE, feedType);
+        modelingFileMetadataService.resolveMetadata(firstFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
+                feedType);
 
         ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, firstFile.getName(),
                 firstFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
@@ -200,8 +230,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Extend_Account.csv",
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Extend_Account.csv"));
 
-        fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
-                (secondFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort(secondFile.getName(),
+                ENTITY_ACCOUNT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equalsIgnoreCase("city")) {
                 Assert.assertNotNull(fieldMapping.getMappedField());
@@ -240,12 +270,12 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     private void getDataFeedTask() {
-        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT +
-                FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
-        contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_CONTACT +
-                FEED_TYPE_SUFFIX, ENTITY_CONTACT);
-        transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_TRANSACTION +
-                FEED_TYPE_SUFFIX, ENTITY_TRANSACTION);
+        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX,
+                ENTITY_ACCOUNT);
+        contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_CONTACT + FEED_TYPE_SUFFIX,
+                ENTITY_CONTACT);
+        transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
+                ENTITY_TRANSACTION + FEED_TYPE_SUFFIX, ENTITY_TRANSACTION);
     }
 
     private SourceFile uploadSourceFile(String csvFileName, String entity) {
@@ -253,17 +283,17 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
 
-
         String feedType = entity + FEED_TYPE_SUFFIX;
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
-                (sourceFile.getName(), entity, SOURCE, feedType);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), entity, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
         }
-        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, entity, SOURCE, feedType);
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, entity, SOURCE,
+                feedType);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
 
         return sourceFile;
@@ -271,20 +301,20 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private void startCDLImport(SourceFile sourceFile, String entity) {
         ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, sourceFile.getName(),
-                sourceFile.getName(),
-                SOURCE, entity, entity + FEED_TYPE_SUFFIX);
+                sourceFile.getName(), SOURCE, entity, entity + FEED_TYPE_SUFFIX);
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-
     @Test(groups = "deployment", dependsOnMethods = "importBase")
     public void verifyTransaction() throws IOException {
         Assert.assertNotNull(baseTransactionFile);
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                        CustomerSpace.parse(mainTestTenant.getId())).toString(), SourceType.FILE.getName());
+                PathBuilder
+                        .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
+                        .toString(),
+                SourceType.FILE.getName());
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
         String avroFileName = baseTransactionFile.getName().substring(0,
                 baseTransactionFile.getName().lastIndexOf("."));
@@ -302,10 +332,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
         Assert.assertEquals(schema.getField("TransactionTime").schema().getTypes().get(0).getType(),
                 Schema.Type.STRING);
-        Assert.assertEquals(schema.getField("Amount").schema().getTypes().get(0).getType(),
-                Schema.Type.INT);
-        Assert.assertEquals(schema.getField("Quantity").schema().getTypes().get(0).getType(),
-                Schema.Type.INT);
+        Assert.assertEquals(schema.getField("Amount").schema().getTypes().get(0).getType(), Schema.Type.INT);
+        Assert.assertEquals(schema.getField("Quantity").schema().getTypes().get(0).getType(), Schema.Type.INT);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")
@@ -315,8 +343,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Table accountTemplate = accountDataFeedTask.getImportTemplate();
         Table contactTemplate = contactDataFeedTask.getImportTemplate();
         Table transactionTemplate = transactionDataFeedTask.getImportTemplate();
-        Set<String> accountHeaders = getHeaderFields(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH +
-                ACCOUNT_SOURCE_FILE));
+        Set<String> accountHeaders = getHeaderFields(
+                ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
         Table accountSourceTable = metadataProxy.getTable(customerSpace, baseAccountFile.getTableName());
         compare(accountSourceTable, accountHeaders);
         Assert.assertEquals(accountTemplate.getAttributes().size(), accountSourceTable.getAttributes().size());
@@ -329,8 +357,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         missingAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(missingAccountFile);
         startCDLImport(missingAccountFile, ENTITY_ACCOUNT);
-        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT +
-                FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
+        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX,
+                ENTITY_ACCOUNT);
         Table accountTemplate2 = accountDataFeedTask.getImportTemplate();
         Table sourceTable = metadataProxy.getTable(customerSpace, missingAccountFile.getTableName());
         Assert.assertNull(accountTemplate2.getAttribute(InterfaceName.Website));
@@ -343,10 +371,9 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
 
-
         String feedType = ENTITY_CONTACT + FEED_TYPE_SUFFIX;
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort
-                (sourceFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -357,13 +384,13 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 fieldMapping.setMappedToLatticeField(false);
             }
         }
-        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE, feedType);
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                feedType);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
         Exception ex = null;
         try {
             ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, sourceFile.getName(),
-                    sourceFile.getName(),
-                    SOURCE, ENTITY_CONTACT, ENTITY_CONTACT + FEED_TYPE_SUFFIX);
+                    sourceFile.getName(), SOURCE, ENTITY_CONTACT, ENTITY_CONTACT + FEED_TYPE_SUFFIX);
 
             JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
             assertEquals(completedStatus, JobStatus.COMPLETED);
@@ -378,7 +405,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
             CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
             InputStream stream = new FileInputStream(new File(sourceFileURL.getFile()));
 
-            return  ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+            return ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
@@ -388,7 +415,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         List<Attribute> attributes = table.getAttributes();
         assertEquals(attributes.size(), headers.size());
 
-        for (Attribute attribute: attributes) {
+        for (Attribute attribute : attributes) {
             assertTrue(headers.contains(attribute.getDisplayName()));
         }
     }

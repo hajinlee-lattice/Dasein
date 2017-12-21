@@ -619,7 +619,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<Action> getActionsByOwnerId(String customerSpace, Long ownerId) {
+    public List<Action> getActionsByOwnerId(String customerSpace, String ownerId) {
         try {
             String url = constructUrl("pls/internal/actions/ownerid/" + ownerId + "/" + customerSpace);
             List<?> listObj = restTemplate.getForObject(url, List.class);

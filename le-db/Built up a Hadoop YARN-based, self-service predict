@@ -1,0 +1,15 @@
+Built up a Hadoop YARN-based, self-service predictive analytics platform for the cloud with real-time PMML scoring.
+Built up a data management suite of services for the cloud, from data import of JDBC data sources, Marketo, SFDC, Eloqua data to Cascading transformations and load back using Avro in HDFS.
+
+Worked with architect, product to develop Lattice Predictive Insights, a Hadoop YARN-based, self-service predictive analytics platform for the cloud with real-time PMML scoring.
+
+● Design and build up a file based scoring service using Hadoop Yarn and HDFS. The data stored in HDFS supports at-rest encryption.
+● Build a provisioning tool for different services of the product using Zookeeper
+● Technical lead on PlayMaker, salesPRISM, and Dante. I worked closely with product management to help refine
+requirements for the entire team, worked and delivered on key backend features, and assisted and mentored
+junior engineers when necessary.
+
+
+1. how my contributions fit into larger scope (product): scoring
+2. I can claim what I have learnt to what I know: admin console
+3. One other thing I did not know but needs to know: cascading and Hadoop encryption.

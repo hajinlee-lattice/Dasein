@@ -7,6 +7,7 @@ import org.apache.avro.Schema.Type;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -30,9 +31,7 @@ public abstract class DataFeedMetadataService {
 
     public abstract CustomerSpace getCustomerSpace(CDLImportConfig importConfig);
 
-    public abstract String getFileName(CDLImportConfig importConfig);
-
-    public abstract String getFileDisplayName(CDLImportConfig importConfig);
+    public abstract CSVImportFileInfo getImportFileInfo(CDLImportConfig importConfig);
 
     public abstract String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier);
 
@@ -43,6 +42,6 @@ public abstract class DataFeedMetadataService {
     public abstract Type getAvroType(Attribute attribute);
 
     public abstract void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
-                                                  String customerSpace);
+            String customerSpace);
 
 }
