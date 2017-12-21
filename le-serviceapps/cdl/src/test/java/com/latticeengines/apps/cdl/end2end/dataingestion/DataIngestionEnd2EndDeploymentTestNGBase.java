@@ -115,10 +115,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
     static final long SEGMENT_1_CONTACT_1 = 23;
-    static final long SEGMENT_1_ACCOUNT_2 = 54;
-    static final long SEGMENT_1_CONTACT_2 = 63;
-    static final long SEGMENT_1_ACCOUNT_3 = 58;
-    static final long SEGMENT_1_CONTACT_3 = 68;
+    static final long SEGMENT_1_ACCOUNT_2 = 30;
+    static final long SEGMENT_1_CONTACT_2 = 32;
+    static final long SEGMENT_1_ACCOUNT_3 = 54;
+    static final long SEGMENT_1_CONTACT_3 = 63;
+    static final long SEGMENT_1_ACCOUNT_4 = 58;
+    static final long SEGMENT_1_CONTACT_4 = 68;
 
     private static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
     static final long SEGMENT_2_ACCOUNT_1 = 24;
@@ -719,12 +721,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
         Assert.assertNotNull(segment,
                 "Cannot find rating engine " + segmentName + " in tenant " + mainTestTenant.getId());
-        final MetadataSegment segment1 = segment;
+        final MetadataSegment immutableSegment = segment;
         expectedCounts.forEach((entity, count) -> {
-            Assert.assertNotNull(segment1.getEntityCount(entity), "Cannot find count of " + entity);
-            Assert.assertEquals(segment1.getEntityCount(entity), count);
-            logger.info("Segment count " + entity.name() + " expected " + segment1.getEntityCount(entity) + " found "
-                    + count);
+            Assert.assertNotNull(immutableSegment.getEntityCount(entity), "Cannot find count of " + entity);
+            Assert.assertEquals(immutableSegment.getEntityCount(entity), count, JsonUtils.pprint(immutableSegment));
         });
     }
 

@@ -58,15 +58,16 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
         upsertProfileTable(profileTableName, profileTableRole());
 
-        Table servingStoreTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                servingStoreTableName);
+        Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
         enrichTableSchema(servingStoreTable);
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), servingStoreTableName,
-                servingStoreTable);
+        metadataProxy.updateTable(customerSpace.toString(), servingStoreTableName, servingStoreTable);
 
         if (publishToRedshift) {
             updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, servingStoreTableName, String.class);
             updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        } else {
+            dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName,
+                    getEntity().getServingStore(), inactive);
         }
 
         updateEntityValueMapInContext(SERVING_STORE_IN_STATS, servingStoreTableName, String.class);

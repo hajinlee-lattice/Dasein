@@ -52,7 +52,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
 
     private boolean hasRawStore = false;
-
     private boolean hasProducts = false;
 
     @Override
