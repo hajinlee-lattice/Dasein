@@ -38,7 +38,7 @@ public class CDLResource {
     }
 
     @RequestMapping(value = "/processanalyze", method = RequestMethod.POST)
-    @ApiOperation(value = "Start Consolidate And Profile job")
+    @ApiOperation(value = "Start Process And Analyze job")
     public ResponseDocument<String> processAnalyze() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         ApplicationId result = cdlProxy.processAnalyze(customerSpace.toString(), null);
