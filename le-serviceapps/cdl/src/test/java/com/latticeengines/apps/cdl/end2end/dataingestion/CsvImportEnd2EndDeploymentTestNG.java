@@ -37,10 +37,6 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
     }
 
     private void verifyProfile() throws IOException {
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of( //
-                TableRoleInCollection.BucketedAccount, importedAccounts + importedAccounts2,
-                TableRoleInCollection.SortedContact, importedContacts + importedContacts2);
-        verifyProfileReport(processAnalyzeAppId, expectedCounts);
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
 
