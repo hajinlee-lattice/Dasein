@@ -35,7 +35,7 @@ public class RatingEngineImportMatchAndModelWorkflow
     private SetCdlConfigurationForScoring setCdlConfigurationForScoring;
 
     @Autowired
-    private CdlScoreWorkflow scoreWorkflow;
+    private RatingEngineScoreWorkflow scoreWorkflow;
 
     @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;

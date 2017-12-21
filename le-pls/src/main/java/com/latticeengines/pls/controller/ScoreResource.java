@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.pls.service.ScoringJobService;
 
 import io.swagger.annotations.Api;
@@ -57,5 +59,18 @@ public class ScoreResource {
                 performEnrichment, useRtsApi));
         return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
                 scoringJobService.scoreTrainingData(modelId, performEnrichment, debug)));
+    }
+
+    @RequestMapping(value = "/rating/{modelId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Score the provided query. Returns the job id.")
+    public String scoreRating(//
+            @PathVariable String modelId, //
+            @RequestParam(value = "displayName") String displayName, //
+            @RequestParam(value = "tableToScoreName", required = false) String tableToScoreName, //
+            @RequestBody(required = false) EventFrontEndQuery targetQuery) {
+        return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
+                scoringJobService.scoreRatinggData(modelId, displayName, targetQuery, tableToScoreName)));
+
     }
 }

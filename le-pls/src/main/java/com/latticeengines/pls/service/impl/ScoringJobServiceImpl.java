@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -25,6 +26,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
+import com.latticeengines.pls.workflow.RatingEngineScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -47,6 +49,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Autowired
     private RTSBulkScoreWorkflowSubmitter rtsBulkScoreWorkflowSubmitter;
+
+    @Autowired
+    private RatingEngineScoreWorkflowSubmitter ratingEngineScoreWorkflowSubmitter;
 
     @Autowired
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
@@ -171,6 +176,17 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
         boolean enableDebug = debug == null ? false : debug.booleanValue();
         return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment, enableDebug);
+    }
+
+    @Override
+    public String scoreRatinggData(String modelId, String displayName, EventFrontEndQuery targetQuery,
+            String tableToScoreName) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        return ratingEngineScoreWorkflowSubmitter.submit(modelSummary, displayName, targetQuery, tableToScoreName)
+                .toString();
     }
 
     private Tenant getTenant() {

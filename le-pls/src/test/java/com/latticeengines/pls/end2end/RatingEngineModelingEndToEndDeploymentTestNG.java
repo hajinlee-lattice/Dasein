@@ -12,7 +12,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AwsApsGeneratorUtils;
@@ -133,7 +133,20 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         log.info("setting up tables for modeling...");
         setupTables();
         createModel();
-        retrieveModelSummary();
+        ModelSummary modelSummary = retrieveModelSummary();
+        scoreWorkflow(modelSummary);
+    }
+
+    private void scoreWorkflow(ModelSummary modelSummary) {
+        String scoreApplicationId = restTemplate.postForObject(
+                String.format("%s/pls/scores/rating/%s?displayName=%s&tableToScoreName=%s", getRestAPIHostPort(),
+                        modelSummary.getId(), modelSummary.getDisplayName(), targetFilterFileName), //
+                null, String.class);
+        scoreApplicationId = StringUtils.substringBetween(scoreApplicationId.split(":")[1], "\"");
+        System.out.println(String.format("Score rating data applicationId = %s", scoreApplicationId));
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, scoreApplicationId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+
     }
 
     @Test(groups = { "deployment.lp" }, enabled = false)
@@ -209,8 +222,10 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     private void model(ModelingParameters parameters) {
         log.info("Start modeling ...");
         ResponseDocument response;
+        String url = String.format("%s/pls/models/rating/%s", getRestAPIHostPort(), parameters.getName());
+        System.out.println("json=" + JsonUtils.serialize(parameters));
         response = restTemplate.postForObject(
-                String.format("%s/pls/models/rating/%s", getRestAPIHostPort(), parameters.getName()), parameters,
+                url, parameters,
                 ResponseDocument.class);
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
@@ -220,7 +235,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    public void retrieveModelSummary() throws InterruptedException {
+    public ModelSummary retrieveModelSummary() throws InterruptedException {
         log.info("Retrieving model summary for modeling ...");
         originalModelSummary = waitToDownloadModelSummary(modelName);
         assertNotNull(originalModelSummary);
@@ -229,6 +244,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         assertNotNull(originalModelSummary.getTrainingTableName());
         assertFalse(originalModelSummary.getTrainingTableName().isEmpty());
         inspectOriginalModelSummaryPredictors(originalModelSummary);
+        return originalModelSummary;
     }
 
     ModelSummary waitToDownloadModelSummary(String modelName) throws InterruptedException {

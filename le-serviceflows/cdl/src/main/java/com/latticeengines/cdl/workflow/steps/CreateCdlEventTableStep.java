@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +41,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     @Override
     public void onConfigurationInitialized() {
         CreateCdlEventTableConfiguration configuration = getConfiguration();
-        String eventTargetName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
-        if (StringUtils.isNotEmpty(eventTargetName)) {
-            configuration.setTargetTableName(eventTargetName);
-        } else {
-            configuration.setTargetTableName(configuration.getOutputTableName());
-        }
+        configuration.setTargetTableName(configuration.getOutputTableName());
         configuration.setApplyTableProperties(true);
         configuration.setDataFlowParams(createDataFlowParameters());
     }

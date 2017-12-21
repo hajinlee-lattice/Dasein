@@ -3,6 +3,7 @@ package com.latticeengines.pls.service;
 import java.io.InputStream;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.workflow.Job;
 
 public interface ScoringJobService {
@@ -22,5 +23,8 @@ public interface ScoringJobService {
     InputStream getPivotScoringFile(String workflowJobId);
 
     String getResultPivotScoreFileName(String workflowJobId);
+
+    String scoreRatinggData(String modelId, String displayName, EventFrontEndQuery targetQuery,
+            String tableToScoreName);
 
 }

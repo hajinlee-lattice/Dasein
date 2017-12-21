@@ -23,7 +23,6 @@ public class CreateCdlTargetTableFilterStep extends BaseWorkflowStep<CreateCdlTa
     public void execute() {
         Table targetFilterTable = getTargetFilterTable();
         putObjectInContext(FILTER_EVENT_TABLE, targetFilterTable);
-        putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, "RatingEngineTarget_" + System.currentTimeMillis());
     }
 
     private Table getTargetFilterTable() {

@@ -38,7 +38,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         private SetCdlConfigurationForScoringConfiguration setConfigForScoring = new SetCdlConfigurationForScoringConfiguration();
-        private CreateCdlTargetTableFilterConfiguration cdlScoringTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
+        private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
 
@@ -50,7 +50,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             export.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
-            cdlScoringTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
+            cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -66,7 +66,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
-            cdlScoringTableTupleFilter.setCustomerSpace(customerSpace);
+            cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             return this;
@@ -82,7 +82,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
                 String targetFilterTableName) {
             cdlEventTableTupleFilter.setTrainFilterTableName(trainFilterTableName);
             cdlEventTableTupleFilter.setEventFilterTableName(eventFilterTableName);
-            cdlScoringTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
+            cdlTargetTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
             return this;
         }
 
@@ -90,7 +90,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
                 EventFrontEndQuery targetQuery) {
             cdlEventTableTupleFilter.setTrainQuery(trainQuery);
             cdlEventTableTupleFilter.setEventQuery(eventQuery);
-            cdlScoringTableTupleFilter.setTargetQuery(targetQuery);
+            cdlTargetTableTupleFilter.setTargetQuery(targetQuery);
             return this;
         }
 
@@ -101,7 +101,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
-            cdlScoringTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
+            cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -280,7 +280,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(matchResult);
             configuration.add(export);
             configuration.add(setConfigForScoring);
-            configuration.add(cdlScoringTableTupleFilter);
+            configuration.add(cdlTargetTableTupleFilter);
             configuration.add(score);
             configuration.add(combineInputWithScores);
 

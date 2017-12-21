@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.CreateCdlTargetTableFilterStep;
-import com.latticeengines.domain.exposed.serviceflows.cdl.CdlScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineScoreWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -17,8 +17,8 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("cdlScoreWorkflow")
-public class CdlScoreWorkflow extends AbstractWorkflow<CdlScoreWorkflowConfiguration> {
+@Component("ratingEngineScoreWorkflow")
+public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScoreWorkflowConfiguration> {
 
     @Autowired
     private CreateCdlTargetTableFilterStep createCdlScoringTableFilterStep;
