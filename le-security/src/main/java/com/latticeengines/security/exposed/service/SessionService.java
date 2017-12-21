@@ -9,6 +9,8 @@ public interface SessionService {
 
     Session attach(Ticket ticket);
 
+    Session attchSamlUserToTenant(String userName, String tenantDeploymentId);
+
     Session retrieve(Ticket ticket);
 
     void logout(Ticket ticket);

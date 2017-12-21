@@ -18,10 +18,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantConfigEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserConfigSummary;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -42,10 +44,13 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     private GlobalAuthAuthenticationEntityMgr gaAuthenticationEntityMgr;
 
     @Autowired
-    private GlobalAuthUserEntityMgr gaUserEntityMgr;
+    protected GlobalAuthUserEntityMgr gaUserEntityMgr;
 
     @Autowired
-    private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
+    protected GlobalAuthUserTenantConfigEntityMgr gaUserTenantConfigEntityMgr;
+
+    @Autowired
+    protected GlobalAuthTicketEntityMgr gaTicketEntityMgr;
 
     @Override
     public synchronized Ticket authenticateUser(String user, String password) {
@@ -91,7 +96,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         return ticket;
     }
 
-    private Ticket constructTicket(GlobalAuthUser user) {
+    protected Ticket constructTicket(GlobalAuthUser user) {
         Ticket ticket = new Ticket();
         ticket.setUniqueness(UUID.randomUUID().toString());
         ticket.setRandomness(GlobalAuthPasswordUtils.getSecureRandomString(16));
@@ -99,8 +104,16 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         ticketData.setUserId(user.getPid());
         ticketData.setTicket(ticket.getData());
         ticketData.setLastAccessDate(new Date(System.currentTimeMillis()));
-        GlobalAuthUser userData = gaUserEntityMgr
-                .findByUserIdWithTenantRightsAndAuthentications(ticketData.getUserId());
+        
+        attachValidTenantsToTicket(user, ticket);
+        
+        gaTicketEntityMgr.create(ticketData);
+        
+        return ticket;
+    }
+
+    protected void attachValidTenantsToTicket(GlobalAuthUser user, Ticket ticket) {
+        GlobalAuthUser userData = gaUserEntityMgr.findByUserIdWithTenantRightsAndAuthentications(user.getPid());
         if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
             Map<String, GlobalAuthTenant> distinctTenants = new HashMap<String, GlobalAuthTenant>();
             for (GlobalAuthUserTenantRight rightData : userData.getUserTenantRights()) {
@@ -110,8 +123,23 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
                     }
                 }
             }
+            
+            // Collect all Tenants where SSO is Enabled and User is forced SSO Login only.
+            List<GlobalAuthUserConfigSummary> userConfigSummaryList = gaUserTenantConfigEntityMgr
+                    .findUserConfigSummaryByUserId(user.getPid());
+            Map<String, GlobalAuthUserConfigSummary> ssoForcedTenantMap = new HashMap<>();
+            userConfigSummaryList.forEach(userConfigSummary -> {
+                if (userConfigSummary.getSsoEnabled() && userConfigSummary.getForceSsoLogin()) {
+                    ssoForcedTenantMap.put(userConfigSummary.getTenantDeploymentId(), userConfigSummary);
+                }
+            });
+
             List<Tenant> tenants = new ArrayList<Tenant>();
             for (Entry<String, GlobalAuthTenant> tenantData : distinctTenants.entrySet()) {
+                // Exclude SSO forced tenants from Display List
+                if (ssoForcedTenantMap.containsKey(tenantData.getKey())) {
+                    continue;
+                }
                 Tenant tenant = new Tenant();
                 tenant.setId(tenantData.getKey());
                 tenant.setName(tenantData.getValue().getName());
@@ -119,10 +147,9 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
             }
             ticket.setTenants(tenants);
         }
-        gaTicketEntityMgr.create(ticketData);
-        return ticket;
     }
 
+    
     @Override
     public synchronized Ticket externallyAuthenticated(String emailAddress) {
         try {
@@ -135,6 +162,18 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     private Ticket globalAuthExternallyAuthenticated(String emailAddress) throws Exception {
         GlobalAuthUser user = gaUserEntityMgr.findByEmailJoinAuthentication(emailAddress);
+
+        validateUserForTicketCreation(user);
+
+        Ticket ticket = constructTicket(user);
+        if (ticket != null) {
+            return ticket;
+        }
+
+        throw new Exception("The credentials provided for login are incorrect.");
+    }
+
+    protected void validateUserForTicketCreation(GlobalAuthUser user) throws Exception {
         if (user == null) {
             throw new Exception("The specified user doesn't exists");
         }
@@ -143,13 +182,6 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         if (!isActive) {
             throw new Exception("The user is inactive!");
         }
-
-        Ticket ticket = constructTicket(user);
-        if (ticket != null) {
-            return ticket;
-        }
-
-        throw new Exception("The credentials provided for login are incorrect.");
     }
 
     @Override

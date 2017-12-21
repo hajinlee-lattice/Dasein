@@ -14,7 +14,8 @@ public class UserDocument {
     private UserResult result;
     private boolean success;
     private Ticket ticket;
-
+    private String authenticationRoute;
+    
     public UserDocument() {
 
     }
@@ -57,6 +58,16 @@ public class UserDocument {
     @JsonProperty("Ticket")
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
+    }
+
+    @JsonProperty("AuthenticationRoute")
+    public String getAuthenticationRoute() {
+        return authenticationRoute;
+    }
+
+    @JsonProperty("AuthenticationRoute")
+    public void setAuthenticationRoute(String authenticationRoute) {
+        this.authenticationRoute = authenticationRoute;
     }
 
     @Override

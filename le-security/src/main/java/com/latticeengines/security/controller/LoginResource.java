@@ -119,6 +119,7 @@ public class LoginResource {
 
             Session session = sessionService.attach(ticket);
             doc.setSuccess(true);
+            doc.setAuthenticationRoute(session.getAuthenticationRoute());
 
             UserResult result = doc.new UserResult();
             UserResult.User user = result.new User();

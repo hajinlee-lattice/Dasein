@@ -16,6 +16,7 @@ public class Session {
     private String locale;
     private String title;
     private String accessLevel;
+    private String authenticationRoute;
 
     @JsonProperty("Tenant")
     public Tenant getTenant() {
@@ -106,9 +107,20 @@ public class Session {
     public void setAccessLevel(String accessLevel) {
         this.accessLevel = accessLevel;
     }
+    
+    @JsonProperty("AuthenticationRoute")
+    public String getAuthenticationRoute() {
+        return authenticationRoute;
+    }
+
+    @JsonProperty("AuthenticationRoute")
+    public void setAuthenticationRoute(String authenticationRoute) {
+        this.authenticationRoute = authenticationRoute;
+    }
 
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 }

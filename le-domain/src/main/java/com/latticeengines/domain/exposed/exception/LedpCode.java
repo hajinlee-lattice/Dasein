@@ -283,6 +283,8 @@ public enum LedpCode {
     LEDP_18167("SegmentExport workflow failed."), //
     LEDP_18168("Sqoop export for recommendations failed."), //
     LEDP_18169("Export could not be initiated as segment has more than {0} entries."), //
+    LEDP_18170("Authentication deined as external IdentityProvider did not validate the User."), //
+    LEDP_18171("Could not create valid session for External User {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

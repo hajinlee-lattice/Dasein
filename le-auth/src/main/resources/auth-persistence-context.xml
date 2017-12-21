@@ -2,12 +2,15 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/tx
-      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+      http://www.springframework.org/schema/data/jpa 
+      http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-    <bean id="dataSourceGlobalAuth" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
+    <bean id="dataSourceGlobalAuth" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
         <property name="jndiName" value="java:comp/env/jdbc/GlobalAuthentication"/>
         <!-- when jndi is not available -->
         <property name="driverClass" value="${auth.globalauth.datasource.driver}" />
@@ -31,24 +34,24 @@
             </props>
         </property>
     </bean>
-	-->
-	
-	<!-- Hibernate session factory -->
-    <bean id="sessionFactoryGlobalAuth" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
-	    <property name="entityManagerFactory" ref="entityManagerFactoryGlobalAuth" />
-	</bean>
-	
-	<!-- Entity manager factory -->
-	<bean id="entityManagerFactoryGlobalAuth" 
-			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    -->
+    
+    <!-- Hibernate session factory -->
+       <bean id="sessionFactoryGlobalAuth" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+        <property name="entityManagerFactory" ref="entityManagerFactoryGlobalAuth" />
+    </bean>
+
+    <!-- Entity manager factory -->
+    <bean id="entityManagerFactoryGlobalAuth" 
+            class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSourceGlobalAuth" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.auth, com.latticeengines.domain.exposed" />
-		<property name="jpaVendorAdapter">
-			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-				<!-- property name="prepareConnection" value="false"/-->
-			</bean>
-		</property>
-		<property name="jpaProperties">
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <!-- property name="prepareConnection" value="false"/-->
+            </bean>
+        </property>
+        <property name="jpaProperties">
           <props>
             <prop key="hibernate.dialect">${auth.globalauth.hibernate.dialect}</prop>
             <prop key="hibernate.show_sql">false</prop>
@@ -68,6 +71,9 @@
     </bean>
     
     <tx:annotation-driven transaction-manager="transactionManagerGlobalAuth" />
+    
+    	<jpa:repositories base-package="com.latticeengines.auth.exposed.repository" base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+        entity-manager-factory-ref="entityManagerFactoryGlobalAuth" transaction-manager-ref="transactionManagerGlobalAuth"  />
 
     <!--  DAOs for GlobalAuth database  -->
     <bean id="globalAuthUserTenantRightDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthUserTenantRightDaoImpl">
