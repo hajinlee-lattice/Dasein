@@ -1,10 +1,13 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import javax.persistence.EntityManager;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.impl.MultiTenantEntityMgrAspect;
@@ -16,6 +19,10 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     private SessionFactory sessionFactory;
 
     @Autowired
+    @Qualifier(value="entityManagerFactory")
+    private EntityManager entityManager;
+    
+    @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
@@ -25,17 +32,17 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ActionEntityMgrImpl.find*(..))")
     public void findAction(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
     }
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ActionEntityMgrImpl.update*(..))")
     public void udpateAction(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
     }
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ActionEntityMgrImpl.delete*(..))")
     public void deleteAction(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
     }
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.find*(..))")
