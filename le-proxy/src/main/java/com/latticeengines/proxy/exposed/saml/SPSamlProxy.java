@@ -3,6 +3,8 @@ package com.latticeengines.proxy.exposed.saml;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
+import com.latticeengines.domain.exposed.saml.LogoutValidationResponse;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("spSamlProxy")

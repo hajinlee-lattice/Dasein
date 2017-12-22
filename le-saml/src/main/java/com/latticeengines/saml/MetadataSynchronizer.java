@@ -32,6 +32,8 @@ import com.latticeengines.saml.util.SAMLUtils;
 public class MetadataSynchronizer {
     private static Logger log = LoggerFactory.getLogger(MetadataSynchronizer.class);
 
+    private static final String SP_METADATA_TEMPLATE = "/metadata/applatticeenginescom_sp.xml";
+
     @Autowired
     private MetadataManager metadataManager;
 
@@ -50,12 +52,15 @@ public class MetadataSynchronizer {
     @Value("${saml.base.address}")
     private String baseAddress;
 
+    @Value("${saml.metadata.refresh.frequency:5000}")
+    private Integer refreshFrequency;
+
     private Timer timer;
 
     @PostConstruct
     private void postConstruct() {
         this.timer = new Timer("Metadata-refresh", true);
-        this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 0, 5000);
+        this.timer.schedule(new MetadataSynchronizer.RefreshTask(), 0, refreshFrequency);
     }
 
     @Transactional
@@ -122,13 +127,19 @@ public class MetadataSynchronizer {
 
     private MetadataProvider constructServiceProvider(String tenantId) {
 
-        try (InputStream metadataInput = getClass().getResourceAsStream("/metadata/applatticeenginescom_sp.xml")) {
+        try (InputStream metadataInput = getClass().getResourceAsStream(SP_METADATA_TEMPLATE)) {
             EntityDescriptor entityDescriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool, metadataInput);
             ExtendedMetadata extendedMetadata = baseServiceProviderMetadata.clone();
             extendedMetadata.setAlias(tenantId);
 
-            String entityId = SAMLUtils.LOCAL_ENTITY_ID_BASE + tenantId;
+            String entityId = entityDescriptor.getEntityID();
+            entityId = replacePlaceholders(tenantId, entityId);
+
+            String id = entityDescriptor.getID();
+            id = replacePlaceholders(tenantId, id);
+
             entityDescriptor.setEntityID(entityId);
+            entityDescriptor.setID(id);
 
             MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(entityDescriptor);
             memoryProvider.initialize();
@@ -139,22 +150,29 @@ public class MetadataSynchronizer {
             descriptor.setWantAssertionsSigned(true);
 
             for (Endpoint endpoint : descriptor.getEndpoints()) {
-                endpoint.setLocation(endpoint.getLocation().replace("___TENANT_ID___", tenantId));
-                endpoint.setLocation(endpoint.getLocation().replace("___BASE_ADDRESS___", baseAddress));
+                String location = endpoint.getLocation();
+                location = replacePlaceholders(tenantId, location);
+                endpoint.setLocation(location);
             }
-            extendedMetadata.setIdpDiscoveryResponseURL(extendedMetadata.getIdpDiscoveryResponseURL().replace(
-                    "___TENANT_ID___", tenantId));
-            extendedMetadata.setIdpDiscoveryResponseURL(extendedMetadata.getIdpDiscoveryResponseURL().replace(
-                    "___BASE_ADDRESS___", baseAddress));
-            extendedMetadata.setIdpDiscoveryURL(extendedMetadata.getIdpDiscoveryURL().replace("___TENANT_ID___",
-                    tenantId));
-            extendedMetadata.setIdpDiscoveryURL(extendedMetadata.getIdpDiscoveryURL().replace("___BASE_ADDRESS___",
-                    baseAddress));
+
+            String idpDiscoveryResponseURL = extendedMetadata.getIdpDiscoveryResponseURL();
+            idpDiscoveryResponseURL = replacePlaceholders(tenantId, idpDiscoveryResponseURL);
+            extendedMetadata.setIdpDiscoveryResponseURL(idpDiscoveryResponseURL);
+
+            String idpDiscoveryURL = extendedMetadata.getIdpDiscoveryURL();
+            idpDiscoveryURL = replacePlaceholders(tenantId, idpDiscoveryURL);
+            extendedMetadata.setIdpDiscoveryResponseURL(idpDiscoveryResponseURL);
+            extendedMetadata.setIdpDiscoveryURL(idpDiscoveryURL);
 
             return serviceProvider;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String replacePlaceholders(String tenantId, String uri) {
+        uri = uri.replace("___TENANT_ID___", tenantId);
+        return uri.replace("___BASE_ADDRESS___", baseAddress);
     }
 
     private class Tenant {

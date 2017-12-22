@@ -1,4 +1,4 @@
-package com.latticeengines.proxy.exposed.saml;
+package com.latticeengines.domain.exposed.saml;
 
 public class LogoutValidationResponse {
 

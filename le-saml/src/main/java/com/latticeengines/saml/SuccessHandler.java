@@ -3,45 +3,46 @@ package com.latticeengines.saml;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.saml.util.SAMLUtils;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 
-public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class SuccessHandler implements AuthenticationSuccessHandler {
+
     public static final Logger log = LoggerFactory.getLogger(SuccessHandler.class);
-
-    @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws ServletException, IOException {
         log.info(String.format("SAML Authentication successful for user %s", authentication.getName()));
-        super.onAuthenticationSuccess(request, response, authentication);
-    }
 
-    @Override
-    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LoginValidationResponse resp = new LoginValidationResponse();
+
         String email = authentication.getName();
-        Ticket ticket = globalAuthenticationService.externallyAuthenticated(email);
-        SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
-        if (credential == null) {
-            throw new RuntimeException(String.format("Credentials not found for user %s", email));
-        }
 
-        return String.format("%s?ticket_id=%s&tenant_id=%s", getDefaultTargetUrl(), ticket.getData(),
-                SAMLUtils.getTenantIdFromLocalEntityId(credential.getLocalEntityID()));
+        log.info("request.getPathInfo() = " + request.getServletPath());
+        log.info("email = " + email);
+
+        String tenantId = request.getServletPath()
+                .substring(request.getServletPath().lastIndexOf("/alias/") + "/alias/".length());
+        log.info("tenantId = " + tenantId);
+
+        ServletOutputStream os = response.getOutputStream();
+        resp.setValidated(true);
+        resp.setUserId(email);
+        JsonUtils.serialize(resp, os);
+        os.flush();
+
+        response.setStatus(HttpStatus.SC_OK);
     }
+
 }

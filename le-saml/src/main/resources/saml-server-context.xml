@@ -2,9 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:security="http://www.springframework.org/schema/security"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
-
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
     <bean class="com.latticeengines.saml.MetadataSynchronizer"/>
 
     <!-- Secured pages with SAML as entry point -->
@@ -19,6 +18,12 @@
     <security:http entry-point-ref="samlEntryPoint" use-expressions="false" pattern="/saml/SSO/**">
         <security:intercept-url pattern="/saml/SSO/**" access="IS_AUTHENTICATED_FULLY"/>
         <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
+        <security:csrf disabled="true"/>
+    </security:http>
+    <security:http entry-point-ref="samlEntryPoint" use-expressions="false" pattern="/saml/metadata/**">
+        <security:intercept-url pattern="/saml/metadata/**" access="IS_AUTHENTICATED_FULLY"/>
+        <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
+        <security:csrf disabled="true"/>
     </security:http>
     <security:http entry-point-ref="samlEntryPoint" use-expressions="false" pattern="/saml/SSOHoK/**">
         <security:intercept-url pattern="/saml/SSOHoK/**" access="IS_AUTHENTICATED_FULLY"/>
@@ -27,12 +32,14 @@
     <security:http entry-point-ref="samlEntryPoint" use-expressions="false" pattern="/saml/SingleLogout/**">
         <security:intercept-url pattern="/saml/SingleLogout/**" access="IS_AUTHENTICATED_FULLY"/>
         <security:custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
+        <security:csrf disabled="true"/>
     </security:http>
 
     <!-- Filters for processing of SAML messages -->
     <bean id="samlFilter" class="org.springframework.security.web.FilterChainProxy">
         <security:filter-chain-map request-matcher="ant">
             <security:filter-chain pattern="/saml/login/**" filters="samlEntryPoint"/>
+            <security:filter-chain pattern="/saml/metadata/**" filters="metadataDisplayFilter"/>
             <security:filter-chain pattern="/saml/logout/**" filters="samlLogoutFilter"/>
             <security:filter-chain pattern="/saml/SSO/**" filters="samlWebSSOProcessingFilter"/>
             <security:filter-chain pattern="/saml/SSOHoK/**" filters="samlWebSSOHoKProcessingFilter"/>
@@ -42,15 +49,11 @@
 
     <!-- Handler deciding where to redirect user after successful login -->
     <bean id="successRedirectHandler"
-          class="com.latticeengines.saml.SuccessHandler">
-        <property name="defaultTargetUrl" value="${saml.success.redirect.address}"/>
-    </bean>
+          class="com.latticeengines.saml.SuccessHandler"/>
 
     <!-- Handler deciding where to redirect user after failed login -->
     <bean id="failureRedirectHandler"
-          class="com.latticeengines.saml.FailureHandler">
-        <property name="defaultFailureUrl" value="${saml.failure.redirect.address}"/>
-    </bean>
+          class="com.latticeengines.saml.FailureHandler"/>
 
     <!-- Handler for successful logout -->
     <bean id="successLogoutHandler"
@@ -90,7 +93,7 @@
 
     <bean id="baseServiceProviderMetadata" class="org.springframework.security.saml.metadata.ExtendedMetadata">
         <property name="local" value="true"/>
-        <property name="securityProfile" value="metaiop"/>
+        <property name="securityProfile" value="pkix"/>
         <property name="sslSecurityProfile" value="pkix"/>
         <property name="sslHostnameVerification" value="default"/>
         <property name="signMetadata" value="true"/>
@@ -106,25 +109,22 @@
 
     <bean id="baseIdentityProviderMetadata" class="org.springframework.security.saml.metadata.ExtendedMetadata">
         <property name="local" value="false"/>
-        <property name="securityProfile" value="metaiop"/>
+        <property name="securityProfile" value="pkix"/>
         <property name="sslSecurityProfile" value="pkix"/>
+        <property name="trustedKeys" value="liferaysamlspdemo"/>
         <property name="sslHostnameVerification" value="default"/>
         <property name="requireLogoutRequestSigned" value="true"/>
         <property name="requireArtifactResolveSigned" value="true"/>
         <property name="supportUnsolicitedResponse" value="true"/>
     </bean>
 
+ 
     <!-- IDP Metadata configuration - paths to metadata of IDPs in circle of trust is here -->
     <bean id="metadataManager" class="org.springframework.security.saml.metadata.MetadataManager">
         <constructor-arg>
             <list>
             </list>
-        </constructor-arg>
-
-        <!-- OPTIONAL used when one of the metadata files contains information about this service provider -->
-        <property name="hostedSPName" value="app.lattice-engines.com"/>
-        <!-- OPTIONAL property: can tell the system which IDP should be used for authenticating user by default. -->
-        <!-- <property name="defaultIDP" value="http://localhost:8080/opensso"/> -->
+        </constructor-arg>        
     </bean>
 
     <!-- SAML Authentication Provider responsible for validating of received SAML messages -->
@@ -135,6 +135,18 @@
     <!-- Provider of default SAML Context -->
     <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
         <property name="metadataResolver" ref="latticeMetadataCredentialResolver"/>
+        <property name="pkixTrustEvaluator">
+		<bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
+			<property name="PKIXValidationOptions">
+				<bean class="org.opensaml.xml.security.x509.CertPathPKIXValidationOptions">
+					<property name="forceRevocationEnabled" value="true"/>
+					<property name="revocationEnabled" value="true"/>
+				</bean>
+			</property>
+			<property name="validateCertPath" value="true"/>
+			<property name="securityProvider" value="SUN"/>
+		</bean>
+	</property>
     </bean>
 
     <bean id="latticeMetadataCredentialResolver" class="com.latticeengines.saml.LatticeMetadataCredentialResolver">
@@ -142,7 +154,7 @@
             <ref bean="metadataManager"/>
         </constructor-arg>
         <constructor-arg>
-            <ref bean="keyManager"/>
+            <ref bean="latticeJKSKeyManagerProxy"/>
         </constructor-arg>
     </bean>
 
@@ -249,5 +261,6 @@
     <bean id="paosBinding" class="org.springframework.security.saml.processor.HTTPPAOS11Binding">
         <constructor-arg ref="parserPool"/>
     </bean>
+
 
 </beans>

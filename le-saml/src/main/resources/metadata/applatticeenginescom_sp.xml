@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="app.lattice-engines.com"
-                     entityID="app.lattice-engines.com">
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="___BASE_ADDRESS___/___TENANT_ID___"
+                     entityID="___BASE_ADDRESS___/___TENANT_ID___">
     <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true"
                         protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
         <md:KeyDescriptor use="signing">

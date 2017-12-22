@@ -1,10 +1,12 @@
-package com.latticeengines.proxy.exposed.saml;
+package com.latticeengines.domain.exposed.saml;
 
 public class LoginValidationResponse {
 
     private boolean isValidated;
 
     private String userId;
+
+    private Exception authenticationException;
 
     public boolean isValidated() {
         return isValidated;
@@ -20,6 +22,14 @@ public class LoginValidationResponse {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Exception getAuthenticationException() {
+        return authenticationException;
+    }
+
+    public void setAuthenticationException(Exception authenticationException) {
+        this.authenticationException = authenticationException;
     }
 
 }

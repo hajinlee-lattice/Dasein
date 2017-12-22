@@ -20,57 +20,10 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-web-parent</artifactId>
+        <artifactId>le-parent</artifactId>
         <version>4.2.0-SNAPSHOT</version>
-        <relativePath>../le-parent/web-pom.xml</relativePath>
+        <relativePath>../le-parent</relativePath>
     </parent>
-
-    <profiles>
-        <profile>
-            <id>run.ssl</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>keytool-maven-plugin</artifactId>
-                        <version>${maven.keytool.version}</version>
-                        <executions>
-                            <execution>
-                                <phase>generate-resources</phase>
-                                <id>clean</id>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <phase>generate-resources</phase>
-                                <id>genkey</id>
-                                <goals>
-                                    <goal>generateKeyPair</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <keystore>target/jetty-ssl.keystore</keystore>
-                            <dname>cn=localhost</dname>
-                            <keypass>jetty123</keypass>
-                            <storepass>jetty123</storepass>
-                            <alias>jetty123</alias>
-                            <keyalg>RSA</keyalg>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <configuration>
-                            <jettyXml>ssl/jetty.xml,ssl/jetty-ssl.xml,ssl/jetty-https.xml</jettyXml>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencies>
         <dependency>

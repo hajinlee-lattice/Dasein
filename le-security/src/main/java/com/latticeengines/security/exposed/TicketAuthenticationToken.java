@@ -15,6 +15,9 @@ public class TicketAuthenticationToken extends AbstractAuthenticationToken {
     private Ticket ticket;
     private Session session;
 
+    public TicketAuthenticationToken(Object principal) {
+        this(principal, null, new ArrayList<GrantedRight>());
+    }
     public TicketAuthenticationToken(Object principal, String token) {
         this(principal, new Ticket(token), new ArrayList<GrantedRight>());
     }
