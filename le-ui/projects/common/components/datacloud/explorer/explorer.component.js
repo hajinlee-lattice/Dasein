@@ -1494,6 +1494,8 @@ angular.module('common.datacloud.explorer', [
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
         
+        console.log(entity);
+
         QueryStore['add' + entity + 'Restriction']({
             columnName: attributeKey, 
             resourceType: entity, 

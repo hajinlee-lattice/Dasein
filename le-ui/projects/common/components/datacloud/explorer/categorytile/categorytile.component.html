@@ -121,7 +121,7 @@
                     <div class="column data value" ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">
                         {{ attribute.TopBkt.Lbl }}
                     </div>
-                    <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data.Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
+                    <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data[attribute.Entity].Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
 
                     <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">
                         <strong ng-if="vm.section === 'segment.analysis'" class="attribute-feedback-container">

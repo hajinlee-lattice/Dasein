@@ -77,14 +77,14 @@
             </p>
         </div>
         -->
-        <div class="stats" ng-if="vm.cube.data.Stats[enrichment.ColumnId].Bkts.List && 
-                                  vm.cube.data.Stats[enrichment.ColumnId].Bkts.List.length && 
+        <div class="stats" ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
+                                  vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
                                   !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1">
     <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
             <h5><label>Attribute range</label><label>Records</label></h5>
             
             <ul class="attribute-stats">
-                <li ng-repeat="stat in vm.cube.data.Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
+                <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
                     class="attribute attribute-stat delay top"
                     ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
@@ -92,7 +92,7 @@
                                 'show-tooltip': vm.section == 'segment.analysis'
                               }"
                     ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))"
-                    ng-init="highest = vm.getHighestStat(vm.cube.data.Stats[enrichment.ColumnId].Bkts.List)">
+                    ng-init="highest = vm.getHighestStat(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List)">
                     <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && statcount == 0">
                         <div class="cover">
                             <h3>Select Attribute</h3>
