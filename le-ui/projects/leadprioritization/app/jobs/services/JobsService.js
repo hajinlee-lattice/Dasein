@@ -332,7 +332,7 @@ angular
         var deferred = $q.defer();
         $http({
             method: 'POST',
-            url: '/pls/jobs/' + jobId+ '/restart'
+            url: '/pls/cdl/processanalyze'
         }).then(function(response) {
             deferred.resolve(response.data);
         });

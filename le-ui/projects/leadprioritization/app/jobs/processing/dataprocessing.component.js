@@ -53,12 +53,9 @@ angular.module('lp.jobs')
             runningJob: {}
         });
 
-        vm.tmpCount = 0; //TO BE REMOVED
-       
 
         vm.init = function () {
-            // vm.jobs = tmpManipolation(); // TO BE REMOVED
-            console.log('INIT', vm.jobs);
+           
             vm.jobs = JobsStore.data.dataImportJobs;
 
             vm.header.filter.unfiltered = vm.jobs;
@@ -128,12 +125,9 @@ angular.module('lp.jobs')
 
         vm.runJob = function (job) {
             job.status = 'Running';
-            setTimeout(function () {
-                job.status = 'Failed';
-            }, 5000);
-            // JobsStore.runJob(job).then(function (updatedJob) {
-            //     vm.runningJob = updatedJob;
-            // });
+            JobsStore.runJob(job).then(function (updatedJob) {
+                vm.runningJob = updatedJob;
+            });
         }
 
         vm.clearMessages = function () {
