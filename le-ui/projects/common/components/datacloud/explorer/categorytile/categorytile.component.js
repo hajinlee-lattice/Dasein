@@ -61,7 +61,7 @@ angular
 
             vm.categoryOrderBy = function() {
                 if(vm.section == 'segment.analysis') {
-                    order = [ 'SegmentChecked', '-Count', '-Value' ];
+                    order = [ 'SegmentChecked', '-TopBkt.Cnt', '-Value' ];
                 } else if(vm.lookupMode) {
                     order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
                 } else {

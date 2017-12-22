@@ -186,12 +186,10 @@
     <div class="query-section-item-records" ng-if="!vm.unused && !vm.editing">
         <span class="query-section-item-records-label">RECORDS</span>
         
-        <span ng-if="vm.tree.bucketRestriction.bkt.Cnt >= 0" class="query-section-item-records-number">
-            {{vm.tree.bucketRestriction.bkt.Cnt}}
-        </span>
-
-        <span ng-if="vm.tree.bucketRestriction.bkt.Cnt < 0" class="query-section-item-records-number">
-            <i class="fa fa-spinner fa-spin"></i>
+        <span class="query-section-item-records-number">
+            <div class="expanding-bars-init" ng-class="{'expanding-bars-spinner':vm.records_updating}">
+                <div ng-repeat="number in (vm.tree.bucketRestriction.bkt.Cnt|number).toString() track by $index">{{ number }}</div>
+            </div>
         </span>
         
         <i class="fa fa-close" ng-click="vm.clickDelete($parent)"></i>

@@ -163,7 +163,7 @@ angular
                             FeatureFlagService.GetAllFlags().then(function(result) {
                                 var flags = FeatureFlagService.Flags();
                                 if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
-                                    console.log('Routing to home.segment.explorer.attributes');
+                                    //console.log('Routing to home.segment.explorer.attributes');
                                     $state.go('home.segment.explorer.attributes', {
                                         tenantName: Tenant.DisplayName,
                                         segment: 'Create'

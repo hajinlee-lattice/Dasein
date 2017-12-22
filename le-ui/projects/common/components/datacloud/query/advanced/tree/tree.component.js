@@ -27,6 +27,7 @@ angular
                 unused: false,
                 uniqueId: $scope.tree.$$hashKey,
                 editMode: 'Custom',
+                records_updating: false,
                 mouseDownTimer: false,
                 numerical_operations: {
                     'IS_NULL': 'Empty',
@@ -208,12 +209,14 @@ angular
 
             vm.updateBucketCount = function() {
                 if (vm.root.mode != 'rules') {
-                    vm.tree.bucketRestriction.bkt.Cnt = -1;
+                    vm.records_updating = true;
 
                     vm.root.updateBucketCount(vm.tree.bucketRestriction).then(function(data) {
                         if (typeof data == 'number') {
                             vm.tree.bucketRestriction.bkt.Cnt = data;
                         }
+                        
+                        vm.records_updating = false;
                     });
                 }
             }
@@ -274,7 +277,7 @@ angular
 
             vm.addOperator = function(tree) {
                 var operator = tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND';
-                
+
                 this.root.saveState();
 
                 if (tree.logicalRestriction) {

@@ -2,7 +2,6 @@
     <ul class="noselect-children">
         <li ui-sref="{{vm.attributes}}" ng-class="{'active':vm.checkState('builder') || vm.checkState('attributes')}">
             <div class="tab-container">
-
                 <h2>
                     Attributes
                     <span class="more-info show-tooltip bottom left delay">
@@ -23,7 +22,6 @@
                         </div>
                     </span>
                 </h2>
-
                 <div class="enrichmentCounts">
                     <span class="count">{{(vm.DataCloudStore.metadata.enrichmentsTotal || 0) | number}}</span>
                     <span class="count">{{ vm.getRuleCount() }}</span>
@@ -31,21 +29,13 @@
                 </div>
             </div>
         </li>
-        <li  ng-class="{'active':vm.checkState('accounts')}">
+        <li ui-sref="{{vm.accounts}}" ng-class="{'active':vm.checkState('accounts')}">
             <div class="tab-container">
                 <h2>Accounts</h2>
-                <div class="enrichmentCounts" ng-click="vm.counts.accounts.loading = !vm.counts.accounts.loading">
-                    <!--span ng-if="!vm.counts.accounts.loading" class="count">{{vm.counts.accounts.value|number}}</span-->
+                <div class="enrichmentCounts">
                     <span class="count">
-                        <!--i class="fa fa-spinner fa-spin"></i-->
-                        <div ng-class="{'expanding-bars-spinner':vm.counts.accounts.loading}">
-                            <div>{{(vm.counts.accounts.value|number).toString()[0]}}</div>
-                            <div>{{(vm.counts.accounts.value|number).toString()[1]}}</div>
-                            <div>{{(vm.counts.accounts.value|number).toString()[2]}}</div>
-                            <div>{{(vm.counts.accounts.value|number).toString()[3]}}</div>
-                            <div>{{(vm.counts.accounts.value|number).toString()[4]}}</div>
-                            <div>{{(vm.counts.accounts.value|number).toString()[5]}}</div>
-                            <div>{{(vm.counts.accounts.value|number).toString()[6]}}</div>
+                        <div class="expanding-bars-init" ng-class="{'expanding-bars-spinner':vm.counts.accounts.loading}">
+                            <div ng-repeat="number in (vm.counts.accounts.value|number).toString() track by $index">{{ number }}</div>
                         </div>
                     </span>
                 </div>
@@ -56,30 +46,12 @@
                 <h2>Contacts</h2>
                 <div class="enrichmentCounts">
                     <span class="count">
-                        <!--i class="fa fa-spinner fa-spin"></i-->
-                        <div ng-class="{'expanding-bars-spinner':vm.counts.accounts.loading}">
-                            <div>{{(vm.counts.contacts.value|number).toString()[0]}}</div>
-                            <div>{{(vm.counts.contacts.value|number).toString()[1]}}</div>
-                            <div>{{(vm.counts.contacts.value|number).toString()[2]}}</div>
-                            <div>{{(vm.counts.contacts.value|number).toString()[3]}}</div>
-                            <div>{{(vm.counts.contacts.value|number).toString()[4]}}</div>
-                            <div>{{(vm.counts.contacts.value|number).toString()[5]}}</div>
-                            <div>{{(vm.counts.contacts.value|number).toString()[6]}}</div>
+                        <div class="expanding-bars-init" ng-class="{'expanding-bars-spinner':vm.counts.contacts.loading}">
+                            <div ng-repeat="number in (vm.counts.contacts.value|number).toString() track by $index">{{ number }}</div>
                         </div>
                     </span>
                 </div>
             </div>
         </li>
-        <!-- removing for segments:demo:fixme
-        <li class="tab-edit" ng-if="vm.inModel()">
-            <div class="tab-container">
-                <h2>Lift</h2>
-                <div class="enrichmentCounts">
-                    <span class="count">1.0x</span>
-                </div>
-            </div>
-        </li>
-        -->
     </ul>
-
 </section>

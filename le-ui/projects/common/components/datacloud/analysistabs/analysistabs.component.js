@@ -22,13 +22,6 @@ angular.module('common.datacloud.analysistabs', [])
 
         QueryStore.getEntitiesCounts();
 
-        // ['accounts','contacts'].forEach(function(source) {
-        //     QueryStore.GetCountByQuery(source).then(function(data){ 
-        //         vm.counts[source].value = data;
-        //         vm.counts[source].loading = false;
-        //     });
-        // });
-
         var attributesUrl = "home.segment.explorer.attributes({segment:'" + vm.segment + "'})";
 
         vm.attributes = vm.ifInModel('home.model.analysis.explorer', attributesUrl);

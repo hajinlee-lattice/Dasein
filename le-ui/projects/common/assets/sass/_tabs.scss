@@ -262,6 +262,8 @@ Chunky Interior Tabs (My Data, Play List, etc...)
                     white-space: nowrap;
                     text-transform: uppercase;
                     color: #222;
+                    margin-top: .7em;
+                    line-height: 1;
                     .count {
                         margin-right: 5px;
                         &:not(:first-child) {

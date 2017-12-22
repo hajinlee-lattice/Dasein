@@ -1,5 +1,4 @@
 <div class="le_modal" ng-class="opened ? 'opened' : 'closed'">
-
     <div class="le-modal-content" ng-class="modalConfig.type">
         <div class="le-modal-header">
             <span class="close" ng-if="modalConfig.showclose" ng-click="forceDischarge()">&times;</span>
@@ -11,7 +10,6 @@
                     {{modalConfig.title | cut:true:config.titlelength:' ...'}}
                 </p>
             </div>
-
         </div>
         <div class="le-modal-body">
             <div ng-transclude ng-show="!showModalMsg && !showWaiting"></div>
@@ -23,8 +21,6 @@
         <div class="le-modal-footer">
             <button ng-click="confirm()" class="button" ng-class="modalConfig.confirmcolor" ng-disabled="confirmDisabled">{{modalConfig.confirmtext}}</button>
             <button ng-click="discharge()" class="button  gray-button" ng-disabled="dischargeDisabled">{{modalConfig.dischargetext}}</button>
-
         </div>
     </div>
-
 </div>
