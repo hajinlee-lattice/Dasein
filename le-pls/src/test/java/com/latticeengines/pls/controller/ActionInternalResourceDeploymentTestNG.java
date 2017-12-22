@@ -34,7 +34,7 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     private static final String ACTION_INITIATOR = "test@lattice-engines.com";
 
-    private static final String OWNER_ID = "application_10002";
+    private static final Long OWNER_ID = 10002L;
 
     private List<Action> actions;
 
@@ -61,7 +61,7 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
         action.setTenant(mainTestTenant);
         Random r = new Random();
         int trackingId = r.ints(0, (10000 + 1)).findFirst().getAsInt();
-        action.setTrackingId(String.valueOf(trackingId));
+        action.setTrackingId((long) trackingId);
         return action;
     }
 
@@ -114,7 +114,7 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
         return internalResourceRestApiProxy.getAllActions(CustomerSpace.parse(mainTestTenant.getId()).toString());
     }
 
-    protected List<Action> findByOwnerId(String ownerId) {
+    protected List<Action> findByOwnerId(Long ownerId) {
         return internalResourceRestApiProxy.getActionsByOwnerId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
                 ownerId);
     }

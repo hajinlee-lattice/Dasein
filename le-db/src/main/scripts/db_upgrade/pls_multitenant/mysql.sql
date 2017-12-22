@@ -48,7 +48,7 @@ DELIMITER ;
 
 CREATE PROCEDURE `AddActionTable`()
     BEGIN
-        create table `ACTION` (`PID` bigint not null auto_increment, `ACTION_INITIATOR` varchar(255), `CREATED` datetime not null, `DESCRIPTION` longtext, `OWNER_ID` varchar(255), `TRACKING_ID` varchar(255), `TYPE` varchar(255) not null, `UPDATED` datetime not null, `FK_TENANT_ID` bigint not null, primary key (`PID`)) engine=InnoDB;
+        create table `ACTION` (`PID` bigint not null auto_increment, `ACTION_INITIATOR` varchar(255), `CREATED` datetime not null, `DESCRIPTION` longtext, `OWNER_ID` bigint, `TRACKING_ID` bigint, `TYPE` varchar(255) not null, `UPDATED` datetime not null, `FK_TENANT_ID` bigint not null, primary key (`PID`)) engine=InnoDB;
         alter table `ACTION` add constraint `FK7oxur5w3ha4rj4rofg1fgekc3` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
     End;
 //

@@ -49,7 +49,7 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Action> findByOwnerId(@Nullable String ownerId, Pageable pageable) {
+    public List<Action> findByOwnerId(@Nullable Long ownerId, Pageable pageable) {
         if (pageable == null) {
             // TODO change back to use JPA repository after PLS-6214 is done
             // return actionRepository.findByOwnerId(ownerId);

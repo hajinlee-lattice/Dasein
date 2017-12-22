@@ -14,7 +14,7 @@ public interface ActionService {
 
     List<Action> findAll();
 
-    List<Action> findByOwnerId(String ownerId, Pageable pageable);
+    List<Action> findByOwnerId(Long ownerId, Pageable pageable);
 
     void delete(Action action);
 

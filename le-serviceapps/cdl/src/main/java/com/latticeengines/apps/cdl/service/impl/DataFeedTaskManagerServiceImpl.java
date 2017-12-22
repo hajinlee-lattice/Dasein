@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -15,10 +14,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
@@ -34,12 +31,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -58,16 +52,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
@@ -171,24 +155,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo);
-        registerImportAction(customerSpace.toString(), appId, csvImportFileInfo);
         return appId.toString();
-    }
-
-    @VisibleForTesting
-    Action registerImportAction(String customerSpaceStr, @NonNull ApplicationId appId,
-            CSVImportFileInfo csvImportFileInfo) {
-        Action action = new Action();
-        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
-        action.setActionInitiator(csvImportFileInfo.getFileUploadInitiator());
-        Tenant tenant = tenantService.findByTenantId(customerSpaceStr);
-        if (tenant == null) {
-            throw new NullPointerException(String.format("Tenant is null with id %s", customerSpaceStr));
-        }
-        action.setTenant(tenant);
-        action.setTrackingId(appId.toString());
-
-        return internalResourceProxy.createAction(customerSpaceStr, action);
     }
 
     private CustomerSpace mapCustomerSpace(CustomerSpace customerSpace) {
@@ -243,8 +210,4 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         return inconsistentAttrs;
     }
 
-    @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceProxy = internalResourceRestApiProxy;
-    }
 }

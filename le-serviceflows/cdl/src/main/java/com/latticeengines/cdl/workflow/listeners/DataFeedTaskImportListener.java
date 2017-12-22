@@ -4,24 +4,32 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -43,17 +51,30 @@ public class DataFeedTaskImportListener extends LEJobListener {
     @Autowired
     private DataLoaderService dataLoaderService;
 
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
+    @PostConstruct
+    public void init() {
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    }
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
-
+        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+        registerImportAction(job);
     }
 
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        String importJobIdentifier = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
+        String importJobIdentifier = job
+                .getInputContextValue(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
         String customerSpace = job.getTenant().getId();
-        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByCollectionIdentifier(importJobIdentifier);
+        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy
+                .getImportJobDetailByCollectionIdentifier(importJobIdentifier);
         if (eaiImportJobDetail == null) {
             log.warn(String.format("Cannot find the job detail for %s", importJobIdentifier));
             return;
@@ -62,7 +83,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
         VdbLoadTableStatus vdbLoadTableStatus = null;
         String statusUrl = eaiImportJobDetail.getReportURL();
         String queryHandle = eaiImportJobDetail.getQueryHandle();
-        if(statusUrl != null && !statusUrl.isEmpty() && queryHandle != null && !queryHandle.isEmpty()) {
+        if (statusUrl != null && !statusUrl.isEmpty() && queryHandle != null && !queryHandle.isEmpty()) {
             vdbLoadTableStatus = new VdbLoadTableStatus();
             vdbLoadTableStatus.setVdbQueryHandle(queryHandle);
         }
@@ -74,11 +95,12 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 String templateName = eaiImportJobDetail.getTemplateName();
                 List<String> pathList = eaiImportJobDetail.getPathDetail();
                 List<String> processedRecordsList = eaiImportJobDetail.getPRDetail();
-                if (pathList == null || processedRecordsList == null || pathList.size() != processedRecordsList.size()) {
+                if (pathList == null || processedRecordsList == null
+                        || pathList.size() != processedRecordsList.size()) {
                     log.error("Error in extract info, skip register extract.");
                     updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
 
-                    if(vdbLoadTableStatus!=null) {
+                    if (vdbLoadTableStatus != null) {
                         vdbLoadTableStatus.setJobStatus("Failed");
                         vdbLoadTableStatus.setMessage("Error in extract info, skip register extract.");
                         dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
@@ -88,7 +110,8 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 List<Extract> extracts = new ArrayList<>();
                 for (int i = 0; i < pathList.size(); i++) {
-                    log.info(String.format("Extract %s have %s records.", pathList.get(i), processedRecordsList.get(i)));
+                    log.info(
+                            String.format("Extract %s have %s records.", pathList.get(i), processedRecordsList.get(i)));
                     long records = Long.parseLong(processedRecordsList.get(i));
                     extracts.add(createExtract(pathList.get(i), records));
                 }
@@ -102,7 +125,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.SUCCESS);
                 updateDataFeedStatus(customerSpace);
 
-                if(vdbLoadTableStatus!=null) {
+                if (vdbLoadTableStatus != null) {
                     vdbLoadTableStatus.setJobStatus("Succeed");
                     vdbLoadTableStatus.setMessage("Load table complete!");
                     dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
@@ -110,7 +133,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
             } catch (Exception e) {
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
 
-                if(vdbLoadTableStatus!=null) {
+                if (vdbLoadTableStatus != null) {
                     vdbLoadTableStatus.setJobStatus("Failed");
                     vdbLoadTableStatus.setMessage(String.format("Load table failed with exception: %s", e.toString()));
                     dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
@@ -122,13 +145,26 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     jobExecution.getStatus().name()));
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
 
-            if(vdbLoadTableStatus!=null) {
+            if (vdbLoadTableStatus != null) {
                 vdbLoadTableStatus.setJobStatus("Failed");
                 vdbLoadTableStatus.setMessage(String.format("DataFeedTask import job ends in unknown status: %s",
                         jobExecution.getStatus().name()));
                 dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
             }
         }
+    }
+
+    @VisibleForTesting
+    Action registerImportAction(WorkflowJob job) {
+        Action action = new Action();
+        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action.setActionInitiator(job.getUserId());
+        Tenant tenant = job.getTenant();
+        tenant.setPid(job.getTenantId());
+        action.setTenant(tenant);
+        action.setTrackingId(job.getWorkflowId());
+
+        return internalResourceProxy.createAction(tenant.getId(), action);
     }
 
     private void updateDataFeedStatus(String customerSpace) {
@@ -143,7 +179,6 @@ public class DataFeedTaskImportListener extends LEJobListener {
         eaiJobDetailProxy.updateImportJobDetail(eaiImportJobDetail);
     }
 
-
     private Extract createExtract(String path, long processedRecords) {
         Extract e = new Extract();
         e.setName(StringUtils.substringAfterLast(path, "/"));
@@ -157,5 +192,10 @@ public class DataFeedTaskImportListener extends LEJobListener {
             throw new RuntimeException(ex);
         }
         return e;
+    }
+
+    @VisibleForTesting
+    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
+        this.internalResourceProxy = internalResourceRestApiProxy;
     }
 }

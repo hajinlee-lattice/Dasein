@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service.impl;
+package com.latticeengines.cdl.workflow.listeners;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -18,51 +17,46 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 
-public class DataFeedTaskManagerServiceImplUnitTestNG {
-
-    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskManagerServiceImplUnitTestNG.class);
-
-    @Mock
-    private TenantService tenantSevrice;
+public class DataFeedTaskImportListenerUnitTestNG {
+    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskImportListenerUnitTestNG.class);
 
     @Mock
     private InternalResourceRestApiProxy internalResourceProxy;
 
     @InjectMocks
-    private DataFeedTaskManagerServiceImpl dataFeedTaskManagerService;
+    private DataFeedTaskImportListener dataFeedTaskImportListener;
 
     private String tenantId = "tenant";
 
-    private String appId = "application_1511820474078_27706";
+    private Long tenantPid = 1000L;
 
-    private CSVImportFileInfo csvImportFileInfo;
+    private Long trackingId = 27706L;
+
+    private WorkflowJob job;
 
     private String INITIATOR = "test@lattice-engines.com";
 
     @BeforeClass(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mockTenantService();
         mockInternalProxy();
-        mockCSVImportFileInfo();
+        mockWorkflowJob();
     }
 
-    private void mockCSVImportFileInfo() {
-        csvImportFileInfo = new CSVImportFileInfo();
-        csvImportFileInfo.setFileUploadInitiator(INITIATOR);
-    }
-
-    private void mockTenantService() {
+    private void mockWorkflowJob() {
+        job = new WorkflowJob();
         Tenant tenant = new Tenant();
         tenant.setId(tenantId);
-        when(tenantSevrice.findByTenantId(anyString())).thenReturn(tenant);
+        job.setTenantId(tenantPid);
+        job.setTenant(tenant);
+        job.setUserId(INITIATOR);
+        job.setWorkflowId(trackingId);
     }
 
     private void mockInternalProxy() {
@@ -79,21 +73,19 @@ public class DataFeedTaskManagerServiceImplUnitTestNG {
                 return null;
             }
         });
-        dataFeedTaskManagerService.setInternalResourceRestApiProxy(internalResourceProxy);
+        dataFeedTaskImportListener.setInternalResourceRestApiProxy(internalResourceProxy);
     }
 
     @Test(groups = "unit")
     public void testRegisterImportAction() {
-        Action action = dataFeedTaskManagerService.registerImportAction(tenantId, ConverterUtils.toApplicationId(appId),
-                csvImportFileInfo);
+        Action action = dataFeedTaskImportListener.registerImportAction(job);
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         Assert.assertEquals(action.getActionInitiator(), INITIATOR);
         Assert.assertEquals(action.getTenant().getId(), tenantId);
-        Assert.assertEquals(action.getTrackingId(), appId);
+        Assert.assertEquals(action.getTrackingId(), trackingId);
         Assert.assertNotNull(action.getUpdated());
         Assert.assertNotNull(action.getCreated());
         log.info(String.format("Action is %s", action));
     }
-
 }

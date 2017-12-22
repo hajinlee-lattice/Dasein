@@ -1499,12 +1499,12 @@ public class InternalResource extends InternalResourceBase {
             HttpServletRequest request) {
         checkHeader(request);
         log.debug(String.format("Retrieve Actions for tenant: %s with ownerId: %s", customerSpace, ownerId));
-        String ownerIdStr = null;
+        Long ownerIdLong = null;
         if (!ownerId.equals(NULL_STRING)) {
-            ownerIdStr = ownerId;
+            ownerIdLong = Long.parseLong(ownerId);
         }
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
-        return actionService.findByOwnerId(ownerIdStr, null);
+        return actionService.findByOwnerId(ownerIdLong, null);
     }
 
     @RequestMapping(value = "/actions/" + TENANT_ID_PATH, method = RequestMethod.POST)

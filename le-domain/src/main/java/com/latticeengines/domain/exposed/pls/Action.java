@@ -50,11 +50,11 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
 
     @JsonProperty("ownerId")
     @Column(name = "OWNER_ID", nullable = true)
-    private String ownerId;
+    private Long ownerId;
 
     @JsonProperty("trackingId")
     @Column(name = "TRACKING_ID", nullable = true)
-    private String trackingId;
+    private Long trackingId;
 
     @JsonProperty("actionInitiator")
     @Column(name = "ACTION_INITIATOR")
@@ -99,19 +99,19 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
         this.type = type;
     }
 
-    public String getOwnerId() {
+    public Long getOwnerId() {
         return this.ownerId;
     }
 
-    public void setOwnerId(String id) {
+    public void setOwnerId(Long id) {
         this.ownerId = id;
     }
 
-    public String getTrackingId() {
+    public Long getTrackingId() {
         return this.trackingId;
     }
 
-    public void setTrackingId(String id) {
+    public void setTrackingId(Long id) {
         this.trackingId = id;
     }
 

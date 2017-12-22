@@ -23,7 +23,7 @@ public class ActionServiceImpl implements ActionService {
     }
 
     @Override
-    public List<Action> findByOwnerId(String ownerId, Pageable pageable) {
+    public List<Action> findByOwnerId(Long ownerId, Pageable pageable) {
         return actionEntityMgr.findByOwnerId(ownerId, pageable);
     }
 
