@@ -40,6 +40,7 @@ public enum InterfaceName {
     Country, //
     PhoneNumber, //
     Address_Street_1, //
+    Address_Street_2,
 
     Website, //
 
@@ -77,6 +78,14 @@ public enum InterfaceName {
     CDLUpdatedTime, // update timestamp of CDL entities
 
     ConsolidateReport, //
+
+    Type, //
+    AnnualRevenueCurrency,
+    SpendAnalyticsSegment,
+    CustomerParentAccountID,
+    DoNotCall,
+    LeadStatus,
+    Cost,
 
     // CDL External
     SalesforceSandboxAccountID,
