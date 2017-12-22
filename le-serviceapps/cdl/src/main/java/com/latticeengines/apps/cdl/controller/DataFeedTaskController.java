@@ -48,9 +48,15 @@ public class DataFeedTaskController {
                                                                  @RequestParam(value = "feedtype") String feedtype,
                                                                  @RequestParam(value = "entity") String entity,
                                                                  @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
-        VdbImportConfig vdbImportConfig = new VdbImportConfig();
-        vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);
-        return createDataFeedTask(customerSpace, source, feedtype, entity, vdbImportConfig);
+        if (vdbLoadTableConfig == null) {
+            return ResponseDocument.failedResponse(new RuntimeException("Vdb load table config can't be null!"));
+        } else if (vdbLoadTableConfig.getTotalRows() == 0) {
+            return ResponseDocument.failedResponse(new RuntimeException("Import data should not be 0 row!"));
+        } else {
+            VdbImportConfig vdbImportConfig = new VdbImportConfig();
+            vdbImportConfig.setVdbLoadTableConfig(vdbLoadTableConfig);
+            return createDataFeedTask(customerSpace, source, feedtype, entity, vdbImportConfig);
+        }
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
