@@ -15,7 +15,6 @@
         <le.security.version>4.2.0-SNAPSHOT</le.security.version>
         <le.testfwk.version>4.2.0-SNAPSHOT</le.testfwk.version>
         <le.remote.version>4.2.0-SNAPSHOT</le.remote.version>
-        <spring.saml.version>1.0.2.RELEASE</spring.saml.version>
     </properties>
 
     <parent>
@@ -89,7 +88,7 @@
         <dependency>
             <groupId>org.springframework.security.extensions</groupId>
             <artifactId>spring-security-saml2-core</artifactId>
-            <version>${spring.saml.version}</version>
+            <version>${spring.saml2.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -16,7 +16,6 @@
         <le.network.version>4.2.0-SNAPSHOT</le.network.version>
         <le.monitor.version>4.2.0-SNAPSHOT</le.monitor.version>
         <le.auth.version>4.2.0-SNAPSHOT</le.auth.version>
-        <spring.saml.version>1.0.2.RELEASE</spring.saml.version>
         <jetty.port>8084</jetty.port>
         <jetty.stop.port>10984</jetty.stop.port>
         <jetty.dir>test</jetty.dir>
@@ -171,7 +170,7 @@
         <dependency>
             <groupId>org.springframework.security.extensions</groupId>
             <artifactId>spring-security-saml2-core</artifactId>
-            <version>${spring.saml.version}</version>
+            <version>${spring.saml2.version}</version>
         </dependency>
     </dependencies>
 </project>
