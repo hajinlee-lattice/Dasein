@@ -53,6 +53,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -216,7 +217,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             throw new LedpException(LedpCode.LEDP_39001, new String[] { accountID, customerSpace });
         }
 
-        Restriction restriction = Restriction.builder() //
+        Restriction accRestriction = Restriction.builder() //
                 .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
                 .eq(accountID) //
                 .build();
@@ -225,10 +226,12 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .let(BusinessEntity.Account, InterfaceName.SalesforceAccountID.name()) //
                 .eq(accountID) //
                 .build();
-        Restriction.builder().and(Arrays.asList(restriction, sfdcRestriction)).build();
+        Restriction restriction = Restriction.builder().or(Arrays.asList(accRestriction, sfdcRestriction)).build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setRestrictNotNullSalesforceId(true);
         frontEndQuery.addLookups(BusinessEntity.Account, attributes.toArray(new String[attributes.size()]));
 
         log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
