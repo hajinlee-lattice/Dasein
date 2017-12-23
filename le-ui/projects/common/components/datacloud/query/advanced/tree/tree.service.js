@@ -1,4 +1,4 @@
-angular.module('common.datacloud.query.builder.tree')
+angular.module('common.datacloud.query.builder.tree.service', [])
     .service('QueryTreeService', function () {
         console.log('TEST service');
         this.cmpMap = {

@@ -1,5 +1,5 @@
 angular
-    .module('common.datacloud.query.builder.tree')
+    .module('common.datacloud.query.builder.tree.info', [])
     .directive('queryItemDirective', function () {
         return {
             restrict: 'E',
