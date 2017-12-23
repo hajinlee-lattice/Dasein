@@ -10,7 +10,7 @@ angular
         },
         templateUrl: '/components/datacloud/query/advanced/tree/tree.component.html',
         controllerAs: 'vm',
-        controller: function ($scope, $timeout, DataCloudStore, QueryStore) {
+        controller: function ($scope, $timeout, DataCloudStore, QueryStore, QueryTreeService) {
             var vm = this;
 
             angular.extend(vm, {
@@ -29,34 +29,10 @@ angular
                 editMode: 'Custom',
                 records_updating: false,
                 mouseDownTimer: false,
-                numerical_operations: {
-                    'IS_NULL': 'Empty',
-                    'IS_NOT_NULL': 'Not Empty',
-                    'EQUAL': 'Equal',
-                    'NOT_EQUAL': 'Not Equal',
-                    'GREATER_THAN': 'Greater Than',
-                    'GREATER_OR_EQUAL': 'Greater or Equal',
-                    'LESS_THAN': 'Less Than',
-                    'LESS_OR_EQUAL': 'Lesser or Equal',
-                    'GTE_AND_LTE': '>= and <=',
-                    'GTE_AND_LT': '>= and <',
-                    'GT_AND_LTE': "> and <=",
-                    'GT_AND_LT': "> and <"
-                },
-                enum_operations: {
-                    'EQUAL': 'Is Equal To',
-                    'NOT_EQUAL': 'Does Not Equal'
-                },
-                no_inputs: [
-                    'IS_NULL',
-                    'IS_NOT_NULL'
-                ],
-                two_inputs: [
-                    'GTE_AND_LTE',
-                    'GTE_AND_LT',
-                    'GT_AND_LTE',
-                    'GT_AND_LT'
-                ]
+                numerical_operations: QueryTreeService.numerical_operations,
+                enum_operations: QueryTreeService.enum_operations,
+                no_inputs: QueryTreeService.no_inputs,
+                two_inputs: QueryTreeService.two_inputs
             });
 
             vm.init = function (type, value) {
@@ -136,35 +112,10 @@ angular
                     return;
                 }
 
-                var map = {
-                    "Yes": "is",
-                    "No": "is",
-                    "": "is",
-                    "is": "is",
-                    "empty": "is empty",
-                    "between": "is between",
-                    'IS_NULL': 'is empty',
-                    'IS_NOT_NULL': 'is present',
-                    'EQUAL': 'is equal to',
-                    'NOT_EQUAL': 'is not equal to',
-                    'GREATER_THAN': 'is greater than',
-                    'GREATER_OR_EQUAL': 'is greater than or equal to',
-                    'LESS_THAN': 'is less than',
-                    'LESS_OR_EQUAL': 'is less than or equal to',
-                    'GTE_AND_LTE': 'is greater or equal and lesser or equal',
-                    'GTE_AND_LT': 'is greater or equal and less than',
-                    'GT_AND_LTE': "is greater than and lesser or equal",
-                    'GT_AND_LT': "is greater than and less than",
-                    'IN_COLLECTION': 'in collection',
-                    'CONTAINS': 'contains',
-                    'NOT_CONTAINS': 'not contains',
-                    'STARTS_WITH': 'starts with'
-                };
-
                 switch (vm.type) {
-                    case 'Boolean': return map[vm.tree.bucketRestriction.bkt.Vals[0] || ''];
-                    case 'Numerical': return map[vm.tree.bucketRestriction.bkt.Cmp];
-                    case 'Enum': return map[vm.tree.bucketRestriction.bkt.Cmp];
+                    case 'Boolean': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Vals[0] || ''];
+                    case 'Numerical': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Cmp];
+                    case 'Enum': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Cmp];
                     default: return 'has a value of';
                 }
             }

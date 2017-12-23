@@ -1,0 +1,20 @@
+<span class="query-section-item-operation">
+    <span class="query-section-item-operation">
+        <span>{{vm.getOperationLabel()}}</span>
+    </span>
+
+    <span class="query-section-item-value" ng-if="vm.type == 'Boolean'">
+        <strong>{{vm.tree.bucketRestriction.bkt.Vals[0] === 'Yes' ? 'True' : (vm.tree.bucketRestriction.bkt.Vals[0] === 'No' ? 'False'
+            : 'Empty')}}</strong>
+    </span>
+
+    <span class="query-section-item-value" ng-if="vm.type == 'Numerical' && vm.no_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) < 0">
+        <strong>{{vm.tree.bucketRestriction.bkt.Vals[0]}}</strong>
+        <span ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0" class="operation-and">-</span>
+        <strong ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0">{{vm.tree.bucketRestriction.bkt.Vals[1]}}</strong>
+    </span>
+
+    <span class="query-section-item-value" ng-if="vm.type == 'Enum'">
+        <strong ng-repeat="value in vm.tree.bucketRestriction.bkt.Vals">{{ value }}</strong>
+    </span>
+</span>
