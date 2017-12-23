@@ -25,7 +25,7 @@ angular.module('lp.import.wizard.transactionids', [])
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);
         ImportWizardStore.setValidation('ids', false);
-
+        
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
             vm.AvailableFields.push(fieldMapping);

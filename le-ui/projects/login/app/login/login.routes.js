@@ -88,5 +88,56 @@ angular.module('login', [
                     template: '<login-update-password-success></login-update-password-success>'
                 }
             }
+        })
+        .state('login.saml', {
+            url: 'saml/tenant/:tenantId',
+            views: {
+                "FrameContent": {
+                    resolve: {
+                        Saml: function($q) {
+                            var deferred = $q.defer();
+
+                            deferred.resolve([]);
+
+                            return deferred.promise;
+                        },
+                    },
+                    template: '<login-saml></login-saml>'
+                }
+            }
+        })
+        .state('login.saml.logout', {
+            url: '/logout',
+            views: {
+                "FrameContent": {
+                    resolve: {
+                        Saml: function($q) {
+                            var deferred = $q.defer();
+
+                            deferred.resolve([]);
+
+                            return deferred.promise;
+                        },
+                    },
+                    template: '<login-saml-logout></login-saml-logout>'
+                }
+            }
+        })
+        .state('login.saml.metadata', {
+            url: '/metadata',
+            views: {
+                "FrameContent": {
+                    resolve: {
+                        Saml: function($q) {
+                            var deferred = $q.defer();
+
+                            deferred.resolve([]);
+
+                            return deferred.promise;
+                        },
+                    },
+                    template: '<login-saml-metadata></login-saml-metadata>'
+                }
+            }
         });
 });

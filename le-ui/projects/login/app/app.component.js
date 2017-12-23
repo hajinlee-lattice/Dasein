@@ -7,7 +7,10 @@ var mainApp = angular.module('loginApp', [
     'login.form',
     'login.update',
     'login.forgot',
-    'login.tenants'
+    'login.tenants',
+    'login.saml',
+    'login.saml.logout',
+    'login.saml.metadata'
 ])
 .config(function($httpProvider) {
     if (!$httpProvider.defaults.headers.get) {

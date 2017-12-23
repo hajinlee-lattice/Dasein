@@ -12,7 +12,6 @@ angular.module('lp.import.wizard.customfields', [])
 
     vm.init = function() {
         vm.size= vm.AvailableFields.length;
-        vm.customFields = ImportWizardStore.getCustomFields(vm.parent_name);
 
         vm.fieldMappings.forEach(function(item){
             if(item.mappedField == null) {

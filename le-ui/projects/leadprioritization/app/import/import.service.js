@@ -29,6 +29,8 @@ angular.module('lp.import')
         };
 
         this.entityType = null;
+
+        this.nonCustomIds = [];
     }
 
     this.init();
@@ -74,7 +76,7 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
                         $state.go(nextState); 
                     });
                 }
@@ -109,7 +111,7 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
                         $state.go(nextState); 
                     });
                 }
@@ -136,7 +138,7 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
                         $state.go(nextState); 
                     });
                 }
@@ -163,7 +165,7 @@ angular.module('lp.import')
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
-                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName()).then(function(){
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
                         $state.go(nextState); 
                     });
                 }
@@ -253,13 +255,13 @@ angular.module('lp.import')
 
     this.getCustomFields = function(type) {
         var data = [],
-            total = 7, //Math.floor(Math.random() * 10 + 1),
+            total = 7, 
             types = ['Text', 'Number', 'Boolean', 'Date'];
         for(var i=0;i<total;i++) {
             var tmp = {
                 CustomField: 'CustomField' + (i + 1),
-                Type: types, //[Math.floor(Math.random()*types.length)],
-                Ignore: false //Math.random() >= 0.5
+                Type: types, 
+                Ignore: false
             };
             data.push(tmp);
         }
@@ -306,7 +308,7 @@ angular.module('lp.import')
 
         userIndexes.forEach(function(index) {
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedField = mappedField;
-            ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = true;
+            ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = (mappedField ? true : false); // allows for unmapping
         });
     }
 
@@ -320,6 +322,26 @@ angular.module('lp.import')
 
     this.setIgnore = function(ignoredFields) {
         ImportWizardStore.fieldDocument.ignoredFields = ignoredFields;
+    }
+
+    this.addNonCustomIds = function(ids) {
+        if(typeof ids === 'object') {
+            for(var i in ids) {
+                var id = ids[i];
+                if(this.nonCustomIds.indexOf(id) === -1) {
+                    this.nonCustomIds.push(id);
+                }
+            }
+        } else if (typeof ids === 'string') {
+            var id = ids;
+            if(this.nonCustomIds.indexOf(id) === -1) {
+                this.nonCustomIds.push(id);
+            }
+        }
+    }
+
+    this.getNonCustomIds = function() {
+        return this.nonCustomIds;
     }
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility) {
@@ -400,7 +422,7 @@ angular.module('lp.import')
             params.displayName = params.displayName || FileName,
             params.source = params.source || 'File',
             params.entity = params.entity || 'Account',
-            params.feedType = params.feedType || 'AccountSchema';
+            params.feedType = params.feedType || params.entity + 'Schema' || 'AccountSchema';
 
 	        $http({
 	            method: 'POST',
@@ -422,14 +444,16 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-	    this.startImportCsv = function(FileName) {
+	    this.startImportCsv = function(FileName, entity) {
 	        var deferred = $q.defer();
 	        var result;
-	        var params = { 'templateFileName':FileName ,
-	            'dataFileName': FileName,
-	            'source': 'File',
-	            'entity': 'Account',
-	            'feedType': 'AccountSchema'};
+	        var params = { 
+                    'templateFileName':FileName ,
+    	            'dataFileName': FileName,
+    	            'source': 'File',
+    	            'entity': 'Account',
+                    'feedType': entity + 'Schema' 
+                };
 
 	        $http({
 	            method: 'POST',

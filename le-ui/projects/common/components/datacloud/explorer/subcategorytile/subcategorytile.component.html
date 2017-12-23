@@ -115,21 +115,21 @@
 
             <div class="attributes-more noselect" ng-if="count > 5">More</div>
         </div>
-        <ul class="controls noselect" ng-if="!vm.lookupMode">
-            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
-                <!-- this can't be a <button> element because IE and FF don't like it -->
-                <div class="button"
-                        ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'dirty'}"
-                        ng-click="vm.closeHighlighterButtons(vm.category + subcategory); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
-                    <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
-                        {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
-                    </span>
-                    <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
-                        <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-class="{'disable-enable-all': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == type}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
-                    </ul>
-
-                </div>
-            </li>
-        </ul>
     </span>
+    <ul class="controls noselect" ng-if="!vm.lookupMode">
+        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
+            <!-- this can't be a <button> element because IE and FF don't like it -->
+            <div class="button"
+                    ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'dirty'}"
+                    ng-click="vm.closeHighlighterButtons(vm.category + subcategory); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
+                <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
+                    {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
+                </span>
+                <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
+                    <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-class="{'disable-enable-all': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == type}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
+                </ul>
+
+            </div>
+        </li>
+    </ul>
 </div>

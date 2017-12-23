@@ -1,6 +1,7 @@
 angular.module('lp.import.wizard.thirdpartyids', [])
 .controller('ImportWizardThirdPartyIDs', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, Identifiers, FieldDocument
+    $state, $stateParams, $scope, $timeout, 
+    ResourceUtility, ImportWizardStore, Identifiers, FieldDocument
 ) {
     var vm = this;
 
@@ -13,7 +14,12 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         unavailableFields: [],
         unavailableTypes: [],
         hiddenFields: [],
-        field: {name: '', types: ['MAP','CRM','ERP','Other'], field: ''}
+        field: {name: '', types: [
+            'MAP',
+            'CRM',
+            //'ERP',
+            'Other'
+        ], field: ''}
     });
 
     vm.init = function() {
@@ -29,20 +35,7 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         return true;
     }
 
-    vm.changeLatticeField = function(mapping) {
-        //  var mapped = [];
-        //  for(var i in mapping) {
-        //     var item = mapping[i];
-        //         map = {}; //userField: item.userField.value, mappedField: item.mappedField};
-        //     if(item.mappedField) {
-        //         map.mappedField = item.mappedField;
-        //     }
-        //     if(item.userField && item.userField.value) {
-        //         map.userField = item.userField.value;
-        //     }
-        //     mapped.push(map);
-        // }
-        
+    vm.changeLatticeField = function(mapping, form) {
         vm.unavailableFields = [];
         vm.unavailableTypes = [];
         mapping.forEach(function(item){
@@ -52,11 +45,40 @@ angular.module('lp.import.wizard.thirdpartyids', [])
 
         ImportWizardStore.setSaveObjects(mapping);
         ImportWizardStore.setThirdpartyidFields(vm.fields, mapping);
+        vm.checkValid(form);
     };
 
     vm.addIdentifier = function(){
         vm.fields.push(vm.field);
     };
+
+    vm.removeIdentifier = function(index){
+    };
+
+    var validateMapping = function(mapping) {
+        var keys = [],
+            valid = true;
+        mapping.forEach(function(item) {
+            var key = item.userName + item.mappedField;
+            valid = (keys.indexOf(key) === -1);
+            keys.push(key);
+        });
+        return valid;
+    }
+
+    vm.checkValidDelay = function(form) {
+        $timeout(function() {
+            vm.checkValid(form);
+        }, 1);
+    };
+
+    vm.checkValid = function(form) {
+        if(!validateMapping(vm.fieldMapping)) {
+            ImportWizardStore.setValidation('thirdpartyids', false);
+        } else {
+            ImportWizardStore.setValidation('thirdpartyids', form.$valid);
+        }
+    }
 
     vm.init();
 });

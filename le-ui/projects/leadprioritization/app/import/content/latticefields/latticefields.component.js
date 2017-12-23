@@ -49,10 +49,11 @@ angular.module('lp.import.wizard.latticefields', [])
 
     vm.init = function() {
         ImportWizardStore.setValidation('latticefields', false);
+
         vm.fieldMappings.forEach(function(fieldMapping) {
-            if(fieldMapping.mappedField) {
-                vm.unavailableFields.push(fieldMapping.userField);
-            }
+            // if(fieldMapping.mappedField) {
+            //     vm.unavailableFields.push(fieldMapping.userField);
+            // }
             vm.availableFields.push(fieldMapping);
         });
     };
@@ -64,7 +65,7 @@ angular.module('lp.import.wizard.latticefields', [])
 
         return {
             mappedField: pieces[0],
-            userField: pieces[1]
+            userField: (pieces[1] === "" ? fallbackUserField : pieces[1])// allows unmapping
         }
     }
 
@@ -73,7 +74,13 @@ angular.module('lp.import.wizard.latticefields', [])
         vm.unavailableFields = [];
         for(var i in mapping) {
             var item = mapping[i],
-                 map = makeObject(item.userField);
+                map = makeObject(item.userField);
+
+            if(!map.userField) {
+                map.userField = i;
+                map.mappedField = null;
+            }
+
             vm.unavailableFields.push(map.userField);
             _mapping.push(map);
         }
@@ -89,7 +96,7 @@ angular.module('lp.import.wizard.latticefields', [])
 
     vm.checkValid = function(form) {
         ImportWizardStore.setValidation('latticefields', form.$valid);
-   }
+    }
 
     if (FieldDocument) {
         vm.init();
