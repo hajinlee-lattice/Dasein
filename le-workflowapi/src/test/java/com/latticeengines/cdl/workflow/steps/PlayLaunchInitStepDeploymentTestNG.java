@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -45,8 +46,8 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml", "classpath:playmakercore-context.xml",
-        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml",
-        "classpath:proxy-context.xml", "classpath:test-workflowapi-context.xml" })
+        "classpath:test-playlaunch-properties-context.xml", "classpath:yarn-context.xml", "classpath:proxy-context.xml",
+        "classpath:test-workflowapi-context.xml" })
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStepDeploymentTestNG.class);
@@ -71,6 +72,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @Autowired
     private SqoopProxy sqoopProxy;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -131,8 +135,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
         helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, recommendationService,
-                pageSize, metadataProxy, sqoopProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser, dataDbPassword,
-                dataDbDialect, dataDbType, yarnConfiguration);
+                pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser,
+                dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());

@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -56,6 +57,9 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
 
     @Autowired
     private SqoopProxy sqoopProxy;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -127,8 +131,8 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
         badRecommendationService = null;
 
         helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, badRecommendationService,
-                pageSize, metadataProxy, sqoopProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser, dataDbPassword,
-                dataDbDialect, dataDbType, yarnConfiguration);
+                pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser,
+                dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());

@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.play;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -19,9 +20,9 @@ public class PlayLaunchInitStepTestHelper {
 
     public PlayLaunchInitStepTestHelper(InternalResourceRestApiProxy internalResourceRestApiProxy,
             EntityProxy entityProxy, RecommendationService recommendationService, long pageSize,
-            MetadataProxy metadataProxy, SqoopProxy sqoopProxy, JobService jobService, String dataDbDriver,
-            String dataDbUrl, String dataDbUser, String dataDbPassword, String dataDbDialect, String dataDbType,
-            Configuration yarnConfiguration) {
+            MetadataProxy metadataProxy, SqoopProxy sqoopProxy, RatingEngineProxy ratingEngineProxy,
+            JobService jobService, String dataDbDriver, String dataDbUrl, String dataDbUser, String dataDbPassword,
+            String dataDbDialect, String dataDbType, Configuration yarnConfiguration) {
         frontEndQueryCreator = new FrontEndQueryCreator();
         frontEndQueryCreator.initLookupFieldsConfiguration();
 
@@ -44,6 +45,7 @@ public class PlayLaunchInitStepTestHelper {
         playLaunchProcessor.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
         playLaunchProcessor.setMetadataProxy(metadataProxy);
         playLaunchProcessor.setSqoopProxy(sqoopProxy);
+        playLaunchProcessor.setRatingEngineProxy(ratingEngineProxy);
         playLaunchProcessor.setJobService(jobService);
         playLaunchProcessor.setDataDbDriver(dataDbDriver);
         playLaunchProcessor.setDataDbUrl(dataDbUrl);

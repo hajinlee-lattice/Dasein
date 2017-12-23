@@ -10,14 +10,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
@@ -30,12 +26,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 // TODO - enable when we have a way to simulate full/partial failure
@@ -66,6 +62,9 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
 
     @Autowired
     private SqoopProxy sqoopProxy;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -133,8 +132,8 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
         mockPartiallyBadRecommendationService();
 
         helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy,
-                partiallyBadRecommendationService, pageSize, metadataProxy, sqoopProxy, jobService, dataDbDriver,
-                dataDbUrl, dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
+                partiallyBadRecommendationService, pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService,
+                dataDbDriver, dataDbUrl, dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());

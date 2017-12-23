@@ -441,6 +441,11 @@ public class PlayLaunchProcessor {
     }
 
     @VisibleForTesting
+    void setRatingEngineProxy(RatingEngineProxy ratingEngineProxy) {
+        this.ratingEngineProxy = ratingEngineProxy;
+    }
+
+    @VisibleForTesting
     void setYarnConfiguration(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
     }

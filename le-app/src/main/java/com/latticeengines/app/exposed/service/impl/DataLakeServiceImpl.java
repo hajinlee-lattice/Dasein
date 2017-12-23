@@ -205,8 +205,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     public DataPage getAccountById(String accountID, ColumnSelection.Predefined predefined) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
 
-        List<Restriction> restrictions = new ArrayList<>();
-
         List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
                 .map(ColumnMetadata::getColumnId).collect(Collectors.toList());
 
