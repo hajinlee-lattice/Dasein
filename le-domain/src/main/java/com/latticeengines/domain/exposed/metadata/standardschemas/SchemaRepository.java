@@ -1107,13 +1107,19 @@ public class SchemaRepository {
         if (schema == SchemaInterpretation.Account || schema == SchemaInterpretation.SalesforceAccount) {
             attrs.add(website);
             attrs.add(accountCompanyName);
-            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns, address1, address2));
+            if (schema == SchemaInterpretation.Account) {
+                attrs.addAll(Arrays.asList(address1, address2));
+            }
+            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
             attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
         } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead) {
             attrs.add(email);
             attrs.add(contactCompanyName);
-            attrs.add(website);
-            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns, address1, address2));
+            if (schema == SchemaInterpretation.Contact) {
+                attrs.add(website);
+                attrs.addAll(Arrays.asList(address1, address2));
+            }
+            attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
             attrs.forEach(a -> a.setCategory(Category.LEAD_INFORMATION));
         }
         return attrs;
