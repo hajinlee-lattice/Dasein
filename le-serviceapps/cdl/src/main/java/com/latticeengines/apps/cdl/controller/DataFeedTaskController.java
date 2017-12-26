@@ -75,7 +75,7 @@ public class DataFeedTaskController {
                     importConfig);
             return ResponseDocument.successResponse(taskId);
         } catch (Exception e) {
-            log.error(String.format("Failed to create data feed task, exception: %s", e.toString()));
+            log.error(String.format("Failed to create data feed task, exception: %s", e.toString()), e);
             return ResponseDocument.failedResponse(e);
         }
 

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.eai.service.ValueConverter;
 
 public abstract class AvroTypeConverter {
@@ -80,6 +81,9 @@ public abstract class AvroTypeConverter {
                     }
                 }
             case STRING:
+                if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
+                    return valueConverter.convertTimeStampString(value);
+                }
                 targetType = String.class;
                 break;
             case BOOLEAN:

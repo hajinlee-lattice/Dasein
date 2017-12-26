@@ -17,4 +17,9 @@ public class CamelValueConverter implements ValueConverter {
         TypeConverter converter = typeConverterRegistry.lookup(targetType, value.getClass());
         return converter.convertTo(targetType, value);
     }
+
+    @Override
+    public String convertTimeStampString(Object value) {
+        return convertTo(String.class, value);
+    }
 }

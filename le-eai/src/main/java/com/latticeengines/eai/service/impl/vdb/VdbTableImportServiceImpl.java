@@ -19,7 +19,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,6 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -278,7 +276,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                             + " has neither physical data type nor source logical data type");
                 }
                 attribute.setPhysicalDataType(vdbTableToAvroTypeConverter
-                        .convertTypeToAvro(attribute.getSourceLogicalDataType().toLowerCase()).name());
+                        .convertTypeToAvro(attribute.getPhysicalDataType().toLowerCase()).name());
                 if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }

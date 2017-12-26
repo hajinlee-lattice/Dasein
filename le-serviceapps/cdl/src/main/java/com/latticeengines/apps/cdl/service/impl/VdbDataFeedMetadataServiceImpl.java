@@ -159,7 +159,9 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         dest.setSourceAttrName(source.getSourceAttrName());
         dest.setDisplayName(source.getDisplayName());
         dest.setSourceLogicalDataType(source.getSourceLogicalDataType());
-        dest.setPhysicalDataType(source.getPhysicalDataType());
+        if (StringUtils.isBlank(dest.getPhysicalDataType())) {
+            dest.setPhysicalDataType(source.getPhysicalDataType());
+        }
         if (StringUtils.isBlank(dest.getSourceLogicalDataType())) {
             dest.setSourceLogicalDataType(source.getPhysicalDataType());
         }
@@ -289,7 +291,10 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     @Override
     public Type getAvroType(Attribute attribute) {
         Type type = null;
-        String typeStrLowerCase = attribute.getSourceLogicalDataType().toLowerCase();
+        if (attribute.getPhysicalDataType() == null) {
+            throw new RuntimeException(String.format("Physical data type for attribute %s is null", attribute.getName()));
+        }
+        String typeStrLowerCase = attribute.getPhysicalDataType().toLowerCase();
         switch (typeStrLowerCase) {
         case "bit":
             type = Type.BOOLEAN;
