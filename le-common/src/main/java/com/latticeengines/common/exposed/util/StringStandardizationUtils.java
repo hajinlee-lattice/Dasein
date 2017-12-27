@@ -61,7 +61,7 @@ public class StringStandardizationUtils {
 
     String getStandardStringInternal(String str) {
         try {
-            if (StringUtils.isEmpty(str)) {
+            if (StringUtils.isEmpty(str) || str.trim().equalsIgnoreCase("none")) {
                 return null;
             }
             Set<Character> removedSet = new HashSet<>(getCharactersToRemove());

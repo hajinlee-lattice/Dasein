@@ -422,7 +422,9 @@ public class LocationUtils {
     }
 
     public static String getStandardCountry(String country) {
-        if (StringUtils.isEmpty(country)) {
+        if (StringUtils.isEmpty(country)
+                || country.trim().equalsIgnoreCase("none")
+                || country.trim().equalsIgnoreCase("null")) {
             return null;
         }
         country = country.replaceAll("\\d", "");
@@ -446,7 +448,9 @@ public class LocationUtils {
     }
 
     public static String getStandardState(String standardCountry, String state) {
-        if (StringUtils.isEmpty(state)) {
+        if (StringUtils.isEmpty(state)
+                || state.trim().equalsIgnoreCase("none")
+                || state.trim().equalsIgnoreCase("null")) {
             return null;
         }
         standardCountry = StringUtils.isNotEmpty(standardCountry) ? standardCountry : USA;
