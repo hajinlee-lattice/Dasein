@@ -158,8 +158,6 @@ public class DataFeedServiceImpl implements DataFeedService {
         Status datafeedStatus = Status.fromName(initialDataFeedStatus);
         switch (datafeedStatus) {
         case InitialLoaded:
-        case InitialConsolidated:
-            return Status.InitialConsolidated;
         case Active:
             return Status.Active;
         default:
