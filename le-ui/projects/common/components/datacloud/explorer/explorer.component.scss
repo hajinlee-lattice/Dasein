@@ -1074,7 +1074,7 @@
                 .attribute-feedback-container {
                     display: inline;
                     position: relative;
-                    padding-left: 15px;
+//                     padding-left: 15px;
                     attribute-feedback-button {
                         display: none;
                         pointer-events: auto;
@@ -1105,12 +1105,15 @@
                         height: 1.3em;
                         text-overflow: ellipsis; //ben
                         overflow: hidden;
-                        min-width: 20%;
+                        min-width: 26%;
                         /*
                         &:not(.records) {
                             min-width: 20%;
                         }
                         */
+                        &.blue-text {
+                            color: inherit;
+                        }
                         &.data-value-yes {
                             font-weight: bold;
                         }

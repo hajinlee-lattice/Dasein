@@ -69,6 +69,9 @@
                         ng-click="vm.selectSegmentAttribute(attribute)"
                         ng-style="{'pointer-events': (vm.section == 'segment.analysis' ? 'all' : 'none')}"
                         title="{{vm.getTitleTooltip(attribute)}}">
+                    
+                    {{ Rules = vm.getAttributeRules(attribute); "" }}
+                    {{ Value = vm.formatAttributeValue(attribute, Rules); "" }}
 
                     <!--input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" /-->
                     <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis'">
@@ -79,31 +82,31 @@
                                 id="{{attribute.Attribute || attribute.ColumnId}}"
                                 ng-show="false"
                                 ng-if="vm.section == 'segment.analysis' && attribute.TopBkt" /-->
-                        <i class="plus fa fa-plus" ng-if="(totalcount = vm.getAttributeRules(attribute)).length == 0"></i>
-                        <i class="plus fa fa-check" ng-if="totalcount.length == 1"></i>
-                        <i class="plus attribute-use-count" ng-if="totalcount.length >= 2">{{ totalcount.length }}</i>
-                        <i class="fa fa-check" ng-if="totalcount.length == 1"></i>
-                        <i class="attribute-use-count" ng-if="totalcount.length >= 2">
-                            {{ totalcount.length }}
+                        <i class="plus fa fa-plus" ng-if="Rules.length == 0"></i>
+                        <i class="plus fa fa-check" ng-if="Rules.length == 1"></i>
+                        <i class="plus attribute-use-count" ng-if="Rules.length >= 2">{{ Rules.length }}</i>
+                        <i class="fa fa-check" ng-if="Rules.length == 1"></i>
+                        <i class="attribute-use-count" ng-if="Rules.length >= 2">
+                            {{ Rules.length }}
                         </i>
-                        <div class="tooltip_" ng-if="totalcount.length >= 1">
-                            <div class="cover" ng-if="totalcount.length == 1">
+                        <div class="tooltip_" ng-if="Rules.length >= 1">
+                            <div class="cover" ng-if="Rules.length == 1">
                                 <h3>Attribute Selected</h3>
                                 <p>This attribute has been used already and can be used again in another query condition. Go to Refine Query to make changes.</p>
                                 <em>Query Snippet:</em>
                                 <ul>
-                                    <li ng-repeat="rule in totalcount">{{attribute.DisplayName}} is {{vm.generateBucketLabel(rule.bucketRestriction.bkt)}}</li>
+                                    <li ng-repeat="rule in Rules">{{attribute.DisplayName}} is {{vm.generateBucketLabel(rule.bucketRestriction.bkt)}}</li>
                                 </ul>
                             </div>
-                            <div class="cover" ng-if="totalcount.length >= 2">
+                            <div class="cover" ng-if="Rules.length >= 2">
                                 <h3>Multiple Uses</h3>
                                 <p>This attribute has been used more than once.<br>Go to Refine Query to make changes.</p>
                                 <em>Query Snippets:</em>
                                 <ul>
-                                    <li ng-repeat="rule in totalcount | limitTo: 3">{{attribute.DisplayName}} is {{vm.generateBucketLabel(rule.bucketRestriction.bkt)}}</li>
-                                    <li ng-if="totalcount.length == 4">{{attribute.DisplayName}} is {{ vm.generateBucketLabel(totalcount[3].bucketRestriction.bkt) }}</li>
-                                    <li ng-if="totalcount.length > 4">
-                                        And {{totalcount.length - 3}} other instances
+                                    <li ng-repeat="rule in Rules | limitTo: 3">{{attribute.DisplayName}} is {{vm.generateBucketLabel(rule.bucketRestriction.bkt)}}</li>
+                                    <li ng-if="Rules.length == 4">{{attribute.DisplayName}} is {{ vm.generateBucketLabel(Rules[3].bucketRestriction.bkt) }}</li>
+                                    <li ng-if="Rules.length > 4">
+                                        And {{Rules.length - 3}} other instances
                                     </li>
                                 </ul>
                             </div>
@@ -118,8 +121,10 @@
                     </div>
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
-                    <div class="column data value" ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">
-                        {{ attribute.TopBkt.Lbl }}
+                    <div    class="column data value" 
+                            ng-class="{ 'blue-text': vm.isSpecialAttributeValue(Value) }"
+                            ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">
+                        {{ Value }}
                     </div>
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data[attribute.Entity].Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
 
@@ -131,8 +136,8 @@
                                 value="attribute.TopBkt.Cnt|number" 
                                 icon-image="vm.categoryIcon(category)"
                                 category-class="vm.categoryClass(category)"
-                                ng-if=" vm.lookupMode && vm.hasCompanyInfo" />
-                                {{ attribute.TopBkt.Cnt|number }}
+                                ng-if="vm.lookupMode && vm.hasCompanyInfo" />
+                                {{ vm.formatAttributeRecords(Value, (attribute.TopBkt.Cnt|number)) }}
                         </strong>
                         <strong ng-if="vm.section != 'segment.analysis'" class="attribute-feedback-container">
                             <attribute-feedback-button 
@@ -142,7 +147,7 @@
                                 icon-image="vm.categoryIcon(category)"
                                 category-class="vm.categoryClass(category)"
                                 ng-if="vm.lookupMode && vm.hasCompanyInfo" />
-                                {{ attribute.Count |number }}
+                                {{ attribute.Count|number }}
                         </strong>
                     </div>
                     <div 

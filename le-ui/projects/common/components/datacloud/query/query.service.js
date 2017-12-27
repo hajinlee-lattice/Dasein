@@ -1,6 +1,9 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, $stateParams, $timeout, QueryService, BucketRestriction, SegmentStore) {
+.service('QueryStore', function(
+    $filter, $q, $stateParams, $timeout, QueryService, BucketRestriction, 
+    SegmentStore, NumberUtility
+) {
     var QueryStore = this;
 
     angular.extend(this, {});
@@ -547,22 +550,36 @@ angular.module('common.datacloud.query.service',[
     }
 
     this.generateBucketLabel = function(bkt) {
+        var a, b;
+
+        if (bkt.Vals) {
+            var format = NumberUtility.AbbreviateLargeNumber;
+            var abbrs = ["K", "M", "B"]; // no T from Backend?
+            
+            a = format(bkt.Vals[0], 0, abbrs);
+            b = format(bkt.Vals[1], 0, abbrs);
+        }
+
         switch (bkt.Cmp) {
-            case 'Yes': bkt.Lbl = 'Yes'; break;
-            case 'empty': bkt.Lbl = ''; break;
-            case 'between': bkt.Lbl = bkt.Vals[0] + ' - ' + bkt.Vals[1]; break;
-            case 'IS_NULL': bkt.Lbl = ''; break;
-            case 'IS_NOT_NULL': bkt.Lbl = ''; break;
-            case 'GREATER_THAN': bkt.Lbl = '> ' + bkt.Vals[0]; break;
-            case 'LESS_THAN': bkt.Lbl = '< ' + bkt.Vals[0]; break;
-            case 'GREATER_OR_EQUAL': bkt.Lbl = '>= ' + bkt.Vals[0]; break;
-            case 'LESS_OR_EQUAL': bkt.Lbl = '<= ' + bkt.Vals[0]; break;
-            case 'GTE_AND_LTE': bkt.Lbl = '>= ' + bkt.Vals[0] + ' and <= ' + bkt.Vals[1]; break;
-            case 'GTE_AND_LT': bkt.Lbl = '>= ' + bkt.Vals[0] + ' and < ' + bkt.Vals[1]; break;
-            case 'GT_AND_LTE': bkt.Lbl = '> ' + bkt.Vals[0] + ' and <= ' + bkt.Vals[1]; break;
-            case 'GT_AND_LT': bkt.Lbl = '> ' + bkt.Vals[0] + ' and < ' + bkt.Vals[1]; break;
+            case 'Yes':             bkt.Lbl = 'Yes';    break;
+            case 'empty':           bkt.Lbl = '';       break;
+            case 'EQUAL':           bkt.Lbl = bkt.Vals[0];  break;
+            case 'IS_NULL':         bkt.Lbl = '';       break;
+            case 'IS_NOT_NULL':     bkt.Lbl = '';       break;
+            case 'GREATER_THAN':    bkt.Lbl = '> '+a;   break;
+            case 'LESS_THAN':       bkt.Lbl = '< '+a;   break;
+            case 'GREATER_OR_EQUAL':bkt.Lbl = '>= '+a;  break;
+            case 'LESS_OR_EQUAL':   bkt.Lbl = '<= '+a;  break;
+            case 'GT_AND_LTE':      bkt.Lbl = '> ' +a+' and <= '+b; break;
+            case 'GT_AND_LT':       bkt.Lbl = '> ' +a+' and < ' +b; break;
+            case 'GTE_AND_LTE':     bkt.Lbl = '>= '+a+' and <= '+b; break;
+            case 'GTE_AND_LT':      bkt.Lbl = a+' - '+b;break;
+            case 'between':         bkt.Lbl = a+' - '+b;break;
+            case 'BETWEEN':         bkt.Lbl = a+' - '+b;break;
             default:
-                bkt.Lbl = (bkt.Vals && bkt.Vals.length>0) ? bkt.Vals[0] : 'empty';
+                if (bkt.Cmp) {
+                    bkt.Lbl = (bkt.Vals && bkt.Vals.length>0) ? a : 'empty';
+                }
         }
 
         return bkt;

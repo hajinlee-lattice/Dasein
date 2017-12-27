@@ -328,7 +328,6 @@ angular.module('common.datacloud.query.builder', [
             }, 250);
         } else {
             QueryStore.setEntitiesProperty('loading', true);
-console.log(1);
             $timeout(function() {
                 var segment = { 
                     'free_form_text_search': "",
@@ -337,13 +336,11 @@ console.log(1);
                         'row_offset': 0
                     }
                 };
-console.log(2);
 
                 segment['account_restriction'] = angular.copy(QueryStore.accountRestriction);
                 segment['contact_restriction'] = angular.copy(QueryStore.contactRestriction);
 
                 QueryStore.getEntitiesCounts(SegmentStore.sanitizeSegment(segment)).then(function(result) {
-console.log(3);
                     QueryStore.setResourceTypeCount('accounts', false, result['Account']);
                     QueryStore.setResourceTypeCount('contacts', false, result['Contact']);
                 });

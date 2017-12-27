@@ -7,7 +7,7 @@ angular.module('mainApp.appCommon.utilities.NumberUtility', [])
      * @param {[type]} decimal_places an integer
      * return: a string
      */
-    this.AbbreviateLargeNumber = function (number, decimal_places) {
+    this.AbbreviateLargeNumber = function (number, decimal_places, abbreviations) {
         if (number == null || typeof number != "number") {
             return null;
         }
@@ -15,7 +15,7 @@ angular.module('mainApp.appCommon.utilities.NumberUtility', [])
         decimal_places = decimal_places != null && typeof decimal_places === 'number' ? decimal_places : 2;
         decimal_places = Math.pow(10,decimal_places);
 
-        var abbreviation = ["K", "M", "B", "T"];
+        var abbreviation = abbreviations || ["K", "M", "B", "T"];
     
         for (var i = abbreviation.length-1; i>=0; i--) {
             var size = Math.pow(10,(i+1)*3);

@@ -1654,7 +1654,7 @@ angular.module('common.datacloud.explorer', [
                 isSameBucket = true,
                 bkt = restriction.bkt;
 
-            if (bucket) {
+            if (bucket && bkt.Vals) {
                 isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
             }
 
@@ -1662,6 +1662,68 @@ angular.module('common.datacloud.explorer', [
         });
 
         return attributes;
+    }
+
+    vm.formatAttributeValue = function(attribute, rules) {
+        var label = attribute.TopBkt ? attribute.TopBkt.Lbl : attribute.Value;
+
+        if (!vm.cube || !rules || rules.length == 0) {
+            return label;
+        }
+
+        var cube = vm.cube.data[attribute.Entity].Stats[attribute.Attribute];
+        var cubeMatches = [];
+        var cubeLabels = [];
+
+        var filtered = rules.filter(function(item) {
+            var Lbl = item.bucketRestriction.bkt.Lbl;
+
+            cubeLabels.push(Lbl);
+
+            return Lbl == label;
+        });
+
+        var matches = cube.Bkts.List.filter(function(item) { 
+            if (cubeLabels.indexOf(item.Lbl) >= 0) {
+                cubeMatches.push(item);
+            }
+
+            return item.Lbl == label;
+        });
+
+        //console.log(attribute.Entity+'.'+attribute.Attribute, rules.length, filtered.length, matches.length, cubeMatches.length, label, cube, { 'rules':rules, 'filtered':filtered, 'matches':matches, 'cubeLabels':cubeLabels, 'cubeMatches':cubeMatches, 'attribute':attribute });
+
+        if (filtered.length != rules.length && rules.length > 1) {
+            return 'MULTIPLE USES';
+        }
+
+        if (filtered.length == 0 && cubeMatches.length == 0 && cubeMatches.length == 0) {
+            return 'CUSTOMIZED';
+        }
+
+        if (matches.length >= 1 && filtered.length == 0) {
+            return 'SELECTED';
+        }
+
+        return label;
+    }
+
+    vm.formatAttributeRecords = function(type, value) {
+        switch (type) {
+            case 'MULTIPLE USES':
+                return '*';
+            case 'CUSTOMIZED':
+                return '*';
+            case 'SELECTED':
+                return "*";
+            default: 
+                return value;
+        }
+    }
+
+    vm.isSpecialAttributeValue = function(value) {
+        var map = ['SELECTED', 'CUSTOMIZED', 'MULTIPLE USES'];
+        return map.indexOf(value) >= 0;
     }
 
     vm.init();
