@@ -57,7 +57,7 @@ public class SamlGlobalAuthenticationServiceImpl extends GlobalAuthenticationSer
             throws Exception {
         super.validateUserForTicketCreation(user);
         if (userConfig == null || Boolean.FALSE.equals(userConfig.getSsoEnabled())) {
-            throw new Exception("SSO login not enabled for user at tenant: " + userConfig.getTenantDeploymentId());
+            throw new Exception("SSO login not enabled for user at tenant: " + user.getEmail());
         }
     }
 

@@ -135,7 +135,7 @@ public class InternalResource extends InternalResourceBase {
     private static final String adminTesterPwd = "admin";
     private static final String adUsername = "testuser1";
     private static final String adPassword = "Lattice1";
-    private static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
+    public static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
     private static final String NULL_STRING = "null";
     private static final Integer BUCKET_0 = 99;
     private static final Integer BUCKET_1 = 95;
