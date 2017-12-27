@@ -18,9 +18,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableFilterParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateStagingTableParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ResolveStagingAndRuntimeTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
@@ -48,9 +45,6 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow
         @JsonSubTypes.Type(value = ParseMatchResultParameters.class, name = "parseMatchResultParameters"), //
         @JsonSubTypes.Type(value = CascadingBulkMatchDataflowParameters.class, name = "cascadingBulkMatchDataflowParameters"), //
         @JsonSubTypes.Type(value = PivotScoreAndEventParameters.class, name = "pivotScoreAndEventParameters"), //
-        @JsonSubTypes.Type(value = CreateStagingTableParameters.class, name = "createStagingTableParameters"), //
-        @JsonSubTypes.Type(value = ResolveStagingAndRuntimeTableParameters.class, name = "resolveStagingAndRuntimeTableParameters"), //
-        @JsonSubTypes.Type(value = RedshiftPublishDataFlowParameters.class, name = "RedshiftExportDataFlowParameters"), //
 })
 public class DataFlowParameters {
 
