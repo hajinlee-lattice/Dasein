@@ -142,12 +142,12 @@ public class CheckRecordsInRTSInOrbInAMTestNG
     }
 
     Object[][] expectedDataValues = new Object[][] { //
-            { "RTS", "DUNS13", 1004, "apple.com" }, //
-            { "RTS", "DUNS11", 1002, "netapp.com" }, //
-            { "RTS", "DUNS16", 1007, "target.com" }, //
-            { "RTS", "DUNS18", 1009, "amazon.com" }, //
-            { "RTS", "DUNS15", 1006, "craigslist.com" }, //
-            { "RTS", "DUNS17", 1008, "payless.com" } };
+            { "RTS", "DUNS13", 1004L, "apple.com" }, //
+            { "RTS", "DUNS11", 1002L, "netapp.com" }, //
+            { "RTS", "DUNS16", 1007L, "target.com" }, //
+            { "RTS", "DUNS18", 1009L, "amazon.com" }, //
+            { "RTS", "DUNS15", 1006L, "craigslist.com" }, //
+            { "RTS", "DUNS17", 1008L, "payless.com" } };
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
