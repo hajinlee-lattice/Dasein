@@ -111,18 +111,18 @@ angular
                 }
             }
 
-            vm.getOperationLabel = function() {
-                if (!vm.tree.bucketRestriction.bkt) {
-                    return;
-                }
+            // vm.getOperationLabel = function() {
+            //     if (!vm.tree.bucketRestriction.bkt) {
+            //         return;
+            //     }
 
-                switch (vm.type) {
-                    case 'Boolean': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Vals[0] || ''];
-                    case 'Numerical': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Cmp];
-                    case 'Enum': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Cmp];
-                    default: return 'has a value of';
-                }
-            }
+            //     switch (vm.type) {
+            //         case 'Boolean': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Vals[0] || ''];
+            //         case 'Numerical': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Cmp];
+            //         case 'Enum': return QueryTreeService.cmpMap[vm.tree.bucketRestriction.bkt.Cmp];
+            //         default: return 'has a value of';
+            //     }
+            // }
 
             vm.setBucket = function($event, unset) {
                 vm.editing = false;
