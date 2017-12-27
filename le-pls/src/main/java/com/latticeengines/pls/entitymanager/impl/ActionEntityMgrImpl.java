@@ -68,4 +68,16 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
         super.delete(action);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
+        actionDao.updateOwnerIdIn(ownerId, actionPids);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Action> findByPidIn(List<Long> actionPids) {
+        return actionRepository.findByPidIn(actionPids);
+    }
+
 }

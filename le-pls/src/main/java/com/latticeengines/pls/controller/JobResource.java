@@ -24,8 +24,6 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Jobs')")
 public class JobResource {
 
-    private static final Long UNCOMPLETED_PROCESS_ANALYZE_ID = 0L;
-
     @Autowired
     private WorkflowJobService workflowJobService;
 

@@ -1,18 +1,24 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -25,6 +31,8 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -32,6 +40,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
@@ -57,6 +66,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
+    }
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
+    @PostConstruct
+    public void init() {
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     public ApplicationId submit(String customerSpace, ProcessAnalyzeRequest request) {
@@ -98,40 +117,66 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         execution = dataFeedProxy.startExecution(customerSpace);
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
-        List<Long> importJobIds = getImportJobIds(customerSpace);
-        log.info(String.format("importJobIdsStr=%s", importJobIds));
+        Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
 
-        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, importJobIds,
-                datafeedStatus);
+        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
+                actionAndJobIds, datafeedStatus);
         return workflowJobService.submit(configuration);
     }
 
-    private List<Long> getImportJobIds(String customerSpace) {
-        List<Job> importJobs = workflowProxy.getWorkflowJobs(customerSpace, null,
-                Collections.singletonList("cdlDataFeedImportWorkflow"), null, Boolean.FALSE);
-        List<Long> importJobIds = Collections.emptyList();
-        if (CollectionUtils.isEmpty(importJobs)) {
-            log.warn("No import jobs are associated with the current consolidate job");
-        } else {
-            importJobIds = importJobs.stream().map(job -> job.getId()).collect(Collectors.toList());
-            log.info(String.format("Import jobs that associated with the current consolidate job are: %s",
-                    importJobIds));
+    @VisibleForTesting
+    Pair<List<Long>, List<Long>> getActionAndJobIds(String customerSpace) {
+        List<Action> actions = internalResourceProxy.getActionsByOwnerId(customerSpace, null);
+        log.info(String.format("Actions are %s", Arrays.toString(actions.toArray())));
+        // TODO add delete jobs
+        Set<ActionType> importAndDeleteTypes = Collections.singleton(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        // TODO add status filter to filter out running ones
+        List<String> importAndDeleteJobIdStrs = actions.stream()
+                .filter(action -> importAndDeleteTypes.contains(action.getType()))
+                .map(action -> action.getTrackingId().toString()).collect(Collectors.toList());
+        List<Job> importAndDeleteJobs = workflowProxy.getWorkflowJobs(customerSpace, importAndDeleteJobIdStrs, null,
+                null, null);
+
+        List<Long> completedImportAndDeleteJobIds = CollectionUtils.isEmpty(importAndDeleteJobs)
+                ? Collections.emptyList()
+                : importAndDeleteJobs.stream().map(job -> job.getId()).collect(Collectors.toList());
+
+        log.info(String.format("Jobs that associated with the current consolidate job are: %s",
+                completedImportAndDeleteJobIds));
+
+        List<Long> completedActionIds = actions.stream()
+                .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobIds))
+                .map(action -> action.getPid()).collect(Collectors.toList());
+        log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
+
+        Pair<List<Long>, List<Long>> idPair = new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
+        return idPair;
+    }
+
+    private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
+            List<Long> completedImportAndDeleteJobIds) {
+        if (selectedTypes.contains(action.getType())
+                && !completedImportAndDeleteJobIds.contains(action.getTrackingId())) {
+            return false;
         }
-        return importJobIds;
+        return true;
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
-            ProcessAnalyzeRequest request, List<Long> importJobIds, Status status) {
+            ProcessAnalyzeRequest request, Pair<List<Long>, List<Long>> actionAndJobIds, Status status) {
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .initialDataFeedStatus(status) //
-                .importJobIds(importJobIds) //
+                .importJobIds(actionAndJobIds.getRight()) //
+                .actionIds(actionAndJobIds.getLeft()) //
                 .rebuildEntities(request.getRebuildEntities()) //
-                .inputProperties(ImmutableMap //
-                        .of(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName())) //
+                .inputProperties(ImmutableMap.<String, String> builder() //
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
+                        .put(WorkflowContextConstants.Inputs.ACTION_IDS, actionAndJobIds.getLeft().toString()) //
+                        .build()) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
     }

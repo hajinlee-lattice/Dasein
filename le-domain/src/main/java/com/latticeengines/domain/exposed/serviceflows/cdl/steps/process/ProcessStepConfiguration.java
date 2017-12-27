@@ -15,6 +15,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("import_job_ids")
     private List<Long> importJobIds = Collections.emptyList();
 
+    @JsonProperty("action_ids")
+    private List<Long> actionIds = Collections.emptyList();
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -31,4 +34,11 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
         this.importJobIds = importJobIds;
     }
 
+    public List<Long> getActionIds() {
+        return this.actionIds;
+    }
+
+    public void setActionIds(List<Long> actionIds) {
+        this.actionIds = actionIds;
+    }
 }

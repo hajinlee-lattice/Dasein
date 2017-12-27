@@ -33,4 +33,16 @@ public class ActionDaoImpl extends BaseDaoImpl<Action> implements ActionDao {
         return results;
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
+    public void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("update %s set OWNER_ID = :ownerId where PID in (:actionPids)",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("ownerId", ownerId);
+        query.setParameterList("actionPids", actionPids);
+        query.executeUpdate();
+    }
+
 }

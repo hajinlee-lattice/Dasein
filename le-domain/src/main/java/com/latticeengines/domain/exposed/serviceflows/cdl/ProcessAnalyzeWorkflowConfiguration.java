@@ -45,8 +45,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace,
-                    "processAnalyzeWorkflow");
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace, "processAnalyzeWorkflow");
             processStepConfiguration.setCustomerSpace(customerSpace);
             processAccountStepConfiguration.setCustomerSpace(customerSpace);
             processContactStepConfiguration.setCustomerSpace(customerSpace);
@@ -97,6 +96,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder importJobIds(List<Long> importJobIds) {
             processStepConfiguration.setImportJobIds(importJobIds);
+            return this;
+        }
+
+        public Builder actionIds(List<Long> actionIds) {
+            processStepConfiguration.setActionIds(actionIds);
             return this;
         }
 

@@ -1,11 +1,15 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -17,12 +21,16 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(ActionEntityMgrImplTestNG.class);
+
     @Inject
     private ActionEntityMgr actionEntityMgr;
 
     private static final String ACTION_INITIATOR = "test@lattice-engines.com";
 
     private static final Long OWNER_ID = 10002L;
+
+    private static final Long NEW_OWNER_ID = 10003L;
 
     private List<Action> actions;
 
@@ -75,10 +83,18 @@ public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Action actionWithoutOwner = findByOwnerId(null).get(0);
         actionWithoutOwner.setOwnerId(OWNER_ID);
         update(actionWithoutOwner);
-        List<Action> actionsWithOwner = findByOwnerId(OWNER_ID);
-        Assert.assertEquals(actionsWithOwner.size(), 2);
+        List<Action> actions = findByOwnerId(OWNER_ID);
+        Assert.assertEquals(actions.size(), 2);
         List<Action> actionsWithoutOwner = findByOwnerId(null);
         Assert.assertEquals(actionsWithoutOwner.size(), 1);
+
+        List<Long> allActionIds = findAll().stream().map(action -> action.getPid()).collect(Collectors.toList());
+        updateOwnerIdIn(NEW_OWNER_ID, allActionIds);
+        actions = findByOwnerId(NEW_OWNER_ID);
+        Assert.assertEquals(actions.size(), 3);
+        actions = findByPidIn(allActionIds);
+        Assert.assertEquals(actions.size(), 3);
+        log.info(String.format("All actions are %s", Arrays.toString(actions.toArray())));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
@@ -112,5 +128,13 @@ public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     protected void delete(Action action) {
         actionEntityMgr.delete(action);
+    }
+
+    protected void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
+        actionEntityMgr.updateOwnerIdIn(ownerId, actionPids);
+    }
+
+    protected List<Action> findByPidIn(List<Long> actionPids) {
+        return actionEntityMgr.findByPidIn(actionPids);
     }
 }

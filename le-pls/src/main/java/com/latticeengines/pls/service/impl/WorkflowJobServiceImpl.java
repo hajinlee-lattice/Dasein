@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,14 +15,18 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -112,11 +117,42 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public Job find(String jobId) {
-        Job job = workflowProxy.getWorkflowExecution(jobId);
-        updateJobWithModelSummary(job);
-        updateStepDisplayNameAndNumSteps(job);
-        updateJobDisplayNameAndDescription(job);
+        if (jobId == null) {
+            throw new NullPointerException("jobId cannot be null.");
+        }
+        Job job = null;
+        // For unfinished ProcessAnalyze job
+        if (Long.parseLong(jobId) == UNCOMPLETED_PROCESS_ANALYZE_ID) {
+            return generateUnstartedProcessAnalyzeJob(true);
+        } else {
+            job = workflowProxy.getWorkflowExecution(jobId);
+            updateJobWithModelSummary(job);
+            updateStepDisplayNameAndNumSteps(job);
+            updateJobDisplayNameAndDescription(job);
+            if (job.getJobType().equals("processAnalyzeWorkflow")) {
+                List<Long> actionPids = getActionIdsForJob(job);
+                List<Action> actions = getActions(actionPids);
+                List<Job> subJobs = expandActions(actions);
+                job.setSubJobs(subJobs);
+            }
+        }
+
         return job;
+    }
+
+    List<Action> getActions(List<Long> actionPids) {
+        return actionService.findByPidIn(actionPids);
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    List<Long> getActionIdsForJob(Job job) {
+        String actionIdsStr = job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS);
+        if (StringUtils.isEmpty(actionIdsStr)) {
+            throw new LedpException(LedpCode.LEDP_18172, new String[] { job.getId().toString() });
+        }
+        List<Object> listObj = JsonUtils.deserialize(actionIdsStr, List.class);
+        return JsonUtils.convertList(listObj, Long.class);
     }
 
     @Override
@@ -139,7 +175,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         jobs.removeIf(job -> NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
         updateAllJobsAndStepsWithModelSummaries(jobs);
-        Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob();
+        Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
         if (unstartedPnAJob != null) {
             jobs.add(unstartedPnAJob);
         }
@@ -147,7 +183,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @VisibleForTesting
-    Job generateUnstartedProcessAnalyzeJob() {
+    Job generateUnstartedProcessAnalyzeJob(boolean expandChildrenJobs) {
         Job job = null;
         List<Action> actions = actionService.findByOwnerId(null, null);
         if (CollectionUtils.isNotEmpty(actions)) {
@@ -165,8 +201,35 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             DateTime dateTime = new DateTime();
             // set the start time to be in the future for UI sorting purpose
             job.setStartTimestamp(dateTime.plusDays(1).toDate());
+            if (expandChildrenJobs) {
+                job.setSubJobs(expandActions(actions));
+            }
         }
         return job;
+    }
+
+    @VisibleForTesting
+    List<Job> expandActions(List<Action> actions) {
+        log.info(String.format("Expand actions...actions=%s", actions));
+        List<Job> jobList = new ArrayList<>();
+        List<String> workflowJobIds = new ArrayList<>();
+        for (Action action : actions) {
+            // this action is a workflow job
+            if (action.getTrackingId() != null) {
+                workflowJobIds.add(action.getTrackingId().toString());
+            } else {
+                Job job = new Job();
+                job.setName(action.getType().getName());
+                job.setJobType(action.getType().getName());
+                job.setUser(action.getActionInitiator());
+                job.setStartTimestamp(action.getCreated());
+                job.setDescription(action.getDescription());
+                job.setJobStatus(JobStatus.COMPLETED);
+                jobList.add(job);
+            }
+        }
+        jobList.addAll(workflowProxy.getWorkflowExecutionsByJobIds(workflowJobIds));
+        return jobList;
     }
 
     private void updateStepDisplayNameAndNumSteps(Job job) {

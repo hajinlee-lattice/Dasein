@@ -43,4 +43,14 @@ public class ActionServiceImplTestNG extends ActionEntityMgrImplTestNG {
         actionService.delete(action);
     }
 
+    @Override
+    protected void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
+        actionService.updateOwnerIdIn(ownerId, actionPids);
+    }
+
+    @Override
+    protected List<Action> findByPidIn(List<Long> actionPids) {
+        return actionService.findByPidIn(actionPids);
+    }
+
 }

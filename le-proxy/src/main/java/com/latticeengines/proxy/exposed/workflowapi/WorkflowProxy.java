@@ -140,8 +140,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
             urlStr.append("?");
         }
         urlStr.append(sb);
-        String url = constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
-        return url;
+        return constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
     }
 
     @Override
@@ -164,8 +163,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
             urlStr.append(String.format("jobId=%s&", jobId));
         }
         urlStr.append(String.format("parentJobId=%s", parentJobId));
-        String url = constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
-        return url;
+        return constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
     }
 
 }

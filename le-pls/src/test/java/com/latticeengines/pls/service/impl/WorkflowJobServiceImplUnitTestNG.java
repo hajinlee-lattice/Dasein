@@ -111,7 +111,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     @SuppressWarnings("unchecked")
     @Test(groups = "unit")
     public void testGenerateUnstartedProcessAnalyzeJob() {
-        Job job = workflowJobService.generateUnstartedProcessAnalyzeJob();
+        Job job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNotNull(job);
         Assert.assertEquals(job.getNote(), WorkflowJobServiceImpl.CDLNote);
         Assert.assertEquals(job.getName(), "processAnalyzeWorkflow");
@@ -125,7 +125,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertEquals(listObj.size(), 2);
         log.info(String.format("listObj is %s", listObj));
         when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
-        job = workflowJobService.generateUnstartedProcessAnalyzeJob();
+        job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNull(job);
     }
 

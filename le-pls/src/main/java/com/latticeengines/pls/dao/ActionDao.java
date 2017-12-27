@@ -9,4 +9,6 @@ public interface ActionDao extends BaseDao<Action> {
 
     List<Action> findAllWithNullOwnerId();
 
+    void updateOwnerIdIn(Long ownerId, List<Long> actionPids);
+
 }

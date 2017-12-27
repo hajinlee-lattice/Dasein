@@ -49,4 +49,14 @@ public class ActionServiceImpl implements ActionService {
         return action;
     }
 
+    @Override
+    public void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
+        actionEntityMgr.updateOwnerIdIn(ownerId, actionPids);
+    }
+
+    @Override
+    public List<Action> findByPidIn(List<Long> actionPids) {
+        return actionEntityMgr.findByPidIn(actionPids);
+    }
+
 }

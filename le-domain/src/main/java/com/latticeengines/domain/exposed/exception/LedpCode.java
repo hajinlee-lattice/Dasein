@@ -285,6 +285,7 @@ public enum LedpCode {
     LEDP_18169("Export could not be initiated as segment has more than {0} entries."), //
     LEDP_18170("Authentication deined as external IdentityProvider did not validate the User."), //
     LEDP_18171("Could not create valid session for External User {0}."), //
+    LEDP_18172("Action Ids for job {0} is empty."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -628,7 +629,8 @@ public enum LedpCode {
     LEDP_37012("Failed to retrieve data from {0}"), //
     LEDP_37013("Could not find data collection of type {0}"), //
     LEDP_37014("Could not find the default data collection"), //
-    LEDP_37015("Could not find the attribute repository for tenant {0}. Make sure data profiling is done for the tenant."), //
+    LEDP_37015(
+            "Could not find the attribute repository for tenant {0}. Make sure data profiling is done for the tenant."), //
     LEDP_37016("Cannot support cross-period event query, found {0} and {1} in the query."), //
 
     // le-dante

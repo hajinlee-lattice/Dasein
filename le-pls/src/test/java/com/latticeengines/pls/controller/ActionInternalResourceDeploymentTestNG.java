@@ -1,8 +1,10 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -35,6 +37,8 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
     private static final String ACTION_INITIATOR = "test@lattice-engines.com";
 
     private static final Long OWNER_ID = 10002L;
+
+    private static final Long NEW_OWNER_ID = 10003L;
 
     private List<Action> actions;
 
@@ -93,6 +97,14 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
         Assert.assertEquals(actionsWithOwner.size(), 2);
         List<Action> actionsWithoutOwner = findByOwnerId(null);
         Assert.assertEquals(actionsWithoutOwner.size(), 1);
+
+        List<Long> allActionIds = findAll().stream().map(action -> action.getPid()).collect(Collectors.toList());
+        updateOwnerIdIn(NEW_OWNER_ID, allActionIds);
+        actions = findByOwnerId(NEW_OWNER_ID);
+        Assert.assertEquals(actions.size(), 3);
+        actions = findByPidIn(allActionIds);
+        Assert.assertEquals(actions.size(), 3);
+        log.info(String.format("All actions are %s", Arrays.toString(actions.toArray())));
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
@@ -111,7 +123,7 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
     }
 
     protected List<Action> findAll() {
-        return internalResourceRestApiProxy.getAllActions(CustomerSpace.parse(mainTestTenant.getId()).toString());
+        return internalResourceRestApiProxy.findAll(CustomerSpace.parse(mainTestTenant.getId()).toString());
     }
 
     protected List<Action> findByOwnerId(Long ownerId) {
@@ -130,6 +142,16 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     protected Action findByPid(Long pid) {
         return actionEntityMgr.findByPid(pid);
+    }
+
+    protected void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
+        internalResourceRestApiProxy.updateOwnerIdIn(CustomerSpace.parse(mainTestTenant.getId()).toString(), ownerId,
+                actionPids);
+    }
+
+    protected List<Action> findByPidIn(List<Long> actionPids) {
+        return internalResourceRestApiProxy.findByPidIn(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+                actionPids);
     }
 
 }

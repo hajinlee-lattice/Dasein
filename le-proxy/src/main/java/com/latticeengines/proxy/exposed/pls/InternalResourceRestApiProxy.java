@@ -609,7 +609,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<Action> getAllActions(String customerSpace) {
+    public List<Action> findAll(String customerSpace) {
         try {
             String url = constructUrl("pls/internal/actions/all/" + customerSpace);
             List<?> listObj = restTemplate.getForObject(url, List.class);
@@ -617,6 +617,26 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         } catch (Exception e) {
             throw new RuntimeException("getAllActions: Remote call failure: " + e.getMessage(), e);
         }
+    }
+
+    public List<Action> findByPidIn(String customerSpace, @NonNull List<Long> pids) {
+        try {
+            String url = generateGetAllActionsByPidsUrl(customerSpace, pids);
+            List<?> listObj = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(listObj, Action.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getAllActionsByPids: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    private String generateGetAllActionsByPidsUrl(String customerSpace, List<Long> pids) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append("pls/internal/actions/all/").append(customerSpace).append("?");
+        for (Long pid : pids) {
+            urlStr.append(String.format("pid=%s&", pid));
+        }
+        urlStr.setLength(urlStr.length() - 1);
+        return constructUrl(urlStr.toString());
     }
 
     public List<Action> getActionsByOwnerId(String customerSpace, Long ownerId) {
@@ -648,6 +668,25 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         } catch (Exception e) {
             throw new RuntimeException("updateAction: Remote call failure: " + e.getMessage(), e);
         }
+    }
+
+    public void updateOwnerIdIn(String customerSpace, @NonNull Long ownerId, @NonNull List<Long> pids) {
+        try {
+            restTemplate.patchForObject(generatePatchOwnerIdOfActionsUrl(customerSpace, ownerId, pids), null,
+                    Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("patchOwnerIdOfActions: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    private String generatePatchOwnerIdOfActionsUrl(String customerSpace, Long ownerId, List<Long> pids) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append("pls/internal/actions/").append(customerSpace).append("?");
+        for (Long pid : pids) {
+            urlStr.append(String.format("pid=%s&", pid));
+        }
+        urlStr.append(String.format("ownerId=%s", ownerId));
+        return constructUrl(urlStr.toString());
     }
 
     public void deleteAction(String customerSpace, @NonNull Long pid) {

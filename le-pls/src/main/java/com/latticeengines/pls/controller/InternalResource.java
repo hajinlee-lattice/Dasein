@@ -1483,11 +1483,16 @@ public class InternalResource extends InternalResourceBase {
     @ApiOperation(value = "Get actions for a tenant")
     public List<Action> getAllActions( //
             @PathVariable("tenantId") String customerSpace, //
+            @RequestParam(value = "pid", required = false) List<Long> pids, //
             HttpServletRequest request) {
         checkHeader(request);
         log.debug(String.format("Retrieve Actions for tenant: %s", customerSpace));
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
-        return actionService.findAll();
+        if (pids == null) {
+            return actionService.findAll();
+        } else {
+            return actionService.findByPidIn(pids);
+        }
     }
 
     @RequestMapping(value = "/actions/ownerid/{ownerId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
@@ -1530,10 +1535,23 @@ public class InternalResource extends InternalResourceBase {
             HttpServletRequest request) {
         checkHeader(request);
         log.debug(String.format("Update action for tenant: %s", customerSpace));
-        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         Tenant tenant = manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         action.setTenant(tenant);
         return actionService.update(action);
+    }
+
+    @RequestMapping(value = "/actions/" + TENANT_ID_PATH, method = RequestMethod.PATCH)
+    @ResponseBody
+    @ApiOperation(value = "Update an action")
+    public void patchOwnerIdOfActions( //
+            @PathVariable("tenantId") String customerSpace, //
+            @RequestParam(value = "pid", required = true) List<Long> pids, //
+            @RequestParam(value = "ownerId", required = true) Long ownerId, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Patch action for tenant: %s", customerSpace));
+        Tenant tenant = manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        actionService.updateOwnerIdIn(ownerId, pids);
     }
 
     @RequestMapping(value = "/actions/{pid}/" + TENANT_ID_PATH, method = RequestMethod.DELETE)

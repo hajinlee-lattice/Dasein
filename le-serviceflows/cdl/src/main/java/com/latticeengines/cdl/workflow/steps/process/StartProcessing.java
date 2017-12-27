@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -8,11 +9,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -34,6 +37,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -57,9 +61,18 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @Inject
     private ExportDataToRedshift exportDataToRedshift;
 
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
     private CustomerSpace customerSpace;
     private DataCollection.Version activeVersion;
     private DataCollection.Version inactiveVersion;
+    private InternalResourceRestApiProxy internalResourceProxy;
+
+    @PostConstruct
+    public void init() {
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    }
 
     @Override
     public void execute() {
@@ -84,7 +97,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         List<Job> importJobs = getJobs(configuration.getImportJobIds());
         createReport(importJobs);
-        updateImportJobs();
+        updateActions();
         cleanupInactiveVersion();
         exportDataToRedshift.upsertToInactiveVersion();
     }
@@ -118,13 +131,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 importJobIds.stream().map(jobId -> jobId.toString()).collect(Collectors.toList()));
     }
 
-    private void updateImportJobs() {
-        List<String> importJobIds = configuration.getImportJobIds().stream().map(jobId -> jobId.toString())
-                .collect(Collectors.toList());
-        if (importJobIds.isEmpty()) {
-            return;
-        }
-        workflowProxy.updateParentJobId(configuration.getCustomerSpace().toString(), importJobIds, jobId.toString());
+    private void updateActions() {
+        List<Long> actionIds = configuration.getActionIds();
+        log.info(String.format("Updating actions=%s", Arrays.toString(actionIds.toArray())));
+        internalResourceProxy.updateOwnerIdIn(configuration.getCustomerSpace().toString(), jobId, actionIds);
     }
 
     private void createReport(List<Job> jobs) {
