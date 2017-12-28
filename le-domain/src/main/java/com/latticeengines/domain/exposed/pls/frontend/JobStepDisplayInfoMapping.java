@@ -97,6 +97,64 @@ public final class JobStepDisplayInfoMapping {
             "launch_play" //
     };
 
+    private static final String[] PROCESS_ANALYZE_STEPS = { //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Publishing", //
+            "Publishing", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring" //
+    };
+
     private static final Map<String, String[]> DISPLAY_NAME = new HashMap<>();
     private static final Map<String, String[]> DISPLAY_DESCRIPTION = new HashMap<>();
     static {
@@ -105,12 +163,14 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_NAME.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_NAME.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
+        DISPLAY_NAME.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_DESCRIPTION.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
+        DISPLAY_DESCRIPTION.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
     }
 
     public static String getMappedName(String workflowType, int stepIndex) {
