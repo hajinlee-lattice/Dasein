@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -13,9 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -54,23 +54,30 @@ public class SamlLoginResource {
     @Autowired
     private SPSamlProxy samlProxy;
 
-    @RequestMapping(value = "/login/" + InternalResource.TENANT_ID_PATH, 
-            method = RequestMethod.POST, 
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @Value("${security.app.public.url}")
+    private String loginUrl;
+
+    @RequestMapping(value = "/login/"
+            + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     @ApiOperation(value = "Login via SAML Authentication")
     public RedirectView authenticateSamlUserAndAttachTenant(@PathVariable("tenantId") String tenantDeploymentId,
-            @RequestParam("SAMLResponse") String samlResponse, @RequestParam(name = "RelayState", required = false) String relayState) {
+            @RequestParam("SAMLResponse") String samlResponse,
+            @RequestParam(name = "RelayState", required = false) String relayState,
+            // TODO - remove this once UI integration is stable. This is added
+            // to help UI to point to QA backend but still get call to local
+            // login UI
+            @RequestParam(name = "enforceLocalUI", required = false, defaultValue = "false") boolean enforceLocalUI) {
         UserDocument uDoc = new UserDocument();
         RedirectView redirectView = new RedirectView();
         try {
             @SuppressWarnings("unchecked")
             MultivaluedMap<String, String> formParams = null;
-            log.info("SAML Login Resource: TenantDeploymentId - RelayState - Response ", tenantDeploymentId,
-                    relayState, samlResponse);
+            log.info("SAML Login Resource: TenantDeploymentId - RelayState - Response ", tenantDeploymentId, relayState,
+                    samlResponse);
 
-            LoginValidationResponse samlLoginResp = samlProxy.validateSSOLogin(tenantDeploymentId,
-                    samlResponse, relayState);
+            LoginValidationResponse samlLoginResp = samlProxy.validateSSOLogin(tenantDeploymentId, samlResponse,
+                    relayState);
 
             if (!samlLoginResp.isValidated()) {
                 throw new LedpException(LedpCode.LEDP_18170);
@@ -81,6 +88,7 @@ public class SamlLoginResource {
 
             uDoc.setSuccess(true);
             uDoc.setAuthenticationRoute(session.getAuthenticationRoute());
+            uDoc.setTicket(session.getTicket());
 
             UserResult result = uDoc.new UserResult();
             UserResult.User user = result.new User();
@@ -94,12 +102,17 @@ public class SamlLoginResource {
             result.setUser(user);
 
             uDoc.setResult(result);
-            
+
             Map<String, Object> attributeMap = new HashMap<>();
             attributeMap.put("userName", uDoc.getResult().getUser().getEmailAddress());
-            attributeMap.put("SamlAuthenticated", true);
-            attributeMap.put("userDocument", uDoc);
-            redirectView.setUrl("https://testapp.lattice-engines.com");
+            attributeMap.put("samlAuthenticated", true);
+            attributeMap.put("userDocument", JsonUtils.serialize(uDoc));
+
+            String baseLoginURL = loginUrl;
+            if (enforceLocalUI) {
+                baseLoginURL = "https://localhost:3000";
+            }
+            redirectView.setUrl(String.format("%s/login/saml/%s", baseLoginURL, tenantDeploymentId));
             redirectView.setAttributesMap(attributeMap);
 
         } catch (LedpException e) {
@@ -108,14 +121,12 @@ public class SamlLoginResource {
             }
             throw e;
         }
-        
-       
+
         return redirectView;
     }
-    
-    @RequestMapping(value = "/attachUser/" + InternalResource.TENANT_ID_PATH, 
-            method = RequestMethod.POST, 
-            headers = "Accept=application/json")
+
+    @RequestMapping(value = "/attachUser/"
+            + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Login via SAML Authentication")
     public UserDocument attachUserToGASession(@PathVariable("tenantId") String tenantDeploymentId,
@@ -148,17 +159,17 @@ public class SamlLoginResource {
             }
             throw e;
         }
-       
+
         return uDoc;
     }
-    
-    @RequestMapping(value = "/logout/" + InternalResource.TENANT_ID_PATH,
-            method = RequestMethod.POST, 
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+
+    @RequestMapping(value = "/logout/"
+            + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     @ApiOperation(value = "Logout the user at GA and SAML IDP")
-    public SimpleBooleanResponse logoutFromSpAndIDP(HttpServletRequest request, @PathVariable("tenantId") String tenantDeploymentId,
-            @RequestParam("SAMLResponse") String samlResponse, @RequestParam(name = "isSPInitiatedLogout", required = false) String isSPInitiatedLogout) {
+    public SimpleBooleanResponse logoutFromSpAndIDP(HttpServletRequest request,
+            @PathVariable("tenantId") String tenantDeploymentId, @RequestParam("SAMLResponse") String samlResponse,
+            @RequestParam(name = "isSPInitiatedLogout", required = false) String isSPInitiatedLogout) {
         log.info("SAML Logout Resource: TenantDeploymentId - isSPInitiatedLogout - Response ", tenantDeploymentId,
                 samlResponse, isSPInitiatedLogout);
 
@@ -171,7 +182,8 @@ public class SamlLoginResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/metadata/" + InternalResource.TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/metadata/"
+            + InternalResource.TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get ServiceProvider SAML Metadata for requested Tenant")
     public Response getIdpMetadata(HttpServletRequest request, @PathVariable("tenantId") String tenantDeploymentId) {
