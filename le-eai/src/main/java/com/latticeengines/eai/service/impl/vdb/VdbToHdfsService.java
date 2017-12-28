@@ -61,6 +61,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
             importContext.setProperty(ImportProperty.IGNORED_ROWS_LIST, new HashMap<String, List<Long>>());
             importContext.setProperty(ImportProperty.DUPLICATE_ROWS, new HashMap<String, Long>());
             importContext.setProperty(ImportProperty.DUPLICATE_ROWS_LIST, new HashMap<String, List<Long>>());
+            importContext.setProperty(ImportProperty.BUSINESS_ENTITY, config.getBusinessEntity());
             String collectionIdentifiers = config.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
             if (!StringUtils.isEmpty(collectionIdentifiers)) {
                 @SuppressWarnings("unchecked")
@@ -167,25 +168,25 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 Map.class);
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             Table table = tableMetaData.get(entry.getValue().getCollectionIdentifier());
-            Long ignoredRows = ignoredRecord.get(table.getName());
             Long totalRows = (long) entry.getValue().getTotalRows();
-            Long duplicateRows = (long) duplicateRecord.get(table.getName());
             if (multipleExtractMap.get(table.getName())) {
                 List<String> recordList = new ArrayList<>();
                 for (Long record : multipleRecords.get(table.getName())) {
                     recordList.add(record.toString());
                 }
-                ignoredRows = 0L;
+                Long ignoredRows = 0L;
                 for (Long record : mutipleIgnoredRecords.get(table.getName())) {
                     ignoredRows += record;
                 }
-                duplicateRows = 0L;
+                Long duplicateRows = 0L;
                 for (Long record : mutipleDuplicatedRecords.get(table.getName())) {
                     duplicateRows += record;
                 }
                 updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
                         multipleTargets.get(table.getName()), recordList, totalRows, ignoredRows, duplicateRows);
             } else {
+                Long ignoredRows = ignoredRecord.get(table.getName());
+                Long duplicateRows = duplicateRecord.get(table.getName());
                 updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
                         Arrays.asList(targetPathsMap.get(table.getName())),
                         Arrays.asList(processedRecordsMap.get(table.getName()).toString()),

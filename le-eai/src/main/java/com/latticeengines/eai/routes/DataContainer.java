@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.Deflater;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.eai.service.impl.CamelValueConverter;
 import com.latticeengines.eai.service.ValueConverter;
 import org.apache.avro.Schema;
@@ -33,22 +34,30 @@ public class DataContainer {
 
     public DataContainer(SpringCamelContext context, Table table) {
         ValueConverter valueConverter = new CamelValueConverter(context.getTypeConverterRegistry());
-        initialize(valueConverter, table);
+        initialize(valueConverter, table, false);
     }
 
     public DataContainer(ValueConverter valueConverter, Table table) {
-        initialize(valueConverter, table);
+        initialize(valueConverter, table, false);
     }
 
-    private void initialize(ValueConverter valueConverter, Table table) {
+    public DataContainer(ValueConverter valueConverter, Table table, boolean uniqueName) {
+        initialize(valueConverter, table, uniqueName);
+    }
+
+    private void initialize(ValueConverter valueConverter, Table table, boolean uniquedName) {
         this.valueConverter = valueConverter;
         this.table = table;
         this.schema = table.getSchema();
         if (schema == null) {
             throw new RuntimeException("Schema cannot be null.");
         }
-        this.file = new File(
-                String.format("%s-%s.avro", table.getName(), new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
+        if (uniquedName) {
+            this.file = new File(String.format("%s.avro", NamingUtils.uuid(table.getName())));
+        } else {
+            this.file = new File(
+                    String.format("%s-%s.avro", table.getName(), new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
+        }
 
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
         dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
