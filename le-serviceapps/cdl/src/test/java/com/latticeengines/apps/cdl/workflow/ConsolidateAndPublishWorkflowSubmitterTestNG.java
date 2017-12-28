@@ -18,12 +18,11 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-public class ConsolidateAndPublishWorkflowSubmitterTestNG extends CDLFunctionalTestNGBase {
+public class ConsolidateAndPublishWorkflowSubmitterTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateAndPublishWorkflowSubmitterTestNG.class);
 

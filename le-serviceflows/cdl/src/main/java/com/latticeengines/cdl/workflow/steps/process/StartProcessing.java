@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +135,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private void updateActions() {
         List<Long> actionIds = configuration.getActionIds();
         log.info(String.format("Updating actions=%s", Arrays.toString(actionIds.toArray())));
-        internalResourceProxy.updateOwnerIdIn(configuration.getCustomerSpace().toString(), jobId, actionIds);
+        if (CollectionUtils.isNotEmpty(actionIds)) {
+            internalResourceProxy.updateOwnerIdIn(configuration.getCustomerSpace().toString(), jobId, actionIds);
+        }
     }
 
     private void createReport(List<Job> jobs) {

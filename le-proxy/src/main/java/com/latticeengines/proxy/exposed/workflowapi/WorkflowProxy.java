@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.workflowapi;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -82,6 +83,9 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
 
     @Override
     public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds) {
+        if (CollectionUtils.isEmpty(jobIds)) {
+            return Collections.emptyList();
+        }
         StringBuilder sb = new StringBuilder();
         for (String jobId : jobIds) {
             sb.append(String.format("jobId=%s&", jobId));

@@ -134,12 +134,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<String> importAndDeleteJobIdStrs = actions.stream()
                 .filter(action -> importAndDeleteTypes.contains(action.getType()))
                 .map(action -> action.getTrackingId().toString()).collect(Collectors.toList());
-        List<Job> importAndDeleteJobs = workflowProxy.getWorkflowJobs(customerSpace, importAndDeleteJobIdStrs, null,
-                null, null);
+        log.info(String.format("importAndDeleteJobIdStrs are %s", importAndDeleteJobIdStrs));
+        List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobIds(importAndDeleteJobIdStrs);
 
         List<Long> completedImportAndDeleteJobIds = CollectionUtils.isEmpty(importAndDeleteJobs)
                 ? Collections.emptyList()
-                : importAndDeleteJobs.stream().map(job -> job.getId()).collect(Collectors.toList());
+                : importAndDeleteJobs.stream().filter(
+                        job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
+                        .map(job -> job.getId()).collect(Collectors.toList());
 
         log.info(String.format("Jobs that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobIds));

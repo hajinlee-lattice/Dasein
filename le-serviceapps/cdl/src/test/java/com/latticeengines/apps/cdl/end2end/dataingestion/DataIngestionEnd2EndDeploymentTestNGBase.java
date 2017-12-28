@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -68,6 +69,8 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -109,6 +112,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger logger = LoggerFactory.getLogger(DataIngestionEnd2EndDeploymentTestNGBase.class);
 
+    private static final String INITIATOR = "test@lattice-engines.com";
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
     private static final String S3_VDB_VERSION = "1";
 
@@ -302,6 +306,19 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity.name());
         dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
                 e);
+        registerImportAction(dataFeedTask);
+    }
+
+    private Action registerImportAction(DataFeedTask dataFeedTask) {
+        logger.info(String.format("Regsitering action for dataFeedTask=%s", dataFeedTask));
+        Action action = new Action();
+        action.setType(ActionType.METADATA_CHANGE);
+        action.setActionInitiator(INITIATOR);
+        action.setTenant(mainTestTenant);
+        action.setDescription(dataFeedTask.getUniqueId());
+        action.setTrackingId(null);
+
+        return internalResourceProxy.createAction(mainTestTenant.getId(), action);
     }
 
     private String uploadMockDataWithModifiedSchema(BusinessEntity entity, int offset, int limit) {
@@ -822,6 +839,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             logger.info("Rating engine count " + bkt.getName() + " expected " + counts.get(bkt.getName()) + " found "
                     + count);
         });
+    }
+
+    void verifyUpdateActions() {
+        List<Action> actions = internalResourceProxy.findAll(mainTestTenant.getId());
+        logger.info(String.format("actions=%s", actions));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(actions));
+        Assert.assertTrue(actions.stream().allMatch(action -> action.getOwnerId() != null));
     }
 
 }

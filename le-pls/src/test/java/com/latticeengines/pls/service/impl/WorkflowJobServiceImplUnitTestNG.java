@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
@@ -25,6 +27,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -62,6 +65,8 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     private Long[] jobIds = { 123L, 456L };
 
+    private static final String INITIATOR = "test@lattice-engines.com";
+
     @BeforeClass(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -74,7 +79,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testFind() {
-        Job job = workflowJobService.find("1");
+        Job job = workflowJobService.find("1001");
         assertEquals(job.getId(), jobIds[0]);
         assertNotNull(job.getInputs());
         assertEquals(job.getJobStatus(), JobStatus.RUNNING);
@@ -109,7 +114,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "unit")
+    @Test(groups = "unit", dependsOnMethods = { "testExpandActions" })
     public void testGenerateUnstartedProcessAnalyzeJob() {
         Job job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNotNull(job);
@@ -122,11 +127,34 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));
         List<Object> listObj = JsonUtils.deserialize(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS),
                 List.class);
-        Assert.assertEquals(listObj.size(), 2);
+        Assert.assertEquals(listObj.size(), 3);
         log.info(String.format("listObj is %s", listObj));
+        job = workflowJobService.generateUnstartedProcessAnalyzeJob(true);
+        Assert.assertNotNull(job.getSubJobs());
+        Assert.assertEquals(job.getSubJobs().size(), 3);
         when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNull(job);
+    }
+
+    @Test(groups = "unit")
+    public void testGetActionIdsForJob() {
+        List<Long> actionIds = workflowJobService.getActionIdsForJob(createProcessAnalyzeJob(jobIds[0]));
+        Assert.assertEquals(actionIds.size(), 3);
+        Assert.assertTrue(actionIds.contains(101L) && actionIds.contains(102L) && actionIds.contains(103L));
+        log.info(String.format("actionIds=%s", actionIds));
+    }
+
+    @Test(groups = "unit")
+    public void testExpandActions() {
+        List<Job> expandedJobs = workflowJobService.expandActions(generateActions());
+        Assert.assertEquals(expandedJobs.size(), 3);
+        Job firstJob = expandedJobs.get(0);
+        Assert.assertEquals(firstJob.getName(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
+        Assert.assertEquals(firstJob.getJobType(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
+        Assert.assertEquals(firstJob.getUser(), INITIATOR);
+        Assert.assertEquals(firstJob.getJobStatus(), JobStatus.COMPLETED);
+        log.info(String.format("expandedJobs=%s", expandedJobs));
     }
 
     private void mockWorkflowProxy() {
@@ -161,10 +189,17 @@ public class WorkflowJobServiceImplUnitTestNG {
         List<Action> actions = new ArrayList<>();
         Action action1 = new Action();
         action1.setPid(1L);
+        action1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action1.setActionInitiator(INITIATOR);
         Action action2 = new Action();
         action2.setPid(2L);
+        action2.setTrackingId(jobIds[0]);
+        Action action3 = new Action();
+        action3.setPid(3L);
+        action3.setTrackingId(jobIds[1]);
         actions.add(action1);
         actions.add(action2);
+        actions.add(action3);
         return actions;
     }
 
@@ -195,6 +230,21 @@ public class WorkflowJobServiceImplUnitTestNG {
         job.setJobStatus(JobStatus.RUNNING);
         job.setSteps(steps);
 
+        return job;
+    }
+
+    private Job createProcessAnalyzeJob(Long jobId) {
+        Job job = new Job();
+        job.setId(jobId);
+        job.setName("processAnalyzeWorkflow");
+        job.setDescription("processAnalyzeWorkflow");
+        job.setJobType("processAnalyzeWorkflow");
+        job.setStartTimestamp(new Date());
+        job.setJobStatus(JobStatus.COMPLETED);
+        List<Long> actionIds = Arrays.asList(101L, 102L, 103L);
+        Map<String, String> inputContext = new HashMap<>();
+        inputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIds.toString());
+        job.setInputs(inputContext);
         return job;
     }
 }
