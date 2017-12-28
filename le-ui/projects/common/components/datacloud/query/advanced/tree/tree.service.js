@@ -157,6 +157,106 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 return 'Uknown';
             }
         }
+        //***************** Editing ************************************/
+
+       
+        /**
+         * Return the var for ng-model in a boolean bucket restriction
+         * @param {*} bucketRestriction 
+         */
+        this.getBooleanModel = function(bucketRestriction){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.getBooleanModel(bucketRestriction);
+            } else {
+                console.warning(' changeBooleanValue() Service not implemented');
+            }
+        }
+        
+        this.getEnumCmpModel = function(bucketRestriction){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.getEnumCmpModel(bucketRestriction);
+            } else {
+                console.warning(' changeBooleanValue() Service not implemented');
+            }
+        }
+
+        this.getNumericalCmpModel = function(bucketRestriction){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.getNumericalCmpModel(bucketRestriction);
+            } else {
+                console.warning(' getNumericalCmpModel() Service not implemented');
+            }
+        }
+
+         /**
+         * Change a boolean value for a Boolean restriction
+         * @param {*} bucketRestriction 
+         */
+        this.changeBooleanValue = function(bucketRestriction, booleanValue){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                service.changeBooleanValue(bucketRestriction, booleanValue);
+            } else {
+                console.warning(' changeBooleanValue() Service not implemented');
+            }
+        }
+        this.changeEnumCmpValue = function(bucketRestriction, value){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.changeEnumCmpValue(bucketRestriction, value);
+            } else {
+                console.warning(' changeEnumCmpValue() Service not implemented');
+            }
+        }
+
+        this.changeNumericalCmpValue = function(bucketRestriction, value){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.changeNumericalCmpValue(bucketRestriction, value);
+            } else {
+                console.warning(' changeNumericalCmpValue() Service not implemented');
+            }
+        }
+        
+        this.changeBktValue = function(bucketRestriction, value, position){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.changeBktValue(bucketRestriction, value, position);
+            } else {
+                console.warning(' changeNumericalCmpValue() Service not implemented');
+            }
+        }
+
+
+        this.getBktValue = function(bucketRestriction, position){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.getBktValue(bucketRestriction, position);
+            } else {
+                console.warning(' getBktValue() Service not implemented');
+            }
+        }
+
+        this.getCubeBktList = function(bucketRestriction, cube){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.getCubeBktList(cube);
+            } else {
+                console.warning(' getCubeBktList() Service not implemented');
+            }
+        }
 
     })
     .service('QueryTreeAccountEntityService', function () {
@@ -248,6 +348,46 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             }
         }
 
+        //******************** Editing mode *********************************/
+        this.changeBooleanValue = function(bucketRestriction, booleanValue){
+            if (!bucketRestriction.bkt.Vals[0]) {
+                bucketRestriction.bkt.Vals[0] = null;
+            }else{
+                bucketRestriction.bkt.Vals[0] = booleanValue;
+            }
+        }
+        this.changeEnumCmpValue = function(bucketRestriction, value){
+            bucketRestriction.bkt.Cmp = value;
+        }
+        this.changeNumericalCmpValue = function(bucketRestriction, value){
+            bucketRestriction.bkt.Cmp = value;
+        }
+
+        this.changeBktValue = function(bucketRestriction, value, position){
+            bucketRestriction.bkt.Vals[position] = value;
+        }
+
+        this.getBooleanModel = function(bucketRestriction){
+            return bucketRestriction.bkt.Vals[0];
+        }
+        this.getEnumCmpModel = function(bucketRestriction){
+            return bucketRestriction.bkt.Cmp;
+        }
+
+        this.getNumericalCmpModel = function(bucketRestriction){
+            return bucketRestriction.bkt.Cmp;
+        }
+
+        this.getBktValue = function(bucketRestriction, position){
+            return bucketRestriction.bkt.Vals[position];
+        }
+
+        this.getCubeBktList = function(cube){
+            return cube.Bkts.List;
+        }
+
+      
+        //*******************************************************************/
 
     })
     .service('QueryTreePurchaseHistoryService', function () {

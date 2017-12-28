@@ -1,8 +1,8 @@
-<span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
+<span ng-if="vm.showItem('Boolean')" class="query-section-item-operation">
     <span class="query-section-item-value" ng-if="vm.tree.bucketRestriction.bkt.Vals[0] != ''">
         <strong>is</strong>
     </span>
-    <select ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" ng-change="vm.changeBooleanValue()">
+    <select ng-model="vm.booleanValue" ng-change="vm.changeBooleanValue()">
         <option value="Yes">True</option>
         <option value="No">False</option>
         <option value="">Empty</option>
@@ -10,16 +10,16 @@
 
 </span>
 
-<span ng-if="vm.type == 'Enum'" class="query-section-item-operation">
-    <select ng-model="vm.tree.bucketRestriction.bkt.Cmp" ng-change="vm.changeOperation()" ng-options="k as v for (k, v) in vm.enum_operations">
+<span ng-if="vm.showItem('Enum')" class="query-section-item-operation">
+    <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()" ng-options="k as v for (k, v) in vm.enum_operations">
     </select>
 
-    <select ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" ng-change="vm.updateBucketCount()">
-        <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
+    <select ng-model="vm.bktVals0" ng-change="vm.changeBktVal(0)">
+        <option ng-repeat="bucket in vm.getCubeBktList()" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
     </select>
 </span>
 
-<span ng-if="vm.type == 'Numerical'" class="query-section-item-operation">
+<span ng-if="vm.showItem('Numerical')" class="query-section-item-operation">
     <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')">
         <button type="button" class="button icon-button {{vm.editMode == 'Custom' ? 'white' : 'light-gray'}}-button" value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
             <span ng-if="vm.editMode == 'Custom'">Custom</span>
@@ -32,21 +32,21 @@
     </div>
 
     <span ng-if="vm.editMode == 'Custom'">
-        <select ng-model="vm.tree.bucketRestriction.bkt.Cmp" ng-change="vm.changeOperation()" ng-options="k as v for (k, v) in vm.numerical_operations">
+        <select ng-model="vm.numericalCmpModel" ng-change="vm.changeNumericalCmpValue()" ng-options="k as v for (k, v) in vm.numerical_operations">
         </select>
 
-        <input ng-model="vm.tree.bucketRestriction.bkt.Vals[0]" ng-if="vm.no_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) < 0"
-            ng-keyup="vm.changeOperation()" ng-value="vm.tree.bucketRestriction.bkt.Vals[0]"></input>
+        <input ng-model="vm.bktVals0" ng-if="vm.no_inputs.indexOf(vm.numericalCmpModel) < 0"
+            ng-keyup="vm.changeBktVal(0)" ng-value="vm.bktVals0"></input>
 
-        <span ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0" class="operation-and">-</span>
+        <span ng-if="vm.two_inputs.indexOf(vm.numericalCmpModel) >= 0" class="operation-and">-</span>
 
-        <input ng-if="vm.two_inputs.indexOf(vm.tree.bucketRestriction.bkt.Cmp) >= 0" ng-model="vm.tree.bucketRestriction.bkt.Vals[1]"
-            ng-keyup="vm.changeOperation()" ng-value="vm.tree.bucketRestriction.bkt.Vals[1]"></input>
+        <input ng-if="vm.two_inputs.indexOf(vm.numericalCmpModel) >= 0" ng-model="vm.bktVals1"
+            ng-keyup="vm.changeBktVal(1)" ng-value="vm.bktVals1"></input>
     </span>
 
     <span ng-if="vm.editMode == 'Preset'">
         <select ng-model="vm.presetOperation" ng-change="vm.changePreset()">
-            <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl" ng-init="vm.checkSelected(bucket)">{{ bucket.Lbl }}</option>
+            <option ng-repeat="bucket in vm.getCubeBktList()" ng-value="bucket.Lbl" ng-init="vm.checkSelected(bucket)">{{ bucket.Lbl }}</option>
         </select>
     </span>
 </span>

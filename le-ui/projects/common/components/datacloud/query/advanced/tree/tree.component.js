@@ -176,13 +176,13 @@ angular
                 }
             }
 
-            vm.changeBooleanValue = function() {
-                if (!vm.tree.bucketRestriction.bkt.Vals[0]) {
-                    vm.tree.bucketRestriction.bkt.Vals[0] = null;
-                }
+            // vm.changeBooleanValue = function() {
+            //     if (!vm.tree.bucketRestriction.bkt.Vals[0]) {
+            //         vm.tree.bucketRestriction.bkt.Vals[0] = null;
+            //     }
 
-                vm.updateBucketCount();
-            }
+            //     vm.updateBucketCount();
+            // }
 
             vm.addAttribute = function(tree) {
                 this.root.saveState();
