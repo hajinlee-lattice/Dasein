@@ -73,7 +73,8 @@
                         ng-if="!vm.current.tileStates[rating.id].editRating">
                         
                         <ul>
-                            <li>Created by <span class="blue-text">{{rating.createdBy}}</span> on <span class="blue-text">{{rating.created | date}}</span></li>
+                            <li>Created by <span class="blue-text">{{rating.createdBy}}</span></li>
+                            <li>Created on <span class="blue-text">{{rating.created | date}}</span></li>
                             <li>
                                 Segment: 
                                 <span ng-if="rating.segmentDisplayName != null" class="blue-text">{{rating.segmentDisplayName}}</span>

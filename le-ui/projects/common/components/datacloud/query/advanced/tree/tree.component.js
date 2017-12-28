@@ -44,6 +44,8 @@ angular
 
                 DataCloudStore.getEnrichments().then(function(enrichments) {
                     vm.enrichments = enrichments;
+
+                    console.log(vm.enrichments);
                     
                     if (vm.tree.bucketRestriction) {
                         var bucket = vm.tree.bucketRestriction;
@@ -55,6 +57,8 @@ angular
                                 ]
                             ]
                         );
+
+                        console.log(vm.item);
 
                         if (!vm.item || typeof vm.tree.bucketRestriction.bkt.Id != "number") {
                             vm.unused = true;

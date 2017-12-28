@@ -61,7 +61,9 @@
                     </div>
                     <div class="tile-metadata" ng-if="!vm.tileStates[segment.name].editSegment">
                         <ul>
+                            <li>Created by <span class="blue-text">{{segment.created_by}}</span></li>
                             <li>Created on <span class="blue-text">{{segment.created | date}}</span></li>
+                            <li>Last updated <span class="blue-text">{{segment.updated | date}}</span></li>
                         </ul>
                     </div>
                     <div class="tile-body wrap-body" ng-if="!vm.tileStates[segment.name].editSegment">

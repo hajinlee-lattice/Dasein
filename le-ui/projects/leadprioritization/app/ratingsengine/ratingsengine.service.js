@@ -388,6 +388,7 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     };
 
+
     this.getBucketRuleCounts = function(restrictions, segmentId){
         var buckets = restrictions.map(function(bucket, index) {
             var label = bucket.bucketRestriction.attr,

@@ -131,16 +131,18 @@ angular.module('lp.ratingsengine.wizard.summary', [])
             map[bucket.bucketRestriction.attr + '_' + index] = bucket;
         })
 
-        RatingsEngineStore.getBucketRuleCounts(restrictions, segmentId).then(function(result) {
-            var buckets = result.segmentIdAndSingleRulesCoverageMap;
+        return RatingsEngineStore.getBucketRuleCounts(restrictions, segmentId);
+
+        // RatingsEngineStore.getBucketRuleCounts(restrictions, segmentId).then(function(result) {
+        //     var buckets = result.segmentIdAndSingleRulesCoverageMap;
             
-            Object.keys(buckets).forEach(function(key) {
-                var label = map[key].bucketRestriction.attr,
-                    type = label.split('.')[0] == 'Contact' ? 'contact' : 'account';
+        //     Object.keys(buckets).forEach(function(key) {
+        //         var label = map[key].bucketRestriction.attr,
+        //             type = label.split('.')[0] == 'Contact' ? 'contact' : 'account';
                 
-                map[key].bucketRestriction.bkt.Cnt = buckets[key][type + 'Count'];
-            });
-        }); 
+        //         map[key].bucketRestriction.bkt.Cnt = buckets[key][type + 'Count'];
+        //     });
+        // }); 
     }
 
     vm.getAllBucketRestrictions = function() {

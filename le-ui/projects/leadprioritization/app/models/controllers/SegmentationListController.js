@@ -2,7 +2,7 @@ angular.module('lp.models.segments', [
     'mainApp.models.modals.DeleteSegmentModal'
 ])
 .controller('SegmentationListController', function ($scope, $element, $state, $stateParams,
-    SegmentsList, DeleteSegmentModal, SegmentService, QueryStore) {
+    SegmentsList, DeleteSegmentModal, SegmentService, QueryStore, RatingsEngineStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -32,13 +32,21 @@ angular.module('lp.models.segments', [
     });
 
     vm.init = function() {
-        SegmentsList.forEach(function(segment) {
-            vm.tileStates[segment.name] = {
-                showCustomMenu: false,
-                editSegment: false,
-                saveEnabled: false
-            };
-        });
+
+        // console.log(vm.segments);
+
+        // vm.segmentIds = [];
+        // SegmentsList.forEach(function(segment) {
+        //     vm.tileStates[segment.name] = {
+        //         showCustomMenu: false,
+        //         editSegment: false,
+        //         saveEnabled: false
+        //     };
+        //     vm.segmentIds.push(segment.name);
+        // });
+        // RatingsEngineStore.getSegmentsCounts(vm.segmentIds).then(function(response){
+        //     console.log(response);
+        // });
 
         if ($stateParams.edit) {
             var tileState = vm.tileStates[$stateParams.edit];

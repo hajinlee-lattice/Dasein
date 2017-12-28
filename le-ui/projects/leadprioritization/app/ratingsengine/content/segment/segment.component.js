@@ -128,8 +128,8 @@ angular.module('lp.ratingsengine.wizard.segment', [])
                 if(done) {
                     vm.loadingSupplementaryData = false;
                 }
-            })
-        })
+            });
+        });
     }
 
     vm.setSegment = function(segment) {
