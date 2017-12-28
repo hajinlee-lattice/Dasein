@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -118,7 +119,11 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
                     booleanExpression = lhsPath.eq(subselect);
                 } else {
-                    booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                    if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                        booleanExpression = ((StringExpression) lhsPath).equalsIgnoreCase(rhsPaths.get(0));
+                    } else {
+                        booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                    }
                 }
                 break;
             case NOT_EQUAL:
@@ -126,7 +131,11 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
                     booleanExpression = lhsPath.ne(subselect);
                 } else {
-                    booleanExpression = lhsPath.ne(rhsPaths.get(0));
+                    if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                        booleanExpression = ((StringExpression) lhsPath).notEqualsIgnoreCase(rhsPaths.get(0));
+                    } else {
+                        booleanExpression = lhsPath.ne(rhsPaths.get(0));
+                    }
                 }
                 break;
             case GREATER_OR_EQUAL:
@@ -158,9 +167,20 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     // like "attr in ?", which is not a valid syntax so we treat
                     // it differently
                     if (rhsPaths.size() > 1) {
-                        booleanExpression = lhsPath.in(rhsPaths.toArray(new ComparableExpression[0]));
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                            rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
+                            booleanExpression = ((StringExpression) lhsPath).toLowerCase().in(
+                                    rhsPaths.toArray(new ComparableExpression[0]));
+
+                        } else {
+                            booleanExpression = lhsPath.in(rhsPaths.toArray(new ComparableExpression[0]));
+                        }
                     } else {
-                        booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                            booleanExpression = ((StringExpression) lhsPath).equalsIgnoreCase(rhsPaths.get(0));
+                        } else {
+                            booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                        }
                     }
                 }
                 break;
@@ -172,6 +192,11 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             case STARTS_WITH:
                 if (lhsPath instanceof StringExpression) {
                     booleanExpression = ((StringExpression) lhsPath).startsWithIgnoreCase(rhsPaths.get(0));
+                    break;
+                }
+            case ENDS_WITH:
+                if (lhsPath instanceof StringExpression) {
+                    booleanExpression = ((StringExpression) lhsPath).endsWithIgnoreCase(rhsPaths.get(0));
                     break;
                 }
             case NOT_CONTAINS:
@@ -192,6 +217,10 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
 
             return booleanExpression;
         }
+    }
+
+    private boolean applyEqualIgnoreCase(boolean isBitEncoded, Lookup lhs, ComparableExpression lhsPath) {
+        return !isBitEncoded && !(lhs instanceof CaseLookup) && (lhsPath instanceof StringExpression);
     }
 
     private boolean isNullValueLookup(Lookup lookup) {

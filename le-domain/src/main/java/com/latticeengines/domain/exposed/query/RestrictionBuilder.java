@@ -170,6 +170,14 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder endsWith(Object value) {
+        operator = ComparisonType.ENDS_WITH;
+        negate = false;
+        rhsLookup = new ValueLookup(value);
+        completeConcrete();
+        return this;
+    }
+
     public RestrictionBuilder inCollection(Collection<Object> collection) {
         if (collection == null) {
             throw new IllegalArgumentException("collection cannot be null");

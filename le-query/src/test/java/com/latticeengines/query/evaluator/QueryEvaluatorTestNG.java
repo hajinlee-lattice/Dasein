@@ -76,7 +76,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
         sqlContains(sqlQuery, String.format("join %s as %s", accountTableName, ACCOUNT));
         sqlContains(sqlQuery, String.format("on %s.%s = %s.%s", CONTACT, ATTR_ACCOUNT_ID, ACCOUNT, ATTR_ACCOUNT_ID));
-        sqlContains(sqlQuery, String.format("where %s.%s = ?", CONTACT, ATTR_CONTACT_ID));
+        sqlContains(sqlQuery, String.format("where lower(%s.%s) = lower(?)", CONTACT, ATTR_CONTACT_ID));
     }
 
     @Test(groups = "functional")
@@ -89,7 +89,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME, "City") //
                 .where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("where %s.AccountId", ACCOUNT));
+        sqlContains(sqlQuery, String.format("where lower(%s.AccountId)", ACCOUNT));
 
         // concrete eq null
         restriction = Restriction.builder() //
@@ -105,7 +105,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("%s.AlexaViewsPerUser = ?", ACCOUNT));
+        sqlContains(sqlQuery, String.format("lower(%s.AlexaViewsPerUser) = lower(?)", ACCOUNT));
 
         // column eqs column
         restriction = Restriction.builder() //
@@ -113,21 +113,21 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         query = Query.builder().where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("%s.%s = %s.City", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT));
+        sqlContains(sqlQuery, String.format("lower(%s.%s) = lower(%s.City)", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT));
 
         // collection look up with 2 elements
         Restriction inCollection = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
                 .inCollection(Arrays.asList('a', 'c')).build();
         query = Query.builder().where(inCollection).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("%s.%s in (?, ?)", ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("lower(%s.%s) in (?, ?)", ACCOUNT, ATTR_ACCOUNT_NAME));
 
         // collection look up with 1 element, corner case
         Restriction inCollection1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
                 .inCollection(Collections.singleton('a')).build();
         query = Query.builder().where(inCollection1).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("%s.%s = ?", ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("lower(%s.%s) = lower(?)", ACCOUNT, ATTR_ACCOUNT_NAME));
 
         // range look up
         Restriction range1 = Restriction.builder() //
@@ -162,6 +162,15 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         query = Query.builder().where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("%s.%s ilike ? || ?", ACCOUNT, ATTR_ACCOUNT_NAME));
+
+        // endsWith
+        restriction = Restriction.builder() //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).endsWith("a") //
+                .build();
+        query = Query.builder().where(restriction).build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("%s.%s ilike ? || ?", ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlQuery.getResults();
 
         restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("a") //
@@ -213,8 +222,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, "where exists");
-        sqlContains(sqlQuery, String.format("%s.%s = ?", CONTACT, ATTR_CONTACT_TITLE));
-        sqlContains(sqlQuery, String.format("%s.%s = ?", CONTACT, ATTR_CONTACT_COUNTRY));
+        sqlContains(sqlQuery, String.format("lower(%s.%s) = lower(?)", CONTACT, ATTR_CONTACT_TITLE));
+        sqlContains(sqlQuery, String.format("lower(%s.%s) = lower(?)", CONTACT, ATTR_CONTACT_COUNTRY));
         sqlContains(sqlQuery, String.format("%s.%s = %s.%s", ACCOUNT, ATTR_ACCOUNT_ID, CONTACT, ATTR_ACCOUNT_ID));
         sqlNotContain(sqlQuery, "join");
     }
@@ -359,7 +368,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("select %s.%s, %s, %s", ACCOUNT, ATTR_ACCOUNT_NAME,
                 "coalesce(sum(Account.AlexaViewsPerUser), ?)", "coalesce(avg(Account.AlexaViewsPerUser), ?)"));
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
-        sqlContains(sqlQuery, String.format("where %s.%s = ?", ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("where lower(%s.%s) = lower(?)", ACCOUNT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery,
                 "having coalesce(sum(Account.AlexaViewsPerUser), ?) > ? or coalesce(avg(Account.AlexaViewsPerUser), ?) > ?");
         sqlContains(sqlQuery, String.format("group by %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
@@ -392,11 +401,11 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("select %s.%s", ACCOUNT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
-        sqlContains(sqlQuery, String.format("where %s.%s = ? ", ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("where lower(%s.%s) = lower(?) ", ACCOUNT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("%s.%s in (", ACCOUNT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("(select %s.%s", subSelectAlias, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
-        sqlContains(sqlQuery, String.format("where %s.%s = ?)", CONTACT, ATTR_CONTACT_EMAIL));
+        sqlContains(sqlQuery, String.format("where lower(%s.%s) = lower(?))", CONTACT, ATTR_CONTACT_EMAIL));
 
     }
 
@@ -429,7 +438,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("(case when %s.%s > ? then ? else ? end) as %s", TRANSACTION,
                 ATTR_TOTAL_AMOUNT, caseAmount));
         sqlContains(sqlQuery, String.format("from %s as %s", transactionTableName, TRANSACTION));
-        sqlContains(sqlQuery, String.format("where %s.%s = ?", TRANSACTION, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("where lower(%s.%s) = lower(?)", TRANSACTION, ATTR_ACCOUNT_ID));
     }
 
     @Test(groups = "functional")

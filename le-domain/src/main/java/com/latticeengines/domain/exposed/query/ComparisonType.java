@@ -15,6 +15,7 @@ public enum ComparisonType {
     CONTAINS, //
     NOT_CONTAINS, //
     STARTS_WITH, //
+    ENDS_WITH, //
     GTE_AND_LTE, //
     GTE_AND_LT, //
     GT_AND_LTE, //
@@ -28,7 +29,7 @@ public enum ComparisonType {
     WITHIN;
 
     public boolean isLikeTypeOfComparison() {
-        return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH;
+        return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;
     }
 
     public boolean filter(String source, String target) {
@@ -39,6 +40,8 @@ public enum ComparisonType {
             return source.toLowerCase().contains(target.toLowerCase());
         case STARTS_WITH:
             return source.toLowerCase().startsWith(target.toLowerCase());
+        case ENDS_WITH:
+            return source.toLowerCase().endsWith(target.toLowerCase());
         default:
             throw new UnsupportedOperationException();
         }

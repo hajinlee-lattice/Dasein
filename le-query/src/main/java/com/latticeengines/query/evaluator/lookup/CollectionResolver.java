@@ -28,6 +28,16 @@ public class CollectionResolver extends BaseLookupResolver<CollectionLookup>
     }
 
     @Override
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForLowercaseCompare(CollectionLookup lookup) {
+        Collection<Object> collection = lookup.getValues();
+        if (collection == null || collection.isEmpty()) {
+            throw new QueryEvaluationException("Collection lookup must have at least one element.");
+        }
+        return collection.stream().map(obj -> Expressions.asComparable(obj.toString().toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Expression<?> resolveForSelect(CollectionLookup lookup, boolean asAlias) {
         throw new UnsupportedOperationException("Should not use collection lookup in select.");
     }

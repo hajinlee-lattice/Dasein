@@ -21,6 +21,11 @@ public class ValueResolver<T extends ValueLookup> extends BaseLookupResolver<T> 
     }
 
     @Override
+    public List<ComparableExpression<? extends Comparable<?>>> resolveForLowercaseCompare(T lookup) {
+        return Collections.singletonList(Expressions.asComparable(lookup.getValue().toString().toLowerCase()));
+    }
+
+    @Override
     public Expression<?> resolveForSelect(ValueLookup lookup, boolean asAlias) {
         throw new UnsupportedOperationException("Should not use value lookup in select.");
     }
