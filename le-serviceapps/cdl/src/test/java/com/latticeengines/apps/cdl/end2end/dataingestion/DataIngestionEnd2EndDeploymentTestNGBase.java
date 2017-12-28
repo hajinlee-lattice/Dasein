@@ -143,7 +143,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     DataFeedProxy dataFeedProxy;
 
     @Inject
-    private CDLProxy cdlProxy;
+    CDLProxy cdlProxy;
 
     @Inject
     private PlsCDLImportProxy plsCDLImportProxy;
@@ -336,6 +336,31 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Resource csvResource = new ClassPathResource(csvPath, Thread.currentThread().getContextClassLoader());
         String templateName = String.format("%s%d_template.csv", entity, fileId);
         String dataName = String.format("%s%d_data.csv", entity, fileId);
+        SourceFile template = fileUploadProxy.uploadFile(templateName, false, templateName, entity.name(), csvResource);
+        SourceFile data = fileUploadProxy.uploadFile(dataName, false, dataName, entity.name(), csvResource);
+        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(true);
+            }
+        }
+        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
+        long startTime = System.currentTimeMillis();
+        ApplicationId applicationId = plsCDLImportProxy.startImportCSV(template.getName(), data.getName(), "File",
+                entity.name(), "e2etest");
+        com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(
+                applicationId.toString(), false);
+        long endTime = System.currentTimeMillis();
+        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
+        return tryGetAvroFileRows(startTime, endTime);
+    }
+
+    long importCsvForCleanup(BusinessEntity entity) throws Exception {
+        String csvPath = String.format("end2end/csv/%s_base.csv", entity.name());
+        Resource csvResource = new ClassPathResource(csvPath, Thread.currentThread().getContextClassLoader());
+        String templateName = String.format("%s_template.csv", entity);
+        String dataName = String.format("%s_data.csv", entity);
         SourceFile template = fileUploadProxy.uploadFile(templateName, false, templateName, entity.name(), csvResource);
         SourceFile data = fileUploadProxy.uploadFile(dataName, false, dataName, entity.name(), csvResource);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());

@@ -38,6 +38,8 @@ public interface DataFeedService {
 
     void resetImport(String customerSpace, String datafeedName);
 
+    void resetImportByEntity(String customerSpace, String datafeedName, String entity);
+
     DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr);
 
     DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod);

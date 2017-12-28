@@ -250,4 +250,18 @@ public class DataFeedServiceImpl implements DataFeedService {
         datafeedProfileEntityMgr.update(profile);
         return profile;
     }
+
+    @Override
+    public void resetImportByEntity(String customerSpace, String datafeedName, String entity) {
+        DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        if (dataFeed == null) {
+            return;
+        }
+
+        for (DataFeedTask task : dataFeed.getTasks()) {
+            if (task.getEntity().equals(entity)) {
+                datafeedTaskService.resetImport(customerSpace, task);
+            }
+        }
+    }
 }

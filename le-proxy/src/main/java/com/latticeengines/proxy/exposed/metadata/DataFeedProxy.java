@@ -160,6 +160,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         post("resetImport", url, null, Void.class);
     }
 
+    public void resetImportByEntity(String customerSpace, String entity) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/resetimport/{entity}",
+                shortenCustomerSpace(customerSpace), entity);
+        post("resetImportByEntity", url, null, Void.class);
+    }
+
     public DataFeedProfile startProfile(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startprofile",
                 shortenCustomerSpace(customerSpace));

@@ -160,4 +160,12 @@ public class DefaultDataFeedController {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         datafeedService.resetImport(customerSpace, "");
     }
+
+    @RequestMapping(value = "/resetimport/{entity}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset the pending import data for this data feed")
+    public void resetImportByEntity(@PathVariable String customerSpace, @PathVariable String entity) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        datafeedService.resetImportByEntity(customerSpace, "", entity);
+    }
 }

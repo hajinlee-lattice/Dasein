@@ -237,4 +237,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return getDataCollection(dataCollection.getName());
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public DataCollectionTable getTableFromCollection(String collectionName, String tableName) {
+        return dataCollectionTableDao.findByNames(collectionName, tableName);
+    }
 }
