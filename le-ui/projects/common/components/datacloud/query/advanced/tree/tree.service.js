@@ -333,7 +333,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         }
 
         this.getOperationValue = function (bucketRestriction, operatorType, position) {
-            console.log('Operation Value', operatorType, position);
+            // console.log('Operation Value', operatorType, position);
             switch (operatorType) {
                 case 'Boolean': {
                     return getBooleanValue(bucketRestriction);
@@ -471,7 +471,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         }
 
         this.getOperationValue = function (bucketRestriction, operatorType, position) {
-            console.log('Operation Value', operatorType, position);
+            // console.log('Operation Value', operatorType, position);
             switch (operatorType) {
                 case 'Boolean': {
                     return getBooleanValue(bucketRestriction);
