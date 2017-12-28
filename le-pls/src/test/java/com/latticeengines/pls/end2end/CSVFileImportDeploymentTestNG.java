@@ -79,6 +79,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final String TRANSACTION_SOURCE_FILE = "Transaction_base.csv";
 
     private static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
+    private static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
@@ -355,6 +356,19 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 Schema.Type.STRING);
         Assert.assertEquals(schema.getField("Amount").schema().getTypes().get(0).getType(), Schema.Type.INT);
         Assert.assertEquals(schema.getField("Quantity").schema().getTypes().get(0).getType(), Schema.Type.INT);
+    }
+
+    @Test(groups = "deployment")
+    public void verifyRequiredFieldMissing() {
+        SourceFile missingColumn = uploadSourceFile(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
+        Assert.assertNotNull(missingColumn);
+        Exception exp = null;
+        try {
+            startCDLImport(missingColumn, ENTITY_TRANSACTION);
+        } catch (RuntimeException e) {
+            exp = e;
+        }
+        Assert.assertNotNull(exp);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")

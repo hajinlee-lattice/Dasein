@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +57,25 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     @Override
     public Table resolveMetadata(Table original, Table schemaTable) {
+        if (schemaTable == null) {
+            return original;
+        }
+        List<Attribute> attributes = schemaTable.getAttributes();
+        Map<String, Attribute> requiredAttr = new HashMap<>();
+        for (Attribute attribute : attributes) {
+            if (attribute.getRequired() == true && attribute.getDefaultValueStr() == null) {
+                requiredAttr.put(attribute.getName(), attribute);
+            }
+        }
+        for (Attribute attribute : original.getAttributes()) {
+            if (requiredAttr.containsKey(attribute.getName())) {
+                requiredAttr.remove(attribute.getName());
+            }
+        }
+        if (requiredAttr.size() > 0) {
+            throw new RuntimeException(String.format("Missing the following required field: %s",
+                    String.join(",", requiredAttr.keySet())));
+        }
         return original;
     }
 
