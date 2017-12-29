@@ -83,7 +83,6 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         while (!fileQueue.isEmpty() || !stop) {
             String dataFileName = fileQueue.poll();
             if (dataFileName == null) {
-                log.info("data file is null, sleep 1s");
                 Thread.sleep(1000);
             } else {
                 log.info("Start process file " + dataFileName);
