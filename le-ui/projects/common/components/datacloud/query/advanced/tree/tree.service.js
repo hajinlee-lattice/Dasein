@@ -1,6 +1,6 @@
 angular.module('common.datacloud.query.builder.tree.service', [])
     .service('QueryTreeService', function (QueryTreeAccountEntityService, QueryTreePurchaseHistoryService) {
-        console.log('TEST service');
+        // console.log('TEST service');
         var QueryTreeService = this;
         this.cmpMap = {
             "Yes": "is",
@@ -518,9 +518,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                     } else {
                         cmp = txn.Time.Cmp;
                     }
-                    console.log('CMP', cmp);
+                    // console.log('CMP', cmp);
                     var ret = cmpMap[cmp];
-                    console.log('RET', ret);
+                    // console.log('RET', ret);
                     return ret;
                 };
                 default: return 'has a value of';
