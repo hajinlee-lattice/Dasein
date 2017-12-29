@@ -1,3 +1,11 @@
 <div class="login-saml">
-    login SAML
+    <h2>SAML login</h2>
+    <dl>
+        <dt>Tenant Id</dt>
+        <dd>{{$ctrl.tenantId}}</dd>
+
+        <dt>Randomness + Uniquness</dt>
+        <dd>{{$ctrl.userDocument.Ticket.Uniqueness}}<span class="randomness">{{$ctrl.userDocument.Ticket.Randomness}}</span></dd>
+    </dl>
+    
 </div>

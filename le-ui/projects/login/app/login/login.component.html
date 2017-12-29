@@ -1,8 +1,7 @@
 <div id="loginMainView">
-    <div class="login-body">
+    <div class="login-body state-{{$ctrl.state.current.name.replace('.','-')}}">
         <div class="container row">
-
-            <div class="columns two offset-three logo-area">
+            <div class="columns two offset-three logo-area" ng-if="!$ctrl.state.params.noLogoArea">
                 <img src="/login/assets/images/logo_login.png" alt="Lattice">
                 <ul class="user-info" ng-if="$ctrl.login.username">
                     <li class="label">username</li>

@@ -90,7 +90,10 @@ angular.module('login', [
             }
         })
         .state('login.saml', {
-            url: 'saml/tenant/:tenantId',
+            url: 'saml/:tenantId',
+            params: {
+                noLogoArea: true
+            },
             views: {
                 "FrameContent": {
                     resolve: {
@@ -106,8 +109,8 @@ angular.module('login', [
                 }
             }
         })
-        .state('login.saml.logout', {
-            url: '/logout',
+        .state('login.saml.logout', { // FIXME route not working, might be caused by some redirect handling somewhere
+             url: 'logout',
             views: {
                 "FrameContent": {
                     resolve: {
@@ -124,7 +127,7 @@ angular.module('login', [
             }
         })
         .state('login.saml.metadata', {
-            url: '/metadata',
+            url: ':tenantId/error',
             views: {
                 "FrameContent": {
                     resolve: {

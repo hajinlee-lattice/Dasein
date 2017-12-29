@@ -11,6 +11,7 @@ angular.module('login.saml.logout', [])
         });
 
         vm.init = function() {
+            console.log('saml logout');
         };
 
         vm.init();

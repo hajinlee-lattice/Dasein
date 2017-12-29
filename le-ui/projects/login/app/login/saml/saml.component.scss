@@ -1,0 +1,19 @@
+.state-login-saml {
+    .login-content {
+        border: 0;
+    }
+    dl {
+        dt, dd {
+            font-size: 12px;
+        }
+        dt {
+            font-weight: bold;
+        }
+        dd {
+            white-space: nowrap;
+        }
+    }
+    .randomness {
+        background-color: #fcfcbd;
+    }
+}
