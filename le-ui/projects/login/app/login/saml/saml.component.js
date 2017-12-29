@@ -17,6 +17,7 @@ angular.module('login.saml', [])
         }
 
         vm.init = function() {
+            console.log(vm.userDocument);
         };
 
         vm.init();

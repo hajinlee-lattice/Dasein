@@ -19,7 +19,6 @@ angular.module('login')
         });
 
         vm.init = function() {
-            console.log($state);
             if (SessionTimeoutUtility.hasSessionTimedOut() && LoginDocument.UserName) {
                 return LoginService.Logout();
             } else {

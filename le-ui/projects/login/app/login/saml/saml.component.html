@@ -4,6 +4,9 @@
         <dt>Tenant Id</dt>
         <dd>{{$ctrl.tenantId}}</dd>
 
+        <dt>Email</dt>
+        <dd>{{$ctrl.userDocument.Result.User.DisplayName}} ({{$ctrl.userDocument.Result.User.EmailAddress}})</dd>
+
         <dt>Randomness + Uniquness</dt>
         <dd>{{$ctrl.userDocument.Ticket.Uniqueness}}<span class="randomness">{{$ctrl.userDocument.Ticket.Randomness}}</span></dd>
     </dl>
