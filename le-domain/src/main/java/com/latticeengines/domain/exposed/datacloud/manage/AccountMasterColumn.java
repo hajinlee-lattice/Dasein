@@ -101,6 +101,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "IsEOL", nullable = false)
     private boolean eol;
 
+    @Column(name = "DataLicense", length = 100)
+    private String dataLicense;
+
     @Override
     @JsonIgnore
     public Long getPid() {
@@ -261,6 +264,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @JsonIgnore
+    public String getDataLicense() {
+        return dataLicense;
+    }
+
+    @JsonIgnore
+    public void setDataLicense(String dataLicense) {
+        this.dataLicense = dataLicense;
+    }
+
+    @JsonIgnore
     public String getDiscretizationStrategy() {
         return discretizationStrategy;
     }
@@ -353,6 +366,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setIsPremium(isPremium());
         metadata.setMatchDestination(getMatchDestination());
         metadata.setDecodeStrategy(getDecodeStrategy());
+        metadata.setDataLicense(getDataLicense());
 
         if (approvedUsages != null) {
             if (approvedUsages.contains(ApprovedUsage.MODEL) || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)

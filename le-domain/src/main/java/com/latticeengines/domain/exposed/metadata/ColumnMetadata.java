@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -17,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -78,6 +78,8 @@ public class ColumnMetadata implements HasAttributeCustomizations {
     private Boolean canInsights;
     @JsonProperty("CanBIS")
     private Boolean canBis;
+    @JsonProperty("DataLicense")
+    private String dataLicense;
 
     @JsonProperty("AttributeFlagsMap")
     private Map<AttributeUseCase, JsonNode> attributeFlagsMap;
@@ -241,6 +243,14 @@ public class ColumnMetadata implements HasAttributeCustomizations {
 
     public void setCanBis(Boolean canBis) {
         this.canBis = canBis;
+    }
+
+    public String getDataLicense() {
+        return dataLicense;
+    }
+
+    public void setDataLicense(String dataLicense) {
+        this.dataLicense = dataLicense;
     }
 
     @JsonProperty("FundamentalType")
