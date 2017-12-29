@@ -156,6 +156,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
     @VisibleForTesting
     Action registerImportAction(WorkflowJob job) {
+        log.info(String.format("Registering an action for job=%d", job.getWorkflowId()));
         Action action = new Action();
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setActionInitiator(job.getUserId());
