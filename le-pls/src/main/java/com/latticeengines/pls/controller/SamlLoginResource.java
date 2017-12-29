@@ -57,7 +57,7 @@ public class SamlLoginResource {
     @Autowired
     private SPSamlProxy samlProxy;
 
-    @Value("${security.app.public.url}")
+    @Value("${security.app.public.url:https://localhost:3000}")
     private String loginUrl;
 
     @RequestMapping(value = "/login/"
