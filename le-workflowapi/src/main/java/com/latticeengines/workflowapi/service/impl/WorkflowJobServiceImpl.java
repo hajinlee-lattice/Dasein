@@ -185,7 +185,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         jobs.removeIf(Objects::isNull);
         jobs.forEach(job -> {
             job.setParentJobId(parentJobId);
-            workflowJobEntityMgr.update(job);
+            workflowJobEntityMgr.updateParentJobId(job);
         });
     }
 

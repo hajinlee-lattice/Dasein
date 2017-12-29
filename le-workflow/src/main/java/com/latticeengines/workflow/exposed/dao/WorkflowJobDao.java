@@ -20,6 +20,8 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     void updateStatus(WorkflowJob workflowJob);
 
+    void updateParentJobId(WorkflowJob workflowJob);
+
     void registerWorkflowId(WorkflowJob workflowJob);
 
 }
