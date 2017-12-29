@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.google.common.annotations.VisibleForTesting;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.JacocoUtils;
@@ -217,6 +217,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 } else {
                     workflowIds.add(workflowId);
                 }
+            } else {
+                log.warn(String.format("Workflow with pid=%d does not set input context", workflowJob.getPid()));
             }
         }
 
@@ -246,9 +248,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
 
         // get state first from database
-        if (workflowJob.getStatus() != null &&
-                (FinalApplicationStatus.FAILED.name().equalsIgnoreCase(workflowJob.getStatus())) ||
-                 JobStatus.FAILED.name().equalsIgnoreCase(workflowJob.getStatus())) {
+        if (workflowJob.getStatus() != null
+                && (FinalApplicationStatus.FAILED.name().equalsIgnoreCase(workflowJob.getStatus()))
+                || JobStatus.FAILED.name().equalsIgnoreCase(workflowJob.getStatus())) {
             job.setJobStatus(JobStatus.FAILED);
         } else {
             WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
