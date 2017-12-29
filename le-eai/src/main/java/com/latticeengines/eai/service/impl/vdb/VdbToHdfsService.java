@@ -3,10 +3,12 @@ package com.latticeengines.eai.service.impl.vdb;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +20,18 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportVdbTableMergeRule;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbToHdfsConfiguration;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
 @Component("vdbToHdfsService")
@@ -39,6 +44,9 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
+
+    @Autowired
+    private CDLProxy cdlProxy;
 
     @Override
     public void invoke(VdbToHdfsConfiguration config) {
@@ -74,6 +82,14 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                     vdbConnectorConfiguration = (VdbConnectorConfiguration) importService
                             .generateConnectorConfiguration(connectorStr, importContext);
 
+                    LinkedHashMap<String, ImportVdbTableConfiguration> importVdbTableConfigurationMap =
+                            vdbConnectorConfiguration.getTableConfigurations();
+                    if(importVdbTableConfigurationMap.size() <= 0) {
+                        throw new LedpException(LedpCode.LEDP_17011, new String[] { "No import vdb table configuration"
+                        });
+                    }
+                    ImportVdbTableMergeRule mergeRule = importVdbTableConfigurationMap.entrySet().iterator().next().getValue().getMergeRule();
+
                     try {
                         log.info("Initialize import job detail record");
                         initJobDetail(vdbConnectorConfiguration);
@@ -92,6 +108,14 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
 
                         log.info("Finalize import job detail record");
                         finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
+
+                        if(mergeRule == ImportVdbTableMergeRule.REPLACE) {
+                            ApplicationId applicationId = cdlProxy.cleanupAllData(config.getCustomerSpace().toString(),
+                                    config.getBusinessEntity());
+
+                            waitForWorkflowStatus(applicationId.toString(), false);
+                        }
+
                     } catch (Exception e) {
                         throw e;
                     }
@@ -121,6 +145,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         HashMap<String, Table> tables = new HashMap<>();
         for (String taskId : taskIds) {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
+
             if (dataFeedTask != null) {
                 tables.put(taskId, dataFeedTask.getImportTemplate());
             }

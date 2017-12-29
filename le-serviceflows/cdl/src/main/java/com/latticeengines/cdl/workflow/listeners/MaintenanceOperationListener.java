@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -42,7 +43,7 @@ public class MaintenanceOperationListener extends LEJobListener {
             }
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             //check data feed status? should be Initing or InitialLoaded?
-
+            dataFeedProxy.updateDataFeedStatus(customerSpace, DataFeed.Status.Active.getName());
         } else {
             log.error(String.format("CDL maintenance job ends in unknown status: %s",
                     jobExecution.getStatus().name()));

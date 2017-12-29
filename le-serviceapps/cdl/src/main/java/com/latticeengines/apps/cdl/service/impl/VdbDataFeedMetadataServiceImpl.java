@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportVdbTableMergeRule;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -277,7 +278,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         importVdbTableConfiguration.setDataCategory(vdbLoadTableConfig.getDataCategory());
         importVdbTableConfiguration.setCollectionIdentifier(jobIdentifier);
         importVdbTableConfiguration.setVdbQueryHandle(vdbLoadTableConfig.getVdbQueryHandle());
-        importVdbTableConfiguration.setMergeRule(vdbLoadTableConfig.getMergeRule());
+        importVdbTableConfiguration.setMergeRule(ImportVdbTableMergeRule.getByName(vdbLoadTableConfig.getMergeRule()));
         importVdbTableConfiguration.setCreateTableRule(vdbLoadTableConfig.getCreateTableRule());
         importVdbTableConfiguration.setMetadataList(vdbLoadTableConfig.getMetadataList());
         importVdbTableConfiguration.setTotalRows(vdbLoadTableConfig.getTotalRows());

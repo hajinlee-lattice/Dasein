@@ -23,7 +23,7 @@ public class ImportVdbTableConfiguration {
     private String vdbQueryHandle;
 
     @JsonProperty("merge_rule")
-    private String mergeRule;
+    private ImportVdbTableMergeRule mergeRule;
 
     @JsonProperty("create_table_rule")
     private String createTableRule;
@@ -82,11 +82,11 @@ public class ImportVdbTableConfiguration {
         this.metadataList = metadataList;
     }
 
-    public String getMergeRule() {
+    public ImportVdbTableMergeRule getMergeRule() {
         return mergeRule;
     }
 
-    public void setMergeRule(String mergeRule) {
+    public void setMergeRule(ImportVdbTableMergeRule mergeRule) {
         this.mergeRule = mergeRule;
     }
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportVdbTableMergeRule;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportVdbTableAndPublishWorkflowConfiguration;
@@ -43,7 +44,7 @@ public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter
         importVdbTableConfiguration.setDataCategory(loadConfig.getDataCategory());
         importVdbTableConfiguration.setCollectionIdentifier(collectionIdentifier);
         importVdbTableConfiguration.setVdbQueryHandle(loadConfig.getVdbQueryHandle());
-        importVdbTableConfiguration.setMergeRule(loadConfig.getMergeRule());
+        importVdbTableConfiguration.setMergeRule(ImportVdbTableMergeRule.getByName(loadConfig.getMergeRule()));
         importVdbTableConfiguration.setCreateTableRule(loadConfig.getCreateTableRule());
         importVdbTableConfiguration.setMetadataList(loadConfig.getMetadataList());
         importVdbTableConfiguration.setTotalRows(loadConfig.getTotalRows());

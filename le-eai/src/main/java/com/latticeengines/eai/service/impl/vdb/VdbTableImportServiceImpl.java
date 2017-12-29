@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.ImportVdbProperty;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportVdbTableMergeRule;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
@@ -172,7 +173,8 @@ public class VdbTableImportServiceImpl extends ImportService {
                     importVdbTableConfiguration.setDataCategory(tableConfig.getDataCategory());
                     importVdbTableConfiguration.setCollectionIdentifier(collectionIdentifier);
                     importVdbTableConfiguration.setVdbQueryHandle(tableConfig.getVdbQueryHandle());
-                    importVdbTableConfiguration.setMergeRule(tableConfig.getMergeRule());
+                    importVdbTableConfiguration.setMergeRule(ImportVdbTableMergeRule.getByName(tableConfig
+                            .getMergeRule()));
                     importVdbTableConfiguration.setMetadataList(tableConfig.getMetadataList());
                     importVdbTableConfiguration.setTotalRows(tableConfig.getTotalRows());
                     importVdbTableConfiguration.setCreateTableRule(tableConfig.getCreateTableRule());
