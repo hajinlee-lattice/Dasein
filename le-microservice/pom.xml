@@ -9,12 +9,12 @@
 
     <properties>
         <component-name>microservice-parent</component-name>
-        <le.monitor.version>4.2.0-SNAPSHOT</le.monitor.version>
-        <le.microservice.version>4.2.0-SNAPSHOT</le.microservice.version>
-        <le.propdata.version>4.2.0-SNAPSHOT</le.propdata.version>
-        <le.network.version>4.2.0-SNAPSHOT</le.network.version>
-        <le.quartz.version>4.2.0-SNAPSHOT</le.quartz.version>
-        <le.modelquality.version>4.2.0-SNAPSHOT</le.modelquality.version>
+        <le.monitor.version>4.2.1-SNAPSHOT</le.monitor.version>
+        <le.microservice.version>4.2.1-SNAPSHOT</le.microservice.version>
+        <le.propdata.version>4.2.1-SNAPSHOT</le.propdata.version>
+        <le.network.version>4.2.1-SNAPSHOT</le.network.version>
+        <le.quartz.version>4.2.1-SNAPSHOT</le.quartz.version>
+        <le.modelquality.version>4.2.1-SNAPSHOT</le.modelquality.version>
         <jetty.dir>test</jetty.dir>
         <jetty.use.test.cp>true</jetty.use.test.cp>
     </properties>
@@ -22,7 +22,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-web-parent</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 

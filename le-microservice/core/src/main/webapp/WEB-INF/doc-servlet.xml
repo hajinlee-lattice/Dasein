@@ -19,6 +19,6 @@
 
     <bean id="apiVersionManager"
           class="com.latticeengines.common.exposed.version.VersionManager">
-        <constructor-arg name="currentVersion" value="4.2.0-SNAPSHOT"/>
+        <constructor-arg name="currentVersion" value="4.2.1-SNAPSHOT"/>
     </bean>
 </beans>
