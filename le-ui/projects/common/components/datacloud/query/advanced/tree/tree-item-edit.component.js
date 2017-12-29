@@ -10,12 +10,18 @@ angular
             controllerAs: 'vm',
             controller: function ($scope, $timeout, DataCloudStore, QueryStore, QueryTreeService) {
                 var vm = $scope.vm;
+                
                 vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
+                // console.log('BOOLEAN VALUE',vm.booleanValue);
                 vm.enumCmpModel = QueryTreeService.getEnumCmpModel(vm.tree.bucketRestriction);
                 vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
+
                 vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
                 vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
 
+                vm.showEmptyOption = function(){
+                    return QueryTreeService.showEmptyOption(vm.tree.bucketRestriction);
+                }
                 vm.getOperationLabel = function () {
                     return QueryTreeService.getOperationLabel(vm.type, vm.tree.bucketRestriction);
                 }
@@ -25,6 +31,7 @@ angular
                 }
                 vm.showItem = function (typeToShow) {
                     var ret = QueryTreeService.showType(vm.tree.bucketRestriction, vm.type, typeToShow);
+                    // console.log('Show ->',' toShow: ',typeToShow, ' - Ret:' ,ret);
                     return ret;
                 }
                 vm.showTo = function () {

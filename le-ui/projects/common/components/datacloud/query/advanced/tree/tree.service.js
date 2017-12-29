@@ -93,6 +93,14 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             }
         }
 
+        this.showEmptyOption = function (bucketRestriction) {
+            if ('PurchaseHistory' === getEntity(bucketRestriction)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         /**
          * Return if a type ('Boolean', 'Numerical', 'Enum') can be shown or not
          * @param {*} bucketRestriction 
@@ -106,7 +114,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 return service.showType(bucketRestriction, type, typeToShow);
             }
             else {
-                console.warning('Service not implemented');
+                console.warn('Service not implemented');
                 return false;
             }
         }
@@ -121,7 +129,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             if (service) {
                 return service.showTo(bucketRestriction, this.two_inputs);
             } else {
-                console.warning('Service not implemented');
+                console.warn('Service not implemented');
                 return false;
             }
         }
@@ -137,7 +145,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             if (service) {
                 return service.getOperationLabel(QueryTreeService.cmpMap, type, bucketRestriction);
             } else {
-                console.warning('Service not implemented');
+                console.warn('Service not implemented');
                 return 'has a value of';
             }
         }
@@ -153,108 +161,108 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             if (service) {
                 return service.getOperationValue(bucketRestriction, operatorType, position);
             } else {
-                console.warning('Service not implemented');
+                console.warn('Service not implemented');
                 return 'Uknown';
             }
         }
         //***************** Editing ************************************/
 
-       
+
         /**
          * Return the var for ng-model in a boolean bucket restriction
          * @param {*} bucketRestriction 
          */
-        this.getBooleanModel = function(bucketRestriction){
+        this.getBooleanModel = function (bucketRestriction) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.getBooleanModel(bucketRestriction);
             } else {
-                console.warning(' changeBooleanValue() Service not implemented');
+                console.warn(' changeBooleanValue() Service not implemented');
             }
         }
-        
-        this.getEnumCmpModel = function(bucketRestriction){
+
+        this.getEnumCmpModel = function (bucketRestriction) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.getEnumCmpModel(bucketRestriction);
             } else {
-                console.warning(' changeBooleanValue() Service not implemented');
+                console.warn(' changeBooleanValue() Service not implemented');
             }
         }
 
-        this.getNumericalCmpModel = function(bucketRestriction){
+        this.getNumericalCmpModel = function (bucketRestriction) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.getNumericalCmpModel(bucketRestriction);
             } else {
-                console.warning(' getNumericalCmpModel() Service not implemented');
+                console.warn(' getNumericalCmpModel() Service not implemented');
             }
         }
 
-         /**
-         * Change a boolean value for a Boolean restriction
-         * @param {*} bucketRestriction 
-         */
-        this.changeBooleanValue = function(bucketRestriction, booleanValue){
+        /**
+        * Change a boolean value for a Boolean restriction
+        * @param {*} bucketRestriction 
+        */
+        this.changeBooleanValue = function (bucketRestriction, booleanValue) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 service.changeBooleanValue(bucketRestriction, booleanValue);
             } else {
-                console.warning(' changeBooleanValue() Service not implemented');
+                console.warn(' changeBooleanValue() Service not implemented');
             }
         }
-        this.changeEnumCmpValue = function(bucketRestriction, value){
+        this.changeEnumCmpValue = function (bucketRestriction, value) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.changeEnumCmpValue(bucketRestriction, value);
             } else {
-                console.warning(' changeEnumCmpValue() Service not implemented');
+                console.warn(' changeEnumCmpValue() Service not implemented');
             }
         }
 
-        this.changeNumericalCmpValue = function(bucketRestriction, value){
+        this.changeNumericalCmpValue = function (bucketRestriction, value) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.changeNumericalCmpValue(bucketRestriction, value);
             } else {
-                console.warning(' changeNumericalCmpValue() Service not implemented');
+                console.warn(' changeNumericalCmpValue() Service not implemented');
             }
         }
-        
-        this.changeBktValue = function(bucketRestriction, value, position){
+
+        this.changeBktValue = function (bucketRestriction, value, position) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.changeBktValue(bucketRestriction, value, position);
             } else {
-                console.warning(' changeNumericalCmpValue() Service not implemented');
+                console.warn(' changeNumericalCmpValue() Service not implemented');
             }
         }
 
 
-        this.getBktValue = function(bucketRestriction, position){
+        this.getBktValue = function (bucketRestriction, position) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.getBktValue(bucketRestriction, position);
             } else {
-                console.warning(' getBktValue() Service not implemented');
+                console.warn(' getBktValue() Service not implemented');
             }
         }
 
-        this.getCubeBktList = function(bucketRestriction, cube){
+        this.getCubeBktList = function (bucketRestriction, cube) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
                 return service.getCubeBktList(cube);
             } else {
-                console.warning(' getCubeBktList() Service not implemented');
+                console.warn(' getCubeBktList() Service not implemented');
             }
         }
 
@@ -283,6 +291,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                     } else {
                         return false;
                     }
+                };
+                case 'Date': {
+                    return false;
                 };
                 default: return false;
             }
@@ -349,75 +360,132 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         }
 
         //******************** Editing mode *********************************/
-        this.changeBooleanValue = function(bucketRestriction, booleanValue){
+        this.changeBooleanValue = function (bucketRestriction, booleanValue) {
             if (!bucketRestriction.bkt.Vals[0]) {
                 bucketRestriction.bkt.Vals[0] = null;
-            }else{
+            } else {
                 bucketRestriction.bkt.Vals[0] = booleanValue;
             }
         }
-        this.changeEnumCmpValue = function(bucketRestriction, value){
+        this.changeEnumCmpValue = function (bucketRestriction, value) {
             bucketRestriction.bkt.Cmp = value;
         }
-        this.changeNumericalCmpValue = function(bucketRestriction, value){
+        this.changeNumericalCmpValue = function (bucketRestriction, value) {
             bucketRestriction.bkt.Cmp = value;
         }
 
-        this.changeBktValue = function(bucketRestriction, value, position){
+        this.changeBktValue = function (bucketRestriction, value, position) {
             bucketRestriction.bkt.Vals[position] = value;
         }
 
-        this.getBooleanModel = function(bucketRestriction){
+        this.getBooleanModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Vals[0];
         }
-        this.getEnumCmpModel = function(bucketRestriction){
+        this.getEnumCmpModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Cmp;
         }
 
-        this.getNumericalCmpModel = function(bucketRestriction){
+        this.getNumericalCmpModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Cmp;
         }
 
-        this.getBktValue = function(bucketRestriction, position){
+        this.getBktValue = function (bucketRestriction, position) {
             return bucketRestriction.bkt.Vals[position];
         }
 
-        this.getCubeBktList = function(cube){
+        this.getCubeBktList = function (cube) {
             return cube.Bkts.List;
         }
 
-      
+
         //*******************************************************************/
 
     })
     .service('QueryTreePurchaseHistoryService', function () {
 
+        /**
+         * type is 'TimeSeries'
+         * How to identify 'Boolean':
+         * bkt: {
+         *      Txn:{
+         *          Negate: false/true
+         *          Time: {
+         *              Cmp: "EVER"
+         *              Period: "Day"
+         *              Vals: []
+         *          }
+         *      }
+         * }
+         * 
+         * ///////
+         * bkt: {
+         *      Txn:{
+         *          Qty: {
+         *              Cmp: "LESS_THAN"
+         *              Vals:[1]
+         *          }
+         *          Time:{
+         *              Cmp: ""
+         *              Period: "EVER"
+         *              Vals: []
+         *          }
+         *      }
+         * }
+         * ////
+         * bkt: {
+         *      Txn:{
+         *          Amt: {
+         *              Cmp: ""
+         *              Vals:[2]
+         *          }
+         *          Time:{
+         *              Cmp: ""
+         *              Period: "EVER"
+         *              Vals: []
+         *          }
+         *      }
+         * }
+         * How to identify 'Numerical'
+         * 
+         * How to identify 'Enum'
+         * 
+         * @param {*} bucketRestriction 
+         * @param {*} type 
+         * @param {*} typeToShow 
+         */
         this.showType = function (bucketRestriction, type, typeToShow) {
-            switch (typeToShow) {
-                case 'Numerical': {
-                    if (typeToShow === type) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                };
-                case 'Boolean': {
-                    if (type === typeToShow) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                };
-                case 'Enum': {
-                    if (type === typeToShow) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                };
-                default: return false;
-            }
+            // console.log(bucketRestriction, ' - TO SHOW: ', typeToShow, ' - TYPE: ', type);
+            if ('TimeSeries' === type) {
 
+                switch (typeToShow) {
+                    case 'Boolean': {
+                        var txn = bucketRestriction.bkt.Txn;
+                        if (txn.Negate != undefined) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+
+                    };
+                    case 'Date':{
+                        var time = bucketRestriction.bkt.Txn.Time;
+                        if (time != undefined) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    case 'Numerical': {
+                        return false;
+                    };
+
+                    case 'Enum': {
+                        return false;
+                    };
+                    default: return false;
+                }
+            }
         }
 
         this.showTo = function (bucketRestriction, two_inputs) {
@@ -442,24 +510,40 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 case 'TimeSeries': {
                     var txn = bucketRestriction.bkt.Txn;
                     var cmp = '';
-                    if (txn.Amt) {
+                    if (txn.Negate !== undefined) {
+                        cmp = 'is';
+                    }
+                    else if (txn.Amt) {
                         cmp = txn.Amt.Cmp;
                     } else {
                         cmp = txn.Time.Cmp;
                     }
-                    return cmpMap[cmp];
+                    console.log('CMP', cmp);
+                    var ret = cmpMap[cmp];
+                    console.log('RET', ret);
+                    return ret;
                 };
                 default: return 'has a value of';
             }
         }
 
         function getBooleanValue(bucketRestriction) {
-            if (bucketRestriction.bkt.Vals[0] === 'Yes') {
+            if (bucketRestriction.bkt.Txn.Negate === true) {
                 return 'True';
-            } if (bucketRestriction.bkt.Vals[0] === 'No') {
+            } if (bucketRestriction.bkt.Txn.Negate === false) {
                 return 'False';
             }
             return 'Empty';
+        }
+
+        function getDateValue(bucketRestriction){
+            var time = bucketRestriction.bkt.Txn.Time;
+            if(time !== undefined){
+                return 'Ever';
+                // return time.Period; This is the value that can be edited in the future
+            }else{
+                return 'Ever';
+            }
         }
 
         function getNumericalValue(bucketRestriction, position) {
@@ -476,6 +560,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 case 'Boolean': {
                     return getBooleanValue(bucketRestriction);
                 };
+                case 'Date': {
+                    return getDateValue(bucketRestriction);
+                };
                 case 'Numerical': {
                     return getNumericalValue(bucketRestriction, position);
                 };
@@ -484,6 +571,72 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 };
                 default: return 'Unknown';
             }
+        }
+
+        //******************** Editing mode *********************************/
+        this.changeBooleanValue = function (bucketRestriction, booleanValue) {
+            var txn = bucketRestriction.bkt.Txn;
+            if (txn != undefined) {
+                if ('Yes' === booleanValue) {
+                    txn.Negate = true;
+                } else if ('No' === booleanValue) {
+                    txn.Negate = false;
+                } else {
+                    txn.Negate = null;
+                }
+
+            }
+        }
+        this.changeEnumCmpValue = function (bucketRestriction, value) {
+            bucketRestriction.bkt.Cmp = value;
+        }
+        this.changeNumericalCmpValue = function (bucketRestriction, value) {
+            bucketRestriction.bkt.Cmp = value;
+        }
+
+        this.changeBktValue = function (bucketRestriction, value, position) {
+            bucketRestriction.bkt.Vals[position] = value;
+        }
+
+        this.getBooleanModel = function (bucketRestriction) {
+            var txn = bucketRestriction.bkt.Txn;
+            if (txn.Negate != undefined) {
+                if (txn.Negate === true) {
+                    return 'Yes';
+                } if (txn.Negate === false) {
+                    return 'No';
+                }
+                return '';
+
+            } else {
+                console.warn('Buket restirction with Boolean Value not set');
+                return '?';
+            }
+        }
+        this.getEnumCmpModel = function (bucketRestriction) {
+            return bucketRestriction.bkt.Cmp;
+        }
+
+        this.getNumericalCmpModel = function (bucketRestriction) {
+            return bucketRestriction.bkt.Cmp;
+        }
+
+        this.getBktValue = function (bucketRestriction, position) {
+            var txn = bucketRestriction.bkt.Txn;
+            if (txn.Negate !== undefined) {
+                return (txn.Negate === true) ? 'Yes' : 'No';
+            }
+            if (txn.Qty) {
+                return txn.Qry.Vals[position];
+            }
+            if (txn.Amt) {
+                return txn.Amt.Vals[position];
+            }
+            return '';
+        }
+
+        this.getCubeBktList = function (cube) {
+            return cube.Bkts.List;
         }
 
 

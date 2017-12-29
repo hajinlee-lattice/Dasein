@@ -6,7 +6,10 @@
     <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
         <strong>{{vm.getOperationValue('Boolean')}}</strong>
     </span>
-
+    <span class="query-section-item-value" ng-if="vm.showItem('Date')">
+        <span>Transaction Period</span>
+        <strong>{{vm.getOperationValue('Date')}}</strong>
+    </span>
     <span class="query-section-item-value" ng-if="vm.showItem('Numerical')">
         <strong>{{vm.getOperationValue('Numerical', 0)}}</strong>
         <span ng-if="vm.showTo()" class="operation-and">-</span>

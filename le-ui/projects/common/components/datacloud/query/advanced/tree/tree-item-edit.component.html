@@ -1,11 +1,12 @@
 <span ng-if="vm.showItem('Boolean')" class="query-section-item-operation">
-    <span class="query-section-item-value" ng-if="vm.tree.bucketRestriction.bkt.Vals[0] != ''">
+    <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
         <strong>is</strong>
     </span>
+  
     <select ng-model="vm.booleanValue" ng-change="vm.changeBooleanValue()">
         <option value="Yes">True</option>
         <option value="No">False</option>
-        <option value="">Empty</option>
+        <option value="" ng-if="vm.showEmptyOption()">Empty</option>
     </select>
 
 </span>

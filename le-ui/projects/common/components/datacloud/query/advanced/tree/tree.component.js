@@ -150,7 +150,7 @@ angular
                     return;
                 }
 
-                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum')) {
+                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries')) {
                     if (vm.unused) {
                         vm.unused = false;
 
