@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,8 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
+import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -103,10 +106,23 @@ public class SamlLoginResource {
 
             uDoc.setResult(result);
 
+            LoginDocument lDoc = new LoginDocument();
+            lDoc.setErrors(new ArrayList<>());
+            lDoc.setRandomness(session.getTicket().getRandomness());
+            lDoc.setUniqueness(session.getTicket().getUniqueness());
+            lDoc.setSuccess(true);
+            LoginResult loginResult = lDoc.new LoginResult();
+            loginResult.setMustChangePassword(false);
+            loginResult.setPasswordLastModified(0L);
+            loginResult.setTenants(session.getTicket().getTenants());
+            lDoc.setResult(loginResult);
+            lDoc.setAuthenticationRoute(session.getAuthenticationRoute());
+
             Map<String, Object> attributeMap = new HashMap<>();
             attributeMap.put("userName", uDoc.getResult().getUser().getEmailAddress());
             attributeMap.put("samlAuthenticated", true);
             attributeMap.put("userDocument", JsonUtils.serialize(uDoc));
+            attributeMap.put("loginDocument", JsonUtils.serialize(lDoc));
 
             String baseLoginURL = loginUrl;
             if (enforceLocalUI) {

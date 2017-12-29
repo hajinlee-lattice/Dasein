@@ -14,6 +14,7 @@ public class LoginDocument {
     private String uniqueness;
     private String randomness;
     private boolean success;
+    private String authenticationRoute;
 
     public LoginDocument() {
 
@@ -75,6 +76,16 @@ public class LoginDocument {
         this.success = success;
     }
 
+    @JsonProperty("AuthenticationRoute")
+    public String getAuthenticationRoute() {
+        return authenticationRoute;
+    }
+
+    @JsonProperty("AuthenticationRoute")
+    public void setAuthenticationRoute(String authenticationRoute) {
+        this.authenticationRoute = authenticationRoute;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
@@ -115,7 +126,9 @@ public class LoginDocument {
         }
 
         @JsonProperty("PasswordLastModified")
-        public long getPasswordLastModified() { return passwordLastModified; }
+        public long getPasswordLastModified() {
+            return passwordLastModified;
+        }
 
         @JsonProperty("PasswordLastModified")
         public void setPasswordLastModified(long passwordLastModified) {
