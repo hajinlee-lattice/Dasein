@@ -105,6 +105,7 @@ public class WorkflowExecutionCache {
             nonDetailedJob.setJobType(job.getJobType());
             nonDetailedJob.setInputs(job.getInputs());
             nonDetailedJob.setOutputs(job.getOutputs());
+            nonDetailedJob.setReports(job.getReports());
 
             nonDetailedJobs.add(nonDetailedJob);
         }
