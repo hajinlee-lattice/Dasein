@@ -24,5 +24,4 @@
                    create-session="stateless">
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
-
 </beans>

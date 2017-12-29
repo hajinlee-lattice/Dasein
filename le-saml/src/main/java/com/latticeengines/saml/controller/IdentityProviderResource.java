@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "identityproviders", description = "REST resource for managing SAML identity providers")
 @RestController
-@RequestMapping("identityproviders")
+@RequestMapping("/management/identityproviders")
 @PreAuthorize("hasRole('Edit_PLS_Data')")
 public class IdentityProviderResource {
     private static final Logger log = LoggerFactory.getLogger(IdentityProviderResource.class);

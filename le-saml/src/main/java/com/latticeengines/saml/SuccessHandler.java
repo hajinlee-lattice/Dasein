@@ -29,11 +29,11 @@ public class SuccessHandler implements AuthenticationSuccessHandler {
 
         String email = authentication.getName();
 
-        log.info("request.getPathInfo() = " + request.getServletPath());
+        log.info("request.getPathInfo() = " + request.getPathInfo());
         log.info("email = " + email);
 
-        String tenantId = request.getServletPath()
-                .substring(request.getServletPath().lastIndexOf("/alias/") + "/alias/".length());
+        String path = request.getPathInfo();
+        String tenantId = path.substring(path.lastIndexOf("/alias/") + "/alias/".length());
         log.info("tenantId = " + tenantId);
 
         ServletOutputStream os = response.getOutputStream();
