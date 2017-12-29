@@ -64,7 +64,7 @@
             <div class="query-algorithm-display">
                 <ul class="query-input query-input-root">
                     <li query-input-directive
-                        ng-repeat="tree in vm.tree"
+                        ng-repeat="tree in (vm.mode == 'rules' ? vm.getRulesInputTree() : vm.getSegmentInputTree())"
                         ng-class="{'input-section-item-box-subtree':tree.logicalRestriction.restrictions}" 
                         class="{{ tree.logicalRestriction.operator ? 'query-input-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
                         items="vm.items" tree="tree" root="vm" parent="vm[vm.state]">
@@ -78,8 +78,8 @@
                 <i class="fa fa-undo"></i> UNDO
             </button>
         </div>
-        
-        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
+
+<!--         <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
             <span>
                 Build a segment with 
                 <div class="button-group" role="group" ng-click="vm.clickTreeMode(vm.treeMode == 'account' ? 'contact' : 'account')">
@@ -98,17 +98,47 @@
                 </div>
                 that have:
             </span>
+        </div> -->
+
+        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
+            <span>
+                Build a segment with <strong>accounts</strong> that have:
+            </span>
         </div>
 
         <ul class="query-section query-tree-root"
             ng-mouseleave="vm.mouseOut()">
             <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
-                    ng-repeat="tree in vm.tree">
+                    ng-repeat="tree in (vm.mode == 'rules' ? vm.accountRulesTree : vm.getAccountTree())">
                 <query-tree-directive 
                         class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
                         items="vm.items" tree="tree" root="vm">
                 </query-tree-directive>
             </li>
         </ul>
+
+        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
+            <span>
+                <strong>AND</strong>
+            </span>
+        </div>
+
+        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
+            <span>
+                <strong>contacts</strong> that have:
+            </span>
+        </div>
+
+        <ul class="query-section query-tree-root"
+            ng-mouseleave="vm.mouseOut()">
+            <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
+                    ng-repeat="tree in (vm.mode == 'rules' ? vm.contactRulesTree : vm.getContactTree())">
+                <query-tree-directive 
+                        class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
+                        items="vm.items" tree="tree" root="vm">
+                </query-tree-directive>
+            </li>
+        </ul>
+
     </div>
 </div>

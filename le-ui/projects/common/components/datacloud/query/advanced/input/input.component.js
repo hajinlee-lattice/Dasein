@@ -25,7 +25,7 @@ angular
                     vm.enrichments = enrichments;
                     
                     if (vm.tree.bucketRestriction) {
-                        vm.item = vm.enrichments[ vm.enrichmentsMap[ vm.tree.bucketRestriction.attr.split('.')[1] ] ]
+                        vm.item = vm.enrichments[ vm.enrichmentsMap[ vm.tree.bucketRestriction.attr.split('.')[1] ] ];
                     }
                 });
             }

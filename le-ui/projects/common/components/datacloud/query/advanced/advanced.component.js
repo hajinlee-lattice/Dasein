@@ -15,6 +15,8 @@ angular.module('common.datacloud.query.builder', [
         cube: Cube,
         history: QueryStore.history,
         restriction: QueryStore.accountRestriction,
+        account_restriction: QueryStore.accountRestriction,
+        contact_restriction: QueryStore.contactRestriction,
         enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
         droppedItem: null,
         draggedItem: null,
@@ -31,7 +33,11 @@ angular.module('common.datacloud.query.builder', [
         rating_id: $stateParams.rating_id,
         ratings: RatingsEngineStore ? RatingsEngineStore.ratings : null,
         treeMode: 'account',
-        segment: $stateParams.segment
+        segment: $stateParams.segment,
+        segmentInputTree: [],
+        rulesInputTree: [],
+        accountRulesTree: [],
+        contactRulesTree: []
     });
 
     vm.init = function() {
@@ -78,7 +84,23 @@ angular.module('common.datacloud.query.builder', [
             DataCloudStore.setEnrichmentsMap(vm.enrichmentsMap);
 
             $timeout(function() {
-                vm.tree = vm.getTree();
+                
+                if (vm.mode == 'rules') {
+                    vm.accountRulesTree = [vm.generateRulesTreeForEntity('Account')];
+                    vm.contactRulesTree = [vm.generateRulesTreeForEntity('Contact')];
+
+                    vm.rulesInputTree = {
+                        'collapsed': false,
+                        'logicalRestriction': {
+                            'operator': 'AND',
+                            'restrictions': [
+                                vm.accountRulesTree[0],
+                                vm.contactRulesTree[0]
+                            ]
+                        }
+                    };
+                }
+                
                 vm.setCurrentSavedTree();
 
                 console.log('[AQB] Restriction:', angular.copy(vm.restriction));
@@ -88,6 +110,18 @@ angular.module('common.datacloud.query.builder', [
         });
 
         QueryStore.setAddBucketTreeRoot(null);
+
+        if (vm.mode == 'segment') {
+            vm.segmentInputTree = {
+                'logicalRestriction': {
+                    'operator': 'AND',
+                    'restrictions': [
+                        vm.account_restriction.restriction,
+                        vm.contact_restriction.restriction
+                    ]
+                }
+            };
+        }
     }
 
     vm.initCoverageMap = function(map) {
@@ -123,14 +157,118 @@ angular.module('common.datacloud.query.builder', [
         }
     }
 
-    vm.generateRulesTree = function() {
+    vm.getAccountTree = function() {
+        return [ vm.account_restriction.restriction ];
+    }
+
+    vm.getContactTree = function() {
+        return [ vm.contact_restriction.restriction ];
+    }
+
+    vm.getSegmentInputTree = function() {
+        if (vm.account_restriction.restriction.logicalRestriction.restrictions.length != 0 && vm.contact_restriction.restriction.logicalRestriction.restrictions.length != 0) {
+            return [ vm.segmentInputTree ];
+        } else if (vm.account_restriction.restriction.logicalRestriction.restrictions.length && !vm.contact_restriction.restriction.logicalRestriction.restrictions.length) {
+            return vm.getAccountTree();
+        } else if (!vm.account_restriction.restriction.logicalRestriction.restrictions.length && vm.contact_restriction.restriction.logicalRestriction.restrictions.length) {
+            return vm.getContactTree();
+        }
+    }
+
+    vm.getRulesInputTree = function() {
+        var accountAttrSelected = vm.checkAttributesSelected('account');
+        var contactAttrSelected = vm.checkAttributesSelected('contact');
+
+        if (vm.accountRulesTree[0] && vm.contactRulesTree[0]) {
+            if (vm.accountRulesTree[0].logicalRestriction.restrictions.length != 0 && vm.contactRulesTree[0].logicalRestriction.restrictions.length != 0 && 
+                    accountAttrSelected && contactAttrSelected) {
+
+                return [ vm.rulesInputTree ];
+            } else if (vm.accountRulesTree[0].logicalRestriction.restrictions.length && vm.contactRulesTree[0].logicalRestriction.restrictions.length == 0 || 
+                        (accountAttrSelected && !contactAttrSelected)) {
+
+                return vm.accountRulesTree;
+            } else if (vm.contactRulesTree[0].logicalRestriction.restrictions.length && vm.accountRulesTree[0].logicalRestriction.restrictions.length == 0 || 
+                        (contactAttrSelected && !accountAttrSelected)) {
+
+                return vm.contactRulesTree;
+            }
+        }
+    }
+
+    vm.checkAttributesSelected = function(entity) {
+        var bucket = vm.buckets[vm.bucketsMap[vm.bucket]];
+        var counts = vm.getRuleCount(bucket, true);
+
+        return counts[entity] > 0;
+    }
+
+    vm.resetRulesInputTree = function() {
+        vm.rulesInputTree = {
+            'collapsed': false,
+            'logicalRestriction': {
+                'operator': 'AND',
+                'restrictions': [
+                    vm.accountRulesTree[0],
+                    vm.contactRulesTree[0]
+                ]
+            }
+        };
+    }
+
+
+    // vm.generateRulesTree = function() {
+    //     var bucketRestrictions = [];
+        
+    //     RatingEngineModel.rule.selectedAttributes
+    //     .forEach(function(value, index) {
+    //         var item = angular.copy(vm.enrichments[vm.enrichmentsMap[value]]);
+
+    //         if (item) {
+    //             bucketRestrictions.push({
+    //                 bucketRestriction: {
+    //                     attr: item.Entity + '.' + value,
+    //                     bkt: {}
+    //                 }
+    //             });
+    //         }
+    //     });
+    //     if (vm.bucket) {
+    //         var bucket = vm.rating_rule.bucketToRuleMap[vm.bucket],
+    //             fromBucket = bucket[vm.treeMode + '_restriction'],
+    //             restrictions = fromBucket.logicalRestriction.restrictions,
+    //             setBuckets = QueryStore.getAllBuckets(restrictions),
+    //             allBuckets = QueryStore.getAllBuckets(restrictions, null, true),
+    //             ids = [],
+    //             rids = [];
+
+
+    //         setBuckets.forEach(function(value, index) {
+    //             ids.push(value.bucketRestriction.attr);
+    //         })
+
+    //         allBuckets.forEach(function(value, index) {
+    //             rids.push(value.bucketRestriction.attr);
+    //         })
+
+    //         bucketRestrictions.forEach(function(value, index) {
+    //             if (ids.indexOf(value.bucketRestriction.attr) < 0 && rids.indexOf(value.bucketRestriction.attr) < 0) {
+    //                 restrictions.push(value);
+    //             }
+    //         })
+    //     }
+
+    //     return fromBucket;
+    // }
+
+    vm.generateRulesTreeForEntity = function(entity) {
         var bucketRestrictions = [];
         
         RatingEngineModel.rule.selectedAttributes
         .forEach(function(value, index) {
             var item = angular.copy(vm.enrichments[vm.enrichmentsMap[value]]);
 
-            if (item) {
+            if (item && item.Entity == entity) {
                 bucketRestrictions.push({
                     bucketRestriction: {
                         attr: item.Entity + '.' + value,
@@ -141,7 +279,7 @@ angular.module('common.datacloud.query.builder', [
         });
         if (vm.bucket) {
             var bucket = vm.rating_rule.bucketToRuleMap[vm.bucket],
-                fromBucket = bucket[vm.treeMode + '_restriction'],
+                fromBucket = bucket[entity.toLowerCase() + '_restriction'],
                 restrictions = fromBucket.logicalRestriction.restrictions,
                 setBuckets = QueryStore.getAllBuckets(restrictions),
                 allBuckets = QueryStore.getAllBuckets(restrictions, null, true),
@@ -181,7 +319,8 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.setCurrentSavedTree = function() {
-        QueryStore.currentSavedTree = angular.copy(vm.tree);
+        QueryStore.currentSavedTree = vm.mode == 'segment' ?  angular.copy([ vm.segmentInputTree ]) : angular.copy([ vm.rulesInputTree ]);
+
     }
 
     vm.getBucketLabel = function(bucket) {
@@ -204,9 +343,9 @@ angular.module('common.datacloud.query.builder', [
     vm.saveState = function(noCount) {
         vm.labelIncrementor = 0;
 
-        var current = angular.copy(vm.tree),
+        var current = vm.mode == 'segment' ?  angular.copy([ vm.segmentInputTree ]) : angular.copy([ vm.rulesInputTree ]),
             old = angular.copy(vm.history[vm.history.length -1]) || [];
-
+        console.log('saveState', current);
         if (!vm.compareTree(old, current)) {
             vm.history.push(current);
 
@@ -221,12 +360,16 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.clickBucketTile = function(bucket) {
+        console.log('CLICK BUCKET TILE', bucket);
         vm.labelIncrementor = 0;
         vm.bucket = bucket.bucket;
-        vm.tree = vm.getTree();
+        // vm.tree = vm.getTree();
+        vm.accountRulesTree = [ vm.generateRulesTreeForEntity('Account') ];
+        vm.contactRulesTree = [ vm.generateRulesTreeForEntity('Contact') ];
+        vm.resetRulesInputTree();
     }
 
-    vm.getRuleCount = function(bkt) {
+    vm.getRuleCount = function(bkt, entity) {
         if (bkt) {
             var buckets = [
                 vm.rating_rule.bucketToRuleMap[bkt.bucket] 
@@ -239,17 +382,31 @@ angular.module('common.datacloud.query.builder', [
             });
         }
 
-        var filtered = [], restrictions = [];
+        var accountRestrictions = [], contactRestrictions = [];
+        var filteredAccounts = [], filteredContacts = []
 
         buckets.forEach(function(bucket, index) {
-            restrictions = QueryStore.getAllBuckets(bucket[vm.treeMode + '_restriction'].logicalRestriction.restrictions);
-            
-            filtered = filtered.concat(restrictions.filter(function(value, index) {
+            accountRestrictions = QueryStore.getAllBuckets(bucket['account_restriction'].logicalRestriction.restrictions);
+            contactRestrictions = QueryStore.getAllBuckets(bucket['contact_restriction'].logicalRestriction.restrictions);
+
+            filteredAccounts = filteredAccounts.concat(accountRestrictions.filter(function(value, index) {
+                return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
+            }));
+
+            filteredContacts = filteredContacts.concat(contactRestrictions.filter(function(value, index) {
                 return value.bucketRestriction && value.bucketRestriction.bkt && value.bucketRestriction.bkt.Id;
             }));
         })
 
-        return filtered.length;
+        if (entity) {
+            var counts = {
+                        'account': filteredAccounts.length, 
+                        'contact': filteredContacts.length
+                    };
+            return counts;
+        }
+
+        return filteredAccounts.length + filteredContacts.length;
     }
 
     vm.getRatingsAndRecordCounts = function(model, segmentName) {
@@ -282,17 +439,46 @@ angular.module('common.datacloud.query.builder', [
         }
     }
 
-    vm.setState = function(newState) {
-        if (!vm.compareTree(newState, angular.copy(vm.tree))) {
-            vm.labelIncrementor = 0;
-            
-            QueryStore[vm.treeMode + 'Restriction'].restriction = newState[0];
 
-            vm.restriction = {
-                restriction: newState[0]
+    // vm.setState = function(newState) {
+    //     console.log('set',newState);
+
+    //     if (!vm.compareTree(newState, angular.copy(vm.tree))) {
+    //         vm.labelIncrementor = 0;
+            
+    //         QueryStore[vm.treeMode + 'Restriction'].restriction = newState[0];
+
+    //         vm.restriction = {
+    //             restriction: newState[0]
+    //         };
+
+    //         vm.tree = newState;
+    //         // vm.mergedTree.logicalRestriction.restrictions[0] = newState;
+
+    //         return true;
+    //     }
+
+    //     return false;
+    // }
+
+    vm.setState = function(newState) {
+        console.log('SET', newState);
+        // var currentTree = vm.mode == 'rules' ? vm.getRulesInputTree : vm.getSegmentInputTree();
+        if (!vm.compareTree(newState, vm.getSegmentInputTree())) {
+            vm.labelIncrementor = 0;
+            QueryStore['accountRestriction'].restriction = newState[0].logicalRestriction.restrictions[0];
+            QueryStore['contactRestriction'].restriction = newState[0].logicalRestriction.restrictions[1];
+
+            vm.account_restriction = {
+                restriction: newState[0].logicalRestriction.restrictions[0]
             };
 
-            vm.tree = newState;
+            vm.contact_restriction = {
+                restriction: newState[0].logicalRestriction.restrictions[1]
+            };
+
+            vm.segmentInputTree.logicalRestriction.restrictions[0] = newState[0].logicalRestriction.restrictions[0];
+            vm.segmentInputTree.logicalRestriction.restrictions[1] = newState[0].logicalRestriction.restrictions[1];
 
             return true;
         }
@@ -311,7 +497,7 @@ angular.module('common.datacloud.query.builder', [
                 BucketMap = RatingEngineCopy.rule.ratingRule.bucketToRuleMap;
 
             vm.bucketLabels.forEach(function(bucketName, index) {
-                var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
+                // var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
 
                 //logical.restrictions = logical.restrictions.filter(function(restriction, index) {
                 //    return restriction.bucketRestriction && restriction.bucketRestriction.bkt.Id;
@@ -319,11 +505,13 @@ angular.module('common.datacloud.query.builder', [
                 
                 vm.buckets[vm.bucketsMap[bucketName]].count = -1;
 
-                SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName][vm.treeMode + '_restriction'] ]);
+                // SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName][vm.treeMode + '_restriction'] ]);
+                SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName]['account_restriction'] ]);
+                SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName]['contact_restriction'] ]);
+
             });
 
             $timeout(function() {
-                console.log('updateCounts');
                 vm.getRatingsAndRecordCounts(RatingEngineCopy, CurrentRatingEngine.segment.name);
             }, 250);
         } else {
@@ -336,8 +524,10 @@ angular.module('common.datacloud.query.builder', [
                         'row_offset': 0
                     }
                 };
+                vm.labelIncrementor = 0;
 
                 segment['account_restriction'] = angular.copy(QueryStore.accountRestriction);
+
                 segment['contact_restriction'] = angular.copy(QueryStore.contactRestriction);
 
                 QueryStore.getEntitiesCounts(SegmentStore.sanitizeSegment(segment)).then(function(result) {
@@ -355,6 +545,7 @@ angular.module('common.datacloud.query.builder', [
             "free_form_text_search": ""
         };
 
+        vm.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
         segment[vm.treeMode + '_restriction'] = {
             "restriction": {
                 "bucketRestriction": angular.copy(bucketRestriction)
@@ -395,11 +586,17 @@ angular.module('common.datacloud.query.builder', [
             restrictions = [];
 
         vm.bucketLabels.forEach(function(bucketName, index) {
-            var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
+            // var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
 
-            QueryStore.getAllBuckets(logical.restrictions, restrictions);
+            // QueryStore.getAllBuckets(logical.restrictions, restrictions);
+
+            var accountLogical = BucketMap[bucketName]['account_restriction'].logicalRestriction;
+            var contactLogical = BucketMap[bucketName]['contact_restriction'].logicalRestriction;
+
+            QueryStore.getAllBuckets(accountLogical.restrictions, restrictions);
+            QueryStore.getAllBuckets(contactLogical.restrictions, restrictions);
         });
-
+        console.log('ALL BUCKET RESTRICTIONS', restrictions);
         return restrictions;
     }
 
