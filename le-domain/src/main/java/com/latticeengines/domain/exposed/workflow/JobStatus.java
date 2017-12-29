@@ -80,11 +80,7 @@ public enum JobStatus {
         }
     }
 
-    public static JobStatus fromYarnStatus(FinalApplicationStatus status) {
-        return fromYarnStatus(status, null);
-    }
-
-    private static JobStatus fromYarnStatus(FinalApplicationStatus status, YarnApplicationState jobState) {
+    public static JobStatus fromYarnStatus(FinalApplicationStatus status, YarnApplicationState jobState) {
         if (jobState != null) {
             if (jobState == YarnApplicationState.RUNNING) {
                 return JobStatus.RUNNING;
@@ -133,35 +129,4 @@ public enum JobStatus {
                 return JobStatus.PENDING;
         }
     }
-
-//    public static FinalApplicationStatus toYarnStatus(JobStatus status) {
-//        switch (status) {
-//            case COMPLETED:
-//                return FinalApplicationStatus.SUCCEEDED;
-//            case FAILED:
-//                return FinalApplicationStatus.FAILED;
-//            case PENDING:
-//            case RUNNING:
-//                return FinalApplicationStatus.UNDEFINED;
-//            case CANCELLED:
-//            default:
-//                return FinalApplicationStatus.KILLED;
-//        }
-//    }
-//
-//    public static BatchStatus toBatchStatus(JobStatus status) {
-//        switch (status) {
-//            case COMPLETED:
-//                return BatchStatus.COMPLETED;
-//            case RUNNING:
-//                return BatchStatus.STARTED;
-//            case CANCELLED:
-//                return BatchStatus.STOPPED;
-//            case FAILED:
-//                return BatchStatus.FAILED;
-//            case PENDING:
-//            default:
-//                return BatchStatus.UNKNOWN;
-//        }
-//    }
 }

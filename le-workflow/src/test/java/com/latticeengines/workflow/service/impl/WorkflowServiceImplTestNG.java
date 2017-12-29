@@ -20,10 +20,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -111,12 +108,14 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         failableStep.setFail(false);
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
-        workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT);
+        BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
+        assertEquals(status, BatchStatus.COMPLETED);
         List<Job> jobs = workflowService.getJobs(Collections.singletonList(workflowId), failableWorkflow.name());
         assertEquals(jobs.size(), 1);
         Job job = jobs.get(0);
         assertEquals(job.getId().longValue(), workflowId.getId());
         assertEquals(job.getJobType(), failableWorkflow.name());
+        assertEquals(job.getJobStatus(), JobStatus.COMPLETED);
     }
 
     @Test(groups = "functional")

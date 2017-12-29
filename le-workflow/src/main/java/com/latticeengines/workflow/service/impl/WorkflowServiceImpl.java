@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.TransformerUtils;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -357,7 +358,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             } finally {
                 if (status != null) {
                     WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
-                    workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
+                    workflowJob.setStatus(JobStatus.fromString(status.getStatus().name(), YarnApplicationState.RUNNING).name());
                     workflowJobEntityMgr.updateWorkflowJob(workflowJob);
                 }
                 Thread.sleep(checkInterval);

@@ -329,7 +329,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob1.setApplicationId(applicationId);
         workflowJob1.setInputContext(inputContext);
         workflowJob1.setTenant(tenant);
-        workflowJob1.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.UNDEFINED).name());
+        workflowJob1.setStatus(JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name()).name());
         workflowJob1.setWorkflowId(jobExecution1.getJobId());
         workflowJob1.setType(jobInstance1.getJobName());
         workflowJob1.setParentJobId(null);
@@ -352,7 +352,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob11.setApplicationId(applicationId);
         workflowJob11.setInputContext(inputContext);
         workflowJob11.setTenant(tenant);
-        workflowJob11.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.UNDEFINED).name());
+        workflowJob11.setStatus(JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name()).name());
         workflowJob11.setWorkflowId(jobExecution11.getJobId());
         workflowJob11.setType(jobInstance11.getJobName());
         workflowJob11.setParentJobId(workflowIds.get(10000L));
@@ -373,7 +373,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob12.setApplicationId(applicationId);
         workflowJob12.setInputContext(inputContext);
         workflowJob12.setTenant(tenant);
-        workflowJob12.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.SUCCEEDED).name());
+        workflowJob12.setStatus(JobStatus.fromString(FinalApplicationStatus.SUCCEEDED.name()).name());
         workflowJob12.setWorkflowId(jobExecution12.getJobId());
         workflowJob12.setType(jobInstance12.getJobName());
         workflowJob12.setParentJobId(workflowIds.get(10000L));
@@ -396,7 +396,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob13.setApplicationId(applicationId);
         workflowJob13.setInputContext(inputContext);
         workflowJob13.setTenant(tenant);
-        workflowJob13.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.FAILED).name());
+        workflowJob13.setStatus(JobStatus.fromString(FinalApplicationStatus.FAILED.name()).name());
         workflowJob13.setWorkflowId(jobExecution13.getJobId());
         workflowJob13.setType(jobInstance13.getJobName());
         workflowJob13.setParentJobId(workflowIds.get(10000L));
@@ -425,7 +425,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob2.setApplicationId(applicationId);
         workflowJob2.setInputContext(inputContext);
         workflowJob2.setTenant(tenant);
-        workflowJob2.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.KILLED).name());
+        workflowJob2.setStatus(JobStatus.fromString(FinalApplicationStatus.KILLED.name()).name());
         workflowJob2.setWorkflowId(jobExecution2.getJobId());
         workflowJob2.setType(jobInstance2.getJobName());
         workflowJobEntityMgr.create(workflowJob2);
@@ -446,7 +446,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob3.setApplicationId(applicationId);
         workflowJob3.setInputContext(inputContext);
         workflowJob3.setTenant(tenant3);
-        workflowJob3.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.UNDEFINED).name());
+        workflowJob3.setStatus(JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name()).name());
         workflowJob3.setWorkflowId(jobExecution3.getJobId());
         workflowJob3.setType(jobInstance3.getJobName());
         workflowJobEntityMgr.create(workflowJob3);
@@ -469,7 +469,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob31.setApplicationId(applicationId);
         workflowJob31.setInputContext(inputContext);
         workflowJob31.setTenant(tenant3);
-        workflowJob31.setStatus(JobStatus.fromYarnStatus(FinalApplicationStatus.SUCCEEDED).name());
+        workflowJob31.setStatus(JobStatus.fromString(FinalApplicationStatus.SUCCEEDED.name()).name());
         workflowJob31.setWorkflowId(jobExecution31.getJobId());
         workflowJob31.setType(jobInstance31.getJobName());
         workflowJobEntityMgr.create(workflowJob31);

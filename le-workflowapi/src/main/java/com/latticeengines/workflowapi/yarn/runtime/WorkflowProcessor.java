@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.yarn.runtime;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -86,7 +87,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
             WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);
             FinalApplicationStatus finalStatus = workflowStatus.toYarnStatus();
-            workflowJob.setStatus(JobStatus.fromYarnStatus(finalStatus).name());
+            workflowJob.setStatus(JobStatus.fromYarnStatus(finalStatus, YarnApplicationState.RUNNING).name());
             log.info(String.format("Completed workflow - workflowId:%s batchStatus:%s yarnStatus:%s appId:%s " +
                             "startTime:%s endTime:%s",
                     String.valueOf(workflowId.getId()), workflowStatus.getStatus(), finalStatus.name(), appId.toString(),

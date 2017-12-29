@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -130,14 +131,33 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
 
         JobStatus yarnJobStatus = new JobStatus();
+        yarnJobStatus.setStatus(FinalApplicationStatus.UNDEFINED);
+        yarnJobStatus.setState(YarnApplicationState.ACCEPTED);
+        workflowJob5.setWorkflowId(null);
+        workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
+        workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
+        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+        assertEquals(workflowJob5.getStatus(), com.latticeengines.domain.exposed.workflow.JobStatus.PENDING.name());
+
         yarnJobStatus.setStatus(FinalApplicationStatus.FAILED);
+        yarnJobStatus.setState(YarnApplicationState.FAILED);
         yarnJobStatus.setStartTime(10000L);
         workflowJob5.setWorkflowId(null);
         workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
         workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
         assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
-        assertEquals(workflowJob5.getStatus(), FinalApplicationStatus.FAILED.name());
+        assertEquals(workflowJob5.getStatus(), com.latticeengines.domain.exposed.workflow.JobStatus.FAILED.name());
         assertEquals(workflowJob5.getStartTimeInMillis(), new Long(10000L));
+
+        yarnJobStatus.setStatus(FinalApplicationStatus.UNDEFINED);
+        yarnJobStatus.setState(YarnApplicationState.RUNNING);
+        yarnJobStatus.setStartTime(20000L);
+        workflowJob5.setWorkflowId(null);
+        workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
+        workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
+        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+        assertEquals(workflowJob5.getStatus(), com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name());
+        assertEquals(workflowJob5.getStartTimeInMillis(), new Long(20000L));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")

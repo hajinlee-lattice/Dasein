@@ -3,7 +3,6 @@ package com.latticeengines.workflow.exposed.dao;
 import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
@@ -19,7 +18,7 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds);
 
-    void updateStatusFromYarn(WorkflowJob workflowJob, JobStatus yarnJobStatus);
+    void updateStatus(WorkflowJob workflowJob);
 
     void registerWorkflowId(WorkflowJob workflowJob);
 
