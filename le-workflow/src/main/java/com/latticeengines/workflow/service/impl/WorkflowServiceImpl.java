@@ -359,7 +359,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 if (status != null) {
                     WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
                     workflowJob.setStatus(JobStatus.fromString(status.getStatus().name(), YarnApplicationState.RUNNING).name());
-                    workflowJobEntityMgr.updateWorkflowJob(workflowJob);
+                    workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
                 }
                 Thread.sleep(checkInterval);
             }
