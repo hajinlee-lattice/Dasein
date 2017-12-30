@@ -15,7 +15,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-web</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
+        <version>4.2.2-SNAPSHOT</version>
         <relativePath>../web-pom.xml</relativePath>
     </parent>
 
