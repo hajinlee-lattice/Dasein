@@ -9,15 +9,15 @@
 
     <properties>
         <component-name>admin</component-name>
-        <le.baton.version>4.2.2-SNAPSHOT</le.baton.version>
-        <le.common.version>4.2.2-SNAPSHOT</le.common.version>
-        <le.domain.version>4.2.2-SNAPSHOT</le.domain.version>
-        <le.monitor.version>4.2.2-SNAPSHOT</le.monitor.version>
-        <le.remote.version>4.2.2-SNAPSHOT</le.remote.version>
-        <le.camille.version>4.2.2-SNAPSHOT</le.camille.version>
-        <le.db.version>4.2.2-SNAPSHOT</le.db.version>
-        <le.security.version>4.2.2-SNAPSHOT</le.security.version>
-        <le.encryption.version>4.2.2-SNAPSHOT</le.encryption.version>
+        <le.baton.version>4.3.0-SNAPSHOT</le.baton.version>
+        <le.common.version>4.3.0-SNAPSHOT</le.common.version>
+        <le.domain.version>4.3.0-SNAPSHOT</le.domain.version>
+        <le.monitor.version>4.3.0-SNAPSHOT</le.monitor.version>
+        <le.remote.version>4.3.0-SNAPSHOT</le.remote.version>
+        <le.camille.version>4.3.0-SNAPSHOT</le.camille.version>
+        <le.db.version>4.3.0-SNAPSHOT</le.db.version>
+        <le.security.version>4.3.0-SNAPSHOT</le.security.version>
+        <le.encryption.version>4.3.0-SNAPSHOT</le.encryption.version>
         <jetty.port>8085</jetty.port>
         <jett.stop.port>10985</jett.stop.port>
     </properties>
@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-web-parent</artifactId>
-        <version>4.2.2-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
         <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 
