@@ -551,7 +551,9 @@ angular.module('common.datacloud.query.builder', [
                 "bucketRestriction": angular.copy(bucketRestriction)
             }
         };
-
+        if(vm.treeMode === 'purchasehistory'){
+            vm.treeMode = 'account';
+        }
         QueryService.GetCountByQuery(
             vm.treeMode + 's', 
             segment, 
