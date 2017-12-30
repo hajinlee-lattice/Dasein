@@ -76,6 +76,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
     public static final String TRANSFORMER_TRANSACTION_AGGREGATOR = "transactionAggregator";
+    public static final String TRANSFORMER_CONTACT_NAME_CONCATENATER = "contactNameConcatenater";
 
     public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
     public static final String TRANSFORMER_CONSOLIDATE_RETAIN = "consolidateRetainFieldTransformer";
