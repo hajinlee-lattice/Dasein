@@ -237,7 +237,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         for (Map.Entry<String, String> entry : map.entrySet()) {
             workflowJob.setReportName(entry.getKey(), entry.getValue());
         }
-        workflowJobEntityMgr.updateWorkflowJob(workflowJob);
+        workflowJobEntityMgr.updateReport(workflowJob);
     }
 
     public void setWorkflowJobEntityMgr(WorkflowJobEntityMgr workflowJobEntityMgr) {

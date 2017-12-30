@@ -113,4 +113,10 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     public void registerWorkflowId(WorkflowJob workflowJob) {
         workflowJobDao.registerWorkflowId(workflowJob);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateReport(WorkflowJob workflowJob) {
+        workflowJobDao.updateReport(workflowJob);
+    }
 }
