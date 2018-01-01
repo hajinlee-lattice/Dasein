@@ -156,7 +156,7 @@ public class DomainOwnershipForDomCleanupTestNG
             { "sbiDuns2.com", "DUNS14", "DUNS", 2, "MULTIPLE_LARGE_COMPANY" }, //
             { "amazon.com", "DUNS31", "DUNS", 2, "HIGHER_NUM_OF_LOC" }, //
             { "netappDuns2.com", "DUNS21", "DUNS", 2, "HIGHER_EMP_TOTAL" }, //
-            { "sbiDuns1.com", "DUNS13, DUNS20, DUNS29, DUNS66", "DUNS", 4, "FRANCHISE" } //
+            { "sbiDuns1.com", "DUNS13,DUNS20,DUNS29,DUNS66", "DUNS", 4, "FRANCHISE" } //
     };
 
     @Override
