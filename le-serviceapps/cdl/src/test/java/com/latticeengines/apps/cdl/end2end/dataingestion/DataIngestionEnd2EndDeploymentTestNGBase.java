@@ -162,7 +162,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private JobService jobService;
 
     @Inject
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Inject
     private CheckpointService checkpointService;

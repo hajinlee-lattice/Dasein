@@ -659,7 +659,16 @@ public enum LedpCode {
     LEDP_38023("No account attributes found for tenant {0}"), //
 
     // le-ulysses
-    LEDP_39001("No account with id {0} found for CustomerSpace {0}") //
+    LEDP_39001("No account with id {0} found for CustomerSpace {0}"), //
+
+    // le-cdl
+    LEDP_40000("CustomerSpace in CleanupByDateRangeConfig is null."), //
+    LEDP_40001("Entity in CleanupByDateRangeConfig is not Transaction."), //
+    LEDP_40002("StartTime or EndTime in CleanupByDateRangeConfig is null."), //
+    LEDP_40003("StartTime cannot after EndTime in CleanupByDateRangeConfig."), //
+    LEDP_40004("Date to day period error. Error message: {0}."), //
+    LEDP_40005("Table is null. CustomerSpace {0}."), //
+    LEDP_40006("There are 0 or more than 1 extract in table. CustomerSpace {0}.") //
     ;
 
     private String message;

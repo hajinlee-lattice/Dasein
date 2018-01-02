@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -54,11 +55,17 @@ public class CDLDataCleanupResource {
     @ApiOperation(value = "Clean up by time range")
     public ResponseDocument<String> cleanupAll(@PathVariable String customerSpace,
                            @RequestParam(value = "BusinessEntity", required = false) BusinessEntity businessEntity,
-                           @RequestParam(value = "startTime") Date startTime,
-                           @RequestParam(value = "endTime") Date endTime) {
-        return ResponseDocument.successResponse(
-                cdlDataCleanupService.cleanupByTimeRange(customerSpace, businessEntity, startTime, endTime).toString());
+                           @RequestParam(value = "startTime") String startTime,
+                           @RequestParam(value = "endTime") String endTime) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = dateFormat.parse(startTime);
+            Date end = dateFormat.parse(endTime);
+
+            return ResponseDocument.successResponse(
+                    cdlDataCleanupService.cleanupByTimeRange(customerSpace, businessEntity, start, end).toString());
+        } catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
     }
-
-
 }

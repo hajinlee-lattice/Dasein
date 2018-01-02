@@ -113,8 +113,13 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException("Failed to submit import job: " +
+                    StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -132,8 +137,13 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException("Failed to submit import job: " +
+                    StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -151,12 +161,18 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException("Failed to submit import job: " +
+                    StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId cleanupByTimeRange(String customerSpace, Date startTime, Date endTime, BusinessEntity entity) {
+    public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime, BusinessEntity
+            entity) {
         List<Object> args = new ArrayList<>();
         args.add(customerSpace);
         args.add(startTime);
@@ -172,8 +188,13 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException("Failed to submit import job: " +
+                    StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 
 }
