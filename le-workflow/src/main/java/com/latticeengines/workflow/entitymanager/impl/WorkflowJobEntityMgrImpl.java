@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,7 +93,7 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
                                             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {
         workflowJob.setStatus(JobStatus.fromString(yarnJobStatus.getStatus().name(), yarnJobStatus.getState()).name());
         workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
-        workflowJobDao.updateStatus(workflowJob);
+        updateWorkflowJobStatus(workflowJob);
         return workflowJob;
     }
 
@@ -118,5 +119,17 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateReport(WorkflowJob workflowJob) {
         workflowJobDao.updateReport(workflowJob);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateOutput(WorkflowJob workflowJob) {
+        workflowJobDao.updateOutput(workflowJob);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateErrorDetails(WorkflowJob workflowJob) {
+        workflowJobDao.updateErrorDetails(workflowJob);
     }
 }

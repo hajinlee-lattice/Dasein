@@ -46,7 +46,7 @@ public class FailureReportingListener extends LEJobListener {
                                 ExceptionUtils.getStackTrace(exception));
                     }
                     job.setErrorDetails(details);
-                    workflowJobEntityMgr.update(job);
+                    workflowJobEntityMgr.updateErrorDetails(job);
                 } else {
                     job.setErrorDetails(new ErrorDetails(LedpCode.LEDP_00002, LedpCode.LEDP_00002.getMessage(), null));
                 }

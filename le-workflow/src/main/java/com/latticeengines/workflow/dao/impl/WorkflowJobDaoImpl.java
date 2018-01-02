@@ -36,7 +36,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format("from %s workflowjob where workflowjob.workflowId in :workflowIds",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameterList("workflowIds", workflowIds);
         return query.list();
     }
@@ -48,7 +48,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format("from %s workflowjob where workflowjob.tenant.pid=:tenantPid",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameter("tenantPid", tenant.getPid());
         return query.list();
     }
@@ -60,7 +60,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format("from %s workflowjob where workflowjob.tenant.pid=:tenantPid and " +
                 "workflowjob.workflowId in :workflowIds", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameter("tenantPid", tenant.getPid());
         query.setParameter("workflowIds", workflowIds);
         return query.list();
@@ -73,7 +73,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         String queryStr = String.format(
                 "update %s workflowjob set workflowjob.status=:status, workflowjob.startTimeInMillis=:startTimeInMillis where workflowjob.applicationId=:applicationId",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("status", workflowJob.getStatus());
         query.setParameter("startTimeInMillis", workflowJob.getStartTimeInMillis());
         query.setParameter("applicationId", workflowJob.getApplicationId());
@@ -87,7 +87,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         String queryStr = String.format(
                 "update %s workflowjob set workflowjob.parentJobId=:parentJobId where workflowjob.workflowId=:workflowId",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("parentJobId", workflowJob.getParentJobId());
         query.setParameter("workflowId", workflowJob.getWorkflowId());
         query.executeUpdate();
@@ -100,7 +100,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         String queryStr = String.format(
                 "update %s workflowjob set workflowjob.workflowId=:workflowId where workflowjob.applicationId=:applicationId",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("workflowId", workflowJob.getWorkflowId());
         query.setParameter("applicationId", workflowJob.getApplicationId());
         query.executeUpdate();
@@ -113,8 +113,34 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         String queryStr = String.format(
                 "update %s workflowjob set workflowjob.reportContextString=:reportContextString where workflowjob.applicationId=:applicationId",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("reportContextString", workflowJob.getReportContextString());
+        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.executeUpdate();
+    }
+
+    @Override
+    public void updateOutput(WorkflowJob workflowJob) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s workflowjob set workflowjob.outputContextString=:outputContextString where workflowjob.applicationId=:applicationId",
+                entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("outputContextString", workflowJob.getOutputContextString());
+        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.executeUpdate();
+    }
+
+    @Override
+    public void updateErrorDetails(WorkflowJob workflowJob) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s workflowjob set workflowjob.errorDetailsString=:errorDetailsString where workflowjob.applicationId=:applicationId",
+                entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("errorDetailsString", workflowJob.getErrorDetailsString());
         query.setParameter("applicationId", workflowJob.getApplicationId());
         query.executeUpdate();
     }

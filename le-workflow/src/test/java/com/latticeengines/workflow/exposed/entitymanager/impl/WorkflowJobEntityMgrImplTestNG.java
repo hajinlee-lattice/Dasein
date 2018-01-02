@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.exposed.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -190,5 +191,53 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.size(), 0);
         workflowJobs = workflowJobEntityMgr.findByWorkflowIds(nonExistWorkflowIds);
         assertEquals(workflowJobs.size(), 0);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testFindByTenantAndWorkflowIds")
+    public void testUpdateReport() {
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setApplicationId("application_000010");
+        workflowJob.setTenant(tenant2);
+        workflowJob.setUserId(WorkflowUser.DEFAULT_USER.name());
+        workflowJobEntityMgr.create(workflowJob);
+        WorkflowJob workflowJob2 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertNull(workflowJob2.getReportContextString());
+        workflowJob2.setReportContextString("abc");
+        workflowJobEntityMgr.updateReport(workflowJob2);
+        WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertEquals(workflowJob2.getReportContextString(), workflowJob3.getReportContextString());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testUpdateReport")
+    public void testUpdateError() {
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setApplicationId("application_000011");
+        workflowJob.setTenant(tenant2);
+        workflowJob.setUserId(WorkflowUser.DEFAULT_USER.name());
+        workflowJobEntityMgr.create(workflowJob);
+        WorkflowJob workflowJob2 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertNull(workflowJob2.getErrorDetailsString());
+        workflowJob2.setErrorDetailsString("abc");
+        workflowJobEntityMgr.updateErrorDetails(workflowJob2);
+        WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertEquals(workflowJob2.getErrorDetailsString(), workflowJob3.getErrorDetailsString());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testUpdateError")
+    public void testUpdateOutput() {
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setApplicationId("application_000012");
+        workflowJob.setTenant(tenant2);
+        workflowJob.setUserId(WorkflowUser.DEFAULT_USER.name());
+        workflowJobEntityMgr.create(workflowJob);
+        WorkflowJob workflowJob2 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertNull(workflowJob2.getOutputContextString());
+        workflowJob2.setOutputContextString("abc");
+        workflowJobEntityMgr.updateOutput(workflowJob2);
+        WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
+        assertEquals(workflowJob2.getOutputContextString(), workflowJob3.getOutputContextString());
     }
 }

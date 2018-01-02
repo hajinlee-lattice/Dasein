@@ -25,10 +25,10 @@ public class WorkflowUtils {
             WorkflowJobEntityMgr workflowJobEntityMgr) {
         YarnApplicationState jobState = null;
 
-        if (workflowJob.getApplicationId() != null
-                && (StringUtils.isEmpty(workflowJob.getStatus())
-                || workflowJob.getStatus().equals(FinalApplicationStatus.UNDEFINED.name())
-                || !JobStatus.fromString(workflowJob.getStatus()).isTerminated())) {
+        if (workflowJob.getApplicationId() != null &&
+                (StringUtils.isEmpty(workflowJob.getStatus()) ||
+                 workflowJob.getStatus().equals(FinalApplicationStatus.UNDEFINED.name()) ||
+                 !JobStatus.valueOf(workflowJob.getStatus()).isTerminated())) {
             try {
                 com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(
                         workflowJob.getApplicationId());

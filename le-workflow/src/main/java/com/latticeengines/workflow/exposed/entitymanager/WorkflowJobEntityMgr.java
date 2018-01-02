@@ -34,4 +34,8 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
     void registerWorkflowId(WorkflowJob workflowJob);
 
     void updateReport(WorkflowJob workflowJob);
+
+    void updateOutput(WorkflowJob workflowJob);
+
+    void updateErrorDetails(WorkflowJob job);
 }

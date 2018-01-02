@@ -71,8 +71,8 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     private String inputContextString;
 
     @Column(name = "STATUS")
-//    @Enumerated(EnumType.STRING)
-//    private FinalApplicationStatus status;
+    // @Enumerated(EnumType.STRING)
+    // private FinalApplicationStatus status;
     private String status;
 
     @Column(name = "START_TIME")
@@ -276,13 +276,13 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         this.status = status;
     }
 
-//    public FinalApplicationStatus getStatus() {
-//        return status;
-//    }
-//
-//    public void setStatus(FinalApplicationStatus status) {
-//        this.status = status;
-//    }
+    // public FinalApplicationStatus getStatus() {
+    // return status;
+    // }
+    //
+    // public void setStatus(FinalApplicationStatus status) {
+    // this.status = status;
+    // }
 
     public Long getStartTimeInMillis() {
         return startTimeInMillis;
@@ -306,6 +306,14 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
             return;
         }
         errorDetailsString = JsonUtils.serialize(details);
+    }
+
+    public String getErrorDetailsString() {
+        return errorDetailsString;
+    }
+    
+    public void setErrorDetailsString(String errorDetailsString) {
+        this.errorDetailsString = errorDetailsString;
     }
 
     public Long getParentJobId() {
