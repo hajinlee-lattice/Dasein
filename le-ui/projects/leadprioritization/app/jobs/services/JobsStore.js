@@ -27,6 +27,7 @@ angular
         loadingJobs: false,
         models: {},
         jobsMap: {},
+        dataModelJobs: [],
         dataImportJobs: [],
         isModelState: false,
         dataProcessingRunningJob: {}
@@ -58,6 +59,7 @@ angular
                 this.data.models[modelId] = [];
                 deferred.resolve([]);
             }
+            JobsStore.setDataModelJobs();
             JobsStore.setDataImportJobs();
         } else {
             JobsService.getAllJobs().then(function(response) {
@@ -87,6 +89,7 @@ angular
                         }
                     }
                 }
+                JobsStore.setDataModelJobs();
                 JobsStore.setDataImportJobs();
                 
                 deferred.resolve(JobsStore.data.jobs);
@@ -124,6 +127,10 @@ angular
         // defer.resolve(this.data.dataImportJobs)
         // return defer.promise;
     };
+
+    this.setDataModelJobs = function(){
+        this.data.dataModelJobs = $filter('filter')(JobsStore.data.jobs, { jobType: '!processAnalyzeWorkflow' }, true);
+    }
 
     this.runJob = function(job) {
         dataProcessingRunningJob = job;

@@ -39,7 +39,7 @@ angular.module('lp.jobs', [
 
             $scope.jobs = JobsStore.data.models[modelId];
         } else {
-            $scope.jobs = JobsStore.data.jobs;
+            $scope.jobs = JobsStore.data.dataModelJobs;
             if (JobsStore.data.isModelState) {
                 $scope.jobs = [];
             }

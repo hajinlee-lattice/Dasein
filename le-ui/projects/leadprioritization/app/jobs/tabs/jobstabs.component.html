@@ -6,7 +6,7 @@
             <div class="tab-container">
                 <h2>Model Jobs</h2>
                 <div>
-                    <span class="count">{{vm.JobsStore.data.jobs.length}}</span>
+                    <span class="count">{{vm.JobsStore.data.dataModelJobs.length}}</span>
                 </div>
             </div>
         </li>
@@ -16,7 +16,7 @@
             <div class="tab-container">
                 <h2>Data Processing & Analysis</h2>
                 <div>
-                    <span class="count">{{vm.JobsStore.data.dataImportJobs.length}}</span>
+                    <span class="count">{{(vm.JobsStore.data.jobs | jobfilter: 'processAnalyzeWorkflow').length}}</span>
                 </div>
             </div>
         </li>

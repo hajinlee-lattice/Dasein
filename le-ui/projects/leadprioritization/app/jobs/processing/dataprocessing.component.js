@@ -68,7 +68,7 @@ angular.module('lp.jobs')
 
         vm.canLastJobRun = function () {
             var canRun = true;
-            if (this.jobs.length >= 2 && this.jobs[1].status === 'Failed') {
+            if (this.jobs.length >= 2 && this.jobs[0].status === 'Failed') {
                 canRun = false;
             }
 

@@ -1,4 +1,18 @@
 angular.module('lp.jobs')
+.filter('jobfilter', function() {
+    return function(jobs, type) {
+        // jobType: 'processAnalyzeWorkflow';
+        var retJobs = [];
+        var count = 0;
+        jobs.forEach(function(job) {
+            if(job.jobType === type){
+                retJobs.push(job);
+            }
+        });
+        console.log('JOBs', retJobs);
+        return retJobs;
+    };
+  })
 .controller('JobsTabsController', function (
     $state, $stateParams, $scope, FeatureFlagService, JobsStore
 ) {
