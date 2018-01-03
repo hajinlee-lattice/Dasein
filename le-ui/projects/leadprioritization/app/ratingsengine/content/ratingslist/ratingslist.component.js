@@ -40,9 +40,35 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.count = function(type) {
         return $filter('filter')(vm.current.ratings, { status: type }, true).length;
     }
-    
+
     vm.init = function($q, $filter) {
         RatingsEngineStore.clear();
+
+        var ratings = vm.current.bucketCountMap;
+        console.log(ratings);
+        // ratings.forEach(function(rating) {
+        //     console.log(rating);
+        // });
+
+        for (var ratingId in ratings) {
+            var ratingBuckets = ratings[ratingId].bucketCoverageCounts;
+            ratingBuckets.forEach(function(bucket){
+                if(bucket.bucket === 'A+'){
+                    var i = ratingBuckets.findIndex(x => x.bucket === "A+");
+                    if (i === 0) return;
+                    if (i > 0) {
+                        ratingBuckets.splice( i, 1 );
+                    }
+                    ratingBuckets.unshift( bucket );
+                }
+            });
+            // for (var prop in rating) {
+            //     if(!rating.hasOwnProperty(prop)) continue;
+            //     if(prop === 'bucketCoverageCounts'){
+            //         console.log(prop);
+            //     }
+            // }
+        }
 
         vm.totalLength = vm.count();
         vm.activeCount = vm.count('ACTIVE');
@@ -75,7 +101,6 @@ angular.module('lp.ratingsengine.ratingslist', [
     //         $interval.cancel(checkForBuckets);
     //     }
     // }, 1000);
-
     vm.init();
 
     vm.getTallestBarHeight = function(bucket, rating) {
@@ -83,7 +108,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 
         return Math.max.apply(Math, bucketArray.map(function(bkt) { 
             return bkt.count; 
-        }))
+        }));
     }
 
     vm.hasRules = function(rating) {
