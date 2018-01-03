@@ -111,11 +111,11 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s workflowjob set workflowjob.reportContextString=:reportContextString where workflowjob.applicationId=:applicationId",
+                "update %s workflowjob set workflowjob.reportContextString=:reportContextString where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("reportContextString", workflowJob.getReportContextString());
-        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
 
@@ -124,11 +124,11 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s workflowjob set workflowjob.outputContextString=:outputContextString where workflowjob.applicationId=:applicationId",
+                "update %s workflowjob set workflowjob.outputContextString=:outputContextString where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("outputContextString", workflowJob.getOutputContextString());
-        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
 
@@ -137,11 +137,11 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s workflowjob set workflowjob.errorDetailsString=:errorDetailsString where workflowjob.applicationId=:applicationId",
+                "update %s workflowjob set workflowjob.errorDetailsString=:errorDetailsString where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("errorDetailsString", workflowJob.getErrorDetailsString());
-        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
 }
