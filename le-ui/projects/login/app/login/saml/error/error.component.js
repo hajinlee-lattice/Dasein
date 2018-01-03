@@ -1,6 +1,6 @@
 angular.module('login.saml.error', [])
 .component('loginSamlMetadata', {
-    templateUrl: 'app/login/saml/metadata/metadata.component.html',
+    templateUrl: 'app/login/saml/error/error.component.html',
     controller: function (
         $scope, $state
     ) {
