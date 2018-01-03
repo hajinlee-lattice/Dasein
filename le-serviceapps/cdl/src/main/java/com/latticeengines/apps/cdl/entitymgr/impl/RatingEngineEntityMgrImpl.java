@@ -244,7 +244,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             aiModel.setId(AIModel.generateIdStr());
             aiModel.setRatingEngine(ratingEngine);
             aiModelDao.create(aiModel);
-
+            ratingEngine.setActiveModelPid(aiModel.getPid());
+            ratingEngineDao.update(ratingEngine);
             break;
         default:
             break;
