@@ -6,7 +6,7 @@
             <div class="tab-container">
                 <h2>Model Jobs</h2>
                 <div>
-                    <span class="count">{{vm.JobsStore.data.dataModelJobs.length}}</span>
+                    <span class="count">{{vm.JobsStore.data.jobs.length - (vm.JobsStore.data.jobs | jobfilter: 'processAnalyzeWorkflow').length}}</span>
                 </div>
             </div>
         </li>

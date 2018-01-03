@@ -5,7 +5,7 @@ angular.module('lp.jobs', [
     'mainApp.appCommon.services.HealthService',
     '720kb.tooltips'
 ])
-.controller('JobsListCtrl', function($scope, $state, $stateParams, $http, $timeout, $interval,
+.controller('JobsListCtrl', function($scope, $state, $stateParams, $http, $timeout, $interval, $filter,
     JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal, HealthService) {
     $scope.expanded = {};
     $scope.statuses = {};
@@ -39,7 +39,7 @@ angular.module('lp.jobs', [
 
             $scope.jobs = JobsStore.data.models[modelId];
         } else {
-            $scope.jobs = JobsStore.data.dataModelJobs;
+            $scope.jobs = $filter('filter')(JobsStore.data.jobs, { jobType: '!processAnalyzeWorkflow' }, true);//JobsStore.data.dataModelJobs;
             if (JobsStore.data.isModelState) {
                 $scope.jobs = [];
             }

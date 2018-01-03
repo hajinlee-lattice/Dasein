@@ -55,9 +55,9 @@ angular.module('lp.jobs')
 
 
         vm.init = function () {
-           
-            vm.jobs = JobsStore.data.dataImportJobs;
-
+            $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true);
+            vm.jobs = $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true); //JobsStore.data.jobs;
+            // vm.JobsStore.data.jobs | jobfilter: 'processAnalyzeWorkflow')
             vm.header.filter.unfiltered = vm.jobs;
             vm.header.filter.filtered = vm.jobs;
 

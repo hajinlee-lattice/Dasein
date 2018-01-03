@@ -27,8 +27,6 @@ angular
         loadingJobs: false,
         models: {},
         jobsMap: {},
-        dataModelJobs: [],
-        dataImportJobs: [],
         isModelState: false,
         dataProcessingRunningJob: {}
 
@@ -59,8 +57,6 @@ angular
                 this.data.models[modelId] = [];
                 deferred.resolve([]);
             }
-            JobsStore.setDataModelJobs();
-            JobsStore.setDataImportJobs();
         } else {
             JobsService.getAllJobs().then(function(response) {
                 var res = response.resultObj;
@@ -89,8 +85,6 @@ angular
                         }
                     }
                 }
-                JobsStore.setDataModelJobs();
-                JobsStore.setDataImportJobs();
                 
                 deferred.resolve(JobsStore.data.jobs);
             });
@@ -115,23 +109,6 @@ angular
         delete this.data.jobsMap[jobId];
     };
 
-    this.setDataImportJobs = function() {
-        this.data.dataImportJobs = $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true);
-        JobsStore.data.dataImportJobs.forEach(function(job) {
-            if(job.jobType === 'processAnalyzeWorkflow') {
-                job.displayName = 'Data Processing & Analysis';
-            }
-        });
-        JobsStore.loadingJobs = false;
-        // var defer = $q.defer();
-        // defer.resolve(this.data.dataImportJobs)
-        // return defer.promise;
-    };
-
-    this.setDataModelJobs = function(){
-        this.data.dataModelJobs = $filter('filter')(JobsStore.data.jobs, { jobType: '!processAnalyzeWorkflow' }, true);
-    }
-
     this.runJob = function(job) {
         dataProcessingRunningJob = job;
         var deferred = $q.defer();
@@ -152,16 +129,16 @@ angular
     };
 
 
-    this.data.dataImportJobs = [{"timestamp":1490971665695,"fileName":"Lattice_Full_location_20170331.csv","jobType":"Data Import","status":"Completed"},
-                                {"timestamp":1491075500934,"fileName":"Lattice_Full_location_20170401.csv","jobType":"Data Import","status":"Pending"},
-                                {"timestamp":1491257578363,"fileName":"Lattice_Full_location_20170403.csv","jobType":"Data Import","status":"Running"},
-                                {"timestamp":1491512702355,"fileName":"Lattice_Full_location_20170406.csv","jobType":"Data Import","status":"Failed"},
-                                {"timestamp":1491667049385,"fileName":"Lattice_Full_location_20170408.csv","jobType":"Data Import","status":"Cancelled"},
-                                {"timestamp":1491938267633,"fileName":"Lattice_Full_location_20170411.csv","jobType":"Data Import","status":"Completed"},
-                                {"timestamp":1492016087146,"fileName":"Lattice_Full_location_20170412.csv","jobType":"Data Import","status":"Pending"},
-                                {"timestamp":1492369432966,"fileName":"Lattice_Full_location_20170416.csv","jobType":"Data Import","status":"Running"},
-                                {"timestamp":1493132895501,"fileName":"Lattice_Full_location_20170425.csv","jobType":"Data Import","status":"Failed"},
-                                {"timestamp":1493403375791,"fileName":"Lattice_Full_location_20170428.csv","jobType":"Data Import","status":"Cancelled"},
-                                {"timestamp":1493649030170,"fileName":"Lattice_Full_location_20170501.csv","jobType":"Data Import","status":"Completed"},
-                                {"timestamp":1493840430170,"fileName":"Lattice_Full_location_20170503.csv","jobType":"Data Import","status":"Pending"}];
+    // this.data.dataImportJobs = [{"timestamp":1490971665695,"fileName":"Lattice_Full_location_20170331.csv","jobType":"Data Import","status":"Completed"},
+    //                             {"timestamp":1491075500934,"fileName":"Lattice_Full_location_20170401.csv","jobType":"Data Import","status":"Pending"},
+    //                             {"timestamp":1491257578363,"fileName":"Lattice_Full_location_20170403.csv","jobType":"Data Import","status":"Running"},
+    //                             {"timestamp":1491512702355,"fileName":"Lattice_Full_location_20170406.csv","jobType":"Data Import","status":"Failed"},
+    //                             {"timestamp":1491667049385,"fileName":"Lattice_Full_location_20170408.csv","jobType":"Data Import","status":"Cancelled"},
+    //                             {"timestamp":1491938267633,"fileName":"Lattice_Full_location_20170411.csv","jobType":"Data Import","status":"Completed"},
+    //                             {"timestamp":1492016087146,"fileName":"Lattice_Full_location_20170412.csv","jobType":"Data Import","status":"Pending"},
+    //                             {"timestamp":1492369432966,"fileName":"Lattice_Full_location_20170416.csv","jobType":"Data Import","status":"Running"},
+    //                             {"timestamp":1493132895501,"fileName":"Lattice_Full_location_20170425.csv","jobType":"Data Import","status":"Failed"},
+    //                             {"timestamp":1493403375791,"fileName":"Lattice_Full_location_20170428.csv","jobType":"Data Import","status":"Cancelled"},
+    //                             {"timestamp":1493649030170,"fileName":"Lattice_Full_location_20170501.csv","jobType":"Data Import","status":"Completed"},
+    //                             {"timestamp":1493840430170,"fileName":"Lattice_Full_location_20170503.csv","jobType":"Data Import","status":"Pending"}];
 });

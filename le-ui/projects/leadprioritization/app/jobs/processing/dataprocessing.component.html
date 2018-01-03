@@ -96,7 +96,7 @@
                     </span>
                     <span class="columns three">
                         <span class="cell">
-                            <span ng-if="!vm.isJobRunning(job) && vm.showRunButton(job)" class="contact">
+                            <span ng-if="!vm.isJobRunning(job) && vm.showRunButton(job) && vm.canLastJobRun()" class="contact">
                                 Schedule at {{job.startTimestamp ? (job.startTimestamp | date : 'MM/dd/yyyy h:mma') : ''}}
                             </span>
                             <span ng-if="!vm.showRunButton(job) && !vm.isJobRunning(job) && !vm.isJobFailed(job)" class="transparent">--</span>

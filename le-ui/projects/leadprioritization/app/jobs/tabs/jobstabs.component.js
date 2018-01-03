@@ -1,7 +1,6 @@
 angular.module('lp.jobs')
 .filter('jobfilter', function() {
     return function(jobs, type) {
-        // jobType: 'processAnalyzeWorkflow';
         var retJobs = [];
         var count = 0;
         jobs.forEach(function(job) {
@@ -9,7 +8,6 @@ angular.module('lp.jobs')
                 retJobs.push(job);
             }
         });
-        console.log('JOBs', retJobs);
         return retJobs;
     };
   })
