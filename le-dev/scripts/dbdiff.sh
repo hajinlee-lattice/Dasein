@@ -7,10 +7,10 @@ DB=$2
 DB=${DB:=PLS_MultiTenant}
 
 if [ "${ENV}" = "prod" ]; then
-    AURORA_URL="lpi-cluster.cluster-c6q8lwiagbkt.us-east-1.rds.amazonaws.com"
+    AURORA_URL="lpi-encrypted.c6q8lwiagbkt.us-east-1.rds.amazonaws.com"
     PASSWORD="@uu5r3Ds!n=W"
 elif [ "${ENV}" = "qa" ]; then
-    AURORA_URL="lpi-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com"
+    AURORA_URL="lpi-encrypted-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com"
     PASSWORD="Lattice123"
 fi
 
