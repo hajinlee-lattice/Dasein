@@ -7,4 +7,6 @@ public interface DataCollectionManagerService {
     boolean resetAll(String customerSpaceStr);
 
     boolean resetEntity(String customerSpaceStr, BusinessEntity entity);
+
+    void refreshCounts(String customerSpace);
 }

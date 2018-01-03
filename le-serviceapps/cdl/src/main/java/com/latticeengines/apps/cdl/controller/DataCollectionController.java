@@ -13,6 +13,7 @@ import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -26,7 +27,6 @@ import io.swagger.annotations.ApiOperation;
 public class DataCollectionController {
 
     private final DataCollectionManagerService collectionMgrSvc;
-
 
     @Inject
     public DataCollectionController(DataCollectionManagerService collectionMgrSvc) {
@@ -60,5 +60,13 @@ public class DataCollectionController {
         cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
                 CacheName.getCdlProfileCacheGroup());
         return ResponseDocument.successResponse("Success");
+    }
+
+    @RequestMapping(value = "/refreshcounts", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Refresh segment and rating engine counts.")
+    public SimpleBooleanResponse refreshCount(@PathVariable String customerSpace) {
+        collectionMgrSvc.refreshCounts(customerSpace);
+        return SimpleBooleanResponse.successResponse();
     }
 }

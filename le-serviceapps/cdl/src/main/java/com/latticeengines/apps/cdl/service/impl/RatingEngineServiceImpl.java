@@ -80,14 +80,16 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public Map<String, Long> updateRatingEngineCounts(String engineId) {
         RatingEngine ratingEngine = getRatingEngineById(engineId, false, true);
         if (ratingEngine != null) {
-            RatingModel ratingModel = ratingEngine.getActiveModel();
-            Map<String, Long> counts = updateRatingCount(ratingEngine, ratingModel);
-            log.info("Updated counts for rating engine " + engineId + " using model " + ratingModel.getId() + " to "
-                    + JsonUtils.serialize(counts));
-            return counts;
-        } else {
-            return null;
+            //TODO: only update rule based for now
+            if (RatingEngineType.RULE_BASED.equals(ratingEngine.getType())) {
+                RatingModel ratingModel = ratingEngine.getActiveModel();
+                Map<String, Long> counts = updateRatingCount(ratingEngine, ratingModel);
+                log.info("Updated counts for rating engine " + engineId + " using model " + ratingModel.getId() + " to "
+                        + JsonUtils.serialize(counts));
+                return counts;
+            }
         }
+        return null;
     }
 
     @Override
