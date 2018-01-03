@@ -34,6 +34,7 @@ if [ ! -z "${HOSTS}" ]; then
     ADMIN_HOSTPORTS=""
     SCORINGAPI_HOSTPORTS=""
     MATCHAPI_HOSTPORTS=""
+    SAML_HOSTPORTS=""
     OAUTH2_HOSTPORTS=""
     PLAYMAKER_HOSTPORTS=""
     EAI_HOSTPORTS=""
@@ -61,6 +62,7 @@ if [ ! -z "${HOSTS}" ]; then
             ADMIN_HOSTPORTS="${ADMIN_HOSTPORTS}${h}:8085,"
             SCORINGAPI_HOSTPORTS="${SCORINGAPI_HOSTPORTS}${h}:8073,"
             MATCHAPI_HOSTPORTS="${MATCHAPI_HOSTPORTS}${h}:8076,"
+            SAML_HOSTPORTS="${SAML_HOSTPORTS}${h}:8087,"
             OAUTH2_HOSTPORTS="${OAUTH2_HOSTPORTS}${h}:8072,"
             PLAYMAKER_HOSTPORTS="${PLAYMAKER_HOSTPORTS}${h}:8071,"
             EAI_HOSTPORTS="${EAI_HOSTPORTS}${h}:9001,"
@@ -88,6 +90,7 @@ replace_token pls ${PLS_HOSTPORTS} true
 replace_token admin ${ADMIN_HOSTPORTS} true
 replace_token scoringapi ${SCORINGAPI_HOSTPORTS} true
 replace_token matchapi ${MATCHAPI_HOSTPORTS} true
+replace_token saml ${SAML_HOSTPORTS} true
 replace_token oauth2 ${OAUTH2_HOSTPORTS} true
 replace_token playmaker ${PLAYMAKER_HOSTPORTS} true
 replace_token eai ${EAI_HOSTPORTS} true

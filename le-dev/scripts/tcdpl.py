@@ -19,17 +19,17 @@ if CATALINA_HOME is None or CATALINA_HOME == '':
 else:
     print 'CATALINA_HOME=%s' % CATALINA_HOME
 
-LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
+LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses', 'saml']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
               'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante', 'cdl', 'lp']
 
 PRESETS = {
     'lp': {
-        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker'],
+        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'saml'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop']
     },
     'cdl': {
-        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses'],
+        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses', 'saml'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'lp', 'quartz', 'cdl', 'dante',
                     'objectapi', 'sqoop']
     },
@@ -38,12 +38,12 @@ PRESETS = {
         'modules': ['metadata', 'workflowapi', 'datacloudapi', 'eai', 'sqoop']
     },
     'mq': {
-        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi'],
+        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'saml'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop',
                     'modelquality']
     },
     'all': {
-        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'playmaker', 'ulysses'],
+        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'playmaker', 'ulysses', 'saml'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop', 'datacloudapi', 'cdl', 'dante',
                     'objectapi']
     }

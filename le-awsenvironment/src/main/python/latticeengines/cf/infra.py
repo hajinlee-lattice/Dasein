@@ -36,6 +36,7 @@ TOMCAT_APP_HEALTH_MAP = {
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
+    "saml": "/saml/health",
     "ulysses": "/ulysses/health",
     "oauth2": "/oauth2/health",
     "playmaker": "/api/health",
@@ -48,7 +49,7 @@ UI_APPS = ["lpi", "adminconsole"]
 API_APPS = [ 'playmaker', 'scoringapi', 'ulysses' ]
 APP_APPS = [ 'lpi', 'pls' ]
 OAUTH_APPS = [ 'oauth2' ]
-ADMINCONSOLE_APPS = [ 'adminconsole', 'matchapi', 'api', 'cdl', 'lp' ]
+ADMINCONSOLE_APPS = [ 'adminconsole', 'matchapi', 'saml',  'api', 'cdl', 'lp' ]
 
 PARAM_TOMCAT_SECURITY_GROUP = Parameter("TomcatSecurityGroupId", "The security group to be used by tomcat", type="AWS::EC2::SecurityGroup::Id")
 PARAM_NODEJS_SECURITY_GROUP = Parameter("NodeJsSecurityGroupId", "The security group to be used by nodejs", type="AWS::EC2::SecurityGroup::Id")
@@ -233,6 +234,7 @@ def create_public_load_balancers(env, tg_map):
     adminconsole_lsnr = create_listener(adminconsole_lb, tg_map["adminconsole"])
     resources.append(adminconsole_lsnr)
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["matchapi"], "/match/*"))
+    resources.append(create_listener_rule(adminconsole_lsnr, tg_map["saml"], "/saml/*"))
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["cdl"], "/cdl/*"))
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["lp"], "/lp/*"))
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["api"], "/api/*"))
@@ -293,6 +295,7 @@ def create_load_balancers(tg_map, stack):
 
     # listener rules
     resources.append(create_listener_rule(private_lsnr, tg_map["matchapi"], "/match/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["saml"], "/saml/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["admin"], "/admin/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["workflowapi"], "/workflowapi/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["dataflowapi"], "/dataflowapi/*"))

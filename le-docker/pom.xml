@@ -12,6 +12,7 @@
         <kafka.connect.docker.context>src/main/scripts/kafka/le-kafka-connect</kafka.connect.docker.context>
         <tomcat.docker.context>src/main/scripts/tomcat/le-tomcatbase</tomcat.docker.context>
         <matchapi.docker.context>src/main/scripts/tomcat/le-matchapi</matchapi.docker.context>
+        <saml.docker.context>src/main/scripts/tomcat/le-saml</saml.docker.context>
         <oauth2.docker.context>src/main/scripts/tomcat/le-oauth2</oauth2.docker.context>
         <playmaker.docker.context>src/main/scripts/tomcat/le-playmaker</playmaker.docker.context>
         <scoringapi.docker.context>src/main/scripts/tomcat/le-scoringapi</scoringapi.docker.context>
@@ -77,6 +78,9 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-matchapi/target/le-matchapi-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/matchapi.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-saml/target/le-saml-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/saml.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-scoringapi/target/le-scoringapi-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/scoringapi.war"

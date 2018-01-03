@@ -17,6 +17,10 @@
         "mem": 4096,
         "port": 8076
     },
+    "saml": {
+        "mem": 1024,
+        "port": 8087
+    },
     "scoringapi": {
         "cpu": 1024,
         "mem": 3072,
