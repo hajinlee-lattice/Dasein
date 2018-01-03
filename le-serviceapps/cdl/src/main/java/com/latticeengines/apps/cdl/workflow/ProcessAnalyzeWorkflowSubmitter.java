@@ -176,6 +176,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .actionIds(actionAndJobIds.getLeft()) //
                 .rebuildEntities(request.getRebuildEntities()) //
                 .inputProperties(ImmutableMap.<String, String> builder() //
+                        .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) 
                         .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
                         .put(WorkflowContextConstants.Inputs.ACTION_IDS, actionAndJobIds.getLeft().toString()) //
