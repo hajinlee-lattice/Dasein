@@ -67,17 +67,23 @@ angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.moda
 
     vm.init = function() {
         if(vm.rating.coverageInfo && vm.rating.coverageInfo.bucketCoverageCounts) {
-            vm.buckets = makeGraph(vm.rating.coverageInfo.bucketCoverageCounts, {label: 'bucket', count: 'count'});
+
+            // Shift A+ buckets to the first position of the buckets
+            var ratingBuckets = vm.rating.coverageInfo.bucketCoverageCounts;
+            ratingBuckets.forEach(function(bucket){
+                if(bucket.bucket === 'A+'){
+                    var i = ratingBuckets.findIndex(x => x.bucket === "A+");
+                    if (i === 0) return;
+                    if (i > 0) {
+                        ratingBuckets.splice( i, 1 );
+                    }
+                    ratingBuckets.unshift( bucket );
+                }
+            });
+            // Make the ratings bucket bar chart
+            vm.buckets = makeGraph(ratingBuckets, {label: 'bucket', count: 'count'});
         }
         vm.initModalWindow();
-        // vm.buckets = makeGraph([
-        //     {bucket: 'A', count: 0},
-        //     {bucket: 'A-', count: 753},
-        //     {bucket: 'B', count: 9913},
-        //     {bucket: 'C', count: 32576},
-        //     {bucket: 'E', count: 0},
-        //     {bucket: 'F', count: 3310},
-        // ], {label: 'bucket', count: 'count'});
     }
 
     var makeGraph = function(data, params) {

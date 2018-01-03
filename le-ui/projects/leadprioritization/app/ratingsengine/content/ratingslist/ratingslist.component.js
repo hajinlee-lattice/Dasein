@@ -44,12 +44,8 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.init = function($q, $filter) {
         RatingsEngineStore.clear();
 
+        // Shift A+ buckets to the first position of the buckets
         var ratings = vm.current.bucketCountMap;
-        console.log(ratings);
-        // ratings.forEach(function(rating) {
-        //     console.log(rating);
-        // });
-
         for (var ratingId in ratings) {
             var ratingBuckets = ratings[ratingId].bucketCoverageCounts;
             ratingBuckets.forEach(function(bucket){
@@ -62,12 +58,6 @@ angular.module('lp.ratingsengine.ratingslist', [
                     ratingBuckets.unshift( bucket );
                 }
             });
-            // for (var prop in rating) {
-            //     if(!rating.hasOwnProperty(prop)) continue;
-            //     if(prop === 'bucketCoverageCounts'){
-            //         console.log(prop);
-            //     }
-            // }
         }
 
         vm.totalLength = vm.count();
@@ -77,14 +67,6 @@ angular.module('lp.ratingsengine.ratingslist', [
         $scope.$watch('vm.current.ratings', function() {
             vm.header.filter.unfiltered = vm.current.ratings;
         });
-
-        // angular.forEach(vm.current.ratings, function(rating) {
-        //     vm.tileStates[rating.id] = {
-        //         showCustomMenu: false,
-        //         editRating: false,
-        //         saveEnabled: false
-        //     };
-        // });
     }
     /**
      * if they decide they want to add sorting by account or contact counts uncomment this and add
