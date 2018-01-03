@@ -33,7 +33,7 @@ angular.module('lp.import.wizard.latticefields', [])
         matchingFieldMappings: {},
         analysisFieldMappings: {},
         availableFields: [],
-        unavailableFields: []
+        unavailableFields: [],
     });
 
 
@@ -50,10 +50,15 @@ angular.module('lp.import.wizard.latticefields', [])
     vm.init = function() {
         ImportWizardStore.setValidation('latticefields', false);
 
+        vm.matchingFieldsArr = [];
+        vm.matchingFields.forEach(function(matchingField) {
+            vm.matchingFieldsArr.push(matchingField.name);
+        });
+
         vm.fieldMappings.forEach(function(fieldMapping) {
-            // if(fieldMapping.mappedField) {
-            //     vm.unavailableFields.push(fieldMapping.userField);
-            // }
+            if(fieldMapping.mappedField && vm.matchingFieldsArr.indexOf(fieldMapping.userField) != -1) {
+                vm.unavailableFields.push(fieldMapping.userField);
+            }
             vm.availableFields.push(fieldMapping);
         });
     };
@@ -69,6 +74,10 @@ angular.module('lp.import.wizard.latticefields', [])
         }
     }
 
+    vm.ifAvailableFields = function() {
+        return (vm.unavailableFields.length >= vm.availableFields.length);
+    }
+
     vm.changeLatticeField = function(mapping, form) {
         var _mapping = [];
         vm.unavailableFields = [];
@@ -80,8 +89,9 @@ angular.module('lp.import.wizard.latticefields', [])
                 map.userField = i;
                 map.mappedField = null;
             }
-
-            vm.unavailableFields.push(map.userField);
+            if(item.userField) {
+                vm.unavailableFields.push(map.userField);
+            }
             _mapping.push(map);
         }
         ImportWizardStore.setSaveObjects(_mapping);

@@ -53,6 +53,8 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     };
 
     vm.removeIdentifier = function(index){
+        vm.fieldMapping.splice(index, 1);
+        vm.fields.splice(index, 1);
     };
 
     var validateMapping = function(mapping) {

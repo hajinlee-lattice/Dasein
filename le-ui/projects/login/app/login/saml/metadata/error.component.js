@@ -1,4 +1,4 @@
-angular.module('login.saml.metadata', [])
+angular.module('login.saml.error', [])
 .component('loginSamlMetadata', {
     templateUrl: 'app/login/saml/metadata/metadata.component.html',
     controller: function (

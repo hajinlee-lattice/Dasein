@@ -44,6 +44,22 @@ angular.module('mainApp.login.services.LoginService', [
         return deferred.promise;
     };
 
+    this.SamlLogin = function (sessionDocument) {
+        var deferred = $q.defer();
+        var result = sessionDocument;
+        if (result != null && result !== "") {
+            BrowserStorageUtility.setTokenDocument(result.Ticket.Uniqueness + "." + result.Ticket.Randomness);
+            //result.Result.UserName = result.Result.User.DisplayName;
+            result.Ticket.Tenants[0].UIVersion = "3.0";
+            deferred.resolve(result);
+            BrowserStorageUtility.setLoginDocument(result.Ticket);
+        }
+        deferred.resolve(result);
+
+        return deferred.promise;
+    };
+
+
     this.GetSessionDocument = function (tenant, username) {
         if (tenant == null) {
             return null;

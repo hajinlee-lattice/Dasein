@@ -130,6 +130,7 @@ angular.module('lp.import')
                 state: 'product_purchases.ids.latticefields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
                     ImportWizardStore.nextSaveFieldDocuments(nextState);
                 }
             },{ 

@@ -126,7 +126,7 @@ angular.module('login', [
                 }
             }
         })
-        .state('login.saml.metadata', {
+        .state('login.saml.error', {
             url: ':tenantId/error',
             views: {
                 "FrameContent": {

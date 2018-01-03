@@ -8,6 +8,7 @@
     <h3 class="{{vm.importType}}-matching">{{vm.importType + (vm.importType == 'Contacts' ? ' Fields' : ' Matching Fields')}}</h3>
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
     <form name="form">
+        {{vm.ignoredFieldLabel}}
         <ul ng-init="fieldMapping = fieldMapping || {}">
         	<li ng-repeat="field in vm.matchingFieldsList">
         		<label>{{field.displayName || field.name}}</label>
@@ -18,7 +19,7 @@
                     ng-required="field.required" 
     			    ng-class="{'required': field.required}">
 
-                    <option value="">-- Unmapped Field --</option>
+                    <option value="">{{vm.ignoredFieldLabel}}</option>
         			<option 
                         ng-repeat="availableField in vm.availableFields" 
                         value="{{field.name}}:{{availableField.userField}}" 
@@ -42,7 +43,7 @@
                         ng-required="field.required" 
                         ng-class="{'required': field.required}">
 
-                        <option value="">-- Unmapped Field --</option>
+                        <option value="">{{vm.ignoredFieldLabel}}</option>
                         <option 
                             ng-repeat="availableField in vm.availableFields" 
                             value="{{field.name}}:{{availableField.userField}}" 

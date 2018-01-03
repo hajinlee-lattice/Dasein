@@ -51,7 +51,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.loginInProgess = false;
             $scope.loginMessage = null;
             if (result != null && result.Success === true) {
-                $rootScope.$broadcast("LoggedIn");
+                //$rootScope.$broadcast("LoggedIn");
 
                 $scope.isLoggedInWithTempPassword = result.Result.MustChangePassword;
                 $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(result.Result.PasswordLastModified);
