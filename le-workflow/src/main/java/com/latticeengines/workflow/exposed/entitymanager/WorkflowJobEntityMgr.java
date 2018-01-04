@@ -14,11 +14,19 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
 
     List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds);
 
+    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types);
+
     WorkflowJob findByWorkflowIdWithFilter(long workflowId);
 
     List<WorkflowJob> findByWorkflowIdsWithFilter(List<Long> workflowIds);
 
+    List<WorkflowJob> findByWorkflowIdsWithFilter(List<Long> workflowIds, List<String> types);
+
+    List<WorkflowJob> findByWorkflowIdsWithFilter(List<Long> workflowIds, List<String> types, Long parentJobId);
+
     List<WorkflowJob> findByTenant(Tenant tenant);
+
+    List<WorkflowJob> findByTenant(Tenant tenant, List<String> types);
 
     List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds);
 

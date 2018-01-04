@@ -43,6 +43,35 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s workflowjob where workflowjob.workflowId in :workflowIds and workflowjob.type in :types",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameterList("workflowIds", workflowIds);
+        query.setParameterList("types", types);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, Long parentJobId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s workflowjob where workflowjob.workflowId in :workflowIds and " +
+                        "workflowjob.type in :types and workflowjob.parentJobId=:parentJobId",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameterList("workflowIds", workflowIds);
+        query.setParameterList("types", types);
+        query.setParameter("parentJobId", parentJobId);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<WorkflowJob> findByTenant(Tenant tenant) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
@@ -50,6 +79,19 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
                 entityClz.getSimpleName());
         Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameter("tenantPid", tenant.getPid());
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByTenant(Tenant tenant, List<String> types) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s workflowjob where workflowjob.tenant.pid=:tenantPid and " +
+                "workflowjob.type in :types", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("tenantPid", tenant.getPid());
+        query.setParameterList("types", types);
         return query.list();
     }
 
@@ -67,7 +109,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
     }
 
     @Override
-    public void updateStatus(WorkflowJob workflowJob) {
+    public void updateStatusAndStartTime(WorkflowJob workflowJob) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
@@ -76,6 +118,19 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("status", workflowJob.getStatus());
         query.setParameter("startTimeInMillis", workflowJob.getStartTimeInMillis());
+        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.executeUpdate();
+    }
+
+    @Override
+    public void updateStatus(WorkflowJob workflowJob) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s workflowjob set workflowjob.status=:status where workflowjob.applicationId=:applicationId",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("status", workflowJob.getStatus());
         query.setParameter("applicationId", workflowJob.getApplicationId());
         query.executeUpdate();
     }

@@ -86,17 +86,15 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             }
 
             WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);
-            FinalApplicationStatus finalStatus = workflowStatus.toYarnStatus();
-            workflowJob.setStatus(JobStatus.fromYarnStatus(finalStatus, YarnApplicationState.RUNNING).name());
+            workflowJob.setStatus(JobStatus.fromString(workflowStatus.getStatus().name()).name());
             log.info(String.format("Completed workflow - workflowId:%s batchStatus:%s yarnStatus:%s appId:%s " +
                             "startTime:%s endTime:%s",
-                    String.valueOf(workflowId.getId()), workflowStatus.getStatus(), finalStatus.name(), appId.toString(),
-                    workflowStatus.getStartTime(), workflowStatus.getEndTime()));
+                    String.valueOf(workflowId.getId()), workflowStatus.getStatus(), workflowStatus.toYarnStatus(),
+                    appId.toString(), workflowStatus.getStartTime(), workflowStatus.getEndTime()));
         } catch (Exception e) {
             workflowJob.setStatus(JobStatus.FAILED.name());
-            throw new RuntimeException(e);
-        } finally {
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            throw new RuntimeException(e);
         }
         return null;
     }

@@ -59,6 +59,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types) {
+        return workflowJobDao.findByWorkflowIds(workflowIds, types);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public WorkflowJob findByWorkflowIdWithFilter(long workflowId) {
         return workflowJobDao.findByWorkflowId(workflowId);
     }
@@ -71,8 +77,26 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowIdsWithFilter(List<Long> workflowIds, List<String> types) {
+        return workflowJobDao.findByWorkflowIds(workflowIds, types);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowIdsWithFilter(List<Long> workflowIds, List<String> types, Long parentJobId) {
+        return workflowJobDao.findByWorkflowIds(workflowIds, types, parentJobId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByTenant(Tenant tenant) {
         return workflowJobDao.findByTenant(tenant);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByTenant(Tenant tenant, List<String> types) {
+        return workflowJobDao.findByTenant(tenant, types);
     }
 
     @Override
@@ -93,7 +117,7 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
                                             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {
         workflowJob.setStatus(JobStatus.fromString(yarnJobStatus.getStatus().name(), yarnJobStatus.getState()).name());
         workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
-        updateWorkflowJobStatus(workflowJob);
+        workflowJobDao.updateStatusAndStartTime(workflowJob);
         return workflowJob;
     }
 

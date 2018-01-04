@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.TransformerUtils;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -48,6 +47,8 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
+
+import javax.batch.runtime.BatchStatus;
 
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
@@ -158,6 +159,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflowJob.setUserId(user);
         workflowJob.setWorkflowId(jobExecutionId);
         workflowJob.setStatus(JobStatus.RUNNING.name());
+        workflowJob.setStartTimeInMillis(System.currentTimeMillis());
         workflowJobEntityMgr.create(workflowJob);
 
         return new WorkflowExecutionId(jobExecutionId);
@@ -348,6 +350,9 @@ public class WorkflowServiceImpl implements WorkflowService {
                 if (status == null) {
                     break;
                 } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
+                    WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
+                    workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
+                    workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
                     break done;
                 }
             } catch (Exception e) {
@@ -356,11 +361,6 @@ public class WorkflowServiceImpl implements WorkflowService {
                 if (--retryOnException == 0)
                     throw e;
             } finally {
-                if (status != null) {
-                    WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
-                    workflowJob.setStatus(JobStatus.fromString(status.getStatus().name(), YarnApplicationState.RUNNING).name());
-                    workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-                }
                 Thread.sleep(checkInterval);
             }
         } while (System.currentTimeMillis() - start < maxWaitTime);
