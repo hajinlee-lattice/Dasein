@@ -86,10 +86,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
+        log.info("Updating entity counts for segment " + segment.getName());
         updateEntityCounts(segment);
         translateForBackend(segment);
         MetadataSegment updatedSegment = translateForFrontend(
                 segmentProxy.createOrUpdateSegment(customerSpace, segment));
+        log.info("Updating rating engines counts belonging to segment " + segment.getName());
         updateRatingEngineCounts(customerSpace, updatedSegment.getName());
         return updatedSegment;
     }
