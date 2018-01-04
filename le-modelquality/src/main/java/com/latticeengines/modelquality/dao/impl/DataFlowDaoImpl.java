@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.modelquality.dao.DataFlowDao;
 
 @Component("dataFlowDao")
-public class DataFlowDaoImpl extends BaseDaoImpl<DataFlow> implements DataFlowDao {
+public class DataFlowDaoImpl extends ModelQualityBaseDaoImpl<DataFlow> implements DataFlowDao {
 
     @Override
     protected Class<DataFlow> getEntityClass() {

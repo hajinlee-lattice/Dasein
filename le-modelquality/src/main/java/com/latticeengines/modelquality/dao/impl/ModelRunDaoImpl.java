@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.dao.ModelRunDao;
 
 @Component("qualityModelRunDao")
-public class ModelRunDaoImpl extends BaseDaoImpl<ModelRun> implements ModelRunDao {
+public class ModelRunDaoImpl extends ModelQualityBaseDaoImpl<ModelRun> implements ModelRunDao {
 
     private static final Logger log = LoggerFactory.getLogger(ModelRunDaoImpl.class);
 

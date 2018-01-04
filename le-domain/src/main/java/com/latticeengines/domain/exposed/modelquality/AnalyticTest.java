@@ -7,6 +7,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,6 +46,7 @@ public class AnalyticTest implements HasName, HasPid {
 
     @JsonProperty("analytic_test_type")
     @Column(name = "ANALYTIC_TEST_TYPE", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
     private AnalyticTestType analyticTestType = AnalyticTestType.SelectedPipelines;
 
     @JsonProperty("analytic_test_tag")

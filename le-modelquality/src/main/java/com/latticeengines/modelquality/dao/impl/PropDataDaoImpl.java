@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.modelquality.dao.PropDataDao;
 
 @Component("propDataDao")
-public class PropDataDaoImpl extends BaseDaoImpl<PropData> implements PropDataDao {
+public class PropDataDaoImpl extends ModelQualityBaseDaoImpl<PropData> implements PropDataDao {
 
     @Override
     protected Class<PropData> getEntityClass() {

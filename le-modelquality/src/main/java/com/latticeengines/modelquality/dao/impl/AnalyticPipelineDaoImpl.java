@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.modelquality.dao.AnalyticPipelineDao;
 
 @Component("qualityAnalyticPipelineDao")
-public class AnalyticPipelineDaoImpl extends BaseDaoImpl<AnalyticPipeline> implements AnalyticPipelineDao {
+public class AnalyticPipelineDaoImpl extends ModelQualityBaseDaoImpl<AnalyticPipeline> implements AnalyticPipelineDao {
 
     @Override
     protected Class<AnalyticPipeline> getEntityClass() {

@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.modelquality.PipelineToPipelineSteps;
 import com.latticeengines.modelquality.dao.PipelineToPipelineStepsDao;
 
 @Component("pipelineToPipelineStepsDao")
-public class PipelineToPipelineStepsDaoImpl extends BaseDaoImpl<PipelineToPipelineSteps>
+public class PipelineToPipelineStepsDaoImpl extends ModelQualityBaseDaoImpl<PipelineToPipelineSteps>
         implements PipelineToPipelineStepsDao {
 
     @Override

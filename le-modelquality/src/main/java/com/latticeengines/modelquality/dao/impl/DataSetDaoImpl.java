@@ -14,7 +14,7 @@ import com.latticeengines.modelquality.dao.DataSetDao;
 import com.latticeengines.modelquality.service.impl.FileModelRunServiceImpl;
 
 @Component("dataSetDao")
-public class DataSetDaoImpl extends BaseDaoImpl<DataSet> implements DataSetDao {
+public class DataSetDaoImpl extends ModelQualityBaseDaoImpl<DataSet> implements DataSetDao {
 
     @Override
     protected Class<DataSet> getEntityClass() {

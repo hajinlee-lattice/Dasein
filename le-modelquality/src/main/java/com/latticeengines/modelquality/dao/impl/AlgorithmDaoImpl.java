@@ -6,12 +6,11 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.modelquality.dao.AlgorithmDao;
 
 @Component("qualityAlgorithmDao")
-public class AlgorithmDaoImpl extends BaseDaoImpl<Algorithm> implements AlgorithmDao {
+public class AlgorithmDaoImpl extends ModelQualityBaseDaoImpl<Algorithm> implements AlgorithmDao {
 
     @Override
     protected Class<Algorithm> getEntityClass() {

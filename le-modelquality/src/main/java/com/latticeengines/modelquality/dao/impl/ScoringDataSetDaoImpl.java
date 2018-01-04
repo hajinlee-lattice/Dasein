@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.modelquality.ScoringDataSet;
 import com.latticeengines.modelquality.dao.ScoringDataSetDao;
 
 @Component("scoringDataSetDao")
-public class ScoringDataSetDaoImpl extends BaseDaoImpl<ScoringDataSet> implements ScoringDataSetDao {
+public class ScoringDataSetDaoImpl extends ModelQualityBaseDaoImpl<ScoringDataSet> implements ScoringDataSetDao {
 
     @Override
     protected Class<ScoringDataSet> getEntityClass() {

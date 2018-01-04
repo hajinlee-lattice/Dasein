@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryMetrics;
 import com.latticeengines.modelquality.dao.ModelSummaryMetricsDao;
 
 @Component("modelSummaryMetricsDao")
-public class ModelSummaryMetricsDaoImpl extends BaseDaoImpl<ModelSummaryMetrics> implements ModelSummaryMetricsDao {
+public class ModelSummaryMetricsDaoImpl extends ModelQualityBaseDaoImpl<ModelSummaryMetrics> implements ModelSummaryMetricsDao {
 
     @Override
     protected Class<ModelSummaryMetrics> getEntityClass() {

@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.modelquality.SamplingPropertyValue;
 import com.latticeengines.modelquality.dao.SamplingPropertyValueDao;
 
 @Component("samplingPropertyValueDao")
-public class SamplingPropertyValueDaoImpl extends BaseDaoImpl<SamplingPropertyValue>
+public class SamplingPropertyValueDaoImpl extends ModelQualityBaseDaoImpl<SamplingPropertyValue>
         implements SamplingPropertyValueDao {
 
     @Override

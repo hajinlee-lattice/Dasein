@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.modelquality.dao.AnalyticTestDao;
 
 @Component("qualityAnalyticTestDao")
-public class AnalyticTestDaoImpl extends BaseDaoImpl<AnalyticTest> implements AnalyticTestDao {
+public class AnalyticTestDaoImpl extends ModelQualityBaseDaoImpl<AnalyticTest> implements AnalyticTestDao {
 
     @Override
     protected Class<AnalyticTest> getEntityClass() {

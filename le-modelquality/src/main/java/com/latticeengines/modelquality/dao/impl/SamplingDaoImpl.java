@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.modelquality.dao.SamplingDao;
 
 @Component("qualitySamplingDao")
-public class SamplingDaoImpl extends BaseDaoImpl<Sampling> implements SamplingDao {
+public class SamplingDaoImpl extends ModelQualityBaseDaoImpl<Sampling> implements SamplingDao {
 
     @Override
     protected Class<Sampling> getEntityClass() {

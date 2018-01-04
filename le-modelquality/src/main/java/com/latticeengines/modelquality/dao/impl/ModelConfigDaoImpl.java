@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.modelquality.ModelConfig;
 import com.latticeengines.modelquality.dao.ModelConfigDao;
 
 @Component("modelConfigDao")
-public class ModelConfigDaoImpl extends BaseDaoImpl<ModelConfig> implements ModelConfigDao {
+public class ModelConfigDaoImpl extends ModelQualityBaseDaoImpl<ModelConfig> implements ModelConfigDao {
 
     @Override
     protected Class<ModelConfig> getEntityClass() {
