@@ -30,6 +30,7 @@ public class WorkflowContextConstants {
         public static final String DATAFEEDTASK_IMPORT_IDENTIFIER = "DATAFEEDTASK_IMPORT_IDENTIFIER";
         public static final String CHILDREN_WORKFLOW_JOB_IDS = "CHILDREN_WORKFLOW_JOB_IDS";
         public static final String ACTION_IDS = "ACTION_IDS";
+        public static final String ACTION_ID = "ACTION_ID";
         public static final String DRAINING = "DRAINING";
     }
 }

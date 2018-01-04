@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -224,7 +225,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setUser(action.getActionInitiator());
                 job.setStartTimestamp(action.getCreated());
                 job.setDescription(action.getDescription());
-                job.setJobStatus(JobStatus.COMPLETED);
+                if (action.getType() != ActionType.METADATA_CHANGE) {
+                    job.setJobStatus(JobStatus.RUNNING);
+                } else {
+                    job.setJobStatus(JobStatus.COMPLETED);
+                }
                 jobList.add(job);
             }
         }

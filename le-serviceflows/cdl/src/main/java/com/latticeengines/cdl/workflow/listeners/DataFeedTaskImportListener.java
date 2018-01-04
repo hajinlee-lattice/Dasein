@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.listeners;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -22,9 +23,7 @@ import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
@@ -64,7 +63,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        registerImportAction(job);
+        updateImportAction(job);
     }
 
     @Override
@@ -154,18 +153,23 @@ public class DataFeedTaskImportListener extends LEJobListener {
         }
     }
 
-    @VisibleForTesting
-    Action registerImportAction(WorkflowJob job) {
-        log.info(String.format("Registering an action for job=%d", job.getWorkflowId()));
-        Action action = new Action();
-        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
-        action.setActionInitiator(job.getUserId());
-        Tenant tenant = job.getTenant();
-        tenant.setPid(job.getTenantId());
-        action.setTenant(tenant);
-        action.setTrackingId(job.getWorkflowId());
-
-        return internalResourceProxy.createAction(tenant.getId(), action);
+    private void updateImportAction(WorkflowJob job) {
+        String ActionPidStr = job.getInputContextValue(WorkflowContextConstants.Inputs.ACTION_ID);
+        if (ActionPidStr != null) {
+            Long pid = Long.parseLong(ActionPidStr);
+            log.info(String.format("Updating an actionPid=%d for job=%d", pid, job.getWorkflowId()));
+            Action action = internalResourceProxy.findByPidIn(job.getTenant().getId(), Collections.singletonList(pid))
+                    .get(0);
+            if (action != null) {
+                log.info(String.format("Action=%s", action));
+                action.setTrackingId(job.getWorkflowId());
+                internalResourceProxy.updateAction(job.getTenant().getId(), action);
+            } else {
+                log.warn(String.format("Action with pid=%d cannot be found", pid));
+            }
+        } else {
+            log.warn(String.format("ActionPid is not correctly registered by workflow job=%d", job.getWorkflowId()));
+        }
     }
 
     private void updateDataFeedStatus(String customerSpace) {

@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.listeners;
+package com.latticeengines.apps.cdl.workflow;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -17,46 +17,57 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.security.exposed.service.TenantService;
 
-public class DataFeedTaskImportListenerUnitTestNG {
-    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskImportListenerUnitTestNG.class);
+public class CDLDataFeedImportWorkflowSubmitterUnitTestNG {
+    private static final Logger log = LoggerFactory.getLogger(CDLDataFeedImportWorkflowSubmitterUnitTestNG.class);
 
     @Mock
     private InternalResourceRestApiProxy internalResourceProxy;
 
+    @Mock
+    private TenantService tenantService;
+
     @InjectMocks
-    private DataFeedTaskImportListener dataFeedTaskImportListener;
+    private CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter;
 
     private String tenantId = "tenant";
 
-    private Long tenantPid = 1000L;
+    private Tenant tenant;
 
-    private Long trackingId = 27706L;
+    private CustomerSpace cs;
 
-    private WorkflowJob job;
+    private DataFeedTask dataFeedTask;
+
+    private CSVImportFileInfo csvImportFileInfo;
 
     private String INITIATOR = "test@lattice-engines.com";
+
+    private String UNIQUE_ID = "dataFeed_ID";
 
     @BeforeClass(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mockInternalProxy();
-        mockWorkflowJob();
+        mockActionInfo();
     }
 
-    private void mockWorkflowJob() {
-        job = new WorkflowJob();
-        Tenant tenant = new Tenant();
+    private void mockActionInfo() {
+        tenant = new Tenant();
         tenant.setId(tenantId);
-        job.setTenantId(tenantPid);
-        job.setTenant(tenant);
-        job.setUserId(INITIATOR);
-        job.setWorkflowId(trackingId);
+        cs = CustomerSpace.parse(tenantId);
+        dataFeedTask = new DataFeedTask();
+        dataFeedTask.setUniqueId(UNIQUE_ID);
+        csvImportFileInfo = new CSVImportFileInfo();
+        csvImportFileInfo.setFileUploadInitiator(INITIATOR);
+        when(tenantService.findByTenantId(anyString())).thenReturn(tenant);
     }
 
     private void mockInternalProxy() {
@@ -73,17 +84,17 @@ public class DataFeedTaskImportListenerUnitTestNG {
                 return null;
             }
         });
-        dataFeedTaskImportListener.setInternalResourceRestApiProxy(internalResourceProxy);
+        cdlDataFeedImportWorkflowSubmitter.setInternalResourceRestApiProxy(internalResourceProxy);
     }
 
     @Test(groups = "unit")
-    public void testRegisterImportAction() {
-        Action action = dataFeedTaskImportListener.registerImportAction(job);
+    public void testRegisterAction() {
+        Action action = cdlDataFeedImportWorkflowSubmitter.registerAction(cs, dataFeedTask, csvImportFileInfo);
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         Assert.assertEquals(action.getActionInitiator(), INITIATOR);
         Assert.assertEquals(action.getTenant().getId(), tenantId);
-        Assert.assertEquals(action.getTrackingId(), trackingId);
+        Assert.assertNull(action.getTrackingId());
         Assert.assertNotNull(action.getUpdated());
         Assert.assertNotNull(action.getCreated());
         log.info(String.format("Action is %s", action));

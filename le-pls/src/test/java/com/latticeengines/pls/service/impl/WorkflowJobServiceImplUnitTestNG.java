@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -127,11 +127,11 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));
         List<Object> listObj = JsonUtils.deserialize(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS),
                 List.class);
-        Assert.assertEquals(listObj.size(), 3);
+        Assert.assertEquals(listObj.size(), 4);
         log.info(String.format("listObj is %s", listObj));
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(true);
         Assert.assertNotNull(job.getSubJobs());
-        Assert.assertEquals(job.getSubJobs().size(), 3);
+        Assert.assertEquals(job.getSubJobs().size(), 4);
         when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNull(job);
@@ -148,12 +148,18 @@ public class WorkflowJobServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void testExpandActions() {
         List<Job> expandedJobs = workflowJobService.expandActions(generateActions());
-        Assert.assertEquals(expandedJobs.size(), 3);
+        Assert.assertEquals(expandedJobs.size(), 4);
         Job firstJob = expandedJobs.get(0);
         Assert.assertEquals(firstJob.getName(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
         Assert.assertEquals(firstJob.getJobType(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
         Assert.assertEquals(firstJob.getUser(), INITIATOR);
-        Assert.assertEquals(firstJob.getJobStatus(), JobStatus.COMPLETED);
+        Assert.assertEquals(firstJob.getJobStatus(), JobStatus.RUNNING);
+
+        Job secondJob = expandedJobs.get(1);
+        Assert.assertEquals(secondJob.getName(), ActionType.METADATA_CHANGE.getName());
+        Assert.assertEquals(secondJob.getJobType(), ActionType.METADATA_CHANGE.getName());
+        Assert.assertEquals(secondJob.getUser(), INITIATOR);
+        Assert.assertEquals(secondJob.getJobStatus(), JobStatus.COMPLETED);
         log.info(String.format("expandedJobs=%s", expandedJobs));
     }
 
@@ -193,13 +199,20 @@ public class WorkflowJobServiceImplUnitTestNG {
         action1.setActionInitiator(INITIATOR);
         Action action2 = new Action();
         action2.setPid(2L);
+        action2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action2.setTrackingId(jobIds[0]);
         Action action3 = new Action();
         action3.setPid(3L);
+        action3.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action3.setTrackingId(jobIds[1]);
+        Action action4 = new Action();
+        action4.setPid(4L);
+        action4.setType(ActionType.METADATA_CHANGE);
+        action4.setActionInitiator(INITIATOR);
         actions.add(action1);
         actions.add(action2);
         actions.add(action3);
+        actions.add(action4);
         return actions;
     }
 
