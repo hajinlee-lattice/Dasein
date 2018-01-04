@@ -6,14 +6,13 @@ angular.module('common.datacloud.query.service',[
 ) {
     var QueryStore = this;
 
-    angular.extend(this, {});
+    this.entities = ['account', 'contact'];
     this.validResourceTypes = ['accounts', 'contacts', 'products'];
+    this.validContexts = ['accounts', 'contacts', 'products'];
     this.segment = null;
 
     // for Adanced Query Builder
     this.history = [];
-
-    this.validContexts = ['accounts', 'contacts', 'products'];
 
     this.counts = {
         accounts: {
@@ -42,26 +41,39 @@ angular.module('common.datacloud.query.service',[
     this.ratedTargetsLimit = null;
 
     this.init = function() {
-        this.resetRestrictions();
+        this.initRestrictions();
     }
 
-    this.resetRestrictions = function() {
-        this.accountRestriction = {
-            "restriction": {
-                "logicalRestriction": {
-                    "operator": "AND",
-                    "restrictions": [] 
+    this.initRestrictions = function() {
+        var template = {
+            restriction: {
+                logicalRestriction: {
+                    operator: "AND",
+                    restrictions: []
                 }
             }
         };
-        this.contactRestriction = {
-            "restriction": {
-                "logicalRestriction": {
-                    "operator": "AND",
-                    "restrictions": []
-                }
+
+        this.entities.forEach(function(entity) {
+            QueryStore[entity + 'Restriction'] = angular.copy(template);
+        });
+    }
+
+    this.resetRestrictions = function(segment) {
+        console.log(segment);
+        this.entities.forEach(function(entity) {
+            var restriction = QueryStore[entity + 'Restriction'].restriction.logicalRestriction;
+
+            restriction.operator = "AND";
+
+            if (segment && segment[entity + '_restriction']) {
+                restriction.restrictions = segment[entity + '_restriction'];
+            } else {
+                restriction.restrictions.length = 0;
             }
-        };
+        });
+
+        this.getEntitiesCounts();
     }
 
     this.setEntitiesProperty = function(property, value) {
@@ -127,6 +139,10 @@ angular.module('common.datacloud.query.service',[
         return this.accounts;
     };
 
+    var self = this;
+    this.validResourceTypes.forEach(function(resourceType) {
+        self.setResourceTypeCount(resourceType, true);
+    });
 
     this.setContacts = function(query) {
         var deferred = $q.defer();
@@ -141,12 +157,6 @@ angular.module('common.datacloud.query.service',[
     this.getContacts = function(){ 
         return this.contacts;
     };
-
-
-    var self = this;
-    this.validResourceTypes.forEach(function(resourceType) {
-        self.setResourceTypeCount(resourceType, true);
-    });
 
     this.setDefaultRestrictions = function(defaultRestrictions) {
         this.defaultRestrictions = defaultRestrictions;
@@ -194,66 +204,13 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setupStore = function(segment) {
-        var self = this,
-            deferred = $q.defer();
+        this.setSegment(segment);
+        this.resetRestrictions(segment);
 
-        this.setSegment(segment)
+        var aRS = JSON.stringify(segment ? segment.account_restriction : this.getAccountRestriction());
+        var cRS = JSON.stringify(segment ? segment.contact_restriction : this.getContactRestriction());
 
-        if (segment != null) {
-            accountRestriction = segment.account_restriction ? segment.account_restriction : [];
-            contactRestriction = segment.contact_restriction ? segment.contact_restriction : [];
-
-            this.setAccountRestriction(segment.account_restriction);
-            this.setContactRestriction(segment.contact_restriction);
-
-            accountRestrictionsString = JSON.stringify(accountRestriction);
-            contactRestrictionsString = JSON.stringify(contactRestriction);
-            defaultRestrictions = accountRestrictionsString + contactRestrictionsString;
-
-            this.setDefaultRestrictions(defaultRestrictions);
-
-            deferred.resolve();
-
-        } else {
-            accountRestriction = [];
-            contactRestriction = [];
-
-            this.setAccountRestriction({
-                "restriction": {
-                    "logicalRestriction": {
-                        "operator": "AND",
-                        "restrictions": accountRestriction 
-                    }
-                }
-            });
-            this.setContactRestriction({
-                "restriction": {
-                    "logicalRestriction": {
-                        "operator": "AND",
-                        "restrictions": contactRestriction 
-                    }
-                }
-            });
-
-            // this.setPurchaseHistoryRestriction({
-            //     "restriction": {
-            //         "logicalRestriction": {
-            //             "operator": "AND",
-            //             "restrictions": purchaseRestriction 
-            //         }
-            //     }
-            // });
-
-            accountRestrictionsString = JSON.stringify(this.getAccountRestriction());
-            contactRestrictionsString = JSON.stringify(this.getContactRestriction());
-            defaultRestrictions = accountRestrictionsString + contactRestrictionsString;
-            this.setDefaultRestrictions(defaultRestrictions);
-
-            deferred.resolve();
-
-        }
-
-        return deferred.promise;
+        this.setDefaultRestrictions(aRS + cRS);
     }
 
     this.getSegmentProperty = function(properties, propertyName) {
@@ -423,7 +380,7 @@ angular.module('common.datacloud.query.service',[
                 'restrict_without_sfdcid': query.restrict_without_sfdcid
             };
         };
-
+        
         queryWithRestriction = SegmentStore.sanitizeSegment(queryWithRestriction);
 
         QueryService.GetEntitiesCounts(queryWithRestriction).then(function(data) {

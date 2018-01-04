@@ -323,26 +323,25 @@ angular
                         modelId = $stateParams.modelId,
                         tenantName = $stateParams.tenantName;
 
-                    QueryStore.setupStore(null).then(function(){
-                        if (segmentName === 'Create') {
-                            resolveQueryRestriction();
-                        } else {
-                            SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-                                if (segmentName && !result) {
-                                    if (modelId) {
-                                        $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
-                                    } else {
-                                        $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
-                                    }
+                    QueryStore.setupStore(null);
+                    
+                    if (segmentName === 'Create') {
+                        resolveQueryRestriction();
+                    } else {
+                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                            if (segmentName && !result) {
+                                if (modelId) {
+                                    $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
                                 } else {
-                                    return QueryStore.setupStore(result);
+                                    $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
                                 }
-                            }).then(function() {
-                                resolveQueryRestriction();
-                            });
-                        }
-                    });
+                            } else {
+                                return QueryStore.setupStore(result);
+                            }
+                        }).then(function() {
+                            resolveQueryRestriction();
+                        });
+                    }
 
                     return deferred.promise;                   
                 }],

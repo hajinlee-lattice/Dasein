@@ -1020,10 +1020,15 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.generateTileTableLabel = function(items) {
+        if (items) {
+            if (vm.section == 'segment.analysis') {
+                return 'Attribute';
+            }
+            
+            return 'Top ' + (items.length > 1 ? items.length + ' attributes' : 'attribute');
+        }
 
-        return items
-            ? 'Top ' + (items.length > 1 ? items.length + ' attributes' : 'attribute')
-            : '';
+        return '';
     }
 
     vm.inCategory = function(enrichment){

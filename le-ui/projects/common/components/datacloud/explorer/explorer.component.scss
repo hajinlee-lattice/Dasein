@@ -1052,7 +1052,7 @@
             margin-top: 15px;
             font-size: 11px;
             text-align: left;
-            div:not(.data-value-yes) {
+            > li > div:not(.data-value-yes):not(.inherit-color) {
                 color: #1a1a1a;
             }
             & > li {
@@ -1111,7 +1111,7 @@
                             min-width: 20%;
                         }
                         */
-                        &.blue-text {
+                        &.inherit-color {
                             color: inherit;
                         }
                         &.data-value-yes {

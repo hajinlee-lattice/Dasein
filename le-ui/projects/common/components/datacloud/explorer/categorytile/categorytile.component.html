@@ -122,7 +122,7 @@
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
                     <div    class="column data value" 
-                            ng-class="{ 'blue-text': vm.isSpecialAttributeValue(Value) }"
+                            ng-class="{ 'inherit-color': vm.isSpecialAttributeValue(Value) }"
                             ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">
                         {{ Value }}
                     </div>

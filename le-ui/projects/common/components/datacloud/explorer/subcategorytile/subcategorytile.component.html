@@ -93,7 +93,7 @@
                         <strong ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</strong>
                     </div>
                     <div    class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" 
-                            ng-class="{ 'blue-text': vm.isSpecialAttributeValue(Value) }"
+                            ng-class="{ 'inherit-color': vm.isSpecialAttributeValue(Value) }"
                             ng-if="vm.lookupMode || vm.section == 'segment.analysis'">
                         <div class="attribute-feedback-container">
                             <attribute-feedback-button 

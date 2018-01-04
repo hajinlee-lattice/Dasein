@@ -61,11 +61,11 @@ angular
 
             vm.categoryOrderBy = function() {
                 if(vm.section == 'segment.analysis') {
-                    order = [ 'SegmentChecked', '-TopBkt.Cnt', '-Value' ];
+                    order = [ 'SegmentChecked', '-ImportanceOrdering', '-TopBkt.Cnt', '-Value' ];
                 } else if(vm.lookupMode) {
                     order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
                 } else {
-                    order = [ '-HighlightHighlighted', '-Value' ];
+                    order = [ '-HighlightHighlighted', '-Count' ];
                 }
                 // remove highlighting
                 if(!vm.showHighlighting()) {
