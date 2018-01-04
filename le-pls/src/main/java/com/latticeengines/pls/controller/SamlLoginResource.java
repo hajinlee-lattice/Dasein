@@ -72,9 +72,11 @@ public class SamlLoginResource {
             // to help UI to point to QA backend but still get call to local
             // login UI
             @RequestParam(name = "enforceLocalUI", required = false, defaultValue = "false") boolean enforceLocalUI) {
-        UserDocument uDoc = new UserDocument();
         RedirectView redirectView = new RedirectView();
+        String baseLoginURL = loginUrl;
+
         try {
+            UserDocument uDoc = new UserDocument();
             @SuppressWarnings("unchecked")
             MultivaluedMap<String, String> formParams = null;
             log.info("SAML Login Resource: TenantDeploymentId - RelayState - Response ", tenantDeploymentId, relayState,
@@ -112,7 +114,6 @@ public class SamlLoginResource {
             attributeMap.put("samlAuthenticated", true);
             attributeMap.put("userDocument", JsonUtils.serialize(uDoc));
 
-            String baseLoginURL = loginUrl;
             if (enforceLocalUI) {
                 baseLoginURL = "https://localhost:3000";
             }
@@ -120,10 +121,8 @@ public class SamlLoginResource {
             redirectView.setAttributesMap(attributeMap);
 
         } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18170) {
-                throw new LoginException(e);
-            }
-            throw e;
+            log.error(e.getMessage(), e);
+            redirectView.setUrl(String.format("%s/login/saml/%s/error", baseLoginURL, tenantDeploymentId));
         }
 
         return redirectView;

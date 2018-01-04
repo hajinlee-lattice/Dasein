@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -25,13 +26,13 @@ public class FailureHandler implements AuthenticationFailureHandler {
         log.error(String.format("Failed to authenticate: %s", exception));
 
         LoginValidationResponse resp = new LoginValidationResponse();
-        resp.setValidated(false);
-        resp.setAuthenticationException(exception);
 
-        ServletOutputStream os = response.getOutputStream();
-        JsonUtils.serialize(resp, os);
-        os.flush();
-
-        response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+        try (ServletOutputStream os = response.getOutputStream()) {
+            response.setContentType(MediaType.APPLICATION_JSON);
+            response.setStatus(HttpStatus.SC_OK);
+            resp.setValidated(false);
+            resp.setAuthenticationException(exception);
+            JsonUtils.serialize(resp, os);
+        }
     }
 }
