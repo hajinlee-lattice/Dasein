@@ -14,12 +14,17 @@ angular.module('login.saml', [])
         });
 
         function makeUserDocument(rawUserDocument) {
-            return JSON.parse(rawUserDocument);
+            return (rawUserDocument ? JSON.parse(rawUserDocument) : []);
         }
 
         vm.init = function() {
             LoginService.SamlLogin(vm.userDocument).then(function(result) {
-                $state.go('login.tenants');
+                /**
+                 * This takes the user to the tenants page, which is correct behavior: see below
+                 * If there's one tenant login.tenants will automatically go to that tenant.  
+                 * If there's more than one tenant login.tenants will show a list of those tenants to select from.
+                 */
+                $state.go('login.tenants');  
             });
         };
 

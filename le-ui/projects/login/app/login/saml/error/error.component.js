@@ -1,5 +1,5 @@
 angular.module('login.saml.error', [])
-.component('loginSamlMetadata', {
+.component('loginSamlError', {
     templateUrl: 'app/login/saml/error/error.component.html',
     controller: function (
         $scope, $state

@@ -92,54 +92,33 @@ angular.module('login', [
         .state('login.saml', {
             url: 'saml/:tenantId',
             params: {
-                noLogoArea: true
+                disableLogoArea: true
             },
             views: {
                 "FrameContent": {
-                    resolve: {
-                        Saml: function($q) {
-                            var deferred = $q.defer();
-
-                            deferred.resolve([]);
-
-                            return deferred.promise;
-                        },
-                    },
                     template: '<login-saml></login-saml>'
                 }
             }
         })
-        .state('login.saml.logout', { // FIXME route not working, might be caused by some redirect handling somewhere
-             url: 'logout',
+        .state('login.saml_logout', { // FIXME route not working, might be caused by some redirect handling somewhere
+            url: 'saml/:tenantId/logout',
+            params: {
+                disableLogoArea: true
+            },
             views: {
                 "FrameContent": {
-                    resolve: {
-                        Saml: function($q) {
-                            var deferred = $q.defer();
-
-                            deferred.resolve([]);
-
-                            return deferred.promise;
-                        },
-                    },
                     template: '<login-saml-logout></login-saml-logout>'
                 }
             }
         })
-        .state('login.saml.error', {
-            url: ':tenantId/error',
+        .state('login.saml_error', {
+            url: 'saml/:tenantId/error',
+            params: {
+                disableLogoArea: true
+            },
             views: {
                 "FrameContent": {
-                    resolve: {
-                        Saml: function($q) {
-                            var deferred = $q.defer();
-
-                            deferred.resolve([]);
-
-                            return deferred.promise;
-                        },
-                    },
-                    template: '<login-saml-metadata></login-saml-metadata>'
+                    template: '<login-saml-error></login-saml-error>'
                 }
             }
         });

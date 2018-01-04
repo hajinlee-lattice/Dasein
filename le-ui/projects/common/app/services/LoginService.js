@@ -49,7 +49,6 @@ angular.module('mainApp.login.services.LoginService', [
         var result = sessionDocument;
         if (result != null && result !== "") {
             BrowserStorageUtility.setTokenDocument(result.Ticket.Uniqueness + "." + result.Ticket.Randomness);
-            //result.Result.UserName = result.Result.User.DisplayName;
             result.Ticket.Tenants[0].UIVersion = "3.0";
             deferred.resolve(result);
             BrowserStorageUtility.setLoginDocument(result.Ticket);

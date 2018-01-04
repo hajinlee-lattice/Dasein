@@ -1,6 +1,8 @@
 @import "login/login.component.scss";
 @import "login/tenants/tenants.component.scss";
 @import "login/saml/saml.component.scss";
+@import "login/saml/logout/logout.component.scss";
+@import "login/saml/error/error.component.scss";
 
 body {
     opacity: 0;
