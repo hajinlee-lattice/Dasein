@@ -7,16 +7,17 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum RuleBucketName {
-    A_PLUS("A+"), //
-    A("A"), //
-    B("B"), //
-    C("C"), //
-    D("D"), //
-    F("F");
+    A_PLUS("A+", 100D), //
+    A("A", 95.0D), //
+    B("B", 90.0D), //
+    C("C", 85.0D), //
+    D("D", 75.0D), //
+    F("F", 50.0D);
 
     private String name;
+    private Double defaultLikelihood;
 
-    RuleBucketName(String name) {
+    RuleBucketName(String name, Double defaultLikelihood) {
         this.name = name;
     }
 
@@ -31,6 +32,10 @@ public enum RuleBucketName {
     @JsonValue
     public String getName() {
         return this.name;
+    }
+
+    public Double getDefaultLikelihood() {
+        return defaultLikelihood;
     }
 
     public static Set<String> getDefaultRuleBucketNames() {

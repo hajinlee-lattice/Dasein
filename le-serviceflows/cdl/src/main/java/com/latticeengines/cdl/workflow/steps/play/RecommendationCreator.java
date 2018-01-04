@@ -31,8 +31,6 @@ public class RecommendationCreator {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
 
-    private static final double DEFAULT_LIKELIHOOD = 50.0D;
-
     public void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
             DataFileWriter<GenericRecord> dataFileWriter) {
@@ -155,7 +153,7 @@ public class RecommendationCreator {
         }
 
         recommendation.setTenantId(tenant.getPid());
-        recommendation.setLikelihood(DEFAULT_LIKELIHOOD);
+        recommendation.setLikelihood(bucket.getDefaultLikelihood());
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
 
         recommendation.setPriorityID(bucket);
