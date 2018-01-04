@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
@@ -55,31 +56,25 @@ public class EventQueryTranslator extends TranslatorCommon {
     public QueryBuilder translateForScoring(QueryFactory queryFactory,
                                             AttributeRepository repository,
                                             Restriction restriction,
-                                            String periodName,
-                                            int periodCount,
+                                            EventFrontEndQuery frontEndQuery,
                                             QueryBuilder queryBuilder) {
-        return translateRestriction(queryFactory, repository, restriction, true, false,
-                                    periodName, periodCount, queryBuilder);
+        return translateRestriction(queryFactory, repository, restriction, true, false, frontEndQuery, queryBuilder);
     }
 
     public QueryBuilder translateForTraining(QueryFactory queryFactory,
                                              AttributeRepository repository,
                                              Restriction restriction,
-                                             String periodName,
-                                             int periodCount,
+                                             EventFrontEndQuery frontEndQuery,
                                              QueryBuilder queryBuilder) {
-        return translateRestriction(queryFactory, repository, restriction, false, false,
-                                    periodName, periodCount, queryBuilder);
+        return translateRestriction(queryFactory, repository, restriction, false, false, frontEndQuery, queryBuilder);
     }
 
     public QueryBuilder translateForEvent(QueryFactory queryFactory,
                                           AttributeRepository repository,
                                           Restriction restriction,
-                                          String periodName,
-                                          int periodCount,
+                                          EventFrontEndQuery frontEndQuery,
                                           QueryBuilder queryBuilder) {
-        return translateRestriction(queryFactory, repository, restriction, false, true,
-                                    periodName, periodCount, queryBuilder);
+        return translateRestriction(queryFactory, repository, restriction, false, true, frontEndQuery, queryBuilder);
     }
 
 
@@ -129,6 +124,30 @@ public class EventQueryTranslator extends TranslatorCommon {
         subQuery.setSubQueryExpression(minusProdSubQuery);
         subQuery.setAlias(KEYS);
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtype"})
+    private SubQuery translateProductRevenues(QueryFactory queryFactory,
+                                              AttributeRepository repository,
+                                              List<String> targetProductIds,
+                                              String period) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
+
+        String txTableName = getPeriodTransactionTableName(repository);
+        StringPath tablePath = Expressions.stringPath(txTableName);
+        NumberExpression amount = Expressions.numberPath(BigDecimal.class, amountVal.getMetadata());
+        BooleanExpression periodFilter = limitPeriodByNameAndCount(queryFactory, repository, period, -1);
+        BooleanExpression productFilter = productId.in(targetProductIds);
+        SQLQuery revenueSubQuery = factory.query() //
+                .select(accountId, periodId, amount.sum()) //
+                .from(tablePath) //
+                .where(periodFilter.and(productFilter)) //
+                .groupBy(accountId, periodId);
+
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(revenueSubQuery);
+        subQuery.setAlias(TRXN_REVENUE);
+        return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID).withProjection(REVENUE);
     }
 
     @SuppressWarnings("unchecked")
@@ -432,9 +451,11 @@ public class EventQueryTranslator extends TranslatorCommon {
                                               Restriction restriction,
                                               boolean isScoring,
                                               boolean isEvent,
-                                              String periodName,
-                                              int periodCount,
+                                              EventFrontEndQuery frontEndQuery,
                                               QueryBuilder builder) {
+
+        final String periodName = frontEndQuery.getPeriodName();
+        final int periodCount = frontEndQuery.getPeriodCount();
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
@@ -446,6 +467,14 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
 
         builder.with(translateAllKeys(queryFactory, repository, period, periodCount));
+
+        if (frontEndQuery.getCalculateProductRevenue()) {
+            if (frontEndQuery.getTargetProductIds() == null || frontEndQuery.getTargetProductIds().isEmpty()) {
+                throw new RuntimeException("No target product specified");
+            }
+            builder.with(translateProductRevenues(queryFactory, repository, frontEndQuery.getTargetProductIds(),
+                                                  period));
+        }
 
         // combine one leg behind restriction for event query, this is not needed for scoring and training
         if (isEvent) {

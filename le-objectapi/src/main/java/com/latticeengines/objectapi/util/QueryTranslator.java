@@ -88,18 +88,18 @@ public class QueryTranslator {
         switch (eventType) {
         case Scoring:
             queryBuilder = eventQueryTranslator.translateForScoring(queryFactory, repository, restriction,
-                                                                    frontEndQuery.getPeriodName(),
-                                                                    frontEndQuery.getPeriodCount(), queryBuilder);
+                                                                    frontEndQuery,
+                                                                    queryBuilder);
             break;
         case Training:
             queryBuilder = eventQueryTranslator.translateForTraining(queryFactory, repository, restriction,
-                                                                     frontEndQuery.getPeriodName(),
-                                                                     frontEndQuery.getPeriodCount(), queryBuilder);
+                                                                     frontEndQuery,
+                                                                     queryBuilder);
             break;
         case Event:
             queryBuilder = eventQueryTranslator.translateForEvent(queryFactory, repository, restriction,
-                                                                  frontEndQuery.getPeriodName(),
-                                                                  frontEndQuery.getPeriodCount(), queryBuilder);
+                                                                  frontEndQuery,
+                                                                  queryBuilder);
             break;
         }
 

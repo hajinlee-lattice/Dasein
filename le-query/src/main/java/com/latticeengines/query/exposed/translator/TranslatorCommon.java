@@ -41,7 +41,7 @@ public class TranslatorCommon {
     static final String REVENUE = "revenue";
     static final String NUMBER = "n";
     static final String DUMMY = "dummy";
-    static final String PERIOD_RANGE = "periodRange";
+    static final String PERIOD_RANGE = "periodrange";
     static final String MIN_PID = "minpid";
     static final String CROSS_PROD = "crossprod";
     static final String ALL_ACCOUNTS = "allaccounts";

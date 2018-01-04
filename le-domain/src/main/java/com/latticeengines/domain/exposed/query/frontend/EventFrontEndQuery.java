@@ -22,6 +22,9 @@ public class EventFrontEndQuery extends FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.TARGET_PRODUCT_IDS)
     private List<String> targetProductIds;
 
+    @JsonProperty(FrontEndQueryConstants.CALCULATE_PRODUCT_REVENUE)
+    private boolean calculateProductRevenue = false;
+
     public String getPeriodName() {
         return periodName;
     }
@@ -36,6 +39,14 @@ public class EventFrontEndQuery extends FrontEndQuery {
 
     public void setPeriodCount(int periodCount) {
         this.periodCount = periodCount;
+    }
+
+    public boolean getCalculateProductRevenue() {
+        return calculateProductRevenue;
+    }
+
+    public void setCalculateProductRevenue(boolean calculateProductRevenue) {
+        this.calculateProductRevenue = calculateProductRevenue;
     }
 
     public List<String> getTargetProductIds() {
