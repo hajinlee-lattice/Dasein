@@ -244,7 +244,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
             Assert.assertTrue(ruModel.getSelectedAttributes().size() > 0);
         } else if (retrievedRe.getActiveModel() instanceof AIModel) {
             AIModel ruModel = (AIModel) retrievedRe.getActiveModel();
-            Assert.assertNull(ruModel);
+            Assert.assertNotNull(ruModel);
         }
     }
 
