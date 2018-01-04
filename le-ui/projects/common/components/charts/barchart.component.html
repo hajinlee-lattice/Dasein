@@ -1,0 +1,22 @@
+<div class="barChart">
+    
+    <h4 ng-if="header">{{header}}</h4>
+    <ul class="bars"
+    >
+        <li 
+            ng-repeat="bucket in data track by $index"
+            class="bucket-{{bucket.bucket|lowercase}}"
+            ng-class="{'bucket-aplus': bucket.bucket === 'A+'}">
+
+            <div class="value">{{bucket.count|number}}</div>
+
+            <div 
+                class="bar"
+                ng-attr-style="{{'height: '+ bucket.height +'%' }}">
+            </div>
+
+            <div class="meta">{{bucket.bucket}}</div>
+        </li>
+    </ul>
+
+</div>

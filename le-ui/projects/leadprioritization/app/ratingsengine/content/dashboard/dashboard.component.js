@@ -1,4 +1,7 @@
-angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.modal.window'])
+angular.module('lp.ratingsengine.dashboard', [
+    'mainApp.appCommon.directives.modal.window',
+    'mainApp.appCommon.directives.barchart'
+])
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, StateHistory, RatingsEngineStore, RatingsEngineService, 
     Rating, TimestampIntervalUtility, NumberUtility, ModalStore
@@ -55,55 +58,17 @@ angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.moda
         });
     }
 
-   
-    vm.getBarHeight = function(label, count) {
-        // find the highest bucket value and use that for total
-        var max = Object.values(vm.buckets.data).reduce(function (a, b) {
-            return (a > b ? a : b);
-        });
+    // vm.getBarHeight = function(label, count) {
+    //     // find the highest bucket value and use that for total
+    //     var max = Object.values(vm.buckets.data).reduce(function (a, b) {
+    //         return (a > b ? a : b);
+    //     });
 
-        return vm.NumberUtility.MakePercentage(count, max, '%');
-    }
+    //     return vm.NumberUtility.MakePercentage(count, max, '%');
+    // }
 
     vm.init = function() {
-        if(vm.rating.coverageInfo && vm.rating.coverageInfo.bucketCoverageCounts) {
-
-            // Shift A+ buckets to the first position of the buckets
-            var ratingBuckets = vm.rating.coverageInfo.bucketCoverageCounts;
-            ratingBuckets.forEach(function(bucket){
-                if(bucket.bucket === 'A+'){
-                    var i = ratingBuckets.findIndex(x >= x.bucket === "A+");
-                    if (i === 0) return;
-                    if (i > 0) {
-                        ratingBuckets.splice( i, 1 );
-                    }
-                    ratingBuckets.unshift( bucket );
-                }
-            });
-            // Make the ratings bucket bar chart
-            vm.buckets = makeGraph(ratingBuckets, {label: 'bucket', count: 'count'});
-        }
         vm.initModalWindow();
-    }
-
-    var makeGraph = function(data, params) {
-        if(!data) {
-            return null;
-        }
-        var label_key = params.label || 'bucket',
-            count_key = params.count || 'count',
-            total = 0,
-            _graph = {},
-            graph = {};
-        angular.forEach(data, function(value) {
-            total = total + value[count_key];
-            _graph[value[label_key]] = value[count_key];
-        });
-        graph = {
-            total: total,
-            data: _graph
-        }
-        return graph;
     }
 
     /**

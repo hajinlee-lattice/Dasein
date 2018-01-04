@@ -1,5 +1,6 @@
 angular.module('lp.ratingsengine.ratingslist', [
-    'mainApp.ratingsengine.deleteratingmodal'
+    'mainApp.ratingsengine.deleteratingmodal',
+    'mainApp.appCommon.directives.barchart'
 ])
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $element, $state, $stateParams, $filter, $interval, 
@@ -44,22 +45,6 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.init = function($q, $filter) {
         RatingsEngineStore.clear();
 
-        // Shift A+ buckets to the first position of the buckets
-        var ratings = vm.current.bucketCountMap;
-        for (var ratingId in ratings) {
-            var ratingBuckets = ratings[ratingId].bucketCoverageCounts;
-            ratingBuckets.forEach(function(bucket){
-                if(bucket.bucket === 'A+'){
-                    var i = ratingBuckets.findIndex(x >= x.bucket === "A+");
-                    if (i === 0) return;
-                    if (i > 0) {
-                        ratingBuckets.splice( i, 1 );
-                    }
-                    ratingBuckets.unshift( bucket );
-                }
-            });
-        }
-
         vm.totalLength = vm.count();
         vm.activeCount = vm.count('ACTIVE');
         vm.inactiveCount = vm.count('INACTIVE');
@@ -84,14 +69,6 @@ angular.module('lp.ratingsengine.ratingslist', [
     //     }
     // }, 1000);
     vm.init();
-
-    vm.getTallestBarHeight = function(bucket, rating) {
-        var bucketArray = vm.current.bucketCountMap[rating.id].bucketCoverageCounts;
-
-        return Math.max.apply(Math, bucketArray.map(function(bkt) { 
-            return bkt.count; 
-        }));
-    }
 
     vm.hasRules = function(rating) {
         return RatingsEngineStore.hasRules(rating);

@@ -92,24 +92,14 @@
                     <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
 
                         <div ng-class="{'inactive': rating.status === 'INACTIVE'}">
-                            <h4>Account Ratings</h4>
-                            <ul class="barChart ratings"
+                            
+                            <barchart 
+                                header="Account Ratings"
+                                ratings="true" 
+                                data="vm.current.bucketCountMap[rating.id].bucketCoverageCounts"
                                 ng-if="vm.current.bucketCountMap[rating.id] && vm.current.bucketCountMap[rating.id].bucketCoverageCounts">
-                                <li 
-                                    ng-repeat="bucket in vm.current.bucketCountMap[rating.id].bucketCoverageCounts"
-                                    class="bucket-{{bucket.bucket|lowercase}}"
-                                    ng-class="{'bucket-aplus': bucket.bucket === 'A+'}">
+                            </barchart>
 
-                                    <div class="value">{{bucket.count|number}}</div>
-
-                                    <div 
-                                        class="rating-bar"
-                                        ng-attr-style="{{'height: '+ vm.ceil(((bucket.count / vm.getTallestBarHeight(bucket, rating)) * 100) / 2) + 'px' }}">
-                                    </div>
-
-                                    <div class="meta">{{bucket.bucket}}</div>
-                                </li>
-                            </ul>
                             <span 
                                 ng-if="!vm.current.bucketCountMap[rating.id]" 
                                 class="bucket-loading">

@@ -25,19 +25,14 @@
                             Last Data Refresh: {{vm.TimestampIntervalUtility.timeAgo(vm.rating.summary.lastRefreshedDate)}}
                         </p>
                     </div>
-                    <div class="dashboard-section-content account-ratings" ng-if="vm.buckets">
-                        <div class="dashboard-subsection-header">
-                            <h3>Account ratings</h3>
-                        </div>
-                        <ul class="ratings graph">
-                            <li class="_rating bucket-{{label|lowercase}}" 
-                                ng-repeat="(label, count) in vm.buckets.data" 
-                                ng-style="{height: vm.getBarHeight(label, count)}"
-                                ng-class="{empty: !count}">
-                                <div class="_label">{{label}}</div>
-                                <div class="_count">{{count|number}}</div>
-                            </li>
-                        </ul>
+                    <div class="dashboard-section-content account-ratings" ng-if="vm.rating.coverageInfo.bucketCoverageCounts">
+
+                        <barchart 
+                            header="Account Ratings"
+                            ratings="true" 
+                            data="vm.rating.coverageInfo.bucketCoverageCounts">
+                        </barchart>
+
                     </div>
                     <div class="dashboard-section-footer">
                         <div class="dashboard-section-footer-columns">

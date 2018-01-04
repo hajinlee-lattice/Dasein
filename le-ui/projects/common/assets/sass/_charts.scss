@@ -1,0 +1,104 @@
+.barChart {
+    h4 {
+        text-align: center;
+    }
+    & > .bars {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        height: 120px;
+        & > li {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-direction: column;
+            height: 100%;
+            width: 15%;
+            margin: 0 2px;
+            text-align: center;
+            & > div {
+                flex: 0 0 1;
+                &:nth-child(1), &:nth-child(3){
+                    height: 22px;
+                }
+            }
+            .bar {
+                background-color: rgba(0,0,0,.5);
+                width: 100%;
+                min-height: 2px;
+            }
+            &.bucket-aplus {
+                .value {
+                    color: #70bf4a;
+                }
+                .bar {
+                    background-color: #70bf4a;
+                }
+            }
+            &.bucket-a {
+                .value {
+                    color: #33bdb7;
+                }
+                .bar {
+                    background-color: #33bdb7;
+                }
+            }
+            &.bucket-b {
+                .value {
+                    color: #cd80bc;
+                }
+                .bar {
+                    background-color: #cd80bc;
+                }
+            }
+            &.bucket-c {
+                .value {
+                    color: #8e71b2;
+                }
+                .bar {
+                    background-color: #8e71b2;
+                }
+            }
+            &.bucket-d {
+                .value {
+                    color: #457eba;
+                }
+                .bar {
+                    background-color: #457eba;
+                }
+            }
+            &.bucket-e {
+                .value {
+                    color: #70bf4a;
+                }
+                .bar {
+                    background-color: #70bf4a;
+                }
+            }
+            &.bucket-f {
+                .value {
+                    color: #33bdb7;
+                }
+                .bar {
+                    background-color: #33bdb7;
+                }
+            }
+        }
+    }
+}
+.inactive {
+    .barChart {    
+        h4 {
+            color: #bbb;
+        }
+        & > .bars > li {
+            .value {
+                color: #bbb;
+            }
+            .bar {
+                border-bottom-color: #ddd;
+                background-color: #ddd;
+            }
+        }
+    }
+}

@@ -113,35 +113,35 @@ Spinner Balls
 Progress Bar 
 ShowSpinner(<text>, 'bar');
 ============================================================ */
-.bar {
-	background: white;
-	border: none;
-	border-radius: 6px;
-	box-shadow: 0 0px 75px 50px rgba(255,255,255,.9);
-	&.loading-spinner {
-		top: 10em;
-		left: 30%;
-		right: 30%;
-		margin: -2.5em 0 0;
-		padding: 1.25em;
-	}
-    h2 {
-      display: inline-block;
-      position: absolute;
-      top: 1.6em;
-      left: 0;
-      right: 0;
-      margin: 0 auto;
-      font-size: 125%;
-      text-align: center;
-      z-index: 1;
-      text-shadow: 1px 1px 0px #aaa, -1px -1px 0px #aaa, -1px 1px 0px #aaa, 1px -1px 0px #aaa;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: #fff;
-      font-weight: bold;
-    }
-}
+// .bar {
+// 	background: white;
+// 	border: none;
+// 	border-radius: 6px;
+// 	box-shadow: 0 0px 75px 50px rgba(255,255,255,.9);
+// 	&.loading-spinner {
+// 		top: 10em;
+// 		left: 30%;
+// 		right: 30%;
+// 		margin: -2.5em 0 0;
+// 		padding: 1.25em;
+// 	}
+//     h2 {
+//       display: inline-block;
+//       position: absolute;
+//       top: 1.6em;
+//       left: 0;
+//       right: 0;
+//       margin: 0 auto;
+//       font-size: 125%;
+//       text-align: center;
+//       z-index: 1;
+//       text-shadow: 1px 1px 0px #aaa, -1px -1px 0px #aaa, -1px 1px 0px #aaa, 1px -1px 0px #aaa;
+//       text-transform: uppercase;
+//       letter-spacing: 3px;
+//       color: #fff;
+//       font-weight: bold;
+//     }
+// }
 .meter.bar {
 	height: 36px; 
 	position: relative;
