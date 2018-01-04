@@ -32,7 +32,7 @@ public class SwaggerConfig {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.latticeengines.saml.controller"))
                 .build()
-                .pathMapping("/saml")
+                .pathMapping("/")
                 .apiInfo(apiInfo())
                 .useDefaultResponseMessages(false)
                 .globalResponseMessage(
