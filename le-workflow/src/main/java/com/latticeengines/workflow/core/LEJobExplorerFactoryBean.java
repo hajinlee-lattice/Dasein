@@ -30,7 +30,7 @@ public class LEJobExplorerFactoryBean extends JobExplorerFactoryBean {
 
     @Override
     protected ExecutionContextDao createExecutionContextDao() throws Exception {
-        JdbcExecutionContextDao dao = new Uft8JdbcExecutionContextDao();
+        JdbcExecutionContextDao dao = new Utf8JdbcExecutionContextDao();
         dao.setJdbcTemplate(jdbcTemplate);
         dao.setLobHandler(null);
         dao.setTablePrefix(tablePrefix);

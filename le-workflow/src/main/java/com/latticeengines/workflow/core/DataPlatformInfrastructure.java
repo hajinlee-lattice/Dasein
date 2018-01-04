@@ -8,6 +8,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.ExecutionContextSerializer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,13 +48,11 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
 
     @Override
     public JobRepository getJobRepository() throws Exception {
-        LEJobRepositoryFactoryBean factory = new LEJobRepositoryFactoryBean();
+        LEJobRepositoryFactoryBean factory = new LEJobRepositoryFactoryBean(jdbcTemplate, WORKFLOW_PREFIX, databaseType,
+                new Jackson2ExecutionContextStringSerializer());
         factory.setDataSource(dataSource);
-        factory.setJdbcOperations(jdbcTemplate);
         factory.setTransactionManager(getTransactionManager());
-        factory.setDatabaseType(databaseType);
         factory.setIsolationLevelForCreate("ISOLATION_REPEATABLE_READ");
-        factory.setTablePrefix(WORKFLOW_PREFIX);
         factory.setValidateTransactionState(false);
         factory.setMaxRetryAttempts(10);
         factory.addExceptionToRetry(DeadlockLoserDataAccessException.class);
@@ -61,7 +60,6 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
         factory.addExceptionToRetry(LockAcquisitionException.class);
         factory.setRetryBackOffMultiplier(2.0);
         factory.setRetryBackOffInitialIntervalMsec(500);
-        factory.setSerializer(new Jackson2ExecutionContextStringSerializer());
         factory.afterPropertiesSet();
         return (JobRepository) factory.getObject();
     }
