@@ -1,15 +1,17 @@
 package com.latticeengines.pls.controller;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +25,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.google.common.net.HttpHeaders;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
-import com.latticeengines.domain.exposed.pls.LoginDocument;
-import com.latticeengines.domain.exposed.pls.LoginDocument.LoginResult;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -106,23 +107,10 @@ public class SamlLoginResource {
 
             uDoc.setResult(result);
 
-            LoginDocument lDoc = new LoginDocument();
-            lDoc.setErrors(new ArrayList<>());
-            lDoc.setRandomness(session.getTicket().getRandomness());
-            lDoc.setUniqueness(session.getTicket().getUniqueness());
-            lDoc.setSuccess(true);
-            LoginResult loginResult = lDoc.new LoginResult();
-            loginResult.setMustChangePassword(false);
-            loginResult.setPasswordLastModified(0L);
-            loginResult.setTenants(session.getTicket().getTenants());
-            lDoc.setResult(loginResult);
-            lDoc.setAuthenticationRoute(session.getAuthenticationRoute());
-
             Map<String, Object> attributeMap = new HashMap<>();
             attributeMap.put("userName", uDoc.getResult().getUser().getEmailAddress());
             attributeMap.put("samlAuthenticated", true);
             attributeMap.put("userDocument", JsonUtils.serialize(uDoc));
-            attributeMap.put("loginDocument", JsonUtils.serialize(lDoc));
 
             String baseLoginURL = loginUrl;
             if (enforceLocalUI) {
@@ -141,7 +129,7 @@ public class SamlLoginResource {
         return redirectView;
     }
 
-    @RequestMapping(value = "/attachUser/"
+    @RequestMapping(value = "/attach-user/"
             + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Login via SAML Authentication")
@@ -202,11 +190,22 @@ public class SamlLoginResource {
             + InternalResource.TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get ServiceProvider SAML Metadata for requested Tenant")
-    public Response getIdpMetadata(HttpServletRequest request, @PathVariable("tenantId") String tenantDeploymentId) {
+    public void getIdpMetadata(HttpServletRequest request, HttpServletResponse response,
+            @PathVariable("tenantId") String tenantDeploymentId) {
         log.info("SAML Metadata Resource: TenantDeploymentId ", tenantDeploymentId);
 
-        String metadata = samlProxy.getSPMetadata(tenantDeploymentId);
-        return Response.ok().entity(metadata).build();
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            String metadata = samlProxy.getSPMetadata(tenantDeploymentId);
+            response.setContentType(MediaType.APPLICATION_XML_VALUE);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    String.format("attachment; filename=\"lattice_saml_sp_%s.xml\"", tenantDeploymentId));
+
+            response.setStatus(HttpStatus.SC_OK);
+            outputStream.write(metadata.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
+import com.latticeengines.saml.util.SAMLUtils;
 
 public class SuccessHandler implements AuthenticationSuccessHandler {
 
@@ -32,17 +34,16 @@ public class SuccessHandler implements AuthenticationSuccessHandler {
         log.info("request.getPathInfo() = " + request.getPathInfo());
         log.info("email = " + email);
 
-        String path = request.getPathInfo();
-        String tenantId = path.substring(path.lastIndexOf("/alias/") + "/alias/".length());
+        String tenantId = SAMLUtils.getTenantFromAlias(request.getPathInfo());
         log.info("tenantId = " + tenantId);
 
-        ServletOutputStream os = response.getOutputStream();
-        resp.setValidated(true);
-        resp.setUserId(email);
-        JsonUtils.serialize(resp, os);
-        os.flush();
-
-        response.setStatus(HttpStatus.SC_OK);
+        try (ServletOutputStream os = response.getOutputStream()) {
+            response.setContentType(MediaType.APPLICATION_JSON);
+            response.setStatus(HttpStatus.SC_OK);
+            resp.setValidated(true);
+            resp.setUserId(email);
+            JsonUtils.serialize(resp, os);
+        }
     }
 
 }

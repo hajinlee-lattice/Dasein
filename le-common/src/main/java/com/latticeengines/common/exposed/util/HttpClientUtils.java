@@ -41,6 +41,16 @@ public class HttpClientUtils {
         return restTemplate;
     }
 
+    public static RestTemplate newFormURLEncodedRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate(SSL_BLIND_HC_FACTORY);
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(
+                new HeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+        interceptors.add(new HeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
+        restTemplate.setInterceptors(interceptors);
+        return restTemplate;
+    }
+
     /**
      * gives a rest template using connection pool and ENFORCE ssl name
      * verification.
@@ -105,7 +115,7 @@ public class HttpClientUtils {
      */
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.out.println("Usage: "+ SSLUtils.class.getName()+" <url>");
+            System.out.println("Usage: " + SSLUtils.class.getName() + " <url>");
             System.exit(1);
         }
         try {
@@ -126,7 +136,6 @@ public class HttpClientUtils {
             content = restTemplate.getForObject(args[0], String.class);
             System.out.println(content.substring(0, Math.min(content.length(), 1000)));
             System.out.println("Successfully connected");
-
 
             restTemplate = HttpClientUtils.newRestTemplate();
             SSLUtils.turnOffSSLNameVerification();

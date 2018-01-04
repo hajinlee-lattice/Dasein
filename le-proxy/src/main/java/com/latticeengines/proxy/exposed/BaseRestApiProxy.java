@@ -126,12 +126,13 @@ public abstract class BaseRestApiProxy {
         });
     }
 
-    protected <T, B> T postWithRetries(final String method, final String url, final B body, final Class<T> returnValueClazz) {
+    protected <T, B> T postWithRetries(final String method, final String url, final B body,
+            final Class<T> returnValueClazz) {
         return postWithRetries(method, url, body, returnValueClazz, true);
     }
 
-    protected <T, B> T postWithRetries(final String method, final String url, final B body, final Class<T> returnValueClazz,
-                            final boolean logBody) {
+    protected <T, B> T postWithRetries(final String method, final String url, final B body,
+            final Class<T> returnValueClazz, final boolean logBody) {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
@@ -152,12 +153,13 @@ public abstract class BaseRestApiProxy {
         });
     }
 
-    protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts, final Class<T> returnValueClazz) {
+    protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts,
+            final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                String msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method,
-                        url, context.getRetryCount() + 1);
+                String msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
+                        context.getRetryCount() + 1);
                 log.info(msg);
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -171,9 +173,33 @@ public abstract class BaseRestApiProxy {
                     }
                 }
                 newRestTemplate.setInterceptors(interceptors);
-                ResponseEntity<T> response =
-                        newRestTemplate.exchange(url, HttpMethod.POST, requestEntity, returnValueClazz);
+                ResponseEntity<T> response = newRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
+                        returnValueClazz);
                 return response.getBody();
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
+            }
+        });
+    }
+
+    protected <T> T postForUrlEncoded(final String method, final String url, final Class<T> returnValueClazz) {
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(context -> {
+            try {
+                String msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
+                        context.getRetryCount() + 1);
+                log.info(msg);
+                String baseUrl = url.substring(0, url.indexOf("?"));
+                String params = url.substring(url.indexOf("?") + 1);
+                RestTemplate newRestTemplate = HttpClientUtils.newFormURLEncodedRestTemplate();
+
+                T response = newRestTemplate.postForObject(baseUrl, params, returnValueClazz);
+                return response;
             } catch (LedpException e) {
                 context.setExhaustedOnly();
                 logError(e, method);

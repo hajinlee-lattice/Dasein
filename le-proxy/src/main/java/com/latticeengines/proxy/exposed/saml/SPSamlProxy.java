@@ -15,11 +15,9 @@ public class SPSamlProxy extends BaseRestApiProxy {
     }
 
     public LoginValidationResponse validateSSOLogin(String tenantId, Object samlSSOResponse, String relayState) {
-        String url = constructUrl("/SSO/alias/{tenant}", tenantId);
-        LoginValidationResponse resp = new LoginValidationResponse();
-        resp.setValidated(true);
-        resp.setUserId("bnguyen@lattice-engines.com");
-        return resp;
+        String url = constructUrl("/SSO/alias/{tenant}?SAMLResponse={samlSSOResponse}&RelayState={relayState}",
+                tenantId, samlSSOResponse, relayState);
+        return postForUrlEncoded("validateSSOLogin", url, LoginValidationResponse.class);
     }
 
     public LogoutValidationResponse validateSingleLogout(String tenantId, boolean isSPInitiatedLogout,
@@ -32,6 +30,6 @@ public class SPSamlProxy extends BaseRestApiProxy {
 
     public String getSPMetadata(String tenantId) {
         String url = constructUrl("/metadata/alias/{tenant}", tenantId);
-        return "DUMMY METADATA";
+        return get("getSPMetadata", url, String.class);
     }
 }

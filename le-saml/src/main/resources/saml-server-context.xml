@@ -132,8 +132,9 @@
         <property name="userDetails" ref="latticeUserDetailsService"/>
     </bean>
 
+
     <!-- Provider of default SAML Context -->
-    <bean id="contextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl">
+    <bean id="contextProvider" class="com.latticeengines.saml.LatticeSAMLContextProviderLB">
         <property name="metadataResolver" ref="latticeMetadataCredentialResolver"/>
         <property name="pkixTrustEvaluator">
 		<bean class="org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator">
@@ -148,7 +149,7 @@
 		</bean>
 	</property>
     </bean>
-
+ 
     <bean id="latticeMetadataCredentialResolver" class="com.latticeengines.saml.LatticeMetadataCredentialResolver">
         <constructor-arg>
             <ref bean="metadataManager"/>

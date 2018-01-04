@@ -19,6 +19,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class SAMLUtils {
+
+    public static final String ALIAS = "/alias/";
     public final static String LOCAL_ENTITY_ID_BASE = "app.lattice-engines.com/";
 
     public static String getEntityIdFromTenantId(String tenantId) {
@@ -65,5 +67,14 @@ public class SAMLUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String getTenantFromAlias(String requestURI) {
+        int filterIndex = getAliasIndex(requestURI);
+        return requestURI.substring(filterIndex + ALIAS.length());
+    }
+
+    public static int getAliasIndex(String requestURI) {
+        return requestURI.indexOf(ALIAS);
     }
 }

@@ -27,7 +27,7 @@ import com.latticeengines.security.exposed.service.SessionService;
 public class SessionServiceImpl implements SessionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionServiceImpl.class);
-    
+
     private static final Integer MAX_RETRY = 3;
     private static final Long RETRY_INTERVAL_MSEC = 200L;
     private static Random random = new Random(System.currentTimeMillis());
@@ -40,13 +40,13 @@ public class SessionServiceImpl implements SessionService {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
-    
+
     @Autowired
     private SamlGlobalAuthenticationService samlGlobalAuthenticationService;
 
     @Autowired
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
-    
+
     @Override
     public Ticket authenticate(Credentials credentials) {
         return globalAuthenticationService.authenticateUser(credentials.getUsername().toLowerCase(),
@@ -62,6 +62,10 @@ public class SessionServiceImpl implements SessionService {
         Tenant tenant = new Tenant();
         tenant.setId(gaTenant.getId());
         tenant.setName(gaTenant.getName());
+        // TODO - jaya to fetch tenant from pls multitenant for correct uiVersion
+        // as it is needed by UI
+        tenant.setUiVersion("3.0");
+
         ticket.setTenants(Collections.singletonList(tenant));
 
         Session session = attach(ticket);

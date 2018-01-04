@@ -48,19 +48,19 @@
             </ds:KeyInfo>
         </md:KeyDescriptor>
         <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                                Location="___BASE_ADDRESS___/SingleLogout/alias/___TENANT_ID___"/>
+                                Location="___BASE_ADDRESS___/saml/logout/___TENANT_ID___"/>
         <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                                Location="___BASE_ADDRESS___/SingleLogout/alias/___TENANT_ID___"/>
+                                Location="___BASE_ADDRESS___/saml/logout/___TENANT_ID___"/>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</md:NameIDFormat>
         <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                                     Location="___BASE_ADDRESS___/SSO/alias/___TENANT_ID___"
+                                     Location="___BASE_ADDRESS___/saml/login/___TENANT_ID___"
                                      index="0" isDefault="true"/>
         <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
-                                     Location="___BASE_ADDRESS___/SSO/alias/___TENANT_ID___"
+                                     Location="___BASE_ADDRESS___/saml/login/___TENANT_ID___"
                                      index="1"/>
     </md:SPSSODescriptor>
 </md:EntityDescriptor>
