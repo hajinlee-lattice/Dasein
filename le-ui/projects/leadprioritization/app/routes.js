@@ -302,7 +302,7 @@ angular
                     },
                     controller: 'SegmentationListController',
                     controllerAs: 'vm',
-                    templateUrl: 'app/models/views/SegmentationListView.html'
+                    templateUrl: 'app/segments/views/SegmentationListView.html'
                 }
             }
         })

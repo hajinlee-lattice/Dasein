@@ -1,5 +1,5 @@
 angular
-.module('lp.models.segments')
+.module('lp.segments.segments')
 .service('SegmentStore', function($q, SegmentService) {
     var SegmentStore = this;
 

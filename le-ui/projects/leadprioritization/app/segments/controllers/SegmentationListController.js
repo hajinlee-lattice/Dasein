@@ -1,5 +1,5 @@
-angular.module('lp.models.segments', [
-    'mainApp.models.modals.DeleteSegmentModal'
+angular.module('lp.segments.segments', [
+    'mainApp.segments.modals.DeleteSegmentModal'
 ])
 .controller('SegmentationListController', function ($scope, $element, $state, $stateParams,
     SegmentsList, DeleteSegmentModal, SegmentService, QueryStore, RatingsEngineStore) {
@@ -35,15 +35,15 @@ angular.module('lp.models.segments', [
 
         // console.log(vm.segments);
 
-        // vm.segmentIds = [];
-        // SegmentsList.forEach(function(segment) {
-        //     vm.tileStates[segment.name] = {
-        //         showCustomMenu: false,
-        //         editSegment: false,
-        //         saveEnabled: false
-        //     };
-        //     vm.segmentIds.push(segment.name);
-        // });
+        vm.segmentIds = [];
+        SegmentsList.forEach(function(segment) {
+            vm.tileStates[segment.name] = {
+                showCustomMenu: false,
+                editSegment: false,
+                saveEnabled: false
+            };
+            vm.segmentIds.push(segment.name);
+        });
         // RatingsEngineStore.getSegmentsCounts(vm.segmentIds).then(function(response){
         //     console.log(response);
         // });

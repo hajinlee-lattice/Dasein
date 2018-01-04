@@ -1,9 +1,8 @@
-angular.module('mainApp.models.modals.AddSegmentModal', [
+angular.module('mainApp.segments.modals.AddSegmentModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService'
 ])
-
 .service('AddSegmentService', function (StringUtility) {
     
     this.GetLowestPriorityAvailable = function (segments) {
@@ -44,7 +43,7 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
 
 .service('AddSegmentModal', function ($compile, $templateCache, $rootScope, $http) {
     this.show = function (segments, models, successCallback) {
-        $http.get('app/models/views/AddSegmentView.html', { cache: $templateCache }).success(function (html) {
+        $http.get('app/segments/modals/AddSegmentView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.segments = segments;

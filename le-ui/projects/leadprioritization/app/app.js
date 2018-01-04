@@ -22,7 +22,7 @@ var mainApp = angular.module('mainApp', [
     'lp.campaigns',
     'lp.campaigns.models',
     'lp.models.list',
-    'lp.models.segments',
+    'lp.segments.segments',
     'lp.models.review',
     'lp.models.ratings',
     'lp.notes',

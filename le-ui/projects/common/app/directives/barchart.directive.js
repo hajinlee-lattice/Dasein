@@ -16,8 +16,6 @@ angular.module('mainApp.appCommon.directives.barchart', [])
                 index = null,
                 max = Math.max.apply(Math,data.map(function(o){return o.count;}));
 
-            console.log(max);
-
             data.forEach(function(bucket){
                 bucket.height = ((bucket.count / max) * 100);
             });

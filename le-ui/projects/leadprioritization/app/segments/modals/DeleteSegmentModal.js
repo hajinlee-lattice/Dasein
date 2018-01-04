@@ -1,4 +1,4 @@
-angular.module('mainApp.models.modals.DeleteSegmentModal', [
+angular.module('mainApp.segments.modals.DeleteSegmentModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.utilities.NavUtility'
@@ -6,7 +6,7 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
 .service('DeleteSegmentModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, SegmentService) {
     var self = this;
     this.show = function (segment, inModel) {
-        $http.get('app/models/views/DeleteSegmentConfirmView.html', { cache: $templateCache }).success(function (html) {
+        $http.get('app/segments/modals/DeleteSegmentConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.segmentName = segment.name;
