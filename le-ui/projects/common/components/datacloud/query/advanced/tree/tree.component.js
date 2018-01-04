@@ -14,7 +14,7 @@ angular
         },
         templateUrl: '/components/datacloud/query/advanced/tree/tree.component.html',
         controllerAs: 'vm',
-        controller: function ($scope, $timeout, DataCloudStore, QueryStore, QueryTreeService) {
+        controller: function ($scope, $timeout, $filter, DataCloudStore, QueryStore, QueryTreeService) {
             var vm = this;
 
             angular.extend(vm, {
@@ -44,21 +44,13 @@ angular
 
                 DataCloudStore.getEnrichments().then(function(enrichments) {
                     vm.enrichments = enrichments;
-
-                    // console.log(vm.enrichments);
                     
                     if (vm.tree.bucketRestriction) {
-                        var bucket = vm.tree.bucketRestriction;
-                        
-                        vm.item = angular.copy(
-                            vm.enrichments[
-                                vm.enrichmentsMap[
-                                    bucket.attr.split('.')[1]
-                                ]
-                            ]
-                        );
+                        var bucket = vm.tree.bucketRestriction,
+                            bucketEntity = bucket.attr.split('.')[0],
+                            bucketColumnId = bucket.attr.split('.')[1];
 
-                        // console.log(vm.item);
+                        vm.item = $filter('filter')(vm.enrichments, {Entity: bucketEntity, ColumnId: bucketColumnId}, true)[0];
 
                         if (!vm.item || typeof vm.tree.bucketRestriction.bkt.Id != "number") {
                             vm.unused = true;
@@ -83,7 +75,7 @@ angular
 
             vm.changePreset = function() {
                 var label = vm.presetOperation;
-                var buckets = vm.item.cube.Bkts.List;
+                var buckets = vm.item.copyube.Bkts.List;
                 var bucket = buckets.filter(function(item) { return item.Lbl == label; })[0];
                 var restriction = vm.tree.bucketRestriction.bkt;
                 var bkt = angular.copy(bucket);
