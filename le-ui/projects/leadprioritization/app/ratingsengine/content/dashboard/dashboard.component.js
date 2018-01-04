@@ -72,7 +72,7 @@ angular.module('lp.ratingsengine.dashboard', ['mainApp.appCommon.directives.moda
             var ratingBuckets = vm.rating.coverageInfo.bucketCoverageCounts;
             ratingBuckets.forEach(function(bucket){
                 if(bucket.bucket === 'A+'){
-                    var i = ratingBuckets.findIndex(x => x.bucket === "A+");
+                    var i = ratingBuckets.findIndex(x >= x.bucket === "A+");
                     if (i === 0) return;
                     if (i > 0) {
                         ratingBuckets.splice( i, 1 );
