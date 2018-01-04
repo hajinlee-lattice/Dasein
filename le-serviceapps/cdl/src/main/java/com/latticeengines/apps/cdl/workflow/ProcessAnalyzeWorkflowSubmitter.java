@@ -92,16 +92,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
 
         DataFeedExecution execution = datafeed.getActiveExecution();
+        if (datafeedStatus == Status.Initing) {
+            throw new RuntimeException("We can't launch a process and analyze workflow now as there is no data yet.");
+        }
         if (execution != null && DataFeedExecution.Status.Started.equals(execution.getStatus())) {
             if (execution.getWorkflowId() == null) {
                 throw new RuntimeException(
-                        "We can't launch any consolidate workflow now as there is one still running.");
+                        "We can't launch a process and analyze workflow now as there is one still running.");
             }
             Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()));
             JobStatus status = job.getJobStatus();
             if (!status.isTerminated()) {
                 throw new RuntimeException(
-                        "We can't launch any consolidate workflow now as there is one still running.");
+                        "We can't launch a process and analyze workflow now as there is one still running.");
             } else if (JobStatus.FAILED.equals(status)) {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
