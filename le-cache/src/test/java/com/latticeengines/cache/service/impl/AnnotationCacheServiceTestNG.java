@@ -21,6 +21,8 @@ public class AnnotationCacheServiceTestNG extends AbstractTestNGSpringContextTes
 
     @BeforeClass
     public void before() {
+        cacheEntity.clear(0);
+        cacheEntity.clear(1);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.latticeengines.cache.test.annotation;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,12 @@ public class CacheEntity {
     }
 
     @CachePut(cacheNames = "Test")
-    public void putValue(int v) {
+    public int putValue(int v) {
         this.v = v;
+        return v;
+    }
+
+    @CacheEvict(cacheNames = "Test")
+    public void clear(int k) {
     }
 }
