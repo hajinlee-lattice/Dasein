@@ -19,6 +19,7 @@ public enum RuleBucketName {
 
     RuleBucketName(String name, Double defaultLikelihood) {
         this.name = name;
+        this.defaultLikelihood = defaultLikelihood;
     }
 
     private static Map<String, RuleBucketName> ruleBucketNameMap = new HashMap<>();
