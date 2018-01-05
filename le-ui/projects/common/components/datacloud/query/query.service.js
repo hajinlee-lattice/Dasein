@@ -366,7 +366,6 @@ angular.module('common.datacloud.query.service',[
                     'row_offset': 0
                 }
             };
-
         } else {
             var queryWithRestriction = { 
                 'free_form_text_search': query.free_form_text_search || '',

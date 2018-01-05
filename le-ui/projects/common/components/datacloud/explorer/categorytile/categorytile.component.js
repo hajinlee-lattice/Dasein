@@ -65,7 +65,7 @@ angular
                 } else if(vm.lookupMode) {
                     order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
                 } else {
-                    order = [ '-HighlightHighlighted', '-Count' ];
+                    order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Count' ];
                 }
                 // remove highlighting
                 if(!vm.showHighlighting()) {
