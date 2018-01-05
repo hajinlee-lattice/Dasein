@@ -58,7 +58,8 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @VisibleForTesting
     Action registerAction(CustomerSpace customerSpace, DataFeedTask dataFeedTask, CSVImportFileInfo csvImportFileInfo) {
-        log.info(String.format("Registering an action for datafeedTask=%s", dataFeedTask.getUniqueId()));
+        log.info(String.format("Registering an action for datafeedTask=%s, tenant=%s", dataFeedTask.getUniqueId(),
+                customerSpace.toString()));
         Action action = new Action();
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setActionInitiator(csvImportFileInfo.getFileUploadInitiator());
