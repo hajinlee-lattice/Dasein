@@ -164,8 +164,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     // update actions with place holder owner Id to minimize the discrepancy
     // issue of jobs page in UI
     private void updateActions(String customerSpace, List<Long> actionIds) {
-        log.info(String.format("Updating actions=%s with place holder ownerId=%d",
-                Arrays.toString(actionIds.toArray())));
+        log.info(String.format("Updating actions=%s with place holder ownerId=%d", Arrays.toString(actionIds.toArray()),
+                UNKNOWN_OWNER_ID));
         if (CollectionUtils.isNotEmpty(actionIds)) {
             internalResourceProxy.updateOwnerIdIn(customerSpace, UNKNOWN_OWNER_ID, actionIds);
         }
