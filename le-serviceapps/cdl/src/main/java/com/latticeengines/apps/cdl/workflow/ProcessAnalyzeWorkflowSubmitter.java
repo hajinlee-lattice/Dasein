@@ -48,6 +48,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
+    // Special owner id for actions whose actual owner Id is not known yet
+    public static final Long UNKNOWN_OWNER_ID = 0L;
+
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
@@ -121,7 +124,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         execution = dataFeedProxy.startExecution(customerSpace);
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
         Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
-
+        updateActions(customerSpace, actionAndJobIds.getLeft());
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
                 actionAndJobIds, datafeedStatus);
         return workflowJobService.submit(configuration);
@@ -156,6 +159,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         Pair<List<Long>, List<Long>> idPair = new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
         return idPair;
+    }
+
+    // update actions with place holder owner Id to minimize the discrepancy
+    // issue of jobs page in UI
+    private void updateActions(String customerSpace, List<Long> actionIds) {
+        log.info(String.format("Updating actions=%s with place holder ownerId=%d",
+                Arrays.toString(actionIds.toArray())));
+        if (CollectionUtils.isNotEmpty(actionIds)) {
+            internalResourceProxy.updateOwnerIdIn(customerSpace, UNKNOWN_OWNER_ID, actionIds);
+        }
     }
 
     private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,

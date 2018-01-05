@@ -122,7 +122,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertEquals(job.getName(), "processAnalyzeWorkflow");
         Assert.assertEquals(job.getJobType(), "processAnalyzeWorkflow");
         Assert.assertEquals(job.getJobStatus(), JobStatus.PENDING);
-        Assert.assertEquals(job.getId(), WorkflowJobServiceImpl.UNCOMPLETED_PROCESS_ANALYZE_ID);
+        Assert.assertEquals(job.getId(), WorkflowJobServiceImpl.UNSTARTED_PROCESS_ANALYZE_ID);
         Assert.assertNotNull(job.getInputs());
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));
         List<Object> listObj = JsonUtils.deserialize(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS),

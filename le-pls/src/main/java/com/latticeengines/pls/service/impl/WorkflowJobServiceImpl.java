@@ -51,7 +51,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     public static final String CDLNote = "Scheduled at 6:30 PM PST.";
-    public static final Long UNCOMPLETED_PROCESS_ANALYZE_ID = 0L;
+    // Special workflow id for unstarted ProcessAnalyze workflow
+    public static final Long UNSTARTED_PROCESS_ANALYZE_ID = 0L;
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
     private static final String[] NON_DISPLAYED_JOB_TYPE_VALUES = new String[] { //
@@ -123,7 +124,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
         Job job = null;
         // For unfinished ProcessAnalyze job
-        if (Long.parseLong(jobId) == UNCOMPLETED_PROCESS_ANALYZE_ID) {
+        if (Long.parseLong(jobId) == UNSTARTED_PROCESS_ANALYZE_ID) {
             return generateUnstartedProcessAnalyzeJob(true);
         } else {
             job = workflowProxy.getWorkflowExecution(jobId);
@@ -190,7 +191,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (CollectionUtils.isNotEmpty(actions)) {
             job = new Job();
             job.setNote(CDLNote);
-            job.setId(UNCOMPLETED_PROCESS_ANALYZE_ID);
+            job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
             job.setName("processAnalyzeWorkflow");
             job.setJobStatus(JobStatus.PENDING);
             job.setJobType("processAnalyzeWorkflow");
