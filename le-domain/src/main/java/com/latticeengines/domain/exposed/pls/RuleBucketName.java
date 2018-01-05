@@ -7,12 +7,12 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum RuleBucketName {
-    A_PLUS("A+", 100D), //
-    A("A", 95.0D), //
-    B("B", 90.0D), //
-    C("C", 85.0D), //
-    D("D", 75.0D), //
-    F("F", 50.0D);
+    A_PLUS("A+", 95D), //
+    A("A", 70.0D), //
+    B("B", 40.0D), //
+    C("C", 20.0D), //
+    D("D", 10.0D), //
+    F("F", 5.0D);
 
     private String name;
     private Double defaultLikelihood;
