@@ -133,12 +133,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @VisibleForTesting
     Pair<List<Long>, List<Long>> getActionAndJobIds(String customerSpace) {
         List<Action> actions = internalResourceProxy.getActionsByOwnerId(customerSpace, null);
-        log.info(String.format("Actions are %s", Arrays.toString(actions.toArray())));
+        log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         // TODO add delete jobs
         Set<ActionType> importAndDeleteTypes = Collections.singleton(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         // TODO add status filter to filter out running ones
         List<String> importAndDeleteJobIdStrs = actions.stream()
-                .filter(action -> importAndDeleteTypes.contains(action.getType()))
+                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingId() != null)
                 .map(action -> action.getTrackingId().toString()).collect(Collectors.toList());
         log.info(String.format("importAndDeleteJobIdStrs are %s", importAndDeleteJobIdStrs));
         List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobIds(importAndDeleteJobIdStrs);
@@ -173,7 +173,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
             List<Long> completedImportAndDeleteJobIds) {
-        if (selectedTypes.contains(action.getType())
+        if (selectedTypes.contains(action.getType()) && action.getTrackingId() != null
                 && !completedImportAndDeleteJobIds.contains(action.getTrackingId())) {
             return false;
         }

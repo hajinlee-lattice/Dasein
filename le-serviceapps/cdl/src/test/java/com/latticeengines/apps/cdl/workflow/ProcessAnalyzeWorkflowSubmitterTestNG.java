@@ -39,6 +39,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long RUNNING_ACTION_2_PID = 3L;
     private static final Long COMPLETE_ACTION_1_PID = 4L;
     private static final Long COMPLETE_ACTION_2_PID = 5L;
+    private static final Long PROBLEMATIC_ACTION_NO_TRACKING_ID_PID = 6L;
     private static final Long RUNNING_ACTION_1_TRACKING_ID = 101L;
     private static final Long RUNNING_ACTION_2_TRACKING_ID = 102L;
     private static final Long COMPLETE_ACTION_1_TRACKING_ID = 103L;
@@ -99,6 +100,30 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(pair.getLeft().get(0), METADATA_ACTION_PID);
         Assert.assertEquals(pair.getLeft().get(1), COMPLETE_ACTION_1_PID);
         Assert.assertEquals(pair.getLeft().get(2), COMPLETE_ACTION_2_PID);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getRight()));
+        Assert.assertEquals(pair.getRight().size(), 2);
+        Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
+        Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_ID);
+    }
+
+    @Test(groups = "functional")
+    public void testGetProblematicActionWithoutTrackingId() {
+        when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
+                .thenReturn(generateActionWithoutTrackingId());
+        List<String> workflowIdStr = Arrays.asList(RUNNING_ACTION_1_TRACKING_ID, RUNNING_ACTION_2_TRACKING_ID,
+                COMPLETE_ACTION_1_TRACKING_ID, COMPLETE_ACTION_2_TRACKING_ID).stream().map(id -> id.toString())
+                .collect(Collectors.toList());
+        when(workflowProxy.getWorkflowExecutionsByJobIds(workflowIdStr)).thenReturn(generateJobs());
+        Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
+        Assert.assertNotNull(pair);
+        log.info(String.format("actionIds=%s", pair.getLeft()));
+        log.info(String.format("jobIds=%s", pair.getRight()));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getLeft()));
+        Assert.assertEquals(pair.getLeft().size(), 4);
+        Assert.assertEquals(pair.getLeft().get(0), METADATA_ACTION_PID);
+        Assert.assertEquals(pair.getLeft().get(1), COMPLETE_ACTION_1_PID);
+        Assert.assertEquals(pair.getLeft().get(2), COMPLETE_ACTION_2_PID);
+        Assert.assertEquals(pair.getLeft().get(3), PROBLEMATIC_ACTION_NO_TRACKING_ID_PID);
         Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getRight()));
         Assert.assertEquals(pair.getRight().size(), 2);
         Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
@@ -167,6 +192,17 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @SuppressWarnings({ "unchecked" })
     private List<Action> generateEmptyActions() {
         return Collections.EMPTY_LIST;
+    }
+
+    private List<Action> generateActionWithoutTrackingId() {
+        List<Action> actions = new ArrayList<>();
+        actions.addAll(generateFullActions());
+        Action action = new Action();
+        action.setPid(PROBLEMATIC_ACTION_NO_TRACKING_ID_PID);
+        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action.setTrackingId(null);
+        actions.add(action);
+        return actions;
     }
 
 }
