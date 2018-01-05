@@ -48,7 +48,7 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         putObjectInContext(EVENT_TABLE, eventTable);
-        saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH,
+        putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH,
                 eventTable.getExtracts().get(0).getPath());
 
         putStringValueInContext(EXPORT_TABLE_NAME, configuration.getTargetTableName());
