@@ -8,7 +8,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -61,6 +60,9 @@ public class SamlLoginResource {
     @Value("${security.app.public.url:https://localhost:3000}")
     private String loginUrl;
 
+    @Value("${pls.saml.local.redirection.allowed:false}")
+    private boolean isLocalRedirectionAllowed;
+
     @RequestMapping(value = "/login/"
             + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
@@ -77,13 +79,21 @@ public class SamlLoginResource {
 
         try {
             UserDocument uDoc = new UserDocument();
-            @SuppressWarnings("unchecked")
-            MultivaluedMap<String, String> formParams = null;
             log.info("SAML Login Resource: TenantDeploymentId - RelayState - Response ", tenantDeploymentId, relayState,
                     samlResponse);
 
-            LoginValidationResponse samlLoginResp = samlProxy.validateSSOLogin(tenantDeploymentId, samlResponse,
-                    relayState);
+            LoginValidationResponse samlLoginResp = null;
+
+            if (isLocalRedirectionAllowed && enforceLocalUI) {
+                // for UI dev - local redirection is allowed only for QA and
+                // local env. For prod this is not allowed.
+                baseLoginURL = "https://localhost:3000";
+                samlLoginResp = new LoginValidationResponse();
+                samlLoginResp.setUserId("bnguyen@lattice-engines.com");
+                samlLoginResp.setValidated(true);
+            } else {
+                samlLoginResp = samlProxy.validateSSOLogin(tenantDeploymentId, samlResponse, relayState);
+            }
 
             if (!samlLoginResp.isValidated()) {
                 throw new LedpException(LedpCode.LEDP_18170);
@@ -114,9 +124,6 @@ public class SamlLoginResource {
             attributeMap.put("samlAuthenticated", true);
             attributeMap.put("userDocument", JsonUtils.serialize(uDoc));
 
-            if (enforceLocalUI) {
-                baseLoginURL = "https://localhost:3000";
-            }
             redirectView.setUrl(String.format("%s/login/saml/%s", baseLoginURL, tenantDeploymentId));
             redirectView.setAttributesMap(attributeMap);
 
