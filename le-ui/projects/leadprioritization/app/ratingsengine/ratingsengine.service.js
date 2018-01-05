@@ -81,6 +81,7 @@ angular.module('lp.ratingsengine')
                     nextLabel: 'Next, Rules'
                 },{
                     label: 'Rules', 
+                    hideBack: true,
                     state: 'segment.attributes.rules', 
                     nextLabel: 'Back To Dashboard', 
                     nextFn: function(nextState) {
