@@ -130,6 +130,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         workflowJob.setUserId(user);
         workflowJob.setApplicationId(appId);
         workflowJob.setInputContext(workflowConfig.getInputProperties());
+        workflowJob.setStatus(JobStatus.PENDING.name());
         workflowJob.setStartTimeInMillis(System.currentTimeMillis());
         workflowJob.setType(workflowConfig.getWorkflowName());
         workflowJobEntityMgr.create(workflowJob);

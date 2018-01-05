@@ -169,7 +169,9 @@ public class WorkflowServiceImpl implements WorkflowService {
     public WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob) {
         long jobExecutionId = startWorkflowJob(workflowConfiguration);
         workflowJob.setWorkflowId(jobExecutionId);
+        workflowJob.setStatus(JobStatus.RUNNING.name());
         workflowJobEntityMgr.registerWorkflowId(workflowJob);
+        workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
         return new WorkflowExecutionId(jobExecutionId);
     }
 

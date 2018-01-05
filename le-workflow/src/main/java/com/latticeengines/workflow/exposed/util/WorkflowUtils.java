@@ -32,7 +32,9 @@ public class WorkflowUtils {
             try {
                 com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(
                         workflowJob.getApplicationId());
-                if (!FinalApplicationStatus.SUCCEEDED.equals(status.getStatus())) {
+                if (FinalApplicationStatus.SUCCEEDED.equals(status.getStatus()) ||
+                        FinalApplicationStatus.FAILED.equals(status.getStatus()) ||
+                        FinalApplicationStatus.KILLED.equals(status.getStatus())) {
                     jobState = status.getState();
                     workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
                 }
