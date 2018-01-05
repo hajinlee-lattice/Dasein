@@ -1,3 +1,13 @@
+<le-modal-window config="vm.config" callback-function="vm.modalCallback(args)">
+    <div>
+        <br>
+        <p>The Job has actions that are not completed yet.</p>
+        <p>If you decide to proceed only the completed action(s) are going to be run</p>
+        <p>The incompleted one(s) are going to be included in the next Job</p>
+        <br>
+    </div>
+</le-modal-window>
+
 <div class="jobs-page container">
 
     <div class="row">
@@ -84,7 +94,7 @@
                     </span>
                     <span class="columns one">
                         <span class="cell">
-                            {{job.actionsCount}}
+                            {{job.actions.length}}
                         </span>
                     </span>
                     <span class="columns two">

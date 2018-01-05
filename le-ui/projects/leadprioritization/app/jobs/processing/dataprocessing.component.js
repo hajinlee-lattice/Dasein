@@ -1,5 +1,5 @@
 angular.module('lp.jobs')
-    .controller('DataProcessingComponent', function ($scope, $http, JobsStore, $filter) {
+    .controller('DataProcessingComponent', function ($scope, $http, JobsStore, $filter, ModalStore) {
         var vm = this;
         vm.loadingJobs = JobsStore.data.loadingJobs;
         vm.pagesize = 10;
@@ -50,29 +50,130 @@ angular.module('lp.jobs')
             successMsg: null,
             errorMsg: null,
             queuedMsg: null,
-            runningJob: {}
+            // runningJob: {},
+            toRun: null
         });
+        vm.initModalWindow = function () {
+            vm.config = {
+                'name': "import_jobs",
+                'type': 'sm',
+                'title': 'Run Job',
+                'titlelength': 100,
+                'dischargetext': 'CANCEL',
+                'dischargeaction': 'cancel',
+                'confirmtext': 'Proceed',
+                'confirmaction': 'proceed',
+                'icon': 'ico ico-cog',
+                'confirmcolor': 'blue-button',
+                'showclose': false
+            };
 
+            vm.modalCallback = function (args) {
+                if (vm.config.dischargeaction === args) {
+                    vm.toggleModal();
+                    vm.toRun = {};
+                } else if (vm.config.confirmaction === args) {
+                    run();
+                    vm.toggleModal();
+                }
+            }
+            vm.toggleModal = function () {
+                var modal = ModalStore.get(vm.config.name);
+                if (modal) {
+                    modal.toggle();
+                }
+            }
+
+            $scope.$on("$destroy", function () {
+                ModalStore.remove(vm.config.name);
+            });
+        }
 
         vm.init = function () {
-            $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true);
+            // $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true);
             vm.jobs = $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true); //JobsStore.data.jobs;
-            // vm.JobsStore.data.jobs | jobfilter: 'processAnalyzeWorkflow')
+            vm.jobs.forEach(function (element) {
+                switch (element.jobType) {
+                    case 'processAnalyzeWorkflow': {
+                        element.displayName = "Data Processing & Analysis"; break;
+                    }
+                }
+            });
             vm.header.filter.unfiltered = vm.jobs;
             vm.header.filter.filtered = vm.jobs;
-
+            vm.initModalWindow();
         }
 
         this.init();
 
+        function isOneActionCompleted(job) {
+            var actions = job.actions;
+            var oneCompleted = false;
+            if (actions) {
+                actions.forEach(function (element) {
+                    if (element.jobStatus === 'Completed') {
+                        oneCompleted = true;
+                        return oneCompleted;
+                    }
+                });
+            }
+            return oneCompleted;
+        }
+
+        function isOneFailed() {
+            var isFailed = false;
+            vm.jobs.forEach(function (element) {
+                if (element.jobStatus === 'Failed') {
+                    isFailed = true;
+                    return isFailed;
+                }
+            });
+            return isFailed;
+        }
+
+        function isOneRunning() {
+            var isOneRunning = false;
+            vm.jobs.forEach(function (element) {
+                if (element.jobStatus === 'Running') {
+                    isOneRunning = true;
+                    return isOneRunning;
+                }
+            });
+            return isOneRunning;
+        }
 
         vm.canLastJobRun = function () {
-            var canRun = true;
-            if (this.jobs.length >= 2 && this.jobs[0].status === 'Failed') {
-                canRun = false;
-            }
+            var canRun = false;
+            var oneFailed = isOneFailed();
+            var oneRunnig = isOneRunning();
+            var oneActionCompleted = false;
+            vm.jobs.forEach(function (element) {
+                if (isOneActionCompleted(element)) {
+                    oneActionCompleted = true;
+                    if (!oneFailed && !oneRunnig && oneActionCompleted) {
+                        canRun = true;
+                        return canRun;
+                    }
+                }
+            });
 
+            if (!oneFailed && !oneRunnig && oneActionCompleted) {
+                canRun = true;
+            }
             return canRun;
+        }
+        vm.showWarningRun = function (job) {
+            var actions = job.actions;
+            var allCompleted = true;
+            if (actions) {
+                for (var i = 0; i < actions.length; i++) {
+                    if (actions[i].jobStatus === 'Running') {
+                        allCompleted = false;
+                        break;
+                    }
+                }
+            }
+            return !allCompleted;
         }
 
         vm.showRunButton = function (job) {
@@ -124,9 +225,18 @@ angular.module('lp.jobs')
         }
 
         vm.runJob = function (job) {
-            job.status = 'Running';
-            JobsStore.runJob(job).then(function (updatedJob) {
-                vm.runningJob = updatedJob;
+            vm.toRun = job;
+            var show = vm.showWarningRun(job);
+            if (show) {
+                vm.toggleModal();
+            } else {
+                run();
+            }
+        }
+
+        function run(){
+            vm.toRun.status = 'Running';
+            JobsStore.runJob(vm.toRun).then(function (updatedJob) {
             });
         }
 

@@ -113,7 +113,7 @@ angular
         dataProcessingRunningJob = job;
         var deferred = $q.defer();
 
-        JobsService.runJob(job.id).then(function(resp){
+        JobsService.runJob(job).then(function(resp){
             
             if(resp.Success && resp.Success === true){
                 job.status = 'Running';

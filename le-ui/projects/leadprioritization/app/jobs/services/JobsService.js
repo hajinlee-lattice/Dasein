@@ -99,11 +99,12 @@ angular
                     var stepRunning = getStepRunning(job);
                     var stepsCompleted = getStepsCompleted(job);
                     var stepFailed = getStepFailed(job);
-                    var actionsCount = getActionsCount(job);
+                    var actions = getActions(job);
+                    
                     return {
                         id: job.id,
                         applicationId: job.applicationId,
-                        actionsCount: actionsCount,
+                        actions: actions,
                         timestamp: job.startTimestamp,
                         errorCode: job.errorCode,
                         errorMsg: job.errorMsg,
@@ -123,7 +124,7 @@ angular
                         stepsCompleted: stepsCompleted,
                         stepFailed: stepFailed,
                         completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
-                        reports: job.reports
+                        reports: job.reports,
                     };
                 });
 
@@ -326,15 +327,17 @@ angular
 
     /**
      * 
-     * @param {*} jobId 
+     * @param {*} job 
      */
-    this.runJob = function(jobId){
+    this.runJob = function(job){
         var deferred = $q.defer();
         $http({
             method: 'POST',
             url: '/pls/cdl/processanalyze'
         }).then(function(response) {
             deferred.resolve(response.data);
+        }, function(err){
+            job.status = 'Failed';
         });
         return deferred.promise;
     }
@@ -391,12 +394,11 @@ angular
         return stepsCompleted;
     }
 
-    function getActionsCount(job) {
-        if(!job.inputs || !job.inputs.ACTION_IDS){
-            return 0;
+    function getActions(job) {
+        if(job.subJobs){
+            return job.subJobs;
         }else {
-            var actions = JSON.parse(job.inputs.ACTION_IDS);
-            return actions.length;
+            return [];
         }
     }
 
