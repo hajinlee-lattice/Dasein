@@ -2,6 +2,7 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.List;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,7 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
                     bucketMetadatas.get(3).getRightBoundScore(), bucketMetadatas.get(3).getNumLeads(),
                     bucketMetadatas.get(3).getLift()));
         } catch (Exception e) {
+            log.error(ExceptionUtils.getFullStackTrace(e));
             log.warn(String.format("Creating default ABCD buckets for model: %s failed. Proceeding with the workflow",
                     getStringValueFromContext(SCORING_MODEL_ID)));
         }
