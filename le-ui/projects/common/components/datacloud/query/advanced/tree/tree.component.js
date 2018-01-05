@@ -75,7 +75,7 @@ angular
 
             vm.changePreset = function() {
                 var label = vm.presetOperation;
-                var buckets = vm.item.copyube.Bkts.List;
+                var buckets = vm.item.cube.Bkts.List;
                 var bucket = buckets.filter(function(item) { return item.Lbl == label; })[0];
                 var restriction = vm.tree.bucketRestriction.bkt;
                 var bkt = angular.copy(bucket);

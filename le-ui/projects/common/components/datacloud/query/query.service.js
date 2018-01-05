@@ -60,14 +60,13 @@ angular.module('common.datacloud.query.service',[
     }
 
     this.resetRestrictions = function(segment) {
-        console.log(segment);
         this.entities.forEach(function(entity) {
             var restriction = QueryStore[entity + 'Restriction'].restriction.logicalRestriction;
 
             restriction.operator = "AND";
 
             if (segment && segment[entity + '_restriction']) {
-                restriction.restrictions = segment[entity + '_restriction'];
+                restriction.restrictions = segment[entity + '_restriction'].restriction.logicalRestriction.restrictions;
             } else {
                 restriction.restrictions.length = 0;
             }
@@ -206,7 +205,7 @@ angular.module('common.datacloud.query.service',[
     this.setupStore = function(segment) {
         this.setSegment(segment);
         this.resetRestrictions(segment);
-
+        
         var aRS = JSON.stringify(segment ? segment.account_restriction : this.getAccountRestriction());
         var cRS = JSON.stringify(segment ? segment.contact_restriction : this.getContactRestriction());
 
