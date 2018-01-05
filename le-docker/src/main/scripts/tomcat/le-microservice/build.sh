@@ -99,6 +99,7 @@ if [ "${MICROSERVICES}" = "" ]; then
     MICROSERVICES="${MICROSERVICES},dellebi"
     MICROSERVICES="${MICROSERVICES},objectapi"
     MICROSERVICES="${MICROSERVICES},dante"
+    MICROSERVICES="${MICROSERVICES},saml"
 
 fi
 
@@ -107,7 +108,7 @@ mkdir tmp || true
 
 for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
     WAR=${service} &&
-    if [ "${WAR}" = "api" ] || [ "${WAR}" = "admin" ] || [ "${WAR}" = "pls" ] || [ "${WAR}" = "matchapi" ] || [ "${WAR}" = "scoringapi" ] || [ "${WAR}" = "ulysses" ]; then
+    if [ "${WAR}" = "api" ] || [ "${WAR}" = "admin" ] || [ "${WAR}" = "pls" ] || [ "${WAR}" = "matchapi" ] || [ "${WAR}" = "scoringapi" ] || [ "${WAR}" = "ulysses" || [ "${WAR}" = "saml" ] ]; then
         WAR=ROOT
     fi &&
     IMAGE=latticeengines/${service} &&
