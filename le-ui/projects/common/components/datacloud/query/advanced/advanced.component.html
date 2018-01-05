@@ -100,9 +100,9 @@
             </span>
         </div> -->
 
-        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
-            <span>
-                Build a segment with <strong>accounts</strong> that have:
+        <div class="row query-helper-text-one" >
+            <span ng-if="vm.mode == 'rules'" >
+                Build {{vm.mode == "rules" ? "rules" : "a segment"}} with <strong>accounts</strong> that have:
             </span>
         </div>
 
@@ -117,13 +117,13 @@
             </li>
         </ul>
 
-        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
+        <div class="row query-helper-text-one">
             <span>
                 <strong>AND</strong>
             </span>
         </div>
 
-        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
+        <div class="row query-helper-text-one">
             <span>
                 <strong>contacts</strong> that have:
             </span>
