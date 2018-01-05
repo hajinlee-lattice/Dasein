@@ -225,10 +225,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return bldr;
     }
 
+    @SuppressWarnings("unchecked")
     protected void saveOutputValue(String key, String val) {
         putOutputValue(key, val);
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
-        workflowJob.setOutputContextValue(key, val);
+        workflowJob.setOutputContext(getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class));
         workflowJobEntityMgr.updateOutput(workflowJob);
     }
 
