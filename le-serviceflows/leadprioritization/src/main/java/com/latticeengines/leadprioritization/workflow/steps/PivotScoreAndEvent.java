@@ -2,17 +2,17 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.List;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -73,7 +73,7 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
                     bucketMetadatas.get(3).getRightBoundScore(), bucketMetadatas.get(3).getNumLeads(),
                     bucketMetadatas.get(3).getLift()));
         } catch (Exception e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getStackTrace(e));
             log.warn(String.format("Creating default ABCD buckets for model: %s failed. Proceeding with the workflow",
                     getStringValueFromContext(SCORING_MODEL_ID)));
         }
