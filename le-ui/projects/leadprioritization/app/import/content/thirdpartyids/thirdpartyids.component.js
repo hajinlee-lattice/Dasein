@@ -52,9 +52,10 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         vm.fields.push(vm.field);
     };
 
-    vm.removeIdentifier = function(index){
+    vm.removeIdentifier = function(index, form){
         vm.fieldMapping.splice(index, 1);
         vm.fields.splice(index, 1);
+        vm.checkValid(form);
     };
 
     var validateMapping = function(mapping) {
@@ -77,6 +78,8 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     vm.checkValid = function(form) {
         if(!validateMapping(vm.fieldMapping)) {
             ImportWizardStore.setValidation('thirdpartyids', false);
+        } else if (!vm.fieldMapping.length) {
+            ImportWizardStore.setValidation('thirdpartyids', true);
         } else {
             ImportWizardStore.setValidation('thirdpartyids', form.$valid);
         }

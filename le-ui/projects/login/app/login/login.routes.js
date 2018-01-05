@@ -100,7 +100,7 @@ angular.module('login', [
                 }
             }
         })
-        .state('login.saml_logout', { // FIXME route not working, might be caused by some redirect handling somewhere
+        .state('login.saml_logout', { 
             url: 'saml/:tenantId/logout',
             params: {
                 disableLogoArea: true
