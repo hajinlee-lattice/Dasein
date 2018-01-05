@@ -36,7 +36,7 @@
             <p>These optional fields are used for analysis and are useful if you can provide them.</p>
             <ul>
                 <li ng-repeat="field in vm.analysisFieldsList">
-                    <label>{{field.name}}</label>
+                    <label>{{field.displayName || field.name}}</label>
                     <select class="form-control"
                         ng-model="fieldMapping[field.name].userField"
                         ng-change="vm.changeLatticeField(fieldMapping, form)"
