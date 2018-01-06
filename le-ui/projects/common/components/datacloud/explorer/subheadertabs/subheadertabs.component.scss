@@ -11,21 +11,24 @@ div.explorer-subheader-tabs {
             font-size: 18px;
             color: #222;
             padding: 0 0.2em;
-            cursor: pointer;
             -webkit-transition: none;
             -moz-transition: none;
             -ms-transition: none;
             transition: none;
             
-            &:hover {
-                color: #457EBA;
+            &.clickable, 
+            &[ng-click] {
+                cursor: pointer;
+                &:hover {
+                    color: #457EBA;
+                }
             }
 
             &:active,
             &.active {
                 color: #ef6a30;
                 cursor: default;
-            } 
+            }
         }
     }
 
