@@ -9,18 +9,18 @@
 
     <properties>
         <component-name>saml</component-name>
-        <le.domain.version>4.3.0-SNAPSHOT</le.domain.version>
-        <le.db.version>4.3.0-SNAPSHOT</le.db.version>
-        <le.auth.version>4.3.0-SNAPSHOT</le.auth.version>
-        <le.security.version>4.3.0-SNAPSHOT</le.security.version>
-        <le.testfwk.version>4.3.0-SNAPSHOT</le.testfwk.version>
-        <le.remote.version>4.3.0-SNAPSHOT</le.remote.version>
+        <le.domain.version>4.3.1-SNAPSHOT</le.domain.version>
+        <le.db.version>4.3.1-SNAPSHOT</le.db.version>
+        <le.auth.version>4.3.1-SNAPSHOT</le.auth.version>
+        <le.security.version>4.3.1-SNAPSHOT</le.security.version>
+        <le.testfwk.version>4.3.1-SNAPSHOT</le.testfwk.version>
+        <le.remote.version>4.3.1-SNAPSHOT</le.remote.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.1-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
