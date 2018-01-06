@@ -17,6 +17,14 @@ public class SPSamlProxy extends BaseRestApiProxy {
     public LoginValidationResponse validateSSOLogin(String tenantId, Object samlSSOResponse, String relayState) {
         String url = constructUrl("/SSO/alias/{tenant}?SAMLResponse={samlSSOResponse}&RelayState={relayState}",
                 tenantId, samlSSOResponse, relayState);
+
+        if (url.contains("+")) {
+            // adding this workaround as in qa env + sigh is not getting
+            // replaced due to changes in new spring library. Without + sign
+            // getting replaced, SAMLResponse generate invalid XML and saml
+            // library fails exception
+            url = url.replaceAll("+", "%2B");
+        }
         return postForUrlEncoded("validateSSOLogin", url, LoginValidationResponse.class);
     }
 

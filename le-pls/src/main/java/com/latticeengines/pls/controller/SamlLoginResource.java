@@ -79,8 +79,9 @@ public class SamlLoginResource {
 
         try {
             UserDocument uDoc = new UserDocument();
-            log.info("SAML Login Resource: TenantDeploymentId - RelayState - Response ", tenantDeploymentId, relayState,
-                    samlResponse);
+            log.info(
+                    String.format("SAML Login Resource: TenantDeploymentId = %s , RelayState = %s , SAMLResponse = %s ",
+                            tenantDeploymentId, relayState, samlResponse));
 
             LoginValidationResponse samlLoginResp = null;
 
