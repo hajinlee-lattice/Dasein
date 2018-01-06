@@ -230,7 +230,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         putOutputValue(key, val);
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
         workflowJob.setOutputContext(getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class));
-        workflowJobEntityMgr.updateOutput(workflowJob);
+        workflowJobEntityMgr.updateWorkflowJob(workflowJob);
     }
 
     protected void saveReport(Map<String, String> map) {
