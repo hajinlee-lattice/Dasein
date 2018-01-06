@@ -179,24 +179,23 @@ angular
                 MatchingFields: function() {
                     return [
                         { name: 'Website' },
-                        { name: 'DUNS' },
                         { name: 'CompanyName', displayName: 'Company Name' },
-                        { name: 'PhoneNumber', displayName: 'Phone Number'},
                         { name: 'City' },
-                        { name: 'Country' },
                         { name: 'State' },
-                        { name: 'PostalCode', displayName: 'Postal Code'}
+                        { name: 'Country' },
+                        { name: 'PostalCode', displayName: 'Postal Code'},
+                        { name: 'DUNS' },
+                        { name: 'PhoneNumber', displayName: 'Phone Number'}
                     ];
                 },
                 AnalysisFields: function() {
                     return [
-                        { name: 'Account_Type', displayName: 'Account Type' },
                         { name: 'Industry' },
-                        { name: 'Est_Yearly_Revenue', displayName: 'Estimated Yearly Revenue' },
-                        { name: 'Est_Yearly_Revenue_Currency_External_ID', displayName: 'Estimated Yearly Revenue Currency External ID' },
-                        { name: 'Lattitude' },
-                        { name: 'Longitude' },
-                        { name: 'Account_Business_Segment', displayName: 'Account Business Segment' }
+                        { name: 'AnnualRevenue', displayName: 'Annual Revenue' },
+                        { name: 'NumberOfEmployees', displayName: 'Number Of Employees' },
+                        { name: 'Type' },
+                        { name: 'AnnualRevenueCurrency', displayName: 'Annual Revenue Currency' },
+                        { name: 'SpendAnalyticsSegment', displayName: 'Spend Analytics Segment' }
                     ];
                 }
             },
@@ -307,27 +306,24 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Website' },
-                        { name: 'CompanyName' },
-                        { name: 'DUNS' },
-                        { name: 'IP_Address', displayName: 'IP Address' },
-                        { name: 'City' },
-                        { name: 'Country' },
-                        { name: 'State_Provence', displayName: 'State or Provence' },
+                        { name: 'ContactName', displayName: 'Contact Name' },
+                        { name: 'Email', displayName: '' },
+                        { name: 'CompanyName', displayName: 'Company Name' },
+                        { name: 'City', displayName: '' },
+                        { name: 'State', displayName: '' },
+                        { name: 'Country', displayName: '' },
                         { name: 'PostalCode', displayName: 'Postal Code' },
-                        { name: 'Last_Name', displayName: 'Last Name' },
-                        { name: 'First_Name', displayName: 'First Name' },
-                        { name: 'Email' }
-                    ];
+                        { name: 'DUNS', displayName: '' },
+                        { name: 'Website', displayName: '' }
+                   ];
                 },
                AnalysisFields: function() {
                     return [
-                        { name: 'Lead_Status', displayName: 'Lead Status' },
-                        { name: 'Lead_Source', displayName: 'Lead Source' },
-                        { name: 'Lead_Type', displayName: 'Lead Type' },
-                        { name: 'Created_Date', displayName: 'Created Date' },
-                        { name: 'Do_Not_Call', displayName: 'Do Not Call' },
-                        { name: 'Do_Not_Mail', displayName: 'Do Not Mail' }
+                        { name: 'Title', displayName: '' },
+                        { name: 'LeadSource', displayName: 'Lead Source' },
+                        { name: 'DoNotMail', displayName: 'Do Not Mail' },
+                        { name: 'DoNotCall', displayName: 'Do Not Call' },
+                        { name: 'LeadStatus', displayName: 'Lead Status' }
                     ];
                 }
             },
@@ -434,10 +430,11 @@ angular
                 },
                 MatchingFields: function() {
                     return [
+                        { name: 'Quantity', displayName: '', required: true },
+                        { name: 'Amount', displayName: '', required: true },
                         { name: 'TransactionTime', displayName: 'Transaction Time', required: true },
-                        { name: 'Amount', required: true },
-                        { name: 'Quantity', required: true },
-                        { name: 'Cost' }
+                        { name: 'TransactionType', displayName: 'Transaction Type' },
+                        { name: 'Cost', displayName: '' }
                     ];
                 },
                 AnalysisFields: function() {
@@ -537,8 +534,9 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'ProductName' },
-                        { name: 'Description'}
+                        { name: 'ProductName', displayName: 'Product Name' },
+                        { name: 'ProductFamily', displayName: 'Product Family' },
+                        { name: 'ProductBundle', displayName: 'Product Bundle' }
                     ];
                 },
                 AnalysisFields: function() {

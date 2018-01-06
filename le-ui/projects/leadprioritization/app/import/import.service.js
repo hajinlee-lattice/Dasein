@@ -452,7 +452,7 @@ angular.module('lp.import')
                     'templateFileName':FileName ,
     	            'dataFileName': FileName,
     	            'source': 'File',
-    	            'entity': 'Account',
+    	            'entity': entity,
                     'feedType': entity + 'Schema' 
                 };
 
