@@ -173,7 +173,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
             List<Long> completedImportAndDeleteJobIds) {
-        if (selectedTypes.contains(action.getType()) && action.getTrackingId() != null
+        if (selectedTypes.contains(action.getType())
                 && !completedImportAndDeleteJobIds.contains(action.getTrackingId())) {
             return false;
         }

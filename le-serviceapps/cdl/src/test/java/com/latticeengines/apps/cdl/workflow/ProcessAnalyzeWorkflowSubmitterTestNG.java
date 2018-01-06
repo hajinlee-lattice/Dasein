@@ -119,11 +119,10 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         log.info(String.format("actionIds=%s", pair.getLeft()));
         log.info(String.format("jobIds=%s", pair.getRight()));
         Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getLeft()));
-        Assert.assertEquals(pair.getLeft().size(), 4);
+        Assert.assertEquals(pair.getLeft().size(), 3);
         Assert.assertEquals(pair.getLeft().get(0), METADATA_ACTION_PID);
         Assert.assertEquals(pair.getLeft().get(1), COMPLETE_ACTION_1_PID);
         Assert.assertEquals(pair.getLeft().get(2), COMPLETE_ACTION_2_PID);
-        Assert.assertEquals(pair.getLeft().get(3), PROBLEMATIC_ACTION_NO_TRACKING_ID_PID);
         Assert.assertTrue(CollectionUtils.isNotEmpty(pair.getRight()));
         Assert.assertEquals(pair.getRight().size(), 2);
         Assert.assertEquals(pair.getRight().get(0), COMPLETE_ACTION_1_TRACKING_ID);
