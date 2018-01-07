@@ -61,6 +61,7 @@ angular
                 jobCreationSuccess: null
             },
             resolve: {
+
                 // This a temporary fix so the Jobs page does not 
                 // enable the sidebar when no data is available
                 AttributesCount: function($q, $state, DataCloudStore, ApiHost) {
@@ -73,6 +74,10 @@ angular
                         deferred.resolve(result.data);
                     });
                     return deferred.promise;
+                },
+                InitJobs: function(JobsStore){
+                    JobsStore.getJobs(false).then(function(result) {
+                    });
                 }
             },
             views: {

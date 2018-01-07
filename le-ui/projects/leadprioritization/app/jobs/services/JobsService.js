@@ -100,11 +100,13 @@ angular
                     var stepsCompleted = getStepsCompleted(job);
                     var stepFailed = getStepFailed(job);
                     var actions = getActions(job);
+                    var actionsCount = getActionsCount(job)
                     
                     return {
                         id: job.id,
                         applicationId: job.applicationId,
                         actions: actions,
+                        actionsCount: actionsCount,
                         timestamp: job.startTimestamp,
                         errorCode: job.errorCode,
                         errorMsg: job.errorMsg,
@@ -399,6 +401,15 @@ angular
             return job.subJobs;
         }else {
             return [];
+        }
+    }
+
+    function getActionsCount(job) {
+        if(!job.inputs || !job.inputs.ACTION_IDS){
+            return 0;
+        }else {
+            var actions = JSON.parse(job.inputs.ACTION_IDS);
+            return actions.length;
         }
     }
 

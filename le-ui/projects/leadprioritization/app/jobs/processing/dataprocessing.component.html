@@ -94,7 +94,7 @@
                     </span>
                     <span class="columns one">
                         <span class="cell">
-                            {{job.actions.length}}
+                            {{job.actionsCount}}
                         </span>
                     </span>
                     <span class="columns two">
@@ -118,9 +118,9 @@
                                 Run Now
                             </button>
 
-                            <a href="javascript:void(0)" ng-if="!vm.showRunButton(job) && !vm.isJobRunning(job) && !vm.isJobFailed(job)">
+                            <!-- <a href="javascript:void(0)" ng-if="!vm.showRunButton(job) && !vm.isJobRunning(job) && !vm.isJobFailed(job)">
                                 Report
-                            </a>
+                            </a> -->
 
                             <span ng-if="vm.isJobFailed(job)">Please Contact Lattice Support</span>
                         </span>
@@ -130,7 +130,7 @@
 
                 </div>
             </div>
-            <div class="section-actions" ng-if="(header.filter.filtered | filter: query).length == 0 && ! vm.loadingJobs">
+            <div class="section-actions" ng-if="(vm.header.filter.filtered | filter: query).length == 0 && ! vm.loadingJobs">
                 There are no jobs to show at the moment
             </div>
             <div class="section-actions" ng-if="vm.loadingJobs && header.filter.filtered.length == 0">
