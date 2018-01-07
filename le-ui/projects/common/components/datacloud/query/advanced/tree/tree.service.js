@@ -165,6 +165,15 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 return 'Uknown';
             }
         }
+
+        this.getAttributeRules = function (bucketRestriction, bkt, bucket, isSameAttribute) {
+            
+            var entity = getEntity(bucketRestriction);
+            // console.log('ENTITY', entity);
+            var service = getService(entity);
+            return service.getAttributeRules(bkt, bucket, isSameAttribute);
+        }
+        
         //***************** Editing ************************************/
 
 
@@ -265,7 +274,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 console.warn(' getCubeBktList() Service not implemented');
             }
         }
-
+        
     })
     .service('QueryTreeAccountEntityService', function () {
 
@@ -357,6 +366,26 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 };
                 default: return 'Unknown';
             }
+        }
+
+        this.getAttributeRules = function (bkt, bucket, isSameAttribute) {
+            // console.log('Account', bucket, bkt);
+            var isSameBucket = true;
+            if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
+                if(bucket.Vals.length == bkt.Vals.length){
+                    var valsEquals = true;
+                    for(var i = 0; i<bucket.Vals.length; i++){
+                        if(bkt.Vals[i] !== bucket.Vals[i]){
+                            valsEquals = false;
+                            break;
+                        }
+                    }
+                    isSameBucket = valsEquals && bkt.Cmp == bucket.Cmp;
+                }
+            }
+            
+            var r = isSameAttribute && isSameBucket;
+            return r;
         }
 
         //******************** Editing mode *********************************/
@@ -529,9 +558,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
 
         function getBooleanValue(bucketRestriction) {
             if (bucketRestriction.bkt.Txn.Negate === true) {
-                return 'True';
-            } if (bucketRestriction.bkt.Txn.Negate === false) {
                 return 'False';
+            } if (bucketRestriction.bkt.Txn.Negate === false) {
+                return 'True';
             }
             return 'Empty';
         }
@@ -573,16 +602,42 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             }
         }
 
+        this.getAttributeRules = function (bkt, bucket, isSameAttribute) {
+            // console.log('PurchaseHistory');
+            var isSameBucket = true;
+            if (bucket && bucket.Txn) {
+                var qty1 = bucket.Txn.Qty;
+                var amt1 = bucket.Txn.Amt;
+                var qty2 = bkt.Txn.Qty;
+                var amt2 = bkt.Txn.Amt;
+
+                if (!qty1 && !amt1 && !qty2 && !qty2) {
+                    var txn1 = bucket.Txn;
+                    var txn2 = bkt.Txn;
+                    var neg1 = txn1.Negate;
+                    var neg2 = txn1.Negate;
+                    var lbl1 = bucket.Lbl;
+                    var lbl2 = bkt.Lbl;
+                    isSameBucket = neg1 == neg2 && lbl1 == lbl2;
+                }
+            } 
+            var r = isSameAttribute && isSameBucket;
+            return r;
+        }
+
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
             var txn = bucketRestriction.bkt.Txn;
             if (txn != undefined) {
                 if ('Yes' === booleanValue) {
-                    txn.Negate = true;
-                } else if ('No' === booleanValue) {
                     txn.Negate = false;
+                    bucketRestriction.bkt.Lbl = 'Yes';
+                } else if ('No' === booleanValue) {
+                    txn.Negate = true;
+                    bucketRestriction.bkt.Lbl = 'No';
                 } else {
                     txn.Negate = null;
+                    bucketRestriction.bkt.Lbl = 'Undefined';
                 }
 
             }
@@ -602,9 +657,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             var txn = bucketRestriction.bkt.Txn;
             if (txn.Negate != undefined) {
                 if (txn.Negate === true) {
-                    return 'Yes';
-                } if (txn.Negate === false) {
                     return 'No';
+                } if (txn.Negate === false) {
+                    return 'Yes';
                 }
                 return '';
 
@@ -613,6 +668,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 return '?';
             }
         }
+
         this.getEnumCmpModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Cmp;
         }
@@ -624,7 +680,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         this.getBktValue = function (bucketRestriction, position) {
             var txn = bucketRestriction.bkt.Txn;
             if (txn.Negate !== undefined) {
-                return (txn.Negate === true) ? 'Yes' : 'No';
+                return (txn.Negate === true) ? 'No' : 'Yes';
             }
             if (txn.Qty) {
                 return txn.Qry.Vals[position];

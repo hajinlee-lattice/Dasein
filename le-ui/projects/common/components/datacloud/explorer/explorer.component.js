@@ -14,7 +14,7 @@ angular.module('common.datacloud.explorer', [
     Enrichments, ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
-    RatingsEngineModels, RatingsEngineStore
+    RatingsEngineModels, RatingsEngineStore, QueryTreeService
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -1650,22 +1650,37 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
+    // vm.getAttributeRules = function(attribute, bucket) {
+    //     var attributes = QueryStore.getDataCloudAttributes(true);
+
+    //     attributes = attributes.filter(function(item) {
+    //         var restriction = item.bucketRestriction,
+    //             isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
+    //             isSameBucket = true,
+    //             bkt = restriction.bkt;
+
+    //         if (bucket && bkt.Vals) {
+    //             isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
+    //         }
+
+    //         return isSameAttribute && isSameBucket;
+    //     });
+
+    //     return attributes;
+    // }
+
     vm.getAttributeRules = function(attribute, bucket) {
         var attributes = QueryStore.getDataCloudAttributes(true);
-
+        
         attributes = attributes.filter(function(item) {
+            
             var restriction = item.bucketRestriction,
                 isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
                 isSameBucket = true,
                 bkt = restriction.bkt;
-
-            if (bucket && bkt.Vals) {
-                isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
-            }
-
-            return isSameAttribute && isSameBucket;
+            var ret = QueryTreeService.getAttributeRules(restriction, bkt, bucket, isSameAttribute);
+            return ret;
         });
-
         return attributes;
     }
 
