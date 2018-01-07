@@ -23,7 +23,7 @@ public class SPSamlProxy extends BaseRestApiProxy {
             // replaced due to changes in new spring library. Without + sign
             // getting replaced, SAMLResponse generate invalid XML and saml
             // library fails exception
-            url = url.replaceAll("+", "%2B");
+            url = url.replace("+", "%2B");
         }
         return postForUrlEncoded("validateSSOLogin", url, LoginValidationResponse.class);
     }
