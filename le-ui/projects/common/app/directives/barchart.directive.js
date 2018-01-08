@@ -12,6 +12,8 @@ angular.module('mainApp.appCommon.directives.barchart', [])
 
             scope.isRatingsChart = scope.ratings || false;
 
+            // console.log(scope.data);
+
             var data = scope.data,
                 index = null,
                 max = Math.max.apply(Math,data.map(function(o){return o.count;}));

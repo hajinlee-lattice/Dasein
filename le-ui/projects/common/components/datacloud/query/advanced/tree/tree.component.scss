@@ -237,7 +237,7 @@ div.advanced-query-builder {
 
                     .item-bucket-data {
                         display: inline-block;
-                        max-width: 45%;
+                        max-width: 35%;
                         overflow: hidden;
                         text-overflow: ellipsis;
                         white-space: nowrap;
@@ -245,7 +245,7 @@ div.advanced-query-builder {
                     
                     .query-section-item-name {
                         display: inline-block;
-                        max-width: 50%;
+                        max-width: 35%;
                         margin-right: .25em;
                         overflow: hidden;
                         text-overflow: ellipsis;
@@ -312,11 +312,15 @@ div.advanced-query-builder {
             }
 
             .query-section-item-records {
-                border-right: none;
+                border-left: #ddd solid 1px;
+                position: absolute;
+                height: 100%;
+                right: 0;
                 width: 9.5em;
                 padding-top: .3em;
                 padding-left: 1em;
                 line-height: 1.4em;
+                background: #fff;
                 
                 span {
                     float: left;

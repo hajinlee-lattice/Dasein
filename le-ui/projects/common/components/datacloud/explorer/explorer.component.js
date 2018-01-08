@@ -148,6 +148,7 @@ angular.module('common.datacloud.explorer', [
         });
 
         DataCloudStore.setFeedbackModal(false);
+
     }
 
     /* some rules that might hide the page */

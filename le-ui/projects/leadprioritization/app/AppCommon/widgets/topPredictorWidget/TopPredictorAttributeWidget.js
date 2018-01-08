@@ -94,8 +94,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         hoverElem.show();
 
         setTimeout(function() {
-            var description = $('.attribute-hover-header p')[0],
+            var description = $('.attribute-hover-header p')[0];
+
+            if(description){
                 height = description.offsetHeight;
+            }
 
             if (height > 28) { // determine > 2 lines, line-height 14.
                 $(description).addClass('truncate_2lines');
@@ -218,7 +221,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         })
         .attr("width", function (d) {
             var barWidth = x(d);
-            return barWidth-0.4;
+            return barWidth;
         })
         .attr("height", 1)
         .style("fill", data.color)

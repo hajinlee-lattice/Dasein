@@ -568,7 +568,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         removedLessThanCharacter = lessThanBucketName.substr(1),
                         million = (bucketToDisplay.name.indexOf("M") >= 0),
                         billion = (bucketToDisplay.name.indexOf("B") >= 0),
-                        number = parseFloat(removedLessThanCharacter.replace(/,/g, ''));
+                        number = parseFloat(removedLessThanCharacter.replace(/,/g, '')),
+                        sortValue;
 
                     if (million === true) {
                         sortValue = number * 1000000;
@@ -577,7 +578,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     } else {
                         sortValue = number;
                     }
-
+                    
                     bucketToDisplay.SortProperty = sortValue;
 
                 } else if (bucketToDisplay.name.indexOf("-") > -1) {

@@ -109,7 +109,14 @@
                             </ul>
                         </div>
                         <div class="dashboard-section-content-subsection ratings">
-                            <div class="dashboard-subsection-header">
+
+                            <barchart 
+                                header="Account Ratings"
+                                ratings="true" 
+                                data="vm.ratingsGraph.buckets">
+                            </barchart>
+
+                            <!-- <div class="dashboard-subsection-header">
                                 <h3>Account ratings</h3>
                             </div>
                             <ul class="playbook-ratings graph" ng-if="vm.ratingsGraph">
@@ -118,7 +125,8 @@
                                     <div class="rating-bar" ng-style="{'height': (rating.count/vm.ratingsGraph.total)*100 + '%'}"></div>
                                     <div class="rating-label">{{rating.bucket}}</div>
                                 </li>
-                            </ul>
+                            </ul> -->
+                            
                         </div>
                     </div>
                     <div class="dashboard-section-footer">
