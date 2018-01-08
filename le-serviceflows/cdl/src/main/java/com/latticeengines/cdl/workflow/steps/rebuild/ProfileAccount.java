@@ -8,6 +8,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,18 +235,24 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         Map<String, ColumnMetadata> amColMap = new HashMap<>();
         amCols.forEach(cm -> amColMap.put(cm.getColumnId(), cm));
         ColumnMetadata latticeIdCm = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
-        List<Attribute> attrs = table.getAttributes();
-        final AtomicLong count = new AtomicLong(0);
-        attrs.forEach(attr -> {
-            if (InterfaceName.LatticeAccountId.name().equals(attr.getName())) {
+        Map<String, Attribute> masterAttrs = new HashMap<>();
+        masterTable.getAttributes().forEach(attr -> {
+            masterAttrs.put(attr.getName(), attr);
+        });
+        List<Attribute> attrs = new ArrayList<>();
+        final AtomicLong dcCount = new AtomicLong(0);
+        final AtomicLong masterCount = new AtomicLong(0);
+        table.getAttributes().forEach(attr0 -> {
+            Attribute attr = attr0;
+            if (InterfaceName.LatticeAccountId.name().equals(attr0.getName())) {
                 attr.setInterfaceName(InterfaceName.LatticeAccountId);
                 attr.setDisplayName(latticeIdCm.getDisplayName());
                 attr.setDescription(latticeIdCm.getDescription());
                 attr.setFundamentalType(FundamentalType.NUMERIC);
                 attr.setCategory(latticeIdCm.getCategory());
                 attr.setGroupsViaList(latticeIdCm.getGroups());
-                count.incrementAndGet();
-            } else if (amColMap.containsKey(attr.getName())) {
+                dcCount.incrementAndGet();
+            } else if (amColMap.containsKey(attr0.getName())) {
                 ColumnMetadata cm = amColMap.get(attr.getName());
                 attr.setDisplayName(removeNonAscII(cm.getDisplayName()));
                 attr.setDescription(removeNonAscII(cm.getDescription()));
@@ -251,13 +260,25 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr.setFundamentalType(cm.getFundamentalType());
                 attr.setCategory(cm.getCategory());
                 attr.setGroupsViaList(cm.getGroups());
-                count.incrementAndGet();
-            } else if (StringUtils.isBlank(attr.getCategory())) {
+                dcCount.incrementAndGet();
+            } else if (masterAttrs.containsKey(attr0.getName())) {
+                attr = masterAttrs.get(attr0.getName());
+                attr.setNullable(Boolean.TRUE);
+                attr.setPhysicalName(attr0.getPhysicalName());
+                attr.setNumOfBits(attr0.getNumOfBits());
+                attr.setBitOffset(attr0.getBitOffset());
+                attr.setPhysicalDataType(Schema.Type.STRING.getName());
+                masterCount.incrementAndGet();
+            }
+            if (StringUtils.isBlank(attr.getCategory())) {
                 attr.setCategory(Category.ACCOUNT_ATTRIBUTES);
             }
             attr.removeAllowedDisplayNames();
+            attrs.add(attr);
         });
-        log.info("Enriched " + count.get() + " attributes using data cloud metadata.");
+        table.setAttributes(attrs);
+        log.info("Enriched " + dcCount.get() + " attributes using data cloud metadata.");
+        log.info("Copied " + masterCount.get() + " attributes from batch store metadata.");
     }
 
     private String removeNonAscII(String str) {

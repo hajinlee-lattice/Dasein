@@ -1,12 +1,14 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
-
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,6 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateReportConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -121,11 +122,30 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
 
     @Override
     protected void enrichTableSchema(Table table) {
-        List<Attribute> attrs = table.getAttributes();
-        attrs.forEach(attr -> {
-            attr.setCategory(Category.CONTACT_ATTRIBUTES);
+        Map<String, Attribute> masterAttrs = new HashMap<>();
+        masterTable.getAttributes().forEach(attr -> {
+            masterAttrs.put(attr.getName(), attr);
+        });
+        List<Attribute> attrs = new ArrayList<>();
+        final AtomicLong masterCount = new AtomicLong(0);
+        table.getAttributes().forEach(attr0 -> {
+            Attribute attr = attr0;
+            if (masterAttrs.containsKey(attr0.getName())) {
+                attr = masterAttrs.get(attr0.getName());
+                attr.setNullable(Boolean.TRUE);
+                attr.setPhysicalName(attr0.getPhysicalName());
+                attr.setNumOfBits(attr0.getNumOfBits());
+                attr.setBitOffset(attr0.getBitOffset());
+                attr.setPhysicalDataType(Schema.Type.STRING.getName());
+                masterCount.incrementAndGet();
+            }
+            if (StringUtils.isBlank(attr.getCategory())) {
+                attr.setCategory(Category.CONTACT_ATTRIBUTES);
+            }
             attr.removeAllowedDisplayNames();
         });
+        table.setAttributes(attrs);
+        log.info("Copied " + masterCount.get() + " attributes from batch store metadata.");
     }
 
 }
