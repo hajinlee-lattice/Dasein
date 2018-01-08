@@ -140,6 +140,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long RATING_D_COUNT_2 = 45;
     static final long RATING_F_COUNT_2 = 2;
 
+    int actionsNumber = 0;
+
     @Inject
     DataCollectionProxy dataCollectionProxy;
 
@@ -370,7 +372,14 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 applicationId.toString(), false);
         long endTime = System.currentTimeMillis();
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
+        verifyActionRegistration();
         return tryGetAvroFileRows(startTime, endTime);
+    }
+
+    private void verifyActionRegistration() {
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        List<Action> actions = internalResourceProxy.findAll(customerSpace.toString());
+        Assert.assertEquals(actions.size(), ++actionsNumber);
     }
 
     long importCsvForCleanup(BusinessEntity entity) throws Exception {
