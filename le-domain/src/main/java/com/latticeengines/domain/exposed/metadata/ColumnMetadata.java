@@ -46,6 +46,8 @@ public class ColumnMetadata implements HasAttributeCustomizations {
     private String matchDestination;
     @JsonProperty("Entity")
     private BusinessEntity entity;
+    @JsonProperty("ImportanceOrdering")
+    private Integer importanceOrdering;
 
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
@@ -468,5 +470,13 @@ public class ColumnMetadata implements HasAttributeCustomizations {
 
     public void setLogicalDataType(LogicalDataType logicalDataType) {
         this.logicalDataType = logicalDataType;
+    }
+
+    public Integer getImportanceOrdering() {
+        return importanceOrdering;
+    }
+
+    public void setImportanceOrdering(Integer importanceOrdering) {
+        this.importanceOrdering = importanceOrdering;
     }
 }

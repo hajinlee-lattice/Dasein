@@ -1,10 +1,8 @@
 package com.latticeengines.app.exposed.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
@@ -13,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
+import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -142,29 +141,8 @@ public class AttributePageProcessor {
             attributeCustomizationService.addFlags(attributes.stream().map(c -> (HasAttributeCustomizations) c)
                     .collect(Collectors.toList()));
         }
-        addImportanceOrdering(attributes);
+        ImportanceOrderingUtils.addImportanceOrderingToLeadEnrichmentAttrs(attributes);
         return attributes;
-    }
-
-    private void addImportanceOrdering(List<LeadEnrichmentAttribute> attributes) {
-        // TODO: this is subject to change on AccountMasterColumn.
-        if (attributes == null) {
-            return;
-        }
-        Map<String, Integer> orderingMap = new HashMap<>();
-        orderingMap.put("LDC_PrimaryIndustry", 100);
-        orderingMap.put("LE_REVENUE_RANGE", 90);
-        orderingMap.put("LE_EMPLOYEE_RANGE", 80);
-        orderingMap.put("LDC_Domain", 70);
-        orderingMap.put("LE_NUMBER_OF_LOCATIONS", 65);
-        orderingMap.put("LDC_Country", 60);
-        orderingMap.put("LDC_City", 50);
-        orderingMap.put("LDC_State", 40);
-        for (LeadEnrichmentAttribute attribute : attributes) {
-            if (orderingMap.containsKey(attribute.getFieldName())) {
-                attribute.setImportanceOrdering(orderingMap.get(attribute.getFieldName()));
-            }
-        }
     }
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,

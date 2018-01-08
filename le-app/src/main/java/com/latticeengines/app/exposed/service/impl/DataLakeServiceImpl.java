@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -302,10 +303,14 @@ public class DataLakeServiceImpl implements DataLakeService {
             return Collections.emptyList();
         } else {
             Set<String> includedAttrs = getAttrsInStats(customerSpace);
-            return batchTable.getAttributes().stream() //
+            List<ColumnMetadata> cms = batchTable.getAttributes().stream() //
                     .map(Attribute::getColumnMetadata) //
                     .filter(cm -> includedAttrs.contains(cm.getColumnId())) //
                     .collect(Collectors.toList());
+            if (TableRoleInCollection.BucketedAccount.equals(role)) {
+                ImportanceOrderingUtils.addImportanceOrdering(cms);
+            }
+            return cms;
         }
     }
 
