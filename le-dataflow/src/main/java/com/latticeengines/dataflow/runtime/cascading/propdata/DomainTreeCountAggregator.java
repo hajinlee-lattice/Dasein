@@ -17,22 +17,25 @@ public class DomainTreeCountAggregator extends BaseAggregator<DomainTreeCountAgg
     private String groupbyField;
     private String domainField;
     private String dunsField;
-    private String rootTypeField;
+    private String rootDunsField;
+    private String dunsTypeField;
 
     public DomainTreeCountAggregator(Fields fieldDeclaration, String groupbyField, String domainField, String dunsField,
-            String rootTypeField) {
+            String rootDunsField, String dunsTypeField) {
         super(fieldDeclaration);
         this.groupbyField = groupbyField;
         this.domainField = domainField;
         this.dunsField = dunsField;
-        this.rootTypeField = rootTypeField;
+        this.rootDunsField = rootDunsField;
+        this.dunsTypeField = dunsTypeField;
     }
 
     public static class Context extends BaseAggregator.Context {
         int count = 0;
         Object domain = null;
         Object duns = null;
-        Object rootType = null;
+        Object rootDuns = null;
+        Object dunsType = null;
         Tuple result;
     }
 
@@ -60,7 +63,8 @@ public class DomainTreeCountAggregator extends BaseAggregator<DomainTreeCountAgg
     protected Context updateContext(Context context, TupleEntry arguments) {
         context.domain = arguments.getString(domainField);
         context.duns = arguments.getString(dunsField);
-        context.rootType = arguments.getString(rootTypeField);
+        context.dunsType = arguments.getString(dunsTypeField);
+        context.rootDuns = arguments.getString(rootDunsField);
         context.count += 1;
         return context;
     }
@@ -68,11 +72,12 @@ public class DomainTreeCountAggregator extends BaseAggregator<DomainTreeCountAgg
     @Override
     protected Tuple finalizeContext(Context context) {
         context.result = new Tuple();
-        context.result = Tuple.size(4);
+        context.result = Tuple.size(5);
         context.result.set(0, context.domain);
         context.result.set(1, context.duns);
-        context.result.set(2, context.rootType);
-        context.result.set(3, context.count);
+        context.result.set(2, context.rootDuns);
+        context.result.set(3, context.dunsType);
+        context.result.set(4, context.count);
         return context.result;
     }
 }

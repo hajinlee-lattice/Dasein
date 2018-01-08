@@ -21,10 +21,11 @@ import cascading.tuple.Fields;
 public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOwnershipTableConfig> {
     public final static String DATAFLOW_BEAN_NAME = "FormDomainOwnershipTableFlow";
     public final static String TRANSFORMER_NAME = "FormDomOwnershipTableTransformer";
-    private final static String GU_TYPE = "GU";
-    private final static String DU_TYPE = "DU";
-    private final static String DUNS_TYPE = "DUNS";
-    private final static String ROOT_TYPE = "ROOT_TYPE";
+    private final static String GU_TYPE_VAL = "GU";
+    private final static String DU_TYPE_VAL = "DU";
+    private final static String DUNS_TYPE_VAL = "DUNS";
+    private final static String ROOT_DUNS = "ROOT_DUNS";
+    private final static String DUNS_TYPE = "DUNS_TYPE";
     private final static String TREE_NUMBER = "TREE_NUMBER";
     private final static String REASON_TYPE = "REASON_TYPE";
     private final static String FRANCHISE = "FRANCHISE";
@@ -51,11 +52,22 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
         Node orbSecSrc = addSource(parameters.getBaseTables().get(1));
         // filter null duns from amSeed
         String checkNullDuns = config.getAmSeedDuns() + " != null && !" + config.getAmSeedDuns() + ".equals(\"\")";
-        Node amSeedDomDuns = amSeed //
+        String checkNullDomain = config.getAmSeedDomain() + " != null && !" + config.getAmSeedDomain()
+                + ".equals(\"\")";
+        Node amSeedFilteredNull = amSeed //
                 .filter(checkNullDuns, new FieldList(config.getAmSeedDuns())) //
-                .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns()));
+                .filter(checkNullDomain, new FieldList(config.getAmSeedDomain()));
+        Node amSeedDomDuns = amSeedFilteredNull //
+                .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns())) //
+                .renamePipe("amSeedDomDuns");
+        String chkNullPriDom = config.getOrbSecPriDom() + " != null && !" + config.getOrbSecPriDom() + ".equals(\"\")";
+        String chkNullSecDom = config.getOrbSrcSecDom() + " != null && !" + config.getOrbSrcSecDom() + ".equals(\"\")";
+        // filter null primary and secondary domains from orbSecondary
+        Node orbSecSrcFiltered = orbSecSrc //
+                .filter(chkNullPriDom, new FieldList(config.getOrbSecPriDom())) //
+                .filter(chkNullSecDom, new FieldList(config.getOrbSrcSecDom()));
         // Join orbSecSrc with amSeed on domain to get other fields info
-        Node orbSecJoinedResult = orbSecSrc //
+        Node orbSecJoinedResult = orbSecSrcFiltered //
                 .join(config.getOrbSecPriDom(), amSeedDomDuns, config.getAmSeedDomain(), JoinType.INNER) //
                 .retain(new FieldList(config.getOrbSrcSecDom(), config.getAmSeedDuns())) //
                 .rename(new FieldList(config.getOrbSrcSecDom()), new FieldList(config.getAmSeedDomain())) //
@@ -64,58 +76,73 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
         Node mergedDomDuns = amSeedDomDuns //
                 .merge(orbSecJoinedResult) //
                 .groupByAndLimit(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns()), 1);
-
-        // join merged list of domain DUNS with amSeed
+        // join merged list of domain DUNS with amSeed : to get required
+        // columns(SalesVolume, totalEmp, numOfLocations)
         Node mergedDomDunsWithAmSeed = mergedDomDuns //
-                .join(config.getAmSeedDuns(), amSeed, config.getAmSeedDuns(), JoinType.INNER) //
+                .join(config.getAmSeedDuns(), amSeedFilteredNull, config.getAmSeedDuns(), JoinType.INNER) //
                 .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns(), config.getAmSeedGuDuns(),
                         config.getAmSeedDuDuns(), config.getUsSalesVolume(), config.getTotalEmp(),
                         config.getNumOfLoc()));
-        Node combinedGuDuDuns = filterAndSetRootDunsType(mergedDomDunsWithAmSeed, amSeed, config);
-        Node dedupedCombinedSet = combinedGuDuDuns //
-                .groupByAndLimit(new FieldList(combinedGuDuDuns.getFieldNames()), 1);
-        Node domOwnershipTable = constructDomOwnershipTable(dedupedCombinedSet, config);
+        Node rootTypePopulated = filterAndSetRootDunsType(mergedDomDunsWithAmSeed, amSeed, config);
+        Node domOwnershipTable = constructDomOwnershipTable(rootTypePopulated, config);
         return domOwnershipTable;
     }
 
     private static Node filterAndSetRootDunsType(Node mergedDomDunsWithAmSeed, Node amSeed,
             FormDomOwnershipTableConfig config) {
-        // filter null DUNS and GU_DUNS and DU_DUNS
-        String chkNullDunsDuGu = "(" + config.getAmSeedDuns() + " != null && !" + config.getAmSeedDuns()
-                + ".equals(\"\")) || (" + config.getAmSeedGuDuns() + " != null && !" + config.getAmSeedGuDuns()
-                + ".equals(\"\")) || (" + config.getAmSeedDuDuns() + " != null && !" + config.getAmSeedDuDuns()
-                + ".equals(\"\"))";
-        Node filteredNull = mergedDomDunsWithAmSeed //
-                .filter(chkNullDunsDuGu,
-                        new FieldList(config.getAmSeedDuns(), config.getAmSeedGuDuns(), config.getAmSeedDuDuns())) //
-                .groupByAndLimit(new FieldList(amSeed.getFieldNames()), 1);
-        // filter function to categorize GU/DU/DUNS types
-        String filterGuExp = config.getAmSeedDuns() + ".equals(" + config.getAmSeedGuDuns() + ")";
-        Node filteredGuRows = filteredNull //
-                .filter(filterGuExp, new FieldList(config.getAmSeedDuns(), config.getAmSeedGuDuns())) //
-                .addColumnWithFixedValue(ROOT_TYPE, GU_TYPE, String.class);
+        // rootType selection expressions
+        String chkGuExp = config.getAmSeedGuDuns() + " != null";
+        String chkGuNull = config.getAmSeedGuDuns() + " == null";
+        String chkDuNotNull = config.getAmSeedDuDuns() + " != null";
+        String chkDuNull = config.getAmSeedDuDuns() + " == null";
+        String rootDunsFirmo = config.getAmSeedDuns() + ".equals(" + ROOT_DUNS + ")";
+        String filterNullDuns = ROOT_DUNS + " != null";
+        // Setting RootDunsType based on selection criteria
+        Node rootTypeGu = mergedDomDunsWithAmSeed //
+                .apply(String.format("%s ? %s : null", chkGuExp, config.getAmSeedGuDuns()),
+                        new FieldList(config.getAmSeedGuDuns()), new FieldMetadata(ROOT_DUNS, String.class)) //
+                .addColumnWithFixedValue(DUNS_TYPE, GU_TYPE_VAL, String.class);
 
-        String filterDuExp = config.getAmSeedDuns() + ".equals(" + config.getAmSeedDuDuns() + ")";
-        Node filteredDuRows = filteredNull //
-                .filter(filterDuExp, new FieldList(config.getAmSeedDuns(), config.getAmSeedDuDuns())) //
-                .addColumnWithFixedValue(ROOT_TYPE, DU_TYPE, String.class);
-        String filterDunsExp = "!" + config.getAmSeedDuns() + ".equals(" + config.getAmSeedDuDuns() + ") && !"
-                + config.getAmSeedDuns() + ".equals(" + config.getAmSeedGuDuns() + ")";
-        Node filteredDunsRows = filteredNull //
-                .filter(filterDunsExp,
-                        new FieldList(config.getAmSeedDuns(), config.getAmSeedDuDuns(), config.getAmSeedGuDuns())) //
-                .addColumnWithFixedValue(ROOT_TYPE, DUNS_TYPE, String.class);
-        Node combinedGuDuDuns = filteredGuRows //
-                .merge(filteredDuRows) //
-                .merge(filteredDunsRows);
-        return combinedGuDuDuns;
+        Node rootTypeDu = mergedDomDunsWithAmSeed //
+                .apply(String.format("%s ? (%s ? %s : null) : null", chkGuNull, chkDuNotNull, config.getAmSeedDuDuns()),
+                        new FieldList(config.getAmSeedGuDuns(), config.getAmSeedDuDuns()),
+                        new FieldMetadata(ROOT_DUNS, String.class)) //
+                .addColumnWithFixedValue(DUNS_TYPE, DU_TYPE_VAL, String.class);
+
+        Node rootTypeDuns = mergedDomDunsWithAmSeed //
+                .apply(String.format("%s ? (%s ? %s : null) : null", chkDuNull, chkGuNull, config.getAmSeedDuns()),
+                        new FieldList(config.getAmSeedGuDuns(), config.getAmSeedDuDuns(), config.getAmSeedDuns()),
+                        new FieldMetadata(ROOT_DUNS, String.class)) //
+                .addColumnWithFixedValue(DUNS_TYPE, DUNS_TYPE_VAL, String.class);
+
+        Node rootTypePopulated = rootTypeGu //
+                .merge(rootTypeDu) //
+                .merge(rootTypeDuns) //
+                .filter(filterNullDuns, new FieldList(ROOT_DUNS));
+
+        Node rootOfTrees = rootTypePopulated
+                .filter(rootDunsFirmo, new FieldList(config.getAmSeedDuns(), ROOT_DUNS)) //
+                .retain(new FieldList(ROOT_DUNS, config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc())) //
+                .renamePipe("RootOfTrees");
+
+       Node rootFirmoAdd = rootTypePopulated //
+                .retain(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE) //
+                .rename(new FieldList(ROOT_DUNS), new FieldList(renameField(ROOT_DUNS))) //
+                .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns(), renameField(ROOT_DUNS),
+                        DUNS_TYPE)) //
+                .join(renameField(ROOT_DUNS), rootOfTrees, ROOT_DUNS, JoinType.INNER) //
+                .retain(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE,
+                        config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc()) //
+                .groupByAndLimit(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE,
+                        config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc()), 1);
+        return rootFirmoAdd;
     }
 
     private static Node constructDomOwnershipTable(Node dedupedCombinedSet, FormDomOwnershipTableConfig config) {
         List<FieldMetadata> fms = fieldMetadataPrep(config);
         DomainTreeCountAggregator agg = new DomainTreeCountAggregator(
-                new Fields(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_TYPE, TREE_NUMBER),
-                config.getAmSeedDomain(), config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_TYPE);
+                new Fields(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE, TREE_NUMBER),
+                config.getAmSeedDomain(), config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE);
         Node domainTreeNumber = dedupedCombinedSet
                 .groupByAndAggregate(new FieldList(config.getAmSeedDomain()), agg, fms) //
                 .renamePipe("DomainTreeNumber");
@@ -127,18 +154,19 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
         // filtering domains present in more that one trees
         Node domainInManyTrees = domainTreeNumber //
                 .filter(chkTreeCount, new FieldList(TREE_NUMBER));
-        // join domainTreeNumber with dedupedCombinedSet
+        // join domainTreeNumber with dedupedCombinedSet for remaining columns to be populated
         Node domainRetain = domainInManyTrees //
-                .rename(new FieldList(config.getAmSeedDomain()), new FieldList("renamed_" + config.getAmSeedDomain())) //
-                .retain(new FieldList("renamed_" + config.getAmSeedDomain(), TREE_NUMBER));
+                .rename(new FieldList(config.getAmSeedDomain()), new FieldList(renameField(config.getAmSeedDomain()))) //
+                .retain(new FieldList(renameField(config.getAmSeedDomain()), TREE_NUMBER));
         Node allColCombined = domainRetain //
-                .join("renamed_" + config.getAmSeedDomain(), dedupedCombinedSet, config.getAmSeedDomain(),
+                .join(renameField(config.getAmSeedDomain()), dedupedCombinedSet, config.getAmSeedDomain(),
                         JoinType.INNER);
         List<FieldMetadata> fmsForDomSelect = fieldMetadataWithReason(config);
         // aggregator to choose domain from one of the trees
         DomainRowSelectorAggregator domainSelect = new DomainRowSelectorAggregator(
-                new Fields(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_TYPE, TREE_NUMBER, REASON_TYPE),
-                config.getAmSeedDomain(), config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_TYPE,
+                new Fields(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE, TREE_NUMBER,
+                        REASON_TYPE),
+                config.getAmSeedDomain(), config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE,
                 config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc(), TREE_NUMBER, REASON_TYPE,
                 config.getMultLargeCompThreshold());
         Node domainRowSelect = allColCombined //
@@ -149,10 +177,14 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
         return domOwnershipTable;
     }
 
+    private static String renameField(String field) {
+        return "renamed_" + field;
+    }
+
     private static List<FieldMetadata> fieldMetadataWithReason(FormDomOwnershipTableConfig config) {
         return Arrays.asList(new FieldMetadata(config.getAmSeedDomain(), String.class), //
                 new FieldMetadata(config.getAmSeedDuns(), String.class), //
-                new FieldMetadata(ROOT_TYPE, String.class), //
+                new FieldMetadata(ROOT_DUNS, String.class), //
                 new FieldMetadata(TREE_NUMBER, Integer.class), //
                 new FieldMetadata(REASON_TYPE, String.class) //
         );
@@ -161,7 +193,8 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
     private static List<FieldMetadata> fieldMetadataPrep(FormDomOwnershipTableConfig config) {
         return Arrays.asList(new FieldMetadata(config.getAmSeedDomain(), String.class), //
                 new FieldMetadata(config.getAmSeedDuns(), String.class), //
-                new FieldMetadata(ROOT_TYPE, String.class), //
+                new FieldMetadata(ROOT_DUNS, String.class), //
+                new FieldMetadata(DUNS_TYPE, String.class), //
                 new FieldMetadata(TREE_NUMBER, Integer.class) //
         );
     }

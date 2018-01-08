@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,22 +53,22 @@ public class DomainOwnershipForDomCleanupTestNG
         schema.add(Pair.of("SALES_VOLUME_US_DOLLARS", Long.class));
         schema.add(Pair.of("EMPLOYEES_TOTAL", String.class));
         schema.add(Pair.of("LE_NUMBER_OF_LOCATIONS", Integer.class));
-        Object[][] data = new Object[][] { { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 1250000242L, "50000", 60 },
+        Object[][] data = new Object[][] { { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60 },
                 { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30 },
                 { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2 },
                 { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3 },
                 { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34 },
                 { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9 },
                 { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1 },
-                { "karlGu.com", null, null, null, null, null, null },
-                { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "3000", 3 },
+                { null, "DUNS21", "DUNS17", "DUNS18", 100002421L, null, 1 },
+                { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3 },
                 { "karlDuns1.com", "DUNS26", null, "DUNS24", 30191910L, "1001", 1 },
                 { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2 },
                 { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1 },
-                { "netappGu.com", "DUNS28", "DUNS28", null, 5000000010L, "55000", 20 },
+                { "netappGu.com", "DUNS28", "DUNS28", null, 21100024L, "55000", 20 },
                 { "netappDu.com", null, "DUNS28", null, null, null, null },
                 { "netappDuns1.com", "DUNS31", "DUNS28", null, 30450010L, "10000", 3 },
-                { "netappDuns2.com", "DUNS33", "DUNS28", null, 30450010L, "8000", 3 },
+                { "netappDuns2.com", "DUNS33", null, null, 30450010L, "8000", 3 },
                 { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2 },
                 { "mongoDbDuns1.com", "DUNS21", "DUNS17", "DUNS18", 30450010L, "10000", 1 } };
         uploadBaseSourceData(baseSource1.getSourceName(), baseSourceVersion, schema, data);
@@ -82,7 +83,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "netappDuns2.com", "mongoDbDuns1.com" }, { "karlDuns1.com", "netappDuns2.com" },
                 { "craigslist.com", "netappDuns1.com" }, { "target.com", "macys.com" },
                 { "karlDuns2.com", "oldnavy.com" }, { "amazon.com", "mongoDbDuns1.com" },
-                { "amazon.com", "netappDuns1.com" } };
+                { "amazon.com", "netappDuns1.com" }, { null, "netappDuns1.com" }, { "airbnb.com", null } };
         uploadBaseSourceData(baseSource2.getSourceName(), baseSourceVersion, schema, data);
     }
 
@@ -151,12 +152,13 @@ public class DomainOwnershipForDomCleanupTestNG
     }
 
     Object[][] expectedDataValues = new Object[][] { //
-            { "karlDuns1.com", "DUNS33", "DUNS", 2, "HIGHER_SALES_VOLUME" }, //
-            { "karlDuns2.com", "DUNS31", "DUNS", 2, "HIGHER_EMP_TOTAL" }, //
-            { "sbiDuns2.com", "DUNS14", "DUNS", 2, "MULTIPLE_LARGE_COMPANY" }, //
-            { "amazon.com", "DUNS31", "DUNS", 2, "HIGHER_NUM_OF_LOC" }, //
-            { "netappDuns2.com", "DUNS21", "DUNS", 2, "HIGHER_EMP_TOTAL" }, //
-            { "sbiDuns1.com", "DUNS13,DUNS20,DUNS29,DUNS66", "DUNS", 4, "FRANCHISE" } //
+            { "karlDuns1.com", "DUNS33", "DUNS33", "DUNS", 2, "HIGHER_SALES_VOLUME" }, //
+            { "karlDuns2.com", "DUNS31", "DUNS28", "GU", 2, "HIGHER_EMP_TOTAL" }, //
+            { "sbiDuns2.com", "DUNS14", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC" }, //
+            { "amazon.com", "DUNS21", "DUNS17", "GU", 2, "MULTIPLE_LARGE_COMPANY" }, //
+            { "netappDuns2.com", "DUNS21", "DUNS17", "GU", 2, "MULTIPLE_LARGE_COMPANY" }, //
+            { "sbiDuns1.com", "DUNS13,DUNS20,DUNS29,DUNS66", "DUNS10,DUNS17,DUNS24,DUNS28", "GU,DU,DUNS", 4,
+                    "FRANCHISE" } //
     };
 
     @Override
@@ -164,31 +166,28 @@ public class DomainOwnershipForDomCleanupTestNG
         int rowCount = 0;
         Map<String, Object[]> expectedData = new HashMap<>();
         for (Object[] data : expectedDataValues) {
-            expectedData.put(String.valueOf(data[0]) + String.valueOf(data[4]), data);
+            expectedData.put(String.valueOf(data[0]), data);
         }
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info("record : " + record);
             String domain = String.valueOf(record.get(0));
-            String reasonType = String.valueOf(record.get(4));
-            Object[] expected = expectedData.get(domain + reasonType);
+            Object[] expected = expectedData.get(domain);
             Assert.assertTrue(isObjEquals(record.get(0), expected[0]));
             if(String.valueOf(expected[1]).contains(",")) {
-                String[] dunsValues = String.valueOf(expected[1]).split(",");
-                String dunsVal = String.valueOf(record.get(1));
-                Object isPresent = "false";
-                for(int i = 0; i < dunsValues.length; i++) {
-                    if (dunsValues[i].equals(dunsVal)) {
-                        isPresent = "true";
-                    }
-                }
-                Assert.assertTrue(isObjEquals(isPresent, "true"));
+                List<String> dunsValues = Arrays.asList(String.valueOf((expected[1])).split(","));
+                List<String> rootDunsValues = Arrays.asList(String.valueOf((expected[2])).split(","));
+                List<String> rootDunsTypes = Arrays.asList(String.valueOf((expected[3])).split(","));
+                Assert.assertTrue(dunsValues.contains(String.valueOf(record.get(1))));
+                Assert.assertTrue(rootDunsValues.contains(String.valueOf(record.get(2))));
+                Assert.assertTrue(rootDunsTypes.contains(String.valueOf(record.get(3))));
             } else {
                 Assert.assertTrue(isObjEquals(record.get(1), expected[1]));
+                Assert.assertTrue(isObjEquals(record.get(2), expected[2]));
+                Assert.assertTrue(isObjEquals(record.get(3), expected[3]));
             }
-            Assert.assertTrue(isObjEquals(record.get(2), expected[2]));
-            Assert.assertTrue(isObjEquals(record.get(3), expected[3]));
             Assert.assertTrue(isObjEquals(record.get(4), expected[4]));
+            Assert.assertTrue(isObjEquals(record.get(5), expected[5]));
             rowCount++;
         }
         Assert.assertEquals(rowCount, 6);

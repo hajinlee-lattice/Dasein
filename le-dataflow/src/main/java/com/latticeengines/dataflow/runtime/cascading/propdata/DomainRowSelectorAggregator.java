@@ -20,7 +20,8 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
     private String groupByField;
     private String domainField;
     private String dunsField;
-    private String rootTypeField;
+    private String rootDunsField;
+    private String dunsTypeField;
     private String treeNum;
     private String reasonType;
     private Long multLargeCompThreshold;
@@ -30,7 +31,7 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
     private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
 
     public DomainRowSelectorAggregator(Fields fieldDeclaration, String groupByField, String domainField,
-            String dunsField, String rootTypeField, String salesVolField,
+            String dunsField, String rootDunsField, String dunsTypeField, String salesVolField,
             String totalEmpField, String numOfLocField, String treeNum, String reasonType,
             Long multLargeCompThreshold) {
         super(fieldDeclaration);
@@ -40,7 +41,8 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
         this.groupByField = groupByField;
         this.domainField = domainField;
         this.dunsField = dunsField;
-        this.rootTypeField = rootTypeField;
+        this.rootDunsField = rootDunsField;
+        this.dunsTypeField = dunsTypeField;
         this.treeNum = treeNum;
         this.reasonType = reasonType;
         this.multLargeCompThreshold = multLargeCompThreshold;
@@ -50,7 +52,8 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
         Tuple result;
         Object domain = null;
         Object duns = null;
-        Object rootType = null;
+        Object rootDuns = null;
+        Object dunsType = null;
         Long maxSalesVolume = 0L;
         int maxEmpTotal = 0;
         int maxNumOfLoc = 0;
@@ -83,14 +86,15 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
     protected Context updateContext(Context context, TupleEntry arguments) {
         context.count++;
         Long salesVolVal = arguments.getLong(salesVolField);
-        int empTotalVal = Integer.valueOf(arguments.getString(totalEmpField));
+        String empCount = arguments.getString(totalEmpField);
+        int empTotalVal = 0;
+        if (empCount != null)
+            empTotalVal = Integer.valueOf(arguments.getString(totalEmpField));
         int numOfLocVal = arguments.getInteger(numOfLocField);
         int treeNumVal = arguments.getInteger(treeNum);
-        if (salesVolVal > context.maxSalesVolume) {
+        int res = checkRuleLargerLong(salesVolVal, context.maxSalesVolume);
+        if (res > 0) {
             context.maxSalesVolume = salesVolVal;
-            context.domain = arguments.getString(domainField);
-            context.duns = arguments.getString(dunsField);
-            context.rootType = arguments.getString(rootTypeField);
             context.treeNumber = treeNumVal;
             if (salesVolVal > multLargeCompThreshold)
                 context.reasonType = MULTIPLE_LARGE_COMPANY;
@@ -100,31 +104,58 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
                 context.maxEmpTotal = empTotalVal;
                 context.maxNumOfLoc = numOfLocVal;
             }
-        } else if (salesVolVal.equals(context.maxSalesVolume)) {
-            if (empTotalVal != context.maxEmpTotal) {
-                if (empTotalVal > context.maxEmpTotal) {
+            return update(context, arguments);
+        } else if (res == 0) {
+            res = checkRuleLargerIntegers(empTotalVal, context.maxEmpTotal);
+            if (res != 0) {
+                if (res > 0) {
                     context.maxEmpTotal = empTotalVal;
-                    context.domain = arguments.getString(domainField);
-                    context.duns = arguments.getString(dunsField);
-                    context.rootType = arguments.getString(rootTypeField);
                     context.treeNumber = treeNumVal;
+                    update(context, arguments);
                 }
                 context.reasonType = HIGHER_EMP_TOTAL;
                 if (context.maxNumOfLoc == 0 || (numOfLocVal > context.maxNumOfLoc))
                     context.maxNumOfLoc = numOfLocVal;
-            } else if (empTotalVal == context.maxEmpTotal) {
-                if (numOfLocVal != context.maxNumOfLoc) {
-                    if (numOfLocVal > context.maxNumOfLoc) {
-                        context.maxNumOfLoc = numOfLocVal;
-                        context.domain = arguments.getString(domainField);
-                        context.duns = arguments.getString(dunsField);
-                        context.rootType = arguments.getString(rootTypeField);
-                        context.treeNumber = treeNumVal;
-                    }
-                    context.reasonType = HIGHER_NUM_OF_LOC;
+                return context;
+            } else if (res == 0) {
+                res = checkRuleLargerIntegers(numOfLocVal, context.maxNumOfLoc);
+                if (res > 0) {
+                    context.maxNumOfLoc = numOfLocVal;
+                    context.treeNumber = treeNumVal;
+                    update(context, arguments);
                 }
+                context.reasonType = HIGHER_NUM_OF_LOC;
+                return context;
             }
         }
+        return context;
+    }
+
+    private int checkRuleLargerLong(Long checking, Long checked) {
+        if (checking != null && (checked == null || checking.longValue() > checked.longValue())) {
+            return 1;
+        } else if (checked != null && (checking == null || checked.longValue() > checking.longValue())) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    private int checkRuleLargerIntegers(Integer checking, Integer checked) {
+        if (checking != null && (checked == null || checking.intValue() > checked.intValue())) {
+            return 1;
+        } else if (checked != null && (checking == null || checked.intValue() > checking.intValue())) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    private Context update(Context context, TupleEntry arguments) {
+        context.domain = arguments.getString(domainField);
+        context.duns = arguments.getString(dunsField);
+        context.rootDuns = arguments.getString(rootDunsField);
+        context.dunsType = arguments.getString(dunsTypeField);
         return context;
     }
 
@@ -135,9 +166,10 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
         // setting tree number and domain
         context.result.set(0, context.domain);
         context.result.set(1, context.duns);
-        context.result.set(2, context.rootType);
-        context.result.set(3, context.treeNumber);
-        context.result.set(4, context.reasonType);
+        context.result.set(2, context.rootDuns);
+        context.result.set(3, context.dunsType);
+        context.result.set(4, context.treeNumber);
+        context.result.set(5, context.reasonType);
         return context.result;
     }
 
