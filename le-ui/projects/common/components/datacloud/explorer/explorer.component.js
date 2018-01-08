@@ -841,14 +841,17 @@ angular.module('common.datacloud.explorer', [
 
     vm.processCategories = function() {
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
-
+        
         if (vm.show_segmentation && vm.section == 'segment.analysis') {
             var topCategories = [
-                'Contact',
-                'Product',
                 'Firmographics',
+                'My Attributes',
+                'Contact Attributes',
+                'Product Spend Profile',
                 'Intent',
-                'Technology Profile'
+                'Technology Profile',
+                'Website Profile',
+                'Online Presence'
             ];
 
             topCategories.forEach(function(category, index) {
@@ -1024,7 +1027,7 @@ angular.module('common.datacloud.explorer', [
             if (vm.section == 'segment.analysis') {
                 return 'Attribute';
             }
-            
+
             return 'Top ' + (items.length > 1 ? items.length + ' attributes' : 'attribute');
         }
 
