@@ -40,9 +40,9 @@ public class AlertServiceImpl implements AlertService {
     @Override
     public String triggerCriticalEvent(String description, String clientUrl, String dedupKey,
             Iterable<? extends BasicNameValuePair> details) {
-//        if (!this.alertServiceEnabled) {
-//            return "disabled";
-//        }
+        if (!this.alertServiceEnabled) {
+            return "disabled";
+        }
 
         try {
             // return pagerDutyEmailService.triggerEvent(description, clientUrl, dedupKey, details);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -61,4 +62,18 @@ public class PagerDutyServiceTestNG extends MonitorFunctionalTestNGBase {
         }
     }
 
+    @Test(groups = "functional", enabled = true)
+    public void testTriggerWithFilter() throws ClientProtocolException, IOException {
+        String result = this.pagerDutyService.triggerEvent("SocketException: Connection reset",
+                "http://AlertServiceTestNG","testTriggerNoDetail");
+        Assert.assertEquals(result,"filterSubjectFail");
+
+        result = this.pagerDutyService.triggerEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
+                "testTriggerOneDetail", new BasicNameValuePair("c1", "Error requesting access token"));
+        Assert.assertEquals(result,"filterBodyFail");
+
+        result = this.pagerDutyService.triggerEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
+                "testTriggerOneDetail", new BasicNameValuePair("c1", "Test trigger one detail"));
+        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+    }
 }

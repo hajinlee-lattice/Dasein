@@ -48,9 +48,6 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     @Value("${monitor.alert.service.enabled:false}")
     private boolean alertServiceEnabled;
 
-    @Value("${monitor.alert.service.callapi.enabled:true}")
-    private boolean alertServiceCallAPIEnabled;
-
     public PagerDutyServiceImpl() {
         this.serviceApiKey = PLS_MODELINGPLATFORM_SCORING_SERVICEAPI_KEY;
 
@@ -88,14 +85,9 @@ public class PagerDutyServiceImpl implements PagerDutyService {
             log.warn("No filter in zk.");
         }
 
-        if(alertServiceEnabled && alertServiceCallAPIEnabled) {
-            log.info("Trigger event by call API to PagerDuty: " + description + ". CallAPI");
-            return restTemplate.postForObject("https://events.pagerduty.com/generic/2010-04-15/create_event.json", payload,
-                    String.class);
-        } else {
-            log.info("Trigger event by call API to PagerDuty: " + description + ". NotCallAPI");
-            return "notCallAPI";
-        }
+        log.info("Trigger event by call API to PagerDuty: " + description);
+        return restTemplate.postForObject("https://events.pagerduty.com/generic/2010-04-15/create_event.json", payload,
+                String.class);
     }
 
     @VisibleForTesting
