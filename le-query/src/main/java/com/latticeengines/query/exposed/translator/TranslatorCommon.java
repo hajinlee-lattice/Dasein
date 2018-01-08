@@ -7,7 +7,6 @@ import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
@@ -31,6 +30,7 @@ public class TranslatorCommon {
     static final String TRXN = "trxn";
     static final String APS = "aps";
     static final String TRXN_REVENUE = "trxnrevenue";
+    static final String SHIFTED_REVENUE = "trxnshift";
     static final String AMOUNT_AGG = "amountagg";
     static final String QUANTITY_AGG = "quantityagg";
     static final String AMOUNT_VAL = "amountval";
@@ -79,6 +79,11 @@ public class TranslatorCommon {
     static final StringPath revenueAccountId = Expressions.stringPath(revenuePath, ACCOUNT_ID);
     static final StringPath revenuePeriodId = Expressions.stringPath(revenuePath, PERIOD_ID);
     static final StringPath revenueRevenue = Expressions.stringPath(revenuePath, REVENUE);
+
+    static final EntityPath<String> shiftedRevenuePath = new PathBuilder<>(String.class, SHIFTED_REVENUE);
+    static final StringPath shiftedAccountId = Expressions.stringPath(shiftedRevenuePath, ACCOUNT_ID);
+    static final StringPath shiftedPeriodId = Expressions.stringPath(shiftedRevenuePath, PERIOD_ID);
+    static final StringPath shiftedRevenue = Expressions.stringPath(shiftedRevenuePath, REVENUE);
 
     BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
         AggregationType aggregateType = aggregationFilter.getAggregationType();

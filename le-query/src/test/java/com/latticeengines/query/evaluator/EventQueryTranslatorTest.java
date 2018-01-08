@@ -1099,4 +1099,18 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
     }
 
+    @Test(groups = "functional")
+    public void testAccountEventQuery() {
+        Restriction acctRestriction = Restriction.builder()
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq("0012400001DNL2vAAH").build();
+        EventQueryTranslator eventTranslator = getEventQueryTranslator();
+        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, acctRestriction,
+                                                        getEventFrontEndQueryWithProductRevenue(), Query.builder()).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        System.out.println("sqlQuery = " + sqlQuery);
+        long count = sqlQuery.fetchCount();
+        Assert.assertEquals(count, 26);
+
+    }
+
 }
