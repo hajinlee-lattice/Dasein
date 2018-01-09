@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
 
@@ -21,11 +22,17 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     private CDLOperationWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
                                             MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
         CDLOperationWorkflowConfiguration cdlOperationWorkflowConfiguration = new CDLOperationWorkflowConfiguration();
+        boolean isCleanupByUpload = false;
+        if(maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
+            isCleanupByUpload = ((CleanupOperationConfiguration) maintenanceOperationConfiguration)
+                    .getCleanupOperationType().isNeedTransFlow();
+        }
         return new CDLOperationWorkflowConfiguration.Builder()
                 .customer(customerSpace)
                 .internalResourceHostPort(internalResourceHostPort)
                 .microServiceHostPort(microserviceHostPort)
                 .maintenanceOperationConfiguration(maintenanceOperationConfiguration)
+                .isCleanupByUpload(isCleanupByUpload)
                 .build();
     }
 }

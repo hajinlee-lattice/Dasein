@@ -14,7 +14,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes({ @JsonSubTypes.Type(value = VdbToHdfsConfiguration.class, name = "VdbToHdfsConfiguration"),
-        @JsonSubTypes.Type(value = CSVToHdfsConfiguration.class, name = "CSVToHdfsConfiguration"), })
+        @JsonSubTypes.Type(value = CSVToHdfsConfiguration.class, name = "CSVToHdfsConfiguration"),
+        @JsonSubTypes.Type(value = DeleteFileToHdfsConfiguration.class, name = "DeleteFileToHdfsConfiguration") })
 public class ImportConfiguration extends EaiJobConfiguration {
 
     private List<SourceImportConfiguration> sourceConfigurations = new ArrayList<>();
