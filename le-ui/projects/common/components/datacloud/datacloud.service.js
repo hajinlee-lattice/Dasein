@@ -1,4 +1,18 @@
 angular.module('common.datacloud')
+.filter("sortByKey", function () {
+    return function (array, key) {
+        if(!angular.isArray(array)) return;
+        var empty = [];
+        var present = array.filter(function (item) {
+            if (item[key]) {
+                return item;
+            } else {
+                empty.push(item);
+            }
+        });
+        return present.concat(empty);
+    };
+})
 .service('DataCloudStore', function($q, DataCloudService){
     var DataCloudStore = this;
 

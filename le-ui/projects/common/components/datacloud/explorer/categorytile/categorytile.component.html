@@ -57,6 +57,7 @@
                         | filter: vm.enrichmentsFilter()
                         | filter: vm.filterHideTrue
                         | orderBy: vm.categoryOrderBy()
+                        | sortByKey: 'TopBkt'
                         | limitTo: 5 - (highlightAttributes.length || 0)))"
                         class="attribute delay top"
                         ng-class="{
