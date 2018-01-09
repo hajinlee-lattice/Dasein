@@ -1,5 +1,8 @@
 package com.latticeengines.query.evaluator;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -621,7 +624,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testHasEngagedForEventWithRevenue() {
+    public void testHasEngagedForEventWithRevenue() throws SQLException {
         TransactionRestriction txRestriction = getHasEngaged();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, txRestriction,
@@ -629,8 +632,16 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                                                         Query.builder()).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         System.out.println("sqlQuery = " + sqlQuery);
-        long count = queryEvaluatorService.getCount(attrRepo, query);
+        ResultSet result = sqlQuery.getResults();
+
         //Assert.assertEquals(count, 17564);
+        ResultSetMetaData metaData = result.getMetaData();
+        Assert.assertEquals(metaData.getColumnCount(), 3);
+        int count = 0;
+        while (result.next()) {
+            Assert.assertTrue(result.getInt("revenue") > 0);
+            count += 1;
+        }
         Assert.assertEquals(count, 318);
     }
 
