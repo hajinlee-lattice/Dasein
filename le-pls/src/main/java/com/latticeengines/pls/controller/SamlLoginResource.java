@@ -193,10 +193,12 @@ public class SamlLoginResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    /*
     @RequestMapping(value = "/metadata/"
             + InternalResource.TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get ServiceProvider SAML Metadata for requested Tenant")
+    */
     public void getIdpMetadata(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("tenantId") String tenantDeploymentId) {
         log.info("SAML Metadata Resource: TenantDeploymentId ", tenantDeploymentId);

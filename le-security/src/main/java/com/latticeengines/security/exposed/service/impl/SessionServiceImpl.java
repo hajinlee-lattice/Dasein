@@ -49,13 +49,16 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public Ticket authenticate(Credentials credentials) {
-        return globalAuthenticationService.authenticateUser(credentials.getUsername().toLowerCase(),
+        Ticket ticket = globalAuthenticationService.authenticateUser(credentials.getUsername().toLowerCase(),
                 credentials.getPassword());
+        ticket.setAuthenticationRoute(AUTH_ROUTE_GA);
+        return ticket;
     }
 
     @Override
     public Session attchSamlUserToTenant(String userName, String tenantDeploymentId) {
         Ticket ticket = samlGlobalAuthenticationService.externallyAuthenticated(userName, tenantDeploymentId);
+        ticket.setAuthenticationRoute(AUTH_ROUTE_SSO);
         GlobalAuthTenant gaTenant = gaTenantEntityMgr.findByTenantId(tenantDeploymentId);
 
         // Update Tenant info into Ticket

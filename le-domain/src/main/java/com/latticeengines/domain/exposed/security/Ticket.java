@@ -13,6 +13,7 @@ public class Ticket {
     private List<Tenant> tenants;
     private boolean mustChangePassword;
     private long passwordLastModified;
+    private String authenticationRoute;
     
     public Ticket() {
         
@@ -72,6 +73,16 @@ public class Ticket {
         this.mustChangePassword = mustChangePassword;
     }
 
+    @JsonProperty("AuthenticationRoute")
+    public String getAuthenticationRoute() {
+        return authenticationRoute;
+    }
+
+    @JsonProperty("AuthenticationRoute")
+    public void setAuthenticationRoute(String authenticationRoute) {
+        this.authenticationRoute = authenticationRoute;
+    }
+    
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
@@ -81,5 +92,4 @@ public class Ticket {
     public String getData() {
         return getUniqueness() + "." + getRandomness();
     }
-    
 }
