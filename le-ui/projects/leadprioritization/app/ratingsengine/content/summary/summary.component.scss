@@ -24,6 +24,11 @@ section.ratingsengine {
                 }
             }
         }
+        textarea {
+            resize: none;
+            min-height: 60px;
+            height: 60px;
+        }
     }
     ul.query-rules-buckets-container {
         display: block;
