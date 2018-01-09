@@ -19,8 +19,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import org.apache.avro.Schema;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -262,12 +260,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr.setGroupsViaList(cm.getGroups());
                 dcCount.incrementAndGet();
             } else if (masterAttrs.containsKey(attr0.getName())) {
-                attr = masterAttrs.get(attr0.getName());
-                attr.setNullable(Boolean.TRUE);
-                attr.setPhysicalName(attr0.getPhysicalName());
-                attr.setNumOfBits(attr0.getNumOfBits());
-                attr.setBitOffset(attr0.getBitOffset());
-                attr.setPhysicalDataType(Schema.Type.STRING.getName());
+                attr = copyMasterAttr(masterAttrs, attr0);
                 masterCount.incrementAndGet();
             }
             if (StringUtils.isBlank(attr.getCategory())) {

@@ -5,12 +5,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.cdl.workflow.steps.ProfileStepBase;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -126,6 +128,18 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     }
 
     protected void enrichTableSchema(Table servingStoreTable) {
+    }
+
+    Attribute copyMasterAttr(Map<String, Attribute> masterAttrs, Attribute attr0) {
+        Attribute attr = masterAttrs.get(attr0.getName());
+        if (attr0.getNumOfBits() != null && attr0.getNumOfBits() > 0) {
+            attr.setNullable(Boolean.TRUE);
+            attr.setPhysicalName(attr0.getPhysicalName());
+            attr.setNumOfBits(attr0.getNumOfBits());
+            attr.setBitOffset(attr0.getBitOffset());
+            attr.setPhysicalDataType(Schema.Type.STRING.getName());
+        }
+        return attr;
     }
 
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
