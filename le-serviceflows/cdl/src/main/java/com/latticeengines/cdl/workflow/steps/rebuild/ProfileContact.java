@@ -134,6 +134,7 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
             }
             attr.setCategory(Category.CONTACT_ATTRIBUTES);
             attr.removeAllowedDisplayNames();
+            attrs.add(attr);
         });
         table.setAttributes(attrs);
         log.info("Copied " + masterCount.get() + " attributes from batch store metadata.");
