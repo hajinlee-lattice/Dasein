@@ -453,7 +453,7 @@ angular.module('lp.playbook')
     this.getPlays = function() {
         var deferred = $q.defer(),
             result,
-            url = '/pls/play';
+            url = '/pls/play' + '?shouldLoadCoverage=true';
         $http({
             method: 'GET',
             url: url,
