@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringComparisonAgainstModelingTestNG;
 import com.latticeengines.scoring.service.ScoringJobService;
 
@@ -23,7 +23,7 @@ public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelin
     private ScoringJobService scoringJobService;
 
     @Override
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant;
@@ -49,6 +49,7 @@ public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelin
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
         scoringConfig.setUniqueKeyColumn("ModelingID");
+        scoringConfig.setScoreInputType(ScoringInputType.Avro);
         ApplicationId appId = scoringJobService.score(scoringConfig);
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
     }
@@ -56,7 +57,7 @@ public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelin
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         try {
-            HdfsUtils.rmdir(yarnConfiguration, path);
+            //HdfsUtils.rmdir(yarnConfiguration, path);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

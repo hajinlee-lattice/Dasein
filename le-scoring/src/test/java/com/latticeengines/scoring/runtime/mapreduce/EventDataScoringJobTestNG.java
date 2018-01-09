@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.service.impl.ScoringJobServiceImpl;
 import com.latticeengines.yarn.functionalframework.YarnMiniClusterFunctionalTestNGBase;
@@ -46,12 +47,12 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
         dataPath = customerBaseDir + "/" + tenant + "/data/Q_PLS_ModelingMulesoft_Relaunch/";
         HdfsUtils.mkdir(miniclusterConfiguration, dataPath);
 
-        URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/allTest-r-00001.avro");
+        URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/s100Test-mulesoft.avro");
         HdfsUtils.copyLocalToHdfs(miniclusterConfiguration, url1.getFile(), dataPath);
 
         uuid = UUID.randomUUID().toString();
         URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/scoring/models/sampleModel/Hootsuite-lead-20160907-1516_2016-09-07_17-13_model.json");
+                "com/latticeengines/scoring/models/sampleModel/Model_Submission1_2018-01-09_08-21_model.json");
         String modelPath = customerBaseDir + "/" + tenant + "/models/Q_PLS_ModelingMulesoft_Relaunch/" + uuid
                 + "/1429553747321_0004";
         HdfsUtils.mkdir(miniclusterConfiguration, modelPath);
@@ -79,10 +80,11 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
     public void test() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);
-        scoringConfig.setSourceDataDir(dataPath);
+        scoringConfig.setSourceDataDir(dataPath + "/s100Test-mulesoft.avro");
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
-        scoringConfig.setUniqueKeyColumn(InterfaceName.Id.name());
+        scoringConfig.setUniqueKeyColumn("ModelingID");
+        scoringConfig.setScoreInputType(ScoringInputType.Avro);
 
         ((ScoringJobServiceImpl) scoringJobService).setConfiguration(miniclusterConfiguration);
         Properties properties = ((ScoringJobServiceImpl) scoringJobService).generateCustomizedProperties(scoringConfig);

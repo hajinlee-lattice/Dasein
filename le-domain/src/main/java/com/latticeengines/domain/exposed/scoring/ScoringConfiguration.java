@@ -21,6 +21,8 @@ public class ScoringConfiguration {
 
     private List<BucketMetadata> bucketMetadata;
 
+    private ScoringInputType scoreInputType = ScoringInputType.Json;
+
     @JsonProperty("customer")
     public String getCustomer() {
         return customer;
@@ -81,7 +83,22 @@ public class ScoringConfiguration {
         return this.bucketMetadata;
     }
 
+    @JsonProperty("score_input_type")
+    public ScoringInputType getScoreInputType() {
+        return this.scoreInputType;
+    }
+
+    @JsonProperty("score_input_type")
+    public void setScoreInputType(ScoringInputType scoreInputType) {
+        this.scoreInputType = scoreInputType;
+    }
+
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public enum ScoringInputType {
+        Json, //
+        Avro;
     }
 }

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
@@ -67,7 +68,7 @@ public class ScoringMapperPredictUtilTestNG {
         modelAndLeadInfo.setModelInfoMap(modelInfoMap);
         modelAndLeadInfo.setTotalRecordCountr(10);
 
-        List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo, models, 1000);
+        List<ScoreOutput> resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndLeadInfo, models, 1000, ScoringInputType.Json.name());
 
         List<ScoreOutput> expectedResultList = new ArrayList<>();
         ScoreOutput result1 = new ScoreOutput("18f446f1-747b-461e-9160-c995c3876ed4", "Highest", 4.88519256666,

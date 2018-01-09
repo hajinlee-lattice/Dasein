@@ -8,22 +8,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.util.ModelAndRecordInfo;
 import com.latticeengines.scoring.util.ScoringJobUtil;
@@ -38,10 +43,8 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
     @Override
     public void run(Context context) throws IOException, InterruptedException {
-
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
-
         URI[] uris = context.getCacheFiles();
         long recordFileThreshold = context.getConfiguration().getLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(),
                 DEFAULT_LEAD_FILE_THRESHOLD);
@@ -55,15 +58,16 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             ModelAndRecordInfo modelAndRecordInfo = ScoringMapperTransformUtil.prepareRecordsForScoring(context,
                     dataType, models, recordFileThreshold);
 
-            if (modelAndRecordInfo.getTotalRecordCount() == 0) {
-                return;
-            }
+            // if (modelAndRecordInfo.getTotalRecordCount() == 0) {
+            // return;
+            // }
             long transformEndTime = System.currentTimeMillis();
             long transformationTotalTime = transformEndTime - transformStartTime;
             log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins");
 
-            long totalRecordCount = modelAndRecordInfo.getTotalRecordCount();
-            log.info("The mapper has transformed: " + totalRecordCount + " records.");
+            // long totalRecordCount = modelAndRecordInfo.getTotalRecordCount();
+            // log.info("The mapper has transformed: " + totalRecordCount + "
+            // records.");
 
             ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
             List<ScoreOutput> resultList = new ArrayList<>();
@@ -73,16 +77,17 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
                         .deserializeLocalScoreDerivationFiles(uris);
                 resultList = ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(modelAndRecordInfo,
-                        scoreDerivationMap, recordFileThreshold);
+                        scoreDerivationMap, recordFileThreshold, config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name()));
             } else {
                 resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndRecordInfo, models,
-                        recordFileThreshold);
+                        recordFileThreshold, config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name()));
             }
             log.info("The mapper has scored: " + resultList.size() + " records.");
-            if (totalRecordCount != resultList.size()) {
-                throw new LedpException(LedpCode.LEDP_20009,
-                        new String[] { String.valueOf(totalRecordCount), String.valueOf(resultList.size()) });
-            }
+            // if (totalRecordCount != resultList.size()) {
+            // throw new LedpException(LedpCode.LEDP_20009,
+            // new String[] { String.valueOf(totalRecordCount),
+            // String.valueOf(resultList.size()) });
+            // }
 
             String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
             log.info("outputDir: " + outputPath);

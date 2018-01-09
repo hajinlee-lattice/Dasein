@@ -7,5 +7,6 @@ public enum ScoringProperty {
     LOG_DIR, //
     UNIQUE_KEY_COLUMN, //
     USE_SCOREDERIVATION, //
-    MODEL_GUID; //
+    MODEL_GUID, //
+    SCORE_INPUT_TYPE; //
 }

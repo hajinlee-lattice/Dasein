@@ -47,14 +47,17 @@ class ScoringEngineTest(TrainingTestBase):
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
-        #self.createCSVFromModel(modelDriver, "./results/scoreinputfile.txt")
+#         self.createCSVFromModel(modelDriver, "./results/scoreinputfile.txt")
         parser = ArgumentParser(modelDriver, None)
         schema = parser.getSchema()
 
         os.environ["PYTHONPATH"] = ''
         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", \
-                                 self.stripPath(schema["test_data"]), "./results/scoreoutputfile.txt", "avro"], \
+                                 self.stripPath(schema["test_data"]), "./results/scoreoutputfile.txt", "ModelingID"], \
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", \
+#                                  "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
+#                                  stdout = subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = popen.communicate()
 
         if len(stderr) > 0:

@@ -37,8 +37,8 @@ def main(argv):
 
     if len(sys.argv) == 3:
         generateScore(pipeline, inputFileName, outputFileName)
-    elif len(sys.argv) == 4 and argv[3] == "avro":
-        generateScoreCdl(pipeline, inputFileName, outputFileName)
+    elif len(sys.argv) == 4:
+        generateScoreCdl(pipeline, inputFileName, outputFileName, argv[3])
     logger.info("scoring complete")
 
 def generateScore(pipeline, inputFileName, outputFileName):
@@ -65,7 +65,7 @@ def generateScore(pipeline, inputFileName, outputFileName):
         writeToFile(w, rowIds[index], scoreList)
     w.close()
 
-def generateScoreCdl(pipeline, inputFileName, outputFileName):
+def generateScoreCdl(pipeline, inputFileName, outputFileName, idColName):
     w = open(outputFileName, 'w')
     with open(inputFileName) as f:
         rowIds = []
@@ -73,7 +73,7 @@ def generateScoreCdl(pipeline, inputFileName, outputFileName):
         reader = avro.reader(f)
         schema = reader.schema
         for line in reader:
-            rowId, rowDict = getRowToScoreCdl(line, basename(inputFileName), schema)
+            rowId, rowDict = getRowToScoreCdl(line, schema, idColName)
             rowIds.append(rowId)
             rowDicts.append(rowDict)
     f.close()
@@ -111,13 +111,14 @@ def getRowToScore(line):
 
     return (rowId, rowDict)
 
-def getRowToScoreCdl(dataRow, rowId, schema):
+def getRowToScoreCdl(dataRow, schema, idColName):
+    id = dataRow[idColName]
     try:
         decodeDataValueCdl(dataRow, schema["fields"])
     except Exception:
         raise
 
-    return (rowId, dataRow)
+    return (id, dataRow)
 
 def decodeDataValueCdl(dataRow, schemaFields):
     for i in range(0, len(schemaFields)):
@@ -136,7 +137,7 @@ def predict(pipeline, rowDict):
     return pipeline.predict(dataFrame, None, True)
 
 def writeToFile(w, rowId, scoreList):
-    w.write(rowId + "," + ",".join(scoreList) + "\n")
+    w.write(str(rowId) + "," + ",".join(scoreList) + "\n")
 
 if __name__ == "__main__":
     main(sys.argv)

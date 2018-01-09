@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -14,6 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.avro.file.CodecFactory;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.codec.binary.Base64InputStream;
@@ -32,10 +37,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
@@ -129,37 +136,60 @@ public class ScoringMapperTransformUtil {
         // key: recordFileName, value: the bufferwriter the file connecting
         Map<String, BufferedWriter> recordFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        int recordNumber = 0;
+        // int recordNumber = 0;
         Collection<String> modelGuids = config.getStringCollection(ScoringProperty.MODEL_GUID.name());
         ObjectMapper mapper = new ObjectMapper();
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
+        OutputStream out = null;
+        DataFileWriter<GenericRecord> writer = null;
+        DataFileWriter<GenericRecord> creator = null;
         while (context.nextKeyValue()) {
-            String record = context.getCurrentKey().datum().toString();
-            JsonNode jsonNode = mapper.readTree(record);
+            Record record = context.getCurrentKey().datum();
+            JsonNode jsonNode = mapper.readTree(record.toString());
             if (CollectionUtils.isEmpty(modelGuids)) {
                 String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
                 transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
                         leadFileThreshold, modelGuid, uniqueKeyColumn);
-                recordNumber++;
+                // recordNumber++;
             } else {
-                for (String modelGuid : modelGuids) {
-                    transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
-                            leadFileThreshold, modelGuid, uniqueKeyColumn);
-                    recordNumber++;
+                String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
+                if (type.equals(ScoringInputType.Avro.name())) {
+                    modelGuids.forEach(m -> {
+                        modelInfoMap.putIfAbsent(UuidUtils.extractUuid(m), new ModelAndRecordInfo.ModelInfo(m, 1L));
+                    });
+
+                    if (out == null) {
+                        out = new FileOutputStream("input.avro");
+                        writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
+                        creator = writer.create(record.getSchema(), out);
+                    }
+                    creator.append(record);
+                } else if (type.equals(ScoringInputType.Json.name())) {
+                    modelGuids.forEach(m -> {
+                        try {
+                            transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
+                                    leadFileThreshold, m, uniqueKeyColumn);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 }
             }
-
+        }
+        if (out != null) {
+            creator.close();
+            writer.close();
         }
         Set<String> keySet = recordFileBufferMap.keySet();
         for (String key : keySet) {
             recordFileBufferMap.get(key).close();
         }
-
         modelAndLeadInfo.setModelInfoMap(modelInfoMap);
-        modelAndLeadInfo.setTotalRecordCountr(recordNumber);
-        ScoringMapperValidateUtil.validateTransformation(modelAndLeadInfo);
+        // modelAndLeadInfo.setTotalRecordCountr(recordNumber);
+        // ScoringMapperValidateUtil.validateTransformation(modelAndLeadInfo);
 
         return modelAndLeadInfo;
+
     }
 
     @VisibleForTesting

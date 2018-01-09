@@ -16,12 +16,12 @@ public class LEJobExplorerFactoryBean extends JobExplorerFactoryBean {
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
     private JdbcTemplate jdbcTemplate;
-    
+
     private String tablePrefix;
 
     public LEJobExplorerFactoryBean(JdbcTemplate jdbcTemplate, String tablePrefix) {
         this.jdbcTemplate = jdbcTemplate;
-        this.tablePrefix = tablePrefix; 
+        this.tablePrefix = tablePrefix;
     }
 
     public void setJobExecutionRetriever(LEJobExecutionRetriever leJobExecutionRetriever) {

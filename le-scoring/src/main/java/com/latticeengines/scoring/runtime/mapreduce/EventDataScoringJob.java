@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
@@ -54,6 +55,10 @@ public class EventDataScoringJob extends MRJobCustomizationBase {
                 config.set(ScoringProperty.MODEL_GUID.name(),
                         properties.getProperty(ScoringProperty.MODEL_GUID.name()));
             }
+
+            config.set(ScoringProperty.SCORE_INPUT_TYPE.name(),
+                    properties.getProperty(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name()));
+
             config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(),
                     properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
 

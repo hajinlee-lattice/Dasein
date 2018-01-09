@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
@@ -53,11 +54,17 @@ public class ScoringMapperPredictUtil {
     public static void evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
             Set<String> uuidSet) throws IOException, InterruptedException {
 
+        Configuration config = context.getConfiguration();
+        String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
         StringBuilder sb = new StringBuilder();
         for (String modelGuid : uuidSet) {
             sb.append(modelGuid + " ");
         }
-        String pythonCommand = "./pythonlauncher.sh lattice " + "scoring.py " + sb.toString();
+        String pythonCommand = String.format("./pythonlauncher.sh lattice scoring.py %s ", type);
+        if (type.equals(ScoringInputType.Avro.name())) {
+            pythonCommand += config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name()) + " ";
+        }
+        pythonCommand += sb.toString();
         log.info(pythonCommand);
         File pyFile = new File("scoring.py");
         if (!pyFile.exists()) {
@@ -121,7 +128,7 @@ public class ScoringMapperPredictUtil {
     }
 
     public static List<ScoreOutput> processScoreFiles(ModelAndRecordInfo modelAndRecordInfo,
-            Map<String, JsonNode> models, long recordFileThreshold) throws IOException, DecoderException {
+            Map<String, JsonNode> models, long recordFileThreshold, String type) throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
         Set<String> uuidSet = modelInfoMap.keySet();
         // list of HashMap<leadId: score>
@@ -135,7 +142,7 @@ public class ScoringMapperPredictUtil {
             long remain = value / recordFileThreshold;
             int totalRawScoreNumber = 0;
             for (int i = 0; i <= remain; i++) {
-                totalRawScoreNumber += readScoreFile(uuid, i, scores);
+                totalRawScoreNumber += readScoreFile(uuid, i, scores, type);
             }
             List<String> duplicateLeadIdList = checkForDuplicateLeads(scores, totalRawScoreNumber, uuid);
             if (!CollectionUtils.isEmpty(duplicateLeadIdList)) {
@@ -156,7 +163,7 @@ public class ScoringMapperPredictUtil {
     }
 
     public static List<ScoreOutput> processScoreFilesUsingScoreDerivation(ModelAndRecordInfo modelAndRecordInfo,
-            Map<String, ScoreDerivation> scoreDerivationMap, long recordFileThreshold)
+            Map<String, ScoreDerivation> scoreDerivationMap, long recordFileThreshold, String type)
             throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
         Set<String> uuidSet = modelInfoMap.keySet();
@@ -170,7 +177,7 @@ public class ScoringMapperPredictUtil {
             long remain = value / recordFileThreshold;
             int totalRawScoreNumber = 0;
             for (int i = 0; i <= remain; i++) {
-                totalRawScoreNumber += readScoreFile(uuid, i, scores);
+                totalRawScoreNumber += readScoreFile(uuid, i, scores, type);
             }
             List<String> duplicateLeadIdList = checkForDuplicateLeads(scores, totalRawScoreNumber, uuid);
             if (!CollectionUtils.isEmpty(duplicateLeadIdList)) {
@@ -210,7 +217,7 @@ public class ScoringMapperPredictUtil {
         return duplicateLeadsList;
     }
 
-    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores)
+    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores, String type)
             throws IOException, DecoderException {
 
         int rawScoreNum = 0;
@@ -220,13 +227,17 @@ public class ScoringMapperPredictUtil {
             throw new LedpException(LedpCode.LEDP_20012, new String[] { fileName });
         }
 
+        @SuppressWarnings("deprecation")
         List<String> lines = FileUtils.readLines(f);
         for (String line : lines) {
             String[] splitLine = line.split(",");
             if (splitLine.length != 2) {
                 throw new LedpException(LedpCode.LEDP_20013);
             }
-            String recordId = new String(Hex.decodeHex(splitLine[0].toCharArray()), "UTF-8");
+            String recordId = splitLine[0];
+            if (type.equals(ScoringInputType.Json.name())) {
+                recordId = new String(Hex.decodeHex(recordId.toCharArray()), "UTF-8");
+            }
             Double rawScore = Double.parseDouble(splitLine[1]);
             if (scores.containsKey(recordId)) {
                 scores.get(recordId).add(rawScore);
