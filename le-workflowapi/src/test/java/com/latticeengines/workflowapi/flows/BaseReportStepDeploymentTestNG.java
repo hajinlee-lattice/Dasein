@@ -16,11 +16,15 @@ import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.testflows.testreport.TestReportWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
+import com.latticeengines.workflowapi.service.WorkflowJobService;
 
 public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {
 
     @Autowired
     private WorkflowService workflowService;
+
+    @Autowired
+    private WorkflowJobService workflowJobService;
 
     @Autowired
     private ReportService reportService;
@@ -32,7 +36,8 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
 
-        Job job = workflowService.getJob(workflowId);
+//        Job job = workflowService.getJob(workflowId);
+        Job job = workflowJobService.getJob(workflowId.getId());
         assertEquals(job.getReports().size(), 1);
         Report report = job.getReports().get(0);
         assertTrue(report.getName().startsWith("Test"));

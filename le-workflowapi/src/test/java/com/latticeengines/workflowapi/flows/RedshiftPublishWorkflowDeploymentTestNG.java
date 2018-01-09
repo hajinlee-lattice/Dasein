@@ -10,12 +10,12 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -132,7 +132,8 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
     }
 
     private void verifyReport(WorkflowExecutionId workflowId, ReportPurpose purpose, int count) {
-        Job job = workflowService.getJob(workflowId);
+//        Job job = workflowService.getJob(workflowId);
+        Job job = workflowJobService.getJob(workflowId.getId());
         Report publishDataReport = job.getReports().stream()
                 .filter(r -> r.getPurpose().equals(ReportPurpose.PUBLISH_DATA_SUMMARY)).findFirst().orElse(null);
         assertNotNull(publishDataReport);

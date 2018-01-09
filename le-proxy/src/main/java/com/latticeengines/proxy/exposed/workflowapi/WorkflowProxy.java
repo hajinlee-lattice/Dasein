@@ -9,8 +9,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -19,12 +19,11 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.network.exposed.workflowapi.DeprecatedWorkflowInterface;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
-public class WorkflowProxy extends MicroserviceRestApiProxy implements DeprecatedWorkflowInterface, WorkflowInterface {
+public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowInterface {
 
     private static Logger log = LoggerFactory.getLogger(WorkflowProxy.class);
 
@@ -76,7 +75,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
     }
 
     @Override
-    public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
+    public List<Job> getWorkflowExecutionsForTenant(Long tenantPid) {
         String url = constructUrl("/jobs/{tenantPid}", tenantPid);
         return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
     }
@@ -110,8 +109,8 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
 
     @Override
     public List<Job> getWorkflowJobs(String customerSpace, List<String> jobIds, List<String> types,
-            Boolean includeDetails, Boolean hasParentId) {
-        String url = generateGetWorkflowUrls(customerSpace, jobIds, types, includeDetails, hasParentId);
+            Boolean includeDetails) {
+        String url = generateGetWorkflowUrls(customerSpace, jobIds, types, includeDetails, false);
         return JsonUtils.convertList(get("getWorkflowJobs", url, List.class), Job.class);
     }
 
@@ -132,10 +131,10 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
             }
         }
         if (includeDetails != null) {
-            sb.append(String.format("includeDetails=%s&", Boolean.valueOf(includeDetails)));
+            sb.append(String.format("includeDetails=%s&", includeDetails));
         }
         if (hasParentId != null) {
-            sb.append(String.format("hasParentId=%s", Boolean.valueOf(hasParentId)));
+            sb.append(String.format("hasParentId=%s", hasParentId));
         }
         if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '&') {
             sb.setLength(sb.length() - 1);
@@ -169,5 +168,4 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements Deprecate
         urlStr.append(String.format("parentJobId=%s", parentJobId));
         return constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
     }
-
 }

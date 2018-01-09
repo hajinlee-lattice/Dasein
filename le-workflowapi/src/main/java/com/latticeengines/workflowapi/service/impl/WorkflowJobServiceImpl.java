@@ -1,37 +1,25 @@
 package com.latticeengines.workflowapi.service.impl;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 
+import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.JobStep;
-import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -68,6 +56,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private WorkflowContainerService workflowContainerService;
 
     @Override
+    public WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String applicationId) {
+        return workflowJobEntityMgr.findByApplicationId(applicationId).getAsWorkflowId();
+    }
+
+    @Override
+    public WorkflowStatus getWorkflowStatus(Long workflowId) {
+        return workflowService.getStatus(new WorkflowExecutionId(workflowId));
+    }
+
+    @Override
     public JobStatus getJobStatus(Long workflowId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
         return (workflowJob != null) ? JobStatus.fromString(workflowJob.getStatus()) : null;
@@ -98,6 +96,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
+    public Job getJobByApplicationId(String applicationId) {
+        return getJobByApplicationId(applicationId, true);
+    }
+
+    @Override
+    public Job getJobByApplicationId(String applicationId, Boolean includeDetails) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        return assembleJob(workflowJob, includeDetails);
+    }
+
+    @Override
     public List<Job> getJobs(List<Long> workflowIds) {
         return getJobs(workflowIds, true);
     }
@@ -105,44 +114,35 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public List<Job> getJobs(List<Long> workflowIds, Boolean includeDetails) {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
+
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Job> getJobs(List<Long> workflowIds, String type) {
-        return getJobs(workflowIds, type, true);
+        return getJobs(workflowIds, Collections.singletonList(type), true);
     }
 
     @Override
-    public List<Job> getJobs(List<Long> workflowIds, String type, Boolean includeDetails) {
-        List<Job> jobs = getJobs(workflowIds, includeDetails);
-        if (type != null) {
-            jobs.removeIf(job -> !type.equalsIgnoreCase(job.getJobType()));
-        }
-        return jobs;
+    public List<Job> getJobs(List<Long> workflowIds, List<String> types, Boolean includeDetails) {
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds, types);
+
+        return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
+                .collect(Collectors.toList());
     }
 
     @Override
     @WithCustomerSpace
-    public List<Job> getJobs(String customerSpace, List<Long> workflowIds, Set<String> types, Boolean includeDetails,
-                             Boolean hasParentId, Long parentJobId) {
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIdsWithFilter(workflowIds);
-
-        workflowJobs.removeIf(workflowJob -> {
-            JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId());
-
-            if (hasParentId) {
-                return (workflowJob.getParentJobId() == null) || !parentJobId.equals(workflowJob.getParentJobId());
-            }
-
-            if (jobExecution == null) {
-                return true;
-            } else {
-                JobInstance jobInstance = jobExecution.getJobInstance();
-                return (jobInstance == null) || !types.contains(jobInstance.getJobName());
-            }
-        });
+    public List<Job> getJobs(String customerSpace, List<Long> workflowIds, List<String> types,
+                             Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+        List<WorkflowJob> workflowJobs;
+        if (hasParentId) {
+            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsWithFilter(workflowIds, types, parentJobId);
+            workflowJobs.forEach(workflowJob -> workflowJob.setParentJobId(parentJobId));
+        } else {
+            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsWithFilter(workflowIds, types);
+        }
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
@@ -158,6 +158,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
         MultiTenantContext.setTenant(tenant);
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant);
+
+        return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Job> getJobsByTenantPid(Long tenantPid, List<String> types, Boolean includeDetails) {
+        Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
+        MultiTenantContext.setTenant(tenant);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant, types);
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
@@ -180,13 +190,31 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
-    public void updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId) {
+    public List<Job> updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId) {
         List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsWithFilter(workflowIds);
         jobs.removeIf(Objects::isNull);
         jobs.forEach(job -> {
             job.setParentJobId(parentJobId);
             workflowJobEntityMgr.updateParentJobId(job);
         });
+
+        return getJobs(workflowIds);
+    }
+
+    @Override
+    public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfiguration) {
+        return workflowContainerService.submitWorkFlow(workflowConfiguration);
+    }
+
+    @Override
+    public String submitAwsWorkflow(WorkflowConfiguration workflowConfiguration) {
+        return workflowContainerService.submitAwsWorkFlow(workflowConfiguration);
+    }
+
+    @Override
+    @WithCustomerSpace
+    public void stopWorkflow(String customerSpace, Long workflowId) {
+        workflowService.stop(customerSpace, new WorkflowExecutionId(workflowId));
     }
 
     private Job assembleJob(WorkflowJob workflowJob, Boolean includeDetails) {

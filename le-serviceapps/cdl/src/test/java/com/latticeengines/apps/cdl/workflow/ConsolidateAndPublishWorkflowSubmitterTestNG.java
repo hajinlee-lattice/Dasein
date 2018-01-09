@@ -48,11 +48,11 @@ public class ConsolidateAndPublishWorkflowSubmitterTestNG {
         List<Long> jobIds = importJobs.stream().map(job -> job.getId()).collect(Collectors.toList());
         log.info("importJobIdss is " + jobIds);
         doReturn(importJobs).when(workflowProxy).getWorkflowJobs(any(String.class), nullable(List.class),
-                nullable(List.class), nullable(Boolean.class), nullable(Boolean.class));
+                nullable(List.class), nullable(Boolean.class));
         List<Long> importJobIds = consolidateAndPublishWorkflowSubmitter.getImportJobIds(customerSpace);
         Assert.assertEquals(importJobIds.toString(), jobIds.toString());
         doReturn(Collections.emptyList()).when(workflowProxy).getWorkflowJobs(any(String.class), nullable(List.class),
-                nullable(List.class), nullable(Boolean.class), nullable(Boolean.class));
+                nullable(List.class), nullable(Boolean.class));
         importJobIds = consolidateAndPublishWorkflowSubmitter.getImportJobIds(customerSpace);
         Assert.assertEquals(importJobIds.toString(), Collections.emptyList().toString());
     }

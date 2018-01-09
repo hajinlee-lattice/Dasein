@@ -101,9 +101,8 @@ public enum JobStatus {
                 case SUCCEEDED:
                     return JobStatus.COMPLETED;
                 case FAILED:
-                    return JobStatus.FAILED;
                 case KILLED:
-                    return JobStatus.CANCELLED;
+                    return JobStatus.FAILED;
                 case UNDEFINED:
                 default:
                     return JobStatus.PENDING;

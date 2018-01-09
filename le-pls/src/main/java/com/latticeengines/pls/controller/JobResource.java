@@ -51,7 +51,7 @@ public class JobResource {
         if (jobIds != null && types == null && includeDetails == null && hasParentId == null) {
             return workflowJobService.findByJobIds(jobIds);
         }
-        return workflowJobService.findJobs(jobIds, types, includeDetails, hasParentId);
+        return workflowJobService.findJobs(jobIds, types, includeDetails, false);
     }
 
     @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

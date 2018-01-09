@@ -54,6 +54,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
+import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -80,6 +81,9 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     @Autowired
     protected SoftwareLibraryService softwareLibraryService;
+
+    @Autowired
+    protected WorkflowJobService workflowJobService;
 
     @Autowired
     protected VersionManager versionManager;

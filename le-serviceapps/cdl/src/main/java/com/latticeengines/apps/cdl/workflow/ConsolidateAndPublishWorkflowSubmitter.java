@@ -100,7 +100,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @VisibleForTesting
     List<Long> getImportJobIds(String customerSpace) {
         List<Job> importJobs = workflowProxy.getWorkflowJobs(customerSpace, null,
-                Arrays.asList("cdlDataFeedImportWorkflow"), null, Boolean.FALSE);
+                Arrays.asList("cdlDataFeedImportWorkflow"), null);
         List<Long> importJobIds = Collections.emptyList();
         if (CollectionUtils.isEmpty(importJobs)) {
             log.warn("No import jobs are associated with the current consolidate job");
