@@ -48,10 +48,11 @@ angular.module('mainApp.login.services.LoginService', [
         var deferred = $q.defer();
         var result = sessionDocument;
         if (result != null && result !== "") {
+            result.Ticket.AuthenticationRoute = result.AuthenticationRoute; //FIXME this is just here until backend starts passing it
+
             BrowserStorageUtility.setTokenDocument(result.Ticket.Uniqueness + "." + result.Ticket.Randomness);
-            result.Ticket.Tenants[0].UIVersion = "3.0";
             deferred.resolve(result);
-            BrowserStorageUtility.setLoginDocument(result.Ticket);
+            BrowserStorageUtility.setLoginDocument(result.Ticket); // with normal LoginService.login ^ this is result.Result, here it's result.Ticket and result.Result is what attach would use
         }
         deferred.resolve(result);
 
@@ -147,8 +148,16 @@ angular.module('mainApp.login.services.LoginService', [
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
 
+                var loginDocument = BrowserStorageUtility.getLoginDocument(),
+                    authenticationRoute = loginDocument.AuthenticationRoute || null,
+                    tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
+
                 setTimeout(function() {
-                    window.open("/login/", "_self");
+                    if(authenticationRoute === 'SSO') {
+                        window.open("/login/saml/' + tenantId + '/logout", "_self");
+                    } else {
+                        window.open("/login/", "_self");
+                    }
                 }, 300);
             } else {
                 SessionService.HandleResponseErrors(data, status);

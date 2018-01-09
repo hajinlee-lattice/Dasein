@@ -24,7 +24,7 @@ angular.module('login.saml', [])
                  * If there's one tenant login.tenants will automatically go to that tenant.  
                  * If there's more than one tenant login.tenants will show a list of those tenants to select from.
                  */
-                $state.go('login.tenants');  
+                $state.go('login.tenants');
             });
         };
 
