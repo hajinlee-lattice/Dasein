@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import org.apache.hadoop.conf.Configuration;
@@ -43,6 +43,10 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
     @Override
     public void run(Context context) throws IOException, InterruptedException {
+
+        FileSplit split = (FileSplit) context.getInputSplit();
+        log.info("split path is :" + split.getPath().getName());
+        String splitName = StringUtils.substringBeforeLast(split.getPath().getName(), ".");
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
         URI[] uris = context.getCacheFiles();
@@ -58,40 +62,35 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             ModelAndRecordInfo modelAndRecordInfo = ScoringMapperTransformUtil.prepareRecordsForScoring(context,
                     dataType, models, recordFileThreshold);
 
-            // if (modelAndRecordInfo.getTotalRecordCount() == 0) {
-            // return;
-            // }
+            if (modelAndRecordInfo.getTotalRecordCount() == 0) {
+                return;
+            }
             long transformEndTime = System.currentTimeMillis();
             long transformationTotalTime = transformEndTime - transformStartTime;
             log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins");
 
-            // long totalRecordCount = modelAndRecordInfo.getTotalRecordCount();
-            // log.info("The mapper has transformed: " + totalRecordCount + "
-            // records.");
+            long totalRecordCount = modelAndRecordInfo.getTotalRecordCount();
+            log.info("The mapper has transformed: " + totalRecordCount + "records.");
 
             ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
-            List<ScoreOutput> resultList = new ArrayList<>();
+//            List<ScoreOutput> resultList = new ArrayList<>();
             if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(),
                     Boolean.FALSE.booleanValue()) == Boolean.TRUE.booleanValue()) {
                 log.info("Using score derivation to generate percentile score.");
                 Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
                         .deserializeLocalScoreDerivationFiles(uris);
-                resultList = ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(modelAndRecordInfo,
-                        scoreDerivationMap, recordFileThreshold, config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name()));
-            } else {
-                resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndRecordInfo, models,
-                        recordFileThreshold, config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name()));
-            }
-            log.info("The mapper has scored: " + resultList.size() + " records.");
-            // if (totalRecordCount != resultList.size()) {
-            // throw new LedpException(LedpCode.LEDP_20009,
-            // new String[] { String.valueOf(totalRecordCount),
-            // String.valueOf(resultList.size()) });
-            // }
+                ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(config, modelAndRecordInfo,
+                        scoreDerivationMap, recordFileThreshold, splitName);
 
-            String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
-            log.info("outputDir: " + outputPath);
-            ScoringMapperPredictUtil.writeToOutputFile(resultList, context.getConfiguration(), outputPath);
+            } else {
+                ScoringMapperPredictUtil.processScoreFiles(config, modelAndRecordInfo, models, recordFileThreshold,
+                        splitName);
+            }
+//            log.info("The mapper has scored: " + resultList.size() + " records.");
+//            if (totalRecordCount != resultList.size()) {
+//                throw new LedpException(LedpCode.LEDP_20009,
+//                        new String[] { String.valueOf(totalRecordCount), String.valueOf(resultList.size()) });
+//            }
 
             long scoringEndTime = System.currentTimeMillis();
             long scoringTotalTime = scoringEndTime - transformEndTime;

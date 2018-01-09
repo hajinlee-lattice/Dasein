@@ -136,7 +136,7 @@ public class ScoringMapperTransformUtil {
         // key: recordFileName, value: the bufferwriter the file connecting
         Map<String, BufferedWriter> recordFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        // int recordNumber = 0;
+        int recordNumber = 0;
         Collection<String> modelGuids = config.getStringCollection(ScoringProperty.MODEL_GUID.name());
         ObjectMapper mapper = new ObjectMapper();
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
@@ -146,18 +146,19 @@ public class ScoringMapperTransformUtil {
         while (context.nextKeyValue()) {
             Record record = context.getCurrentKey().datum();
             JsonNode jsonNode = mapper.readTree(record.toString());
+            recordNumber++;
             if (CollectionUtils.isEmpty(modelGuids)) {
                 String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
                 transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
                         leadFileThreshold, modelGuid, uniqueKeyColumn);
-                // recordNumber++;
             } else {
                 String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
                 if (type.equals(ScoringInputType.Avro.name())) {
                     modelGuids.forEach(m -> {
-                        modelInfoMap.putIfAbsent(UuidUtils.extractUuid(m), new ModelAndRecordInfo.ModelInfo(m, 1L));
+                        String uuid = UuidUtils.extractUuid(m);
+                        modelInfoMap.putIfAbsent(uuid, new ModelAndRecordInfo.ModelInfo(m, 0L));
+                        modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
                     });
-
                     if (out == null) {
                         out = new FileOutputStream("input.avro");
                         writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
@@ -185,9 +186,8 @@ public class ScoringMapperTransformUtil {
             recordFileBufferMap.get(key).close();
         }
         modelAndLeadInfo.setModelInfoMap(modelInfoMap);
-        // modelAndLeadInfo.setTotalRecordCountr(recordNumber);
-        // ScoringMapperValidateUtil.validateTransformation(modelAndLeadInfo);
-
+        modelAndLeadInfo.setTotalRecordCountr(recordNumber);
+        ScoringMapperValidateUtil.validateTransformation(modelAndLeadInfo);
         return modelAndLeadInfo;
 
     }
