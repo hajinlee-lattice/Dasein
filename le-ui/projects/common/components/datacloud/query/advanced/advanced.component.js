@@ -261,6 +261,22 @@ angular.module('common.datacloud.query.builder', [
     //     return fromBucket;
     // }
 
+    /**
+     * TODO: A map with association Entity -> Bucket should be created
+     * Look at vm.updateBucketCount where we can use this map as well
+     * @param {*} item 
+     * @param {*} entity 
+     */
+    vm.isMatching = function(item, entity){
+        if(item.Entity == entity){
+            return true;
+        }
+        else if(item.Entity === 'PurchaseHistory' && entity === 'Account'){
+            return true;
+        } else{
+            return false;
+        }
+    }
     vm.generateRulesTreeForEntity = function(entity) {
         var bucketRestrictions = [];
         
@@ -268,7 +284,7 @@ angular.module('common.datacloud.query.builder', [
         .forEach(function(value, index) {
             var item = angular.copy(vm.enrichments[vm.enrichmentsMap[value]]);
 
-            if (item && item.Entity == entity) {
+            if (item && vm.isMatching(item, entity)) {
                 bucketRestrictions.push({
                     bucketRestriction: {
                         attr: item.Entity + '.' + value,
