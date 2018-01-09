@@ -38,9 +38,19 @@ build_docker latticeengines/jre ${NO_CACHE}
 docker tag latticeengines/jre:latest latticeengines/jre:1.8
 popd
 
+pushd le-jre-c7
+build_docker latticeengines/jrec7 ${NO_CACHE}
+docker tag latticeengines/jrec7:latest latticeengines/jrec7:1.8
+popd
+
 pushd le-tomcat
 build_docker latticeengines/tomcat ${NO_CACHE}
 docker tag latticeengines/tomcat:latest latticeengines/tomcat:8.5
+popd
+
+pushd le-tomcat-c7
+build_docker latticeengines/tomcatc7 ${NO_CACHE}
+docker tag latticeengines/tomcatc7:latest latticeengines/tomcatc7:8.5
 popd
 
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null

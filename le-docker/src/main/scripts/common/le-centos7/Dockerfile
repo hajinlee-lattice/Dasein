@@ -1,11 +1,18 @@
-FROM centos:7
+# leave the comments for now until we are sure the services will not be put back in
+FROM centos:centos7.4.1708
+RUN yum update -y && yum clean all && rm -rf /var/cache/yum
+RUN yum install -y epel-release initscripts && yum clean all
+#RUN yum install -y git passwd wget which && yum clean all
+#RUN yum install -y git passwd wget bind-utils net-tools which && yum clean all
+RUN mkdir -p /root/.ssh  && chmod 0700  /root/.ssh   && mkdir -p /etc/snmp  && mkdir -p /opt/le/bin && chmod 755 /opt/le/bin  && mkdir /root/chefcache && mkdir /root/postfix
+#RUN mkfifo /var/spool/postfix/public/pickup ps aux
+COPY files/le.repo /etc/yum.repos.d/le.repo
 
-RUN yum -y update; yum clean all; 
-RUN yum -y install openssh-server passwd wget bind-utils net-tools which;
+COPY files/main.cf.dev files/main.cf.production /root/postfix/
+COPY files/main.cf.dev /etc/postfix/main.cf
+COPY files/motd.txt /etc/motd
+COPY files/selinux_config /etc/selinux/config
+COPY files/certnew.cer /etc/pki/ca-trust/source/anchors/certnew.cer
+RUN update-ca-trust force-enable && update-ca-trust extract
 
-# java
-RUN wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
-	"http://download.oracle.com/otn-pub/java/jdk/8u60-b27/jdk-8u60-linux-x64.rpm"; \
-	yum -y localinstall jdk-8u60-linux-x64.rpm; \
-	rm jdk-8u60-linux-x64.rpm; \
-    echo 'export JAVA_HOME=/usr/java/default' >> /etc/profile
+
