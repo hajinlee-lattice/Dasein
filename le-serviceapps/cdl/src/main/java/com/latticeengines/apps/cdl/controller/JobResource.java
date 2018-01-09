@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 
@@ -24,6 +25,7 @@ public class JobResource {
     @RequestMapping(value = "/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
+    @NoCustomerSpace
     public JobStatus getJobStatus(@PathVariable String customerSpace, @PathVariable String applicationId) {
         //todo: use customerSpace to filter(waiting for workflow api support);
         return jobProxy.getJobStatus(applicationId);
