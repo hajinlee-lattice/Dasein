@@ -114,7 +114,7 @@
         <jcabi.version>1.1</jcabi.version>
         <sourceforge.csvjdbc.version>1.0.28</sourceforge.csvjdbc.version>
         <jedis.version>2.8.0</jedis.version>
-        <redisson.version>3.5.4</redisson.version>
+        <redisson.version>3.5.6</redisson.version>
         <okio.version>1.13.0</okio.version>
         <caffeine.version>2.5.3</caffeine.version>
         <zip4j.version>1.3.2</zip4j.version>
