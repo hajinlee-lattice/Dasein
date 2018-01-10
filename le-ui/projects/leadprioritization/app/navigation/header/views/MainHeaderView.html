@@ -63,7 +63,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="/login/#/update" data-ng-hide="mandatePasswordChange" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}">
+                                <a href="/login/#/update" data-ng-if="mayChangePassword" data-ng-hide="mandatePasswordChange" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}">
                                     {{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}
                                 </a>
                             </li>

@@ -1,5 +1,5 @@
 <form class="container row">
-    <div class="columns twelve">
+    <div class="columns twelve" ng-if="$ctrl.mayChangePassword">
 
         <div class="messaging error-messaging" ng-if="$ctrl.showPasswordError">
             <button id="close-button" type="button" class="close" ng-click="$ctrl.showPasswordError = false;">x</button>
@@ -36,5 +36,8 @@
             </div>
         </div>
 
+    </div>
+    <div class="columns twelve" ng-if="!$ctrl.mayChangePassword">
+        Access Denied
     </div>
 </form>

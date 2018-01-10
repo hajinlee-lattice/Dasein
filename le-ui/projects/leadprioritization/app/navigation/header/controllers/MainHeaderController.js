@@ -44,6 +44,13 @@ angular.module('pd.navigation.header', [
 
     $scope.showProfileNav = false;
 
+        var loginDocument = BrowserStorageUtility.getLoginDocument(),
+            authenticationRoute = loginDocument.AuthenticationRoute || null,
+            clientSession = BrowserStorageUtility.getClientSession() || {},
+            accessLevel = clientSession.AccessLevel || null;
+
+        $scope.mayChangePassword = (authenticationRoute !== 'SSO' || (authenticationRoute === 'SSO'  && accessLevel === 'SUPER_ADMIN'));
+
     $('body.not-initialized')
         .removeClass('not-initialized')
         .addClass('initialized');

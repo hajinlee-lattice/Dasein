@@ -21,6 +21,13 @@ angular.module('login.update', [
         vm.isLoggedInWithTempPassword = LoginDocument.MustChangePassword;
         vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified);
 
+        var loginDocument = BrowserStorageUtility.getLoginDocument(),
+            authenticationRoute = loginDocument.AuthenticationRoute || null,
+            clientSession = BrowserStorageUtility.getClientSession() || {},
+            accessLevel = clientSession.AccessLevel || null;
+
+        vm.mayChangePassword = (authenticationRoute !== 'SSO' || (authenticationRoute === 'SSO'  && accessLevel === 'SUPER_ADMIN'));
+
         vm.oldPassword = null;
         vm.newPassword = null;
         vm.confirmPassword = null;
