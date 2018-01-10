@@ -169,7 +169,6 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         this.getAttributeRules = function (bucketRestriction, bkt, bucket, isSameAttribute) {
             
             var entity = getEntity(bucketRestriction);
-            // console.log('ENTITY', entity);
             var service = getService(entity);
             return service.getAttributeRules(bkt, bucket, isSameAttribute);
         }
@@ -372,20 +371,10 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             // console.log('Account', bucket, bkt);
             var isSameBucket = true;
             if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
-                if(bucket.Vals.length == bkt.Vals.length){
-                    var valsEquals = true;
-                    for(var i = 0; i<bucket.Vals.length; i++){
-                        if(bkt.Vals[i] !== bucket.Vals[i]){
-                            valsEquals = false;
-                            break;
-                        }
-                    }
-                    isSameBucket = valsEquals && bkt.Cmp == bucket.Cmp;
-                }
+                isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
             }
             
-            var r = isSameAttribute && isSameBucket;
-            return r;
+            return isSameAttribute && isSameBucket;
         }
 
         //******************** Editing mode *********************************/
