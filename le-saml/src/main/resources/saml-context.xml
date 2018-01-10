@@ -6,15 +6,21 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:common-webapp-env-context.xml"/>
- 
+
     <context:component-scan base-package="com.latticeengines.saml"/>
 
+    <import resource="classpath:common-webapp-env-context.xml"/>
     <import resource="classpath:saml-common-context.xml"/>
     <import resource="classpath:saml-server-context.xml"/>
     <import resource="classpath:saml-persistence-context.xml"/>
     <import resource="classpath:saml-management-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
+    <import resource="classpath:monitor-metric-context.xml"/>
 
     <context:annotation-config/>
+
+    <bean id="samlHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
+        <property name="componentName" value="saml" />
+    </bean>
 
 </beans>

@@ -9,74 +9,82 @@
 
     <properties>
         <component-name>saml</component-name>
-        <le.domain.version>4.3.1-SNAPSHOT</le.domain.version>
-        <le.db.version>4.3.1-SNAPSHOT</le.db.version>
-        <le.auth.version>4.3.1-SNAPSHOT</le.auth.version>
-        <le.security.version>4.3.1-SNAPSHOT</le.security.version>
-        <le.testfwk.version>4.3.1-SNAPSHOT</le.testfwk.version>
-        <le.remote.version>4.3.1-SNAPSHOT</le.remote.version>
+        <jetty.port>8087</jetty.port>
+        <jetty.stop.port>10987</jetty.stop.port>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-parent</artifactId>
+        <artifactId>le-web-parent</artifactId>
         <version>4.3.1-SNAPSHOT</version>
-        <relativePath>../le-parent</relativePath>
+        <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-auth</artifactId>
-            <version>${le.auth.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-auth</artifactId>
-            <version>${le.auth.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-remote</artifactId>
-            <version>${le.remote.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

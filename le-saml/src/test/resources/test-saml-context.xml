@@ -15,10 +15,9 @@
                                 expression="com.latticeengines.saml.swagger.SwaggerConfig"/>
     </context:component-scan>
 
-
+    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:saml-common-context.xml"/>
     <import resource="classpath:saml-persistence-context.xml"/>
-    <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:testframework-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
