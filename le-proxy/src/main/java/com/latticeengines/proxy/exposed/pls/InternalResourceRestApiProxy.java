@@ -287,20 +287,26 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public Integer getSelectedAttributeCount(CustomerSpace customerSpace) {
+    public Integer getSelectedAttributeCount(CustomerSpace customerSpace, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedattributes/count",
                     customerSpace.toString());
+            if (considerInternalAttributes) {
+                url += "?" + "considerInternalAttributes" + "=" + considerInternalAttributes;
+            }
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
         }
     }
 
-    public Integer getSelectedAttributePremiumCount(CustomerSpace customerSpace) {
+    public Integer getSelectedAttributePremiumCount(CustomerSpace customerSpace, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedpremiumattributes/count",
                     customerSpace.toString());
+            if (considerInternalAttributes) {
+                url += "?" + "considerInternalAttributes" + "=" + considerInternalAttributes;
+            }
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });

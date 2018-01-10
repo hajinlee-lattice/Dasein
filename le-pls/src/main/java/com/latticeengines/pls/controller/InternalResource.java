@@ -623,8 +623,8 @@ public class InternalResource extends InternalResourceBase {
             @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
             @RequestParam(value = "max", required = false) //
             Integer max, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
+            @ApiParam(value = "Consider internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") //
             Boolean considerInternalAttributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
@@ -655,14 +655,17 @@ public class InternalResource extends InternalResourceBase {
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes //
+            Boolean onlySelectedAttributes, //
+            @ApiParam(value = "Consider internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") //
+            Boolean considerInternalAttributes //
     ) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
         return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, Boolean.FALSE);
+                onlySelectedAttributes, considerInternalAttributes);
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/"
@@ -699,10 +702,13 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
     public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request, //
-            @PathVariable("tenantId") String tenantId) {
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "Consider internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") //
+            Boolean considerInternalAttributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        return attributeService.getSelectedAttributeCount(tenant, Boolean.FALSE);
+        return attributeService.getSelectedAttributeCount(tenant, considerInternalAttributes);
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count"
@@ -712,10 +718,13 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request, //
-            @PathVariable("tenantId") String tenantId) {
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "Consider internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false, defaultValue = "false") //
+            Boolean considerInternalAttributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        return attributeService.getSelectedAttributePremiumCount(tenant, Boolean.FALSE);
+        return attributeService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
 
     @RequestMapping(value = "/enrichment/all"
