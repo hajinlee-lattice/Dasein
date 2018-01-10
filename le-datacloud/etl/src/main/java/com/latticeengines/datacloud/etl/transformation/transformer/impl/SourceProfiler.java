@@ -121,9 +121,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     @Override
     protected void postDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
             ProfileConfig config) {
-        if (config.getStage().equals(DataCloudConstants.PROFILE_STAGE_ENRICH)) {
-            postProcessProfiledAttrs(workflowDir, paras);
-        }
+        postProcessProfiledAttrs(workflowDir, config, paras);
         List<Object[]> result = new ArrayList<>();
         if (paras.getIdAttr() != null) {
             result.add(profileIdAttr(paras.getIdAttr()));
@@ -366,7 +364,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         throw new RuntimeException(String.format("Fail to cast %s to BucketAlgorithm", algo));
     }
 
-    private void postProcessProfiledAttrs(String avroDir, ProfileParameters paras) {
+    private void postProcessProfiledAttrs(String avroDir, ProfileConfig config, ProfileParameters paras) {
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
         Map<String, Attribute> numericAttrsMap = new HashMap<>(); // attr name -> attr
         paras.getNumericAttrs().forEach(numericAttr -> numericAttrsMap.put(numericAttr.getAttr(), numericAttr));
@@ -394,9 +392,26 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                         record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString()));
             }
         }
-        // Only for ENRICHMENT case, so all the attributes are from AM
-        paras.getAmAttrsToEnc().addAll(paras.getNumericAttrs());
-        paras.getAmAttrsToEnc().addAll(paras.getCatAttrs());
+        // Move numerical & categorical attrs to encode attrs
+        String dataCloudVersion = findDCVersionToProfile(config);
+        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(config, dataCloudVersion);
+        for (ProfileParameters.Attribute numAttr : paras.getNumericAttrs()) {
+            if (amAttrsConfig.containsKey(numAttr.getAttr())) {
+                paras.getAmAttrsToEnc().add(numAttr);
+            } else {
+                paras.getExAttrsToEnc().add(numAttr);
+            }
+        }
+        for (ProfileParameters.Attribute catAttr : paras.getCatAttrs()) {
+            if (amAttrsConfig.containsKey(catAttr.getAttr())) {
+                paras.getAmAttrsToEnc().add(catAttr);
+            } else {
+                paras.getExAttrsToEnc().add(catAttr);
+            }
+        }
+
+        // paras.getAmAttrsToEnc().addAll(paras.getNumericAttrs());
+        // paras.getAmAttrsToEnc().addAll(paras.getCatAttrs());
         try {
             List<String> avros = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*\\.avro$");
             for (String path : avros) {
