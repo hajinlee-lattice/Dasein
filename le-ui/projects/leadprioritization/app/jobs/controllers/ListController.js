@@ -107,19 +107,19 @@ angular.module('lp.jobs', [
             }
         };
 
-        // function getAllJobs(use_cache) {
-        //     $scope.loadingJobs = true;
-        //     JobsStore.getJobs(use_cache, modelId).then(function(result) {
-        //         $scope.showEmptyJobsMessage = (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache);
-        //         $scope.loadingJobs = false;
-        //     });
-        // }
+        function getAllJobs(use_cache) {
+            $scope.loadingJobs = true;
+            JobsStore.getJobs(use_cache, modelId).then(function(result) {
+                $scope.showEmptyJobsMessage = (($scope.jobs == null || $scope.jobs.length == 0) && !use_cache);
+                $scope.loadingJobs = false;
+            });
+        }
 
         var BULK_SCORING_INTERVAL = 30 * 1000,
             BULK_SCORING_ID;
 
         // this stuff happens only on Model Bulk Scoring page
-        // getAllJobs();
+        getAllJobs();
 
         if (modelId) {
             BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
