@@ -112,7 +112,7 @@
                     ng-repeat="tree in (vm.mode == 'rules' ? vm.accountRulesTree : vm.getAccountTree())">
                 <query-tree-directive 
                         class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
-                        items="vm.items" tree="tree" root="vm">
+                        items="vm.items" tree="tree" root="vm" entity=" 'Account' ">
                 </query-tree-directive>
             </li>
         </ul>
@@ -135,7 +135,7 @@
                     ng-repeat="tree in (vm.mode == 'rules' ? vm.contactRulesTree : vm.getContactTree())">
                 <query-tree-directive 
                         class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
-                        items="vm.items" tree="tree" root="vm">
+                        items="vm.items" tree="tree" root="vm" entity=" 'Contact' ">
                 </query-tree-directive>
             </li>
         </ul>

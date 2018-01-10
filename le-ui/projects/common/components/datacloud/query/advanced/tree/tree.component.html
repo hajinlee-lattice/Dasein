@@ -131,7 +131,7 @@
             class="query-section-item-box">
         <query-tree-directive 
                 class="{{ vm.tree.logicalRestriction ? 'query-section-type-' + vm.tree.logicalRestriction.operator.toLowerCase() : '' }}" 
-                items="vm.items" tree="item" root="vm.root" parent="vm.tree">
+                items="vm.items" tree="item" root="vm.root" parent="vm.tree" entity="vm.entity">
         </query-tree-directive>
     </li>
 

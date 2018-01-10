@@ -10,7 +10,8 @@ angular
         scope: {
             root: '=',
             tree: '=',
-            parent: '='
+            parent: '=',
+            entity: '='
         },
         templateUrl: '/components/datacloud/query/advanced/tree/tree.component.html',
         controllerAs: 'vm',
@@ -22,6 +23,7 @@ angular
                 tree: $scope.tree,
                 parent: $scope.parent,
                 items: $scope.root.items,
+                entity: $scope.entity,
                 enrichments: [],
                 enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
                 type: '',
@@ -188,7 +190,7 @@ angular
 
             vm.addAttribute = function(tree) {
                 this.root.saveState();
-                QueryStore.setAddBucketTreeRoot(vm.tree);
+                QueryStore.setAddBucketTreeRoot(vm.tree, vm.entity.toLowerCase());
                 this.root.goAttributes();
             }
 

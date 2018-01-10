@@ -43,6 +43,8 @@ angular.module('common.datacloud.query.builder', [
     vm.init = function() {
         console.log('[AQB] RatingEngineModel:', RatingEngineModel);
 
+        QueryStore.mode = vm.mode;
+
         if (vm.segment != null && vm.segment != "Create"){
             SegmentStore.getSegmentByName(vm.segment).then(function(result) {
                 vm.displayName = result.display_name;
@@ -86,8 +88,7 @@ angular.module('common.datacloud.query.builder', [
             $timeout(function() {
                 
                 if (vm.mode == 'rules') {
-                    vm.accountRulesTree = [vm.generateRulesTreeForEntity('Account')];
-                    vm.contactRulesTree = [vm.generateRulesTreeForEntity('Contact')];
+                    vm.setRulesTree();
 
                     vm.rulesInputTree = {
                         'collapsed': false,
@@ -163,6 +164,14 @@ angular.module('common.datacloud.query.builder', [
 
     vm.getContactTree = function() {
         return [ vm.contact_restriction.restriction ];
+    }
+
+    vm.setRulesTree = function() {
+        vm.accountRulesTree = [vm.generateRulesTreeForEntity('Account')];
+        vm.contactRulesTree = [vm.generateRulesTreeForEntity('Contact')];
+
+        QueryStore.setAccountBucketTreeRoot(vm.accountRulesTree[0]);
+        QueryStore.setContactBucketTreeRoot(vm.contactRulesTree[0]);
     }
 
     vm.getSegmentInputTree = function() {
@@ -376,12 +385,10 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.clickBucketTile = function(bucket) {
-        console.log('CLICK BUCKET TILE', bucket);
         vm.labelIncrementor = 0;
         vm.bucket = bucket.bucket;
         // vm.tree = vm.getTree();
-        vm.accountRulesTree = [ vm.generateRulesTreeForEntity('Account') ];
-        vm.contactRulesTree = [ vm.generateRulesTreeForEntity('Contact') ];
+        vm.setRulesTree();
         vm.resetRulesInputTree();
     }
 
@@ -614,7 +621,7 @@ angular.module('common.datacloud.query.builder', [
             QueryStore.getAllBuckets(accountLogical.restrictions, restrictions);
             QueryStore.getAllBuckets(contactLogical.restrictions, restrictions);
         });
-        console.log('ALL BUCKET RESTRICTIONS', restrictions);
+
         return restrictions;
     }
 

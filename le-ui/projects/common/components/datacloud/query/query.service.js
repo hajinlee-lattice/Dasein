@@ -14,6 +14,8 @@ angular.module('common.datacloud.query.service',[
     // for Adanced Query Builder
     this.history = [];
 
+    this.mode = '';
+
     this.counts = {
         accounts: {
             value: 0,
@@ -31,6 +33,8 @@ angular.module('common.datacloud.query.service',[
     
     this.accounts = [];
     this.contacts = [];
+
+    this.addBucketTreeType = '';
 
     this.public = {
         enableSaveSegmentButton: false,
@@ -223,11 +227,20 @@ angular.module('common.datacloud.query.service',[
         return null;
     }
 
-    this.setAddBucketTreeRoot = function(tree) {
+    this.setAccountBucketTreeRoot = function(tree) {
+        this.accountBucketTreeRoot = tree;
+    }
+
+    this.setContactBucketTreeRoot = function(tree) {
+        this.contactBucketTreeRoot = tree;
+    }
+
+    this.setAddBucketTreeRoot = function(tree, type) {
         if (tree === null) {
             delete this.addBucketTreeRoot;
         } else {
             this.addBucketTreeRoot = tree;
+            this.addBucketTreeType = type ? type : '';
         }
     }
 
@@ -258,11 +271,16 @@ angular.module('common.datacloud.query.service',[
     this.addRestriction = function(type, attribute) {
         attribute = this.setAttributeAttr(type, attribute);
 
-        var treeRoot = this.getAddBucketTreeRoot(),
-            restrictions = treeRoot 
-                ? treeRoot.logicalRestriction.restrictions 
-                : this[type + 'Restriction'].restriction.logicalRestriction.restrictions;
-                
+        var treeRoot = this.getAddBucketTreeRoot();
+
+        if (treeRoot && type == this.addBucketTreeType) {
+            var restrictions = treeRoot.logicalRestriction.restrictions;
+        } else if (QueryStore.mode == 'rules') {
+            var restrictions = this[type + 'BucketTreeRoot'].logicalRestriction.restrictions;
+        } else {
+            var restrictions = this[type + 'Restriction'].restriction.logicalRestriction.restrictions;
+        }
+
         restrictions.push({
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
@@ -491,8 +509,10 @@ angular.module('common.datacloud.query.service',[
         var treeRoot = QueryStore.getAddBucketTreeRoot();
         var restrictions = [];
 
-        if (treeRoot) {
-            this.getAllBuckets(treeRoot.logicalRestriction.restrictions, restrictions);
+        if (QueryStore.mode == 'rules') {
+            this.getAllBuckets(QueryStore.accountBucketTreeRoot.logicalRestriction.restrictions, restrictions);
+            this.getAllBuckets(QueryStore.contactBucketTreeRoot.logicalRestriction.restrictions, restrictions);
+            // this.getAllBuckets(this.treeRoot.logicalRestriction.restrictions, restrictions);
         } else {
             var ar = QueryStore.getAccountRestriction();
             var cr = QueryStore.getContactRestriction();
