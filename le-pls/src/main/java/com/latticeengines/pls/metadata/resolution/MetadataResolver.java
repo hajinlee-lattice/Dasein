@@ -14,6 +14,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -291,22 +293,20 @@ public class MetadataResolver {
 
     private boolean isUserFieldMatchWithAttribute(String header, Attribute attribute) {
         List<String> allowedDisplayNames = attribute.getAllowedDisplayNames();
-        if (allowedDisplayNames != null) {
-            for (int i = 0; i < attribute.getAllowedDisplayNames().size(); i++) {
-                if (allowedDisplayNames.get(i).equalsIgnoreCase(header)) {
-                    return true;
-                } else if (allowedDisplayNames.get(i).equalsIgnoreCase(header.replace(" ", "_"))) {
-                    return true;
-                } else if (allowedDisplayNames.get(i).equalsIgnoreCase(header.replace(" ", ""))) {
-                    return true;
-                }
+        if (CollectionUtils.isNotEmpty(allowedDisplayNames)) {
+            final String standardizedHeader = standardizeAttrName(header);
+            String matchedDisplayName = allowedDisplayNames.stream() //
+                    .filter(allowedName -> standardizeAttrName(allowedName).equalsIgnoreCase(standardizedHeader)) //
+                    .findFirst().orElse(null);
+            if (StringUtils.isNotBlank(matchedDisplayName)) {
+                return true;
             }
         }
+        return attribute.getDisplayName().equalsIgnoreCase(header);
+    }
 
-        if (attribute.getDisplayName().equalsIgnoreCase(header)) {
-            return true;
-        }
-        return false;
+    private String standardizeAttrName(String attrName) {
+        return attrName.replace("_", "").replace(" ", "").toUpperCase();
     }
 
     private Attribute getAttributeFromFieldName(String attrName, String fieldName, UserDefinedType userDefinedType) {
