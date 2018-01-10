@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -32,9 +32,9 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
     private static final Logger log = LoggerFactory.getLogger(EnrichRequestProcessorImpl.class);
 
     @Override
-    public EnrichResponse process(CustomerSpace space, EnrichRequest request, String requestId) {
-        if (StringUtils.isBlank(request.getDomain())
-                && StringUtils.isBlank(request.getCompany())
+    public EnrichResponse process(CustomerSpace space, EnrichRequest request, boolean enrichInternalAttributes,
+            String requestId) {
+        if (StringUtils.isBlank(request.getDomain()) && StringUtils.isBlank(request.getCompany())
                 && StringUtils.isBlank(request.getDUNS())) {
             throw new ScoringApiException(LedpCode.LEDP_31199);
         }
@@ -66,8 +66,8 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
         Map<String, Map<String, Object>> matchedRecordEnrichmentMap = //
                 getMatcher(false).matchAndJoin(space, interpreted, //
-                        fieldSchemas, record, null, true, false, false, requestId, false, new ArrayList<String>(),
-                        new ArrayList<String>(), false);
+                        fieldSchemas, record, null, true, enrichInternalAttributes, false, requestId, false,
+                        new ArrayList<String>(), new ArrayList<String>(), false);
         enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
         if (enrichmentAttributes == null) {
             enrichmentAttributes = new HashMap<>();

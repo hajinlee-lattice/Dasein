@@ -31,7 +31,7 @@ public abstract class BaseEnrich extends CommonBase {
     private EnrichRequestProcessor enrichRequestProcessor;
 
     protected EnrichResponse enrichRecord(HttpServletRequest request, EnrichRequest enrichRequest,
-            CustomerSpace customerSpace, String credentialId) {
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, String credentialId) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         requestInfo.put(CREDENTIAL_ID, credentialId);
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
@@ -40,7 +40,8 @@ public abstract class BaseEnrich extends CommonBase {
                 log.info(JsonUtils.serialize(enrichRequest));
             }
             String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-            EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest, requestId);
+            EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest,
+                    enrichInternalAttributes, requestId);
             if (warnings.hasWarnings(requestId)) {
                 response.setWarnings(warnings.getWarnings(requestId));
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings(requestId)));

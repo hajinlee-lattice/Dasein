@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -25,16 +26,21 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.scoringapi.exposed.ScoreUtils;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
 @RequestMapping("")
 public class ScoreResource extends BaseScoring {
+
+    @Autowired
+    private BatonService batonService;
 
     @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -82,7 +88,9 @@ public class ScoreResource extends BaseScoring {
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        return scorePercentileRecord(request, scoreRequest, customerSpace, false, false, requestId);
+        return scorePercentileRecord(request, scoreRequest, customerSpace, //
+                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
+                false, requestId);
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -92,7 +100,9 @@ public class ScoreResource extends BaseScoring {
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        return scorePercentileRecords(request, scoreRequest, customerSpace, false, false, requestId);
+        return scorePercentileRecords(request, scoreRequest, customerSpace, //
+                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
+                false, requestId);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -103,7 +113,8 @@ public class ScoreResource extends BaseScoring {
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        return scoreRecordsDebug(request, scoreRequest, customerSpace, false, false, requestId);
+        return scoreRecordsDebug(request, scoreRequest, customerSpace, //
+                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -113,6 +124,7 @@ public class ScoreResource extends BaseScoring {
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        return scoreProbabilityRecord(request, scoreRequest, customerSpace, false, false, requestId);
+        return scoreProbabilityRecord(request, scoreRequest, customerSpace, //
+                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId);
     }
 }

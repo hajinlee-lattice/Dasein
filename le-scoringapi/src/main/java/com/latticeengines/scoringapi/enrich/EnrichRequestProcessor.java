@@ -6,5 +6,6 @@ import com.latticeengines.domain.exposed.scoringapi.EnrichResponse;
 
 public interface EnrichRequestProcessor {
 
-    EnrichResponse process(CustomerSpace space, EnrichRequest request, String requestId);
+    EnrichResponse process(CustomerSpace space, EnrichRequest request, boolean enrichInternalAttributes,
+            String requestId);
 }
