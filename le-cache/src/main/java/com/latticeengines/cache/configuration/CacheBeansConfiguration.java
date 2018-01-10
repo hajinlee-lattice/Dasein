@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.cache.CacheConfig;
 import org.redisson.spring.cache.RedissonSpringCacheManager;
@@ -12,27 +13,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.cache.interceptor.SimpleCacheResolver;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-
+import org.springframework.cache.annotation.CachingConfigurer;
 import com.latticeengines.domain.exposed.cache.CacheName;
 
 @Configuration
 @EnableCaching
-public class CacheBeansConfiguration {
+public class CacheBeansConfiguration implements CachingConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(CacheBeansConfiguration.class);
 
     @Autowired
     private RedissonClient redisson;
 
+    @Value("${cache.type}")
+    private String cacheType;
+
     @Bean
     @DependsOn("redisson")
-    public CacheManager cacheManager(@Value("${cache.type}") String cacheType) {
+    @Override
+    public CacheManager cacheManager() {
         switch (cacheType) {
         case "redis":
             log.info("using redis cache manager");
@@ -92,4 +103,39 @@ public class CacheBeansConfiguration {
         return compositeCacheManager;
     }
 
+    @Override
+    public CacheResolver cacheResolver() {
+        return new SimpleCacheResolver();
+    }
+
+    @Override
+    public KeyGenerator keyGenerator() {
+        return new SimpleKeyGenerator();
+    }
+
+    @Override
+    public CacheErrorHandler errorHandler() {
+        return new CacheErrorHandler() {
+
+            @Override
+            public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
+                log.error(ExceptionUtils.getStackTrace(exception));
+            }
+
+            @Override
+            public void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value) {
+                throw exception;
+            }
+
+            @Override
+            public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
+                throw exception;
+            }
+
+            @Override
+            public void handleCacheClearError(RuntimeException exception, Cache cache) {
+                throw exception;
+            }
+        };
+    }
 }
