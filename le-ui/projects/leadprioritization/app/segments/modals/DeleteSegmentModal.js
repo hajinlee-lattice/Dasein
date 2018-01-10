@@ -29,7 +29,7 @@ angular.module('mainApp.segments.modals.DeleteSegmentModal', [
         });
     };
 })
-.controller('DeleteSegmentController', function ($scope, $rootScope, $state, ResourceUtility, NavUtility, SegmentService) {
+.controller('DeleteSegmentController', function ($scope, $stateParams, $rootScope, $state, ResourceUtility, NavUtility, SegmentService) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.deleteSegmentClick = function ($event) {
@@ -41,6 +41,8 @@ angular.module('mainApp.segments.modals.DeleteSegmentModal', [
     };
 
     function deleteSegment(segmentName) {
+
+        $stateParams.edit = null;
         $("#deleteSegmentError").hide();
 
         SegmentService.DeleteSegment(segmentName).then(function(result) {

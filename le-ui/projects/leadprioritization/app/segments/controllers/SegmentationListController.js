@@ -121,6 +121,7 @@ angular.module('lp.segments.segments', [
     };
 
     vm.saveSegmentClicked = function($event, segment) {
+
         $event.stopPropagation();
 
         vm.saveInProgress = true;
