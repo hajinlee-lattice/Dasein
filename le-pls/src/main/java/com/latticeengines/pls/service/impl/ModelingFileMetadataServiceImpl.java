@@ -20,10 +20,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -95,13 +97,21 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
         FieldMappingDocument fieldMappingFromSchemaRepo = getFieldMappingDocumentBestEffort(sourceFileName,
                 schemaInterpretation, null);
+        FieldMappingDocument resultDocument;
         if (dataFeedTask == null) {
-            return fieldMappingFromSchemaRepo;
+            resultDocument = fieldMappingFromSchemaRepo;
         } else {
             Table templateTable = dataFeedTask.getImportTemplate();
             FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
-            return mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo);
+            resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo);
         }
+        for (FieldMapping fieldMapping : resultDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() != null && fieldMapping.getMappedField().equals(InterfaceName
+                    .SalesforceAccountID.name())) {
+                fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
+            }
+        }
+        return  resultDocument;
     }
 
     private FieldMappingDocument mergeFieldMappingBestEffort(FieldMappingDocument templateMapping,
