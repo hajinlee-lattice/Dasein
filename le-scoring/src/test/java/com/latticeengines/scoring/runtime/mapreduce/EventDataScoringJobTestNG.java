@@ -17,9 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
-import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.service.impl.ScoringJobServiceImpl;
 import com.latticeengines.yarn.functionalframework.YarnMiniClusterFunctionalTestNGBase;
