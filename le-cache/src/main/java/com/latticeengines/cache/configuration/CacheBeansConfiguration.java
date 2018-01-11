@@ -19,8 +19,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cache.interceptor.NamedCacheResolver;
-import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
