@@ -28,7 +28,7 @@ public class WorkflowUtils {
         if (workflowJob.getApplicationId() != null &&
                 (StringUtils.isEmpty(workflowJob.getStatus()) ||
                  workflowJob.getStatus().equals(FinalApplicationStatus.UNDEFINED.name()) ||
-                 !JobStatus.valueOf(workflowJob.getStatus()).isTerminated())) {
+                 !JobStatus.fromString(workflowJob.getStatus()).isTerminated())) {
             try {
                 com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(
                         workflowJob.getApplicationId());
