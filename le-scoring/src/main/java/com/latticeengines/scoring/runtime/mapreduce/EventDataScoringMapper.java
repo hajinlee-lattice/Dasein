@@ -16,7 +16,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +36,6 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     @SuppressWarnings("deprecation")
     @Override
     public void run(Context context) throws IOException, InterruptedException {
-
-        FileSplit split = (FileSplit) context.getInputSplit();
-        log.info("split path is :" + split.getPath().getName());
         int taskId = context.getTaskAttemptID().getTaskID().getId();
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
