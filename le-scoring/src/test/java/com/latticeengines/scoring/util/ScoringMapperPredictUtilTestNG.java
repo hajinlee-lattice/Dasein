@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -310,7 +311,7 @@ public class ScoringMapperPredictUtilTestNG {
             throws IOException {
         String str = FileUtils.readFileToString(new File(ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/sampleModel/enhancements/scorederivation.json")
-                .getFile()));
+                .getFile()), Charset.forName("UTF-8"));
         ScoreDerivation scoreDerivation = JsonUtils.deserialize(str, ScoreDerivation.class);
         ScoreOutput scoreOutput = ScoringMapperPredictUtil.calculateResult(scoreDerivation, "modelid", id, score);
         assertEquals(scoreOutput.getBucketDisplayName(), bucketDisplayName);
