@@ -3,8 +3,6 @@ package com.latticeengines.scoring.runtime.mapreduce;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,7 +11,6 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import org.apache.hadoop.conf.Configuration;
@@ -24,29 +21,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.scoring.ScoreOutput;
-import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.util.ModelAndRecordInfo;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
-import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
     private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
     private static final long DEFAULT_LEAD_FILE_THRESHOLD = 10000L;
 
+    @SuppressWarnings("deprecation")
     @Override
     public void run(Context context) throws IOException, InterruptedException {
 
         FileSplit split = (FileSplit) context.getInputSplit();
         log.info("split path is :" + split.getPath().getName());
-        String splitName = StringUtils.substringBeforeLast(split.getPath().getName(), ".");
+        int taskId = context.getTaskAttemptID().getTaskID().getId();
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
         URI[] uris = context.getCacheFiles();
@@ -80,11 +74,11 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
                         .deserializeLocalScoreDerivationFiles(uris);
                 ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(config, modelAndRecordInfo,
-                        scoreDerivationMap, recordFileThreshold, splitName);
+                        scoreDerivationMap, recordFileThreshold, taskId);
 
             } else {
                 ScoringMapperPredictUtil.processScoreFiles(config, modelAndRecordInfo, models, recordFileThreshold,
-                        splitName);
+                        taskId);
             }
 //            log.info("The mapper has scored: " + resultList.size() + " records.");
 //            if (totalRecordCount != resultList.size()) {

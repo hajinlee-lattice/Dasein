@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
@@ -108,7 +107,7 @@ public class ScoringMapperPredictUtil {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void processScoreFiles(Configuration config, ModelAndRecordInfo modelAndRecordInfo,
-            Map<String, JsonNode> models, long recordFileThreshold, String splitName)
+            Map<String, JsonNode> models, long recordFileThreshold, int taskId)
             throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
         Set<String> uuidSet = modelInfoMap.keySet();
@@ -121,7 +120,7 @@ public class ScoringMapperPredictUtil {
 
         for (String uuid : uuidSet) {
             log.info("uuid is " + uuid);
-            String fileName = uuid + "-" + splitName + ScoringDaemonService.AVRO_FILE_SUFFIX;
+            String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
             File outputFile = new File(fileName);
 
             DatumWriter userDatumWriter = null;
@@ -185,7 +184,7 @@ public class ScoringMapperPredictUtil {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void processScoreFilesUsingScoreDerivation(Configuration config,
             ModelAndRecordInfo modelAndRecordInfo, Map<String, ScoreDerivation> scoreDerivationMap,
-            long recordFileThreshold, String splitName) throws IOException, DecoderException {
+            long recordFileThreshold, int taskId) throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
         Set<String> uuidSet = modelInfoMap.keySet();
         String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
@@ -197,7 +196,7 @@ public class ScoringMapperPredictUtil {
 
         for (String uuid : uuidSet) {
             log.info("uuid is " + uuid);
-            String fileName = uuid + "-" + splitName + ScoringDaemonService.AVRO_FILE_SUFFIX;
+            String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
             File outputFile = new File(fileName);
 
             DatumWriter userDatumWriter = null;
