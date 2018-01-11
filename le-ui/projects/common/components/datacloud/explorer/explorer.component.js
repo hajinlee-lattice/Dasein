@@ -1010,7 +1010,6 @@ angular.module('common.datacloud.explorer', [
         //         'vm.metadata.toggle': vm.metadata.toggle
         //     }
         // );
-
         return items;
     }
 
@@ -1451,10 +1450,25 @@ angular.module('common.datacloud.explorer', [
     }
 
     var lookupSyncNewTotal = function() {
-        var total = 0;
-        for(var i in vm.categoryCounts) {
-            total += vm.categoryCounts[i];
-        }
+
+        var categories = vm.highlightMetadata.categories,
+            highlightedCategories = [],
+            total = 0;
+
+        for (var key in categories) {
+            if(categories[key].enabled === 1){
+                highlightedCategories.push(key);
+            }
+        };
+
+        highlightedCategories.forEach(function(category) {
+            for (var key in vm.categoryCounts){
+                if(key === category){
+                    total += vm.categoryCounts[key];
+                }
+            };
+        });
+
         LookupStore.add('count', total);
     }
 
