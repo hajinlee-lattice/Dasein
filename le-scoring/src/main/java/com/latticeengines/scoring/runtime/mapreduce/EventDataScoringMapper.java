@@ -3,6 +3,7 @@ package com.latticeengines.scoring.runtime.mapreduce;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,14 +34,13 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
     private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
     private static final long DEFAULT_LEAD_FILE_THRESHOLD = 10000L;
 
-    @SuppressWarnings("deprecation")
     @Override
     public void run(Context context) throws IOException, InterruptedException {
         int taskId = context.getTaskAttemptID().getTaskID().getId();
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
         URI[] uris = context.getCacheFiles();
-        long recordFileThreshold = context.getConfiguration().getLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(),
+        long recordFileThreshold = config.getLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(),
                 DEFAULT_LEAD_FILE_THRESHOLD);
 
         try {
@@ -63,7 +63,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             log.info("The mapper has transformed: " + totalRecordCount + "records.");
 
             ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
-//            List<ScoreOutput> resultList = new ArrayList<>();
+            // List<ScoreOutput> resultList = new ArrayList<>();
             if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(),
                     Boolean.FALSE.booleanValue()) == Boolean.TRUE.booleanValue()) {
                 log.info("Using score derivation to generate percentile score.");
@@ -76,11 +76,13 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                 ScoringMapperPredictUtil.processScoreFiles(config, modelAndRecordInfo, models, recordFileThreshold,
                         taskId);
             }
-//            log.info("The mapper has scored: " + resultList.size() + " records.");
-//            if (totalRecordCount != resultList.size()) {
-//                throw new LedpException(LedpCode.LEDP_20009,
-//                        new String[] { String.valueOf(totalRecordCount), String.valueOf(resultList.size()) });
-//            }
+            // log.info("The mapper has scored: " + resultList.size() + "
+            // records.");
+            // if (totalRecordCount != resultList.size()) {
+            // throw new LedpException(LedpCode.LEDP_20009,
+            // new String[] { String.valueOf(totalRecordCount),
+            // String.valueOf(resultList.size()) });
+            // }
 
             long scoringEndTime = System.currentTimeMillis();
             long scoringTotalTime = scoringEndTime - transformEndTime;
@@ -94,7 +96,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                     ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
             File logFile = new File(config.get(ScoringProperty.LOG_DIR.name()) + "/" + UUID.randomUUID() + ".err");
-            FileUtils.writeStringToFile(logFile, errorMessage);
+            FileUtils.write(logFile, errorMessage, Charset.forName("UTF-8"));
             throw new LedpException(LedpCode.LEDP_20014, e);
         }
     }
