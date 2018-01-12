@@ -31,7 +31,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
             upsertMasterStep = 1;
             diffStep = 2;
 
-            TransformationStepConfig merge = mergeInputs(false);
+            TransformationStepConfig merge = mergeInputs(false, true, true, false);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig report = reportDiff(diffStep);

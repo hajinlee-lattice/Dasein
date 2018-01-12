@@ -50,13 +50,16 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         if (sources.size() <= 1) {
             result = sources.get(0);
         } else {
+            if (config.isMergeOnly()) {
+                return sources.get(0).merge(sources.subList(1, sources.size()));
+            }
             Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
             List<String> fieldToRetain = new ArrayList<>();
             Set<String> commonFields = new HashSet<>();
             consolidateHelper.preProcessSources(sourceNames, sources, dupeFieldMap, fieldToRetain, commonFields);
 
-            List<FieldList> groupFieldLists = consolidateHelper.getGroupFieldList(sourceNames, sourceTables, dupeFieldMap,
-                    groupByKey);
+            List<FieldList> groupFieldLists = consolidateHelper.getGroupFieldList(sourceNames, sourceTables,
+                    dupeFieldMap, groupByKey);
 
             result = sources.get(0).coGroup(groupFieldLists.get(0), sources.subList(1, sources.size()),
                     groupFieldLists.subList(1, groupFieldLists.size()), JoinType.OUTER);

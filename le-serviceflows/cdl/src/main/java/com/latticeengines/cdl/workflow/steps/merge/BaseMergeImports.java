@@ -140,7 +140,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     }
 
-    protected TransformationStepConfig mergeInputs(boolean useTargetTable) {
+    protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource,
+            boolean addTimestamps, boolean mergeOnly) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = inputTableNames;
         step.setBaseSources(baseSources);
@@ -151,7 +152,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         step.setBaseTables(baseTables);
         step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(true, true));
+        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, addTimestamps, mergeOnly));
         if (useTargetTable) {
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
@@ -161,11 +162,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimestamps) {
+    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimestamps, boolean mergeOnly) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(InterfaceName.Id.name());
         config.setMasterIdField(batchStorePrimaryKey);
         config.setDedupeSource(isDedupeSource);
+        config.setMergeOnly(mergeOnly);
         config.setAddTimestamps(addTimestamps);
         return appendEngineConf(config, lightEngineConfig());
     }

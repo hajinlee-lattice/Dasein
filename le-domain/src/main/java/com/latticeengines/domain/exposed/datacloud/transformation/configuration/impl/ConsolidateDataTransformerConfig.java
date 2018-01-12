@@ -12,8 +12,9 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     private Set<String> columnsFromRight;
     private List<String> compositeKeys;
-    private boolean isDedupeSource;
+    private boolean dedupeSource;
     private boolean addTimestamps;
+    private boolean mergeOnly;
 
     public String getSrcIdField() {
         return srcIdField;
@@ -56,11 +57,11 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     }
 
     public boolean isDedupeSource() {
-        return isDedupeSource;
+        return dedupeSource;
     }
 
     public void setDedupeSource(boolean isDedupeSource) {
-        this.isDedupeSource = isDedupeSource;
+        this.dedupeSource = isDedupeSource;
     }
 
     public boolean isAddTimestamps() {
@@ -69,5 +70,13 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     public void setAddTimestamps(boolean addTimestamps) {
         this.addTimestamps = addTimestamps;
+    }
+
+    public boolean isMergeOnly() {
+        return mergeOnly;
+    }
+
+    public void setMergeOnly(boolean mergeOnly) {
+        this.mergeOnly = mergeOnly;
     }
 }

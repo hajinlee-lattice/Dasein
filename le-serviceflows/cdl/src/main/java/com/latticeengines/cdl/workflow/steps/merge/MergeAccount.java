@@ -47,7 +47,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             upsertMasterStep = 2;
             diffStep = 3;
 
-            TransformationStepConfig merge = mergeInputs(false);
+            TransformationStepConfig merge = mergeInputs(false, true, true, false);
             TransformationStepConfig match = match();
             TransformationStepConfig upsertMaster = mergeMaster();
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
