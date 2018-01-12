@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
@@ -177,7 +178,12 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (dataFeedTasks == null || dataFeedTasks.size() == 0) {
             return;
         } else {
+            boolean updatedAttrName = false;
             for (DataFeedTask dataFeedTask : dataFeedTasks) {
+                if (!updatedAttrName) {
+                    updateTableAttributeName(dataFeedTask.getImportTemplate(), metaTable);
+                    updatedAttrName = true;
+                }
                 if (StringUtils.equals(dataFeedTask.getUniqueId(), dataFeedTaskUniqueId)) {
                     continue;
                 }
@@ -208,6 +214,17 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
         }
         return inconsistentAttrs;
+    }
+
+    @VisibleForTesting
+    void updateTableAttributeName(Table templateTable, Table metaTable) {
+        Map<String, Attribute> templateAttrs = new HashMap<>();
+        templateTable.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName().toLowerCase(), attribute));
+        for (Attribute attr : metaTable.getAttributes()) {
+            if (templateAttrs.containsKey(attr.getName().toLowerCase())) {
+                attr.setName(templateAttrs.get(attr.getName().toLowerCase()).getName());
+            }
+        }
     }
 
 }
