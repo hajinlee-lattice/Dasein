@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
+import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface CDLDataCleanupService {
@@ -14,5 +15,5 @@ public interface CDLDataCleanupService {
 
     ApplicationId cleanupByTimeRange(String customerSpace, BusinessEntity entity, Date startTime, Date endTime);
 
-    ApplicationId cleanupByUpload(String customerSpace, BusinessEntity entity, String filePath);
+    ApplicationId cleanupByUpload(String customerSpace, CleanupByUploadConfiguration configuration);
 }

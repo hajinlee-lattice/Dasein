@@ -2,6 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -16,17 +18,23 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.FileUploadService;
+import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -45,10 +53,16 @@ public class FileUploadServiceImpl implements FileUploadService {
     private SourceFileService sourceFileService;
 
     @Autowired
+    private ModelingFileMetadataService modelingFileMetadataService;
+
+    @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private CDLProxy cdlProxy;
 
     @Value("${pls.fileupload.maxupload.rows}")
     private long maxUploadRows;
@@ -186,4 +200,25 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
     }
 
+    @Override
+    public ResponseDocument<String> cleanupByUpload(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
+                                                    BusinessEntity entity, CleanupOperationType cleanupOperationType) {
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort(
+                sourceFile.getName(), schemaInterpretation, null);
+
+        List<FieldMapping> fieldMappings = new ArrayList<>();
+        for (FieldMapping fieldMapping :fieldMappingDocument.getFieldMappings()) {
+            if (!StringUtils.isEmpty(fieldMapping.getMappedField())) {
+                fieldMappings.add(fieldMapping);
+            }
+        }
+        fieldMappingDocument.setFieldMappings(fieldMappings);
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument);
+
+        sourceFile = sourceFileService.findByName(sourceFile.getName());
+        log.info("table name is: " + sourceFile.getTableName() + ", file path: " + sourceFile.getPath());
+        return cdlProxy.cleanupByUpload(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName(),
+                sourceFile.getPath(), entity, cleanupOperationType);
+
+    }
 }

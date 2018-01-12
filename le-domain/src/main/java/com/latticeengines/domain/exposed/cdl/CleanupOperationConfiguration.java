@@ -4,6 +4,7 @@ package com.latticeengines.domain.exposed.cdl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
@@ -15,6 +16,7 @@ public class CleanupOperationConfiguration extends MaintenanceOperationConfigura
     @JsonProperty("entity")
     private BusinessEntity entity;
 
+    @NotNull
     @JsonProperty("cleanup_operation_type")
     private CleanupOperationType cleanupOperationType;
 

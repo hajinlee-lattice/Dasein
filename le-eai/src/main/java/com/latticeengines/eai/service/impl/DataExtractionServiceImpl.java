@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
+import com.latticeengines.domain.exposed.eai.DeleteFileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -143,7 +144,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
             importService.validate(sourceImportConfig, importContext);
             if (!sourceImportConfig.getSourceType().willSubmitEaiJob()) {
-                if (!importConfig.getClass().equals(CSVToHdfsConfiguration.class)) {
+                if (!importConfig.getClass().equals(CSVToHdfsConfiguration.class) &&
+                        !importConfig.getClass().equals(DeleteFileToHdfsConfiguration.class)) {
                     hasNonEaiJobSourceType = true;
                 }
             }

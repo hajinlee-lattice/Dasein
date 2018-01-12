@@ -102,6 +102,12 @@ public class SchemaRepository {
         case TransactionPeriodAggregation:
             table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation);
             break;
+        case DeleteAccountTemplate:
+            table = getDeleteAccountTemplateSchema();
+            break;
+        case DeleteContactTemplate:
+            table = getDeleteContactTemplateSchema();
+            break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
@@ -971,6 +977,42 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
+        return table;
+    }
+
+    private Table getDeleteAccountTemplateSchema() {
+        Table table = createTable(SchemaInterpretation.Account);
+        table.setPrimaryKey(createPrimaryKey("Id"));
+
+        table.addAttribute(attr(InterfaceName.Id.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .required() //
+                .interfaceName(InterfaceName.AccountId) //
+                .logicalType(LogicalDataType.Id) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build());
+
+        return table;
+    }
+
+    private Table getDeleteContactTemplateSchema() {
+        Table table = createTable(SchemaInterpretation.Contact);
+        table.setPrimaryKey(createPrimaryKey("Id"));
+
+        table.addAttribute(attr(InterfaceName.Id.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .required() //
+                .interfaceName(InterfaceName.ContactId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+
         return table;
     }
 

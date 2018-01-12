@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -29,21 +32,20 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "models/uploadfile", description = "REST resource for uploading csv files for modeling")
 @RestController
@@ -198,5 +200,34 @@ public class ModelingFileUploadResource {
             result.put(CDLExternalSystemType.OTHER.name(), externalSystem.getOtherIdList());
         }
         return ResponseDocument.successResponse(result);
+    }
+
+    @RequestMapping(value = "/uploaddeletefiletemplate", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Upload a file")
+    public ResponseDocument<String> uploadDeleteFileTemplate( //
+            @RequestParam(value = "compressed", required = false) boolean compressed, //
+            @RequestParam(value = "displayName", required = true) String csvFileName, //
+            @RequestParam(value = "schema", required = true) SchemaInterpretation schemaInterpretation, //
+            @RequestParam(value = "operationType", required = true) CleanupOperationType cleanupOperationType, //
+            @RequestParam("file") MultipartFile file) {
+        if (schemaInterpretation != SchemaInterpretation.DeleteAccountTemplate &&
+                schemaInterpretation != SchemaInterpretation.DeleteContactTemplate) {
+            throw new LedpException(LedpCode.LEDP_18173);
+        }
+
+        BusinessEntity entity = schemaInterpretation == SchemaInterpretation.DeleteAccountTemplate ?
+                BusinessEntity.Account : BusinessEntity.Contact;
+
+        ResponseDocument<SourceFile> responseDocument = uploadFile(compressed, csvFileName,
+                schemaInterpretation, entity.name(), file);
+
+        if(!responseDocument.isSuccess()) {
+            throw new RuntimeException("Upload delete file template failed. " +
+                    StringUtils.join(responseDocument.getErrors(), ","));
+        }
+
+        return fileUploadService.cleanupByUpload(responseDocument.getResult(), schemaInterpretation,
+                entity, cleanupOperationType);
     }
 }

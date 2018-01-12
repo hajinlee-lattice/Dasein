@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
-
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,6 +13,7 @@ import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
+import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -63,8 +63,13 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     }
 
     @Override
-    public ApplicationId cleanupByUpload(String customerSpace, BusinessEntity entity, String filePath) {
-        //todo
-        return null;
+    public ApplicationId cleanupByUpload(String customerSpace, CleanupByUploadConfiguration configuration) {
+        configuration.setCustomerSpace(customerSpace);
+        log.info("customerSpace: " + customerSpace +
+                ", configuration.getCleanupOperationType(): " + configuration.getCleanupOperationType() +
+                ", configuration.getFilePath(): " + configuration.getFilePath() +
+                ", configuration.getTableName(): " + configuration.getTableName() +
+                ", configuration.getEntity(): " + configuration.getEntity());
+        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), configuration);
     }
 }

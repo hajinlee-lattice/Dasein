@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.maintenance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.DeleteFileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -19,12 +20,14 @@ public class DeleteFileUploadStep extends BaseWorkflowStep<DeleteFileUploadStepC
 
     @Override
     public void execute() {
-        //execute import.
+        AppSubmission submission = eaiProxy.submitEaiJob(generateImportConfiguration());
+        waitForAppId(submission.getApplicationIds().get(0));
     }
 
     private ImportConfiguration generateImportConfiguration() {
         DeleteFileToHdfsConfiguration importConfig = new DeleteFileToHdfsConfiguration();
-//        importConfig.setTableName();
+        importConfig.setTableName(configuration.getTableName());
+        importConfig.setFilePath(configuration.getFilePath());
         importConfig.setCustomerSpace(configuration.getCustomerSpace());
         SourceImportConfiguration sourceImportConfiguration = new SourceImportConfiguration();
         sourceImportConfiguration.setSourceType(SourceType.FILE);

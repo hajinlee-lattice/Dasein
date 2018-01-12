@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -197,4 +199,17 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public ResponseDocument<String> cleanupByUpload(String customerSpace, String tableName, String filePath, BusinessEntity
+            entity, CleanupOperationType operationType) {
+        CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
+        configuration.setTableName(tableName);
+        configuration.setFilePath(filePath);
+        configuration.setEntity(entity);
+        configuration.setCleanupOperationType(operationType);
+
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/byupload", customerSpace);
+
+        return post("cleanup by upload", url, configuration, ResponseDocument.class);
+    }
 }
