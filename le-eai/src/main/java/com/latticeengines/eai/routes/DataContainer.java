@@ -98,8 +98,10 @@ public class DataContainer {
 
     public void setValueForAttribute(Attribute attribute, Object value) {
         if (value == null) {
-            record.put(attribute.getName(),
-                    AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
+            if(valueConverter == null || valueConverter.autoFillNullValue()) {
+                record.put(attribute.getName(),
+                        AvroTypeConverter.getEmptyValue(Type.valueOf(attribute.getPhysicalDataType())));
+            }
         } else {
             try {
                 Type type = Type.valueOf(attribute.getPhysicalDataType());

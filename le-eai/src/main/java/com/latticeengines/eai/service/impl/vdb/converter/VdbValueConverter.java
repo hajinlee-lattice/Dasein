@@ -62,4 +62,9 @@ public class VdbValueConverter implements ValueConverter {
             }
         }
     }
+
+    @Override
+    public boolean autoFillNullValue() {
+        return false;
+    }
 }

@@ -22,4 +22,9 @@ public class CamelValueConverter implements ValueConverter {
     public String convertTimeStampString(Object value) {
         return convertTo(String.class, value);
     }
+
+    @Override
+    public boolean autoFillNullValue() {
+        return true;
+    }
 }
