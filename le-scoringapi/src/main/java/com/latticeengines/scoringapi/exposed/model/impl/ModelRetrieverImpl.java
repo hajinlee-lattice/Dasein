@@ -190,8 +190,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         boolean fuzzyMatchEnabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_FUZZY_MATCH);
         String dataCloudVersion = modelSummary.getDataCloudVersion();
-        log.info("fuzzyMatchEnabled = " + fuzzyMatchEnabled + ", and dataCloudVersion = " + dataCloudVersion
-                + " for model " + modelId);
+        log.info("fuzzyMatchEnabled=" + fuzzyMatchEnabled + ", and dataCloudVersion=" + dataCloudVersion
+                + " for model=" + modelId);
+
         if (StringUtils.isEmpty(dataCloudVersion) || dataCloudVersion.equals(RTS_DATA_CLOUD_VERSION)) {
             fields.setValidationExpression(FieldInterpretationCollections.RTS_MODEL_VALIDATION_EXPRESSION);
         } else {
@@ -322,6 +323,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
         List<BucketMetadata> bucketMetadataList = getBucketMetadata(customerSpace, modelId);
         ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
+
+        boolean fuzzyMatchEnabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_FUZZY_MATCH);
+        String dataCloudVersion = modelSummary.getDataCloudVersion();
+        log.info("fuzzyMatchEnabled=" + fuzzyMatchEnabled + ", and dataCloudVersion=" + dataCloudVersion
+                + " for model=" + modelId);
+
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
                 customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
