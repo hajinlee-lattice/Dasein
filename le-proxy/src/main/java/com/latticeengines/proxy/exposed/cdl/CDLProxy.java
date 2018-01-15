@@ -3,11 +3,8 @@ package com.latticeengines.proxy.exposed.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
-import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -15,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -27,31 +26,9 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId consolidate(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/consolidate", shortenCustomerSpace(customerSpace));
-        ResponseDocument<String> responseDoc = post("consolidate", url, null, ResponseDocument.class);
-        if (responseDoc == null) {
-            return null;
-        }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
-    }
-
-    @SuppressWarnings("unchecked")
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze", shortenCustomerSpace(customerSpace));
         ResponseDocument<String> responseDoc = post("process and analyze", url, request, ResponseDocument.class);
-        if (responseDoc == null) {
-            return null;
-        }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
-    }
-
-    @SuppressWarnings("unchecked")
-    public ApplicationId profile(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/profile", shortenCustomerSpace(customerSpace));
-        ResponseDocument<String> responseDoc = post("profile", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
@@ -93,25 +70,6 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import/internal" +
                 "/{taskIdentifier}", customerSpace, taskIdentifier);
         ResponseDocument<String> responseDoc = post("submitImportJob", url, importConfig, ResponseDocument.class);
-        if (responseDoc == null) {
-            return null;
-        }
-        if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
-        } else {
-            throw new RuntimeException("Failed to submit import job: " +
-                    StringUtils.join(responseDoc.getErrors(), ","));
-        }
-    }
-
-
-    @SuppressWarnings("unchecked")
-    public ApplicationId consolidateManually(String customerSpace) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/datafeed/consolidate?" + "draining={draining}",
-                shortenCustomerSpace(customerSpace), "true");
-        ResponseDocument<String> responseDoc = post("consolidate", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }

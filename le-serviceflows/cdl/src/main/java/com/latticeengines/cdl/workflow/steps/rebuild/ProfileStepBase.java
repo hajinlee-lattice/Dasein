@@ -1,4 +1,10 @@
-package com.latticeengines.cdl.workflow.steps;
+package com.latticeengines.cdl.workflow.steps.rebuild;
+
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,6 +14,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
@@ -15,26 +26,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
-
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
 public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
 
@@ -65,21 +62,6 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         }
         entityValueMap.put(entity, value);
         putObjectInContext(key, entityValueMap);
-    }
-
-    void upsertProfileTable(String profileTableName, TableRoleInCollection profileRole) {
-        String customerSpace = configuration.getCustomerSpace().toString();
-        Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
-        if (profileTable == null) {
-            throw new RuntimeException(
-                    "Failed to find profile table " + profileTableName + " in customer " + customerSpace);
-        }
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-        dataCollectionProxy.upsertTable(customerSpace, profileTableName, profileRole, inactiveVersion);
-        profileTable = dataCollectionProxy.getTable(customerSpace, profileRole, inactiveVersion);
-        if (profileTable == null) {
-            throw new IllegalStateException("Cannot find the upserted " + profileRole + " table in data collection.");
-        }
     }
 
     protected TransformationStepConfig profile(String masterTableName) {

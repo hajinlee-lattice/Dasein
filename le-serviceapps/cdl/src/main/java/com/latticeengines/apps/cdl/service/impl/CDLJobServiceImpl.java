@@ -257,10 +257,6 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private ApplicationId startApplication(CDLJobDetail cdlJobDetail) {
         switch (cdlJobDetail.getCdlJobType()) {
-            case CONSOLIDATE:
-                return cdlProxy.consolidate(cdlJobDetail.getTenant().getId());
-            case PROFILE:
-                return cdlProxy.profile(cdlJobDetail.getTenant().getId());
             default:
                 return null;
         }
@@ -290,7 +286,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         CDLJobDetail entity = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.CONSOLIDATE, tenant);
         ApplicationId id = null;
         try {
-            id = cdlProxy.consolidateManually(customerSpace);
+            // id = cdlProxy.consolidateManually(customerSpace);
+            throw new UnsupportedOperationException("Consolidate is unsupported.");
         } catch (Exception e) {
             cdlJobDetailEntityMgr.delete(entity);
         }
@@ -315,7 +312,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         CDLJobDetail entity = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROFILE, tenant);
         ApplicationId id = null;
         try {
-            id = cdlProxy.profile(customerSpace);
+            // id = cdlProxy.profile(customerSpace);
+            throw new UnsupportedOperationException("Profile job is not supported.");
         } catch (Exception e) {
             cdlJobDetailEntityMgr.delete(entity);
         }

@@ -219,24 +219,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         assertEquals(resetStatus, true);
     }
 
-    void consolidate() {
-        logger.info("Start consolidating ...");
-        ApplicationId appId = cdlProxy.consolidate(mainTestTenant.getId());
-        com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
-                false);
-        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
-        consolidateAppId = appId.toString();
-    }
-
-    void profile() throws IOException {
-        logger.info("Start profiling ...");
-        ApplicationId appId = cdlProxy.profile(mainTestTenant.getId());
-        com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
-                false);
-        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
-        profileAppId = appId.toString();
-    }
-
     void processAnalyze() {
         processAnalyze(null);
     }
