@@ -470,9 +470,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "bitEncodedData")
-    public void testBitEncoded(ComparisonType operator, String value, long expectedCount) {
+    public void testBitEncoded(ComparisonType operator, String[] vals, long expectedCount) {
         // bucket
         RestrictionBuilder builder = Restriction.builder();
+        String value = vals == null ? null : vals[0];
         switch (operator) {
             case EQUAL:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(value);
@@ -483,6 +484,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
             case STARTS_WITH:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).startsWith(value);
                 break;
+            case ENDS_WITH:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).endsWith(value);
+                break;
             case CONTAINS:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).contains(value);
                 break;
@@ -491,6 +495,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 break;
             case IS_NOT_NULL:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
+                break;
+            case IN_COLLECTION:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
                 break;
             default:
                 throw new UnsupportedOperationException("Does not support " + operator);
@@ -504,20 +511,25 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @DataProvider(name = "bitEncodedData", parallel = true)
     private Object[][] provideBitEncodedData() {
         return new Object[][] {
-                { ComparisonType.EQUAL, "Yes", BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.EQUAL, "No", BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.EQUAL, new String[]{ "Yes" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.EQUAL, new String[]{ "No" }, BUCKETED_NO_IN_CUSTOEMR }, //
                 { ComparisonType.EQUAL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
 
                 { ComparisonType.IS_NULL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
                 { ComparisonType.IS_NOT_NULL, null, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
 
-                { ComparisonType.NOT_EQUAL, "Yes", BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.NOT_EQUAL, "No", BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_EQUAL, new String[]{ "Yes" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_EQUAL, new String[]{ "No" }, BUCKETED_YES_IN_CUSTOEMR }, //
 
-                { ComparisonType.STARTS_WITH, "y", BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.STARTS_WITH, "N", BUCKETED_NO_IN_CUSTOEMR }, //
-                { ComparisonType.CONTAINS, "e", BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.CONTAINS, "o", BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.STARTS_WITH, new String[]{ "y" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.STARTS_WITH, new String[]{ "N" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.ENDS_WITH, new String[]{ "S" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.ENDS_WITH, new String[]{ "o" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.CONTAINS, new String[]{ "e" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.CONTAINS, new String[]{ "O" }, BUCKETED_NO_IN_CUSTOEMR }, //
+
+                { ComparisonType.IN_COLLECTION, new String[]{ "Yes", "yes" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.IN_COLLECTION, new String[]{ "YES", "no" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
         };
     }
 

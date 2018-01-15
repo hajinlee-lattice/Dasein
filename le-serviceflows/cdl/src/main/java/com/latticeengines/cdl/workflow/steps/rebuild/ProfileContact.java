@@ -12,12 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateReportConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -33,19 +29,11 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
 
     private static final Logger log = LoggerFactory.getLogger(ProfileContact.class);
 
-    private static int profileStep;
-    private static int bucketStep;
-
-    private String reportTablePrefix;
-    private String masterTableName;
-    private String accountMasterTableName;
-
     private List<String> dedupFields = ImmutableList.of(InterfaceName.AccountId.name());
 
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        reportTablePrefix = entity.name() + "_Report";
     }
 
     @Override
@@ -55,9 +43,7 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
-        masterTableName = masterTable.getName();
-        accountMasterTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedAccount, inactive);
+        String masterTableName = masterTable.getName();
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("ProfileContactStep");
@@ -65,8 +51,8 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         request.setKeepTemp(false);
         request.setEnableSlack(false);
 
-        profileStep = 0;
-        bucketStep = 1;
+        int profileStep = 0;
+        int bucketStep = 1;
 
         TransformationStepConfig profile = profile(masterTableName);
         TransformationStepConfig bucket = bucket(profileStep, masterTableName);
@@ -82,40 +68,9 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
                 sort, //
                 sortProfile //
         );
-        // if (StringUtils.isNotBlank(accountMasterTableName)) {
-        // TransformationStepConfig report = report();
-        // steps = new ArrayList<>(steps);
-        // steps.add(report);
-        // }
         // -----------
         request.setSteps(steps);
         return request;
-    }
-
-    private TransformationStepConfig report() {
-        TransformationStepConfig step = new TransformationStepConfig();
-
-        String masterTableSourceName = "ContactUniverse";
-        SourceTable sourceTable1 = new SourceTable(masterTableName, customerSpace);
-        String accountTableSourceName = "AccountUniverse";
-        SourceTable sourceTable2 = new SourceTable(accountMasterTableName, customerSpace);
-        List<String> baseSources = Arrays.asList(masterTableSourceName, accountTableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = ImmutableMap.of(masterTableSourceName, sourceTable1, //
-                accountTableSourceName, sourceTable2);
-        step.setBaseTables(baseTables);
-
-        step.setTransformer("ConsolidateReporter");
-        ConsolidateReportConfig config = new ConsolidateReportConfig();
-        config.setEntity(entity);
-        String configStr = appendEngineConf(config, lightEngineConfig());
-        step.setConfiguration(configStr);
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(reportTablePrefix);
-        step.setTargetTable(targetTable);
-
-        return step;
     }
 
     @Override

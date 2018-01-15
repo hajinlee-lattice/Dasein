@@ -245,6 +245,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
             case IS_NOT_NULL:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
                 break;
+            case IN_COLLECTION:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
+                break;
             default:
                 throw new UnsupportedOperationException("Does not support " + operator);
         }
@@ -259,6 +262,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         String equalPattern = String.format("(%s.%s>>?)&? = ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         String notNullPattern = String.format("(%s.%s>>?)&? != ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         String notEqualPattern = String.format("%s and %s", notNullPattern, notNullPattern);
+        String inCollectionPattern = String.format("(%s.%s>>?)&? in (?, ?)", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         return new Object[][] { //
                 { "bucket = label", ComparisonType.EQUAL, new Object[] { "Yes" }, equalPattern }, //
                 { "bucket is null", ComparisonType.EQUAL, new Object[] { null }, equalPattern }, //
@@ -266,6 +270,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 { "bucket is not null", ComparisonType.NOT_EQUAL, new Object[] { null }, notNullPattern }, //
                 { "bucket is not null", ComparisonType.IS_NOT_NULL, null, notNullPattern }, //
                 { "bucket != label", ComparisonType.NOT_EQUAL, new Object[] { "Yes" }, notEqualPattern }, //
+                { "bucket in collection", ComparisonType.IN_COLLECTION, new Object[] { "YES", "no" }, inCollectionPattern }, //
         };
     }
 

@@ -2,9 +2,14 @@ package com.latticeengines.query.evaluator.restriction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,15 +64,19 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 restriction.setRelation(ComparisonType.NOT_EQUAL);
                 rhs = new ValueLookup(0);
                 isBitEncodedNullQuery = true;
+            } else if (rhs instanceof  CollectionLookup) {
+                CollectionLookup collectionLookup = (CollectionLookup) rhs;
+                AttributeStats stats = findAttributeStats(attrLookup);
+                Buckets bkts = stats.getBuckets();
+                rhs = convertCollectionLookup(bkts, collectionLookup.getValues());
             } else {
-                // TODO: handle collection lookup
                 ValueLookup valueLookup = (ValueLookup) rhs;
                 AttributeStats stats = findAttributeStats(attrLookup);
                 Buckets bkts = stats.getBuckets();
                 if (restriction.getRelation().isLikeTypeOfComparison()) {
-                    rhs = convert(restriction, bkts, (String) valueLookup.getValue());
+                    rhs = convertValueLookup(restriction, bkts, (String) valueLookup.getValue());
                 } else {
-                    rhs = convert(bkts, (String) valueLookup.getValue());
+                    rhs = convertValueLookup(bkts, (String) valueLookup.getValue());
                 }
             }
         }
@@ -255,9 +264,18 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         throw new UnsupportedOperationException(
                                 "Bucket attribute can only do string value lookup. But found " + val + " instead.");
                     }
+                } else if (rhs != null && rhs instanceof CollectionLookup) {
+                    CollectionLookup colLookup = (CollectionLookup) rhs;
+                    for (Object val : colLookup.getValues()) {
+                        if (val != null && !(val instanceof String)) {
+                            throw new UnsupportedOperationException(
+                                    "Bucket attribute can only do string value lookup. But found " + val + " instead.");
+                        }
+                    }
+                    return true;
                 } else {
                     throw new UnsupportedOperationException(
-                            "Bucket attribute can only do string value lookup. But found "
+                            "Bucket attribute can only do string value or collection lookup. But found "
                                     + (rhs == null ? "null" : rhs.getClass()) + " instead.");
                 }
             }
@@ -265,33 +283,24 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         return false;
     }
 
-    private ValueLookup convert(Buckets buckets, String bktLbl) {
+    private ValueLookup convertValueLookup(Buckets buckets, String val) {
         int value = 0;
-        if (bktLbl != null) {
+        if (val != null) {
             Bucket bkt = buckets.getBucketList().stream() //
-                    .filter(b -> b.getLabel().equals(bktLbl)) //
+                    .filter(b -> getBktVal(b).equals(val)) //
                     .findFirst() //
                     .orElseThrow(
-                            () -> new QueryEvaluationException("Cannot find label [" + bktLbl + "] in statistics."));
+                            () -> new QueryEvaluationException("Cannot find label [" + val + "] in statistics."));
             value = bkt.getIdAsInt();
         }
         return new ValueLookup(value);
     }
 
-    private Lookup convert(ConcreteRestriction restriction, Buckets buckets, String bktLbl) {
+    private Lookup convertValueLookup(ConcreteRestriction restriction, Buckets buckets, String bktLbl) {
         List<Object> ids = new ArrayList<>();
         if (bktLbl != null) {
             ids = buckets.getBucketList().stream() //
-                    .filter(b -> {
-                        String lbl = null;
-                        if (ComparisonType.EQUAL.equals(b.getComparisonType()) && b.getValues() != null
-                                && b.getValues().size() == 1) {
-                            lbl = (String) b.getValues().get(0);
-                        } else {
-                            lbl = b.getLabel();
-                        }
-                        return restriction.getRelation().filter(lbl, bktLbl);
-                    }) //
+                    .filter(b -> restriction.getRelation().filter(getBktVal(b), bktLbl)) //
                     .map(Bucket::getIdAsInt) //
                     .collect(Collectors.toList());
         }
@@ -304,6 +313,30 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         }
         restriction.setRelation(ComparisonType.EQUAL);
         return new ValueLookup(ids.get(0));
+    }
+
+    private CollectionLookup convertCollectionLookup(Buckets buckets, Collection<Object> vals) {
+        Set<Integer> ids = new HashSet<>();
+        Set<String> valsLowerCase = vals.stream() //
+                .map(val -> String.valueOf(val).toLowerCase()).collect(Collectors.toSet());
+        if (CollectionUtils.isNotEmpty(vals)) {
+            ids = buckets.getBucketList().stream() //
+                    .filter(b -> valsLowerCase.contains(getBktVal(b).toLowerCase())) //
+                    .map(Bucket::getIdAsInt) //
+                    .collect(Collectors.toSet());
+        }
+        List<Integer> idList = new ArrayList<>(ids);
+        Collections.sort(idList);
+        return new CollectionLookup(new ArrayList<>(idList));
+    }
+
+    private String getBktVal(Bucket bucket) {
+        if (ComparisonType.EQUAL.equals(bucket.getComparisonType()) && bucket.getValues() != null
+                && bucket.getValues().size() == 1) {
+            return (String) bucket.getValues().get(0);
+        } else {
+            return bucket.getLabel();
+        }
     }
 
 }
