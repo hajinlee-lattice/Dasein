@@ -16,6 +16,8 @@ import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("cdlDataCleanupService")
@@ -52,6 +54,14 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Override
     public ApplicationId cleanupByTimeRange(String customerSpace, BusinessEntity entity, Date startTime, Date endTime) {
+        if(startTime == null || endTime == null) {
+            throw new LedpException(LedpCode.LEDP_40002);
+        }
+
+        if(startTime.getTime() > endTime.getTime()) {
+            throw new LedpException(LedpCode.LEDP_40003);
+        }
+
         CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration = new CleanupByDateRangeConfiguration();
         cleanupByDateRangeConfiguration.setOperationType(MaintenanceOperationType.DELETE);
         cleanupByDateRangeConfiguration.setCleanupOperationType(CleanupOperationType.BYDATERANGE);
