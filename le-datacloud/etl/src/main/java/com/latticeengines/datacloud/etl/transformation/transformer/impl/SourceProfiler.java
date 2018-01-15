@@ -121,7 +121,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     @Override
     protected void postDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
             ProfileConfig config) {
-        postProcessProfiledAttrs(workflowDir, config, paras);
+        if (config.getStage() == DataCloudConstants.PROFILE_STAGE_ENRICH) {
+            postProcessProfiledAttrs(workflowDir, config, paras);
+        }
         List<Object[]> result = new ArrayList<>();
         if (paras.getIdAttr() != null) {
             result.add(profileIdAttr(paras.getIdAttr()));
