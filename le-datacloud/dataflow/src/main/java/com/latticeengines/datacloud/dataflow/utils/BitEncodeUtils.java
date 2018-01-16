@@ -11,9 +11,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.propdata.BitDecodeAndEncodeFunction;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 
@@ -23,7 +26,7 @@ public class BitEncodeUtils {
 
     // return group-by fields and target encoded fields
     public static Node encode(Node node, String[] groupByFields, List<SourceColumn> columns) {
-        Map<String, EnrichedBitCodeBook> codeBookMap = getCodeBooks(columns);
+        Map<String, EnrichedBitCodeBook> codeBookMap = getCodeBooks(columns, false);
         List<Node> encodedNodes = new ArrayList<>();
 
         List<String> retainedFields = new ArrayList<>(Arrays.asList(groupByFields));
@@ -51,7 +54,46 @@ public class BitEncodeUtils {
         return join.retain(new FieldList(retainedFields.toArray(new String[retainedFields.size()])));
     }
 
-    private static Map<String, EnrichedBitCodeBook> getCodeBooks(List<SourceColumn> columns) {
+    public static Node decodeAndEncode(Node node, String[] groupByFields, List<SourceColumn> columns) {
+        Map<String, EnrichedBitCodeBook> encodeBookMap = getCodeBooks(columns, true);
+        Map<String, BitCodeBook> decodeBookMap = new HashMap<>();
+        Map<String, List<String>> encColToDecCols = new HashMap<>();
+        getDecodeBooks(columns, decodeBookMap, encColToDecCols);
+        
+        List<Node> encodedNodes = new ArrayList<>();
+
+        List<String> toFinalRetain = new ArrayList<>(Arrays.asList(groupByFields));
+
+        for (Map.Entry<String, EnrichedBitCodeBook> entry : encodeBookMap.entrySet()) {
+            List<String> toRetain = new ArrayList<>(Arrays.asList(groupByFields));
+            toRetain.add(entry.getKey());
+            
+            Node encodedNode = node.apply(
+                    new BitDecodeAndEncodeFunction("_NEW_" + entry.getKey(), entry.getKey(),
+                            encColToDecCols.get(entry.getKey()), decodeBookMap.get(entry.getKey()),
+                            entry.getValue().getBitCodeBook()),
+                    new FieldList(node.getFieldNames()), new FieldMetadata("_NEW_" + entry.getKey(), String.class))
+                    .discard(entry.getKey())
+                    .rename(new FieldList("_NEW_" + entry.getKey()), new FieldList(entry.getKey()))
+                    .retain(new FieldList(toRetain));
+            encodedNode = encodedNode.renamePipe("encoded-" + entry.getKey());
+            encodedNodes.add(encodedNode);
+            toFinalRetain.add(entry.getKey());
+        }
+
+        Node join = null;
+        for (Node encodedNode : encodedNodes) {
+            if (join == null) {
+                join = encodedNode.renamePipe("join-encoded");
+            } else {
+                join = join.outerJoin(new FieldList(groupByFields), encodedNode, new FieldList(groupByFields));
+            }
+        }
+
+        return join.retain(new FieldList(toFinalRetain.toArray(new String[toFinalRetain.size()])));
+    }
+
+    private static Map<String, EnrichedBitCodeBook> getCodeBooks(List<SourceColumn> columns, boolean isDecAndEnc) {
 
         Map<String, List<SourceColumn>> columnGroups = new HashMap<>();
         Map<String, EnrichedBitCodeBook> codeBookMap = new HashMap<>();
@@ -83,14 +125,42 @@ public class BitEncodeUtils {
         }
 
         for (Map.Entry<String, List<SourceColumn>> entry : columnGroups.entrySet()) {
-            EnrichedBitCodeBook codeBook = getCodeBookForOneGroup(entry.getValue());
+            EnrichedBitCodeBook codeBook = getCodeBookForOneGroup(entry.getValue(), isDecAndEnc);
             codeBookMap.put(entry.getKey(), codeBook);
         }
 
         return codeBookMap;
     }
 
-    private static EnrichedBitCodeBook getCodeBookForOneGroup(List<SourceColumn> columns) {
+    private static void getDecodeBooks(List<SourceColumn> columns,
+            Map<String, BitCodeBook> codeBookMap, Map<String, List<String>> encColToDecCols) {
+        Map<String, String> codeBookLookup = new HashMap<>();
+        Map<String, String> decodeStrs = getDecodeStrs(columns);
+        BitCodeBookUtils.constructCodeBookMap(codeBookMap, codeBookLookup, decodeStrs);
+        for (Map.Entry<String, String> entry : codeBookLookup.entrySet()) {
+            if (!encColToDecCols.containsKey(entry.getValue())) {
+                encColToDecCols.put(entry.getValue(), new ArrayList<>());
+            }
+            encColToDecCols.get(entry.getValue()).add(entry.getKey());
+        }
+    }
+
+    private static Map<String, String> getDecodeStrs(List<SourceColumn> columns) {
+        Map<String, String> decodeStrs = new HashMap<>();
+        for (SourceColumn col : columns) {
+            ObjectMapper om = new ObjectMapper();
+            JsonNode jsonNode;
+            try {
+                jsonNode = om.readTree(col.getArguments());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to parse arguments to json for column " + col.getColumnName(), e);
+            }
+            decodeStrs.put(col.getColumnName(), jsonNode.get("DecodeStrategy").toString());
+        }
+        return decodeStrs;
+    }
+
+    private static EnrichedBitCodeBook getCodeBookForOneGroup(List<SourceColumn> columns, boolean isDecAndEnc) {
         String keyColumn = null;
         String valueColumn = null;
         BitCodeBook.Algorithm algorithm = null;
@@ -168,8 +238,12 @@ public class BitEncodeUtils {
 
             switch (algorithm) {
             case KEY_EXISTS:
-                for (String key : targetKeys) {
-                    bitPosMap.put(key, bitPos);
+                if (isDecAndEnc) {
+                    bitPosMap.put(column.getColumnName(), bitPos);
+                } else {
+                    for (String key : targetKeys) {
+                        bitPosMap.put(key, bitPos);
+                    }
                 }
                 break;
             default:

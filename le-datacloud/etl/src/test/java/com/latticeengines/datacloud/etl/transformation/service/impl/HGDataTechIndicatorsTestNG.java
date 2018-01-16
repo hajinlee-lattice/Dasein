@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,21 +38,30 @@ public class HGDataTechIndicatorsTestNG
     private final String SEGMENT_INDICATORS = "SegmentTechIndicators";
     private final String SUPPLIER_INDICATORS = "SupplierTechIndicators";
 
-    private final String TECH_VMWARE = "TechIndicator_VMware";
-    private final String TECH_VSPHERE = "TechIndicator_VMwarevSphere";
+    private final String TECH_SEG1 = "TechIndicator_1010Data";
+    private final String TECH_SEG2 = "TechIndicator_CommVault";
+    private final String TECH_SEG3 = "TechIndicator_AutonomyConnectedBackup";
+    private final String TECH_SEG4 = "TechIndicator_11";
 
-    private final String TECH_MS = "TechIndicator_Microsoft";
-    private final String TECH_ACCESS = "TechIndicator_MicrosoftAccess";
+    private final String TECH_SUPP1 = "TechIndicator_247Customer";
+    private final String TECH_SUPP2 = "TechIndicator_3M";
+    private final String TECH_SUPP3 = "TechIndicator_24_7";
+    private final String TECH_SUPP4 = "TechIndicator_ABB";
 
-    private int HAS_VMWARE_POS = -1;
-    private int HAS_VSPHERE_POS = -1;
-    private int HAS_MS_POS = -1;
-    private int HAS_ACCESS_POS = -1;
+    private int HAS_SEG1_POS = -1;
+    private int HAS_SEG2_POS = -1;
+    private int HAS_SEG3_POS = -1;
+    private int HAS_SEG4_POS = -1;
+    private int HAS_SUPP1_POS = -1;
+    private int HAS_SUPP2_POS = -1;
+    private int HAS_SUPP3_POS = -1;
+    private int HAS_SUPP4_POS = -1;
 
     private final ObjectMapper om = new ObjectMapper();
 
     GeneralSource source = new GeneralSource("HGDataTechIndicators");
-    GeneralSource baseSource = new GeneralSource("HGDataClean");
+    GeneralSource hgClean = new GeneralSource("HGDataClean");
+    GeneralSource hgTechInd = new GeneralSource("HGDataTechIndicators");
 
     @Autowired
     private SourceColumnEntityMgr sourceColumnEntityMgr;
@@ -59,8 +69,8 @@ public class HGDataTechIndicatorsTestNG
     @Test(groups = "functional")
     public void testTransformation() {
         readBitPositions();
-
-        uploadBaseAvro(baseSource, baseSourceVersion);
+        prepareHGClean();
+        prepareHGTechInd();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -99,7 +109,8 @@ public class HGDataTechIndicatorsTestNG
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
-            baseSources.add(baseSource.getSourceName());
+            baseSources.add(hgClean.getSourceName());
+            baseSources.add(hgTechInd.getSourceName());
             step1.setBaseSources(baseSources);
             step1.setTransformer(HGDataTechIndicatorsFlow.TRANSFORMER_NAME);
             step1.setTargetSource(source.getSourceName());
@@ -127,28 +138,78 @@ public class HGDataTechIndicatorsTestNG
         return om.writeValueAsString(config);
     }
 
+    private Object[][] hgCleanData = new Object[][] { //
+            { "google.com", "Supplier", "1010Data" }, //
+            { "google.com", "Supplier", "Commvault" }, //
+            { "google.com", "24/7 Customer, Inc.", "Segment" }, //
+            { "google.com", "3M Company", "Segment" }, //
+            { "facebook.com", "Supplier", "1010Data" }, //
+            { "facebook.com", "Supplier", "Commvault" }, //
+            { "facebook.com", "24/7 Customer, Inc.", "Segment" }, //
+            { "facebook.com", "3M Company", "Segment" }, //
+    };
+
+    private void prepareHGClean() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        columns.add(Pair.of("Domain", String.class));
+        columns.add(Pair.of("Supplier_Name", String.class));
+        columns.add(Pair.of("Segment_Name", String.class));
+        uploadBaseSourceData(hgClean.getSourceName(), baseSourceVersion, columns, hgCleanData);
+    }
+
+    private Object[][] hgTechIndData = new Object[][] { //
+            { "google.com", "AAAAAAAAAAAAAAAAAAAAAAAAAAAACA",
+                    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg" }, //
+    };
+
+    private void prepareHGTechInd() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        columns.add(Pair.of("Domain", String.class));
+        columns.add(Pair.of("SupplierTechIndicators", String.class));
+        columns.add(Pair.of("SegmentTechIndicators", String.class));
+        uploadBaseSourceData(hgTechInd.getSourceName(), baseSourceVersion, columns, hgTechIndData);
+    }
+
     @Override
     public void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int recordsToCheck = 100;
         int pos = 0;
-        log.info("HAS_VMWARE_POS: " + HAS_VMWARE_POS);
-        log.info("HAS_VSPHERE_POS: " + HAS_VSPHERE_POS);
-        log.info("HAS_MS_POS: " + HAS_MS_POS);
-        log.info("HAS_LabVIEW_POS: " + HAS_ACCESS_POS);
+        log.info("HAS_SEG1_POS: " + HAS_SEG1_POS);
+        log.info("HAS_SEG2_POS: " + HAS_SEG2_POS);
+        log.info("HAS_SEG3_POS: " + HAS_SEG3_POS);
+        log.info("HAS_SEG4_POS: " + HAS_SEG4_POS);
+        log.info("HAS_SUPP1_POS: " + HAS_SUPP1_POS);
+        log.info("HAS_SUPP2_POS: " + HAS_SUPP2_POS);
+        log.info("HAS_SUPP3_POS: " + HAS_SUPP3_POS);
+        log.info("HAS_SUPP4_POS: " + HAS_SUPP4_POS);
         while (pos++ < recordsToCheck && records.hasNext()) {
             GenericRecord record = records.next();
             String domain = record.get("Domain").toString();
             try {
                 boolean[] bits = BitCodecUtils.decode(record.get(SEGMENT_INDICATORS).toString(),
-                        new int[] { HAS_VSPHERE_POS, HAS_ACCESS_POS });
+                        new int[] { HAS_SEG1_POS, HAS_SEG2_POS, HAS_SEG3_POS, HAS_SEG4_POS });
                 boolean[] bits2 = BitCodecUtils.decode(record.get(SUPPLIER_INDICATORS).toString(),
-                        new int[] { HAS_VMWARE_POS, HAS_MS_POS });
-                if ("arcelormittal.com".equals(domain)) {
+                        new int[] { HAS_SUPP1_POS, HAS_SUPP2_POS, HAS_SUPP3_POS, HAS_SUPP4_POS });
+                if ("google.com".equals(domain)) {
                     Assert.assertTrue(bits[0]);
                     Assert.assertTrue(bits2[0]);
                     Assert.assertTrue(bits[1]);
                     Assert.assertTrue(bits2[1]);
+                    Assert.assertTrue(bits[2]);
+                    Assert.assertTrue(bits2[2]);
+                    Assert.assertFalse(bits[3]);
+                    Assert.assertFalse(bits2[3]);
+                }
+                if ("facebook.com".equals(domain)) {
+                    Assert.assertTrue(bits[0]);
+                    Assert.assertTrue(bits2[0]);
+                    Assert.assertTrue(bits[1]);
+                    Assert.assertTrue(bits2[1]);
+                    Assert.assertFalse(bits[2]);
+                    Assert.assertFalse(bits2[2]);
+                    Assert.assertFalse(bits[3]);
+                    Assert.assertFalse(bits2[3]);
                 }
             } catch (IOException e) {
                 System.out.println(record);
@@ -161,16 +222,26 @@ public class HGDataTechIndicatorsTestNG
         List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns(source.getSourceName());
         for (SourceColumn column : columns) {
             String columnName = column.getColumnName();
-            if (TECH_VMWARE.equals(columnName)) {
-                HAS_VMWARE_POS = parseBitPos(column.getArguments());
-            } else if (TECH_VSPHERE.equals(columnName)) {
-                HAS_VSPHERE_POS = parseBitPos(column.getArguments());
-            } else if (TECH_MS.equals(columnName)) {
-                HAS_MS_POS = parseBitPos(column.getArguments());
-            } else if (TECH_ACCESS.equals(columnName)) {
-                HAS_ACCESS_POS = parseBitPos(column.getArguments());
+            if (TECH_SEG1.equals(columnName)) {
+                HAS_SEG1_POS = parseBitPos(column.getArguments());
+            } else if (TECH_SEG2.equals(columnName)) {
+                HAS_SEG2_POS = parseBitPos(column.getArguments());
+            } else if (TECH_SEG3.equals(columnName)) {
+                HAS_SEG3_POS = parseBitPos(column.getArguments());
+            } else if (TECH_SEG4.equals(columnName)) {
+                HAS_SEG4_POS = parseBitPos(column.getArguments());
+            } else if (TECH_SUPP1.equals(columnName)) {
+                HAS_SUPP1_POS = parseBitPos(column.getArguments());
+            } else if (TECH_SUPP2.equals(columnName)) {
+                HAS_SUPP2_POS = parseBitPos(column.getArguments());
+            } else if (TECH_SUPP3.equals(columnName)) {
+                HAS_SUPP3_POS = parseBitPos(column.getArguments());
+            } else if (TECH_SUPP4.equals(columnName)) {
+                HAS_SUPP4_POS = parseBitPos(column.getArguments());
             }
-            if (Collections.min(Arrays.asList(HAS_VMWARE_POS, HAS_VSPHERE_POS, HAS_MS_POS, HAS_ACCESS_POS)) > -1) {
+            if (Collections
+                    .min(Arrays.asList(HAS_SEG1_POS, HAS_SEG2_POS, HAS_SEG3_POS, HAS_SEG4_POS, HAS_SUPP1_POS,
+                            HAS_SUPP2_POS, HAS_SUPP3_POS, HAS_SUPP4_POS)) > -1) {
                 break;
             }
         }

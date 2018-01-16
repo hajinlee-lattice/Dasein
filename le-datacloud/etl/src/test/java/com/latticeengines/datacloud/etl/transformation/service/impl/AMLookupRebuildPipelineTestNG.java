@@ -230,6 +230,9 @@ public class AMLookupRebuildPipelineTestNG
                 { 54L, "dom021.com", null, null, null, "DUNS021", "N", "Y", null, null, 999, null, null },
                 { 55L, "dom021.com", null, null, null, "DUNS022", "N", "Y", null, null, null, null, null },
                 { 56L, "dom021.com", null, null, null, "DUNS023", "N", "Y", null, null, 1000, null, null },
+
+                // test priority to pick country-wise location
+
         };
 
         uploadBaseSourceData(ams, baseSourceVersion, columns, data);

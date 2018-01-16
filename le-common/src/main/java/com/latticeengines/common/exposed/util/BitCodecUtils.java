@@ -39,11 +39,11 @@ public class BitCodecUtils {
         return values;
     }
 
-    private static BitSet strToBits(String str) throws IOException {
+    public static BitSet strToBits(String str) throws IOException {
         return BitSet.valueOf(Base64Utils.decodeBase64(str));
     }
 
-    private static String bitsToStr(BitSet bits) throws IOException {
+    public static String bitsToStr(BitSet bits) throws IOException {
         return Base64Utils.encodeBase64(bits.toByteArray());
     }
 
