@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 
@@ -83,7 +84,8 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     private Pair<StatsCube, TopNTree> readStatsPairFromHdfs(String dataCloudVersion) {
         Statistics statistics = readStatisticsFromHdfs(dataCloudVersion);
         StatsCube statsCube = StatsCubeUtils.toStatsCube(statistics);
-        TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, false);
+        List<ColumnMetadata> cms = fromPredefinedSelection(Predefined.Enrichment, dataCloudVersion);
+        TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, false, cms);
         return ImmutablePair.of(statsCube, topNTree);
     }
 

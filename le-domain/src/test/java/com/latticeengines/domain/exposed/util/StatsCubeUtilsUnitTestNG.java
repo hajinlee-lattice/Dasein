@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -26,6 +27,8 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
@@ -68,7 +71,8 @@ public class StatsCubeUtilsUnitTestNG {
         InputStream is = readResource("statistics.json.gz");
         GZIPInputStream gis = new GZIPInputStream(is);
         Statistics statistics = JsonUtils.deserialize(gis, StatisticsContainer.class).getStatistics();
-        TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, true);
+        TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, true, prepareMockMetadata());
+        System.out.println(JsonUtils.serialize(topNTree));
         Assert.assertTrue(MapUtils.isNotEmpty(topNTree.getCategories()));
         StatsCube cube = StatsCubeUtils.toStatsCube(statistics);
 
@@ -77,6 +81,7 @@ public class StatsCubeUtilsUnitTestNG {
         verifyTechTopN(topNTree.getCategories().get(Category.WEBSITE_PROFILE), cube);
         verifyTechTopN(topNTree.getCategories().get(Category.TECHNOLOGY_PROFILE), cube);
         verifyPurchaseHistoryTopN(topNTree.getCategories().get(Category.PRODUCT_SPEND));
+        verifyDateAttrInTopN(topNTree);
     }
 
     private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
@@ -181,6 +186,34 @@ public class StatsCubeUtilsUnitTestNG {
         Bucket expectedTopBkt = attributeStats.getBuckets().getBucketList().stream().sorted(comparator).findFirst()
                 .orElse(null);
         assertSameBucket(topBkt, expectedTopBkt);
+    }
+
+    private List<ColumnMetadata> prepareMockMetadata() {
+        List<ColumnMetadata> cms = new ArrayList<>();
+        ColumnMetadata cm1 = new ColumnMetadata();
+        cm1.setColumnId("AlexaOnlineSince");
+        cm1.setFundamentalType(FundamentalType.DATE);
+        cm1.setCategory(Category.ONLINE_PRESENCE);
+        ColumnMetadata cm2 = new ColumnMetadata();
+        cm2.setColumnId("LastModifiedDate");
+        cm2.setLogicalDataType(LogicalDataType.Date);
+        cm2.setCategory(Category.ACCOUNT_ATTRIBUTES);
+        cms.add(cm1);
+        cms.add(cm2);
+        return cms;
+    }
+
+    private void verifyDateAttrInTopN(TopNTree topNTree) {
+        CategoryTopNTree opTopNTree = topNTree.getCategories().get(Category.ONLINE_PRESENCE);
+        for (List<TopAttribute> subcatTopAttrs : opTopNTree.getSubcategories().values())
+            for (TopAttribute topAttr : subcatTopAttrs) {
+                Assert.assertNotEquals(topAttr.getAttribute(), "AlexaOnlineSince");
+            }
+        CategoryTopNTree actTopNTree = topNTree.getCategories().get(Category.ACCOUNT_ATTRIBUTES);
+        for (List<TopAttribute> subcatTopAttrs : actTopNTree.getSubcategories().values())
+            for (TopAttribute topAttr : subcatTopAttrs) {
+                Assert.assertNotEquals(topAttr.getAttribute(), "LastModifiedDate");
+            }
     }
 
     private void assertSameBucket(Bucket bkt1, Bucket bkt2) {

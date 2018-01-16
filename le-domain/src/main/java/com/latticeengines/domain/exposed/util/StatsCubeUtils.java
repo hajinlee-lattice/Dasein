@@ -10,9 +10,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,8 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
@@ -395,31 +399,52 @@ public class StatsCubeUtils {
         return attributeStats;
     }
 
-    public static TopNTree toTopNTree(Statistics statistics, boolean includeTopBkt) {
+    public static TopNTree toTopNTree(Statistics statistics, boolean includeTopBkt, List<ColumnMetadata> cms) {
         TopNTree topNTree = new TopNTree();
         Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
         for (Map.Entry<Category, CategoryStatistics> entry : statistics.getCategories().entrySet()) {
-            catTrees.put(entry.getKey(), toCatTopTree(entry.getKey(), entry.getValue(), includeTopBkt));
+            catTrees.put(entry.getKey(),
+                    toCatTopTree(entry.getKey(), entry.getValue(), includeTopBkt, getAttrsToHide(cms)));
         }
         topNTree.setCategories(catTrees);
         return topNTree;
     }
 
-    private static CategoryTopNTree toCatTopTree(Category category, CategoryStatistics catStats, boolean includeTopBkt) {
+    private static Map<Category, Set<String>> getAttrsToHide(List<ColumnMetadata> cms) {
+        Map<Category, Set<String>> attrsToHide = new HashMap<>();
+        if (cms == null) {
+            return attrsToHide;
+        }
+        for (ColumnMetadata cm : cms) {
+            if (cm.getFundamentalType() == FundamentalType.DATE || cm.getLogicalDataType() == LogicalDataType.Date) {
+                if (!attrsToHide.containsKey(cm.getCategory())) {
+                    attrsToHide.put(cm.getCategory(), new HashSet<>());
+                }
+                attrsToHide.get(cm.getCategory()).add(cm.getColumnId());
+            }
+        }
+        return attrsToHide;
+    }
+
+    private static CategoryTopNTree toCatTopTree(Category category, CategoryStatistics catStats, boolean includeTopBkt,
+            Map<Category, Set<String>> attrsToHide) {
         CategoryTopNTree topNTree = new CategoryTopNTree();
         Map<String, List<TopAttribute>> subCatTrees = new HashMap<>();
         for (Map.Entry<String, SubcategoryStatistics> entry : catStats.getSubcategories().entrySet()) {
-            subCatTrees.put(entry.getKey(), toSubcatTopTree(category, entry.getValue(), includeTopBkt));
+            subCatTrees.put(entry.getKey(), toSubcatTopTree(category, entry.getValue(), includeTopBkt, attrsToHide));
         }
         topNTree.setSubcategories(subCatTrees);
         return topNTree;
     }
 
-    private static List<TopAttribute> toSubcatTopTree(Category category, SubcategoryStatistics catStats, boolean includeTopBkt) {
+    private static List<TopAttribute> toSubcatTopTree(Category category, SubcategoryStatistics catStats,
+            boolean includeTopBkt, Map<Category, Set<String>> attrsToHide) {
         Comparator<Map.Entry<AttributeLookup, AttributeStats>> comparator = getAttrComparatorForCategory(category);
         return catStats.getAttributes().entrySet().stream() //
                 .sorted(comparator) //
                 .map(entry -> toTopAttr(category, entry, includeTopBkt)) //
+                .filter(attr -> !(attrsToHide.containsKey(category)
+                        && attrsToHide.get(category).contains(attr.getAttribute())))
                 .collect(Collectors.toList());
     }
 

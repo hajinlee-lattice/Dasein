@@ -181,7 +181,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (statistics == null) {
             return null;
         }
-        return StatsCubeUtils.toTopNTree(statistics, includeTopBkt);
+        return StatsCubeUtils.toTopNTree(statistics, includeTopBkt, getAllAttributes());
     }
 
     @Override
