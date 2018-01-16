@@ -418,7 +418,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                 Configuration yarnConfiguration = context.getProperty(ImportVdbProperty.HADOOPCONFIG,
                         Configuration.class);
                 int totalRows = importVdbTableConfiguration.getTotalRows();
-                int rowsToGet = getBatchSize(businessEntity);
+                int rowsToGet = getBatchSize(businessEntity, importVdbTableConfiguration.getMetadataList().size());
                 setExtractContextForVdbTable(table, context, importVdbTableConfiguration, true);
                 EaiImportJobDetail importJobDetail = eaiImportJobDetailService
                         .getImportJobDetailByCollectionIdentifier(extractIdentifier);
@@ -543,16 +543,21 @@ public class VdbTableImportServiceImpl extends ImportService {
         }
     }
 
-    private int getBatchSize(BusinessEntity businessEntity) {
+    private int getBatchSize(BusinessEntity businessEntity, int columnCount) {
+        int scale;
         switch (businessEntity) {
             case Transaction:
-                return transactionBatchSize;
+                scale = columnCount / 10;
+                scale = scale == 0 ? 1 : scale;
+                return transactionBatchSize / scale;
             case Account:
             case Contact:
             case Product:
-                return batchSize;
+                scale = columnCount / 20;
+                scale = scale == 0 ? 1 : scale;
+                return batchSize / scale;
             default:
-                return 20000;
+                return 10000;
         }
     }
 
