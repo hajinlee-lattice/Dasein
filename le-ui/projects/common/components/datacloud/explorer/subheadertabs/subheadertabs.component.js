@@ -109,6 +109,9 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
             ts = new Date().getTime();
 
         var xhrSaveSegment = function(segmentData) {
+
+            console.log(segmentData);
+
             var name = isNewSegment 
                 ? 'segment' + ts 
                 : segmentData.name;
@@ -117,9 +120,14 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
                 ? 'segment' + ts 
                 : segmentData.display_name;
 
+            var description = isNewSegment 
+                ? null 
+                : segmentData.description;
+
             var segment = SegmentStore.sanitizeSegment({
                 name: name,
                 display_name: displayName,
+                description: description,
                 account_restriction: angular.copy(accountRestriction),
                 contact_restriction: angular.copy(contactRestriction),
                 page_filter: {

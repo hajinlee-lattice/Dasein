@@ -44,7 +44,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.init = function($q, $filter) {
 
-        // console.log(vm.current);
+        console.log(vm.current);
 
         RatingsEngineStore.clear();
 
@@ -106,8 +106,9 @@ angular.module('lp.ratingsengine.ratingslist', [
         $event.preventDefault();
         var tileState = vm.current.tileStates[rating.id];
         if(tileState.editRating !== true){
+
             // go to dashboard if there are rules in ratingModels
-            var url = RatingsEngineStore.hasRules(rating) 
+            var url = RatingsEngineStore.hasRules(rating) || rating.type === 'AI_BASED' 
                 ? 'home.ratingsengine.dashboard'
                 : 'home.ratingsengine.wizard.segment';
 

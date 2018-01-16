@@ -33,7 +33,7 @@ angular.module('lp.segments.segments', [
 
     vm.init = function() {
 
-        // console.log(vm.segments);
+        console.log(vm.segments);
 
         vm.segmentIds = [];
         SegmentsList.forEach(function(segment) {
