@@ -26,7 +26,7 @@ MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring
 PRESETS = {
     'cdl_pre_checkin': {
         'apps': ['admin', 'pls', 'microservice', 'matchapi'],
-        'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl', 'objectapi']
+        'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl', 'objectapi', 'dante']
     },
     'lp': {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'saml'],
