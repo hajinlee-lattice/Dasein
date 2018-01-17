@@ -87,7 +87,7 @@ public class CacheBeansConfiguration implements CachingConfigurer {
     }
 
     private CacheManager gaCacheManager() {
-        CacheConfig sessionCacheConfig = new CacheConfig(5 * 60 * 1000, 5 * 60 * 1000);
+        CacheConfig sessionCacheConfig = new CacheConfig(20 * 60 * 1000, 20 * 60 * 1000);
         Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
         config.put(CacheName.SessionCache.name(), sessionCacheConfig);
 
