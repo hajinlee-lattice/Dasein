@@ -35,6 +35,11 @@ public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService 
     }
 
     @Override
+    public EaiImportJobDetail getImportJobDetailById(Long id) {
+        return eaiImportJobDetailEntityMgr.findByField("PID", id);
+    }
+
+    @Override
     public boolean updateImportJobDetail(EaiImportJobDetail eaiImportJobDetail) {
         eaiImportJobDetailEntityMgr.update(eaiImportJobDetail);
         return true;

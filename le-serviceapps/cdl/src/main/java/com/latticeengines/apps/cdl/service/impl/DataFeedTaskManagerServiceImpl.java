@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -64,7 +65,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     @Override
-    public String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source,
+    public synchronized String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source,
             CDLImportConfig importConfig) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(importConfig);
@@ -90,7 +91,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             if (!dataFeedMetadataService.compareMetadata(originMeta, newMeta,
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
-                dataFeedTask.setImportTemplate(newMeta);
+                dataFeedTask.setImportTemplate(mergeTable(originMeta, newMeta));
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             }
             return dataFeedTask.getUniqueId();
@@ -225,6 +226,20 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 attr.setName(templateAttrs.get(attr.getName().toLowerCase()).getName());
             }
         }
+    }
+
+    @VisibleForTesting
+    Table mergeTable(Table templateTable, Table metaTable) {
+        Map<String, Attribute> templateAttrs = new HashMap<>();
+        templateTable.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
+        for (Attribute attr : metaTable.getAttributes()) {
+            if (!templateAttrs.containsKey(attr.getName())) {
+                Attribute newAttr = new Attribute(attr.getName());
+                AttributeUtils.copyPropertiesFromAttribute(attr, newAttr);
+                templateTable.addAttribute(newAttr);
+            }
+        }
+        return templateTable;
     }
 
 }

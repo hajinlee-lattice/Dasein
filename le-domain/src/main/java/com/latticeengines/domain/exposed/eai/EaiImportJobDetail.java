@@ -1,23 +1,5 @@
 package com.latticeengines.domain.exposed.eai;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.api.client.util.Lists;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import org.hibernate.annotations.Index;
-
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
@@ -27,9 +9,29 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Lob;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.api.client.util.Lists;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+
 @Entity
-@javax.persistence.Table(name = "EAI_IMPORT_JOB_DETAIL", uniqueConstraints = { @UniqueConstraint(columnNames = {
-        "COLLECTION_IDENTIFIER", "SEQUENCE_ID" }) })
+@javax.persistence.Table(name = "EAI_IMPORT_JOB_DETAIL",
+        indexes = { @Index(name = "IX_COLLECTION_IDENTIFIER", columnList = "COLLECTION_IDENTIFIER"),
+                    @Index(name = "IX_SEQUENCE_ID", columnList = "SEQUENCE_ID")},
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "COLLECTION_IDENTIFIER", "SEQUENCE_ID" }) })
 public class EaiImportJobDetail implements HasPid, Serializable {
 
     private static final long serialVersionUID = -1299972365295269629L;
@@ -42,12 +44,10 @@ public class EaiImportJobDetail implements HasPid, Serializable {
     private Long pid;
 
     @Column(name = "COLLECTION_IDENTIFIER", nullable = false)
-    @Index(name = "IX_COLLECTION_IDENTIFIER")
     @JsonProperty("collection_identifier")
     private String collectionIdentifier;
 
     @Column(name = "SEQUENCE_ID", nullable = false)
-    @Index(name = "IX_SEQUENCE_ID")
     @JsonProperty("sequence_id")
     private Long sequenceId;
 

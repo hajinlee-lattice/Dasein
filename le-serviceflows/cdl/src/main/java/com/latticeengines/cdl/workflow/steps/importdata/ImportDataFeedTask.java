@@ -3,14 +3,11 @@ package com.latticeengines.cdl.workflow.steps.importdata;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -19,16 +16,14 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfigurationFactory;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
-import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("importDataFeedTask")
@@ -63,6 +58,7 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
         dataFeedProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask);
         waitForAppId(applicationId);
         EaiImportJobDetail jobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
+        saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
         getJson().put(dataFeedTask.getEntity(), jobDetail.getProcessedRecords())
                 .put("total_rows", jobDetail.getTotalRows()).put("ignored_rows", jobDetail.getIgnoredRows())
                 .put("imported_rows", jobDetail.getProcessedRecords()).put("deduped_rows", jobDetail.getDedupedRows());

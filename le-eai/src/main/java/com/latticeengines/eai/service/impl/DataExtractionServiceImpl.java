@@ -171,32 +171,15 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     private List<EaiImportJobDetail> initailImportJobDetail(ImportConfiguration importConfig) {
         String collectionIdentifiers = importConfig.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
+        List<Long> eaiJobIds = new ArrayList<>();
         if (!StringUtils.isEmpty(collectionIdentifiers)) {
             @SuppressWarnings("unchecked")
             List<Object> identifiersRaw = JsonUtils.deserialize(collectionIdentifiers, List.class);
             List<String> identifiers = JsonUtils.convertList(identifiersRaw, String.class);
             List<EaiImportJobDetail> jobDetails = new ArrayList<>();
             for (String collectionIdentifier : identifiers) {
-                EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService
-                        .getImportJobDetailByCollectionIdentifier(collectionIdentifier);
-                if (eaiImportJobDetail != null) {
-                    switch (eaiImportJobDetail.getStatus()) {
-                    case SUBMITTED:
-                        throw new LedpException(LedpCode.LEDP_18136);
-                    case RUNNING:
-                    case WAITINGREGISTER:
-                        throw new LedpException(LedpCode.LEDP_18137,
-                                new String[] { eaiImportJobDetail.getLoadApplicationId() });
-//                    case SUCCESS:
-//                        eaiImportJobDetail.setStatus(ImportStatus.SUBMITTED);
-//                        eaiImportJobDetail.setCollectionTimestamp(new Date());
-//                        eaiImportJobDetail.setProcessedRecords(0);
-//                        eaiImportJobDetail.setSourceType(importConfig.getSourceConfigurations().get(0).getSourceType());
-//                        eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
-//                        break;
-                    }
-                }
-                eaiImportJobDetail = new EaiImportJobDetail();
+
+                EaiImportJobDetail eaiImportJobDetail = new EaiImportJobDetail();
                 eaiImportJobDetail.setCollectionIdentifier(collectionIdentifier);
                 eaiImportJobDetail.setStatus(ImportStatus.SUBMITTED);
                 eaiImportJobDetail.setCollectionTimestamp(new Date());
@@ -204,7 +187,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
                 eaiImportJobDetail.setSourceType(importConfig.getSourceConfigurations().get(0).getSourceType());
                 eaiImportJobDetailService.createImportJobDetail(eaiImportJobDetail);
                 jobDetails.add(eaiImportJobDetail);
+                eaiJobIds.add(eaiImportJobDetail.getPid());
             }
+            importConfig.setProperty(ImportProperty.EAIJOBDETAILIDS, JsonUtils.serialize(eaiJobIds));
             return jobDetails;
         } else {
             return null;

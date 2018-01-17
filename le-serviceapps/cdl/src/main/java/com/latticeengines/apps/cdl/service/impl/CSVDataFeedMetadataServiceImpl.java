@@ -137,7 +137,6 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     @Override
     public String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier) {
         CSVToHdfsConfiguration csvmportConfig = ((CSVImportConfig) importConfig).getCsvToHdfsConfiguration();
-        ;
         csvmportConfig.setJobIdentifier(jobIdentifier);
         return JsonUtils.serialize(csvmportConfig);
     }

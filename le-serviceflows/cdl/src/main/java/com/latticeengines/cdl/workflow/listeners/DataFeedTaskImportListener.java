@@ -69,13 +69,14 @@ public class DataFeedTaskImportListener extends LEJobListener {
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+        String applicationId = job.getOutputContextValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
         String importJobIdentifier = job
                 .getInputContextValue(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
         String customerSpace = job.getTenant().getId();
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy
-                .getImportJobDetailByCollectionIdentifier(importJobIdentifier);
+                .getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
-            log.warn(String.format("Cannot find the job detail for %s", importJobIdentifier));
+            log.warn(String.format("Cannot find the job detail for %s", applicationId));
             return;
         }
 

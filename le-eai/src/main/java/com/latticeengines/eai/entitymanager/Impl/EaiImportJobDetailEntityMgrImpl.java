@@ -44,13 +44,8 @@ public class EaiImportJobDetailEntityMgrImpl extends BaseEntityMgrImpl<EaiImport
             eaiImportJobDetail.setSequenceId(1L);
             eaiImportJobDetailDao.create(eaiImportJobDetail);
         } else {
-            if (lastDetail.getStatus().isTerminated()) {
-                eaiImportJobDetail.setSequenceId(lastDetail.getSequenceId() + 1);
-                eaiImportJobDetailDao.create(eaiImportJobDetail);
-            } else {
-                throw new RuntimeException(String.format("Only one running import is allowed for one data feed task. " +
-                        "%s", eaiImportJobDetail.getCollectionIdentifier()));
-            }
+            eaiImportJobDetail.setSequenceId(lastDetail.getSequenceId() + 1);
+            eaiImportJobDetailDao.create(eaiImportJobDetail);
         }
     }
 }

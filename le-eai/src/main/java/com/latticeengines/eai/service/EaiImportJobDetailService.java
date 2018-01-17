@@ -15,4 +15,6 @@ public interface EaiImportJobDetailService {
     void cancelImportJob(String collectionIdentifier);
 
     EaiImportJobDetail getImportJobDetailByAppId(String appId);
+
+    EaiImportJobDetail getImportJobDetailById(Long id);
 }

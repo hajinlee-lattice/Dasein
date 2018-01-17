@@ -49,7 +49,12 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     private CDLProxy cdlProxy;
 
     @Override
+    @SuppressWarnings("unchecked")
     public void invoke(VdbToHdfsConfiguration config) {
+        String jobDetailIds = config.getProperty(ImportProperty.EAIJOBDETAILIDS);
+        List<Object> jobDetailIdsRaw = JsonUtils.deserialize(jobDetailIds, List.class);
+        List<Long> eaiJobDetailIds = JsonUtils.convertList(jobDetailIdsRaw, Long.class);
+        Long jobDetailId = eaiJobDetailIds.size() > 0 ? eaiJobDetailIds.get(0) : -1L;
 
         try {
             SourceImportConfiguration sourceImportConfiguration = config.getSourceConfigurations().get(0);
@@ -70,84 +75,81 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
             importContext.setProperty(ImportProperty.DUPLICATE_ROWS, new HashMap<String, Long>());
             importContext.setProperty(ImportProperty.DUPLICATE_ROWS_LIST, new HashMap<String, List<Long>>());
             importContext.setProperty(ImportProperty.BUSINESS_ENTITY, config.getBusinessEntity());
-            String collectionIdentifiers = config.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
-            if (!StringUtils.isEmpty(collectionIdentifiers)) {
-                @SuppressWarnings("unchecked")
-                List<Object> identifiersRaw = JsonUtils.deserialize(collectionIdentifiers, List.class);
-                List<String> identifiers = JsonUtils.convertList(identifiersRaw, String.class);
 
-                VdbConnectorConfiguration vdbConnectorConfiguration = null;
+            VdbConnectorConfiguration vdbConnectorConfiguration = null;
+            try {
+                log.info("Start getting connector config.");
+                vdbConnectorConfiguration = (VdbConnectorConfiguration) importService
+                        .generateConnectorConfiguration(connectorStr, importContext);
+
+                LinkedHashMap<String, ImportVdbTableConfiguration> importVdbTableConfigurationMap =
+                        vdbConnectorConfiguration.getTableConfigurations();
+                if(importVdbTableConfigurationMap.size() <= 0) {
+                    throw new LedpException(LedpCode.LEDP_17011, new String[] { "No import vdb table configuration"
+                    });
+                }
+                ImportVdbTableMergeRule mergeRule = importVdbTableConfigurationMap.entrySet().iterator().next().getValue().getMergeRule();
+
                 try {
-                    log.info("Start getting connector config.");
-                    vdbConnectorConfiguration = (VdbConnectorConfiguration) importService
-                            .generateConnectorConfiguration(connectorStr, importContext);
+                    log.info("Initialize import job detail record");
+                    initJobDetail(jobDetailId, vdbConnectorConfiguration);
+                    log.info("Import metadata");
+                    HashMap<Long, Table> tableTemplates = getTableMap(config.getCustomerSpace().toString(),
+                            eaiJobDetailIds);
 
-                    LinkedHashMap<String, ImportVdbTableConfiguration> importVdbTableConfigurationMap =
-                            vdbConnectorConfiguration.getTableConfigurations();
-                    if(importVdbTableConfigurationMap.size() <= 0) {
-                        throw new LedpException(LedpCode.LEDP_17011, new String[] { "No import vdb table configuration"
-                        });
-                    }
-                    ImportVdbTableMergeRule mergeRule = importVdbTableConfigurationMap.entrySet().iterator().next().getValue().getMergeRule();
+                    List<Table> metadata = importService.prepareMetadata(new ArrayList<>(tableTemplates.values()));
+                    metadata = sortTable(metadata, vdbConnectorConfiguration);
 
-                    try {
-                        log.info("Initialize import job detail record");
-                        initJobDetail(vdbConnectorConfiguration);
-                        log.info("Import metadata");
-                        HashMap<String, Table> tableTemplates = getTableMap(config.getCustomerSpace().toString(),
-                                identifiers);
+                    sourceImportConfiguration.setTables(metadata);
 
-                        List<Table> metadata = importService.prepareMetadata(new ArrayList<>(tableTemplates.values()));
-                        metadata = sortTable(metadata, vdbConnectorConfiguration);
+                    log.info("Import table data");
+                    importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
+                            vdbConnectorConfiguration);
 
-                        sourceImportConfiguration.setTables(metadata);
+                    log.info("Finalize import job detail record");
+                    finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
 
-                        log.info("Import table data");
-                        importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
-                                vdbConnectorConfiguration);
+                    if(mergeRule == ImportVdbTableMergeRule.REPLACE) {
+                        ApplicationId applicationId = cdlProxy.cleanupAllData(config.getCustomerSpace().toString(),
+                                config.getBusinessEntity());
 
-                        log.info("Finalize import job detail record");
-                        finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
-
-                        if(mergeRule == ImportVdbTableMergeRule.REPLACE) {
-                            ApplicationId applicationId = cdlProxy.cleanupAllData(config.getCustomerSpace().toString(),
-                                    config.getBusinessEntity());
-
-                            waitForWorkflowStatus(applicationId.toString(), false);
-                        }
-
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                } catch (LedpException e) {
-                    switch (e.getCode()) {
-                    case LEDP_17011:
-                    case LEDP_17012:
-                    case LEDP_17013:
-                        log.error("Generate connector configuration error!");
-                        break;
-                    default:
-                        break;
+                        waitForWorkflowStatus(applicationId.toString(), false);
                     }
 
                 } catch (Exception e) {
                     throw e;
                 }
+            } catch (LedpException e) {
+                switch (e.getCode()) {
+                case LEDP_17011:
+                case LEDP_17012:
+                case LEDP_17013:
+                    log.error("Generate connector configuration error!");
+                    break;
+                default:
+                    break;
+                }
+                throw e;
+
+            } catch (Exception e) {
+                throw e;
             }
         } catch (Exception e) {
-            updateJobDetailStatus("", ImportStatus.FAILED);
+            updateJobDetailStatus(jobDetailId, ImportStatus.FAILED);
             throw e;
         }
 
     }
 
-    private HashMap<String, Table> getTableMap(String customerSpace, List<String> taskIds) {
-        HashMap<String, Table> tables = new HashMap<>();
-        for (String taskId : taskIds) {
-            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
-
-            if (dataFeedTask != null) {
-                tables.put(taskId, dataFeedTask.getImportTemplate());
+    private HashMap<Long, Table> getTableMap(String customerSpace, List<Long> jobDetailIds) {
+        HashMap<Long, Table> tables = new HashMap<>();
+        for (Long jobId : jobDetailIds) {
+            String taskId = getTaskIdFromJobId(jobId);
+            if (taskId != null) {
+                DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
+                if (dataFeedTask != null) {
+                    tables.put(jobId, dataFeedTask.getImportTemplate());
+                }
             }
         }
         return tables;
@@ -166,16 +168,16 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         return result;
     }
 
-    private void initJobDetail(VdbConnectorConfiguration config) {
+    private void initJobDetail(Long jobDetailId, VdbConnectorConfiguration config) {
         log.info(String.format("Table config count: %d", config.getTableConfigurations().size()));
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             log.info(String.format("Collection identifier: %s", entry.getValue().getCollectionIdentifier()));
-            initJobDetail(entry.getValue().getCollectionIdentifier(), SourceType.VISIDB);
+            initJobDetail(jobDetailId, entry.getValue().getCollectionIdentifier(), SourceType.VISIDB);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void finalizeJobDetail(VdbConnectorConfiguration config, HashMap<String, Table> tableMetaData,
+    private void finalizeJobDetail(VdbConnectorConfiguration config, HashMap<Long, Table> tableMetaData,
             ImportContext importContext) {
         Map<String, Boolean> multipleExtractMap = importContext.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class);
         Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
@@ -191,9 +193,9 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         Map<String, Long> duplicateRecord = importContext.getProperty(ImportProperty.DUPLICATE_ROWS, Map.class);
         Map<String, List<Long>> mutipleDuplicatedRecords = importContext.getProperty(ImportProperty.DUPLICATE_ROWS_LIST,
                 Map.class);
-        for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
-            Table table = tableMetaData.get(entry.getValue().getCollectionIdentifier());
-            Long totalRows = (long) entry.getValue().getTotalRows();
+        for (Map.Entry<Long, Table> entry : tableMetaData.entrySet()) {
+            Table table = entry.getValue();
+            Long totalRows = (long) config.getVdbTableConfiguration(table.getName()).getTotalRows();
             if (multipleExtractMap.get(table.getName())) {
                 List<String> recordList = new ArrayList<>();
                 for (Long record : multipleRecords.get(table.getName())) {
@@ -207,12 +209,12 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 for (Long record : mutipleDuplicatedRecords.get(table.getName())) {
                     duplicateRows += record;
                 }
-                updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
+                updateJobDetailExtractInfo(entry.getKey(), table.getName(),
                         multipleTargets.get(table.getName()), recordList, totalRows, ignoredRows, duplicateRows);
             } else {
                 Long ignoredRows = ignoredRecord.get(table.getName());
                 Long duplicateRows = duplicateRecord.get(table.getName());
-                updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
+                updateJobDetailExtractInfo(entry.getKey(), table.getName(),
                         Arrays.asList(targetPathsMap.get(table.getName())),
                         Arrays.asList(processedRecordsMap.get(table.getName()).toString()),
                         totalRows, ignoredRows, duplicateRows);

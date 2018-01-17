@@ -68,6 +68,11 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
     @Override
     @SuppressWarnings("unchecked")
     public void invoke(CSVToHdfsConfiguration config) {
+        String jobDetailIds = config.getProperty(ImportProperty.EAIJOBDETAILIDS);
+        List<Object> jobDetailIdsRaw = JsonUtils.deserialize(jobDetailIds, List.class);
+        List<Long> eaiJobDetailIds = JsonUtils.convertList(jobDetailIdsRaw, Long.class);
+        Long jobDetailId = eaiJobDetailIds.size() > 0 ? eaiJobDetailIds.get(0) : -1L;
+
         try {
             List<SourceImportConfiguration> sourceImportConfigs = config.getSourceConfigurations();
             String customerSpace = config.getCustomerSpace().toString();
@@ -90,10 +95,11 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             context.setProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, Boolean.TRUE.toString());
             context.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
+
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find the dataFeed task for import!");
             }
-            initJobDetail(config.getJobIdentifier(), SourceType.FILE);
+            initJobDetail(jobDetailId, config.getJobIdentifier(), SourceType.FILE);
             Table template = dataFeedTask.getImportTemplate();
             log.info(String.format("Modeling metadata for template: %s",
                     JsonUtils.serialize(template.getModelingMetadata())));
@@ -124,16 +130,17 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
                 }
                 importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
 
-                waitAndFinalizeJob(config, context, template.getName());
+                waitAndFinalizeJob(config, context, template.getName(), eaiJobDetailIds.get(0));
             }
         } catch (RuntimeException e) {
-            updateJobDetailStatus(config.getJobIdentifier(), ImportStatus.FAILED);
+            updateJobDetailStatus(jobDetailId, ImportStatus.FAILED);
             throw e;
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void waitAndFinalizeJob(CSVToHdfsConfiguration config, ImportContext context, String templateName) {
+    private void waitAndFinalizeJob(CSVToHdfsConfiguration config, ImportContext context, String templateName,
+                                    Long jobDetailID) {
         // update csv import processed records.
         ApplicationId appId = context.getProperty(ImportProperty.APPID, ApplicationId.class);
 
@@ -150,7 +157,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
         long ignoredRecords = counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
         long duplicatedRecords = counters.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue();
         long totalRecords = processedRecords + ignoredRecords + duplicatedRecords;
-        updateJobDetailExtractInfo(config.getJobIdentifier(), templateName,
+        updateJobDetailExtractInfo(jobDetailID, templateName,
                 Arrays.asList(targetPathsMap.get(templateName)), Arrays.asList(Long.toString(processedRecords)),
                 totalRecords, ignoredRecords, duplicatedRecords);
     }

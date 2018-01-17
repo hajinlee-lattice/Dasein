@@ -395,8 +395,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
                 ENTITY_ACCOUNT);
         Table accountTemplate2 = accountDataFeedTask.getImportTemplate();
         Table sourceTable = metadataProxy.getTable(customerSpace, missingAccountFile.getTableName());
-        Assert.assertNull(accountTemplate2.getAttribute(InterfaceName.Website));
         Assert.assertNull(sourceTable.getAttribute(InterfaceName.Website));
+        Assert.assertNotNull(accountTemplate2.getAttribute(InterfaceName.Website));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "verifyBase")
@@ -452,5 +452,25 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         for (Attribute attribute : attributes) {
             assertTrue(headers.contains(attribute.getDisplayName()));
         }
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "verifyColumnMissing")
+    public void testParallelImport() {
+        SourceFile sourceFile1 = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
+        Assert.assertNotNull(sourceFile1);
+        ApplicationId applicationId1 = cdlImportService.submitCSVImport(customerSpace, sourceFile1.getName(),
+                sourceFile1.getName(), SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX);
+
+        SourceFile sourceFile2 = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
+        Assert.assertNotNull(sourceFile2);
+        ApplicationId applicationId2 = cdlImportService.submitCSVImport(customerSpace, sourceFile2.getName(),
+                sourceFile2.getName(), SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT +
+                        FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
+        Assert.assertNotNull(dataFeedTask);
+        JobStatus completedStatus1 = waitForWorkflowStatus(workflowProxy, applicationId1.toString(), false);
+        assertEquals(completedStatus1, JobStatus.COMPLETED);
+        JobStatus completedStatus2 = waitForWorkflowStatus(workflowProxy, applicationId2.toString(), false);
+        assertEquals(completedStatus2, JobStatus.COMPLETED);
     }
 }

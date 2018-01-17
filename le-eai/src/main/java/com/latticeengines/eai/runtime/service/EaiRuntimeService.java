@@ -51,9 +51,9 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         progressReporter.apply(progress);
     }
 
-    public void initJobDetail(String jobIdentifier, SourceType sourceType) {
+    public void initJobDetail(Long jobDetailId, String jobIdentifier, SourceType sourceType) {
         EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                .getImportJobDetailByCollectionIdentifier(jobIdentifier);
+                .getImportJobDetailById(jobDetailId);
         if (jobDetail == null) {
             jobDetail = new EaiImportJobDetail();
             jobDetail.setStatus(ImportStatus.RUNNING);
@@ -68,19 +68,19 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         }
     }
 
-    public void updateJobDetailStatus(String jobIdentifier, ImportStatus status) {
+    public void updateJobDetailStatus(Long jobDetailId, ImportStatus status) {
         EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                .getImportJobDetailByCollectionIdentifier(jobIdentifier);
+                .getImportJobDetailById(jobDetailId);
         if (jobDetail != null) {
             jobDetail.setStatus(status);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);
         }
     }
 
-    public void updateJobDetailExtractInfo(String jobIdentifier, String templateName, List<String> pathList,
+    public void updateJobDetailExtractInfo(Long jobDetailId, String templateName, List<String> pathList,
             List<String> processedRecords, Long totalRows, Long ignoredRows, Long dedupedRows) {
         EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                .getImportJobDetailByCollectionIdentifier(jobIdentifier);
+                .getImportJobDetailById(jobDetailId);
         if (jobDetail != null) {
             int totalRecords = 0;
             for (String processedRecord : processedRecords) {
@@ -96,6 +96,16 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
             //when extract has processed records info means the import completed, waiting for register.
             jobDetail.setStatus(ImportStatus.WAITINGREGISTER);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);
+        }
+    }
+
+    public String getTaskIdFromJobId(Long jobDetailId) {
+        EaiImportJobDetail jobDetail = eaiImportJobDetailService
+                .getImportJobDetailById(jobDetailId);
+        if (jobDetail != null) {
+            return jobDetail.getCollectionIdentifier();
+        } else {
+            return null;
         }
     }
 
