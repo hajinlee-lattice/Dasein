@@ -43,7 +43,19 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types) {
+    public List<WorkflowJob> findByTypes(List<String> types) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s workflowjob where workflowjob.type in :types",
+                entityClz.getSimpleName());
+        Query<WorkflowJob> query = session.createQuery(queryStr);
+        query.setParameterList("types", types);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByWorkflowIdsAndTypes(List<Long> workflowIds, List<String> types) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
@@ -57,13 +69,42 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, Long parentJobId) {
+    public List<WorkflowJob> findByWorkflowIdsAndParentJobId(List<Long> workflowIds, Long parentJobId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s workflowjob where workflowjob.workflowId in :workflowIds and workflowjob.parentJobId=:parentJobId",
+                entityClz.getSimpleName());
+        Query<WorkflowJob> query = session.createQuery(queryStr);
+        query.setParameterList("workflowIds", workflowIds);
+        query.setParameter("parentJobId", parentJobId);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByTypesAndParentJobId(List<String> types, Long parentJobId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s workflowjob where workflowjob.type in :types and workflowjob.parentJobId=:parentJobId",
+                entityClz.getSimpleName());
+        Query<WorkflowJob> query = session.createQuery(queryStr);
+        query.setParameterList("types", types);
+        query.setParameter("parentJobId", parentJobId);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByWorkflowIdsAndTypesAndParentJobId(List<Long> workflowIds, List<String> types,
+                                                                     Long parentJobId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format("from %s workflowjob where workflowjob.workflowId in :workflowIds and " +
                         "workflowjob.type in :types and workflowjob.parentJobId=:parentJobId",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameterList("workflowIds", workflowIds);
         query.setParameterList("types", types);
         query.setParameter("parentJobId", parentJobId);

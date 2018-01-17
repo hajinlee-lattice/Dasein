@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -31,6 +33,7 @@ public enum JobStatus {
     private int statusId;
     private String statusCode;
     private boolean terminated;
+    private static Logger log = LoggerFactory.getLogger(JobStatus.class);
 
     public int getStatusId() {
         return statusId;
@@ -75,8 +78,11 @@ public enum JobStatus {
             return fromYarnStatus(jobStatus, jobState);
         } else if (EnumUtils.isValidEnum(BatchStatus.class, status)) {
             return fromBatchStatus(BatchStatus.valueOf(status));
-        } else {
+        } else if (EnumUtils.isValidEnum(JobStatus.class, status)) {
             return JobStatus.valueOf(status);
+        } else {
+            log.warn("Got job status that cannot be handled. Status = " + status);
+            return null;
         }
     }
 
@@ -114,6 +120,7 @@ public enum JobStatus {
         switch (status) {
             case COMPLETED:
                 return JobStatus.COMPLETED;
+            case STARTING:
             case STARTED:
             case STOPPING:
                 return JobStatus.RUNNING;
@@ -121,9 +128,8 @@ public enum JobStatus {
                 return JobStatus.CANCELLED;
             case ABANDONED:
             case FAILED:
-                return JobStatus.FAILED;
-            case STARTING:
             case UNKNOWN:
+                return JobStatus.FAILED;
             default:
                 return JobStatus.PENDING;
         }

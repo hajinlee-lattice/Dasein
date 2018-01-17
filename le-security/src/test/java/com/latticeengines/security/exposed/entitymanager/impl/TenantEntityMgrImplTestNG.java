@@ -19,6 +19,8 @@ public class TenantEntityMgrImplTestNG extends SecurityFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
+    private Long tenantPid;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         Tenant tenant = new Tenant();
@@ -36,6 +38,14 @@ public class TenantEntityMgrImplTestNG extends SecurityFunctionalTestNGBase {
     @Test(groups = "functional")
     public void findByTenantId() {
         Tenant t = tenantEntityMgr.findByTenantId("TENANT1");
+        tenantPid = t.getPid();
+        assertEquals(t.getName(), "TENANT1");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "findByTenantId")
+    public void findByTenantPid() {
+        Tenant t = tenantEntityMgr.findByTenantPid(tenantPid);
+        assertEquals(t.getId(), "TENANT1");
         assertEquals(t.getName(), "TENANT1");
     }
 
@@ -44,5 +54,4 @@ public class TenantEntityMgrImplTestNG extends SecurityFunctionalTestNGBase {
         Tenant t = tenantEntityMgr.findByTenantName("TENANT1");
         assertEquals(t.getId(), "TENANT1");
     }
-
 }

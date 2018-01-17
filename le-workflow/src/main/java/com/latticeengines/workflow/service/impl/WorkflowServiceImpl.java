@@ -34,7 +34,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -47,8 +46,6 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
-
-import javax.batch.runtime.BatchStatus;
 
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
@@ -212,8 +209,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    @WithCustomerSpace
-    public void stop(String customerSpace, WorkflowExecutionId workflowId) {
+    public void stop(WorkflowExecutionId workflowId) {
         try {
             WorkflowJob job = workflowJobEntityMgr.findByWorkflowIdWithFilter(workflowId.getId());
             if(job != null) {

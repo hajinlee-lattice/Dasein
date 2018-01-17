@@ -18,13 +18,23 @@ public class WorkflowMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.findAllWithFilter(..))")
+    public void findAll(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
     @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.findByWorkflowIdWithFilter(..))")
     public void findByWorkflowJobId(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.findByWorkflowIdsWithFilter(..))")
-    public void findByWorkflowJobIds(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(..))")
+    public void findByWorkflowJobIdsOrTypesOrParentJobId(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.WorkflowJobEntityMgrImpl.findByApplicationIdWithFilter(..))")
+    public void findByApplicationId(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 }

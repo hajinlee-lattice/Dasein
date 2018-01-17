@@ -9,30 +9,28 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 
 public interface WorkflowInterface {
+    AppSubmission submitWorkflowExecution(WorkflowConfiguration config, String ... params);
 
-    List<Job> getWorkflowJobs(String customerSpace, List<String> jobIds, List<String> types, Boolean includeDetails);
+    AppSubmission restartWorkflowExecution(String workflowId, String ... params);
 
-    List<Job> updateParentJobId(String customerSpace, List<String> jobIds, String parentJobId);
+    String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String ... params);
 
-    AppSubmission submitWorkflowExecution(WorkflowConfiguration config);
+    void stopWorkflowExecution(String workflowId, String ... params);
 
-    String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig);
+    WorkflowExecutionId getWorkflowId(String applicationId, String ... params);
 
-    void stopWorkflow(String customerSpace, String workflowId);
+    WorkflowStatus getWorkflowStatus(String workflowId, String ... params);
 
-    AppSubmission restartWorkflowExecution(Long workflowId);
+    Job getWorkflowJobFromApplicationId(String applicationId, String ... params);
 
-    WorkflowExecutionId getWorkflowId(String applicationId);
+    Job getWorkflowExecution(String workflowId, String ... params);
 
-    WorkflowStatus getWorkflowStatus(String workflowId);
+    List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds, String ... params);
 
-    Job getWorkflowJobFromApplicationId(String applicationId);
+    @Deprecated
+    List<Job> getWorkflowExecutionsForTenant(Long tenantPid, String ... params);
 
-    Job getWorkflowExecution(String workflowId);
+    List<Job> getJobs(List<String> jobIds, List<String> types, Boolean includeDetails, String ... params);
 
-    List<Job> getWorkflowExecutionsForTenant(Long tenantPid);
-
-    List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds);
-
-    List<Job> getWorkflowExecutionsForTenant(long tenantPid, String type);
+    void updateParentJobId(List<String> jobIds, String parentJobId, String ... params);
 }

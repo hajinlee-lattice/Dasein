@@ -80,30 +80,29 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     public void testGetJobStatus() {
         createWorkflowJobs();
 
-        JobStatus status = workflowJobService.getJobStatus(workflowIds.get(10000L));
+        JobStatus status = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10000L));
         Assert.assertEquals(status, JobStatus.PENDING);
 
-        status = workflowJobService.getJobStatus(workflowIds.get(10001L));
+        status = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10001L));
         Assert.assertEquals(status, JobStatus.PENDING);
 
-        status = workflowJobService.getJobStatus(workflowIds.get(10002L));
+        status = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10002L));
         Assert.assertEquals(status, JobStatus.COMPLETED);
 
-        status = workflowJobService.getJobStatus(workflowIds.get(10003L));
+        status = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10003L));
         Assert.assertEquals(status, JobStatus.FAILED);
 
-        status = workflowJobService.getJobStatus(workflowIds.get(20000L));
+        status = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(20000L));
         Assert.assertEquals(status, JobStatus.FAILED);
 
         List<Long> testWorkflowIds1 = new ArrayList<>();
         testWorkflowIds1.add(workflowIds.get(10000L));
         testWorkflowIds1.add(workflowIds.get(20000L));
         testWorkflowIds1.add(workflowIds.getOrDefault(90000L, 90000L));
-        List<JobStatus> statuses = workflowJobService.getJobStatus(testWorkflowIds1);
-        Assert.assertEquals(statuses.size(), 3);
+        List<JobStatus> statuses = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1);
+        Assert.assertEquals(statuses.size(), 2);
         Assert.assertEquals(statuses.get(0), JobStatus.PENDING);
         Assert.assertEquals(statuses.get(1), JobStatus.FAILED);
-        Assert.assertNull(statuses.get(2));
 
         List<Long> testWorkflowIds2 = new ArrayList<>();
         testWorkflowIds2.add(workflowIds.get(10000L));
@@ -117,7 +116,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
     public void testGetJobsByTenant() {
         mockWorkflowContainerService();
-        List<Job> jobs = workflowJobService.getJobsByTenantPid(tenant.getPid());
+        List<Job> jobs = workflowJobService.getJobsByTenantPid(tenant.getPid(), false);
         Assert.assertEquals(jobs.size(), 5);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
         Assert.assertEquals(jobs.get(0).getJobType(), "application_10000");
@@ -129,6 +128,14 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(3).getJobType(), "application_10003");
         Assert.assertEquals(jobs.get(4).getApplicationId(), "application_20000");
         Assert.assertEquals(jobs.get(4).getJobType(), "application_20000");
+
+        jobs = workflowJobService.getJobsByTenantPid(tenant.getPid(),
+                Arrays.asList("application_10001", "application_10002"), true);
+        Assert.assertEquals(jobs.size(), 2);
+        Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10001");
+        Assert.assertEquals(jobs.get(0).getJobType(), "application_10001");
+        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_10002");
+        Assert.assertEquals(jobs.get(1).getJobType(), "application_10002");
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobsByTenant" },
@@ -137,9 +144,25 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     public void testGetJobs() {
         mockWorkflowService();
         setupLEJobExecutionRetriever();
+
+        List<Job> jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), false);
+        Assert.assertEquals(jobs.size(), 5);
+        List<String> applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
+        Assert.assertTrue(applicationIds.contains("application_10000"));
+        Assert.assertTrue(applicationIds.contains("application_10001"));
+        Assert.assertTrue(applicationIds.contains("application_10002"));
+        Assert.assertTrue(applicationIds.contains("application_10003"));
+        Assert.assertTrue(applicationIds.contains("application_20000"));
+
+        jobs = workflowJobService.getJobs(customerSpace3.toString(), false);
+        Assert.assertEquals(jobs.size(), 2);
+        applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
+        Assert.assertTrue(applicationIds.contains("application_30000"));
+        Assert.assertTrue(applicationIds.contains("application_30001"));
+
         List<Long> workflowExecutionIds = new ArrayList<>(workflowIds.values());
-        List<Job> jobs = workflowJobService.getJobs(workflowExecutionIds);
-        Assert.assertEquals(jobs.size(), workflowJobEntityMgr.findAll().size());
+        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds, null, true, null, null);
+        Assert.assertEquals(jobs.size(), 5);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
         Assert.assertEquals(jobs.get(0).getSteps().size(), 2);
         Assert.assertEquals(jobs.get(0).getSteps().get(0).getJobStepType(), "step1_2");
@@ -155,18 +178,26 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(4).getApplicationId(), "application_20000");
         Assert.assertEquals(jobs.get(4).getSteps().size(), 9);
         Assert.assertEquals(jobs.get(4).getSteps().get(1).getJobStepType(), "step2_8");
-        Assert.assertEquals(jobs.get(5).getApplicationId(), "application_30000");
-        Assert.assertEquals(jobs.get(5).getSteps().size(), 1);
-        Assert.assertEquals(jobs.get(5).getSteps().get(0).getJobStepType(), "step3_1");
-        Assert.assertEquals(jobs.get(6).getApplicationId(), "application_30001");
-        Assert.assertEquals(jobs.get(6).getSteps().size(), 4);
-        Assert.assertEquals(jobs.get(6).getSteps().get(3).getJobStepType(), "step31_1");
 
-        jobs = workflowJobService.getJobs(workflowExecutionIds, "application_10002");
+        List<Long> workflowExecutionIds3 = new ArrayList<>();
+        workflowExecutionIds3.add(workflowIds.get(30000L));
+        workflowExecutionIds3.add(workflowIds.get(30001L));
+        jobs = workflowJobService.getJobs(customerSpace3.toString(), workflowExecutionIds3, null, true, null, null);
+        Assert.assertEquals(jobs.size(), 2);
+        Assert.assertEquals(jobs.get(0).getApplicationId(), "application_30000");
+        Assert.assertEquals(jobs.get(0).getSteps().size(), 1);
+        Assert.assertEquals(jobs.get(0).getSteps().get(0).getJobStepType(), "step3_1");
+        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_30001");
+        Assert.assertEquals(jobs.get(1).getSteps().size(), 4);
+        Assert.assertEquals(jobs.get(1).getSteps().get(3).getJobStepType(), "step31_1");
+
+        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds,
+                Collections.singletonList("application_10002"), true, false, -1L);
         Assert.assertEquals(jobs.size(), 1);
         Assert.assertEquals(jobs.get(0).getJobType(), "application_10002");
         Assert.assertEquals(jobs.get(0).getSteps().size(), 1);
-        jobs = workflowJobService.getJobs(workflowExecutionIds, Collections.singletonList("application_20000"), false);
+        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds,
+                Collections.singletonList("application_20000"), false, false, -1L);
         Assert.assertEquals(jobs.size(), 1);
         Assert.assertEquals(jobs.get(0).getJobType(), "application_20000");
         Assert.assertNull(jobs.get(0).getSteps());
@@ -195,20 +226,15 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
         List<String> testTypes = new ArrayList<>();
         testTypes.add("application_10001");
-        testTypes.add("application_10002");
         jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, testTypes, false, false, 0L);
         Assert.assertEquals(jobs.size(), 2);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10001");
         Assert.assertNull(jobs.get(0).getSteps());
-        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_10002");
-        Assert.assertNull(jobs.get(1).getSteps());
 
         jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, testTypes, true, false, 0L);
         Assert.assertEquals(jobs.size(), 2);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10001");
         Assert.assertNotNull(jobs.get(0).getSteps());
-        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_10002");
-        Assert.assertNotNull(jobs.get(1).getSteps());
 
         Long parentJobId = workflowIds.get(10000L);
         jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, null, true, true, parentJobId);
@@ -224,14 +250,14 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         mockWorkflowService();
         setupLEJobExecutionRetriever();
         Long workflowId = workflowIds.get(10000L);
-        List<String> stepNames = workflowJobService.getStepNames(workflowId);
+        List<String> stepNames = workflowJobService.getStepNames(WFAPITEST_CUSTOMERSPACE.toString(), workflowId);
         Assert.assertNotNull(stepNames);
         Assert.assertEquals(stepNames.size(), 2);
         Assert.assertEquals(stepNames.get(0), "step1_2");
         Assert.assertEquals(stepNames.get(1), "step1_1");
 
         workflowId = workflowIds.getOrDefault(90000L, 90000L);
-        Assert.assertNull(workflowJobService.getStepNames(workflowId));
+        Assert.assertNull(workflowJobService.getStepNames(WFAPITEST_CUSTOMERSPACE.toString(), workflowId));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobs" })

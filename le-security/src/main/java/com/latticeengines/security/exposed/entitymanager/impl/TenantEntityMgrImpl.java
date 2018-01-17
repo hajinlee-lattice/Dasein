@@ -26,6 +26,12 @@ public class TenantEntityMgrImpl extends BaseEntityMgrImpl<Tenant> implements Te
 
     @Override
     @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Tenant findByTenantPid(Long tenantPid) {
+        return tenantDao.findByKey(Tenant.class, tenantPid);
+    }
+
+    @Override
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantId(String tenantId) {
         return tenantDao.findByTenantId(tenantId);
     }

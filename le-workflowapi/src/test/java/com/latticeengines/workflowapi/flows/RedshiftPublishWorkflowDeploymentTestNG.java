@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -132,8 +133,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
     }
 
     private void verifyReport(WorkflowExecutionId workflowId, ReportPurpose purpose, int count) {
-//        Job job = workflowService.getJob(workflowId);
-        Job job = workflowJobService.getJob(workflowId.getId());
+        Job job = workflowJobService.getJob(CustomerSpace.parse(tenant.getId()).toString(), workflowId.getId(), true);
         Report publishDataReport = job.getReports().stream()
                 .filter(r -> r.getPurpose().equals(ReportPurpose.PUBLISH_DATA_SUMMARY)).findFirst().orElse(null);
         assertNotNull(publishDataReport);
@@ -159,5 +159,4 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         assertEquals(results.size(), size,
                 "Got " + results.size() + " results in stead of " + size + " by querying [" + sql + "]");
     }
-
 }

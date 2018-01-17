@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -40,6 +39,7 @@ import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class WorkflowJobServiceImplUnitTestNG {
 
@@ -75,6 +75,9 @@ public class WorkflowJobServiceImplUnitTestNG {
         mockModelSummaryService();
         mockTenantEntityManager();
         mockActionService();
+
+        Tenant tenant = tenantEntityMgr.findByTenantId("tenant");
+        MultiTenantContext.setTenant(tenant);
     }
 
     @Test(groups = "unit")
@@ -105,8 +108,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testFindByJobIds() {
-        List<String> jobIdStrs = Arrays.asList(jobIds).stream().map(jobId -> jobId.toString())
-                .collect(Collectors.toList());
+        List<String> jobIdStrs = Arrays.stream(jobIds).map(String::valueOf).collect(Collectors.toList());
         log.info(String.format("jobIdStrs are %s", jobIdStrs));
         List<Job> jobs = workflowJobService.findByJobIds(jobIdStrs);
         assertNotNull(jobs);
@@ -164,13 +166,12 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     private void mockWorkflowProxy() {
-        when(workflowProxy.getWorkflowExecution(anyString())).thenReturn(createJob(jobIds[0]));
+        when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(createJob(jobIds[0]));
 
         List<Job> jobs = new ArrayList<>();
         jobs.add(createJob(jobIds[0]));
         jobs.add(createJob(jobIds[1]));
-        when(workflowProxy.getWorkflowExecutionsForTenant(anyLong())).thenReturn(jobs);
-        when(workflowProxy.getWorkflowExecutionsByJobIds(anyList())).thenReturn(jobs);
+        when(workflowProxy.getWorkflowExecutionsByJobIds(anyList(), anyString())).thenReturn(jobs);
     }
 
     private void mockSourceFileEntityManager() {

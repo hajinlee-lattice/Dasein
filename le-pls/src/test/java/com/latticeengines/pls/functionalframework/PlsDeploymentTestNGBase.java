@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
@@ -84,7 +85,8 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
         while (true) {
             try {
-                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId,
+                        CustomerSpace.parse(mainTestTenant.getId()).toString());
             } catch (Exception e) {
                 System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
 

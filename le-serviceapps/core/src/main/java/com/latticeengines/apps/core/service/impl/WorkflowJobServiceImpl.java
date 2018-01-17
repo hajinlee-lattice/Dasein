@@ -30,7 +30,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public ApplicationId restart(Long jobId) {
-        AppSubmission submission = workflowProxy.restartWorkflowExecution(jobId);
+        AppSubmission submission = workflowProxy.restartWorkflowExecution(String.valueOf(jobId));
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Resubmitted workflow with application id %s", applicationId));

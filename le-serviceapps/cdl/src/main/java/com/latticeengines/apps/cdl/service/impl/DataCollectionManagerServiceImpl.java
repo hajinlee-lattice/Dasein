@@ -101,7 +101,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         try {
             Job job = workflowProxy.getWorkflowExecution(workflowId.toString());
             if ((job != null) && (job.isRunning())) {
-                workflowProxy.stopWorkflow(customerSpace, workflowId.toString());
+                workflowProxy.stopWorkflowExecution(workflowId.toString(), customerSpace);
             }
         } catch (Exception e) {
             log.error("Failed to stop workflow " + workflowId, e);

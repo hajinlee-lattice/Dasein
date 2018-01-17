@@ -9,6 +9,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
@@ -35,9 +36,8 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
         WorkflowExecutionId workflowId = workflowService.start(configuration);
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
-
-//        Job job = workflowService.getJob(workflowId);
-        Job job = workflowJobService.getJob(workflowId.getId());
+        
+        Job job = workflowJobService.getJob(CustomerSpace.parse(tenant.getId()).toString(), workflowId.getId(), true);
         assertEquals(job.getReports().size(), 1);
         Report report = job.getReports().get(0);
         assertTrue(report.getName().startsWith("Test"));

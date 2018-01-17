@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,140 +33,182 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowI
     }
 
     @Override
-    public AppSubmission submitWorkflowExecution(WorkflowConfiguration config) {
-        String url = constructUrl("/");
-        return post("submitWorkflowExecution", url, config, AppSubmission.class);
+    public AppSubmission submitWorkflowExecution(WorkflowConfiguration workflowConfig, String ... params) {
+        String baseUrl = "/jobs";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        return post("submitWorkflowExecution", constructUrl(url), workflowConfig, AppSubmission.class);
     }
 
     @Override
-    public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig) {
-        String url = constructUrl("/aws");
-        return post("submitAWSWorkflowExecution", url, workflowConfig, String.class);
+    public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String ... params) {
+        String baseUrl = "/awsJobs";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        return post("submitAWSWorkflowExecution", constructUrl(url), workflowConfig, String.class);
     }
 
     @Override
-    public AppSubmission restartWorkflowExecution(Long workflowId) {
-        String url = constructUrl("/job/{workflowId}/restart", workflowId);
-        return post("restartWorkflow", url, null, AppSubmission.class);
+    public AppSubmission restartWorkflowExecution(String workflowId, String ... params) {
+        String baseUrl = "/job/{workflowId}/restart";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        return post("restartWorkflowExecution", constructUrl(url, workflowId), null, AppSubmission.class);
     }
 
     @Override
-    public WorkflowExecutionId getWorkflowId(String applicationId) {
-        String url = constructUrl("/yarnapps/id/{applicationId}", applicationId);
-        return get("getWorkflowId", url, WorkflowExecutionId.class);
+    public void stopWorkflowExecution(String workflowId, String ... params) {
+        String baseUrl = "/job/{workflowId}/stop";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        post("stopWorkflowExecution", constructUrl(url, workflowId), null, Void.class);
     }
 
     @Override
-    @Deprecated
-    public WorkflowStatus getWorkflowStatus(String workflowId) {
-        String url = constructUrl("/status/{workflowId}", workflowId);
-        return get("getWorkflowStatus", url, WorkflowStatus.class);
+    public WorkflowExecutionId getWorkflowId(String applicationId, String ... params) {
+        String baseUrl = "/yarnapps/id/{applicationId}";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        return get("getWorkflowId", constructUrl(url, applicationId), WorkflowExecutionId.class);
     }
 
     @Override
-    public Job getWorkflowJobFromApplicationId(String applicationId) {
-        String url = constructUrl("/yarnapps/jobs/{applicationId}", applicationId);
-        return get("getWorkflowJobFromApplicationId", url, Job.class);
+    public WorkflowStatus getWorkflowStatus(String workflowId, String ... params) {
+        String baseUrl = "/status/{workflowId}";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        return get("getWorkflowStatus", constructUrl(url, workflowId), WorkflowStatus.class);
     }
 
     @Override
-    public Job getWorkflowExecution(String workflowId) {
-        String url = constructUrl("/job/{workflowId}", workflowId);
-        return get("getWorkflowExecution", url, Job.class);
+    public Job getWorkflowJobFromApplicationId(String applicationId, String... params) {
+        String baseUrl = "/yarnapps/job/{applicationId}";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        return get("getJobFromApplicationId", constructUrl(url, applicationId), Job.class);
     }
 
     @Override
-    public List<Job> getWorkflowExecutionsForTenant(Long tenantPid) {
-        String url = constructUrl("/jobs/{tenantPid}", tenantPid);
-        return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
+    public Job getWorkflowExecution(String workflowId, String ... params) {
+        String baseUrl = "/job/{workflowId}";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        return get("getJobFromWorkflowId", constructUrl(url, workflowId), Job.class);
     }
 
     @Override
-    public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds) {
+    public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds, String ... params) {
         if (CollectionUtils.isEmpty(jobIds)) {
             return Collections.emptyList();
         }
-        StringBuilder sb = new StringBuilder();
-        for (String jobId : jobIds) {
-            sb.append(String.format("jobId=%s&", jobId));
-        }
-        sb.setLength(sb.length() - 1);
-        String url = constructUrl(String.format("/jobs?%s", sb.toString()));
-        return JsonUtils.convertList(get("getWorkflowExecutionsByJobIds", url, List.class), Job.class);
+
+        String baseUrl = "/jobs";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        url += url.contains("?customerSpace=") ? "&" : "?";
+        url += buildQueryString("jobId", jobIds);
+        return JsonUtils.convertList(get("getJobs", constructUrl(url), List.class), Job.class);
+    }
+
+    @Deprecated
+    @Override
+    public List<Job> getWorkflowExecutionsForTenant(Long tenantPid, String ... params) {
+        String baseUrl = "/tenant/{tenantPid}/jobs";
+        String url = parseOptionalParameter(baseUrl, "type", params);
+        return JsonUtils.convertList(
+                get("getWorkflowExecutionsForTenant", constructUrl(url, tenantPid), List.class), Job.class);
     }
 
     @Override
-    public List<Job> getWorkflowExecutionsForTenant(long tenantPid, String type) {
-        String url = constructUrl("/jobs/{tenantPid}/find?type={type}", tenantPid, type);
-        return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
+    public List<Job> getJobs(List<String> jobIds, List<String> types, Boolean includeDetails, String ... params) {
+        String baseUrl = "/jobs";
+        if (params != null && params.length > 0) {
+            String customerSpace = params[0];
+            String url = generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, includeDetails, false);
+            return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
+        } else {
+            String url = generateGetWorkflowUrls(baseUrl,null, jobIds, types, includeDetails, false);
+            return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
+        }
     }
 
     @Override
-    public void stopWorkflow(String customerSpace, String workflowId) {
-        String url = constructUrl("/customerspaces/{customerspaces}/job/{workflowId}/stop",
-                shortenCustomerSpace(customerSpace), workflowId);
-        post("stopWorkflow", url, null, Void.class);
-    }
-
-    @Override
-    public List<Job> getWorkflowJobs(String customerSpace, List<String> jobIds, List<String> types,
-            Boolean includeDetails) {
-        String url = generateGetWorkflowUrls(customerSpace, jobIds, types, includeDetails, false);
-        return JsonUtils.convertList(get("getWorkflowJobs", url, List.class), Job.class);
-    }
-
-    @VisibleForTesting
-    String generateGetWorkflowUrls(String customerSpace, List<String> jobIds, List<String> types,
-            Boolean includeDetails, Boolean hasParentId) {
-        StringBuilder urlStr = new StringBuilder();
-        urlStr.append("/customerspaces/{customerspaces}/jobs");
-        StringBuilder sb = new StringBuilder();
-        if (CollectionUtils.isNotEmpty(jobIds)) {
-            for (String jobId : jobIds) {
-                sb.append(String.format("jobId=%s&", jobId));
-            }
-        }
-        if (CollectionUtils.isNotEmpty(types)) {
-            for (String type : types) {
-                sb.append(String.format("type=%s&", type));
-            }
-        }
-        if (includeDetails != null) {
-            sb.append(String.format("includeDetails=%s&", includeDetails));
-        }
-        if (hasParentId != null) {
-            sb.append(String.format("hasParentId=%s", hasParentId));
-        }
-        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '&') {
-            sb.setLength(sb.length() - 1);
-        }
-        if (sb.length() > 0) {
-            urlStr.append("?");
-        }
-        urlStr.append(sb);
-        return constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
-    }
-
-    @Override
-    public List<Job> updateParentJobId(String customerSpace, List<String> jobIds, String parentJobId) {
-        String url = generateUpdateParentJobIdUrl(customerSpace, jobIds, parentJobId);
-        return JsonUtils.convertList(post("updateParentJobId", url, null, List.class), Job.class);
-    }
-
-    @VisibleForTesting
-    String generateUpdateParentJobIdUrl(String customerSpace, List<String> jobIds, String parentJobId) {
+    public void updateParentJobId(List<String> jobIds, String parentJobId, String ... params) {
         if (CollectionUtils.isEmpty(jobIds)) {
             throw new LedpException(LedpCode.LEDP_18165);
         }
-        if (parentJobId == null) {
+
+        if (StringUtils.isBlank(parentJobId)) {
             throw new LedpException(LedpCode.LEDP_18166);
         }
-        StringBuilder urlStr = new StringBuilder();
-        urlStr.append("/customerspaces/{customerspaces}/jobs?");
-        for (String jobId : jobIds) {
-            urlStr.append(String.format("jobId=%s&", jobId));
+
+        String baseUrl = "/jobs";
+        if (params != null && params.length > 0) {
+            String customerSpace = params[0];
+            String url = generateUpdateParentJobIdUrl(baseUrl, customerSpace, jobIds, parentJobId);
+            put("updateParentJobId", url, null);
+        } else {
+            String url = generateUpdateParentJobIdUrl(baseUrl, "", jobIds, parentJobId);
+            put("updateParentJobId", url, null);
         }
-        urlStr.append(String.format("parentJobId=%s", parentJobId));
-        return constructUrl(urlStr.toString(), shortenCustomerSpace(customerSpace));
+    }
+
+    @VisibleForTesting
+    String parseOptionalParameter(String baseUrl, String parameterName, String ... parameterValues) {
+        if (parameterValues != null && parameterValues.length > 0) {
+            String var = parameterValues[0];
+            if (parameterName.equals("customerSpace")) {
+                return String.format(baseUrl + "?%s=%s", parameterName, shortenCustomerSpace(var));
+            } else {
+                return String.format(baseUrl + "?%s=%s", parameterName, var);
+            }
+        } else {
+            return baseUrl;
+        }
+    }
+
+    @VisibleForTesting
+    String buildQueryString(String queryStringName, List<String> parameters) {
+        if (CollectionUtils.isEmpty(parameters)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        parameters.forEach(parameter -> builder.append(String.format(queryStringName + "=%s&", parameter)));
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
+    }
+
+    @VisibleForTesting
+    String generateGetWorkflowUrls(String baseUrl, String customerSpace, List<String> jobIds, List<String> types,
+                                   Boolean includeDetails, Boolean hasParentId) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append(baseUrl);
+        if (StringUtils.isNotEmpty(customerSpace)) {
+            urlStr.append("?customerSpace=").append(shortenCustomerSpace(customerSpace)).append("&");
+        } else {
+            urlStr.append("?");
+        }
+        if (CollectionUtils.isNotEmpty(jobIds)) {
+            urlStr.append(buildQueryString("jobId", jobIds)).append("&");
+        }
+        if (CollectionUtils.isNotEmpty(types)) {
+            urlStr.append(buildQueryString("type", types)).append("&");
+        }
+        if (includeDetails != null) {
+            urlStr.append("includeDetails=").append(String.valueOf(includeDetails)).append("&");
+        }
+        if (hasParentId != null) {
+            urlStr.append("hasParentId=").append(String.valueOf(hasParentId));
+        }
+        if (urlStr.charAt(urlStr.length() - 1) == '&') {
+            urlStr.setLength(urlStr.length() - 1);
+        }
+        return constructUrl(urlStr.toString());
+    }
+
+    @VisibleForTesting
+    String generateUpdateParentJobIdUrl(String baseUrl, String customerSpace, List<String> jobIds, String parentJobId) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append(baseUrl);
+        if (StringUtils.isNotEmpty(customerSpace)) {
+            urlStr.append("?customerSpace=").append(shortenCustomerSpace(customerSpace)).append("&");
+        } else {
+            urlStr.append("?");
+        }
+        urlStr.append(buildQueryString("jobId", jobIds)).append("&");
+        urlStr.append("parentJobId=").append(parentJobId);
+        return constructUrl(urlStr.toString());
     }
 }

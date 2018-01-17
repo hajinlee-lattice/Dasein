@@ -5,7 +5,6 @@ import java.util.List;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.workflow.exposed.build.Workflow;
 
 public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
@@ -15,9 +14,16 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds);
 
-    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types);
+    List<WorkflowJob> findByTypes(List<String> types);
 
-    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, Long parentJobId);
+    List<WorkflowJob> findByWorkflowIdsAndTypes(List<Long> workflowIds, List<String> types);
+
+    List<WorkflowJob> findByWorkflowIdsAndParentJobId(List<Long> workflowIds, Long parentJobId);
+
+    List<WorkflowJob> findByTypesAndParentJobId(List<String> types, Long parentJobId);
+
+    List<WorkflowJob> findByWorkflowIdsAndTypesAndParentJobId(List<Long> workflowIds, List<String> types,
+                                                              Long parentJobId);
 
     List<WorkflowJob> findByTenant(Tenant tenant);
 

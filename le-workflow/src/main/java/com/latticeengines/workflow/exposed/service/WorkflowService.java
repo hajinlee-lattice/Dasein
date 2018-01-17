@@ -24,7 +24,7 @@ public interface WorkflowService {
 
     WorkflowExecutionId restart(WorkflowInstanceId workflowId, WorkflowJob workflowJob);
 
-    void stop(String customerSpace, WorkflowExecutionId workflowId);
+    void stop(WorkflowExecutionId workflowId);
 
     WorkflowStatus getStatus(WorkflowExecutionId workflowId);
 

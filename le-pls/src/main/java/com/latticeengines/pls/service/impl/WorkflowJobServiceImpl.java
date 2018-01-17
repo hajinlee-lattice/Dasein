@@ -79,7 +79,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public ApplicationId restart(Long jobId) {
-        AppSubmission submission = workflowProxy.restartWorkflowExecution(jobId);
+        Tenant tenantWithPid = getTenant();
+        AppSubmission submission = workflowProxy.restartWorkflowExecution(
+                String.valueOf(jobId), CustomerSpace.parse(tenantWithPid.getId()).toString());
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Resubmitted workflow with application id %s", applicationId));
@@ -89,7 +91,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public void cancel(String jobId) {
         Tenant tenantWithPid = getTenant();
-        workflowProxy.stopWorkflow(CustomerSpace.parse(tenantWithPid.getId()).toString(), jobId);
+        workflowProxy.stopWorkflowExecution(jobId, CustomerSpace.parse(tenantWithPid.getId()).toString());
     }
 
     @Override
@@ -111,7 +113,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public Job findByApplicationId(String applicationId) {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding job for application Id " + applicationId + " with pid " + tenantWithPid.getPid());
-        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId,
+                CustomerSpace.parse(tenantWithPid.getId()).toString());
         updateStepDisplayNameAndNumSteps(job);
         updateJobDisplayNameAndDescription(job);
         return job;
@@ -127,7 +130,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (Long.parseLong(jobId) == UNSTARTED_PROCESS_ANALYZE_ID) {
             return generateUnstartedProcessAnalyzeJob(true);
         } else {
-            job = workflowProxy.getWorkflowExecution(jobId);
+            Tenant tenantWithPid = getTenant();
+            job = workflowProxy.getWorkflowExecution(jobId,
+                    CustomerSpace.parse(tenantWithPid.getId()).toString());
             updateJobWithModelSummary(job);
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
@@ -159,7 +164,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<Job> findByJobIds(List<String> jobIds) {
-        List<Job> jobs = workflowProxy.getWorkflowExecutionsByJobIds(jobIds);
+        Tenant tenantWithPid = getTenant();
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsByJobIds(jobIds,
+                CustomerSpace.parse(tenantWithPid.getId()).toString());
         if (jobs == null) {
             return Collections.emptyList();
         }
@@ -196,7 +203,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             job.setJobStatus(JobStatus.PENDING);
             job.setJobType("processAnalyzeWorkflow");
             Map<String, String> unfinishedInputContext = new HashMap<>();
-            List<Long> unfinishedActionIds = actions.stream().map(action -> action.getPid())
+            List<Long> unfinishedActionIds = actions.stream().map(Action::getPid)
                     .collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
@@ -234,7 +241,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 jobList.add(job);
             }
         }
-        jobList.addAll(workflowProxy.getWorkflowExecutionsByJobIds(workflowJobIds));
+        Tenant tenantWithPid = getTenant();
+        jobList.addAll(workflowProxy.getWorkflowExecutionsByJobIds(workflowJobIds,
+                CustomerSpace.parse(tenantWithPid.getId()).toString()));
         return jobList;
     }
 
@@ -309,7 +318,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private void updateJobWithModelSummary(Job job) {
         if (job.getInputs() == null) {
-            job.setInputs(new HashMap<String, String>());
+            job.setInputs(new HashMap<>());
         }
         job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
                 getJobSourceFileExists(job.getApplicationId()).toString());
@@ -340,10 +349,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public ApplicationId submit(WorkflowConfiguration configuration) {
+        Tenant tenantWithPid = getTenant();
         String userId = MultiTenantContext.getEmailAddress();
         configuration.setUserId(userId);
 
-        AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
+        AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration,
+                CustomerSpace.parse(tenantWithPid.getId()).toString());
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Submitted %s with application id %s", configuration.getWorkflowName(), applicationId));
@@ -352,7 +363,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public JobStatus getJobStatusFromApplicationId(String appId) {
-        Job job = workflowProxy.getWorkflowJobFromApplicationId(appId);
+        Tenant tenantWithPid = getTenant();
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(appId,
+                CustomerSpace.parse(tenantWithPid.getId()).toString());
         return job.getJobStatus();
     }
 
@@ -377,12 +390,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public List<Job> findJobs(List<String> jobIds, List<String> types, Boolean includeDetails,
                               Boolean hasParentId) {
         Tenant tenantWithPid = getTenant();
-        List<Job> jobs = workflowProxy.getWorkflowJobs(CustomerSpace.parse(tenantWithPid.getId()).toString(), jobIds,
-                types, includeDetails);
+        List<Job> jobs = workflowProxy.getJobs(jobIds, types, includeDetails,
+                CustomerSpace.parse(tenantWithPid.getId()).toString());
         if (jobs == null) {
             return Collections.emptyList();
         }
         return jobs;
     }
-
 }

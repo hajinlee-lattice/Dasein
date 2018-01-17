@@ -10,7 +10,7 @@
 
 # update null status
 UPDATE WORKFLOW_JOB job
-    JOIN WORKFLOW_JOB_EXECUTION jobExecution ON job.WORKFLOW_ID = jobExecution.JOB_EXECUTION_ID
+  JOIN WORKFLOW_JOB_EXECUTION jobExecution ON job.WORKFLOW_ID = jobExecution.JOB_EXECUTION_ID
 SET job.STATUS = CASE
                  WHEN jobExecution.STATUS = 'ABANDONED' OR jobExecution.STATUS = 'FAILED' OR jobExecution.STATUS = 'UNKNOWN' THEN 'FAILED'
                  WHEN jobExecution.STATUS = 'STOPPED' THEN 'CANCELLED'
@@ -18,3 +18,10 @@ SET job.STATUS = CASE
                  WHEN jobExecution.STATUS = 'COMPLETED' THEN 'COMPLETED'
                  END
 WHERE job.STATUS IS NULL;
+
+# update null type
+UPDATE WORKFLOW_JOB job
+  JOIN WORKFLOW_JOB_EXECUTION execution ON job.WORKFLOW_ID = execution.JOB_EXECUTION_ID
+  JOIN WORKFLOW_JOB_INSTANCE instance ON execution.JOB_INSTANCE_ID = instance.JOB_INSTANCE_ID
+SET job.TYPE = instance.JOB_NAME
+WHERE job.TYPE IS NULL;

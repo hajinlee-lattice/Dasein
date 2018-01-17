@@ -22,9 +22,11 @@ public class SetTenantAspect {
     private TenantEntityMgr tenantEntityMgr;
 
     @Before("@annotation(com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace)")
-    public void allMethodsWorkflowService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setSecurityContext(CustomerSpace.parse(customerSpace).toString());
+    public void allMethodsWorkflowJobService(JoinPoint joinPoint) {
+        String customerSpace = String.valueOf(joinPoint.getArgs()[0]);
+        if (!customerSpace.equalsIgnoreCase("null")) {
+            setSecurityContext(CustomerSpace.parse(customerSpace).toString());
+        }
     }
 
     private void setSecurityContext(String customerSpace) {

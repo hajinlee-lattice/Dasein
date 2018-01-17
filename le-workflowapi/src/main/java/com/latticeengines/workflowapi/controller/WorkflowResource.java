@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.controller;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -25,155 +25,127 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController
 @RequestMapping("/workflows")
-public class WorkflowResource implements WorkflowInterface {
+public class WorkflowResource {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowResource.class);
 
     @Autowired
-//    private WorkflowService workflowService;
     private WorkflowJobService workflowJobService;
 
-    @RequestMapping(value = "/customerspaces/{customerSpace}/job/{workflowId}/stop", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
+    @RequestMapping(value = "/job/{workflowId}/stop", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Stop an executing workflow")
-    @Override
-    public void stopWorkflow(@PathVariable String customerSpace, @PathVariable String workflowId) {
-//        workflowService.stop(customerSpace, new WorkflowExecutionId(Long.valueOf(workflowId)));
+    public void stopWorkflowExecution(@PathVariable String workflowId,
+                                      @RequestParam(required = false) String customerSpace) {
         workflowJobService.stopWorkflow(customerSpace, Long.valueOf(workflowId));
     }
 
-    @RequestMapping(value = "/customerspaces/{customerSpace}/jobs", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get list of workflow executions given list of job Ids")
-    @Override
-    public List<Job> getWorkflowJobs(@PathVariable String customerSpace,
-                                     @RequestParam(value = "jobId", required = false) List<String> jobIds,
-                                     @RequestParam(value = "type", required = false) List<String> types,
-                                     @RequestParam(value = "includeDetails", required = false) Boolean includeDetails) {
-        return workflowJobService.getJobs(customerSpace,
-                jobIds.stream().map(Long::valueOf).collect(Collectors.toList()),
-                types, includeDetails, false, -1L);
-    }
-
-    @RequestMapping(value = "/customerspaces/{customerSpace}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update workflow jobs' parent job Id")
-    @Override
-    public List<Job> updateParentJobId(@PathVariable String customerSpace,
-                                       @RequestParam(value = "jobId", required = true) List<String> jobIds,
-                                       @RequestParam(value = "parentId", required = true) String parentJobId) {
-        return workflowJobService.updateParentJobId(customerSpace,
-                jobIds.stream().map(Long::valueOf).collect(Collectors.toList()),
-                Long.valueOf(parentJobId));
-    }
-
-    @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create a workflow execution in a Yarn container")
-    @Override
-    public AppSubmission submitWorkflowExecution(@RequestBody WorkflowConfiguration config) {
-        return new AppSubmission(workflowJobService.submitWorkFlow(config));
-    }
-
-    @RequestMapping(value = "/aws", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create a workflow execution in a AWS container")
-    @Override
-    public String submitAWSWorkflowExecution(@RequestBody WorkflowConfiguration workflowConfig) {
-        return workflowJobService.submitAwsWorkflow(workflowConfig);
-    }
-
     @RequestMapping(value = "/job/{workflowId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
     @ApiOperation(value = "Restart a previous workflow execution")
-    @Override
-    public AppSubmission restartWorkflowExecution(@PathVariable Long workflowId) {
-        //        WorkflowExecutionId workflowExecutionId = new WorkflowExecutionId(workflowId);
-//        WorkflowStatus status = workflowService.getStatus(workflowExecutionId);
-        WorkflowStatus status = workflowJobService.getWorkflowStatus(workflowId);
+    public AppSubmission restartWorkflowExecution(@PathVariable String workflowId,
+                                                  @RequestParam(required = false) String customerSpace) {
+        Long wfId = Long.valueOf(workflowId);
+        WorkflowStatus status = workflowJobService.getWorkflowStatus(customerSpace, wfId);
 
         if (status == null) {
-            throw new LedpException(LedpCode.LEDP_28017, new String[] { String.valueOf(workflowId) });
+            throw new LedpException(LedpCode.LEDP_28017, new String[] { workflowId });
         } else if (!WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
-            throw new LedpException(LedpCode.LEDP_28018,
-                    new String[] { String.valueOf(workflowId), status.getStatus().name() });
+            throw new LedpException(LedpCode.LEDP_28018, new String[] { workflowId, status.getStatus().name() });
         }
-//        WorkflowJob workflowJob = workflowService.getJob(workflowId);
-        Job job = workflowJobService.getJob(workflowId, false);
+
+        Job job = workflowJobService.getJob(customerSpace, wfId, false);
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
         workflowConfig.setWorkflowName(status.getWorkflowName());
         workflowConfig.setRestart(true);
-        workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(workflowId));
+        workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(wfId));
         workflowConfig.setCustomerSpace(status.getCustomerSpace());
         workflowConfig.setInputProperties(job.getInputs());
         workflowConfig.setUserId(job.getUser());
 
-//        return new AppSubmission(Arrays.<ApplicationId> asList(
-//                new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
-        return new AppSubmission(workflowJobService.submitWorkFlow(workflowConfig));
-    }
-
-    @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
-    @Override
-    public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId) {
-        //        return workflowContainerService.getWorkflowId(ConverterUtils.toApplicationId(applicationId));
-        return workflowJobService.getWorkflowExecutionIdByApplicationId(applicationId);
-    }
-
-    @RequestMapping(value = "/status/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get status about a submitted workflow")
-    @Override
-    public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId) {
-        return workflowJobService.getWorkflowStatus(Long.valueOf(workflowId));
-    }
-
-    @RequestMapping(value = "/yarnapps/jobs/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
-    @Override
-    public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId) {
-        return workflowJobService.getJobByApplicationId(applicationId);
+        return new AppSubmission(workflowJobService.submitWorkFlow(customerSpace, workflowConfig));
     }
 
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
     @ApiOperation(value = "Get a workflow execution")
-    @Override
-    public Job getWorkflowExecution(@PathVariable String workflowId) {
-        return workflowJobService.getJob(Long.valueOf(workflowId));
-    }
-
-    @RequestMapping(value = "/jobs/{tenantPid}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get list of workflow executions for a tenant")
-    @Override
-    public List<Job> getWorkflowExecutionsForTenant(@PathVariable Long tenantPid) {
-        return workflowJobService.getJobsByTenantPid(tenantPid);
+    public Job getWorkflowExecution(@PathVariable String workflowId,
+                                    @RequestParam(required = false) String customerSpace) {
+        return workflowJobService.getJob(customerSpace, Long.valueOf(workflowId), true);
     }
 
     @RequestMapping(value = "/jobs", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get list of workflow executions given list of job Ids")
-    @Override
-    public List<Job> getWorkflowExecutionsByJobIds(@RequestParam(value = "jobId") List<String> jobIds) {
-//        List<WorkflowExecutionId> workflowExecutionIds = jobIds.stream()
-//                .map(jobId -> new WorkflowExecutionId((Long.valueOf(jobId)))).collect(Collectors.toList());
-//        return workflowService.getJobs(workflowExecutionIds);
-        List<Long> workflowIds = jobIds.stream().map(Long::valueOf).collect(Collectors.toList());
-        return workflowJobService.getJobs(workflowIds);
+    @ApiOperation(value = "Get list of workflow jobs by given list of job Ids or job types.")
+    public List<Job> getJobs(@RequestParam(value = "jobId", required = false) List<String> jobIds,
+                             @RequestParam(value = "type", required = false) List<String> types,
+                             @RequestParam(value = "includeDetails", required = false) Boolean includeDetails,
+                             @RequestParam(required = false) String customerSpace) {
+        Optional<List<String>> optionalJobIds = Optional.ofNullable(jobIds);
+        Optional<List<String>> optionalTypes = Optional.ofNullable(types);
+        Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(includeDetails);
+
+        if (optionalJobIds.isPresent()) {
+            List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
+            return workflowJobService.getJobs(customerSpace, workflowIds, optionalTypes.orElse(null),
+                    optionalIncludeDetails.orElse(true), false, -1L);
+        } else if (optionalTypes.isPresent()) {
+            return workflowJobService.getJobs(customerSpace, null, optionalTypes.get(),
+                    optionalIncludeDetails.orElse(true), false, -1L);
+        } else {
+            return workflowJobService.getJobs(customerSpace, optionalIncludeDetails.orElse(true));
+        }
     }
 
-    @RequestMapping(value = "/jobs/{tenantPid}/find", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
-    @Override
-    public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid,
-                                                    @RequestParam(value = "type") String type) {
-//        List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid, type);
-//        return jobs;
-        return workflowJobService.getJobsByTenantPid(tenantPid, Collections.singletonList(type), true);
+    @RequestMapping(value = "/jobs", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ApiOperation(value = "Update workflow jobs' parent job Id")
+    public void updateParentJobId(@RequestParam(value = "jobId", required = true) List<String> jobIds,
+                                  @RequestParam(value = "parentId", required = true) String parentJobId,
+                                  @RequestParam(required = false) String customerSpace) {
+        workflowJobService.updateParentJobId(customerSpace,
+                jobIds.stream().map(Long::valueOf).collect(Collectors.toList()), Long.valueOf(parentJobId));
+    }
+
+    @RequestMapping(value = "/jobs", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Create a workflow execution in a Yarn container")
+    public AppSubmission submitWorkflowExecution(@RequestBody WorkflowConfiguration config,
+                                                 @RequestParam(required = false) String customerSpace) {
+        return new AppSubmission(workflowJobService.submitWorkFlow(customerSpace, config));
+    }
+
+    @RequestMapping(value = "/awsJobs", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Create a workflow execution in a AWS container")
+    public String submitAWSWorkflowExecution(@RequestBody WorkflowConfiguration workflowConfig,
+                                             @RequestParam(required = false) String customerSpace) {
+        return workflowJobService.submitAwsWorkflow(customerSpace, workflowConfig);
+    }
+
+    @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
+    public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId,
+                                             @RequestParam(required = false) String customerSpace) {
+        return workflowJobService.getWorkflowExecutionIdByApplicationId(customerSpace, applicationId);
+    }
+
+    @RequestMapping(value = "/status/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get status about a submitted workflow")
+    public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId,
+                                            @RequestParam(required = false) String customerSpace) {
+        return workflowJobService.getWorkflowStatus(customerSpace, Long.valueOf(workflowId));
+    }
+
+    @RequestMapping(value = "/yarnapps/job/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
+    public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId,
+                                               @RequestParam(required = false) String customerSpace) {
+        return workflowJobService.getJobByApplicationId(customerSpace, applicationId, true);
+    }
+
+    @Deprecated
+    @RequestMapping(value = "/tenant/{tenantPid}/jobs", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get workflow jobs for given tenant.")
+    public List<Job> getWorkflowExecutionsForTenant(@PathVariable Long tenantPid,
+                                                    @RequestParam(required = false) String type) {
+        if (type != null) {
+            return workflowJobService.getJobsByTenantPid(tenantPid, Collections.singletonList(type), true);
+        } else {
+            return workflowJobService.getJobsByTenantPid(tenantPid, true);
+        }
     }
 }
