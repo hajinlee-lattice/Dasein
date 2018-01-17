@@ -231,7 +231,11 @@ public class AMLookupRebuildPipelineTestNG
                 { 55L, "dom021.com", null, null, null, "DUNS022", "N", "Y", null, null, null, null, null },
                 { 56L, "dom021.com", null, null, null, "DUNS023", "N", "Y", null, null, 1000, null, null },
 
-                // test priority to pick country-wise location
+                // test priority to search by dom+country / dom+country+state / dom+country+zip
+                { 100L, "dom100.com", "State100", "Zip100", "Country100", "DUNS100", "Y", "Y", null, "DUNS100", 10000,
+                        10000L, "N" },
+                { 101L, "dom100.com", "State100", "Zip100", "Country100", "DUNS101", "Y", "Y", null, "DUNS101", 10000,
+                        10000L, "Y" },
 
         };
 
@@ -376,6 +380,15 @@ public class AMLookupRebuildPipelineTestNG
                 { "_DOMAIN_dom021.com_DUNS_DUNS021", 54L }, //
                 { "_DOMAIN_dom021.com_DUNS_DUNS022", 55L }, //
                 { "_DOMAIN_dom021.com_DUNS_DUNS023", 56L }, //
+
+                { "_DOMAIN_dom100.com_DUNS_NULL", 101L }, //
+                { "_DOMAIN_dom100.com_DUNS_NULL_COUNTRY_Country100_STATE_NULL_ZIPCODE_NULL", 101L }, //
+                { "_DOMAIN_dom100.com_DUNS_NULL_COUNTRY_Country100_STATE_State100_ZIPCODE_NULL", 101L }, //
+                { "_DOMAIN_dom100.com_DUNS_NULL_COUNTRY_Country100_STATE_NULL_ZIPCODE_Zip100", 101L }, //
+                { "_DOMAIN_NULL_DUNS_DUNS100", 100L }, //
+                { "_DOMAIN_NULL_DUNS_DUNS101", 101L }, //
+                { "_DOMAIN_dom100.com_DUNS_DUNS100", 100L }, //
+                { "_DOMAIN_dom100.com_DUNS_DUNS101", 101L }, //
         };
 
         Map<String, Long> lookup = new HashMap<>();
