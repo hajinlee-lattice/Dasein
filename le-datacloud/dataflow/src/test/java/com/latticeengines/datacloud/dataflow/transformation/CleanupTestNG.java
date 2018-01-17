@@ -12,8 +12,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CleanupConfig;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class CleanupTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
@@ -61,6 +63,9 @@ public class CleanupTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Arrays.asList(AVRO_INPUT, CLEANUPBASE));
         CleanupConfig config = new CleanupConfig();
+        config.setJoinColumn("AccountId");
+        config.setBusinessEntity(BusinessEntity.Account);
+        config.setOperationType(CleanupOperationType.BYUPLOAD_ID);
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;
     }

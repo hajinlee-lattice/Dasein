@@ -11,6 +11,7 @@ import org.springframework.util.MultiValueMap;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -87,4 +88,31 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         post("save field mapping", url, fieldMappingDocument, Void.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public String uploadDeleteFile(boolean compressed, String csvFileName,
+            String schemaInterpretation, String cleanupOperationType,
+            Resource fileResource) {
+        List<Object> args = new ArrayList<>();
+        args.add(csvFileName);
+        args.add(compressed);
+        String urlPattern = "/uploaddeletefiletemplate?displayName={csvFileName}&compressed={compressed}";
+        if (schemaInterpretation != null) {
+            urlPattern += "&schema={schemaInterpretation}";
+            args.add(schemaInterpretation);
+        }
+        if (cleanupOperationType != null) {
+            urlPattern += "&operationType={cleanupOperationType}";
+            args.add(cleanupOperationType);
+        }
+
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", fileResource);
+        ResponseDocument resp = postMultiPart("upload file", url, parts, ResponseDocument.class);
+        if (resp.isSuccess()) {
+            return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), String.class);
+        } else {
+            throw new RuntimeException("Failed to upload file: " + StringUtils.join(resp.getErrors(), ","));
+        }
+    }
 }

@@ -2,22 +2,19 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class CleanupConfig extends TransformerConfig {
 
-    @JsonProperty("base_file")
-    private String baseFile;
 
     @JsonProperty("operation_type")
     private CleanupOperationType operationType;
 
-    public String getBaseFile() {
-        return baseFile;
-    }
+    @JsonProperty("business_entity")
+    private BusinessEntity businessEntity;
 
-    public void setBaseFile(String baseFile) {
-        this.baseFile = baseFile;
-    }
+    @JsonProperty("join_column")
+    private String joinColumn;
 
     public CleanupOperationType getOperationType() {
         return operationType;
@@ -26,4 +23,21 @@ public class CleanupConfig extends TransformerConfig {
     public void setOperationType(CleanupOperationType operationType) {
         this.operationType = operationType;
     }
+
+    public BusinessEntity getBusinessEntity() {
+        return businessEntity;
+    }
+
+    public void setBusinessEntity(BusinessEntity businessEntity) {
+        this.businessEntity = businessEntity;
+    }
+
+    public String getJoinColumn() {
+        return joinColumn;
+    }
+
+    public void setJoinColumn(String joinColumn) {
+        this.joinColumn = joinColumn;
+    }
+
 }

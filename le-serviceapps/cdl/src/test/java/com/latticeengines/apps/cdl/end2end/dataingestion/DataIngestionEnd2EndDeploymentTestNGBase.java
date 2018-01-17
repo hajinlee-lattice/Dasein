@@ -49,6 +49,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -238,6 +239,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         SourceFile sourceFile = fileUploadProxy.uploadFile("Account1.csv", false, "Account1.csv",
                 SchemaInterpretation.Account, "Account", csvResrouce);
         logger.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
+    }
+
+    String uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type, Resource source) {
+        logger.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
+        return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
     }
 
     void mockVdbImport(BusinessEntity entity, int offset, int limit) throws IOException {
