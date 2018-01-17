@@ -58,16 +58,16 @@ public class CacheBeansConfiguration implements CachingConfigurer {
         long maxIdleTime = 5 * 24 * 60 * 60 * 1000;
 
         CacheConfig dataLakeCMCacheConfig = new CacheConfig(0, maxIdleTime);
-        dataLakeCMCacheConfig.setMaxSize(100 * 2);
+        dataLakeCMCacheConfig.setMaxSize(800 * 2);
         CacheConfig dataLakeStatsCacheConfig = new CacheConfig(0, maxIdleTime);
-        dataLakeStatsCacheConfig.setMaxSize(100 * 2);
+        dataLakeStatsCacheConfig.setMaxSize(800 * 2);
 
         CacheConfig entityCountCacheConfig = new CacheConfig(0, maxIdleTime);
-        entityCountCacheConfig.setMaxSize(3000 * 2);
+        entityCountCacheConfig.setMaxSize(3000 * 8 * 2);
         CacheConfig entityDataCacheConfig = new CacheConfig(0, maxIdleTime);
-        entityDataCacheConfig.setMaxSize(300 * 2);
+        entityDataCacheConfig.setMaxSize(300 * 8 * 2);
         CacheConfig entityRatingCountCacheConfig = new CacheConfig(0, maxIdleTime);
-        entityRatingCountCacheConfig.setMaxSize(3000 * 2);
+        entityRatingCountCacheConfig.setMaxSize(3000 * 8 * 2);
 
         CacheConfig metadataCacheConfig = new CacheConfig(10 * 60 * 1000, 10 * 60 * 1000);
 
