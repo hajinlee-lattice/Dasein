@@ -83,8 +83,8 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
 
     private Pair<StatsCube, TopNTree> readStatsPairFromHdfs(String dataCloudVersion) {
         Statistics statistics = readStatisticsFromHdfs(dataCloudVersion);
-        StatsCube statsCube = StatsCubeUtils.toStatsCube(statistics);
         List<ColumnMetadata> cms = fromPredefinedSelection(Predefined.Enrichment, dataCloudVersion);
+        StatsCube statsCube = StatsCubeUtils.toStatsCube(statistics, cms);
         TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, false, cms);
         return ImmutablePair.of(statsCube, topNTree);
     }

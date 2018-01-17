@@ -74,7 +74,7 @@ public class StatsCubeUtilsUnitTestNG {
         TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, true, prepareMockMetadata());
         System.out.println(JsonUtils.serialize(topNTree));
         Assert.assertTrue(MapUtils.isNotEmpty(topNTree.getCategories()));
-        StatsCube cube = StatsCubeUtils.toStatsCube(statistics);
+        StatsCube cube = StatsCubeUtils.toStatsCube(statistics, prepareMockMetadata());
 
         verifyFirmographicsTopN(topNTree.getCategories().get(Category.FIRMOGRAPHICS), cube);
         verifyIntentTopN(topNTree.getCategories().get(Category.INTENT), cube);
@@ -82,6 +82,7 @@ public class StatsCubeUtilsUnitTestNG {
         verifyTechTopN(topNTree.getCategories().get(Category.TECHNOLOGY_PROFILE), cube);
         verifyPurchaseHistoryTopN(topNTree.getCategories().get(Category.PRODUCT_SPEND));
         verifyDateAttrInTopN(topNTree);
+        verifyDateAttrInCube(cube);
     }
 
     private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
@@ -214,6 +215,10 @@ public class StatsCubeUtilsUnitTestNG {
             for (TopAttribute topAttr : subcatTopAttrs) {
                 Assert.assertNotEquals(topAttr.getAttribute(), "LastModifiedDate");
             }
+    }
+
+    private void verifyDateAttrInCube(StatsCube cube) {
+        Assert.assertFalse(cube.getStatistics().containsKey("AlexaOnlineSince"));
     }
 
     private void assertSameBucket(Bucket bkt1, Bucket bkt2) {

@@ -163,7 +163,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (statistics == null) {
             return null;
         }
-        return StatsCubeUtils.toStatsCube(statistics);
+        return StatsCubeUtils.toStatsCube(statistics, getAllAttributes());
     }
 
     @Override
@@ -172,7 +172,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (statistics == null) {
             return null;
         }
-        return StatsCubeUtils.toStatsCubes(statistics);
+        return StatsCubeUtils.toStatsCubes(statistics, getAllAttributes());
     }
 
     @Override

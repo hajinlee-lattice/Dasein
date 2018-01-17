@@ -347,13 +347,19 @@ public class StatsCubeUtils {
         return bucket;
     }
 
-    public static StatsCube toStatsCube(Statistics statistics) {
+    public static StatsCube toStatsCube(Statistics statistics, List<ColumnMetadata> cms) {
+        Map<Category, Set<String>> attrsToHide = getAttrsToHide(cms);
         StatsCube cube = new StatsCube();
         Map<String, AttributeStats> stats = new HashMap<>();
-        for (CategoryStatistics catStats : statistics.getCategories().values()) {
+        for (Map.Entry<Category, CategoryStatistics> catStatsEntry : statistics.getCategories().entrySet()) {
+            Category cat = catStatsEntry.getKey();
+            CategoryStatistics catStats = catStatsEntry.getValue();
             for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
                 for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
-                    stats.put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
+                    if (attrsToHide.get(cat) == null || !attrsToHide.get(cat).contains(entry.getKey().getAttribute())) {
+                        stats.put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
+                    }
+
                 }
             }
         }
@@ -361,16 +367,21 @@ public class StatsCubeUtils {
         return cube;
     }
 
-    public static Map<BusinessEntity, StatsCube> toStatsCubes(Statistics statistics) {
+    public static Map<BusinessEntity, StatsCube> toStatsCubes(Statistics statistics, List<ColumnMetadata> cms) {
+        Map<Category, Set<String>> attrsToHide = getAttrsToHide(cms);
         Map<BusinessEntity, Map<String, AttributeStats>> statsMap = new HashMap<>();
-        for (CategoryStatistics catStats : statistics.getCategories().values()) {
+        for (Map.Entry<Category, CategoryStatistics> catStatsEntry : statistics.getCategories().entrySet()) {
+            Category cat = catStatsEntry.getKey();
+            CategoryStatistics catStats = catStatsEntry.getValue();
             for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
                 for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
                     BusinessEntity entity = entry.getKey().getEntity();
                     if (!statsMap.containsKey(entity)) {
                         statsMap.put(entity, new HashMap<>());
                     }
-                    statsMap.get(entity).put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
+                    if (attrsToHide.get(cat) == null || !attrsToHide.get(cat).contains(entry.getKey().getAttribute())) {
+                        statsMap.get(entity).put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
+                    }
                 }
             }
         }
@@ -443,8 +454,8 @@ public class StatsCubeUtils {
         return catStats.getAttributes().entrySet().stream() //
                 .sorted(comparator) //
                 .map(entry -> toTopAttr(category, entry, includeTopBkt)) //
-                .filter(attr -> !(attrsToHide.containsKey(category)
-                        && attrsToHide.get(category).contains(attr.getAttribute())))
+                .filter(attr -> attrsToHide.get(category) == null
+                        || !attrsToHide.get(category).contains(attr.getAttribute()))
                 .collect(Collectors.toList());
     }
 
