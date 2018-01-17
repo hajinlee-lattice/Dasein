@@ -129,7 +129,11 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new RuntimeException(e);
         }
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(cacheFiles));
-        properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
+        if (Boolean.FALSE.equals(scoringConfig.getUseScorederivation())) {
+            properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.FALSE.toString());
+        } else {
+            properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
+        }
         return properties;
     }
 

@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -52,6 +51,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         Table accountTable = getAndSetAccountTable();
         CreateCdlEventTableParameters parameters = new CreateCdlEventTableParameters(inputTable.getName(),
                 apsTable.getName(), accountTable.getName());
+        parameters.setEventTable(configuration.getEventColumn());
         return parameters;
     }
 
@@ -101,8 +101,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
             attribute.setApprovedUsage(ApprovedUsage.NONE);
             attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
             String name = attribute.getName();
-            if (InterfaceName.Target.name().equalsIgnoreCase(name)
-                    || InterfaceName.Event.name().equalsIgnoreCase(name)) {
+            if (getConfiguration().getEventColumn().equalsIgnoreCase(name)) {
                 attribute.setLogicalDataType(LogicalDataType.Event);
             }
         }

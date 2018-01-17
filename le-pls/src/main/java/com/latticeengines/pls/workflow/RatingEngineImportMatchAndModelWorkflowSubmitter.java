@@ -3,7 +3,6 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -90,7 +89,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
                 .trainingTableName(tableName) //
                 .inputProperties(inputProperties) //
                 .enableV2Profiling(false) //
-                .cdlModel(true) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, getTrainPath(parameters)) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled,
@@ -104,7 +102,11 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
                 .matchDestTables("DerivedColumnsCache") //
                 .setRetainLatticeAccountId(true) //
                 .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
+                .cdlModel(true) //
                 .setUniqueKeyColumn(InterfaceName.AnalyticPurchaseState_ID.name()) //
+                .setEventColumn(InterfaceName.Target.name()) //
+                .setExpectedValue(parameters.isExpectedValue()) //
+                .setUseScorederivation(false) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

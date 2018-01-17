@@ -3,7 +3,6 @@ package com.latticeengines.scoring.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -111,7 +110,7 @@ public class ScoringJobUtil {
         return jsonObj;
     }
 
-    public static Table createGenericOutputSchema(String uniqueKeyColumn) {
+    public static Table createGenericOutputSchema(String uniqueKeyColumn, boolean hasRevenue) {
         Table scoreResultTable = new Table();
         String tableName = "ScoreResult";
         scoreResultTable.setName(tableName);
@@ -131,19 +130,41 @@ public class ScoringJobUtil {
         percentile.setPhysicalDataType(ScoreResultField.Percentile.physicalDataType);
         percentile.setSourceLogicalDataType(ScoreResultField.Percentile.sourceLogicalDataType);
 
-        Attribute rawScore = new Attribute();
-        rawScore.setName(ScoreResultField.RawScore.name());
-        rawScore.setDisplayName(ScoreResultField.RawScore.name());
-        rawScore.setPhysicalDataType(ScoreResultField.RawScore.physicalDataType);
-        rawScore.setSourceLogicalDataType(ScoreResultField.RawScore.sourceLogicalDataType);
+        Attribute rawScore = createAttribute(ScoreResultField.RawScore);
+        List<Attribute> attributes = new ArrayList<>();
+        attributes.add(id);
+        attributes.add(percentile);
+        attributes.add(rawScore);
 
-        scoreResultTable.setAttributes(Arrays.<Attribute> asList(new Attribute[] { id, percentile, rawScore }));
+        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)) {
+            Attribute probility = createAttribute(ScoreResultField.Probability);
+            attributes.add(probility);
+            Attribute normalized = createAttribute(ScoreResultField.NormalizedScore);
+            attributes.add(normalized);
+        }
+        if (hasRevenue) {
+            Attribute predictedRevenue = createAttribute(ScoreResultField.PredictedRevenue);
+            attributes.add(predictedRevenue);
+            Attribute expectedRevenue = createAttribute(ScoreResultField.ExpectedRevenue);
+            attributes.add(expectedRevenue);
+        }
+
+        scoreResultTable.setAttributes(attributes);
         return scoreResultTable;
+    }
+
+    private static Attribute createAttribute(ScoreResultField field) {
+        Attribute attribute = new Attribute();
+        attribute.setName(field.name());
+        attribute.setDisplayName(field.name());
+        attribute.setPhysicalDataType(field.physicalDataType);
+        attribute.setSourceLogicalDataType(field.sourceLogicalDataType);
+        return attribute;
     }
 
     public static void writeScoreResultToAvroRecord(DataFileWriter<GenericRecord> dataFileWriter,
             List<ScoreOutput> resultList, File outputFile, String uniqueKeyColumn) throws IOException {
-        Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn);
+        Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, false);
         Schema schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
 
         dataFileWriter.create(schema, outputFile);

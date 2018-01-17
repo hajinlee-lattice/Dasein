@@ -91,6 +91,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         scoringConfig.setModelGuids(Arrays.asList(modelId));
         scoringConfig.setSourceDataDir(getSourceDir());
         scoringConfig.setUniqueKeyColumn(getUniqueKeyColumn());
+        scoringConfig.setUseScorederivation(configuration.getUseScorederivation());
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), //
                 configuration.getCustomerSpace());
         String tableName = String.format("ScoreResult_%s_%d", modelId.replaceAll("-", "_"), System.currentTimeMillis());
@@ -120,4 +121,5 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
             uniqueKeyColumn = configuration.getUniqueKeyColumn();
         return uniqueKeyColumn;
     }
+
 }

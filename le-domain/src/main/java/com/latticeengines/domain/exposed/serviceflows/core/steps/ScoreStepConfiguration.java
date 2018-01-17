@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
-
 public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     private String modelId;
@@ -12,6 +10,8 @@ public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
     
     private Boolean registerScoredTable = false;
     
+    private Boolean useScorederivation = null;
+
     public String getModelId() {
         return modelId;
     }
@@ -42,6 +42,14 @@ public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setRegisterScoredTable(Boolean registerScoredTable) {
         this.registerScoredTable = registerScoredTable;
+    }
+
+    public Boolean getUseScorederivation() {
+        return useScorederivation;
+    }
+
+    public void setUseScorederivation(Boolean useScorederivation) {
+        this.useScorederivation = useScorederivation;
     }
 
 }

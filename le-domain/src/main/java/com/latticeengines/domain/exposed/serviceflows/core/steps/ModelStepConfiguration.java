@@ -52,7 +52,9 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean v2ProfilingEnabled;
 
-    private boolean isCdlModel = false;
+    private boolean cdlModel = false;
+
+    private boolean expectedValue = false;
 
     private String notesContent;
 
@@ -222,11 +224,19 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty
     public boolean isCdlModel() {
-        return isCdlModel;
+        return cdlModel;
     }
 
-    public void setCdlModel(boolean isCdlModel) {
-        this.isCdlModel = isCdlModel;
+    public void setCdlModel(boolean cdlModel) {
+        this.cdlModel = cdlModel;
+    }
+
+    public boolean isExpectedValue() {
+        return this.expectedValue;
+    }
+
+    public void setExpectedValue(boolean expectedValue) {
+        this.expectedValue = expectedValue;
     }
 
     @JsonProperty

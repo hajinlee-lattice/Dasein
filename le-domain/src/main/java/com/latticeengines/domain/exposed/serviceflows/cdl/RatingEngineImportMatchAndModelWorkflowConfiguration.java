@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchRes
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PivotScoreAndEventConfiguration;
 
 public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -41,6 +42,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             model.setMicroServiceHostPort(microServiceHostPort);
@@ -53,6 +55,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
+            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -69,6 +72,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            pivotScoreAndEvent.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -104,11 +108,13 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder userId(String userId) {
             model.setUserName(userId);
+            pivotScoreAndEvent.setUserId(userId);
             return this;
         }
 
@@ -268,6 +274,24 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
+        public Builder setUseScorederivation(boolean useScorederivation) {
+            score.setUseScorederivation(useScorederivation);
+            return this;
+        }
+
+        public Builder setEventColumn(String eventColumn) {
+            pivotScoreAndEvent.setEventColumn(eventColumn);
+            cdlEventTable.setEventColumn(eventColumn);
+            cdlEventTableTupleFilter.setEventColumn(eventColumn);
+            return this;
+        }
+
+        public Builder setExpectedValue(boolean expectedValue) {
+            model.setExpectedValue(expectedValue);
+            cdlEventTableTupleFilter.setExpectedValue(expectedValue);
+            return this;
+        }
+
         public RatingEngineImportMatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);
@@ -283,6 +307,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(score);
             configuration.add(combineInputWithScores);
+            configuration.add(pivotScoreAndEvent);
 
             return configuration;
         }

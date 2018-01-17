@@ -45,7 +45,7 @@ public class CreateCdlTableHelper {
     protected Configuration yarnConfiguration;
 
     public Table getFilterTable(CustomerSpace customerSpace, String recordType, String tableSuffix, String tableName,
-                                EventFrontEndQuery query, InterfaceName type, String targetTableName) {
+            EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue) {
         Table filterTable = null;
         log.info("Table Name:" + tableName);
         if (StringUtils.isNotBlank(tableName)) {
@@ -55,20 +55,21 @@ public class CreateCdlTableHelper {
                 return filterTable;
             }
         }
-        Schema schema = getSchema(recordType);
+        Schema schema = getSchema(recordType, expectedValue);
         String filePath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString();
         tableName = targetTableName + tableSuffix;
         filePath += "/" + tableName + "/" + "/part-00000.avro";
-        filterTable = runQueryToTable(customerSpace, schema, tableName, filePath, query, type);
+        filterTable = runQueryToTable(customerSpace, schema, tableName, filePath, query, type, expectedValue);
         metadataProxy.updateTable(customerSpace.toString(), filterTable.getName(), filterTable);
         return filterTable;
     }
 
     private Table runQueryToTable(CustomerSpace customerSpace, Schema schema, String tableName, String filePath,
-                                  EventFrontEndQuery query, InterfaceName type) {
+            EventFrontEndQuery query, InterfaceName type, boolean expectedValue) {
 
         String accountIdKey = InterfaceName.AccountId.name().toLowerCase();
         String periodIdKey = InterfaceName.PeriodId.name().toLowerCase();
+        String revenueKey = InterfaceName.__Revenue.name().toLowerCase().substring(2);
         int rowNumber = 0, pageSize = 10000;
         long total = 0;
         while (true) {
@@ -79,6 +80,7 @@ public class CreateCdlTableHelper {
                 dataPage = eventProxy.getTrainingTuples(customerSpace.toString(), query);
                 break;
             case Event:
+                query.setCalculateProductRevenue(expectedValue);
                 dataPage = eventProxy.getEventTuples(customerSpace.toString(), query);
                 break;
             default:
@@ -94,6 +96,8 @@ public class CreateCdlTableHelper {
                 GenericRecord record = new GenericData.Record(schema);
                 record.put(InterfaceName.AccountId.name(), row.get(accountIdKey));
                 record.put(InterfaceName.PeriodId.name(), Long.valueOf(row.get(periodIdKey).toString()));
+                if (expectedValue)
+                    record.put(InterfaceName.__Revenue.name(), Double.valueOf(row.get(revenueKey).toString()));
                 records.add(record);
             }
             writeRecords(schema, filePath, records);
@@ -119,12 +123,16 @@ public class CreateCdlTableHelper {
         }
     }
 
-    private Schema getSchema(String recordName) {
+    private Schema getSchema(String recordName, boolean expectedValue) {
         String schemaString = "{\"namespace\": \"RatingEngineModel\", \"type\": \"record\", " + "\"name\": \"%s\","
-                + "\"fields\": ["
-                + "{\"name\": \"AccountId\", \"type\": [\"string\", \"null\"]}, {\"name\": \"PeriodId\", \"type\": [\"long\", \"null\"]}"
-                + "]}";
-        schemaString = String.format(schemaString, recordName);
+                + "\"fields\": [" + "{\"name\": \"" + InterfaceName.AccountId.name()
+                + "\", \"type\": [\"string\", \"null\"]}, {\"name\": \"" + InterfaceName.PeriodId.name()
+                + "\", \"type\": [\"long\", \"null\"]} %s" + "]}";
+        if (!expectedValue)
+            schemaString = String.format(schemaString, recordName, "");
+        else
+            schemaString = String.format(schemaString, recordName,
+                    ",{\"name\": \"" + InterfaceName.__Revenue.name() + "\", \"type\": [\"double\", \"null\"]}");
         Schema.Parser parser = new Schema.Parser();
         return parser.parse(schemaString);
     }

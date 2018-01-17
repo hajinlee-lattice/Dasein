@@ -28,7 +28,7 @@ public class CreateCdlTargetTableFilterStep extends BaseWorkflowStep<CreateCdlTa
     private Table getTargetFilterTable() {
         return createCdlTableHelper.getFilterTable(configuration.getCustomerSpace(), "RatingEngineModelTargetFilter",
                 "_target_filter", configuration.getTargetFilterTableName(), configuration.getTargetQuery(),
-                InterfaceName.Target, configuration.getTargetTableName());
+                InterfaceName.Target, configuration.getTargetTableName(), false);
     }
 
 }

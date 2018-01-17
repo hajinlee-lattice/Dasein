@@ -27,6 +27,9 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     @JsonProperty
     private String targetFilterTableName;
 
+    @JsonProperty
+    private boolean expectedValue;
+
     public String getTableName() {
         return tableName;
     }
@@ -83,4 +86,11 @@ public class RatingEngineModelingParameters extends ModelingParameters {
         this.targetFilterQuery = targetFilterQuery;
     }
 
+    public boolean isExpectedValue() {
+        return expectedValue;
+    }
+
+    public void setExpectedValue(boolean expectedValue) {
+        this.expectedValue = expectedValue;
+    }
 }

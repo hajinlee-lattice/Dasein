@@ -124,6 +124,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         parameters.setTrainFilterTableName(trainFilterTableName);
         parameters.setEventFilterTableName(eventFilterTableName);
         parameters.setTargetFilterTableName(targetFilterTableName);
+        parameters.setExpectedValue(true);
 
         log.info("Test environment setup finished.");
     }
@@ -140,7 +141,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     private void scoreWorkflow(ModelSummary modelSummary) {
         String scoreApplicationId = restTemplate.postForObject(
                 String.format("%s/pls/scores/rating/%s?displayName=%s&tableToScoreName=%s", getRestAPIHostPort(),
-                        modelSummary.getId(), modelSummary.getDisplayName(), targetFilterFileName), //
+                        modelSummary.getId(), "RatingEngineBulkScoring", targetFilterTableName), //
                 null, String.class);
         scoreApplicationId = StringUtils.substringBetween(scoreApplicationId.split(":")[1], "\"");
         System.out.println(String.format("Score rating data applicationId = %s", scoreApplicationId));
@@ -224,9 +225,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         ResponseDocument response;
         String url = String.format("%s/pls/models/rating/%s", getRestAPIHostPort(), parameters.getName());
         System.out.println("json=" + JsonUtils.serialize(parameters));
-        response = restTemplate.postForObject(
-                url, parameters,
-                ResponseDocument.class);
+        response = restTemplate.postForObject(url, parameters, ResponseDocument.class);
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));

@@ -26,7 +26,7 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         Node apsTable = addSource(parameters.apsTable);
         Node accountTable = addSource(parameters.accountTable);
 
-        List<String> retainFields = buildRetainFields(inputTable, apsTable, accountTable);
+        List<String> retainFields = buildRetainFields(parameters, inputTable, apsTable, accountTable);
 
         FieldList inputGroupFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
         Node result = apsTable.join(new FieldList("LEAccount_ID", "Period_ID"), inputTable, inputGroupFields,
@@ -39,14 +39,17 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         return result;
     }
 
-    private List<String> buildRetainFields(Node inputTable, Node apsTable, Node accountTable) {
+    private List<String> buildRetainFields(CreateCdlEventTableParameters parameters, Node inputTable, Node apsTable,
+            Node accountTable) {
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(apsTable.getFieldNames());
         retainFields.addAll(accountTable.getFieldNames());
         if (inputTable.getFieldNames().contains(InterfaceName.Train.name()))
             retainFields.add(InterfaceName.Train.name());
-        if (inputTable.getFieldNames().contains(InterfaceName.Target.name()))
-            retainFields.add(InterfaceName.Target.name());
+        if (inputTable.getFieldNames().contains(parameters.eventColumn))
+            retainFields.add(parameters.eventColumn);
+        if (inputTable.getFieldNames().contains(InterfaceName.__Revenue.name()))
+            retainFields.add(InterfaceName.__Revenue.name());
         retainFields.removeAll(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.CDLCreatedTime.name(),
                 InterfaceName.CDLUpdatedTime.name()));
         return retainFields;

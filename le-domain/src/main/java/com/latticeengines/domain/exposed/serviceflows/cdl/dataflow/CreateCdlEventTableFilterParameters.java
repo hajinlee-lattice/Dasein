@@ -10,16 +10,26 @@ public class CreateCdlEventTableFilterParameters extends DataFlowParameters {
     @SourceTableName
     public String trainFilterTable;
 
-    @JsonProperty("target_filter_table")
+    @JsonProperty("event_filter_table")
     @SourceTableName
-    public String targetFilterTable;
+    public String eventFilterTable;
 
-    public CreateCdlEventTableFilterParameters(String trainFilterTable, String targetFilterTable) {
+    private String eventColumn;
+
+    public CreateCdlEventTableFilterParameters(String trainFilterTable, String eventFilterTable) {
         this.trainFilterTable = trainFilterTable;
-        this.targetFilterTable = targetFilterTable;
+        this.eventFilterTable = eventFilterTable;
     }
 
     public CreateCdlEventTableFilterParameters() {
+    }
+
+    public String getEventColumn() {
+        return eventColumn;
+    }
+
+    public void setEventColumn(String eventColumn) {
+        this.eventColumn = eventColumn;
     }
 
 }

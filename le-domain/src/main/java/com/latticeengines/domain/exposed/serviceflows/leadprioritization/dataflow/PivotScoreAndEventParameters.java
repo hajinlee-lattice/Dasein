@@ -18,6 +18,9 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
     @JsonProperty("model_avg_probability")
     private double modelAvgProbability;
 
+    @JsonProperty("event_column")
+    private String eventColumn;
+
     /**
      * Serialization constructor
      */
@@ -44,6 +47,14 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
 
     public void setModelAvgProbability(double modelAvgProbability) {
         this.modelAvgProbability = modelAvgProbability;
+    }
+
+    public String getEventColumn() {
+        return eventColumn;
+    }
+
+    public void setEventColumn(String eventColumn) {
+        this.eventColumn = eventColumn;
     }
 
     @Override

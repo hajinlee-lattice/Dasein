@@ -18,6 +18,7 @@ public enum InterfaceName {
     PeriodId, //
     PeriodName, //
     Target, //
+    __Revenue, //
     AnalyticPurchaseState_ID, //
     Train, //
 

@@ -228,7 +228,7 @@ public class ModelingServiceExecutor {
     }
 
     public String model() throws Exception {
-        if (builder.isCdlModel) {
+        if (builder.cdlModel) {
             return cdlModel();
         }
 
@@ -284,6 +284,11 @@ public class ModelingServiceExecutor {
         Algorithm algorithm = new RandomForestAlgorithm();
         algorithm.setSampleName("all");
         algorithm.setScript("/app/dataplatform/scripts/algorithm/parallel_rf_train.py");
+        if (builder.isExpectedValue()) {
+            algorithm.setPipelineScript("/app/playmaker/evmodel/evpipeline.py");
+            algorithm.setPipelineLibScript("/app/playmaker/evmodel/evpipeline.tar.gz");
+            log.info("This is EV model!.");
+        }
         algorithm.setPriority(2);
         List<String> properties = new ArrayList<>();
         properties.add("criterion=gini");
@@ -441,7 +446,8 @@ public class ModelingServiceExecutor {
         private String productType;
         private String transformationGroupName;
         private boolean v2ProfilingEnabled;
-        private boolean isCdlModel;
+        private boolean cdlModel;
+        private boolean expectedValue;
         private Predefined predefinedColumnSelection;
         private String predefinedSelectionVersion;
         private ColumnSelection customizedColumnSelection;
@@ -473,8 +479,13 @@ public class ModelingServiceExecutor {
             return this;
         }
 
-        public Builder cdlModel(boolean isCdlModel) {
-            this.setCdlModel(isCdlModel);
+        public Builder cdlModel(boolean cdlModel) {
+            this.setCdlModel(cdlModel);
+            return this;
+        }
+
+        public Builder expectedValue(boolean expectedValue) {
+            this.setExpectedValue(expectedValue);
             return this;
         }
 
@@ -1002,11 +1013,19 @@ public class ModelingServiceExecutor {
         }
 
         public boolean isCdlModel() {
-            return isCdlModel;
+            return cdlModel;
         }
 
-        public void setCdlModel(boolean isCdlModel) {
-            this.isCdlModel = isCdlModel;
+        public void setCdlModel(boolean cdlModel) {
+            this.cdlModel = cdlModel;
+        }
+
+        public boolean isExpectedValue() {
+            return expectedValue;
+        }
+
+        public void setExpectedValue(boolean expectedValue) {
+            this.expectedValue = expectedValue;
         }
 
         public void setProductType(String productType) {

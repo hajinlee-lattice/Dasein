@@ -118,6 +118,8 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .bucketMetadata(bucketMetadataList) //
                 .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
                 .setUniqueKeyColumn(InterfaceName.AnalyticPurchaseState_ID.name()) //
+                .setUseScorederivation(false) //
+                .setEventColumn(InterfaceName.Target.name()) //
                 .build();
     }
 }

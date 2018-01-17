@@ -18,6 +18,9 @@ public class CreateCdlEventTableParameters extends DataFlowParameters {
     @SourceTableName
     public String accountTable;
 
+    @JsonProperty("event_column")
+    public String eventColumn;
+
     public CreateCdlEventTableParameters(String inputTable, String apsTable, String accountTable) {
         this.inputTable = inputTable;
         this.apsTable = apsTable;
@@ -25,5 +28,9 @@ public class CreateCdlEventTableParameters extends DataFlowParameters {
     }
 
     public CreateCdlEventTableParameters() {
+    }
+
+    public void setEventTable(String eventColumn) {
+        this.eventColumn = eventColumn;
     }
 }

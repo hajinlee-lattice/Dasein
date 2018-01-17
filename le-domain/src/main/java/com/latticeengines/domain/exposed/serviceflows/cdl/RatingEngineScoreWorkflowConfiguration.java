@@ -184,6 +184,16 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder setUseScorederivation(boolean useScorederivation) {
+            score.setUseScorederivation(useScorederivation);
+            return this;
+        }
+
+        public Builder setEventColumn(String eventColumn) {
+            cdlEventTable.setEventColumn(eventColumn);
+            return this;
+        }
+
         public RatingEngineScoreWorkflowConfiguration build() {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);

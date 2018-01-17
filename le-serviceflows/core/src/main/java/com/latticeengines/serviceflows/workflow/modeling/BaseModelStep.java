@@ -68,6 +68,10 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
 
         targets.add("Event: " + event.getName());
 
+        if (configuration.isExpectedValue()) {
+            targets.add("Revenue: " + InterfaceName.__Revenue.name());
+        }
+
         Attribute companyName = eventTable.getAttribute(InterfaceName.CompanyName);
         if (companyName != null) {
             targets.add("Company: " + companyName.getName());
@@ -143,6 +147,9 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         log.info("Exclude prop data columns = " + configuration.getModelSummaryProvenance()
                 .getBoolean(ProvenancePropertyName.ExcludePropdataColumns, false));
 
+        if (configuration.isExpectedValue()) {
+            excludedColumns.add(InterfaceName.__Revenue.name());
+        }
         for (Attribute attr : eventTable.getAttributes()) {
             if (attr.getApprovedUsage() == null //
                     || attr.getApprovedUsage().size() == 0 //
@@ -156,7 +163,6 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                     excludedColumns.add(attr.getName());
                 }
             }
-
             if (!(attr.getApprovedUsage() == null //
                     || attr.getApprovedUsage().size() == 0 //
                     || attr.getApprovedUsage().get(0).equals("None")) && attr.getTags() != null
@@ -178,6 +184,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .transformationGroupName(getTransformationGroupName()) //
                 .enableV2Profiling(configuration.isV2ProfilingEnabled()) //
                 .cdlModel(configuration.isCdlModel()) //
+                .expectedValue(configuration.isExpectedValue()) //
                 .pivotArtifactPath(configuration.getPivotArtifactPath()) //
                 .moduleName(configuration.getModuleName()) //
                 .productType(configuration.getProductType()) //

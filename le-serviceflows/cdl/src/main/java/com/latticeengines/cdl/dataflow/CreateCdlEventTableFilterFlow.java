@@ -23,20 +23,24 @@ public class CreateCdlEventTableFilterFlow extends TypesafeDataFlowBuilder<Creat
     public Node construct(CreateCdlEventTableFilterParameters parameters) {
         List<String> retainFields = new ArrayList<>();
         Node trainFilterTable = addSource(parameters.trainFilterTable);
-        Node targetFilterTable = addSource(parameters.targetFilterTable);
-        retainFields.addAll(targetFilterTable.getFieldNames());
-        String target = InterfaceName.Target.name();
+        Node eventFilterTable = addSource(parameters.eventFilterTable);
+
+        retainFields.addAll(eventFilterTable.getFieldNames());
+        String eventColumn = parameters.getEventColumn();
+        retainFields.add(eventColumn);
         retainFields.add(InterfaceName.Train.name());
-        retainFields.add(target);
+        String revenueColumn = InterfaceName.__Revenue.name();
 
         trainFilterTable = trainFilterTable.addColumnWithFixedValue(InterfaceName.Train.toString(), 1, Integer.class);
-        targetFilterTable = targetFilterTable.addColumnWithFixedValue(InterfaceName.Target.toString(), 1,
-                Integer.class);
+        eventFilterTable = eventFilterTable.addColumnWithFixedValue(eventColumn, 1, Integer.class);
         FieldList joinFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
-        Node result = trainFilterTable.leftJoin(joinFields, targetFilterTable, joinFields);
+        Node result = trainFilterTable.leftJoin(joinFields, eventFilterTable, joinFields);
 
-        result = result.apply(target + " == null ? new Integer(0) : " + target, new FieldList(target),
-                new FieldMetadata(target, Integer.class));
+        result = result.apply(eventColumn + " == null ? new Integer(0) : " + eventColumn, new FieldList(eventColumn),
+                new FieldMetadata(eventColumn, Integer.class));
+        if (eventFilterTable.getFieldNames().contains(revenueColumn))
+            result = result.apply(revenueColumn + " == null ? new Double(0) : " + revenueColumn,
+                    new FieldList(revenueColumn), new FieldMetadata(revenueColumn, Double.class));
         result = result.retain(new FieldList(retainFields));
         log.info("Cdl event table filter's columns=", retainFields);
         return result;

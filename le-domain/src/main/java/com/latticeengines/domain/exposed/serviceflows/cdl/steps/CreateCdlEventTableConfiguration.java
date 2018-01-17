@@ -4,6 +4,7 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
 
     private String sourceSchemaInterpretation;
     private String outputTableName;
+    private String eventColumn;
 
     public CreateCdlEventTableConfiguration() {
         setBeanName("createCdlEventTableFlow");
@@ -23,5 +24,13 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
 
     public String getOutputTableName() {
         return this.outputTableName;
+    }
+
+    public void setEventColumn(String eventColumn) {
+        this.eventColumn = eventColumn;
+    }
+
+    public String getEventColumn() {
+        return eventColumn;
     }
 }

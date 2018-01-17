@@ -40,19 +40,20 @@ public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTab
         eventFilterTable = getEventFilterTable();
         CreateCdlEventTableFilterParameters parameters = new CreateCdlEventTableFilterParameters(
                 trainFilterTable.getName(), eventFilterTable.getName());
+        parameters.setEventColumn(configuration.getEventColumn());
         return parameters;
     }
 
     private Table getTrainFilterTable() {
         return createCdlTableHelper.getFilterTable(configuration.getCustomerSpace(), "RatingEngineModelTrainFilter",
                 "_train_filter", configuration.getTrainFilterTableName(), configuration.getTrainQuery(),
-                InterfaceName.Train, configuration.getTargetTableName());
+                InterfaceName.Train, configuration.getTargetTableName(), false);
     }
 
     private Table getEventFilterTable() {
         return createCdlTableHelper.getFilterTable(configuration.getCustomerSpace(), "RatingEngineModelTargetFilter",
                 "_event_filter", configuration.getEventFilterTableName(), configuration.getEventQuery(),
-                InterfaceName.Event, configuration.getTargetTableName());
+                InterfaceName.Event, configuration.getTargetTableName(), configuration.isExpectedValue());
     }
 
     @Override
