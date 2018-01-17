@@ -17,6 +17,8 @@ public class ScoringConfiguration {
 
     private String targetResultDir;
 
+    private Boolean useScorederivation;
+
     private List<String> modelGuids = new ArrayList<>();
 
     private List<BucketMetadata> bucketMetadata;
@@ -91,6 +93,16 @@ public class ScoringConfiguration {
     @JsonProperty("score_input_type")
     public void setScoreInputType(ScoringInputType scoreInputType) {
         this.scoreInputType = scoreInputType;
+    }
+
+    @JsonProperty("use_score_derivation")
+    public Boolean getUseScorederivation() {
+        return useScorederivation;
+    }
+
+    @JsonProperty("use_score_derivation")
+    public void setUseScorederivation(Boolean useScorederivation) {
+        this.useScorederivation = useScorederivation;
     }
 
     public String toString() {
