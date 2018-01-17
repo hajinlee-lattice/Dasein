@@ -11,7 +11,7 @@ public class CalendarMonthPeriodBuilder extends StartTimeBasedPeriodBuilder impl
         super();
     }
 
-    CalendarMonthPeriodBuilder(String startDate) {
+    public CalendarMonthPeriodBuilder(String startDate) {
         super(startDate);
     }
 

@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class CalendarMonthPeriodBuilderUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "dataProvider")
-    public void extractModelArtifacts(String startDate, String endDate, int period) throws Exception {
+    public void testPeriodCount(String startDate, String endDate, int period) throws Exception {
         PeriodBuilder builder;
         if (StringUtils.isBlank(startDate)) {
             builder = new CalendarMonthPeriodBuilder();

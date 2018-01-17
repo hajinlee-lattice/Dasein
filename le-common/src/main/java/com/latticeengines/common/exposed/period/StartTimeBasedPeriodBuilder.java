@@ -2,6 +2,8 @@ package com.latticeengines.common.exposed.period;
 
 import java.time.LocalDate;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.annotations.VisibleForTesting;
 
 public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
@@ -19,7 +21,7 @@ public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
     }
 
     public StartTimeBasedPeriodBuilder(String startDate) {
-        this(LocalDate.parse(startDate));
+        this(StringUtils.isBlank(startDate) ? DEFAULT_FIRST_DATE : LocalDate.parse(startDate));
     }
 
     public StartTimeBasedPeriodBuilder(LocalDate startDate) {

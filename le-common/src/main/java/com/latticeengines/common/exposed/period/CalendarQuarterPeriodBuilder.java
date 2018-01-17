@@ -12,7 +12,7 @@ public class CalendarQuarterPeriodBuilder extends StartTimeBasedPeriodBuilder im
         super();
     }
 
-    CalendarQuarterPeriodBuilder(String startDate) {
+    public CalendarQuarterPeriodBuilder(String startDate) {
         super(startDate);
     }
 
