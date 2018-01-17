@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -218,9 +220,13 @@ public class ScoringMapperPredictUtil {
         // list of HashMap<leadId: score>
         // List<ScoreOutput> resultList = new ArrayList<ScoreOutput>();
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
-
-        for (String uuid : uuidSet) {
+        Collection<String> modelGuids = config.getStringCollection(ScoringProperty.MODEL_GUID.name());
+        for (String modelGuid : modelGuids) {
+            String uuid = UuidUtils.extractUuid(modelGuid);
             log.info("uuid is " + uuid);
+            if (!uuidSet.contains(uuid)) {
+                continue;
+            }
             // key: leadID, value: list of raw scores for that lead
             Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
             Map<String, List<Double>> revenues = new HashMap<String, List<Double>>();
@@ -270,6 +276,7 @@ public class ScoringMapperPredictUtil {
                             builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
                         } else {
                             builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));
+                            builder.set(ScoreResultField.ModelId.displayName, modelGuid);
                         }
                         builder.set(ScoreResultField.Percentile.displayName, result.getPercentile());
                         builder.set(ScoreResultField.RawScore.name(), result.getRawScore());
@@ -283,42 +290,6 @@ public class ScoringMapperPredictUtil {
             HdfsUtils.copyLocalToHdfs(config, fileName, outputPath + "/" + fileName);
         }
     }
-
-    // public static void writeToOutputFile(List<ScoreOutput> resultList,
-    // Configuration configuration, String outputPath)
-    // throws IOException {
-    // String fileName = UUID.randomUUID() +
-    // ScoringDaemonService.AVRO_FILE_SUFFIX;
-    // File outputFile = new File(fileName);
-    //
-    // String uniqueKeyColumn =
-    // configuration.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
-    // if (uniqueKeyColumn.equals(InterfaceName.Id.name())
-    // || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name()))
-    // {
-    // DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
-    // DataFileWriter<GenericRecord> dataFileWriter = new
-    // DataFileWriter<>(userDatumWriter);
-    // ScoringJobUtil.writeScoreResultToAvroRecord(dataFileWriter, resultList,
-    // outputFile, uniqueKeyColumn);
-    // dataFileWriter.close();
-    // } else {
-    // DatumWriter<ScoreOutput> userDatumWriter = new
-    // SpecificDatumWriter<ScoreOutput>();
-    // DataFileWriter<ScoreOutput> dataFileWriter = new
-    // DataFileWriter<ScoreOutput>(userDatumWriter);
-    // for (int i = 0; i < resultList.size(); i++) {
-    // ScoreOutput result = resultList.get(i);
-    // if (i == 0) {
-    // dataFileWriter.create(result.getSchema(), outputFile);
-    // }
-    // dataFileWriter.append(result);
-    // }
-    // dataFileWriter.close();
-    // }
-    // HdfsUtils.copyLocalToHdfs(configuration, fileName, outputPath + "/" +
-    // fileName);
-    // }
 
     @VisibleForTesting
     static List<String> checkForDuplicateLeads(Map<String, List<Double>> scoreMap, int totalRawScoreNumber,

@@ -8,5 +8,6 @@ public enum ScoringProperty {
     UNIQUE_KEY_COLUMN, //
     USE_SCOREDERIVATION, //
     MODEL_GUID, //
+    READ_MODEL_ID_FROM_RECORD, //
     SCORE_INPUT_TYPE; //
 }

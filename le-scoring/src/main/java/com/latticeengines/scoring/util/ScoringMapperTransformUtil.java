@@ -9,13 +9,16 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -37,7 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -51,6 +53,8 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 public class ScoringMapperTransformUtil {
 
     private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
+
+    private static Charset charSet = Charset.forName("UTF-8");
 
     public static Map<String, JsonNode> processLocalizedFiles(URI[] uris) throws IOException {
         // key: uuid, value: model contents
@@ -87,7 +91,7 @@ public class ScoringMapperTransformUtil {
 
     @VisibleForTesting
     static JsonNode parseFileContentToJsonNode(URI uri) throws IOException {
-        String content = FileUtils.readFileToString(new File(uri.getFragment()));
+        String content = FileUtils.readFileToString(new File(uri.getFragment()), charSet);
         JsonNode jsonNode = new ObjectMapper().readTree(content);
         return jsonNode;
     }
@@ -112,12 +116,12 @@ public class ScoringMapperTransformUtil {
         String fileName = uuid + ScoringDaemonService.SCORING_SCRIPT_NAME;
         log.info("fileName is " + fileName);
         File file = new File(fileName);
-        FileUtils.writeStringToFile(file, scriptContent);
+        FileUtils.writeStringToFile(file, scriptContent, charSet);
     }
 
     private static void decodeBase64ThenDecompressToFile(String value, String fileName) throws IOException {
         try (FileOutputStream stream = new FileOutputStream(fileName)) {
-            try (InputStream gzis = new GZIPInputStream(new Base64InputStream(IOUtils.toInputStream(value)))) {
+            try (InputStream gzis = new GZIPInputStream(new Base64InputStream(IOUtils.toInputStream(value, charSet)))) {
                 IOUtils.copy(gzis, stream);
             }
         }
@@ -143,29 +147,19 @@ public class ScoringMapperTransformUtil {
         OutputStream out = null;
         DataFileWriter<GenericRecord> writer = null;
         DataFileWriter<GenericRecord> creator = null;
+        String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
+        Set<String> modelIds = new HashSet<>();
         while (context.nextKeyValue()) {
             Record record = context.getCurrentKey().datum();
             JsonNode jsonNode = mapper.readTree(record.toString());
             recordNumber++;
-            if (CollectionUtils.isEmpty(modelGuids)) {
-                String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
-                transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
-                        leadFileThreshold, modelGuid, uniqueKeyColumn);
-            } else {
-                String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
-                if (type.equals(ScoringInputType.Avro.name())) {
-                    modelGuids.forEach(m -> {
-                        String uuid = UuidUtils.extractUuid(m);
-                        modelInfoMap.putIfAbsent(uuid, new ModelAndRecordInfo.ModelInfo(m, 0L));
-                        modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
-                    });
-                    if (out == null) {
-                        out = new FileOutputStream("input.avro");
-                        writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
-                        creator = writer.create(record.getSchema(), out);
-                    }
-                    creator.append(record);
-                } else if (type.equals(ScoringInputType.Json.name())) {
+            if (type.equals(ScoringInputType.Json.name())) {
+                if (CollectionUtils.isEmpty(modelGuids)) {
+                    String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
+                    modelIds.add(modelGuid);
+                    transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
+                            leadFileThreshold, modelGuid, uniqueKeyColumn);
+                } else {
                     modelGuids.forEach(m -> {
                         try {
                             transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
@@ -175,11 +169,35 @@ public class ScoringMapperTransformUtil {
                         }
                     });
                 }
+            } else {
+                boolean readModelIdFromRecord = config.getBoolean(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
+                        true);
+                if (readModelIdFromRecord) {
+                    String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
+                    String uuid = UuidUtils.extractUuid(modelGuid);
+                    modelInfoMap.putIfAbsent(uuid, new ModelAndRecordInfo.ModelInfo(modelGuid, 0L));
+                    modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
+                } else {
+                    modelGuids.forEach(m -> {
+                        String uuid = UuidUtils.extractUuid(m);
+                        modelInfoMap.putIfAbsent(uuid, new ModelAndRecordInfo.ModelInfo(m, 0L));
+                        modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
+                    });
+                }
+                if (out == null) {
+                    out = new FileOutputStream("input.avro");
+                    writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
+                    creator = writer.create(record.getSchema(), out);
+                }
+                creator.append(record);
             }
         }
         if (out != null) {
             creator.close();
             writer.close();
+        }
+        if (!modelIds.isEmpty()) {
+            config.setStrings(ScoringProperty.MODEL_GUID.name(), modelIds.toArray(new String[] {}));
         }
         Set<String> keySet = recordFileBufferMap.keySet();
         for (String key : keySet) {
@@ -217,7 +235,7 @@ public class ScoringMapperTransformUtil {
 
             recordFileName = uuid + "-0";
             bw = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), "UTF8"));
+                    new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), charSet));
             recordFilebufferMap.put(recordFileName, bw);
         } else {
             long currentLeadNum = modelInfoMap.get(uuid).getRecordCount() + 1;
@@ -229,7 +247,7 @@ public class ScoringMapperTransformUtil {
             if (!recordFilebufferMap.containsKey(recordFileName)) {
                 // create new stream
                 bw = new BufferedWriter(
-                        new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), "UTF8"));
+                        new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), charSet));
                 recordFilebufferMap.put(recordFileName, bw);
                 // close the previous stream
                 StringBuilder formerLeadFileBuilder = new StringBuilder();
@@ -308,7 +326,7 @@ public class ScoringMapperTransformUtil {
 
     public static void main(String[] args) throws Exception {
         File modelFile = new File("/Users/ygao/Downloads/leoMKTOTenant_PLSModel_2015-06-10_04-16_model.json");
-        String modelStr = FileUtils.readFileToString(modelFile);
+        String modelStr = FileUtils.readFileToString(modelFile, charSet);
         JsonNode modelObject = new ObjectMapper().readTree(modelStr);
         decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
         writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
@@ -319,7 +337,7 @@ public class ScoringMapperTransformUtil {
         Map<String, ScoreDerivation> scoreDerivations = new HashMap<>();
         for (URI uri : uris) {
             if (uri.getFragment() != null && uri.getFragment().endsWith("_scorederivation")) {
-                String content = FileUtils.readFileToString(new File(uri.getFragment()));
+                String content = FileUtils.readFileToString(new File(uri.getFragment()), Charset.forName("UTF-8"));
                 String uuid = org.apache.commons.lang3.StringUtils.substringBeforeLast(uri.getFragment(),
                         "_scorederivation");
                 scoreDerivations.put(uuid, JsonUtils.deserialize(content, ScoreDerivation.class));

@@ -4,10 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.io.DatumWriter;
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -15,9 +24,17 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.service.impl.ScoringJobServiceImpl;
 import com.latticeengines.yarn.functionalframework.YarnMiniClusterFunctionalTestNGBase;
@@ -35,7 +52,7 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
 
     private String scorePath;
 
-    private String uuid;
+    private String uuid = "f7f1eb16-0d26-4aa1-8c4a-3ac696e13d06";
 
     @Override
     @BeforeClass(groups = "functional")
@@ -45,10 +62,9 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
         dataPath = customerBaseDir + "/" + tenant + "/data/Q_PLS_ModelingMulesoft_Relaunch/";
         HdfsUtils.mkdir(miniclusterConfiguration, dataPath);
 
-        URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/s100Test-mulesoft.avro");
+        URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/s100Test-mulesoft-scoring.avro");
         HdfsUtils.copyLocalToHdfs(miniclusterConfiguration, url1.getFile(), dataPath);
 
-        uuid = UUID.randomUUID().toString();
         URL modelSummaryUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/scoring/models/sampleModel/Model_Submission1_2018-01-09_08-21_model.json");
         String modelPath = customerBaseDir + "/" + tenant + "/models/Q_PLS_ModelingMulesoft_Relaunch/" + uuid
@@ -78,15 +94,51 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
     public void test() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);
-        scoringConfig.setSourceDataDir(dataPath + "/s100Test-mulesoft.avro");
+        scoringConfig.setSourceDataDir(dataPath + "/s100Test-mulesoft-scoring.avro");
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
-        scoringConfig.setUniqueKeyColumn("ModelingID");
-        //scoringConfig.setScoreInputType(ScoringInputType.Avro);
+        scoringConfig.setUniqueKeyColumn(InterfaceName.Id.name());
+        scoringConfig.setScoreInputType(ScoringInputType.Avro);
+        scoringConfig.setModelIdFromRecord(true);
 
         ((ScoringJobServiceImpl) scoringJobService).setConfiguration(miniclusterConfiguration);
         Properties properties = ((ScoringJobServiceImpl) scoringJobService).generateCustomizedProperties(scoringConfig);
         testMRJob(EventDataScoringJob.class, properties);
 
     }
+
+//    public static void main(String[] args) throws IOException {
+//        String uuid = "f7f1eb16-0d26-4aa1-8c4a-3ac696e13d06";
+//        URL url1 = ClassLoader.getSystemResource("com/latticeengines/scoring/data/s100Test-mulesoft.avro");
+//
+//        DatumWriter userDatumWriter = new GenericDatumWriter<GenericRecord>();
+//        DataFileWriter dataFileWriter = new DataFileWriter(userDatumWriter);
+//
+//        Table t = MetadataConverter.getTable(new Configuration(), url1.getPath());
+//        Attribute a = new Attribute();
+//        a.setName(ScoringDaemonService.MODEL_GUID);
+//        a.setDisplayName(a.getName());
+//        a.setPhysicalDataType("String");
+//        t.addAttribute(a);
+//
+//        t.getAttribute("ModelingID").setName(InterfaceName.Id.name());
+//
+//        Schema s = TableUtils.createSchema("scoringtable", t);
+//        dataFileWriter.create(s, new File("s100Test-mulesoft-scoring.avro"));
+//        List<GenericRecord> records = AvroUtils.readFromLocalFile(url1.getPath());
+//        GenericRecordBuilder builder = new GenericRecordBuilder(s);
+//        for (GenericRecord r : records) {
+//            builder.set(ScoringDaemonService.MODEL_GUID, "ms__" + uuid + "-PLS_model");
+//            for (Field f : s.getFields()) {
+//                if (!f.name().equals(ScoringDaemonService.MODEL_GUID)) {
+//                    if (f.name().equals(InterfaceName.Id.name())) {
+//                        builder.set(f, r.get("ModelingID"));
+//                    } else {
+//                        builder.set(f, r.get(f.name()));
+//                    }
+//                }
+//            }
+//            dataFileWriter.append(builder.build());
+//        }
+//    }
 }

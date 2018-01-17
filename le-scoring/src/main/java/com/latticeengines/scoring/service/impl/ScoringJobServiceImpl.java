@@ -118,6 +118,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.MODEL_GUID.name(), commaJoiner.join(scoringConfig.getModelGuids()));
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
         properties.setProperty(ScoringProperty.SCORE_INPUT_TYPE.name(), scoringConfig.getScoreInputType().name());
+        properties.setProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(), String.valueOf(scoringConfig.readModelIdFromRecord()));
 
         List<String> cacheFiles = new ArrayList<>();
         try {

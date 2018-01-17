@@ -65,6 +65,9 @@ public class EventDataScoringJob extends MRJobCustomizationBase {
             config.set(ScoringProperty.TENANT_ID.name(), properties.getProperty(ScoringProperty.TENANT_ID.name()));
             config.set(ScoringProperty.LOG_DIR.name(), properties.getProperty(ScoringProperty.LOG_DIR.name()));
 
+            config.set(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
+                    properties.getProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name()));
+
             String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());

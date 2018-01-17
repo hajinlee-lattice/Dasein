@@ -124,6 +124,12 @@ public class ScoringJobUtil {
         }
         id.setSourceLogicalDataType(InterfaceName.Id.name());
 
+        Attribute modelId = new Attribute();
+        modelId.setName(ScoreResultField.ModelId.displayName);
+        modelId.setDisplayName(ScoreResultField.ModelId.displayName);
+        modelId.setPhysicalDataType(ScoreResultField.ModelId.physicalDataType);
+        modelId.setSourceLogicalDataType(ScoreResultField.ModelId.sourceLogicalDataType);
+
         Attribute percentile = new Attribute();
         percentile.setName(ScoreResultField.Percentile.displayName);
         percentile.setDisplayName(ScoreResultField.Percentile.displayName);
@@ -133,6 +139,7 @@ public class ScoringJobUtil {
         Attribute rawScore = createAttribute(ScoreResultField.RawScore);
         List<Attribute> attributes = new ArrayList<>();
         attributes.add(id);
+        attributes.add(modelId);
         attributes.add(percentile);
         attributes.add(rawScore);
 
