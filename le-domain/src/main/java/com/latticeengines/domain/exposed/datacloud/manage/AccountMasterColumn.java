@@ -104,6 +104,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "DataLicense", length = 100)
     private String dataLicense;
 
+    @Column(name = "EOLVersion", length = 50)
+    private String eolVersion;
+
     @Override
     @JsonIgnore
     public Long getPid() {
@@ -271,6 +274,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @JsonIgnore
     public void setDataLicense(String dataLicense) {
         this.dataLicense = dataLicense;
+    }
+
+    @JsonIgnore
+    public String getEolVersion() {
+        return eolVersion;
+    }
+
+    @JsonIgnore
+    public void setEolVersion(String eolVersion) {
+        this.eolVersion = eolVersion;
     }
 
     @JsonIgnore
