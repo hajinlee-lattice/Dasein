@@ -114,7 +114,7 @@ public class PlaymakerTenant implements HasPid {
     }
 
     @JsonProperty("JdbcUserName")
-    @Column(name = "JDBC_USERNAME", nullable = false)
+    @Column(name = "JDBC_USERNAME", nullable = true)
     public String getJdbcUserName() {
         return jdbcUserName;
     }
@@ -136,7 +136,7 @@ public class PlaymakerTenant implements HasPid {
     }
 
     @JsonProperty("JdbcPasswordEncrypt")
-    @Column(name = "JDBC_PASSWORD_ENCRYPT", nullable = false)
+    @Column(name = "JDBC_PASSWORD_ENCRYPT", nullable = true)
     public String getJdbcPasswordEncrypt() {
         return jdbcPasswordEncrypt;
     }
