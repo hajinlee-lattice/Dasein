@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public abstract class BaseExceptionHandler {
         }
 
         String dedupKey = getCurrentRequest().getRequestURL().toString() + "|" + e.getClass().getName() + "|" + tenant;
-        this.alertService.triggerCriticalEvent(e.getMessage(), null, dedupKey, details);
+        String message = StringUtils.isBlank(e.getMessage()) ? e.toString() : e.getMessage();
+        this.alertService.triggerCriticalEvent(message, null, dedupKey, details);
     }
 }
