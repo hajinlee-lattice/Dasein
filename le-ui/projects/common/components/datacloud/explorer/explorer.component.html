@@ -89,14 +89,14 @@
             </div>
         </div>
 
-        <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
-            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
-                <div ng-if="vm.subcategories[vm.category].length > 1 || (vm.isYesNoCategory(vm.category, true) && vm.subcategories[vm.category].length >= 1)">
+        <div class="enrichments-container" ng-if="vm.subcategory && vm.category">
+            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length">
+                <div ng-if="vm.hasSubcategories(vm.category)">
                     <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
                 </div>
             </div>
-            <div class="subcategory-back" ng-if="filteredList.length && vm.category && (!vm.subcategory || (vm.subcategory == 'Other' && !vm.isYesNoCategory(vm.category, true))) && !vm.stateParams.gotoNonemptyCategory">
-                <span ng-if="vm.subcategories[vm.category].length <= 1" ng-click="vm.setCategory(''); vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
+            <div class="subcategory-back" ng-if="vm.category && !vm.hasSubcategories(vm.category) && !vm.stateParams.gotoNonemptyCategory">
+                <span ng-click="vm.setCategory(''); vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="filteredList.length > vm.pagesize">
                 <div class="twelve columns">

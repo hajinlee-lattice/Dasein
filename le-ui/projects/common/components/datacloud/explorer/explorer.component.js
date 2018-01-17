@@ -1226,6 +1226,10 @@ angular.module('common.datacloud.explorer', [
         return list.indexOf(category) >= 0;
     }
 
+    vm.hasSubcategories = function(category) {
+        return vm._subcategories[category].length != 1 || vm._subcategories[category][0] != 'Other';
+    }
+
     vm.percentage = function(number, total, suffix, limit) {
         var suffix = suffix || '',
             percentage = 0;
