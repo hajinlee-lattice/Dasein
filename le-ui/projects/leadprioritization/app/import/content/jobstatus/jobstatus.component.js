@@ -5,10 +5,10 @@ angular.module('lp.import.wizard.jobstatus', [])
     var vm = this;
 
     angular.extend(vm, {
-
     });
 
     vm.init = function() {
+        //ImportWizardStore.setValidation('jobstatus', true);
     }
 
     vm.init();

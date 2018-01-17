@@ -104,7 +104,7 @@ angular
                 'wizard_controls': {
                     resolve: {
                         WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.accounts', nextState: 'home.segments' };
+                            return { backState: 'home.import.entry.accounts', nextState: 'home.jobs.status' };
                         }
                     },
                     controller: 'ImportWizardControls',
@@ -253,7 +253,7 @@ angular
                 'wizard_controls': {
                     resolve: {
                         WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.contacts', nextState: 'home.segments' };
+                            return { backState: 'home.import.entry.contacts', nextState: 'home.jobs.status' };
                         }
                     },
                     controller: 'ImportWizardControls',
@@ -376,7 +376,7 @@ angular
                 'wizard_controls': {
                     resolve: {
                         WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.product_purchases', nextState: 'home.segments' };
+                            return { backState: 'home.import.entry.product_purchases', nextState: 'home.jobs.status' };
                         }
                     },
                     controller: 'ImportWizardControls',
@@ -480,7 +480,7 @@ angular
                 'wizard_controls': {
                     resolve: {
                         WizardControlsOptions: function() {
-                            return { backState: 'home.import.entry.product_bundles', nextState: 'home.segments' };
+                            return { backState: 'home.import.entry.product_bundles', nextState: 'home.jobs.status' };
                         }
                     },
                     controller: 'ImportWizardControls',

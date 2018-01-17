@@ -59,7 +59,7 @@ angular.module('lp.import.wizard.transactionids', [])
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('ids', true);
+        ImportWizardStore.setValidation('ids', form.$valid);
     }
 
     vm.init();

@@ -18,7 +18,7 @@ angular.module('lp.import')
             thirdpartyids: true,
             latticefields: false,
             customfields: true,
-            jobstatus: true
+            jobstatus: false
         }
 
         this.saveObjects = [];
@@ -68,7 +68,9 @@ angular.module('lp.import')
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
+                        ImportWizardStore.setValidation('jobstatus', true);                
+                    });
                 }
             },{ 
                 label: 'Import Data', 
@@ -103,7 +105,9 @@ angular.module('lp.import')
                 state: 'contacts.ids.latticefields.customfields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true);                
+                    });
                 }
             },{ 
                 label: 'Import Data', 
@@ -131,7 +135,9 @@ angular.module('lp.import')
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
-                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true);                
+                    });
                 }
             },{ 
                 label: 'Import Data', 
@@ -158,7 +164,9 @@ angular.module('lp.import')
                 state: 'product_bundles.ids.latticefields', 
                 nextLabel: 'Import File', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveFieldDocuments(nextState);
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true);
+                    });
                 }
             },{ 
                 label: 'Import Data', 
@@ -197,11 +205,14 @@ angular.module('lp.import')
         $state.go(nextState);
     }
 
-    this.nextSaveFieldDocuments = function(nextState) {
+    this.nextSaveFieldDocuments = function(nextState, callback) {
+        var callback = (typeof callback === 'function' ? callback : function(){});
+
         ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {
             entity: ImportWizardStore.getEntityType()
-        });
-        $state.go(nextState); 
+        }).then(callback);
+
+        $state.go(nextState);
     }
 
     this.getAccountIdState = function() {
