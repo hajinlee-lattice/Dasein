@@ -23,6 +23,8 @@ public class ScoringConfiguration {
 
     private List<BucketMetadata> bucketMetadata;
 
+    private boolean readModelIdFromRecord = true;
+
     private ScoringInputType scoreInputType = ScoringInputType.Json;
 
     @JsonProperty("customer")
@@ -109,8 +111,18 @@ public class ScoringConfiguration {
         return JsonUtils.serialize(this);
     }
 
+    @JsonProperty("read_modelid_from_record")
+    public boolean readModelIdFromRecord() {
+        return readModelIdFromRecord;
+    }
+
+    public void setModelIdFromRecord(boolean readModelIdFromRecord) {
+        this.readModelIdFromRecord = readModelIdFromRecord;
+    }
+
     public enum ScoringInputType {
         Json, //
         Avro;
     }
+
 }

@@ -6,11 +6,12 @@ public enum ScoreResultField {
 
     Percentile(Type.INT.name(), "Score", Integer.class.getSimpleName()), //
     RawScore(Type.DOUBLE.name(), "RawScore", Double.class.getSimpleName()), //
+    Rating(Type.STRING.name(), "Rating", String.class.getSimpleName()), //
+    ModelId(Type.STRING.name(), "__ModelId__", String.class.getSimpleName()), //
     Probability(Type.DOUBLE.name(), "Probability", Double.class.getSimpleName()), //
     NormalizedScore(Type.DOUBLE.name(), "NormalizedScore", Double.class.getSimpleName()), //
     PredictedRevenue(Type.DOUBLE.name(), "PredictedRevenue", Double.class.getSimpleName()), //
-    ExpectedRevenue(Type.DOUBLE.name(), "ExpectedRevenue", Double.class.getSimpleName()), //
-    Rating(Type.STRING.name(), "Rating", String.class.getSimpleName());
+    ExpectedRevenue(Type.DOUBLE.name(), "ExpectedRevenue", Double.class.getSimpleName());
 
     public String physicalDataType;
 
