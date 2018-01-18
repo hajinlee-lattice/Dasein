@@ -239,6 +239,10 @@ public class RatingEngineResource {
             if (jobId == null) {
                 modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
                 RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
+                parameters.setName(ratingModelId);
+                parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + ratingModel.getIteration());
+                parameters.setDescription(ratingEngine.getDisplayName());
+                parameters.setModuleName("Module");
                 parameters.setUserId(MultiTenantContext.getEmailAddress());
                 EventFrontEndQuery eventQuery = EventFrontEndQuery
                         .fromFrontEndQuery(FrontEndQuery.fromSegment(ratingEngine.getSegment()));
