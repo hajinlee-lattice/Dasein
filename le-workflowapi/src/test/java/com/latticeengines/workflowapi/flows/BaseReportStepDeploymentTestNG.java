@@ -37,7 +37,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
         
-        Job job = workflowJobService.getJob(CustomerSpace.parse(tenant.getId()).toString(), workflowId.getId(), true);
+        Job job = workflowJobService.getJob(CustomerSpace.parse(mainTestTenant.getId()).toString(), workflowId.getId(), true);
         assertEquals(job.getReports().size(), 1);
         Report report = job.getReports().get(0);
         assertTrue(report.getName().startsWith("Test"));
