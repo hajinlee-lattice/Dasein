@@ -77,6 +77,10 @@ angular
                 if(!vm.params.noSizeLimit && vm.selectedFile.size > (GB * GBLimit)) {
                     ServiceErrorUtility.showBanner({data: {errorMsg: 'Your file is too large.  Please try again with a file that is smaller then ' + GBLimit + 'GB.'}});
                     return;
+                } else if (!vm.matchesFileExtension(vm.selectedFileName)) {
+                    var fileExt = vm.fileAccept ? vm.fileAccept.split(',')[0].split('.').pop().toUpperCase() : 'CSV'; //get first file extension in file-accept or use CSV as default;
+                    ServiceErrorUtility.showBanner({data: {errorMsg: 'Invalid file format. Please try uploading the file in ' + fileExt + ' format.'}});
+                    return;
                 }
 
                 ServiceErrorUtility.hideBanner();
@@ -116,6 +120,18 @@ angular
             vm.getFileName = function(s) { 
                 return (typeof s==='string' && (s=s.match(/[^\\\/]+$/)) && s[0]) || '';
             } 
+
+            vm.getFileExtension = function(fileName) {
+                return fileName.split('.').pop();
+            }
+
+            vm.matchesFileExtension = function(fileName) {
+                if (vm.fileAccept) {
+                    return vm.fileAccept.includes(vm.getFileExtension(fileName));
+                } else {
+                    return vm.getFileExtension(vm.selectedFileName) == 'csv';
+                }
+            }
 
             vm.changeFile = function(scope) {
                 vm.cancel(true);
