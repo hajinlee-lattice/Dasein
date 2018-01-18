@@ -44,6 +44,7 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -179,7 +180,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
         while (true) {
             try {
-                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId,
+                        CustomerSpace.parse(mainTestTenant.getId()).toString());
             } catch (Exception e) {
                 System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
 
