@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.dataloader.JobStatusResult;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -25,13 +28,18 @@ public class JobResource {
     @Autowired
     private WorkflowProxy workflowProxy;
 
+    @Autowired
+    private DLTenantMappingService dlTenantMappingService;
+
     @RequestMapping(value = "/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted job")
     @NoCustomerSpace
     public JobStatusResult getJobStatus(@PathVariable String customerSpace, @PathVariable String applicationId) {
-        //todo: use customerSpace to filter(waiting for workflow api support);
-        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+        CustomerSpace cs = CustomerSpace.parse(customerSpace);
+        DLTenantMapping tenantMapping = dlTenantMappingService.getDLTenantMapping(cs.getTenantId(), "*");
+        customerSpace = tenantMapping == null ? cs.toString() : CustomerSpace.parse(tenantMapping.getTenantId()).toString();
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId, customerSpace);
         if (job != null) {
             JobStatusResult jobStatusResult = new JobStatusResult();
             JobStatus jobStatus = job.getJobStatus();
