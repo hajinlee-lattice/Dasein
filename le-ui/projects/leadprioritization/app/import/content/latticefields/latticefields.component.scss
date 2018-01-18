@@ -46,6 +46,9 @@
 		background: #fff;
 	    height: 30px;
 	    font-size: 14px;
+	    option[disabled] {
+	    	color: lightgray;
+	    }
 	}
 
 }

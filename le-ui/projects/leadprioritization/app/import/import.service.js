@@ -200,7 +200,7 @@ angular.module('lp.import')
 
     this.nextSaveMapping = function(nextState) {
         this.saveObjects.forEach(function(item, index) {
-            ImportWizardStore.remapMap(item.userField, item.mappedField);
+            ImportWizardStore.remapMap(item.userField, item.mappedField, item.unmap);
         });
         $state.go(nextState);
     }
@@ -309,16 +309,17 @@ angular.module('lp.import')
         return indexes;
     }
 
-    this.remapMap = function(userField, mappedField) {
-        var mappedIndexes = findIndexes(this.fieldDocument.fieldMappings, 'mappedField', mappedField),
-            userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField);
+    this.remapMap = function(userField, mappedField, unmap) {
+        var _mappedIndexes = findIndexes(this.fieldDocument.fieldMappings, 'mappedField', mappedField), 
+            userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField),
+            unmappedIndexes = (unmap ? findIndexes(this.fieldDocument.fieldMappings, 'mappedField', userField) : []), // find unmapped items
+            mappedIndexes = _mappedIndexes.concat(unmappedIndexes); // add unmapped items so they get same unmapping as duplciates
 
-        mappedIndexes.forEach(function(index) {
+        mappedIndexes.forEach(function(index) { // this unmaps previous fields, to remove duplicate mappings
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedField = null;
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = false;
         });
-
-        userIndexes.forEach(function(index) {
+        userIndexes.forEach(function(index) { // this maps the new fields
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedField = mappedField;
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = (mappedField ? true : false); // allows for unmapping
         });

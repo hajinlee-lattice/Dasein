@@ -14,7 +14,9 @@ angular.module('lp.import.wizard.latticefields', [])
     }
 
     var matchingFieldsList = makeList(MatchingFields),
-        analysisFieldsList = makeList(AnalysisFields);
+        analysisFieldsList = makeList(AnalysisFields),
+        ignoredFieldLabel = '-- Unmapped Field --',
+        noFieldLabel = '-- No Fields Available --';
 
     angular.extend(vm, {
         importType: Type,
@@ -28,7 +30,7 @@ angular.module('lp.import.wizard.latticefields', [])
         csvFileName: ImportWizardStore.getCsvFileName(),
         ignoredFields: FieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
-        ignoredFieldLabel: '-- Unmapped Field --',
+        ignoredFieldLabel: ignoredFieldLabel,
         UnmappedFieldsMap: {},
         matchingFieldMappings: {},
         analysisFieldMappings: {},
@@ -81,6 +83,7 @@ angular.module('lp.import.wizard.latticefields', [])
     vm.changeLatticeField = function(mapping, form) {
         var _mapping = [];
         vm.unavailableFields = [];
+        vm.ignoredFieldLabel = ignoredFieldLabel;
         for(var i in mapping) {
             var item = mapping[i],
                 map = makeObject(item.userField);
@@ -88,11 +91,17 @@ angular.module('lp.import.wizard.latticefields', [])
             if(!map.userField) {
                 map.userField = i;
                 map.mappedField = null;
+                map.unmap = true;
             }
             if(item.userField) {
                 vm.unavailableFields.push(map.userField);
             }
-            _mapping.push(map);
+            if(map.userField) {
+                _mapping.push(map);
+            }
+        }
+        if(vm.unavailableFields.length >= vm.availableFields.length) {
+            vm.ignoredFieldLabel = noFieldLabel;
         }
         ImportWizardStore.setSaveObjects(_mapping);
         vm.checkValid(form);

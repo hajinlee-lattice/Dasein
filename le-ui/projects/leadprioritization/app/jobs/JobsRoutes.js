@@ -87,7 +87,7 @@ angular
             }
         })
         .state('home.jobs.data', {
-            url: '/status',
+            url: '/status/data',
             views: {
                 "main@": {
                     controller: 'DataProcessingComponent',
