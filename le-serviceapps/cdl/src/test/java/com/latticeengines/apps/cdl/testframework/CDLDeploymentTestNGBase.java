@@ -19,6 +19,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Listeners;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -116,7 +117,8 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         Job job = null;
         while (true) {
             try {
-                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId,
+                        CustomerSpace.parse(mainTestTenant.getId()).toString());
             } catch (Exception e) {
                 log.error(String.format("Workflow job exception: %s", e.getMessage()), e);
 
