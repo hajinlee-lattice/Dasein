@@ -172,15 +172,16 @@ public class ScoringMapperTransformUtil {
             } else {
                 boolean readModelIdFromRecord = config.getBoolean(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
                         true);
+                modelGuids.forEach(m -> {
+                    modelInfoMap.putIfAbsent(UuidUtils.extractUuid(m), new ModelAndRecordInfo.ModelInfo(m, 0L));
+                });
                 if (readModelIdFromRecord) {
                     String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
                     String uuid = UuidUtils.extractUuid(modelGuid);
-                    modelInfoMap.putIfAbsent(uuid, new ModelAndRecordInfo.ModelInfo(modelGuid, 0L));
                     modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
                 } else {
                     modelGuids.forEach(m -> {
                         String uuid = UuidUtils.extractUuid(m);
-                        modelInfoMap.putIfAbsent(uuid, new ModelAndRecordInfo.ModelInfo(m, 0L));
                         modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
                     });
                 }
