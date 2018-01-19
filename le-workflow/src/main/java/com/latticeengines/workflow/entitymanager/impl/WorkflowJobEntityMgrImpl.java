@@ -32,11 +32,11 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         return super.findAll();
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<WorkflowJob> findAllWithFilter() {
-        return super.findAll();
-    }
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+//    public List<WorkflowJob> findAllWithFilter() {
+//        return super.findAll();
+//    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -50,11 +50,11 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         return workflowJobDao.findByApplicationId(applicationId);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public WorkflowJob findByApplicationIdWithFilter(String applicationId) {
-        return workflowJobDao.findByApplicationId(applicationId);
-    }
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+//    public WorkflowJob findByApplicationIdWithFilter(String applicationId) {
+//        return workflowJobDao.findByApplicationId(applicationId);
+//    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -74,11 +74,11 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         return workflowJobDao.findByWorkflowIdsAndTypes(workflowIds, types);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public WorkflowJob findByWorkflowIdWithFilter(long workflowId) {
-        return workflowJobDao.findByWorkflowId(workflowId);
-    }
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+//    public WorkflowJob findByWorkflowIdWithFilter(long workflowId) {
+//        return workflowJobDao.findByWorkflowId(workflowId);
+//    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -101,38 +101,38 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         }
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobIdWithFilter(List<Long> workflowIds, List<String> types,
-                                                                             Long parentJobId) {
-        if (workflowIds != null && types != null && parentJobId != null) {
-            return workflowJobDao.findByWorkflowIdsAndTypesAndParentJobId(workflowIds, types, parentJobId);
-        } else if (workflowIds != null && types != null) {
-            return workflowJobDao.findByWorkflowIdsAndTypes(workflowIds, types);
-        } else if (workflowIds != null && parentJobId != null) {
-            return workflowJobDao.findByWorkflowIdsAndParentJobId(workflowIds, parentJobId);
-        } else if (workflowIds != null) {
-            return workflowJobDao.findByWorkflowIds(workflowIds);
-        } else if (types != null && parentJobId != null) {
-            return workflowJobDao.findByTypesAndParentJobId(types, parentJobId);
-        } else if (types != null) {
-            return workflowJobDao.findByTypes(types);
-        } else {
-            return null;
-        }
-    }
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+//    public List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobIdWithFilter(List<Long> workflowIds, List<String> types,
+//                                                                             Long parentJobId) {
+//        if (workflowIds != null && types != null && parentJobId != null) {
+//            return workflowJobDao.findByWorkflowIdsAndTypesAndParentJobId(workflowIds, types, parentJobId);
+//        } else if (workflowIds != null && types != null) {
+//            return workflowJobDao.findByWorkflowIdsAndTypes(workflowIds, types);
+//        } else if (workflowIds != null && parentJobId != null) {
+//            return workflowJobDao.findByWorkflowIdsAndParentJobId(workflowIds, parentJobId);
+//        } else if (workflowIds != null) {
+//            return workflowJobDao.findByWorkflowIds(workflowIds);
+//        } else if (types != null && parentJobId != null) {
+//            return workflowJobDao.findByTypesAndParentJobId(types, parentJobId);
+//        } else if (types != null) {
+//            return workflowJobDao.findByTypes(types);
+//        } else {
+//            return null;
+//        }
+//    }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<WorkflowJob> findByTenant(Tenant tenant) {
-        return workflowJobDao.findByTenant(tenant);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<WorkflowJob> findByTenant(Tenant tenant, List<String> types) {
-        return workflowJobDao.findByTenant(tenant, types);
-    }
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+//    public List<WorkflowJob> findByTenant(Tenant tenant) {
+//        return workflowJobDao.findByTenant(tenant);
+//    }
+//
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+//    public List<WorkflowJob> findByTenant(Tenant tenant, List<String> types) {
+//        return workflowJobDao.findByTenant(tenant, types);
+//    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)

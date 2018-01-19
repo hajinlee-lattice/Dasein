@@ -38,7 +38,6 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     private String tenantId1;
-
     private String tenantId2;
 
     @BeforeClass(groups = "functional")
@@ -122,7 +121,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(jobs.size(), 4);
 
         MultiTenantContext.setTenant(tenant1);
-        jobs = workflowJobEntityMgr.findAllWithFilter();
+        jobs = workflowJobEntityMgr.findAll();
         assertEquals(jobs.size(), 3);
         List<String> applicationIds = jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList());
         assertTrue(applicationIds.contains("application_10000"));
@@ -130,10 +129,19 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertTrue(applicationIds.contains("application_10002"));
 
         MultiTenantContext.setTenant(tenant2);
-        jobs = workflowJobEntityMgr.findAllWithFilter();
+        jobs = workflowJobEntityMgr.findAll();
         assertEquals(jobs.size(), 1);
         assertTrue(jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList())
                 .contains("application_20000"));
+
+        MultiTenantContext.setTenant(null);
+        jobs = workflowJobEntityMgr.findAll();
+        assertEquals(jobs.size(), 4);
+        applicationIds = jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList());
+        assertTrue(applicationIds.contains("application_10000"));
+        assertTrue(applicationIds.contains("application_10001"));
+        assertTrue(applicationIds.contains("application_10002"));
+        assertTrue(applicationIds.contains("application_20000"));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testFindAll")
@@ -142,7 +150,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         Tenant tenant2 = tenantService.findByTenantId(tenantId2);
 
         MultiTenantContext.setTenant(tenant1);
-        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 null, Collections.singletonList("type1"), null);
         assertEquals(jobs.size(), 3);
         List<String> applicationIds = jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList());
@@ -153,48 +161,48 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         List<Long> workflowIds = new ArrayList<>();
         workflowIds.add(11L);
         workflowIds.add(2L);
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, null, null);
         assertEquals(jobs.size(), 1);
         assertEquals(jobs.get(0).getApplicationId(), "application_10001");
 
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, Collections.singletonList("type1"), null);
         assertEquals(jobs.size(), 1);
         assertEquals(jobs.get(0).getApplicationId(), "application_10001");
 
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, Collections.singletonList("type2"), null);
         assertEquals(jobs.size(), 0);
 
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, null, 1L);
         assertEquals(jobs.size(), 1);
         assertEquals(jobs.get(0).getApplicationId(), "application_10001");
 
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, null, -1L);
         assertEquals(jobs.size(), 0);
 
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 null, Collections.singletonList("type1"), 1L);
         assertEquals(jobs.size(), 2);
         assertEquals(jobs.get(0).getApplicationId(), "application_10001");
         assertEquals(jobs.get(1).getApplicationId(), "application_10002");
 
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 null, Collections.singletonList("type1"), -1L);
         assertEquals(jobs.size(), 0);
 
         MultiTenantContext.setTenant(tenant2);
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 null, Collections.singletonList("type2"), null);
         assertEquals(jobs.size(), 1);
         assertTrue(jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList())
                 .contains("application_20000"));
 
         workflowIds.remove(0);
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, null, null);
         assertEquals(jobs.size(), 1);
         assertTrue(jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList())
@@ -202,7 +210,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
         workflowIds.clear();
         workflowIds.add(1L);
-        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, Collections.singletonList("type2"), null);
         assertEquals(jobs.size(), 0);
 
@@ -232,7 +240,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob3.setUserId("user3");
         workflowJobEntityMgr.create(workflowJob3);
 
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant1);
+        MultiTenantContext.setTenant(tenant1);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         assertEquals(workflowJobs.size(), 2);
 
         assertEquals(workflowJobs.get(0).getApplicationId(), "application_00001");
@@ -245,7 +254,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.get(1).getTenantId(), workflowJob4.getTenantId());
         assertEquals(workflowJobs.get(1).getUserId(), workflowJob4.getUserId());
 
-        workflowJobs = workflowJobEntityMgr.findByTenant(tenant2);
+        MultiTenantContext.setTenant(tenant2);
+        workflowJobs = workflowJobEntityMgr.findAll();
         assertEquals(workflowJobs.size(), 1);
         assertEquals(workflowJobs.get(0).getApplicationId(), "application_00002");
         assertEquals(workflowJobs.get(0).getUserId(), "user2");
@@ -299,7 +309,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
     public void testFindByTenantAndWorkflowIds() {
         Tenant tenant1 = tenantService.findByTenantId(tenantId1);
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant1);
+        MultiTenantContext.setTenant(tenant1);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         assertEquals(workflowJobs.size(), 2);
 
         workflowJobs.get(0).setWorkflowId(100L);
