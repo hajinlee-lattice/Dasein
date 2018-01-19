@@ -7,15 +7,14 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -23,6 +22,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
 import com.latticeengines.workflow.functionalframework.FailableStep;
@@ -69,22 +70,40 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
     @Autowired
     private WorkflowWithFailingListener workflowWithFailingListener;
 
+    @Autowired
+    private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
+
     private WorkflowConfiguration workflowConfig;
 
     private Tenant tenant1;
 
     private String customerSpace;
 
+    private Long workflowId;
+
+    private ScheduledExecutorService executorService;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         customerSpace = bootstrapWorkFlowTenant().toString();
+        executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @AfterClass(groups = "functional")
-    public void cleanup() {
+    public void teardown() {
         tenant1 = tenantService.findByTenantId(customerSpace);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
+        }
+
+        try {
+            executorService.shutdown();
+            executorService.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (Exception exc) {
+            log.warn("Exception while trying to shutdown executorService. " + exc);
         }
     }
 
@@ -94,13 +113,26 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
     }
 
+    @AfterMethod(groups = "functional")
+    public void cleanp() {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        if (workflowJob != null) {
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
+            workflowJobEntityMgr.delete(workflowJob);
+            workflowJobUpdateEntityMgr.delete(jobUpdate);
+        }
+    }
+
     @Test(groups = "functional")
     public void testStart() throws Exception {
         failableStep.setFail(false);
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        this.workflowId = workflowId.getId();
+        ScheduledFuture future = checkWorkflowJobUpdate(workflowId);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
+        future.cancel(true);
     }
 
     @Test(groups = "functional")
@@ -108,6 +140,8 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         failableStep.setFail(false);
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        this.workflowId = workflowId.getId();
+        ScheduledFuture future = checkWorkflowJobUpdate(workflowId);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
         List<Job> jobs = workflowService.getJobs(Collections.singletonList(workflowId), failableWorkflow.name());
@@ -116,6 +150,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertEquals(job.getId().longValue(), workflowId.getId());
         assertEquals(job.getJobType(), failableWorkflow.name());
         assertEquals(job.getJobStatus(), JobStatus.COMPLETED);
+        future.cancel(true);
     }
 
     @Test(groups = "functional")
@@ -123,6 +158,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         failableStep.setFail(true);
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        this.workflowId = workflowId.getId();
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
         assertTrue(stepNames.contains(successfulStep.name()));
@@ -145,6 +181,8 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertEquals(status, BatchStatus.COMPLETED);
         assertEquals(workflowJobEntityMgr.findByApplicationId(appid).getWorkflowId().longValue(),
                 restartedWorkflowId.getId());
+
+        super.cleanup(workflowJob.getWorkflowId());
     }
 
     @Test(groups = "functional")
@@ -152,6 +190,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         failableStep.setFail(true);
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        this.workflowId = workflowId.getId();
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.FAILED);
         Job job = workflowService.getJob(workflowId);
@@ -165,6 +204,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         failableStep.setUseRuntimeException(true);
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        this.workflowId = workflowId.getId();
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.FAILED);
         Job job = workflowService.getJob(workflowId);
@@ -173,7 +213,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testGetNames() throws Exception {
+    public void testGetNames() {
         List<String> workflowNames = workflowService.getNames();
         assertTrue(workflowNames.contains(failableWorkflow.name()));
         assertTrue(workflowNames.contains(runCompletedStepAgainWorkflow.name()));
@@ -185,6 +225,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         int failureListenerCalls = FailingListener.calls;
         workflowConfig.setWorkflowName(workflowWithFailingListener.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        this.workflowId = workflowId.getId();
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
         assertEquals(SuccessfulListener.calls, successfulListenerCalls + 1);
@@ -196,6 +237,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         sleepableStep.setSleepTime(10000L);
         workflowConfig.setWorkflowName(sleepableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        this.workflowId = workflowId.getId();
         BatchStatus status = workflowService.getStatus(workflowId).getStatus();
         assertTrue(status.equals(BatchStatus.STARTING) || status.equals(BatchStatus.STARTED));
 
@@ -210,5 +252,19 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
         status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.STOPPED);
+    }
+
+    private ScheduledFuture checkWorkflowJobUpdate(WorkflowExecutionId workflowId) {
+        Long workflowPid = workflowJobEntityMgr.findByWorkflowId(workflowId.getId()).getPid();
+        WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
+        assertNotNull(jobUpdate);
+        Long diff = System.currentTimeMillis() - jobUpdate.getLastUpdateTime();
+        assertTrue(diff < TimeUnit.SECONDS.toMillis(2));
+
+        AtomicLong lastUpdateTime = new AtomicLong(jobUpdate.getLastUpdateTime());
+        return executorService.scheduleAtFixedRate(() -> {
+            Long updateTime = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid).getLastUpdateTime();
+            assertTrue(updateTime >= lastUpdateTime.getAndAdd(updateTime));
+        } , 10L, 10L, TimeUnit.SECONDS);
     }
 }

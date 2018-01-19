@@ -2,6 +2,8 @@ package com.latticeengines.workflow.functionalframework;
 
 import javax.sql.DataSource;
 
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.workflow.core.DataPlatformInfrastructure;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 @ContextConfiguration(locations = { "classpath:test-workflow-context.xml" })
@@ -34,6 +37,9 @@ public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
 
     @Autowired
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    protected WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     @Autowired
     private TenantService tenantService;
@@ -75,4 +81,15 @@ public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
         return customerSpace;
     }
 
+    protected void cleanup(Long workflowJobId) {
+        MultiTenantContext.setTenant(null);
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowJobId);
+        if (workflowJob != null) {
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
+            if (jobUpdate != null) {
+                workflowJobUpdateEntityMgr.delete(jobUpdate);
+            }
+            workflowJobEntityMgr.delete(workflowJob);
+        }
+    }
 }

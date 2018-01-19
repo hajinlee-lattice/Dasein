@@ -43,6 +43,7 @@ import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
@@ -80,6 +81,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     @Override
     public List<String> getNames() {
@@ -151,13 +155,20 @@ public class WorkflowServiceImpl implements WorkflowService {
         String user = workflowConfiguration.getUserId();
         user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
 
+        Long currentTime = System.currentTimeMillis();
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setTenant(tenant);
         workflowJob.setUserId(user);
         workflowJob.setWorkflowId(jobExecutionId);
         workflowJob.setStatus(JobStatus.RUNNING.name());
-        workflowJob.setStartTimeInMillis(System.currentTimeMillis());
+        workflowJob.setStartTimeInMillis(currentTime);
         workflowJobEntityMgr.create(workflowJob);
+
+        Long workflowPid = workflowJobEntityMgr.findByWorkflowId(workflowJob.getWorkflowId()).getPid();
+        WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
+        jobUpdate.setWorkflowPid(workflowPid);
+        jobUpdate.setLastUpdateTime(currentTime);
+        workflowJobUpdateEntityMgr.create(jobUpdate);
 
         return new WorkflowExecutionId(jobExecutionId);
     }
@@ -169,6 +180,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflowJob.setStatus(JobStatus.RUNNING.name());
         workflowJobEntityMgr.registerWorkflowId(workflowJob);
         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+
+        WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
+        jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+        workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+
         return new WorkflowExecutionId(jobExecutionId);
     }
 
@@ -197,6 +213,18 @@ public class WorkflowServiceImpl implements WorkflowService {
             jobExecutionId = jobOperator.restart(workflowExecutionId.getId());
             workflowJob.setWorkflowId(jobExecutionId);
             workflowJobEntityMgr.registerWorkflowId(workflowJob);
+
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
+            if (jobUpdate == null) {
+                jobUpdate = new WorkflowJobUpdate();
+                jobUpdate.setWorkflowPid(workflowJob.getPid());
+                jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+                workflowJobUpdateEntityMgr.create(jobUpdate);
+            } else {
+                jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+                workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+            }
+
             log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
                     workflowExecutionId.getId(), jobExecutionId));
         } catch (JobInstanceAlreadyCompleteException | NoSuchJobExecutionException | NoSuchJobException
@@ -211,7 +239,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public void stop(WorkflowExecutionId workflowId) {
         try {
-            WorkflowJob job = workflowJobEntityMgr.findByWorkflowIdWithFilter(workflowId.getId());
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
             if(job != null) {
                 jobOperator.stop(workflowId.getId());
             } else {
@@ -341,6 +369,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         long start = System.currentTimeMillis();
         int retryOnException = 16;
 
+        Long workflowPid = workflowJobEntityMgr.findByWorkflowId(workflowId.getId()).getPid();
         // break label for inner loop
         done: do {
             try {
@@ -351,7 +380,15 @@ public class WorkflowServiceImpl implements WorkflowService {
                     WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
                     workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
                     workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+
+                    WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
+                    jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+                    workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
                     break done;
+                } else {
+                    WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
+                    jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+                    workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
                 }
             } catch (Exception e) {
                 log.warn(String.format("Error while getting status for workflow %d, with error %s", workflowId.getId(),

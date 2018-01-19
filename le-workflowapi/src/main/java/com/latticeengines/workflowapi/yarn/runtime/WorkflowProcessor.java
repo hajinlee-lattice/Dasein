@@ -1,8 +1,7 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
+import com.latticeengines.domain.exposed.workflow.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -13,13 +12,9 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
@@ -42,6 +37,9 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     public WorkflowProcessor() {
         super();
@@ -94,6 +92,10 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         } catch (Exception e) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
+            jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+            workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
             throw new RuntimeException(e);
         }
         return null;

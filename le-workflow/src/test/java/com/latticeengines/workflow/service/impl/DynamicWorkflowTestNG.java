@@ -68,6 +68,8 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
 
     private String customerSpace;
 
+    private WorkflowExecutionId workflowId;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         customerSpace = bootstrapWorkFlowTenant().toString();
@@ -79,6 +81,8 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
         if (tenant != null) {
             tenantService.discardTenant(tenant);
         }
+
+        super.cleanup(workflowId.getId());
     }
 
     @BeforeMethod(groups = "functional")
@@ -92,7 +96,7 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
         choreographer.examinedSteps = new ArrayList<>();
         choreographer.setSkipStrategy(skipStrategy);
         workflowConfig.setWorkflowName(dynamicWorkflow.name());
-        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 1000).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
         verifySteps(stepsShouldBeSkipped);
