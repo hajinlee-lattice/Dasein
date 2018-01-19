@@ -296,7 +296,9 @@ nav.primary-nav {
                 }
             }
             &.active > a span:first-of-type,
-            &.active:hover > a span:first-of-type {
+            &.active:hover > a span:first-of-type,
+            &.activate > a span:first-of-type,
+            &.activate:hover > a span:first-of-type {
                 background-color: rgba(239, 106, 48, 1);
                 transition: all 250ms ease 1ms;
                 span {

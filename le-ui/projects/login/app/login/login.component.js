@@ -58,11 +58,10 @@ angular.module('login')
             vm.loginInProgress[tenant.DisplayName] = true;
 
             LoginService.GetSessionDocument(tenant, username).then(function(data) {
-                vm.loginInProgress[tenant.DisplayName] = false;
-                
                 if (data != null && data.Success === true) {
                     LoginStore.redirectToLP(tenant);
                 } else {
+                    vm.loginInProgress[tenant.DisplayName] = false;
                     showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
                 }
             });

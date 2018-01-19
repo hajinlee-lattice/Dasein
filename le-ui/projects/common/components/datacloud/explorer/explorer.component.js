@@ -860,16 +860,6 @@ angular.module('common.datacloud.explorer', [
                     swap(vm.categories, vm.categories.indexOf(category), index);
                 }
             });
-        } else {
-            var removeCategories = [
-                'Product',
-                'Contact',
-                'Engagement'
-            ];
-
-            removeCategories.forEach(function(category) {
-                vm.categories.slice(vm.categories.indexOf(category), 1);
-            });
         }
 
         for (var i in vm.categories) {
@@ -915,6 +905,7 @@ angular.module('common.datacloud.explorer', [
                             //'AttributeValue',
                             'FundamentalType',
                             'DisplayName',
+                            'Category',
                             'Subcategory',
                             'IsSelected',
                             'IsPremium',
@@ -976,7 +967,7 @@ angular.module('common.datacloud.explorer', [
          * if we aren't showing highlighted items don't segment them even if the UI asks
          */
 
-        if(segment === 'HighlightHighlighted' && !vm.showHighlighting()) {
+        if (segment === 'HighlightHighlighted' && !vm.showHighlighting()) {
             segment = '';
         }
 

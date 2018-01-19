@@ -126,30 +126,11 @@ angular.module('common.datacloud.query.results', [
                     vm.accounts = response.data;
                     vm.loading = false;
                 });
-                // QueryStore.GetCountByQuery('accounts').then(function(data){ 
-                //     vm.counts.accounts.value = data;
-                //     vm.counts.accounts.loading = false;
-                    
-                //     if(data > 10){
-                //         vm.showAccountPagination = true;
-                //         vm.showContactPagination = false;
-                //     }
-                // });
             } else if (vm.page === 'Contacts'){
                 QueryStore.setContacts(dataQuery).then(function(response) {
                     vm.contacts = response.data;
                     vm.loading = false;
                 });
-                // QueryStore.GetCountByQuery('contacts').then(function(data){ 
-                //     vm.counts.contacts.value = data;
-                //     vm.counts.contacts.loading = false;
-
-                //     if(data > 10){
-                //         vm.showAccountPagination = false;
-                //         vm.showContactPagination = true;
-                //     }
-
-                // });
             }
 
             QueryStore.getEntitiesCounts().then(function(data){ 

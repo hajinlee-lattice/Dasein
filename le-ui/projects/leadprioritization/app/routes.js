@@ -55,6 +55,7 @@ angular
             window.open("/login", "_self");
         }
 
+        // detect when a major state change is taking place and ShowSpinner gif
         var views = toState.views || {},
             toParams = toParams,
             LoadingText = toParams ? (toParams.LoadingText || '') : '',
@@ -72,11 +73,13 @@ angular
             ShowSpinner(LoadingText);
         }
 
+        // implement state redirectTo functionality
         if (toState.redirectTo) {
             event.preventDefault();
             $state.go(toState.redirectTo, toParams);
         }
 
+        // close any error banner that might be open
         ServiceErrorUtility.hideBanner();
     });
 
@@ -94,6 +97,7 @@ angular
 
     $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
         console.error('$stateChangeError', event, toState, toParams, fromState, fromParams, error);
+
         if ($state.current.name != toState.name) {
             $state.reload();
         }
@@ -140,6 +144,7 @@ angular
 
                     return deferred.promise;
                 },
+                // placeholder for when this is set to /ulysses in insights iframe
                 ApiHost: function() {
                     return '/pls'; // don't remove this. -Lazarus
                 }
@@ -305,8 +310,8 @@ angular
                     templateUrl: 'app/segments/views/SegmentationListView.html'
                 }
             }
-        })
-        .state('home.segment.import', {
+        }
+)        .state('home.segment.import', {
             url: '/mydata',
             params: {
                 pageIcon: 'ico-attributes',
@@ -329,9 +334,7 @@ angular
                     controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'))($scope);
-                        console.log($stateParams);
                         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }

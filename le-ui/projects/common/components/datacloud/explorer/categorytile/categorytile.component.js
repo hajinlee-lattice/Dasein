@@ -59,20 +59,37 @@ angular
                 return vm.category ? vm.categorySize : vm.pagesize;
             }
 
-            vm.categoryOrderBy = function() {
-                if(vm.section == 'segment.analysis') {
-                    order = [ 'SegmentChecked', '-ImportanceOrdering', '-TopBkt.Cnt', '-Value' ];
-                } else if(vm.lookupMode) {
-                    order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
+            vm.categoryOrderBy = function(category, subcategory) {
+                var YesCategories = [
+                        'Technology Profile',
+                        'Website Profile',
+                        'Product Spend Profile'
+                    ];
+
+                if (vm.section == 'segment.analysis') {
+                    var order = ['SegmentChecked','-ImportanceOrdering'];
+
+                    if (category && YesCategories.indexOf(category) >= 0) {
+                        order.push(function(attribute) {
+                            return attribute.TopBkt && attribute.TopBkt.Lbl == 'Yes' ? -1 : 1;
+                        });
+                    }
+
+                    order = order.concat(['-TopBkt.Cnt','-Value']);
                 } else {
-                    order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Count' ];
+                    var order = !vm.showHighlighting()
+                        ? ['-ImportanceOrdering']
+                        : ['-HighlightHighlighted','-ImportanceOrdering'];
+
+                    if (vm.lookupMode ) {
+                        order.push(function(attribute) {
+                            return attribute.Value == 'Yes' ? -1 : 1;
+                        });
+                    }
+
+                    order = order.concat(['-Count','-Value']);
                 }
-                // remove highlighting
-                if(!vm.showHighlighting()) {
-                    order = order.filter(function(item){
-                        return item != '-HighlightHighlighted' && item != 'HighlightHighlighted'
-                    });
-                }
+
                 return order;
             }
 

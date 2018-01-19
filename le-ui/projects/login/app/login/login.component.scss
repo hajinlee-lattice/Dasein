@@ -60,13 +60,17 @@
             }
             
             .fa-spinner {
-                float: right;
-                color: #222;
+                float: left;
                 width: 1.2em;
                 margin-top: 1px;
-                margin-right: -1px;
+                margin-left: 2px;
+                margin-right: 4px;
                 border-radius: 100%;
                 border: none;
+
+                &, &::before {
+                    transition: none;
+                }
             }
         }
 

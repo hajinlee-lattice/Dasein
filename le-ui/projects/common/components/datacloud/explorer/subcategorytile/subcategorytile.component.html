@@ -27,7 +27,7 @@
                         ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
                             | filter: vm.enrichmentsFilter()
                             | filter: vm.filterHideTrue
-                            | orderBy: vm.categoryOrderBy()
+                            | orderBy: vm.categoryOrderBy(vm.category, subcategory)
                             | sortByKey: 'TopBkt'
                             | limitTo: 5))"
                         ng-class="{
