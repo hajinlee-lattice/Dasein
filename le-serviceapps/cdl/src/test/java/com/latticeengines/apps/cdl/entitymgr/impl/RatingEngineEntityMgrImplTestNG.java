@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
-import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -157,7 +157,10 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // test find with active model populated
         RatingEngine re = ratingEngineEntityMgr.findById(ratingEngineId, true);
         Assert.assertNotNull(re.getActiveModel());
-        validateDefaultRuleBasedModel((RuleBasedModel) re.getActiveModel());
+        RuleBasedModel activeModel = (RuleBasedModel) re.getActiveModel();
+        validateDefaultRuleBasedModel(activeModel);
+        validateSelectedAttributesInRuleBasedModel(activeModel);
+
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testFind" })
@@ -239,18 +242,26 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(model.getRatingRule().getDefaultBucketName(), RatingRule.DEFAULT_BUCKET_NAME);
     }
 
+    private void validateSelectedAttributesInRuleBasedModel(RuleBasedModel model) {
+        Assert.assertNotNull(model.getSelectedAttributes());
+        Assert.assertTrue(model.getSelectedAttributes().size() > 0);
+    }
+
     @Test(groups = "functional")
     public void testFindUsedAttributes() {
         RatingEngineEntityMgrImpl r = new RatingEngineEntityMgrImpl();
-        Restriction restr = getTestRestriction();
+        
         MetadataSegment segment = new MetadataSegment();
-        segment.setAccountRestriction(restr);
-        segment.setContactRestriction(restr);
+        segment.setAccountRestriction(testSegment.getAccountRestriction());
+        segment.setContactRestriction(testSegment.getContactRestriction());
         List<String> usedAttributesInSegment = r.findUsedAttributes(segment);
         Assert.assertNotNull(usedAttributesInSegment);
+
         Set<String> expectedResult = new HashSet<>();
-        expectedResult.add(LE_IS_PRIMARY_DOMAIN);
-        expectedResult.add(LDC_NAME);
+        addAttrInExpectedSet(expectedResult, BusinessEntity.Account, accountAttributes);
+        addAttrInExpectedSet(expectedResult, BusinessEntity.Contact, contactAttributes);
+
+        Assert.assertEquals(usedAttributesInSegment.size(), (accountAttributes.size() + contactAttributes.size()));
         Assert.assertEquals(usedAttributesInSegment.size(), expectedResult.size());
 
         for (String attr : usedAttributesInSegment) {
@@ -261,67 +272,10 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         }
     }
 
-    public static Restriction getTestRestriction() {
-        return JsonUtils.deserialize(TEST_RESTRICTION, Restriction.class);
+    private void addAttrInExpectedSet(Set<String> expectedResult, BusinessEntity entity,
+            List<String> entityAttributes) {
+        for (String attr : entityAttributes) {
+            expectedResult.add(entity + "." + attr);
+        }
     }
-
-    private static String TEST_RESTRICTION = "{ " //
-            + "  \"logicalRestriction\": { " //
-            + "    \"operator\": \"AND\", " //
-            + "    \"restrictions\": [ " //
-            + "      { " //
-            + "        \"logicalRestriction\": { " //
-            + "          \"operator\": \"AND\", " //
-            + "          \"restrictions\": [ " //
-            + "            { " //
-            + "              \"logicalRestriction\": { " //
-            + "                \"operator\": \"AND\", " //
-            + "                \"restrictions\": [ " //
-            + "                  { " //
-            + "                    \"bucketRestriction\": { " //
-            + "                      \"bkt\": { " //
-            + "                        \"Lbl\": \"Yes\", " //
-            + "                        \"Cnt\": 2006, " //
-            + "                        \"Id\": 1 " //
-            + "                      }, " //
-            + "                      \"attr\": \"Account." + LE_IS_PRIMARY_DOMAIN + "\" " //
-            + "                    } " //
-            + "                  } " //
-            + "                ] " //
-            + "              } " //
-            + "            }, " //
-            + "            { " //
-            + "              \"bucketRestriction\": { " //
-            + "                \"bkt\": { " //
-            + "                  \"Lbl\": \"Yes\", " //
-            + "                  \"Cnt\": 2006, " //
-            + "                  \"Id\": 1 " //
-            + "                }, " //
-            + "                \"attr\": \"Account." + LE_IS_PRIMARY_DOMAIN + "\" " //
-            + "              } " //
-            + "            } " //
-            + "          ] " //
-            + "        } " //
-            + "      }, " //
-            + "      { " //
-            + "        \"concreteRestriction\": { " //
-            + "          \"negate\": false, " //
-            + "          \"lhs\": { " //
-            + "            \"attribute\": { " //
-            + "              \"entity\": \"Account\", " //
-            + "              \"attribute\": \"" + LDC_NAME + "\" " //
-            + "            } " //
-            + "          }, " //
-            + "          \"relation\": \"IN_RANGE\", " //
-            + "          \"rhs\": { " //
-            + "            \"range\": { " //
-            + "              \"min\": \"A\", " //
-            + "              \"max\": \"O\" " //
-            + "            } " //
-            + "          } " //
-            + "        } " //
-            + "      } " //
-            + "    ] " //
-            + "  } " //
-            + "} ";
 }

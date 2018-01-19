@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -273,13 +272,13 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
                     ConcreteRestriction cr = (ConcreteRestriction) node;
                     Lookup lookup = cr.getLhs();
                     if (lookup instanceof AttributeLookup) {
-                        usedAttributesInSegment.add(sanitize(((AttributeLookup) lookup).getAttribute()));
+                        usedAttributesInSegment.add(sanitize(((AttributeLookup) lookup).toString()));
                     } else if (lookup instanceof SubQueryAttrLookup) {
                         usedAttributesInSegment.add(sanitize(((SubQueryAttrLookup) lookup).getAttribute()));
                     }
                 } else if (node instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) node;
-                    usedAttributesInSegment.add(sanitize(bucket.getAttr().getAttribute()));
+                    usedAttributesInSegment.add(sanitize(bucket.getAttr().toString()));
                 }
             });
         }
@@ -288,12 +287,6 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     private String sanitize(String attribute) {
         if (StringUtils.isNotBlank(attribute)) {
             attribute = attribute.trim();
-            for (BusinessEntity entity : BusinessEntity.values()) {
-                String prefix = entity.name() + ".";
-                if (attribute.startsWith(prefix)) {
-                    attribute = attribute.substring(prefix.length());
-                }
-            }
         }
         return attribute;
     }
