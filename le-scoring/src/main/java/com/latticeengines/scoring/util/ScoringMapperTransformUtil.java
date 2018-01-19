@@ -12,7 +12,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -146,7 +145,6 @@ public class ScoringMapperTransformUtil {
         DataFileWriter<GenericRecord> writer = null;
         DataFileWriter<GenericRecord> creator = null;
         String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
-        Set<String> modelIds = new HashSet<>();
         while (context.nextKeyValue()) {
             Record record = context.getCurrentKey().datum();
             JsonNode jsonNode = mapper.readTree(record.toString());
@@ -154,7 +152,6 @@ public class ScoringMapperTransformUtil {
             if (type.equals(ScoringInputType.Json.name())) {
                 if (CollectionUtils.isEmpty(modelGuids)) {
                     String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
-                    modelIds.add(modelGuid);
                     transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
                             leadFileThreshold, modelGuid, uniqueKeyColumn);
                 } else {
@@ -194,9 +191,6 @@ public class ScoringMapperTransformUtil {
         if (out != null) {
             creator.close();
             writer.close();
-        }
-        if (!modelIds.isEmpty()) {
-            config.setStrings(ScoringProperty.MODEL_GUID.name(), modelIds.toArray(new String[] {}));
         }
         Set<String> keySet = recordFileBufferMap.keySet();
         for (String key : keySet) {

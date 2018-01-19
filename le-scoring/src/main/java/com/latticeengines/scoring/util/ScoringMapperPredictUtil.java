@@ -169,6 +169,7 @@ public class ScoringMapperPredictUtil {
                     if (hasUniqueKey) {
                         GenericRecordBuilder builder = createRecordWithUniqueKey(uniqueKeyColumn, revenues, hasRevenue,
                                 schema, key, result, i);
+                        builder.set(ScoreResultField.ModelId.displayName, modelInfoMap.get(uuid).getModelGuid());
                         dataFileWriter.append(builder.build());
                     } else {
                         dataFileWriter.append(result);
@@ -220,13 +221,8 @@ public class ScoringMapperPredictUtil {
         // list of HashMap<leadId: score>
         // List<ScoreOutput> resultList = new ArrayList<ScoreOutput>();
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
-        Collection<String> modelGuids = config.getStringCollection(ScoringProperty.MODEL_GUID.name());
-        for (String modelGuid : modelGuids) {
-            String uuid = UuidUtils.extractUuid(modelGuid);
+        for (String uuid : uuidSet) {
             log.info("uuid is " + uuid);
-            if (!uuidSet.contains(uuid)) {
-                continue;
-            }
             // key: leadID, value: list of raw scores for that lead
             Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
             Map<String, List<Double>> revenues = new HashMap<String, List<Double>>();
@@ -276,8 +272,8 @@ public class ScoringMapperPredictUtil {
                             builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
                         } else {
                             builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));
-                            builder.set(ScoreResultField.ModelId.displayName, modelGuid);
                         }
+                        builder.set(ScoreResultField.ModelId.displayName, modelInfoMap.get(uuid).getModelGuid());
                         builder.set(ScoreResultField.Percentile.displayName, result.getPercentile());
                         builder.set(ScoreResultField.RawScore.name(), result.getRawScore());
                         dataFileWriter.append(builder.build());
