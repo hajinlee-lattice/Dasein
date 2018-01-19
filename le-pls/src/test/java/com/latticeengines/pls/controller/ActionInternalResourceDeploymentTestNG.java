@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.pls.entitymanager.ActionEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -86,6 +88,11 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
         Assert.assertNotNull(retrievedAction);
         List<Action> actionsWithoutOwner = findByOwnerId(null);
         Assert.assertEquals(actionsWithoutOwner.size(), 2);
+
+        // test internal proxy for getting jobs
+        List<Long> actionPids = findAll().stream().map(action -> action.getPid()).collect(Collectors.toList());
+        List<Job> retrievedJobs = findJobsBasedOnActionIdsAndType(actionPids, ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        Assert.assertTrue(CollectionUtils.isEmpty(retrievedJobs));
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGet" })
@@ -152,6 +159,11 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
     protected List<Action> findByPidIn(List<Long> actionPids) {
         return internalResourceRestApiProxy.findByPidIn(CustomerSpace.parse(mainTestTenant.getId()).toString(),
                 actionPids);
+    }
+
+    protected List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType) {
+        return internalResourceRestApiProxy.findJobsBasedOnActionIdsAndType(
+                CustomerSpace.parse(mainTestTenant.getId()).toString(), actionPids, actionType);
     }
 
 }

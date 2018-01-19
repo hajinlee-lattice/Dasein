@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-@JsonSubTypes({ @JsonSubTypes.Type(value = CleanupOperationConfiguration.class, name = "CleanupOperationConfiguration")
-                })
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = CleanupOperationConfiguration.class, name = "CleanupOperationConfiguration") })
 public class MaintenanceOperationConfiguration {
 
     @JsonProperty("operation_type")
     private MaintenanceOperationType operationType;
+
+    @JsonProperty("operation_initiator")
+    private String operationInitiator;
 
     @JsonProperty("customer_space")
     private String customerSpace;
@@ -29,5 +32,13 @@ public class MaintenanceOperationConfiguration {
 
     public void setCustomerSpace(String customerSpace) {
         this.customerSpace = customerSpace;
+    }
+
+    public String getOperationInitiator() {
+        return this.operationInitiator;
+    }
+
+    public void setOperationInitiator(String initiator) {
+        this.operationInitiator = initiator;
     }
 }

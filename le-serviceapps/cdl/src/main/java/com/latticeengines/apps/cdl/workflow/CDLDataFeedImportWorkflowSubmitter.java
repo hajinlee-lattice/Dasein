@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -58,8 +59,8 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @VisibleForTesting
     Action registerAction(CustomerSpace customerSpace, DataFeedTask dataFeedTask, CSVImportFileInfo csvImportFileInfo) {
-        log.info(String.format("Registering an action for datafeedTask=%s, tenant=%s", dataFeedTask.getUniqueId(),
-                customerSpace.toString()));
+        log.info(String.format("Registering an import action for datafeedTask=%s, tenant=%s",
+                dataFeedTask.getUniqueId(), customerSpace.toString()));
         Action action = new Action();
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setActionInitiator(csvImportFileInfo.getFileUploadInitiator());
@@ -74,7 +75,8 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
-            DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo, Long actionPid) {
+            DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo,
+            @NotNull Long actionPid) {
 
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //

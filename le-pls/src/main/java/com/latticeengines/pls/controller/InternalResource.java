@@ -62,6 +62,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -90,6 +91,7 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
@@ -107,6 +109,7 @@ import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -217,6 +220,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private WorkflowJobService workflowJobService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1578,6 +1584,20 @@ public class InternalResource extends InternalResourceBase {
             throw new NullPointerException(String.format("Action with Pid = %d cannot be found", pid));
         }
         actionService.delete(action);
+    }
+
+    @RequestMapping(value = "/jobs/all/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get actions for a tenant")
+    public List<Job> getJobsBasedOnActionIdsAndType( //
+            @PathVariable("tenantId") String customerSpace, //
+            @RequestParam(value = "pid", required = true) List<Long> pids, //
+            @RequestParam(value = "type", required = true) ActionType actionType, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Retrieve Jobs for tenant: %s based on type %s", customerSpace, actionType));
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
     }
 
 }

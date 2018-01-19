@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -165,6 +166,17 @@ public class WorkflowJobServiceImplUnitTestNG {
         log.info(String.format("expandedJobs=%s", expandedJobs));
     }
 
+    @Test(groups = "unit")
+    public void testFindJobsBasedOnActionIdsAndType() {
+        List<Job> jobs = workflowJobService.findJobsBasedOnActionIdsAndType(Arrays.asList(1L, 2L, 3L, 4L),
+                ActionType.CDL_OPERATION_WORKFLOW);
+        Assert.assertTrue(CollectionUtils.isEmpty(jobs));
+        jobs = workflowJobService.findJobsBasedOnActionIdsAndType(Arrays.asList(1L, 2L, 3L, 4L),
+                ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        Assert.assertFalse(CollectionUtils.isEmpty(jobs));
+        Assert.assertEquals(jobs.size(), 3);
+    }
+
     private void mockWorkflowProxy() {
         when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(createJob(jobIds[0]));
 
@@ -190,6 +202,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     private void mockActionService() {
         when(actionService.findByOwnerId(null, null)).thenReturn(generateActions());
+        when(actionService.findByPidIn(anyList())).thenReturn(generateActions());
     }
 
     private List<Action> generateActions() {

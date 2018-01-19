@@ -364,7 +364,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return tryGetAvroFileRows(startTime, endTime);
     }
 
-    private void verifyActionRegistration() {
+    protected void verifyActionRegistration() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         List<Action> actions = internalResourceProxy.findAll(customerSpace.toString());
         Assert.assertEquals(actions.size(), ++actionsNumber);

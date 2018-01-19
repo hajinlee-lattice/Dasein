@@ -69,7 +69,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public SourceFile uploadFile(String outputFileName, //
-            SchemaInterpretation schemaInterpretation, // 
+            SchemaInterpretation schemaInterpretation, //
             String entity, //
             String displayName, //
             InputStream inputStream) {
@@ -92,26 +92,27 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(displayName);
 
-            long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream, outputPath + "/" + outputFileName, maxUploadRows);
+            long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
+                    outputPath + "/" + outputFileName, maxUploadRows);
             log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
-            if(fileRows > maxUploadRows) {
+            if (fileRows > maxUploadRows) {
                 try {
                     HdfsUtils.rmdir(yarnConfiguration, outputPath + "/" + outputFileName);
                 } catch (Exception e) {
                     log.error(String.format("error when deleting file %s in hdfs", outputPath + "/" + outputFileName));
                 }
-                double rows = (double)fileRows / 1000000;
-                throw new LedpException(LedpCode.LEDP_18148,
-                        new String[] { String.format("%.2f", rows)});
+                double rows = (double) fileRows / 1000000;
+                throw new LedpException(LedpCode.LEDP_18148, new String[] { String.format("%.2f", rows) });
             }
             sourceFileService.create(file);
             return getSourceFilewithRetry(file.getName());
         } catch (IOException e) {
             if (outputHdfsPath != null) {
                 try {
-                    HdfsUtils.rmdir(yarnConfiguration,  outputHdfsPath + "/" + outputFileName);
+                    HdfsUtils.rmdir(yarnConfiguration, outputHdfsPath + "/" + outputFileName);
                 } catch (IOException e1) {
-                    log.error(String.format("error when deleting file %s in hdfs", outputHdfsPath + "/" + outputFileName));
+                    log.error(String.format("error when deleting file %s in hdfs",
+                            outputHdfsPath + "/" + outputFileName));
                 }
             }
             log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, displayName), e);
@@ -140,9 +141,8 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public SourceFile uploadFile(String outputFileName, String displayName, InputStream inputStream) {
-        log.info(String.format(
-                "Uploading file (outputFileName=%s, displayName=%s, customer=%s)",
-                outputFileName, displayName, MultiTenantContext.getCustomerSpace()));
+        log.info(String.format("Uploading file (outputFileName=%s, displayName=%s, customer=%s)", outputFileName,
+                displayName, MultiTenantContext.getCustomerSpace()));
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             tenant = tenantEntityMgr.findByTenantId(tenant.getId());
@@ -155,7 +155,8 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(displayName);
 
-            HdfsUtils.copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
+            HdfsUtils.copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream,
+                    outputPath + "/" + outputFileName);
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());
         } catch (IOException e) {
@@ -202,12 +203,12 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public ResponseDocument<String> cleanupByUpload(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-                                                    BusinessEntity entity, CleanupOperationType cleanupOperationType) {
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort(
-                sourceFile.getName(), schemaInterpretation, null);
+            BusinessEntity entity, CleanupOperationType cleanupOperationType) {
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), schemaInterpretation, null);
 
         List<FieldMapping> fieldMappings = new ArrayList<>();
-        for (FieldMapping fieldMapping :fieldMappingDocument.getFieldMappings()) {
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!StringUtils.isEmpty(fieldMapping.getMappedField())) {
                 fieldMappings.add(fieldMapping);
             }
@@ -216,9 +217,11 @@ public class FileUploadServiceImpl implements FileUploadService {
         modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument);
 
         sourceFile = sourceFileService.findByName(sourceFile.getName());
-        log.info("table name is: " + sourceFile.getTableName() + ", file path: " + sourceFile.getPath());
+        String email = MultiTenantContext.getEmailAddress();
+        log.info(String.format("table name is: %s, file path:  %s, email: %s", sourceFile.getTableName(),
+                sourceFile.getPath(), email));
         return cdlProxy.cleanupByUpload(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName(),
-                sourceFile.getPath(), entity, cleanupOperationType);
+                sourceFile.getPath(), entity, cleanupOperationType, email);
 
     }
 }

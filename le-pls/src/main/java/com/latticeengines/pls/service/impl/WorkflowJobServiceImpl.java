@@ -19,6 +19,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -80,8 +81,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public ApplicationId restart(Long jobId) {
         Tenant tenantWithPid = getTenant();
-        AppSubmission submission = workflowProxy.restartWorkflowExecution(
-                String.valueOf(jobId), CustomerSpace.parse(tenantWithPid.getId()).toString());
+        AppSubmission submission = workflowProxy.restartWorkflowExecution(String.valueOf(jobId),
+                CustomerSpace.parse(tenantWithPid.getId()).toString());
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Resubmitted workflow with application id %s", applicationId));
@@ -131,8 +132,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return generateUnstartedProcessAnalyzeJob(true);
         } else {
             Tenant tenantWithPid = getTenant();
-            job = workflowProxy.getWorkflowExecution(jobId,
-                    CustomerSpace.parse(tenantWithPid.getId()).toString());
+            job = workflowProxy.getWorkflowExecution(jobId, CustomerSpace.parse(tenantWithPid.getId()).toString());
             updateJobWithModelSummary(job);
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
@@ -149,6 +149,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     List<Action> getActions(List<Long> actionPids) {
         return actionService.findByPidIn(actionPids);
+    }
+
+    @Override
+    public List<Job> findJobsBasedOnActionIdsAndType(@NonNull List<Long> actionPids, @NonNull ActionType actionType) {
+        List<Action> actionsWithType = getActions(actionPids).stream()
+                .filter(action -> action.getType().equals(actionType)).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(actionsWithType)) {
+            return expandActions(actionsWithType);
+        }
+        return Collections.emptyList();
     }
 
     @VisibleForTesting
@@ -203,8 +213,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             job.setJobStatus(JobStatus.PENDING);
             job.setJobType("processAnalyzeWorkflow");
             Map<String, String> unfinishedInputContext = new HashMap<>();
-            List<Long> unfinishedActionIds = actions.stream().map(Action::getPid)
-                    .collect(Collectors.toList());
+            List<Long> unfinishedActionIds = actions.stream().map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
             DateTime dateTime = new DateTime();
@@ -387,8 +396,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public List<Job> findJobs(List<String> jobIds, List<String> types, Boolean includeDetails,
-                              Boolean hasParentId) {
+    public List<Job> findJobs(List<String> jobIds, List<String> types, Boolean includeDetails, Boolean hasParentId) {
         Tenant tenantWithPid = getTenant();
         List<Job> jobs = workflowProxy.getJobs(jobIds, types, includeDetails,
                 CustomerSpace.parse(tenantWithPid.getId()).toString());

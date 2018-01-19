@@ -69,8 +69,8 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
             DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
             assertNotNull(dataFeed);
 
-            Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection
-                    .ConsolidatedRawTransaction);
+            Table table = dataCollectionProxy.getTable(mainTestTenant.getId(),
+                    TableRoleInCollection.ConsolidatedRawTransaction);
             assertNotNull(table);
             assertNotNull(table.getExtracts());
             assertEquals(table.getExtracts().size(), 1);
@@ -89,13 +89,14 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
         Date endTime = new Date(1488384000000l); // 2017-3-2
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-        ApplicationId applicationId = cdlProxy.cleanupByTimeRange(mainTestTenant.getId(),
-                df.format(startTime), df.format(endTime), BusinessEntity.Transaction);
+        ApplicationId applicationId = cdlProxy.cleanupByTimeRange(mainTestTenant.getId(), df.format(startTime),
+                df.format(endTime), BusinessEntity.Transaction);
 
         assertNotNull(applicationId);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, avroDir));
+        verifyActionRegistration();
     }
 
     private void verifyCleanup(BusinessEntity entity) {
@@ -121,5 +122,6 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
         assertEquals(status, JobStatus.COMPLETED);
         List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, entity.name());
         assertNull(dfTasks);
+        verifyActionRegistration();
     }
 }

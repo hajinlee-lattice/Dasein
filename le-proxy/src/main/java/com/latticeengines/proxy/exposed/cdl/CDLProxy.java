@@ -27,7 +27,8 @@ public class CDLProxy extends MicroserviceRestApiProxy {
 
     @SuppressWarnings("unchecked")
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze",
+                shortenCustomerSpace(customerSpace));
         ResponseDocument<String> responseDoc = post("process and analyze", url, request, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
@@ -38,7 +39,8 @@ public class CDLProxy extends MicroserviceRestApiProxy {
 
     @SuppressWarnings("unchecked")
     public boolean reset(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/reset", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/reset",
+                shortenCustomerSpace(customerSpace));
         ResponseDocument<String> responseDoc = post("kickoff reset", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return false;
@@ -49,9 +51,10 @@ public class CDLProxy extends MicroserviceRestApiProxy {
 
     @SuppressWarnings("unchecked")
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
-                                           CDLImportConfig metadata) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create" +
-                        "?source={source}&feedtype={feedtype}&entity={entity}",
+            CDLImportConfig metadata) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create"
+                        + "?source={source}&feedtype={feedtype}&entity={entity}",
                 shortenCustomerSpace(customerSpace), source, feedType, entity);
         ResponseDocument<String> responseDoc = post("createDataFeedTask", url, metadata, ResponseDocument.class);
         if (responseDoc == null) {
@@ -60,15 +63,16 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         if (responseDoc.isSuccess()) {
             return responseDoc.getResult();
         } else {
-            throw new RuntimeException("Failed to create data feed task: " +
-                    StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(
+                    "Failed to create data feed task: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
     @SuppressWarnings("unchecked")
     public ApplicationId submitImportJob(String customerSpace, String taskIdentifier, CDLImportConfig importConfig) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import/internal" +
-                "/{taskIdentifier}", customerSpace, taskIdentifier);
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import/internal" + "/{taskIdentifier}",
+                customerSpace, taskIdentifier);
         ResponseDocument<String> responseDoc = post("submitImportJob", url, importConfig, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
@@ -77,8 +81,8 @@ public class CDLProxy extends MicroserviceRestApiProxy {
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException("Failed to submit import job: " +
-                    StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(
+                    "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
@@ -101,8 +105,8 @@ public class CDLProxy extends MicroserviceRestApiProxy {
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException("Failed to submit import job: " +
-                    StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(
+                    "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
@@ -125,14 +129,14 @@ public class CDLProxy extends MicroserviceRestApiProxy {
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException("Failed to submit import job: " +
-                    StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(
+                    "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime, BusinessEntity
-            entity) {
+    public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
+            BusinessEntity entity) {
         List<Object> args = new ArrayList<>();
         args.add(customerSpace);
         args.add(startTime);
@@ -152,19 +156,20 @@ public class CDLProxy extends MicroserviceRestApiProxy {
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException("Failed to submit import job: " +
-                    StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(
+                    "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<String> cleanupByUpload(String customerSpace, String tableName, String filePath, BusinessEntity
-            entity, CleanupOperationType operationType) {
+    public ResponseDocument<String> cleanupByUpload(String customerSpace, String tableName, String filePath,
+            BusinessEntity entity, CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
         configuration.setTableName(tableName);
         configuration.setFilePath(filePath);
         configuration.setEntity(entity);
         configuration.setCleanupOperationType(operationType);
+        configuration.setOperationInitiator(initiator);
 
         String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/byupload", customerSpace);
 

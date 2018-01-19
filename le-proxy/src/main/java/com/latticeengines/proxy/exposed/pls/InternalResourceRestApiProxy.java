@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
@@ -702,5 +704,27 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         } catch (Exception e) {
             throw new RuntimeException("deleteAction: Remote call failure: " + e.getMessage(), e);
         }
+    }
+
+    public List<Job> findJobsBasedOnActionIdsAndType(@NonNull String customerSpace, @NonNull List<Long> actionPids,
+            @NonNull ActionType actionType) {
+        try {
+            String url = generateFindJobsBasedOnActionIdsAndTypeUrl(customerSpace, actionPids, actionType);
+            List<?> listObj = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(listObj, Job.class);
+        } catch (Exception e) {
+            throw new RuntimeException("findJobsBasedOnActionIdsAndType: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    private String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
+            ActionType actionType) {
+        StringBuilder urlStr = new StringBuilder();
+        urlStr.append("pls/internal/jobs/all/").append(customerSpace).append("?");
+        for (Long pid : actionPids) {
+            urlStr.append(String.format("pid=%s&", pid));
+        }
+        urlStr.append(String.format("type=%s", actionType));
+        return constructUrl(urlStr.toString());
     }
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -134,8 +135,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     Pair<List<Long>, List<Long>> getActionAndJobIds(String customerSpace) {
         List<Action> actions = internalResourceProxy.getActionsByOwnerId(customerSpace, null);
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
-        // TODO add delete jobs
-        Set<ActionType> importAndDeleteTypes = Collections.singleton(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        Set<ActionType> importAndDeleteTypes = Stream
+                .of(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, ActionType.CDL_OPERATION_WORKFLOW)
+                .collect(Collectors.toSet());
         // TODO add status filter to filter out running ones
         List<String> importAndDeleteJobIdStrs = actions.stream()
                 .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingId() != null)

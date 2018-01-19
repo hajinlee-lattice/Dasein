@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -54,11 +55,11 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Override
     public ApplicationId cleanupByTimeRange(String customerSpace, BusinessEntity entity, Date startTime, Date endTime) {
-        if(startTime == null || endTime == null) {
+        if (startTime == null || endTime == null) {
             throw new LedpException(LedpCode.LEDP_40002);
         }
 
-        if(startTime.getTime() > endTime.getTime()) {
+        if (startTime.getTime() > endTime.getTime()) {
             throw new LedpException(LedpCode.LEDP_40003);
         }
 
@@ -69,17 +70,18 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         cleanupByDateRangeConfiguration.setEndTime(endTime);
         cleanupByDateRangeConfiguration.setEntity(entity);
         cleanupByDateRangeConfiguration.setCustomerSpace(customerSpace);
-        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), cleanupByDateRangeConfiguration);
+        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace),
+                cleanupByDateRangeConfiguration);
     }
 
     @Override
     public ApplicationId cleanupByUpload(String customerSpace, CleanupByUploadConfiguration configuration) {
         configuration.setCustomerSpace(customerSpace);
-        log.info("customerSpace: " + customerSpace +
-                ", configuration.getCleanupOperationType(): " + configuration.getCleanupOperationType() +
-                ", configuration.getFilePath(): " + configuration.getFilePath() +
-                ", configuration.getTableName(): " + configuration.getTableName() +
-                ", configuration.getEntity(): " + configuration.getEntity());
+        log.info("customerSpace: " + customerSpace + ", configuration.getCleanupOperationType(): "
+                + configuration.getCleanupOperationType() + ", configuration.getFilePath(): "
+                + configuration.getFilePath() + ", configuration.getTableName(): " + configuration.getTableName()
+                + ", configuration.getEntity(): " + configuration.getEntity()
+                + ", configuration.getOperationInitiator(): " + configuration.getOperationInitiator());
         return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), configuration);
     }
 }

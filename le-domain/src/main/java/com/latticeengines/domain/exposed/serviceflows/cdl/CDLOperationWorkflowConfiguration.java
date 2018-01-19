@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.CleanupByUploadWrapperConfiguration;
@@ -67,6 +69,11 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             deleteFileUploadStepConfiguration.setSkipStep(!cleanupByUpload);
             cleanupByUploadWrapperConfiguration.setSkipStep(!cleanupByUpload);
             operationExecuteConfiguration.setSkipStep(cleanupByUpload);
+            return this;
+        }
+
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
             return this;
         }
 

@@ -6,9 +6,8 @@ import java.util.Map;
 public enum ActionType {
 
     CDL_DATAFEED_IMPORT_WORKFLOW("cdlDataFeedImportWorkflow"), //
+    CDL_OPERATION_WORKFLOW("cdlOperationWorkflow"), //
     METADATA_CHANGE("metadataChange"); //
-    // TODO: Going to add more action such as delete workflow, metadata change,
-    // etc.
 
     private String name;
 
