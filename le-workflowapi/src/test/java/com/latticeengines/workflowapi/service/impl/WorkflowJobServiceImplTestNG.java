@@ -111,34 +111,20 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(statuses.size(), 2);
         Assert.assertEquals(statuses.get(0), JobStatus.PENDING);
         Assert.assertEquals(statuses.get(1), JobStatus.COMPLETED);
+
+        MultiTenantContext.setTenant(tenant);
+        statuses = workflowJobService.getJobStatus(null, testWorkflowIds1);
+        Assert.assertEquals(statuses.size(), 2);
+        Assert.assertEquals(statuses.get(0), JobStatus.PENDING);
+        Assert.assertEquals(statuses.get(1), JobStatus.FAILED);
+
+        statuses = workflowJobService.getJobStatus(null, testWorkflowIds2);
+        Assert.assertEquals(statuses.size(), 2);
+        Assert.assertEquals(statuses.get(0), JobStatus.PENDING);
+        Assert.assertEquals(statuses.get(1), JobStatus.COMPLETED);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
-    public void testGetJobsByTenant() {
-        mockWorkflowContainerService();
-        List<Job> jobs = workflowJobService.getJobsByTenantPid(tenant.getPid(), false);
-        Assert.assertEquals(jobs.size(), 5);
-        Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
-        Assert.assertEquals(jobs.get(0).getJobType(), "application_10000");
-        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_10001");
-        Assert.assertEquals(jobs.get(1).getJobType(), "application_10001");
-        Assert.assertEquals(jobs.get(2).getApplicationId(), "application_10002");
-        Assert.assertEquals(jobs.get(2).getJobType(), "application_10002");
-        Assert.assertEquals(jobs.get(3).getApplicationId(), "application_10003");
-        Assert.assertEquals(jobs.get(3).getJobType(), "application_10003");
-        Assert.assertEquals(jobs.get(4).getApplicationId(), "application_20000");
-        Assert.assertEquals(jobs.get(4).getJobType(), "application_20000");
-
-        jobs = workflowJobService.getJobsByTenantPid(tenant.getPid(),
-                Arrays.asList("application_10001", "application_10002"), true);
-        Assert.assertEquals(jobs.size(), 2);
-        Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10001");
-        Assert.assertEquals(jobs.get(0).getJobType(), "application_10001");
-        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_10002");
-        Assert.assertEquals(jobs.get(1).getJobType(), "application_10002");
-    }
-
-    @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobsByTenant" },
+    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus",
             expectedExceptions = { RuntimeException.class },
             expectedExceptionsMessageRegExp = "No tenant found with id .*")
     public void testGetJobs() {
@@ -157,6 +143,18 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         jobs = workflowJobService.getJobs(customerSpace3.toString(), false);
         Assert.assertEquals(jobs.size(), 2);
         applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
+        Assert.assertTrue(applicationIds.contains("application_30000"));
+        Assert.assertTrue(applicationIds.contains("application_30001"));
+
+        MultiTenantContext.setTenant(null);
+        jobs = workflowJobService.getJobs(null, false);
+        Assert.assertEquals(jobs.size(), 7);
+        applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
+        Assert.assertTrue(applicationIds.contains("application_10000"));
+        Assert.assertTrue(applicationIds.contains("application_10001"));
+        Assert.assertTrue(applicationIds.contains("application_10002"));
+        Assert.assertTrue(applicationIds.contains("application_10003"));
+        Assert.assertTrue(applicationIds.contains("application_20000"));
         Assert.assertTrue(applicationIds.contains("application_30000"));
         Assert.assertTrue(applicationIds.contains("application_30001"));
 
@@ -179,10 +177,21 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(jobs.get(4).getSteps().size(), 9);
         Assert.assertEquals(jobs.get(4).getSteps().get(1).getJobStepType(), "step2_8");
 
-        List<Long> workflowExecutionIds3 = new ArrayList<>();
-        workflowExecutionIds3.add(workflowIds.get(30000L));
-        workflowExecutionIds3.add(workflowIds.get(30001L));
-        jobs = workflowJobService.getJobs(customerSpace3.toString(), workflowExecutionIds3, null, true, null, null);
+        List<String> workflowExecutionTypes = new ArrayList<>();
+        workflowExecutionTypes.add("application_30000");
+        workflowExecutionTypes.add("application_30001");
+        jobs = workflowJobService.getJobs(customerSpace3.toString(), null, workflowExecutionTypes, true, null, null);
+        Assert.assertEquals(jobs.size(), 2);
+        Assert.assertEquals(jobs.get(0).getApplicationId(), "application_30000");
+        Assert.assertEquals(jobs.get(0).getSteps().size(), 1);
+        Assert.assertEquals(jobs.get(0).getSteps().get(0).getJobStepType(), "step3_1");
+        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_30001");
+        Assert.assertEquals(jobs.get(1).getSteps().size(), 4);
+        Assert.assertEquals(jobs.get(1).getSteps().get(3).getJobStepType(), "step31_1");
+
+        MultiTenantContext.setTenant(tenant3);
+        workflowExecutionTypes.add("application_10000");
+        jobs = workflowJobService.getJobs(null, null, workflowExecutionTypes, true, null, null);
         Assert.assertEquals(jobs.size(), 2);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_30000");
         Assert.assertEquals(jobs.get(0).getSteps().size(), 1);
@@ -267,6 +276,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         testWorkflowIds.add(workflowIds.get(10002L));
         testWorkflowIds.add(workflowIds.get(10003L));
         testWorkflowIds.add(workflowIds.getOrDefault(90000L, 90000L));
+        MultiTenantContext.setTenant(tenant);
         WorkflowJob workflowjob0 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(0));
         WorkflowJob workflowjob1 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(1));
         WorkflowJob workflowjob2 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds.get(2));
@@ -307,16 +317,17 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Long parentJobId = 30000L;
         WorkflowJob workflowJob0 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(0));
         WorkflowJob workflowJob1 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(1));
-        WorkflowJob workflowJob2 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(2));
         Assert.assertNull(workflowJob0.getParentJobId());
         Assert.assertEquals(workflowJob1.getParentJobId(), workflowIds.get(10000L));
-        Assert.assertNull(workflowJob2.getParentJobId());
+        WorkflowJob workflowJob2 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(2));
+        Assert.assertNull(workflowJob2);
+
         workflowJobService.updateParentJobId(customerSpace3.toString(), testWorkflowIds2, parentJobId);
         workflowJob0 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(0));
         workflowJob1 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(1));
         workflowJob2 = workflowJobEntityMgr.findByWorkflowId(testWorkflowIds2.get(2));
-        Assert.assertNull(workflowJob0.getParentJobId());
-        Assert.assertEquals(workflowJob1.getParentJobId(), workflowIds.get(10000L));
+        Assert.assertNull(workflowJob0);
+        Assert.assertNull(workflowJob1);
         Assert.assertEquals(workflowJob2.getParentJobId(), parentJobId);
     }
 
@@ -567,7 +578,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
                 invocation -> {
                     Long tenantPid = (Long) invocation.getArguments()[0];
                     Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-                    List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant);
+                    MultiTenantContext.setTenant(tenant);
+                    List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
                     return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
                 }
         );

@@ -99,7 +99,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public List<Job> findAllWithType(String type) {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
-        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid(), type);
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid, type);
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
@@ -187,7 +187,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public List<Job> findAll() {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
-        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid);
         if (jobs == null) {
             return Collections.emptyList();
         }

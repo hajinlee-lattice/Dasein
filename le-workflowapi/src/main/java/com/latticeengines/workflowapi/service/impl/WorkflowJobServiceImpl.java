@@ -19,12 +19,10 @@ import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 
@@ -46,9 +44,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private ReportService reportService;
 
     @Autowired
-    private WorkflowTenantService workflowTenantService;
-
-    @Autowired
     private WorkflowService workflowService;
 
     @Autowired
@@ -57,7 +52,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId) {
-        return workflowJobEntityMgr.findByApplicationIdWithFilter(applicationId).getAsWorkflowId();
+        return workflowJobEntityMgr.findByApplicationId(applicationId).getAsWorkflowId();
     }
 
     @Override
@@ -69,14 +64,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public JobStatus getJobStatus(String customerSpace, Long workflowId) {
-        WorkflowJob job = workflowJobEntityMgr.findByWorkflowIdWithFilter(workflowId);
+        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId);
         return JobStatus.fromString(job.getStatus());
     }
 
     @Override
     @WithCustomerSpace
     public List<JobStatus> getJobStatus(String customerSpace, List<Long> workflowIds) {
-        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, null, null);
         jobs.removeIf(Objects::isNull);
         return jobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
@@ -85,21 +80,21 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public Job getJob(String customerSpace, Long workflowId, Boolean includeDetails) {
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowIdWithFilter(workflowId);
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
         return assembleJob(workflowJob, includeDetails);
     }
 
     @Override
     @WithCustomerSpace
     public Job getJobByApplicationId(String customerSpace, String applicationId, Boolean includeDetails) {
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationIdWithFilter(applicationId);
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
         return assembleJob(workflowJob, includeDetails);
     }
 
     @Override
     @WithCustomerSpace
     public List<Job> getJobs(String customerSpace, Boolean includeDetails) {
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAllWithFilter();
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
@@ -114,30 +109,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<WorkflowJob> workflowJobs;
 
         if (hasParentId != null && hasParentId) {
-            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                     optionalWorkflowIds.orElse(null), optionalTypes.orElse(null), parentJobId);
         } else {
-            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(
+            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                     optionalWorkflowIds.orElse(null), optionalTypes.orElse(null), null);
         }
-
-        return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Job> getJobsByTenantPid(Long tenantPid, Boolean includeDetails) {
-        Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant);
-
-        return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Job> getJobsByTenantPid(Long tenantPid, List<String> types, Boolean includeDetails) {
-        Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant, types);
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
@@ -157,7 +134,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public void updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId) {
-        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobIdWithFilter(workflowIds,
+        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(workflowIds,
                 null, null);
         jobs.removeIf(Objects::isNull);
         jobs.forEach(job -> {

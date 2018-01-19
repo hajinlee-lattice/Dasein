@@ -1,6 +1,5 @@
 package com.latticeengines.workflowapi.controller;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -135,17 +134,5 @@ public class WorkflowResource {
     public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId,
                                                @RequestParam(required = false) String customerSpace) {
         return workflowJobService.getJobByApplicationId(customerSpace, applicationId, true);
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/tenant/{tenantPid}/jobs", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ApiOperation(value = "Get workflow jobs for given tenant.")
-    public List<Job> getWorkflowExecutionsForTenant(@PathVariable Long tenantPid,
-                                                    @RequestParam(required = false) String type) {
-        if (type != null) {
-            return workflowJobService.getJobsByTenantPid(tenantPid, Collections.singletonList(type), true);
-        } else {
-            return workflowJobService.getJobsByTenantPid(tenantPid, true);
-        }
     }
 }

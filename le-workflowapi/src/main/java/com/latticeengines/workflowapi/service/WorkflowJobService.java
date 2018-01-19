@@ -28,10 +28,6 @@ public interface WorkflowJobService {
     List<Job> getJobs(String customerSpace, List<Long> workflowIds, List<String> types, Boolean includeDetails,
                       Boolean hasParentId, Long parentJobId);
 
-    List<Job> getJobsByTenantPid(Long tenantPid, Boolean includeDetails);
-
-    List<Job> getJobsByTenantPid(Long tenantPid, List<String> types, Boolean includeDetails);
-
     List<String> getStepNames(String customerSpace, Long workflowId);
 
     void updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId);

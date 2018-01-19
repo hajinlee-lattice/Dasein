@@ -64,7 +64,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid() + " and model "
                 + modelId);
-        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid);
         List<Job> ret = new ArrayList<>();
         for (Job job : jobs) {
             if (job.getJobType().equals("scoreWorkflow") || job.getJobType().equals("importMatchAndScoreWorkflow")

@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.google.common.annotations.VisibleForTesting;
+
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.JacocoUtils;
@@ -23,16 +23,12 @@ import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
+import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
@@ -58,6 +54,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     @Autowired
     private WorkflowTenantService workflowTenantService;
@@ -125,15 +124,22 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         String user = workflowConfig.getUserId();
         user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
 
+        Long currentTime = System.currentTimeMillis();
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setTenant(tenant);
         workflowJob.setUserId(user);
         workflowJob.setApplicationId(appId);
         workflowJob.setInputContext(workflowConfig.getInputProperties());
         workflowJob.setStatus(JobStatus.PENDING.name());
-        workflowJob.setStartTimeInMillis(System.currentTimeMillis());
+        workflowJob.setStartTimeInMillis(currentTime);
         workflowJob.setType(workflowConfig.getWorkflowName());
         workflowJobEntityMgr.create(workflowJob);
+
+        Long workflowPid = workflowJobEntityMgr.findByApplicationId(appId).getPid();
+        WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
+        jobUpdate.setWorkflowPid(workflowPid);
+        jobUpdate.setLastUpdateTime(currentTime);
+        workflowJobUpdateEntityMgr.create(jobUpdate);
     }
 
     @Override
@@ -203,7 +209,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Override
     public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid) {
         Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant);
+        MultiTenantContext.setTenant(tenant);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
 
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
@@ -280,5 +287,4 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     void setJobProxy(JobProxy jobProxy) {
         this.jobProxy = jobProxy;
     }
-
 }
