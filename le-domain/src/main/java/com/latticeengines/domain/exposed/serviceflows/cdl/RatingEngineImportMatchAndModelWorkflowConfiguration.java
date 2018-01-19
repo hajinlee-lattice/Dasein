@@ -279,6 +279,11 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
+        public Builder setModelIdFromRecord(boolean setModelIdFromRecord) {
+            score.setModelIdFromRecord(setModelIdFromRecord);
+            return this;
+        }
+
         public Builder setEventColumn(String eventColumn) {
             pivotScoreAndEvent.setEventColumn(eventColumn);
             cdlEventTable.setEventColumn(eventColumn);

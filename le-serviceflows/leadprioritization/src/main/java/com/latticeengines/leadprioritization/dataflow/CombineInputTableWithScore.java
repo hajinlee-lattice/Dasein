@@ -36,9 +36,10 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
 
         if (noRatingColumnInScoreTable && notPMMLModel) {
             scoreWithRating = scoreTable.apply(
-                    new AddRatingColumnFunction(ScoreResultField.Percentile.displayName,
-                            ScoreResultField.Rating.displayName, parameters.getBucketMetadata()),
-                    new FieldList(ScoreResultField.Percentile.displayName),
+                    new AddRatingColumnFunction(parameters.getScoreFieldName(),
+                            ScoreResultField.Rating.displayName, parameters.getBucketMetadata(),
+                            parameters.getScoreMultiplier()),
+                    new FieldList(parameters.getScoreFieldName()),
                     new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
         }
 

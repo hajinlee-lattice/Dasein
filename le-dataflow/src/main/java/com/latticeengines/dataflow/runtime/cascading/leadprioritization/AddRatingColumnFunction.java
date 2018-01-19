@@ -25,23 +25,30 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     private String scoreFieldName;
     private List<BucketMetadata> bucketMetadata = new ArrayList<>();
 
-    public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName, List<BucketMetadata> bucketMetadata) {
+    private Integer scoreMultiplier;
+
+    public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName, List<BucketMetadata> bucketMetadata,
+            Integer scoreMultiplier) {
         super(new Fields(ratingFieldName));
         this.scoreFieldName = scoreFieldName;
         this.bucketMetadata = bucketMetadata;
+        this.scoreMultiplier = scoreMultiplier;
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         Object scoreObj = arguments.getObject(scoreFieldName);
-        int percentileScore = Integer.parseInt(scoreObj.toString());
-        Object ratingObj = bucketPercileScore(bucketMetadata, percentileScore);
+        double score = Double.parseDouble(scoreObj.toString());
+        if (scoreMultiplier != null) {
+            score *= scoreMultiplier;
+        }
+        Object ratingObj = bucketPercileScore(bucketMetadata, score);
         functionCall.getOutputCollector().add(new Tuple(ratingObj.toString()));
         return;
     }
 
-    protected String bucketPercileScore(List<BucketMetadata> bucketMetadataList, int percentile) {
+    protected String bucketPercileScore(List<BucketMetadata> bucketMetadataList, double score) {
         BucketName bucketName = null;
         int min = BucketName.A.getDefaultUpperBound();
         int max = BucketName.D.getDefaultLowerBound();
@@ -63,7 +70,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
                     max = leftBoundScore;
                     maxBucket = currentBucketName;
                 }
-                if (percentile >= rightBoundScore && percentile <= leftBoundScore) {
+                if (score >= rightBoundScore && score <= leftBoundScore) {
                     withinRange = true;
                     bucketName = currentBucketName;
                 }
@@ -75,13 +82,11 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
                 throw new RuntimeException("Bucket metadata has wrong buckets");
             }
 
-            if (!withinRange && percentile < min) {
-                log.warn(String.format("%d is less than minimum bound, setting to %s", percentile,
-                        minBucket.toString()));
+            if (!withinRange && score < min) {
+                log.warn(String.format("%d is less than minimum bound, setting to %s", score, minBucket.toString()));
                 bucketName = minBucket;
-            } else if (!withinRange && percentile > max) {
-                log.warn(String.format("%d is more than maximum bound, setting to %s", percentile,
-                        maxBucket.toString()));
+            } else if (!withinRange && score > max) {
+                log.warn(String.format("%d is more than maximum bound, setting to %s", score, maxBucket.toString()));
                 bucketName = maxBucket;
             }
         } else {
@@ -89,25 +94,19 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
             if (log.isDebugEnabled()) {
                 log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");
             }
-            if (percentile < BucketName.D.getDefaultLowerBound()) {
-                log.warn(
-                        String.format("%d is less than minimum bound, setting to %s", percentile, BucketName.D.name()));
+            if (score < BucketName.D.getDefaultLowerBound()) {
+                log.warn(String.format("%d is less than minimum bound, setting to %s", score, BucketName.D.name()));
                 bucketName = BucketName.D;
-            } else if (percentile >= BucketName.D.getDefaultLowerBound()
-                    && percentile <= BucketName.D.getDefaultUpperBound()) {
+            } else if (score >= BucketName.D.getDefaultLowerBound() && score <= BucketName.D.getDefaultUpperBound()) {
                 bucketName = BucketName.D;
-            } else if (percentile >= BucketName.C.getDefaultLowerBound()
-                    && percentile <= BucketName.C.getDefaultUpperBound()) {
+            } else if (score >= BucketName.C.getDefaultLowerBound() && score <= BucketName.C.getDefaultUpperBound()) {
                 bucketName = BucketName.C;
-            } else if (percentile >= BucketName.B.getDefaultLowerBound()
-                    && percentile <= BucketName.B.getDefaultUpperBound()) {
+            } else if (score >= BucketName.B.getDefaultLowerBound() && score <= BucketName.B.getDefaultUpperBound()) {
                 bucketName = BucketName.B;
-            } else if (percentile >= BucketName.A.getDefaultLowerBound()
-                    && percentile <= BucketName.A.getDefaultUpperBound()) {
+            } else if (score >= BucketName.A.getDefaultLowerBound() && score <= BucketName.A.getDefaultUpperBound()) {
                 bucketName = BucketName.A;
             } else {
-                log.warn(
-                        String.format("%d is more than maximum bound, setting to %s", percentile, BucketName.A.name()));
+                log.warn(String.format("%d is more than maximum bound, setting to %s", score, BucketName.A.name()));
                 bucketName = BucketName.A;
             }
         }

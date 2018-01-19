@@ -119,6 +119,7 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
                 .setUniqueKeyColumn(InterfaceName.AnalyticPurchaseState_ID.name()) //
                 .setUseScorederivation(false) //
+                .setModelIdFromRecord(false) //
                 .setEventColumn(InterfaceName.Target.name()) //
                 .build();
     }

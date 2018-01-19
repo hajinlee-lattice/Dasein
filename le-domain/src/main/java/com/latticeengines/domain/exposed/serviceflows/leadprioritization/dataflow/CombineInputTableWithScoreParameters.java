@@ -7,6 +7,7 @@ import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 
 public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @JsonProperty("score_results_table_name")
@@ -22,6 +23,12 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     @JsonProperty("model_type")
     private String modelType;
+
+    @JsonProperty("score_field_name")
+    private String scoreFieldName = ScoreResultField.Percentile.displayName;
+
+    @JsonProperty("score_multiplier")
+    private Integer scoreMultiplier;
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         this(scoreResultsTable, trainingTable, null);
@@ -77,6 +84,22 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public void setModelType(String modelType) {
         this.modelType = modelType;
+    }
+
+    public String getScoreFieldName() {
+        return scoreFieldName;
+    }
+
+    public void setScoreFieldName(String scoreFieldName) {
+        this.scoreFieldName = scoreFieldName;
+    }
+
+    public Integer getScoreMultiplier() {
+        return scoreMultiplier;
+    }
+
+    public void setScoreMultiplier(Integer scoreMultiplier) {
+        this.scoreMultiplier = scoreMultiplier;
     }
 
     @Override

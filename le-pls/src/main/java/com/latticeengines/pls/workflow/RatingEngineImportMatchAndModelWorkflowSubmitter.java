@@ -107,6 +107,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
                 .setEventColumn(InterfaceName.Target.name()) //
                 .setExpectedValue(parameters.isExpectedValue()) //
                 .setUseScorederivation(false) //
+                .setModelIdFromRecord(false) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }
