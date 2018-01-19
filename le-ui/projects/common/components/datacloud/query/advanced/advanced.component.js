@@ -276,11 +276,11 @@ angular.module('common.datacloud.query.builder', [
      * @param {*} item 
      * @param {*} entity 
      */
-    vm.isMatching = function(item, entity){
-        if(item.Entity == entity){
+    vm.isMatching = function(itemEntity, entity){
+        if(itemEntity == entity){
             return true;
         }
-        else if(item.Entity === 'PurchaseHistory' && entity === 'Account'){
+        else if(itemEntity === 'PurchaseHistory' && entity === 'Account'){
             return true;
         } else{
             return false;
@@ -291,12 +291,12 @@ angular.module('common.datacloud.query.builder', [
         
         RatingEngineModel.rule.selectedAttributes
         .forEach(function(value, index) {
-            var item = angular.copy(vm.enrichments[vm.enrichmentsMap[value]]);
+            var item = angular.copy(vm.enrichments[vm.enrichmentsMap[value.split('.')[1]]]);
 
-            if (item && vm.isMatching(item, entity)) {
+            if (item && vm.isMatching(value.split('.')[0], entity)) {
                 bucketRestrictions.push({
                     bucketRestriction: {
-                        attr: item.Entity + '.' + value,
+                        attr: value,
                         bkt: {}
                     }
                 });

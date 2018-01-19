@@ -585,7 +585,7 @@ angular.module('common.datacloud.explorer', [
         var rule = getRatingsEngineRule(RatingsEngineModels),
             ratingsEngineAttributes = rule.selectedAttributes || [];
 
-        if(ratingsEngineAttributes.indexOf(item.ColumnId) >= 0) {
+        if(ratingsEngineAttributes.indexOf(item.Entity + '.' + item.ColumnId) >= 0) {
             return true;
         }
         return false;
@@ -1647,7 +1647,7 @@ angular.module('common.datacloud.explorer', [
 
             var rule = getRatingsEngineRule(RatingsEngineModels);
 
-            DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.ColumnId]).then(function(response) {
+            DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.Entity + '.' + enrichment.ColumnId]).then(function(response) {
                 enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
                 
                 var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
