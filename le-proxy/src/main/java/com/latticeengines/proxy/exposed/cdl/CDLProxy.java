@@ -2,8 +2,9 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -12,8 +13,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
+import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
+import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -87,17 +91,17 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId cleanupAll(String customerSpace, BusinessEntity entity) {
-        List<Object> args = new ArrayList<>();
-        args.add(customerSpace);
-        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/all";
-
-        if (entity != null) {
-            args.add(entity);
-            urlPattern += "?BusinessEntity={BusinessEntity}";
-        }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        ResponseDocument<String> responseDoc = post("cleanup all", url, null, ResponseDocument.class);
+    public ApplicationId cleanupAll(String customerSpace, BusinessEntity entity, String initiator) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
+        String url = constructUrl(urlPattern, customerSpace);
+        CleanupAllConfiguration cleanupAllConfiguration = new CleanupAllConfiguration();
+        cleanupAllConfiguration.setOperationType(MaintenanceOperationType.DELETE);
+        cleanupAllConfiguration.setCleanupOperationType(CleanupOperationType.ALL);
+        cleanupAllConfiguration.setEntity(entity);
+        cleanupAllConfiguration.setCustomerSpace(customerSpace);
+        cleanupAllConfiguration.setOperationInitiator(initiator);
+        ResponseDocument<String> responseDoc = post("cleanup all", url, cleanupAllConfiguration,
+                ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
@@ -105,23 +109,22 @@ public class CDLProxy extends MicroserviceRestApiProxy {
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException(
-                    "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException("Failed to cleanupAll: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId cleanupAllData(String customerSpace, BusinessEntity entity) {
-        List<Object> args = new ArrayList<>();
-        args.add(customerSpace);
-        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/alldata";
-
-        if (entity != null) {
-            args.add(entity);
-            urlPattern += "?BusinessEntity={BusinessEntity}";
-        }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        ResponseDocument<String> responseDoc = post("cleanup all data", url, null, ResponseDocument.class);
+    public ApplicationId cleanupAllData(String customerSpace, BusinessEntity entity, String initiator) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
+        String url = constructUrl(urlPattern, customerSpace);
+        CleanupAllConfiguration cleanupAllConfiguration = new CleanupAllConfiguration();
+        cleanupAllConfiguration.setOperationType(MaintenanceOperationType.DELETE);
+        cleanupAllConfiguration.setCleanupOperationType(CleanupOperationType.ALLDATA);
+        cleanupAllConfiguration.setEntity(entity);
+        cleanupAllConfiguration.setCustomerSpace(customerSpace);
+        cleanupAllConfiguration.setOperationInitiator(initiator);
+        ResponseDocument<String> responseDoc = post("cleanup all data", url, cleanupAllConfiguration,
+                ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
@@ -129,26 +132,28 @@ public class CDLProxy extends MicroserviceRestApiProxy {
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException(
-                    "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException("Failed to cleanupAllData: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
     @SuppressWarnings("unchecked")
     public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
-            BusinessEntity entity) {
-        List<Object> args = new ArrayList<>();
-        args.add(customerSpace);
-        args.add(startTime);
-        args.add(endTime);
-        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/bytimerange?startTime={startTime}&endTime={endTime}";
-
-        if (entity != null) {
-            args.add(entity);
-            urlPattern += "&BusinessEntity={BusinessEntity}";
-        }
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        ResponseDocument<String> responseDoc = post("cleanup by time range", url, null, ResponseDocument.class);
+            BusinessEntity entity, String initiator) throws ParseException {
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date start = dateFormat.parse(startTime);
+        Date end = dateFormat.parse(endTime);
+        String url = constructUrl(urlPattern, customerSpace);
+        CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration = new CleanupByDateRangeConfiguration();
+        cleanupByDateRangeConfiguration.setOperationType(MaintenanceOperationType.DELETE);
+        cleanupByDateRangeConfiguration.setCleanupOperationType(CleanupOperationType.BYDATERANGE);
+        cleanupByDateRangeConfiguration.setStartTime(start);
+        cleanupByDateRangeConfiguration.setEndTime(end);
+        cleanupByDateRangeConfiguration.setEntity(entity);
+        cleanupByDateRangeConfiguration.setCustomerSpace(customerSpace);
+        cleanupByDateRangeConfiguration.setOperationInitiator(initiator);
+        ResponseDocument<String> responseDoc = post("cleanup by time range", url, cleanupByDateRangeConfiguration,
+                ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
@@ -157,7 +162,7 @@ public class CDLProxy extends MicroserviceRestApiProxy {
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
             throw new RuntimeException(
-                    "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
+                    "Failed to cleanupByTimeRange: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
@@ -171,7 +176,7 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         configuration.setCleanupOperationType(operationType);
         configuration.setOperationInitiator(initiator);
 
-        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/byupload", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup", customerSpace);
 
         return post("cleanup by upload", url, configuration, ResponseDocument.class);
     }

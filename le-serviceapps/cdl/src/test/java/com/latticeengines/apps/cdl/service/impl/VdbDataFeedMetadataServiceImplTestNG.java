@@ -15,6 +15,7 @@ import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
@@ -145,8 +146,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     public void testGetImportFileInfo() {
         CSVImportFileInfo csvImportFileInfo = vdbDataFeedMetadataService.getImportFileInfo(testVdbMetadata);
         Assert.assertNotNull(csvImportFileInfo);
-        Assert.assertEquals(csvImportFileInfo.getFileUploadInitiator(),
-                VdbDataFeedMetadataServiceImpl.DEFAULT_VISIDB_USER);
+        Assert.assertEquals(csvImportFileInfo.getFileUploadInitiator(), CDLConstants.DEFAULT_VISIDB_USER);
         Assert.assertNotNull(csvImportFileInfo.getReportFileDisplayName());
         Assert.assertNotNull(csvImportFileInfo.getReportFileName());
         log.info(String.format("fileName=%s, fileDisplayName=%s, initiator=%s", csvImportFileInfo.getReportFileName(),

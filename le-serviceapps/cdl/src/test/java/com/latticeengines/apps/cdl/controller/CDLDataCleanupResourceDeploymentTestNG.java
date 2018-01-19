@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class CDLDataCleanupResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -21,18 +22,18 @@ public class CDLDataCleanupResourceDeploymentTestNG extends CDLDeploymentTestNGB
     @Autowired
     private DataFeedProxy dataFeedProxy;
 
-    @BeforeClass(groups = {"deployment"}, enabled = false)
+    @BeforeClass(groups = { "deployment" }, enabled = false)
     public void setup() throws Exception {
         setupTestEnvironment();
     }
 
-    @Test(groups = {"deployment"}, enabled = false)
+    @Test(groups = { "deployment" }, enabled = false)
     public void testCleanup() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
         dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Active.getName());
 
-        ApplicationId appId = cdlProxy.cleanupAll(customerSpace.toString(), null);
+        ApplicationId appId = cdlProxy.cleanupAll(customerSpace.toString(), null, MultiTenantContext.getEmailAddress());
 
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);

@@ -8,6 +8,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CleanupEnd2EndDeploymentTestNG.class);
@@ -84,13 +86,13 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
         }
     }
 
-    private void verifyCleanupByDateRange() throws IOException {
+    private void verifyCleanupByDateRange() throws IOException, ParseException {
         Date startTime = new Date(1488211200000l); // 2017-2-28
         Date endTime = new Date(1488384000000l); // 2017-3-2
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
         ApplicationId applicationId = cdlProxy.cleanupByTimeRange(mainTestTenant.getId(), df.format(startTime),
-                df.format(endTime), BusinessEntity.Transaction);
+                df.format(endTime), BusinessEntity.Transaction, MultiTenantContext.getEmailAddress());
 
         assertNotNull(applicationId);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
@@ -105,7 +107,7 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
         String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getBatchStore());
         DataCollection dtCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
 
-        ApplicationId appId = cdlProxy.cleanupAllData(customerSpace, entity);
+        ApplicationId appId = cdlProxy.cleanupAllData(customerSpace, entity, MultiTenantContext.getEmailAddress());
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
 
@@ -117,7 +119,8 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
         assertNull(table);
 
         log.info("clean up all metadata");
-        appId = cdlProxy.cleanupAll(CustomerSpace.parse(mainTestTenant.getId()).toString(), entity);
+        appId = cdlProxy.cleanupAll(CustomerSpace.parse(mainTestTenant.getId()).toString(), entity,
+                MultiTenantContext.getEmailAddress());
         status = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
         List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, entity.name());

@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Date;
-
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -12,14 +10,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
-import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
-import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
-import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("cdlDataCleanupService")
 public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
@@ -34,54 +28,24 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     }
 
     @Override
-    public ApplicationId cleanupAll(String customerSpace, BusinessEntity entity) {
-        CleanupAllConfiguration cleanupAllConfiguration = new CleanupAllConfiguration();
-        cleanupAllConfiguration.setOperationType(MaintenanceOperationType.DELETE);
-        cleanupAllConfiguration.setCleanupOperationType(CleanupOperationType.ALL);
-        cleanupAllConfiguration.setEntity(entity);
-        cleanupAllConfiguration.setCustomerSpace(customerSpace);
-        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), cleanupAllConfiguration);
+    public ApplicationId cleanupData(String customerSpace, CleanupOperationConfiguration configuration) {
+        log.info("customerSpace: " + customerSpace + ", CleanupOperationConfiguration: " + configuration);
+        if (configuration instanceof CleanupByDateRangeConfiguration) {
+            verifyCleanupByDataRangeConfiguration((CleanupByDateRangeConfiguration) configuration);
+        }
+        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), configuration);
     }
 
-    @Override
-    public ApplicationId cleanupAllData(String customerSpace, BusinessEntity entity) {
-        CleanupAllConfiguration cleanupAllConfiguration = new CleanupAllConfiguration();
-        cleanupAllConfiguration.setOperationType(MaintenanceOperationType.DELETE);
-        cleanupAllConfiguration.setCleanupOperationType(CleanupOperationType.ALLDATA);
-        cleanupAllConfiguration.setEntity(entity);
-        cleanupAllConfiguration.setCustomerSpace(customerSpace);
-        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), cleanupAllConfiguration);
-    }
-
-    @Override
-    public ApplicationId cleanupByTimeRange(String customerSpace, BusinessEntity entity, Date startTime, Date endTime) {
-        if (startTime == null || endTime == null) {
+    private void verifyCleanupByDataRangeConfiguration(
+            CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration) {
+        if (cleanupByDateRangeConfiguration.getStartTime() == null
+                || cleanupByDateRangeConfiguration.getEndTime() == null) {
             throw new LedpException(LedpCode.LEDP_40002);
         }
 
-        if (startTime.getTime() > endTime.getTime()) {
+        if (cleanupByDateRangeConfiguration.getStartTime().getTime() > cleanupByDateRangeConfiguration.getEndTime()
+                .getTime()) {
             throw new LedpException(LedpCode.LEDP_40003);
         }
-
-        CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration = new CleanupByDateRangeConfiguration();
-        cleanupByDateRangeConfiguration.setOperationType(MaintenanceOperationType.DELETE);
-        cleanupByDateRangeConfiguration.setCleanupOperationType(CleanupOperationType.BYDATERANGE);
-        cleanupByDateRangeConfiguration.setStartTime(startTime);
-        cleanupByDateRangeConfiguration.setEndTime(endTime);
-        cleanupByDateRangeConfiguration.setEntity(entity);
-        cleanupByDateRangeConfiguration.setCustomerSpace(customerSpace);
-        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace),
-                cleanupByDateRangeConfiguration);
-    }
-
-    @Override
-    public ApplicationId cleanupByUpload(String customerSpace, CleanupByUploadConfiguration configuration) {
-        configuration.setCustomerSpace(customerSpace);
-        log.info("customerSpace: " + customerSpace + ", configuration.getCleanupOperationType(): "
-                + configuration.getCleanupOperationType() + ", configuration.getFilePath(): "
-                + configuration.getFilePath() + ", configuration.getTableName(): " + configuration.getTableName()
-                + ", configuration.getEntity(): " + configuration.getEntity()
-                + ", configuration.getOperationInitiator(): " + configuration.getOperationInitiator());
-        return cdlOperationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), configuration);
     }
 }

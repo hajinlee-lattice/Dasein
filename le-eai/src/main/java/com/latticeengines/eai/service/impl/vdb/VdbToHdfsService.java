@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
@@ -82,13 +82,13 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 vdbConnectorConfiguration = (VdbConnectorConfiguration) importService
                         .generateConnectorConfiguration(connectorStr, importContext);
 
-                LinkedHashMap<String, ImportVdbTableConfiguration> importVdbTableConfigurationMap =
-                        vdbConnectorConfiguration.getTableConfigurations();
-                if(importVdbTableConfigurationMap.size() <= 0) {
-                    throw new LedpException(LedpCode.LEDP_17011, new String[] { "No import vdb table configuration"
-                    });
+                LinkedHashMap<String, ImportVdbTableConfiguration> importVdbTableConfigurationMap = vdbConnectorConfiguration
+                        .getTableConfigurations();
+                if (importVdbTableConfigurationMap.size() <= 0) {
+                    throw new LedpException(LedpCode.LEDP_17011, new String[] { "No import vdb table configuration" });
                 }
-                ImportVdbTableMergeRule mergeRule = importVdbTableConfigurationMap.entrySet().iterator().next().getValue().getMergeRule();
+                ImportVdbTableMergeRule mergeRule = importVdbTableConfigurationMap.entrySet().iterator().next()
+                        .getValue().getMergeRule();
 
                 try {
                     log.info("Initialize import job detail record");
@@ -109,9 +109,9 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                     log.info("Finalize import job detail record");
                     finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
 
-                    if(mergeRule == ImportVdbTableMergeRule.REPLACE) {
+                    if (mergeRule == ImportVdbTableMergeRule.REPLACE) {
                         ApplicationId applicationId = cdlProxy.cleanupAllData(config.getCustomerSpace().toString(),
-                                config.getBusinessEntity());
+                                config.getBusinessEntity(), CDLConstants.DEFAULT_VISIDB_USER);
 
                         waitForWorkflowStatus(applicationId.toString(), false);
                     }
@@ -209,15 +209,15 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 for (Long record : mutipleDuplicatedRecords.get(table.getName())) {
                     duplicateRows += record;
                 }
-                updateJobDetailExtractInfo(entry.getKey(), table.getName(),
-                        multipleTargets.get(table.getName()), recordList, totalRows, ignoredRows, duplicateRows);
+                updateJobDetailExtractInfo(entry.getKey(), table.getName(), multipleTargets.get(table.getName()),
+                        recordList, totalRows, ignoredRows, duplicateRows);
             } else {
                 Long ignoredRows = ignoredRecord.get(table.getName());
                 Long duplicateRows = duplicateRecord.get(table.getName());
                 updateJobDetailExtractInfo(entry.getKey(), table.getName(),
                         Arrays.asList(targetPathsMap.get(table.getName())),
-                        Arrays.asList(processedRecordsMap.get(table.getName()).toString()),
-                        totalRows, ignoredRows, duplicateRows);
+                        Arrays.asList(processedRecordsMap.get(table.getName()).toString()), totalRows, ignoredRows,
+                        duplicateRows);
             }
         }
 

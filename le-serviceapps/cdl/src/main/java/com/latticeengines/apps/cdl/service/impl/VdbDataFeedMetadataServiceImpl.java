@@ -20,6 +20,7 @@ import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
@@ -43,8 +44,6 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     public final String DEFAULT_FILE_FORMAT = "%s_%s.csv";
 
     public final String DATE_FORMAT = "MM-dd-yyyy";
-
-    public final static String DEFAULT_VISIDB_USER = "Default VisiDB User";
 
     private static final String[] VDB_ATTR_FIELDS = { "DisplayName", "SourceLogicalDataType", "Description",
             "FundamentalType", "StatisticalType", "DisplayDiscretizationStrategy", "DataQuality", "DataSource",
@@ -293,7 +292,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     public Type getAvroType(Attribute attribute) {
         Type type = null;
         if (attribute.getPhysicalDataType() == null) {
-            throw new RuntimeException(String.format("Physical data type for attribute %s is null", attribute.getName()));
+            throw new RuntimeException(
+                    String.format("Physical data type for attribute %s is null", attribute.getName()));
         }
         String typeStrLowerCase = attribute.getPhysicalDataType().toLowerCase();
         switch (typeStrLowerCase) {
@@ -353,7 +353,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                 new SimpleDateFormat(DATE_FORMAT).format(new Date())));
         csvImportFileInfo.setReportFileName(String.format(DEFAULT_FILE_FORMAT, SourceType.VISIDB.getName(),
                 new SimpleDateFormat(DATE_FORMAT).format(new Date())));
-        csvImportFileInfo.setFileUploadInitiator(DEFAULT_VISIDB_USER);
+        csvImportFileInfo.setFileUploadInitiator(CDLConstants.DEFAULT_VISIDB_USER);
         return csvImportFileInfo;
     }
 }
