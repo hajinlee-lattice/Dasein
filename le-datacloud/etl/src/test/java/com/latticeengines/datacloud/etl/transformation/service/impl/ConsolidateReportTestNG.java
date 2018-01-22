@@ -236,7 +236,7 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
             JsonNode report = node.get(BusinessEntity.Account.name());
             Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_NEW).asInt(), 2);
             Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UPDATE).asInt(), 2);
-            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_MATCH).asInt(), 3);
+            Assert.assertEquals(report.get(ConsolidateReportFlow.REPORT_TOPIC_UNMATCH).asInt(), 1);
         } catch (IOException e) {
             throw new RuntimeException("Fail to read parse report: " + accountReportStr);
         }

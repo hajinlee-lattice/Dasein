@@ -25,6 +25,7 @@ public class ConsolidateReportFlow
     public static final String REPORT_TOPIC_TOTAL = "TOTAL";
     public static final String REPORT_TOPIC_NEW = "NEW";
     public static final String REPORT_TOPIC_UPDATE = "UPDATE";
+    public static final String REPORT_TOPIC_UNMATCH = "UNMATCH";
     public static final String REPORT_TOPIC_MATCH = "MATCH";
 
     @Override
@@ -41,8 +42,8 @@ public class ConsolidateReportFlow
             Node totalReport = reportTotal(source);
             Node newReport = reportNew(source, parameters);
             Node updateReport = reportUpdate(totalReport, newReport);
-            Node matchReport = reportMatch(source);
-            reports.addAll(Arrays.asList(newReport, updateReport, matchReport));
+            Node unMatchReport = reportUnmatch(source);
+            reports.addAll(Arrays.asList(newReport, updateReport, unMatchReport));
             break;
         case Contact:
             totalReport = reportTotal(source);
@@ -50,7 +51,7 @@ public class ConsolidateReportFlow
             updateReport = reportUpdate(totalReport, newReport);
             reports.addAll(Arrays.asList(newReport, updateReport));
             if (parameters.getBaseTables().size() > 1) {
-                matchReport = reportMatchAccount(source, addSource(parameters.getBaseTables().get(1)));
+                Node matchReport = reportMatchAccount(source, addSource(parameters.getBaseTables().get(1)));
                 reports.add(matchReport);
             }
             break;
@@ -109,11 +110,11 @@ public class ConsolidateReportFlow
         return updateReport;
     }
 
-    private Node reportMatch(Node node) {
-        node = node.filter(String.format("%s != null", InterfaceName.LatticeAccountId.name()),
+    private Node reportUnmatch(Node node) {
+        node = node.filter(String.format("%s == null", InterfaceName.LatticeAccountId.name()),
                 new FieldList(InterfaceName.LatticeAccountId.name()));
-        node = node.count("__MATCH_COUNT__").rename(new FieldList("__MATCH_COUNT__"), new FieldList(REPORT_CONTENT))
-                .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_MATCH, String.class).renamePipe("MatchReport");
+        node = node.count("__UNMATCH_COUNT__").rename(new FieldList("__UNMATCH_COUNT__"), new FieldList(REPORT_CONTENT))
+                .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_UNMATCH, String.class).renamePipe("UnMatchReport");
         return node;
     }
 
