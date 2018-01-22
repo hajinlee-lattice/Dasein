@@ -1,6 +1,7 @@
 package com.latticeengines.workflowapi.service.impl;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
@@ -41,6 +43,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Autowired
+    private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
+
+    @Autowired
     private ReportService reportService;
 
     @Autowired
@@ -48,6 +53,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Autowired
     private WorkflowContainerService workflowContainerService;
+
+    private static final long HEARTBEAT_FAILURE_THRESHOLD = TimeUnit.MILLISECONDS.convert(5L, TimeUnit.MINUTES);
 
     @Override
     @WithCustomerSpace
@@ -65,6 +72,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public JobStatus getJobStatus(String customerSpace, Long workflowId) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        job = checkLastUpdateTime(Collections.singletonList(job)).get(0);
         return JobStatus.fromString(job.getStatus());
     }
 
@@ -74,6 +82,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, null, null);
         jobs.removeIf(Objects::isNull);
+        jobs = checkLastUpdateTime(jobs);
         return jobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
     }
 
@@ -81,6 +90,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public Job getJob(String customerSpace, Long workflowId, Boolean includeDetails) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
         return assembleJob(workflowJob, includeDetails);
     }
 
@@ -88,6 +98,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public Job getJobByApplicationId(String customerSpace, String applicationId, Boolean includeDetails) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
         return assembleJob(workflowJob, includeDetails);
     }
 
@@ -95,6 +106,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public List<Job> getJobs(String customerSpace, Boolean includeDetails) {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
+        workflowJobs = checkLastUpdateTime(workflowJobs);
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
@@ -115,6 +127,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                     optionalWorkflowIds.orElse(null), optionalTypes.orElse(null), null);
         }
+
+        workflowJobs = checkLastUpdateTime(workflowJobs);
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
@@ -137,6 +151,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(workflowIds,
                 null, null);
         jobs.removeIf(Objects::isNull);
+        jobs = checkLastUpdateTime(jobs);
         jobs.forEach(job -> {
             job.setParentJobId(parentJobId);
             workflowJobEntityMgr.updateParentJobId(job);
@@ -159,6 +174,27 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public void stopWorkflow(String customerSpace, Long workflowId) {
         workflowService.stop(new WorkflowExecutionId(workflowId));
+    }
+
+    private List<WorkflowJob> checkLastUpdateTime(List<WorkflowJob> workflowJobs) {
+        if (workflowJobs == null) {
+            return null;
+        }
+
+        for (WorkflowJob workflowJob : workflowJobs) {
+            if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
+                continue;
+            }
+
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
+            if (jobUpdate != null &&
+                    (System.currentTimeMillis() - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
+                workflowJob.setStatus(JobStatus.FAILED.name());
+                workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            }
+        }
+
+        return workflowJobs;
     }
 
     private Job assembleJob(WorkflowJob workflowJob, Boolean includeDetails) {

@@ -264,7 +264,8 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         AtomicLong lastUpdateTime = new AtomicLong(jobUpdate.getLastUpdateTime());
         return executorService.scheduleAtFixedRate(() -> {
             Long updateTime = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid).getLastUpdateTime();
-            assertTrue(updateTime >= lastUpdateTime.getAndAdd(updateTime));
-        } , 10L, 10L, TimeUnit.SECONDS);
+            log.info(String.format("workflowPid = %s, updateTime = %s, lastUpdateTime = %s", workflowPid, updateTime, lastUpdateTime));
+            assertTrue(updateTime >= lastUpdateTime.getAndSet(updateTime));
+        } , 2L, 2L, TimeUnit.SECONDS);
     }
 }

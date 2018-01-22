@@ -360,7 +360,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception {
-        return waitForCompletion(workflowId, maxWaitTime, 30000);
+        return waitForCompletion(workflowId, maxWaitTime, 1000 * 120);
     }
 
     @Override
@@ -369,26 +369,29 @@ public class WorkflowServiceImpl implements WorkflowService {
         long start = System.currentTimeMillis();
         int retryOnException = 16;
 
-        Long workflowPid = workflowJobEntityMgr.findByWorkflowId(workflowId.getId()).getPid();
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
+        if (workflowJob == null) {
+            return null;
+        }
+
+        Long workflowPid = workflowJob.getPid();
+
         // break label for inner loop
         done: do {
             try {
                 status = getStatus(workflowId);
+                WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
+                long currentTime = System.currentTimeMillis();
+                jobUpdate.setLastUpdateTime(currentTime);
+                workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+
                 if (status == null) {
                     break;
                 } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
-                    WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
                     workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
                     workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
 
-                    WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
-                    jobUpdate.setLastUpdateTime(System.currentTimeMillis());
-                    workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
                     break done;
-                } else {
-                    WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
-                    jobUpdate.setLastUpdateTime(System.currentTimeMillis());
-                    workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
                 }
             } catch (Exception e) {
                 log.warn(String.format("Error while getting status for workflow %d, with error %s", workflowId.getId(),
