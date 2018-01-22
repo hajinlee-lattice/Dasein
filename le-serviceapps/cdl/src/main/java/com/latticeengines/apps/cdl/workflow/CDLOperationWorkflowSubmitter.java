@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -71,10 +72,12 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     private CDLOperationWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
             MaintenanceOperationConfiguration maintenanceOperationConfiguration, @NonNull Long actionPid) {
         boolean isCleanupByUpload = false;
+        BusinessEntity businessEntity = null;
         if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
             log.info("Configuratin is CleanupOperation");
             isCleanupByUpload = ((CleanupOperationConfiguration) maintenanceOperationConfiguration)
                     .getCleanupOperationType().isNeedTransFlow();
+            businessEntity = ((CleanupOperationConfiguration) maintenanceOperationConfiguration).getEntity();
         }
         String filePath = "";
         String tableName = "";
@@ -92,6 +95,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 .isCleanupByUpload(isCleanupByUpload) //
                 .filePath(filePath) //
                 .tableName(tableName) //
+                .businessEntity(businessEntity)
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .build())

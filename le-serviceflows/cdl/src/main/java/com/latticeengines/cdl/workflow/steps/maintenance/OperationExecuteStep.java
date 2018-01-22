@@ -1,5 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
@@ -22,7 +25,10 @@ public class OperationExecuteStep extends BaseReportStep<OperationExecuteConfigu
             throw new RuntimeException(
                     String.format("Cannot find maintenance service for class: %s", maintenanceOperationConfiguration.getClass()));
         }
-        maintenanceOperationService.invoke(maintenanceOperationConfiguration);
+        Map<String, Long> report = maintenanceOperationService.invoke(maintenanceOperationConfiguration);
+        Optional.ofNullable(report).ifPresent(map -> map.forEach((entity, rows) -> {
+            getJson().put(entity + "_Deleted", rows);
+        }));
         super.execute();
     }
 

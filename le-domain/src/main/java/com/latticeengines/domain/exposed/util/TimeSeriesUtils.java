@@ -52,20 +52,40 @@ public class TimeSeriesUtils {
     }
 
     public static void cleanupPeriodData(YarnConfiguration yarnConfiguration, String avroDir, Set<Integer> periods) {
+        cleanupPeriodData(yarnConfiguration, avroDir, periods, false);
+    }
+
+    public static Long cleanupPeriodData(YarnConfiguration yarnConfiguration, String avroDir, Set<Integer> periods,
+                                         boolean countRows) {
         avroDir = getPath(avroDir);
         log.info("Clean periods from " + avroDir);
+        Long rowCounts = 0L;
         try {
             List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
             for (String fileName : avroFiles) {
                 try {
                     if (periods == null) {
-                       HdfsUtils.rmdir(yarnConfiguration, fileName);
+                        if (countRows) {
+                            try {
+                                rowCounts += AvroUtils.count(yarnConfiguration, fileName);
+                            } catch (Exception e) {
+                                log.error("Failed to count the rows for file: " + fileName);
+                            }
+                        }
+                        HdfsUtils.rmdir(yarnConfiguration, fileName);
                     } else {
                         String[] dirs = fileName.split("/");
                         String avroName = dirs[dirs.length - 1];
                         Integer period = getPeriodFromFileName(avroName);
                         if ((period != null) && periods.contains(period)) {
-                           HdfsUtils.rmdir(yarnConfiguration, fileName);
+                            if(countRows) {
+                                try {
+                                    rowCounts += AvroUtils.count(yarnConfiguration, fileName);
+                                } catch (Exception e) {
+                                    log.error("Failed to count the rows for file: " + fileName);
+                                }
+                            }
+                            HdfsUtils.rmdir(yarnConfiguration, fileName);
                         }
                     }
                 } catch (Exception e) {
@@ -75,6 +95,7 @@ public class TimeSeriesUtils {
         } catch (Exception e) {
             log.error("Failed to clean period data", e);
         }
+        return rowCounts;
     }
 
     public static void cleanupPeriodData(YarnConfiguration yarnConfiguration, String avroDir) {

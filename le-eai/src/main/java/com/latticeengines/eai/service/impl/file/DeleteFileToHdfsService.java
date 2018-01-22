@@ -24,8 +24,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.DeleteFileToHdfsConfiguration;
+import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -59,6 +61,11 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
     @Override
     @SuppressWarnings("unchecked")
     public void invoke(DeleteFileToHdfsConfiguration config) {
+        String jobDetailIds = config.getProperty(ImportProperty.EAIJOBDETAILIDS);
+        List<Object> jobDetailIdsRaw = JsonUtils.deserialize(jobDetailIds, List.class);
+        List<Long> eaiJobDetailIds = JsonUtils.convertList(jobDetailIdsRaw, Long.class);
+        Long jobDetailId = eaiJobDetailIds.size() > 0 ? eaiJobDetailIds.get(0) : -1L;
+
         List<SourceImportConfiguration> sourceImportConfigs = config.getSourceConfigurations();
         String customerSpace = config.getCustomerSpace().toString();
 
@@ -114,11 +121,16 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
 
         Counters counters = jobProxy.getMRJobCounters(appId.toString());
         long processedRecords = counters.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue();
+        long ignoredRecords = counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
+        long duplicatedRecords = counters.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue();
+        long totalRecords = processedRecords + ignoredRecords + duplicatedRecords;
         Map<String, Long> processedRecordsMap = context.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
         processedRecordsMap.put(template.getName(), processedRecords);
 
         eaiMetadataService.updateTableSchema(metadata, context);
         eaiMetadataService.registerTables(metadata, context);
+
+        setEaiJobDetailInfo(jobDetailId, (int)processedRecords, ignoredRecords, duplicatedRecords, totalRecords);
     }
 
     private String createTargetPath(CustomerSpace customerSpace) {
@@ -126,6 +138,21 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.FILE.getName(), new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
         return targetPath;
+    }
+
+    private void setEaiJobDetailInfo(Long jobDetailId, int processedRecords, long ignoredRecords,
+                                     long duplicatedRecords, long totalRecords) {
+        EaiImportJobDetail jobDetail = eaiImportJobDetailService
+                .getImportJobDetailById(jobDetailId);
+        if (jobDetail != null) {
+            jobDetail.setProcessedRecords(processedRecords);
+            jobDetail.setTotalRows(totalRecords);
+            jobDetail.setIgnoredRows(ignoredRecords);
+            jobDetail.setDedupedRows(duplicatedRecords);
+            //when extract has processed records info means the import completed, waiting for register.
+            jobDetail.setStatus(ImportStatus.SUCCESS);
+            eaiImportJobDetailService.updateImportJobDetail(jobDetail);
+        }
     }
 
     private void waitForAppId(String appId) {

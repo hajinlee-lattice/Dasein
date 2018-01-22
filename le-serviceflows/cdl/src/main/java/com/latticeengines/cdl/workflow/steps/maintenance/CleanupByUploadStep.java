@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -20,12 +23,15 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.CleanupByUploadWrapperConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
@@ -46,7 +52,10 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
     private CleanupByUploadConfiguration cleanupByUploadConfiguration;
+
+    private Long totalRecords;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -62,10 +71,18 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
         Table cleanupTable = metadataProxy.getTable(customerSpace, cleanupTableName);
         log.info("result table Name is " + cleanupTable.getName());
         if (cleanupTable != null) {
+            createDeleteReport(getTableDataLines(cleanupTable));
             DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace);
             dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), cleanupTableName,
                     cleanupByUploadConfiguration.getEntity().getBatchStore(), version);
         }
+    }
+
+    private void createDeleteReport(Long currentRows) {
+        ObjectNode json = JsonUtils.createObjectNode();
+        json.put(cleanupByUploadConfiguration.getEntity().name() + "_Deleted", totalRecords - currentRows);
+        Report report = createReport(json.toString(), ReportPurpose.MAINTENANCE_OPERATION_SUMMARY, UUID.randomUUID().toString());
+        registerReport(configuration.getCustomerSpace(), report);
     }
 
     private void intializeConfiguration() {
@@ -110,6 +127,7 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
                     String.format("master table in collection shouldn't be null when customer space %s, role %s",
                             customerSpace.toString(), entity.getBatchStore()));
         }
+        totalRecords = getTableDataLines(masterTable);
         String deleteName = cleanupByUploadConfiguration.getTableName();
         String masterName = masterTable.getName();
         SourceTable source = new SourceTable(masterName, customerSpace);
@@ -148,6 +166,17 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
         step.setTargetTable(targetTable);
 
         return step;
+    }
+
+    private Long getTableDataLines(Table table) {
+        if (table == null || table.getExtracts() == null) {
+            return 0L;
+        }
+        Long lines = 0L;
+        for (Extract extract : table.getExtracts()) {
+            lines += extract.getProcessedRecords();
+        }
+        return lines;
     }
 
 }

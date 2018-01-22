@@ -15,6 +15,7 @@ public class WorkflowContextConstants {
         public static final String INTERNAL_ENRICHMENT_ATTRIBUTES_LIST = "INTERNAL_ENRICHMENT_ATTRIBUTES_LIST";
         public static final String DATAFEED_STATUS = "DATAFEED_STATUS";
         public static final String EAI_JOB_APPLICATION_ID = "EAI_JOB_APPLICATION_ID";
+        public static final String BUSINESS_ENTITY = "BUSINESS_ENTITY";
     }
 
     public static class Inputs {

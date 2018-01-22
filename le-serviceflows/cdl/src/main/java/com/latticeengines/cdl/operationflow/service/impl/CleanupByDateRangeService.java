@@ -6,7 +6,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -37,9 +39,9 @@ public class CleanupByDateRangeService extends MaintenanceOperationService<Clean
     private YarnConfiguration yarnConfiguration;
 
     @Override
-    public void invoke(CleanupByDateRangeConfiguration config) {
+    public Map<String, Long> invoke(CleanupByDateRangeConfiguration config) {
         log.info("Start cleanup by date range operation!");
-
+        Map<String, Long> report = new HashMap<>();
         if(config.getCustomerSpace() == null) {
             throw new LedpException(LedpCode.LEDP_40000);
         }
@@ -88,7 +90,10 @@ public class CleanupByDateRangeService extends MaintenanceOperationService<Clean
 
         String avroDir = table.getExtracts().get(0).getPath();
         log.info("avroDir: " + avroDir);
-        TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, avroDir, periods);
+
+        Long deletedRows = TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, avroDir, periods, true);
+        report.put(config.getEntity().name(), deletedRows);
+        return report;
     }
 
     @VisibleForTesting

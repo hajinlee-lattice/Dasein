@@ -26,7 +26,7 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
     protected Function<Float, Void> progressReporter;
 
     @Autowired
-    private EaiImportJobDetailService eaiImportJobDetailService;
+    protected EaiImportJobDetailService eaiImportJobDetailService;
 
     @Autowired
     private WorkflowProxy workflowProxy;

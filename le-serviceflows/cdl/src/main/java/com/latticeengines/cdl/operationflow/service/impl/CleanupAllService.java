@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.operationflow.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -32,7 +35,14 @@ public class CleanupAllService  extends MaintenanceOperationService<CleanupAllCo
     private MetadataProxy metadataProxy;
 
     @Override
-    public void invoke(CleanupAllConfiguration config) {
+    public Map<String, Long> invoke(CleanupAllConfiguration config) {
+        Map<String, Long> report;
+        try {
+            report = getReportInfo(config.getCustomerSpace(), config.getEntity());
+        } catch (RuntimeException e) {
+            log.error("Cannot get delete report for CleanupAll job!");
+            report = new HashMap<>();
+        }
         String customerSpace = config.getCustomerSpace();
         BusinessEntity entity = config.getEntity();
         log.info(String.format("begin clean up cdl data of CustomerSpace %s", customerSpace));
@@ -83,5 +93,44 @@ public class CleanupAllService  extends MaintenanceOperationService<CleanupAllCo
                 }
             }
         }
+        return report;
+    }
+
+    private Map<String, Long> getReportInfo(String customerSpace, BusinessEntity entity) {
+        Map<String, Long> result = new HashMap<>();
+        if (entity == null) {
+            Table account = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Account.getBatchStore());
+            result.put(BusinessEntity.Account.name(), getTableDataLines(account));
+            Table contact = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Contact.getBatchStore());
+            result.put(BusinessEntity.Contact.name(), getTableDataLines(contact));
+            Table product = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Product.getBatchStore());
+            result.put(BusinessEntity.Product.name(), getTableDataLines(product));
+            Table rawTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+            Table dailyTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedDailyTransaction);
+            Table periodTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedPeriodTransaction);
+            result.put(BusinessEntity.Transaction.name(), getTableDataLines(rawTransaction)
+                    + getTableDataLines(dailyTransaction) + getTableDataLines(periodTransaction));
+        } else if (entity == BusinessEntity.Transaction) {
+            Table rawTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+            Table dailyTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedDailyTransaction);
+            Table periodTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedPeriodTransaction);
+            result.put(BusinessEntity.Transaction.name(), getTableDataLines(rawTransaction)
+                    + getTableDataLines(dailyTransaction) + getTableDataLines(periodTransaction));
+        } else {
+            Table table = dataCollectionProxy.getTable(customerSpace, entity.getBatchStore());
+            result.put(entity.name(), getTableDataLines(table));
+        }
+        return result;
+    }
+
+    private Long getTableDataLines(Table table) {
+        if (table == null || table.getExtracts() == null) {
+            return 0L;
+        }
+        Long lines = 0L;
+        for (Extract extract : table.getExtracts()) {
+            lines += extract.getProcessedRecords();
+        }
+        return lines;
     }
 }

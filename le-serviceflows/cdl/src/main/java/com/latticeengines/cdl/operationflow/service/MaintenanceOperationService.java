@@ -27,7 +27,7 @@ public abstract class MaintenanceOperationService<T extends MaintenanceOperation
         return map.get(clz);
     }
 
-    public abstract void invoke(T config);
+    public abstract Map<String, Long> invoke(T config);
 
 
 }
