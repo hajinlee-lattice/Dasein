@@ -110,7 +110,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         return results;
     }
 
-    public final T findByFields(String... fieldsAndValues) {
+    public final T findByFields(Object... fieldsAndValues) {
         List<T> results = findAllByFields(fieldsAndValues);
         if (results.size() == 0) {
             return null;
@@ -122,7 +122,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     }
 
     @SuppressWarnings("unchecked")
-    public final List<T> findAllByFields(String... fieldsAndValues) {
+    public final List<T> findAllByFields(Object... fieldsAndValues) {
         if (fieldsAndValues.length % 2 != 0) {
             throw new RuntimeException("Must specify a value for each field name");
         }
@@ -133,11 +133,13 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
             if (i > 0) {
                 sb.append(" and ");
             }
-            sb.append(String.format("%s = '%s'", fieldsAndValues[i], fieldsAndValues[i + 1]));
+            sb.append(String.format("%1$s = :%1$s", fieldsAndValues[i]));
         }
         String queryStr = String.format("from %s where %s", getEntityClass().getSimpleName(), sb.toString());
         Query query = session.createQuery(queryStr);
-
+        for (int i = 0; i < fieldsAndValues.length - 1; i += 2) {
+            query.setParameter(fieldsAndValues[i].toString(), fieldsAndValues[i + 1]);
+        }
         return query.list();
     }
 
@@ -158,13 +160,15 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @Override
     public void delete(T entity) {
-    		// This is needed as part of Hibernate and JPA integration for backward compatibility
-    		// Refer to section 5.4 and 5.7 in https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html
-    		if (entity == null) {
-    			return;
-    		}
-    		Session currSession = getSessionFactory().getCurrentSession();
-    		currSession.delete(currSession.contains(entity) ? entity: currSession.merge(entity));
+        // This is needed as part of Hibernate and JPA integration for backward
+        // compatibility
+        // Refer to section 5.4 and 5.7 in
+        // https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html
+        if (entity == null) {
+            return;
+        }
+        Session currSession = getSessionFactory().getCurrentSession();
+        currSession.delete(currSession.contains(entity) ? entity : currSession.merge(entity));
     }
 
     @Override
