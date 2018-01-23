@@ -1,0 +1,22 @@
+<div class="job-subactions le-col-start-1 le-col-span-12">
+    <div class="le-row chevron-element">
+        <ol class="wizard job-status le-col-start-1 le-col-span-12">
+            <li class="le-col-span-3 chevron-element" 
+                ng-repeat="step in (steps = vm.stepsconfig)"
+                ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
+                <div class="chevron-element">
+
+                    <span class="load-data">
+                        <span>{{step.label}} </span>
+                    </span>
+                    <span>
+                        <span class="loading-small" ng-if="vm.isStepRunning(1)"></span>
+                        <i class="fa fa-check" ng-if="vm.isStepDone($index) && !vm.isStepFailed($index)"></i>
+                        <i class="fa fa-exclamation-triangle" ng-if="vm.isStepFailed($index)"></i>
+                    </span>
+
+                </div>
+            </li>
+        </ol>
+    </div>
+</div>

@@ -1,0 +1,31 @@
+section.import-jobs {
+    import-job-row{
+        border: 1px solid rgba(0, 0, 0, 0.22);
+
+        .icon-failed{
+            padding: 10px;
+            color: #F16A24;
+        }
+    }
+    .chevron-container {
+        padding: 10px;
+        padding-right: 0px;
+    }
+    .import-jobs-container {
+        max-width: 1500px;
+    }
+    .job-subactions {
+        padding: 10px;
+    }
+    .le-header-expand {
+        border-top: 0px solid gray;
+        border-bottom: 0px solid gray;
+    }
+    .chevron-element{
+        max-height: 72px;
+
+        .fa.fa-check{
+            margin-top: -5px;
+        }
+    }
+}

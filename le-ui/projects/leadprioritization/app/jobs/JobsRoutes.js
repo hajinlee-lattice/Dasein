@@ -1,5 +1,5 @@
 angular
-.module('lp.jobs')
+.module('lp.jobs', ['lp.jobs.model', 'lp.jobs.import'])
 .config(function($stateProvider, $routeProvider, $httpProvider) {
     $stateProvider
         .state('home.jobs', {

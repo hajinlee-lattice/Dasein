@@ -1,4 +1,4 @@
-angular.module('lp.jobs', [
+angular.module('lp.jobs.model', [
     'lp.jobs.status',
     'pd.navigation.pagination',
     'mainApp.core.utilities.BrowserStorageUtility',

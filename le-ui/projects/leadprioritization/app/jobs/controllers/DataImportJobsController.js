@@ -1,4 +1,4 @@
-angular.module('lp.jobs')
+angular.module('lp.jobs.imp', [])
 .controller('DataImportJobsCtrl', function($scope, $http, JobsStore, $filter) {
     // filter:{jobType:'dataProcessingWorkflow'}
     $scope.jobs = JobsStore.data.jobs;

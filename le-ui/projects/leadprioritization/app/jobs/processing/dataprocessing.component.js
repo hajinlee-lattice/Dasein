@@ -1,8 +1,55 @@
-angular.module('lp.jobs')
-    .controller('DataProcessingComponent', function ($scope, $http, JobsStore, $filter, ModalStore) {
+angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', 'lp.jobs.chevron'])
+    .service('Browser', ['$window', function ($window) {
+
+        this.IEVersion = function () {
+            var sAgent = $window.navigator.userAgent;
+            var Idx = sAgent.indexOf("MSIE");
+
+            // If IE, return version number.
+            if (Idx > 0)
+                return parseInt(sAgent.substring(Idx + 5, sAgent.indexOf(".", Idx)));
+
+            // If IE 11 then look for Updated user agent string.
+            else if (!!navigator.userAgent.match(/Trident\/7\./)) {
+                return 11;
+            }
+            else {
+                return 0; //It is not IE
+            }
+
+        }
+
+    }])
+    .directive('onFinishRender', ['$timeout', 'Browser', function ($timeout, browser) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attr) {
+                $timeout(function () {
+
+                    var tmp = browser.IEVersion();
+                    if (tmp > 0) {
+                        console.log('====== Creating msGridRow =======');
+                        var nodes = element.context.childNodes;
+                        var j = 1;
+                        for (var i = 0; i < nodes.length; i++) {
+                            var className = nodes[i].className;
+                            // console.log('CLASS NAME', className);
+                            if (className && className.indexOf('le-row') >= 0) {
+                                nodes[i].style['msGridRow'] = j;
+                                j++;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }])
+    .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, ModalStore) {
         var vm = this;
+
         vm.loadingJobs = JobsStore.data.loadingJobs;
         vm.pagesize = 10;
+        vm.promise = null;
         vm.query = '';
         vm.header = {
             filter: {
@@ -45,14 +92,15 @@ angular.module('lp.jobs')
                 ]
             }
         }
+
         angular.extend(vm, {
             jobs: [],
             successMsg: null,
             errorMsg: null,
             queuedMsg: null,
             // runningJob: {},
-            toRun: null
         });
+
         vm.initModalWindow = function () {
             vm.config = {
                 'name': "import_jobs",
@@ -71,9 +119,11 @@ angular.module('lp.jobs')
             vm.modalCallback = function (args) {
                 if (vm.config.dischargeaction === args) {
                     vm.toggleModal();
-                    vm.toRun = {};
                 } else if (vm.config.confirmaction === args) {
-                    run();
+                    if (vm.promise) {
+                        vm.promise.resolve({ 'action': 'run' });
+                        vm.promise = null;
+                    }
                     vm.toggleModal();
                 }
             }
@@ -225,21 +275,17 @@ angular.module('lp.jobs')
         }
 
         vm.runJob = function (job) {
-            vm.toRun = job;
+            var deferred = $q.defer();
+            vm.promise = deferred;
             var show = vm.showWarningRun(job);
             if (show) {
                 vm.toggleModal();
             } else {
-                run();
+                deferred.resolve({ 'action': 'run' });
             }
-        }
 
-        function run(){
-            vm.toRun.status = 'Running';
-            JobsStore.runJob(vm.toRun).then(function (updatedJob) {
-            });
+            return deferred.promise;
         }
-
         vm.clearMessages = function () {
             vm.successMsg = null;
             vm.errorMsg = null;

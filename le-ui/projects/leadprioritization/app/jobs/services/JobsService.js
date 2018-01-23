@@ -161,6 +161,7 @@ angular
                 var stepRunning = getStepRunning(job);
                 var stepsCompleted = getStepsCompleted(job);
                 var stepFailed = getStepFailed(job);
+                var subJobs = gestSubJobs(job);
 
                 if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     stepRunning = "score_training_set";
@@ -181,6 +182,7 @@ angular
                             stepRunning: stepRunning,
                             stepsCompleted: stepsCompleted,
                             stepFailed: stepFailed,
+                            subJobs: subJobs,
                             completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
                             reports: job.reports,
                             applicationId: job.applicationId,
@@ -410,6 +412,13 @@ angular
         }else {
             var actions = JSON.parse(job.inputs.ACTION_IDS);
             return actions.length;
+        }
+    }
+    function gestSubJobs(job) {
+        if(job.subJobs){
+            return job.subJobs;
+        } else{
+            return [];
         }
     }
 

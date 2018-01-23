@@ -1,0 +1,66 @@
+<div class="le-cell le-col-start-1 le-col-span-2">
+
+    <span ng-if="!vm.showRunButton(job)">
+        {{job.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
+    </span>
+</div>
+<div class="le-cell le-col-start-3 le-col-span-2">
+    <span>
+        {{job.displayName}}
+    </span>
+</div>
+<div class="le-cell le-col-start-5 le-col-span-1">
+    <span>
+        {{job.actionsCount}}
+    </span>
+</div>
+<div class="le-cell le-col-start-6 le-col-span-1">
+    <span>
+        {{jobStatus}}
+        <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="vm.isJobRunning(job)"></i>
+        <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="vm.isJobFailed(job) && !vm.isJobRunning(job)"></i>
+    </span>
+</div>
+<div class="le-cell le-col-start-7 le-col-span-2">
+    <span ng-if="!vm.isJobRunning(job) && vm.showRunButton(job) && vm.canLastJobRun()" class="contact">
+        Schedule at {{job.startTimestamp ? (job.startTimestamp | date : 'MM/dd/yyyy h:mma') : ''}}
+    </span>
+</div>
+<div class="le-cell le-col-start-9 le-col-span-1">
+    <button class="button blue-button" ng-if="vm.showRunButton(job)" ng-click="vm.runJob(job)" ng-disabled="!vm.canLastJobRun()">
+        Run Now
+    </button>
+
+    <a href="javascript:void(0)" ng-if="!vm.showRunButton(job) && !vm.isJobRunning(job) && !vm.isJobFailed(job)">
+        Report
+    </a>
+</div>
+<div class="le-cell le-col-start-10 le-col-span-3">
+    <span>
+        <span ng-if="vm.isJobFailed(job)">Please Contact Lattice Support</span>
+    </span>
+    <!-- <a href="javascript:void(0)" data-toggle="collapse">
+        <i class="fa fa-plus-square-o" aria-hidden="true" ng-click="add()"></i>
+    </a> -->
+    <a href="javascript:void(0)" data-toggle="collapse" ng-click="expandRow()" ng-show="!expanded">
+        <span>
+            <i class="fa fa-angle-double-down fa-lg"></i>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" data-toggle="collapse" ng-click="expandRow()" data-ng-show="expanded">
+        <span>
+            <i class="fa fa-angle-double-up fa-lg"></i>
+        </span>
+    </a>
+    
+</div>
+<div class="le-row" ng-if="loading">
+    <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+        <span>
+            <span class="loading-small"></span>
+        </span>
+    </div>
+</div>
+<chevron class="le-row" stepsconfig="stepsConfig" stepscompleted="stepscompleted" jobstatus="jobStatus" ng-if="expanded && jobStatus != 'Pending'"></chevron>
+<import-job-row-sub-jobs ng-if="expanded" subjobs="subjobs"></import-job-row-sub-jobs>
