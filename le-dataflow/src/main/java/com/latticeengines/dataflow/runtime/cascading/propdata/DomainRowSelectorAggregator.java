@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.util.HashSet;
+
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,7 +21,6 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
     private String numOfLocField;
     private String groupByField;
     private String domainField;
-    private String dunsField;
     private String rootDunsField;
     private String dunsTypeField;
     private String treeNum;
@@ -31,7 +32,7 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
     private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
 
     public DomainRowSelectorAggregator(Fields fieldDeclaration, String groupByField, String domainField,
-            String dunsField, String rootDunsField, String dunsTypeField, String salesVolField,
+            String rootDunsField, String dunsTypeField, String salesVolField,
             String totalEmpField, String numOfLocField, String treeNum, String reasonType,
             Long multLargeCompThreshold) {
         super(fieldDeclaration);
@@ -40,7 +41,6 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
         this.numOfLocField = numOfLocField;
         this.groupByField = groupByField;
         this.domainField = domainField;
-        this.dunsField = dunsField;
         this.rootDunsField = rootDunsField;
         this.dunsTypeField = dunsTypeField;
         this.treeNum = treeNum;
@@ -51,15 +51,15 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
     public static class Context extends BaseAggregator.Context {
         Tuple result;
         Object domain = null;
-        Object duns = null;
         Object rootDuns = null;
         Object dunsType = null;
         Long maxSalesVolume = 0L;
         int maxEmpTotal = 0;
         int maxNumOfLoc = 0;
         int treeNumber = 0;
-        int count = 0;
         Object reasonType = null;
+        int largeCompCount = 0;
+        HashSet<Object> visitedRootDuns = new HashSet<Object>();
     }
 
     @Override
@@ -84,21 +84,28 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        context.count++;
-        Long salesVolVal = arguments.getLong(salesVolField);
-        String empCount = arguments.getString(totalEmpField);
-        int empTotalVal = 0;
-        if (empCount != null)
-            empTotalVal = Integer.valueOf(arguments.getString(totalEmpField));
-        int numOfLocVal = arguments.getInteger(numOfLocField);
+        Long salesVolVal = (Long) arguments.getObject(salesVolField);
+        Integer empTotalVal = 0;
+        if (empTotalVal != null)
+            empTotalVal = Integer.parseInt(arguments.getString(totalEmpField));
+        Integer numOfLocVal = (Integer) arguments.getObject(numOfLocField);
+        Object rootDuns = arguments.getObject(rootDunsField);
         int treeNumVal = arguments.getInteger(treeNum);
         int res = checkRuleLargerLong(salesVolVal, context.maxSalesVolume);
+        // if salesVolume is greater
         if (res > 0) {
             context.maxSalesVolume = salesVolVal;
             context.treeNumber = treeNumVal;
-            if (salesVolVal > multLargeCompThreshold)
-                context.reasonType = MULTIPLE_LARGE_COMPANY;
-            else
+            if (!context.visitedRootDuns.contains(rootDuns) && salesVolVal > multLargeCompThreshold) {
+                // checking if in a group there are more than one large sales
+                // volume making it unable to select one of them
+                if (context.largeCompCount > 0) {
+                    context.reasonType = MULTIPLE_LARGE_COMPANY;
+                } else {
+                    context.largeCompCount += 1;
+                    context.reasonType = HIGHER_SALES_VOLUME;
+                }
+            } else
                 context.reasonType = HIGHER_SALES_VOLUME;
             if (context.maxEmpTotal == 0 || (empTotalVal > context.maxEmpTotal)) {
                 context.maxEmpTotal = empTotalVal;
@@ -106,6 +113,7 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
             }
             return update(context, arguments);
         } else if (res == 0) {
+            // if salesVolume are equal then need to check empTotal
             res = checkRuleLargerIntegers(empTotalVal, context.maxEmpTotal);
             if (res != 0) {
                 if (res > 0) {
@@ -128,6 +136,7 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
                 return context;
             }
         }
+        context.visitedRootDuns.add(rootDuns);
         return context;
     }
 
@@ -153,7 +162,6 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
 
     private Context update(Context context, TupleEntry arguments) {
         context.domain = arguments.getString(domainField);
-        context.duns = arguments.getString(dunsField);
         context.rootDuns = arguments.getString(rootDunsField);
         context.dunsType = arguments.getString(dunsTypeField);
         return context;
@@ -165,11 +173,15 @@ public class DomainRowSelectorAggregator extends BaseAggregator<DomainRowSelecto
         context.result = Tuple.size(getFieldDeclaration().size());
         // setting tree number and domain
         context.result.set(0, context.domain);
-        context.result.set(1, context.duns);
-        context.result.set(2, context.rootDuns);
-        context.result.set(3, context.dunsType);
-        context.result.set(4, context.treeNumber);
-        context.result.set(5, context.reasonType);
+        if (context.reasonType.equals(MULTIPLE_LARGE_COMPANY)) {
+            context.result.set(1, null);
+            context.result.set(2, null);
+        } else {
+            context.result.set(1, context.rootDuns);
+            context.result.set(2, context.dunsType);
+        }
+        context.result.set(3, context.treeNumber);
+        context.result.set(4, context.reasonType);
         return context.result;
     }
 

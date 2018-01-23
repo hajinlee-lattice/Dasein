@@ -5,22 +5,24 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ComputeRootDunsAndTypeFunction;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.FormDomOwnershipTableConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+
+import cascading.tuple.Fields;
 
 @Component(CleanupAmSeedSrcFlow.DATAFLOW_BEAN_NAME)
 public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipTableConfig> {
     public final static String DATAFLOW_BEAN_NAME = "CleanupAmSeedSrcFlow";
     public final static String TRANSFORMER_NAME = "CleanupAmSeedSrcTransformer";
     private final static String REASON_TYPE = "REASON_TYPE";
-    private final static String FRANCHISE = "FRANCHISE";
-    private final static String MULTIPLE_LARGE_COMPANY = "MULTIPLE_LARGE_COMPANY";
+    private final static String HIGHER_SALES_VOLUME = "HIGHER_SALES_VOLUME";
+    private final static String HIGHER_EMP_TOTAL = "HIGHER_EMP_TOTAL";
+    private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
     private final static String ROOT_DUNS = "ROOT_DUNS";
     private final static String DUNS_TYPE = "DUNS_TYPE";
-    private final static String GU_TYPE_VAL = "GU";
-    private final static String DU_TYPE_VAL = "DU";
-    private final static String DUNS_TYPE_VAL = "DUNS";
     private final static String IS_RETAINED = "IS_RETAINED";
     private final static String RETAIN_YES = "YES";
     private final static String RETAIN_NO = "NO";
@@ -43,44 +45,120 @@ public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        FormDomOwnershipTableConfig config = getTransformerConfig(parameters);
         Node domOwnershipTable = addSource(parameters.getBaseTables().get(0));
         Node amSeed = addSource(parameters.getBaseTables().get(1));
-        // filter null duns from amSeed
-        String checkNullDuns = config.getAmSeedDuns() + " != null && !" + config.getAmSeedDuns() + ".equals(\"\")";
-        String checkNullDomain = config.getAmSeedDomain() + " != null && !" + config.getAmSeedDomain()
-                + ".equals(\"\")";
+        // filter null domain and duns from amSeed
+        String checkNullDomainDuns = String.join(" && ", DataCloudConstants.AMS_ATTR_DUNS + " != null",
+                "!" + DataCloudConstants.AMS_ATTR_DUNS + ".equals(\"\")",
+                DataCloudConstants.AMS_ATTR_DOMAIN + " != null",
+                "!" + DataCloudConstants.AMS_ATTR_DOMAIN + ".equals(\"\")");
         Node amSeedFiltered = amSeed //
-                .filter(checkNullDuns, new FieldList(config.getAmSeedDuns())) //
-                .filter(checkNullDomain, new FieldList(config.getAmSeedDomain()));
-        String filterDomOwnTable = "!" + REASON_TYPE + ".equals(\"" + FRANCHISE + "\") && !" + REASON_TYPE
-                + ".equals(\"" + MULTIPLE_LARGE_COMPANY + "\")";
+                .filter(checkNullDomainDuns,
+                        new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS));
+        String filterDomOwnTable = String.join(" || ", REASON_TYPE + ".equals(\"" + HIGHER_SALES_VOLUME + "\")",
+                REASON_TYPE + ".equals(\"" + HIGHER_EMP_TOTAL + "\")",
+                REASON_TYPE + ".equals(\"" + HIGHER_NUM_OF_LOC + "\")");
         // retaining required columns : domain, root duns, dunsType
-        Node domOwnTableFilter = domOwnershipTable //
+        Node domOwnTableForCleanup = domOwnershipTable //
                 .filter(filterDomOwnTable, new FieldList(REASON_TYPE)) //
-                .rename(new FieldList(config.getAmSeedDomain()), new FieldList(renameField(config.getAmSeedDomain()))) //
-                .retain(new FieldList(renameField(config.getAmSeedDomain()), ROOT_DUNS, DUNS_TYPE));
-        // amSeed Cleanup join
-        Node joinAmSeedWithDomOwnTable = amSeedFiltered //
-                .join(config.getAmSeedDomain(), domOwnTableFilter, renameField(config.getAmSeedDomain()),
-                        JoinType.LEFT);
+                .rename(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS),
+                        new FieldList(renameField(DataCloudConstants.AMS_ATTR_DOMAIN), renameField(ROOT_DUNS))) //
+                .retain(new FieldList(renameField(DataCloudConstants.AMS_ATTR_DOMAIN), renameField(ROOT_DUNS),
+                        DUNS_TYPE));
 
-        // filter records not in domain ownership table
-        String filterNullDom = renameField(config.getAmSeedDomain()) + " == null";
-        Node recordsNotInDomOwnTable = joinAmSeedWithDomOwnTable //
-                .filter(filterNullDom, new FieldList(renameField(config.getAmSeedDomain()))) //
+        amSeedFiltered = amSeedFiltered //
+                .addColumnWithFixedValue(ROOT_DUNS, null, String.class);
+
+        Node finalCleanedupAmSeed = computeRootDunsAndCompare(amSeedFiltered, domOwnTableForCleanup,
+                checkNullDomainDuns);
+
+        String filterNullDomain = DataCloudConstants.AMS_ATTR_DOMAIN + " == null && " + DataCloudConstants.AMS_ATTR_DUNS
+                + " != null";
+        String filterDomDunsExist = DataCloudConstants.AMS_ATTR_DOMAIN + " != null && "
+                + DataCloudConstants.AMS_ATTR_DUNS + " != null";
+        // remove duns only entries if another record exists with the value of
+        // same duns
+        Node cleanedUpAmSeedWithNullDom = finalCleanedupAmSeed //
+                .filter(filterNullDomain,
+                        new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS)) //
+                .renamePipe("cleanedUpAmSeedWithNullDom");
+        Node cleanedUpAmSeedWithDom = finalCleanedupAmSeed //
+                .filter(filterDomDunsExist,
+                        new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS));
+
+        Node renamedCleanedUpAmSeedWithDom = cleanedUpAmSeedWithDom //
+                .rename(new FieldList(DataCloudConstants.AMS_ATTR_DUNS),
+                        new FieldList(renameField(DataCloudConstants.AMS_ATTR_DUNS))) //
+                .retain(new FieldList(DataCloudConstants.ATTR_DU_DUNS, renameField(DataCloudConstants.AMS_ATTR_DUNS),
+                        DataCloudConstants.ATTR_EMPLOYEE_TOTAL, DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS,
+                        DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.AMS_ATTR_DOMAIN,
+                        DataCloudConstants.ATTR_GU_DUNS, ROOT_DUNS)) //
+                .renamePipe("cleanedUpAmSeedWithDom");
+        String filterRecordsToCleanup = renameField(DataCloudConstants.AMS_ATTR_DUNS) + " == null";
+        // to check the DUNS that persist with domain as well
+        Node dunsOnlyEntriesCleanedup = cleanedUpAmSeedWithNullDom //
+                .join(DataCloudConstants.AMS_ATTR_DUNS, renamedCleanedUpAmSeedWithDom,
+                        renameField(DataCloudConstants.AMS_ATTR_DUNS), JoinType.LEFT) //
+                .filter(filterRecordsToCleanup, new FieldList(renameField(DataCloudConstants.AMS_ATTR_DUNS))) //
+                .retain(new FieldList(amSeed.getFieldNames()));
+        cleanedUpAmSeedWithDom = cleanedUpAmSeedWithDom //
+                .retain(new FieldList(amSeed.getFieldNames()));
+        Node finalCleanedupResult = cleanedUpAmSeedWithDom //
+                .merge(dunsOnlyEntriesCleanedup);
+        return finalCleanedupResult;
+    }
+
+    private static Node computeRootDunsAndCompare(Node amSeedFiltered, Node domOwnTableForCleanup,
+            String checkNullDomainDuns) {
+        // add ROOT_DUNS to amSeedFiltered
+        ComputeRootDunsAndTypeFunction computeRootDuns = new ComputeRootDunsAndTypeFunction(
+                new Fields(amSeedFiltered.getFieldNamesArray()), DataCloudConstants.ATTR_GU_DUNS,
+                DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS, DUNS_TYPE);
+
+        Node amSeedWithRootDuns = amSeedFiltered //
+                .apply(computeRootDuns, new FieldList(amSeedFiltered.getFieldNames()), amSeedFiltered.getSchema(),
+                        new FieldList(amSeedFiltered.getFieldNames()), Fields.REPLACE);
+
+        String amSeedRootDunsNotNull = ROOT_DUNS + " != null";
+        String domOwnTabRootDunsNotNull = renameField(ROOT_DUNS) + " != null";
+
+        // filter ROOT_DUNS = null from DomainOwnershipTable and AMSeedFiltered
+        Node filterAmSeedWithRootDuns = amSeedWithRootDuns //
+                .filter(amSeedRootDunsNotNull, new FieldList(ROOT_DUNS));
+        Node filterDomOwnTabWithRootDuns = domOwnTableForCleanup //
+                .filter(domOwnTabRootDunsNotNull, new FieldList(renameField(ROOT_DUNS)));
+
+        // amSeed left join domainOwnTable
+        Node joinAmSeedWithDomOwnTable = filterAmSeedWithRootDuns //
+                .join(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN), filterDomOwnTabWithRootDuns,
+                        new FieldList(renameField(DataCloudConstants.AMS_ATTR_DOMAIN)), JoinType.LEFT);
+
+        // Not in domOwnTable are : having TREE_NUMBER = 1 and ones that are not
+        // to be cleaned up (like FRANCHISE/MULTIPLE_LARGE_COMPANY)
+        String filterDomainNull = renameField(DataCloudConstants.AMS_ATTR_DOMAIN) + " == null";
+        Node recNotInDomOwnTable = joinAmSeedWithDomOwnTable //
+                .filter(filterDomainNull, new FieldList(renameField(DataCloudConstants.AMS_ATTR_DOMAIN))) //
                 .retain(new FieldList(amSeedFiltered.getFieldNames()));
-        String filterNotNullDom = renameField(config.getAmSeedDomain()) + " != null";
-        Node recordsInDomOwnTable = joinAmSeedWithDomOwnTable //
-                .filter(filterNotNullDom, new FieldList(renameField(config.getAmSeedDomain())));
 
-        Node retainedGu = filterGuAmSeed(config, recordsInDomOwnTable);
-        Node retainedDu = filterDuAmSeed(config, recordsInDomOwnTable);
-        Node retainedDuns = filterDunsAmSeed(config, recordsInDomOwnTable);
+        String filterDomainNotNull = renameField(DataCloudConstants.AMS_ATTR_DOMAIN) + " != null";
+        Node recInDomOwnTable = joinAmSeedWithDomOwnTable //
+                .filter(filterDomainNotNull, new FieldList(renameField(DataCloudConstants.AMS_ATTR_DOMAIN)));
 
-        Node amSeedWithRetain = retainedGu //
-                .merge(retainedDu) //
-                .merge(retainedDuns);
+        // expression function to check if ROOT_DUNS of amSeed and domOwnTable
+        // are same : if equal then
+        // mark RETAIN=YES and if not equal then mark RETAIN=NO
+        String rootDunsEqual = ROOT_DUNS + ".equals(" + renameField(ROOT_DUNS) + ")";
+        String rootDunsNotEqual = "!" + ROOT_DUNS + ".equals(" + renameField(ROOT_DUNS) + ")";
+        Node chkRecMatchInDomOwnTab = recInDomOwnTable //
+                .filter(rootDunsEqual, new FieldList(ROOT_DUNS, renameField(ROOT_DUNS))) //
+                .addColumnWithFixedValue(IS_RETAINED, RETAIN_YES, String.class);
+
+        Node chkRecNotMatchInDomOwnTab = recInDomOwnTable //
+                .filter(rootDunsNotEqual, new FieldList(ROOT_DUNS, renameField(ROOT_DUNS))) //
+                .addColumnWithFixedValue(IS_RETAINED, RETAIN_NO, String.class);
+
+        Node amSeedWithRetain = chkRecMatchInDomOwnTab //
+                .merge(chkRecNotMatchInDomOwnTab);
 
         String filterRetainPresent = IS_RETAINED + ".equals(\"" + RETAIN_YES + "\")";
         String filterNotRetain = IS_RETAINED + ".equals(\"" + RETAIN_NO + "\")";
@@ -90,8 +168,8 @@ public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
             filterNotRetained = amSeedWithRetain //
                     .filter(filterNotRetain, new FieldList(IS_RETAINED)) //
                     .addColumnWithFixedValue(NULL_DOMAIN, null, String.class) //
-                    .rename(new FieldList(config.getAmSeedDomain(), NULL_DOMAIN),
-                            new FieldList(NULL_DOMAIN, config.getAmSeedDomain())) //
+                    .rename(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, NULL_DOMAIN),
+                            new FieldList(NULL_DOMAIN, DataCloudConstants.AMS_ATTR_DOMAIN)) //
                     .retain(new FieldList(amSeedFiltered.getFieldNames()));
 
             filterRetained = amSeedWithRetain //
@@ -101,121 +179,12 @@ public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
 
         Node finalCleanedupAmSeed = filterNotRetained //
                 .merge(filterRetained) //
-                .merge(recordsNotInDomOwnTable);
-
-        String filterNullDomain = config.getAmSeedDomain() + " == null && " + config.getAmSeedDuns() + " != null";
-        String filterDomDunsExist = config.getAmSeedDomain() + " != null && " + config.getAmSeedDuns() + " != null";
-        // remove duns only entries if another record exists with the value of
-        // same duns
-        Node cleanedUpAmSeedWithNullDom = finalCleanedupAmSeed //
-                .filter(filterNullDomain, new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns())) //
-                .renamePipe("cleanedUpAmSeedWithNullDom");
-        Node cleanedUpAmSeedWithDom = finalCleanedupAmSeed //
-                .filter(filterDomDunsExist, new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns())) //
-                .renamePipe("cleanedUpAmSeedWithDom");
-        Node dunsOnlyEntriesToCleanup = cleanedUpAmSeedWithNullDom //
-                .join(config.getAmSeedDuns(), cleanedUpAmSeedWithDom, config.getAmSeedDuns(), JoinType.INNER) //
-                .retain(new FieldList(cleanedUpAmSeedWithNullDom.getFieldNames())) //
-                .rename(new FieldList(config.getAmSeedDuns()), new FieldList(renameField(config.getAmSeedDuns()))) //
-                .retain(new FieldList(renameField(config.getAmSeedDuns())));
-        if (dunsOnlyEntriesToCleanup != null) {
-            String filterRecordsToCleanup = renameField(config.getAmSeedDuns()) + " == null";
-            finalCleanedupAmSeed = finalCleanedupAmSeed //
-                    .join(config.getAmSeedDuns(), dunsOnlyEntriesToCleanup, renameField(config.getAmSeedDuns()),
-                            JoinType.LEFT) //
-                    .filter(filterRecordsToCleanup, new FieldList(renameField(config.getAmSeedDuns()))) //
-                    .retain(new FieldList(finalCleanedupAmSeed.getFieldNames()));
-        }
-        return finalCleanedupAmSeed;
-    }
-
-    private static Node filterGuAmSeed(FormDomOwnershipTableConfig config, Node recordsInDomOwnTable) {
-        // filter GU
-        String filterGuExp = DUNS_TYPE + ".equals(\"" + GU_TYPE_VAL + "\")";
-        String filterNullGu = config.getAmSeedGuDuns() + " != null";
-        Node filterGuFromJoinedResult = recordsInDomOwnTable //
-                .filter(filterGuExp, new FieldList(DUNS_TYPE)) //
-                .filter(filterNullGu, new FieldList(config.getAmSeedGuDuns()));
-        Node retainedGu = null;
-        if (filterGuFromJoinedResult != null) {
-            String guExpRetain = config.getAmSeedGuDuns() + ".equals(" + ROOT_DUNS + ")";
-            String guExpNonRetain = "!" + config.getAmSeedGuDuns() + ".equals(" + ROOT_DUNS + ")";
-            // apply filter to check if GU and rootType value are same
-            Node filterRetainedFromGu = filterGuFromJoinedResult //
-                    .filter(guExpRetain, new FieldList(config.getAmSeedGuDuns(), ROOT_DUNS));
-
-            if (filterRetainedFromGu != null)
-                filterRetainedFromGu = filterRetainedFromGu //
-                        .addColumnWithFixedValue(IS_RETAINED, RETAIN_YES, String.class);
-            Node filterNonRetainedFromGu = filterGuFromJoinedResult //
-                    .filter(guExpNonRetain, new FieldList(config.getAmSeedGuDuns(), ROOT_DUNS)); //
-            if (filterNonRetainedFromGu != null)
-                filterNonRetainedFromGu = filterNonRetainedFromGu.addColumnWithFixedValue(IS_RETAINED, RETAIN_NO,
-                        String.class);
-
-            retainedGu = filterRetainedFromGu //
-                    .merge(filterNonRetainedFromGu);
-        }
-        return retainedGu;
-    }
-
-    private static Node filterDuAmSeed(FormDomOwnershipTableConfig config, Node recordsInDomOwnTable) {
-        // filter DU
-        String filterDuExp = DUNS_TYPE + ".equals(\"" + DU_TYPE_VAL + "\")";
-        String filterNullDu = config.getAmSeedDuDuns() + " != null";
-        Node filterDuFromJoinedResult = recordsInDomOwnTable //
-                .filter(filterDuExp, new FieldList(DUNS_TYPE)) //
-                .filter(filterNullDu, new FieldList(config.getAmSeedDuDuns()));
-
-        Node retainedDu = null;
-        if (filterDuFromJoinedResult != null) {
-            String duExpRetain = config.getAmSeedDuDuns() + ".equals(" + ROOT_DUNS + ")";
-            String duExpNonRetain = "!" + config.getAmSeedDuDuns() + ".equals(" + ROOT_DUNS + ")";
-            // apply filter to check if DU and rootType value are same
-            Node filterRetainedFromDu = filterDuFromJoinedResult //
-                    .filter(duExpRetain, new FieldList(config.getAmSeedDuDuns(), ROOT_DUNS));
-            if (filterRetainedFromDu != null)
-                filterRetainedFromDu = filterRetainedFromDu //
-                    .addColumnWithFixedValue(IS_RETAINED, RETAIN_YES, String.class);
-            Node filterNonRetainedFromDu = filterDuFromJoinedResult //
-                    .filter(duExpNonRetain, new FieldList(config.getAmSeedDuDuns(), ROOT_DUNS));
-            if (filterNonRetainedFromDu != null)
-                filterNonRetainedFromDu = filterNonRetainedFromDu.addColumnWithFixedValue(IS_RETAINED, RETAIN_NO,
-                        String.class);
-            retainedDu = filterRetainedFromDu //
-                    .merge(filterNonRetainedFromDu);
-        }
-        return retainedDu;
-    }
-
-    private static Node filterDunsAmSeed(FormDomOwnershipTableConfig config, Node recordsInDomOwnTable) {
-        // filter DUNS
-        String filterDunsExp = DUNS_TYPE + ".equals(\"" + DUNS_TYPE_VAL + "\")";
-        String filterNullDuns = config.getAmSeedDuns() + " != null";
-        Node filterDunsFromJoinedResult = recordsInDomOwnTable //
-                .filter(filterDunsExp, new FieldList(DUNS_TYPE)) //
-                .filter(filterNullDuns, new FieldList(config.getAmSeedDuns()));
-
-        Node retainedDuns = null;
-        if(filterDunsFromJoinedResult != null) {
-            String dunsExpRetain = config.getAmSeedDuns() + ".equals(" + ROOT_DUNS + ")";
-            String dunsExpNonRetain = "!" + config.getAmSeedDuns() + ".equals(" + ROOT_DUNS + ")";
-            // apply filter to check if DUNS and rootType value are same
-            Node filterRetainedFromDuns = filterDunsFromJoinedResult //
-                    .filter(dunsExpRetain, new FieldList(config.getAmSeedDuns(), ROOT_DUNS));
-            if(filterRetainedFromDuns != null)
-                filterRetainedFromDuns = filterRetainedFromDuns //
-                    .addColumnWithFixedValue(IS_RETAINED, RETAIN_YES, String.class);
-            Node filterNonRetainedFromDuns = filterDunsFromJoinedResult //
-                    .filter(dunsExpNonRetain, new FieldList(config.getAmSeedDuns(), ROOT_DUNS));
-            if(filterNonRetainedFromDuns != null)
-                filterNonRetainedFromDuns = filterNonRetainedFromDuns //
-                    .addColumnWithFixedValue(IS_RETAINED, RETAIN_NO, String.class);
-            retainedDuns = filterRetainedFromDuns //
-                    .merge(filterNonRetainedFromDuns);
-        }
-        return retainedDuns;
-
+                .merge(recNotInDomOwnTable);
+        // filtering null domain & duns row introduced by cleanup process
+        Node filteredNullFinalNode = finalCleanedupAmSeed //
+                .filter(checkNullDomainDuns,
+                        new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS));
+        return filteredNullFinalNode;
     }
 
     private static String renameField(String field) {

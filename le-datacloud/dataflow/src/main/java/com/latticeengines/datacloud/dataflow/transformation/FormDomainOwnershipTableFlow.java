@@ -8,8 +8,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ComputeRootDunsAndTypeFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainRowSelectorAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainTreeCountAggregator;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.FormDomOwnershipTableConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -21,14 +23,15 @@ import cascading.tuple.Fields;
 public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOwnershipTableConfig> {
     public final static String DATAFLOW_BEAN_NAME = "FormDomainOwnershipTableFlow";
     public final static String TRANSFORMER_NAME = "FormDomOwnershipTableTransformer";
-    private final static String GU_TYPE_VAL = "GU";
-    private final static String DU_TYPE_VAL = "DU";
-    private final static String DUNS_TYPE_VAL = "DUNS";
     private final static String ROOT_DUNS = "ROOT_DUNS";
     private final static String DUNS_TYPE = "DUNS_TYPE";
     private final static String TREE_NUMBER = "TREE_NUMBER";
     private final static String REASON_TYPE = "REASON_TYPE";
     private final static String FRANCHISE = "FRANCHISE";
+    private final static String NULL_ROOT_DUNS = "NULL_ROOT_DUNS";
+    private final static String NULL_ROOT_TYPE = "NULL_ROOT_TYPE";
+    private final static String ORB_SEC_PRI_DOMAIN = "PrimaryDomain";
+    private final static String ORB_SRC_SEC_DOMAIN = "SecondaryDomain";
 
     @Override
     public String getDataFlowBeanName() {
@@ -51,38 +54,37 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
         Node amSeed = addSource(parameters.getBaseTables().get(0));
         Node orbSecSrc = addSource(parameters.getBaseTables().get(1));
         // filter null duns from amSeed
-        String checkNullDuns = config.getAmSeedDuns() + " != null && !" + config.getAmSeedDuns() + ".equals(\"\")";
-        String checkNullDomain = config.getAmSeedDomain() + " != null && !" + config.getAmSeedDomain()
-                + ".equals(\"\")";
+        String checkNullDunsDomain = String.join(" && ", DataCloudConstants.AMS_ATTR_DUNS + " != null",
+                "!" + DataCloudConstants.AMS_ATTR_DUNS + ".equals(\"\")",
+                DataCloudConstants.AMS_ATTR_DOMAIN + " != null",
+                "!" + DataCloudConstants.AMS_ATTR_DOMAIN + ".equals(\"\")");
         Node amSeedFilteredNull = amSeed //
-                .filter(checkNullDuns, new FieldList(config.getAmSeedDuns())) //
-                .filter(checkNullDomain, new FieldList(config.getAmSeedDomain()));
+                .filter(checkNullDunsDomain,
+                        new FieldList(DataCloudConstants.AMS_ATTR_DUNS, DataCloudConstants.AMS_ATTR_DOMAIN));
         Node amSeedDomDuns = amSeedFilteredNull //
-                .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns())) //
+                .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS)) //
                 .renamePipe("amSeedDomDuns");
-        String chkNullPriDom = config.getOrbSecPriDom() + " != null && !" + config.getOrbSecPriDom() + ".equals(\"\")";
-        String chkNullSecDom = config.getOrbSrcSecDom() + " != null && !" + config.getOrbSrcSecDom() + ".equals(\"\")";
-        // filter null primary and secondary domains from orbSecondary
-        Node orbSecSrcFiltered = orbSecSrc //
-                .filter(chkNullPriDom, new FieldList(config.getOrbSecPriDom())) //
-                .filter(chkNullSecDom, new FieldList(config.getOrbSrcSecDom()));
         // Join orbSecSrc with amSeed on domain to get other fields info
-        Node orbSecJoinedResult = orbSecSrcFiltered //
-                .join(config.getOrbSecPriDom(), amSeedDomDuns, config.getAmSeedDomain(), JoinType.INNER) //
-                .retain(new FieldList(config.getOrbSrcSecDom(), config.getAmSeedDuns())) //
-                .rename(new FieldList(config.getOrbSrcSecDom()), new FieldList(config.getAmSeedDomain())) //
-                .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns()));
+        Node orbSecJoinedResult = orbSecSrc //
+                .join(ORB_SEC_PRI_DOMAIN, amSeedDomDuns, DataCloudConstants.AMS_ATTR_DOMAIN, JoinType.INNER) //
+                .retain(new FieldList(ORB_SRC_SEC_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS)) //
+                .rename(new FieldList(ORB_SRC_SEC_DOMAIN), new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN)) //
+                .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS));
         // merge nodes : orbSecSrc and amSeed, then dedup the result
         Node mergedDomDuns = amSeedDomDuns //
                 .merge(orbSecJoinedResult) //
-                .groupByAndLimit(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns()), 1);
+                .groupByAndLimit(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS),
+                        1);
         // join merged list of domain DUNS with amSeed : to get required
         // columns(SalesVolume, totalEmp, numOfLocations)
         Node mergedDomDunsWithAmSeed = mergedDomDuns //
-                .join(config.getAmSeedDuns(), amSeedFilteredNull, config.getAmSeedDuns(), JoinType.INNER) //
-                .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns(), config.getAmSeedGuDuns(),
-                        config.getAmSeedDuDuns(), config.getUsSalesVolume(), config.getTotalEmp(),
-                        config.getNumOfLoc()));
+                .join(DataCloudConstants.AMS_ATTR_DUNS, amSeedFilteredNull, DataCloudConstants.AMS_ATTR_DUNS,
+                        JoinType.INNER) //
+                .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS,
+                        DataCloudConstants.ATTR_GU_DUNS,
+                        DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.ATTR_SALES_VOL_US,
+                        DataCloudConstants.ATTR_EMPLOYEE_TOTAL,
+                        DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS));
         Node rootTypePopulated = filterAndSetRootDunsType(mergedDomDunsWithAmSeed, amSeed, config);
         Node domOwnershipTable = constructDomOwnershipTable(rootTypePopulated, config);
         return domOwnershipTable;
@@ -90,87 +92,90 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
 
     private static Node filterAndSetRootDunsType(Node mergedDomDunsWithAmSeed, Node amSeed,
             FormDomOwnershipTableConfig config) {
-        // rootType selection expressions
-        String chkGuExp = config.getAmSeedGuDuns() + " != null";
-        String chkGuNull = config.getAmSeedGuDuns() + " == null";
-        String chkDuNotNull = config.getAmSeedDuDuns() + " != null";
-        String chkDuNull = config.getAmSeedDuDuns() + " == null";
-        String rootDunsFirmo = config.getAmSeedDuns() + ".equals(" + ROOT_DUNS + ")";
-        String filterNullDuns = ROOT_DUNS + " != null";
-        // Setting RootDunsType based on selection criteria
-        Node rootTypeGu = mergedDomDunsWithAmSeed //
-                .apply(String.format("%s ? %s : null", chkGuExp, config.getAmSeedGuDuns()),
-                        new FieldList(config.getAmSeedGuDuns()), new FieldMetadata(ROOT_DUNS, String.class)) //
-                .addColumnWithFixedValue(DUNS_TYPE, GU_TYPE_VAL, String.class);
+        String rootDunsFirmo = DataCloudConstants.AMS_ATTR_DUNS + ".equals(" + ROOT_DUNS + ")";
 
-        Node rootTypeDu = mergedDomDunsWithAmSeed //
-                .apply(String.format("%s ? (%s ? %s : null) : null", chkGuNull, chkDuNotNull, config.getAmSeedDuDuns()),
-                        new FieldList(config.getAmSeedGuDuns(), config.getAmSeedDuDuns()),
-                        new FieldMetadata(ROOT_DUNS, String.class)) //
-                .addColumnWithFixedValue(DUNS_TYPE, DU_TYPE_VAL, String.class);
+        // Adding the required columns
+        mergedDomDunsWithAmSeed = mergedDomDunsWithAmSeed //
+                .addColumnWithFixedValue(ROOT_DUNS, null, String.class) //
+                .addColumnWithFixedValue(DUNS_TYPE, null, String.class);
 
-        Node rootTypeDuns = mergedDomDunsWithAmSeed //
-                .apply(String.format("%s ? (%s ? %s : null) : null", chkDuNull, chkGuNull, config.getAmSeedDuns()),
-                        new FieldList(config.getAmSeedGuDuns(), config.getAmSeedDuDuns(), config.getAmSeedDuns()),
-                        new FieldMetadata(ROOT_DUNS, String.class)) //
-                .addColumnWithFixedValue(DUNS_TYPE, DUNS_TYPE_VAL, String.class);
+        // Setting RootDuns and dunsType based on selection criteria
+        ComputeRootDunsAndTypeFunction computeRootDuns = new ComputeRootDunsAndTypeFunction(
+                new Fields(mergedDomDunsWithAmSeed.getFieldNamesArray()), DataCloudConstants.ATTR_GU_DUNS,
+                DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS, DUNS_TYPE);
 
-        Node rootTypePopulated = rootTypeGu //
-                .merge(rootTypeDu) //
-                .merge(rootTypeDuns) //
-                .filter(filterNullDuns, new FieldList(ROOT_DUNS));
+        Node rootTypePopulated = mergedDomDunsWithAmSeed
+                .apply(computeRootDuns, new FieldList(mergedDomDunsWithAmSeed.getFieldNames()),
+                        mergedDomDunsWithAmSeed.getSchema(), new FieldList(mergedDomDunsWithAmSeed.getFieldNames()),
+                        Fields.REPLACE);
 
         Node rootOfTrees = rootTypePopulated
-                .filter(rootDunsFirmo, new FieldList(config.getAmSeedDuns(), ROOT_DUNS)) //
-                .retain(new FieldList(ROOT_DUNS, config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc())) //
+                .filter(rootDunsFirmo, new FieldList(DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS)) //
+                .retain(new FieldList(ROOT_DUNS, DataCloudConstants.ATTR_SALES_VOL_US,
+                        DataCloudConstants.ATTR_EMPLOYEE_TOTAL, DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS)) //
                 .renamePipe("RootOfTrees");
 
-       Node rootFirmoAdd = rootTypePopulated //
-                .retain(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE) //
-                .rename(new FieldList(ROOT_DUNS), new FieldList(renameField(ROOT_DUNS))) //
-                .retain(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns(), renameField(ROOT_DUNS),
-                        DUNS_TYPE)) //
-                .join(renameField(ROOT_DUNS), rootOfTrees, ROOT_DUNS, JoinType.INNER) //
-                .retain(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE,
-                        config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc()) //
-                .groupByAndLimit(new FieldList(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE,
-                        config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc()), 1);
-        return rootFirmoAdd;
+        Node rootFirmoAdd = rootTypePopulated //
+                .retain(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE) //
+                .join(ROOT_DUNS, rootOfTrees, ROOT_DUNS, JoinType.INNER) //
+                .retain(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE,
+                        DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.ATTR_EMPLOYEE_TOTAL,
+                        DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS);
+
+        Node dedupRootFirmo = rootFirmoAdd //
+                .groupByAndLimit(new FieldList(rootFirmoAdd.getFieldNames()), 1);
+        return dedupRootFirmo;
     }
 
-    private static Node constructDomOwnershipTable(Node dedupedCombinedSet, FormDomOwnershipTableConfig config) {
+    private static Node constructDomOwnershipTable(Node rootTypePopulated, FormDomOwnershipTableConfig config) {
         List<FieldMetadata> fms = fieldMetadataPrep(config);
         DomainTreeCountAggregator agg = new DomainTreeCountAggregator(
-                new Fields(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE, TREE_NUMBER),
-                config.getAmSeedDomain(), config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE);
-        Node domainTreeNumber = dedupedCombinedSet
-                .groupByAndAggregate(new FieldList(config.getAmSeedDomain()), agg, fms) //
+                new Fields(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER),
+                DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE);
+        Node domainTreeNumber = rootTypePopulated
+                .groupByAndAggregate(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN), agg, fms) //
                 .renamePipe("DomainTreeNumber");
+
         String chkFranchiseExp = TREE_NUMBER + " >= " + config.getFranchiseThreshold();
+        // filtering franchise and setting its rootDuns and dunsType as Null
         Node franchiseSet = domainTreeNumber //
                 .filter(chkFranchiseExp, new FieldList(TREE_NUMBER)) //
+                .addColumnWithFixedValue(NULL_ROOT_DUNS, null, String.class) //
+                .addColumnWithFixedValue(NULL_ROOT_TYPE, null, String.class) //
+                .retain(DataCloudConstants.AMS_ATTR_DOMAIN, NULL_ROOT_DUNS, NULL_ROOT_TYPE, TREE_NUMBER) //
+                .rename(new FieldList(NULL_ROOT_DUNS, NULL_ROOT_TYPE), new FieldList(ROOT_DUNS, DUNS_TYPE)) //
+                .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER)) //
                 .addColumnWithFixedValue(REASON_TYPE, FRANCHISE, String.class);
-        String chkTreeCount = TREE_NUMBER + " > 1 && " + TREE_NUMBER + " <= " + config.getFranchiseThreshold();
+
+        String chkTreeCount = TREE_NUMBER + " > 1 && " + TREE_NUMBER + " < " + config.getFranchiseThreshold();
         // filtering domains present in more that one trees
         Node domainInManyTrees = domainTreeNumber //
                 .filter(chkTreeCount, new FieldList(TREE_NUMBER));
-        // join domainTreeNumber with dedupedCombinedSet for remaining columns to be populated
-        Node domainRetain = domainInManyTrees //
-                .rename(new FieldList(config.getAmSeedDomain()), new FieldList(renameField(config.getAmSeedDomain()))) //
-                .retain(new FieldList(renameField(config.getAmSeedDomain()), TREE_NUMBER));
-        Node allColCombined = domainRetain //
-                .join(renameField(config.getAmSeedDomain()), dedupedCombinedSet, config.getAmSeedDomain(),
+        // join domainTreeNumber with dedupedCombinedSet for remaining
+        // columns to be populated
+        Node rootDunsRetain = domainInManyTrees //
+                .rename(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN),
+                        new FieldList(renameField(DataCloudConstants.AMS_ATTR_DOMAIN))) //
+                .retain(new FieldList(renameField(DataCloudConstants.AMS_ATTR_DOMAIN), TREE_NUMBER));
+        Node allColCombined = rootDunsRetain //
+                .join(renameField(DataCloudConstants.AMS_ATTR_DOMAIN), rootTypePopulated,
+                        DataCloudConstants.AMS_ATTR_DOMAIN,
                         JoinType.INNER);
+
         List<FieldMetadata> fmsForDomSelect = fieldMetadataWithReason(config);
+
         // aggregator to choose domain from one of the trees
         DomainRowSelectorAggregator domainSelect = new DomainRowSelectorAggregator(
-                new Fields(config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE, TREE_NUMBER,
+                new Fields(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER,
                         REASON_TYPE),
-                config.getAmSeedDomain(), config.getAmSeedDomain(), config.getAmSeedDuns(), ROOT_DUNS, DUNS_TYPE,
-                config.getUsSalesVolume(), config.getTotalEmp(), config.getNumOfLoc(), TREE_NUMBER, REASON_TYPE,
+                DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE,
+                DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.ATTR_EMPLOYEE_TOTAL,
+                DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS,
+                TREE_NUMBER, REASON_TYPE,
                 config.getMultLargeCompThreshold());
         Node domainRowSelect = allColCombined //
-                .groupByAndAggregate(new FieldList(config.getAmSeedDomain()), domainSelect, fmsForDomSelect) //
+                .groupByAndAggregate(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN), domainSelect, fmsForDomSelect) //
+                .retain(new FieldList(franchiseSet.getFieldNames())) //
                 .renamePipe("DomainRowSelect");
         Node domOwnershipTable = franchiseSet //
                 .merge(domainRowSelect);
@@ -182,17 +187,16 @@ public class FormDomainOwnershipTableFlow extends ConfigurableFlowBase<FormDomOw
     }
 
     private static List<FieldMetadata> fieldMetadataWithReason(FormDomOwnershipTableConfig config) {
-        return Arrays.asList(new FieldMetadata(config.getAmSeedDomain(), String.class), //
-                new FieldMetadata(config.getAmSeedDuns(), String.class), //
+        return Arrays.asList(new FieldMetadata(DataCloudConstants.AMS_ATTR_DOMAIN, String.class), //
                 new FieldMetadata(ROOT_DUNS, String.class), //
+                new FieldMetadata(DUNS_TYPE, String.class), //
                 new FieldMetadata(TREE_NUMBER, Integer.class), //
                 new FieldMetadata(REASON_TYPE, String.class) //
         );
     }
 
     private static List<FieldMetadata> fieldMetadataPrep(FormDomOwnershipTableConfig config) {
-        return Arrays.asList(new FieldMetadata(config.getAmSeedDomain(), String.class), //
-                new FieldMetadata(config.getAmSeedDuns(), String.class), //
+        return Arrays.asList(new FieldMetadata(DataCloudConstants.AMS_ATTR_DOMAIN, String.class), //
                 new FieldMetadata(ROOT_DUNS, String.class), //
                 new FieldMetadata(DUNS_TYPE, String.class), //
                 new FieldMetadata(TREE_NUMBER, Integer.class) //
