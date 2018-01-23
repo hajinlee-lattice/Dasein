@@ -106,7 +106,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     @BeforeClass(groups = { "deployment.lp" })
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         firstTenant = testBed.getMainTestTenant();
         if (EncryptionGlobalState.isEnabled()) {
             ConfigurationController<CustomerSpaceScope> controller = ConfigurationController

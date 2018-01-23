@@ -130,7 +130,6 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         aiModel.setWorkflowType(ModelWorkflowType.CROSS_SELL);
         aiModel.setTargetProducts(generateSeletedProducts());
         aiModel.setTrainingProducts(generateTrainingProducts());
-        aiModel.setTargetCustomerSet("new");
         aiModel.setModelingJobId(APP_JOB_ID);
 
         updateRatingModel(aiModel);
@@ -243,7 +242,6 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(aiModel.getWorkflowType(), ModelWorkflowType.CROSS_SELL);
         Assert.assertNotNull(aiModel.getTrainingProducts());
         Assert.assertNotNull(aiModel.getTrainingProducts().contains(PRODUCT_ID3));
-        Assert.assertEquals(aiModel.getTargetCustomerSet(), "new");
         Assert.assertEquals(aiModel.getModelingJobId().toString(), APP_JOB_ID);
     }
 
@@ -290,7 +288,6 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(aiModel.getWorkflowType());
         Assert.assertNull(aiModel.getTargetProducts());
         Assert.assertNull(aiModel.getTrainingProducts());
-        Assert.assertNull(aiModel.getTargetCustomerSet());
         Assert.assertNull(aiModel.getModelingJobId());
     }
 

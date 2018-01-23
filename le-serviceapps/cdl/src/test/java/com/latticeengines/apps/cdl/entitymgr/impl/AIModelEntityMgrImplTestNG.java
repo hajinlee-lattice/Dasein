@@ -99,7 +99,6 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     public void testUpdateTrainingData() {
         aiModel.setTrainingSegment(createMetadataSegment(TRAINING_SEGMENT_NAME));
         aiModel.setTrainingProducts(generateTrainingProducts());
-        aiModel.setTargetCustomerSet("new");
 
         aiModel.setModelingJobId(APP_JOB_ID);
 
@@ -153,7 +152,6 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         Assert.assertNotNull(aiModel.getTrainingProducts());
         Assert.assertNotNull(aiModel.getTrainingProducts().contains(PRODUCT_ID3));
-        Assert.assertEquals(aiModel.getTargetCustomerSet(), "new");
 
         Assert.assertEquals(aiModel.getModelingJobId().toString(), APP_JOB_ID);
     }
