@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -29,7 +28,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument.UserResult;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -136,44 +134,6 @@ public class SamlLoginResource {
         return redirectView;
     }
 
-    @RequestMapping(value = "/attach-user/"
-            + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Login via SAML Authentication")
-    public UserDocument attachUserToGASession(@PathVariable("tenantId") String tenantDeploymentId,
-            @QueryParam("UserName") String userName) {
-        UserDocument uDoc = new UserDocument();
-        try {
-            log.info("SAML Attach Resource: TenantDeploymentId - UserName ", tenantDeploymentId, userName);
-
-            Session session = sessionService.attchSamlUserToTenant(userName, tenantDeploymentId);
-
-            uDoc.setSuccess(true);
-            uDoc.setAuthenticationRoute(session.getAuthenticationRoute());
-
-            UserResult result = uDoc.new UserResult();
-            UserResult.User user = result.new User();
-            user.setDisplayName(session.getDisplayName());
-            user.setEmailAddress(session.getEmailAddress());
-            user.setIdentifier(session.getIdentifier());
-            user.setLocale(session.getLocale());
-            user.setTitle(session.getTitle());
-            user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
-            user.setAccessLevel(session.getAccessLevel());
-            result.setUser(user);
-
-            uDoc.setResult(result);
-
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18170) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-
-        return uDoc;
-    }
-
     @RequestMapping(value = "/logout/"
             + InternalResource.TENANT_ID_PATH, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
@@ -194,11 +154,14 @@ public class SamlLoginResource {
     }
 
     /*
-    @RequestMapping(value = "/metadata/"
-            + InternalResource.TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get ServiceProvider SAML Metadata for requested Tenant")
-    */
+     * @RequestMapping(value = "/metadata/" + InternalResource.TENANT_ID_PATH,
+     * method = RequestMethod.GET, headers = "Accept=application/json")
+     * 
+     * @ResponseBody
+     * 
+     * @ApiOperation(value =
+     * "Get ServiceProvider SAML Metadata for requested Tenant")
+     */
     public void getIdpMetadata(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("tenantId") String tenantDeploymentId) {
         log.info("SAML Metadata Resource: TenantDeploymentId ", tenantDeploymentId);
