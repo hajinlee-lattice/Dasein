@@ -28,7 +28,7 @@ angular.module('lp.jobs.import.row', [])
                     var step = steps[i];
                     var stepObj = $scope.stepsConfig[step];
                     if($scope.stepscompleted.length < stepObj.position){
-                        $scope.stepscompleted.push({step});
+                        $scope.stepscompleted.push(step);
                     }
 
                 }
