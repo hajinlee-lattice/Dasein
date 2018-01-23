@@ -1,7 +1,7 @@
 angular.module('lp.jobs.import.row', [])
 
     .directive('importJobRow', [function () {
-        var controller = ['$scope', '$interval', 'JobsStore', function ($scope, $interval, JobsStore) {
+        var controller = ['$scope', '$interval', '$q', '$timeout', 'JobsStore', function ($scope, $interval, $q, $timeout, JobsStore) {
             $scope.loading = false;
             $scope.expanded = false;
             $scope.subjobs = [];
@@ -10,10 +10,10 @@ angular.module('lp.jobs.import.row', [])
             var POOLING_INTERVAL = 15 * 1000;
             var INTERVAL_ID;
             $scope.stepsConfig = {
-                "Merging, De-duping & matching to Lattice Data Cloud":{position:1, label: 'Merging, De-duping & Matching'}, 
-                'Analyzing':{position:2, label: 'Analyzing'},
-                'Publishing':{position:3, label: 'Publishing'}, 
-                'Scoring':{position:4, label: 'Scoring'}
+                "Merging, De-duping & matching to Lattice Data Cloud": { position: 1, label: 'Merging, De-duping & Matching' },
+                'Analyzing': { position: 2, label: 'Analyzing' },
+                'Publishing': { position: 3, label: 'Publishing' },
+                'Scoring': { position: 4, label: 'Scoring' }
             };
 
             function updateJobData(job) {
@@ -23,11 +23,11 @@ angular.module('lp.jobs.import.row', [])
                 updateStepsCompleted(job.stepsCompleted);
             }
 
-            function updateStepsCompleted(steps){
+            function updateStepsCompleted(steps) {
                 for (var i = 0; i < steps.length; i++) {
                     var step = steps[i];
                     var stepObj = $scope.stepsConfig[step];
-                    if($scope.stepscompleted.length < stepObj.position){
+                    if ($scope.stepscompleted.length < stepObj.position) {
                         $scope.stepscompleted.push(step);
                     }
 
@@ -44,13 +44,19 @@ angular.module('lp.jobs.import.row', [])
                     INTERVAL_ID = $interval(fetchJobData, POOLING_INTERVAL);
                 }
             }
-
+            function callbackModalWindow(action) {
+                if (action && action.action === 'run') {
+                    JobsStore.runJob($scope.job).then(function (updatedJob) {
+                        checkIfPooling();
+                    });
+                }
+            }
             function init() {
                 $scope.job = angular.copy($scope.job);
                 $scope.jobStatus = $scope.job.jobStatus;
+                $scope.vm.callback = callbackModalWindow;
             }
 
-            
             $scope.expandRow = function () {
                 if ($scope.expanded) {
                     $scope.expanded = false;
@@ -66,20 +72,16 @@ angular.module('lp.jobs.import.row', [])
 
             };
 
+            $scope.vm.run = function () {
+                var show = $scope.vm.showWarningRun($scope.job);
+                if (show) {
+                    $scope.vm.toggleModal();
 
-            function run() {
-                $scope.job.status = 'Running';
-                JobsStore.runJob($scope.job).then(function (updatedJob) {
-                });
+                } else {
+                    $scope.vm.callback({ 'action': 'run' });
+                }
             }
 
-            $scope.vm.canRunJob = function () {
-                $scope.vm.runJob($scope.job).then(function (action) {
-                    if (action.action === 'run') {
-                        run();
-                    }
-                });
-            }
 
 
             $scope.$on("$destroy", function () {

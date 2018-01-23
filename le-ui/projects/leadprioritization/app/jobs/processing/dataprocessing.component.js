@@ -49,7 +49,6 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
 
         vm.loadingJobs = JobsStore.data.loadingJobs;
         vm.pagesize = 10;
-        vm.promise = null;
         vm.query = '';
         vm.header = {
             filter: {
@@ -97,7 +96,6 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
             successMsg: null,
             errorMsg: null,
             queuedMsg: null,
-            // runningJob: {},
         });
 
         vm.initModalWindow = function () {
@@ -119,11 +117,8 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
                 if (vm.config.dischargeaction === args) {
                     vm.toggleModal();
                 } else if (vm.config.confirmaction === args) {
-                    if (vm.promise) {
-                        vm.promise.resolve({ 'action': 'run' });
-                        vm.promise = null;
-                    }
                     vm.toggleModal();
+                    vm.callback({ 'action': 'run' });
                 }
             }
             vm.toggleModal = function () {
@@ -273,18 +268,6 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
             }
         }
 
-        vm.runJob = function (job) {
-            var deferred = $q.defer();
-            vm.promise = deferred;
-            var show = vm.showWarningRun(job);
-            if (show) {
-                vm.toggleModal();
-            } else {
-                deferred.resolve({ 'action': 'run' });
-            }
-
-            return deferred.promise;
-        }
         vm.clearMessages = function () {
             vm.successMsg = null;
             vm.errorMsg = null;
