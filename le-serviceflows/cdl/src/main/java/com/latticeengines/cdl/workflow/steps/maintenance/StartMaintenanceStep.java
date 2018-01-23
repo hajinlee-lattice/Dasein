@@ -30,7 +30,7 @@ public class StartMaintenanceStep extends BaseWorkflowStep<StartMaintenanceConfi
         dataFeedProxy.updateDataFeedStatus(customerSpaceStr, DataFeed.Status.Deleting.getName());
         saveOutputValue(WorkflowContextConstants.Outputs.DATAFEED_STATUS, startStatus.getName());
         if (configuration.getEntity() != null) {
-            saveOutputValue(WorkflowContextConstants.Outputs.BUSINESS_ENTITY, configuration.getEntity().name());
+            saveOutputValue(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES, configuration.getEntity().name());
         }
     }
 

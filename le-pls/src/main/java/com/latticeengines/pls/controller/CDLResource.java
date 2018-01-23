@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -27,7 +28,7 @@ public class CDLResource {
     private CDLJobProxy cdlJobProxy;
 
     @Inject
-    private CDLProxy cdlProxy;
+    private CDLService cdlService;
 
     @RequestMapping(value = "/consolidateAndProfile", method = RequestMethod.POST)
     @ApiOperation(value = "Start Consolidate And Profile job")
@@ -41,7 +42,7 @@ public class CDLResource {
     @ApiOperation(value = "Start Process And Analyze job")
     public ResponseDocument<String> processAnalyze() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        ApplicationId result = cdlProxy.processAnalyze(customerSpace.toString(), null);
+        ApplicationId result = cdlService.processAnalyze(customerSpace.toString());
         return ResponseDocument.successResponse(result.toString());
     }
 }

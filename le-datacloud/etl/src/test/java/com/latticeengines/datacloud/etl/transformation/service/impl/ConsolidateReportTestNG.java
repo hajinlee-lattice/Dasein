@@ -170,8 +170,7 @@ public class ConsolidateReportTestNG extends PipelineTransformationTestNGBase {
         try {
             contactData = new Object[][] { { "123", "5", ((Date) formatter.parse("2017-10-08")).getTime() }, //
                     { "456", null, null }, //
-                    { null, "6", null }
-            };
+                    { null, "6", null } };
         } catch (ParseException e) {
             throw new RuntimeException("Fail to prepare contact data", e);
         }

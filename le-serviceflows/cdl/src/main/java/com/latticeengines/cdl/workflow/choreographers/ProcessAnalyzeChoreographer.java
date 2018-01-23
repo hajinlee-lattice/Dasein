@@ -131,7 +131,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         return inWorkflow(seq, ratingWorkflow);
     }
 
-    private boolean inWorkflow(int seq, AbstractWorkflow workflow) {
+    private boolean inWorkflow(int seq, AbstractWorkflow<?> workflow) {
         String namespace = getStepNamespace(seq);
         return namespace.startsWith(workflow.name());
     }

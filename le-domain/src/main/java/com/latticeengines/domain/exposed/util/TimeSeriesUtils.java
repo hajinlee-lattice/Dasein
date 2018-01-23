@@ -32,7 +32,7 @@ public class TimeSeriesUtils {
 
     private static final Logger log = LoggerFactory.getLogger(TimeSeriesUtils.class);
 
-    public static Set<Integer> collectPeriods(YarnConfiguration yarnConfiguration, String avroDir, String periodField) {
+    public static Set<Integer> collectPeriods(Configuration yarnConfiguration, String avroDir, String periodField) {
 
         avroDir = getPath(avroDir) + "/*.avro";
         log.info("Collect " + periodField + " periods from " + avroDir);
@@ -159,7 +159,7 @@ public class TimeSeriesUtils {
         }
     }
 
-    public static boolean distributePeriodData(YarnConfiguration yarnConfiguration, String inputDir, String targetDir, Set<Integer> periods, String periodField) {
+    public static boolean distributePeriodData(Configuration yarnConfiguration, String inputDir, String targetDir, Set<Integer> periods, String periodField) {
         inputDir = getPath(inputDir) + "/*.avro";
         targetDir = getPath(targetDir);
         log.info("Distribute period data from " + inputDir + " to " + targetDir);
@@ -227,7 +227,7 @@ public class TimeSeriesUtils {
         return productMap;
     }
 
-    private static void writeDataBuffer(YarnConfiguration yarnConfiguration, Schema schema, Integer period, Map<Integer, String> periodFileMap,
+    private static void writeDataBuffer(Configuration yarnConfiguration, Schema schema, Integer period, Map<Integer, String> periodFileMap,
             Map<Integer, List<GenericRecord>> dateRecordMap) throws IOException {
         List<GenericRecord> records = dateRecordMap.get(period);
         String fileName = periodFileMap.get(period);

@@ -5,7 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PER
 import java.util.List;
 import java.util.Set;
 
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class PeriodDataDistributor
     public static final String TRANSFORMER_NAME = PERIOD_DATA_DISTRIBUTOR;
 
     @Autowired
-    private YarnConfiguration yarnConfiguration;
+    private Configuration yarnConfiguration;
 
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {

@@ -12,7 +12,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private DataCollectionProxy dataCollectionProxy;
 
     @Inject
-    private YarnConfiguration yarnConfiguration;
+    private Configuration yarnConfiguration;
 
     @Override
     protected BusinessEntity getEntity() {

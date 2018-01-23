@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -34,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -126,9 +130,33 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
         Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
         updateActions(customerSpace, actionAndJobIds.getLeft());
+
+        request = setRebuildEntities(customerSpace, actionAndJobIds, request);
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
                 actionAndJobIds, datafeedStatus);
         return workflowJobService.submit(configuration);
+    }
+
+    private ProcessAnalyzeRequest setRebuildEntities(String customerSpace, Pair<List<Long>, List<Long>> actionAndJobIds,
+            ProcessAnalyzeRequest request) {
+
+        Set<BusinessEntity> rebuildEntities = new HashSet<>();
+        if (request != null && request.getRebuildEntities() != null) {
+            rebuildEntities.addAll(request.getRebuildEntities());
+        }
+        List<Job> deleteJobs = internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace,
+                actionAndJobIds.getLeft(), ActionType.CDL_OPERATION_WORKFLOW);
+        for (Job job : deleteJobs) {
+            String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
+            if (StringUtils.isEmpty(str)) {
+                continue;
+            }
+            List<String> entityStrs = Arrays.asList(str.substring(1, str.length() - 1).split(", "));
+            rebuildEntities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
+        }
+        ProcessAnalyzeRequest newRequest = new ProcessAnalyzeRequest();
+        newRequest.setRebuildEntities(new ArrayList<>(rebuildEntities));
+        return newRequest;
     }
 
     @VisibleForTesting
