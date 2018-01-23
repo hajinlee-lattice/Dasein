@@ -71,6 +71,7 @@ angular.module('common.datacloud.query.service',[
 
             if (segment && segment[entity + '_restriction']) {
                 restriction.restrictions = segment[entity + '_restriction'].restriction.logicalRestriction.restrictions;
+                restriction.operator = segment[entity + '_restriction'].restriction.logicalRestriction.operator;
             } else {
                 restriction.restrictions.length = 0;
             }
