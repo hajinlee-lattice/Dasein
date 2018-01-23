@@ -63,8 +63,7 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
                     { label: "Completed", action: { status: 'Completed' } },
                     { label: "Pending", action: { status: 'Pending' } },
                     { label: "Running", action: { status: 'Running' } },
-                    { label: "Failed", action: { status: "Failed" } },
-                    { label: "Cancelled", action: { status: "Cancelled" } }
+                    { label: "Failed", action: { status: "Failed" } }
                 ]
             },
             maxperpage: {
