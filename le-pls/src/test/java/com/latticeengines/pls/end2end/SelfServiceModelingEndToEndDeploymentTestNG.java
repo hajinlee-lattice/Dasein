@@ -433,7 +433,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
 
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, false);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId,
+                false, secondTenant);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
