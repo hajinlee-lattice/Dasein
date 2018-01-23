@@ -47,8 +47,7 @@ public class ModelNoteServiceImpl implements ModelNoteService {
 
     @Override
     public void deleteById(String id) {
-        ModelNote note = modelNotesEntityMgr.findByNoteId(id);
-        modelNotesEntityMgr.delete(note);
+        modelNotesEntityMgr.deleteById(id);
     }
 
     @Override
@@ -69,8 +68,7 @@ public class ModelNoteServiceImpl implements ModelNoteService {
     @Override
     public void copyNotes(String sourceModelSummaryId, String targetModelSummaryId) {
         ModelSummary sourceModelSummary = modelSummaryEntityMgr.getByModelId(sourceModelSummaryId);
-        List<ModelNote> notes = modelNotesEntityMgr
-                .getAllByModelSummaryId(String.valueOf(sourceModelSummary.getPid()));
+        List<ModelNote> notes = modelNotesEntityMgr.getAllByModelSummaryId(String.valueOf(sourceModelSummary.getPid()));
         ModelSummary targetModelSummary = modelSummaryEntityMgr.getByModelId(targetModelSummaryId);
         for (ModelNote note : notes) {
             System.out.println("content" + note.getNotesContents());

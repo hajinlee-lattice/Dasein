@@ -181,4 +181,11 @@ public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {
         note2 = list.get(0);
         assertEquals(note2.getLastModifiedByUser(), "lpl@lattice-engines.com");
     }
+
+    @Test(groups = "functional", dependsOnMethods = "testCopyNotes")
+    public void testDeleteNotes() {
+        modelNoteService.deleteById(note2.getId());
+        List<ModelNote> list = modelNoteService.getAllByModelSummaryId(modelSummary2.getId());
+        assertEquals(list.size(), 0);
+    }
 }

@@ -36,4 +36,10 @@ public class ModelNoteEntityMgrImpl extends BaseEntityMgrImpl<ModelNote> impleme
         return modelNotesDao.findByNoteId(noteId);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteById(String id) {
+        modelNotesDao.deleteById(id);
+    }
+
 }

@@ -11,4 +11,6 @@ public interface ModelNoteEntityMgr extends BaseEntityMgr<ModelNote> {
 
     ModelNote findByNoteId(String noteId);
 
+    void deleteById(String id);
+
 }

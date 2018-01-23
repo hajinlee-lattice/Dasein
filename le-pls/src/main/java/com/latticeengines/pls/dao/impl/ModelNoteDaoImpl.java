@@ -38,4 +38,12 @@ public class ModelNoteDaoImpl extends BaseDaoImpl<ModelNote> implements ModelNot
         return (ModelNote) query.list().get(0);
     }
 
+    @Override
+    public void deleteById(String id) {
+        Session session = getSessionFactory().getCurrentSession();
+        Query query = session.createQuery("delete from " + getEntityClass().getSimpleName() + " where id = :id")
+                .setParameter("id", id);
+        query.executeUpdate();
+    }
+
 }
