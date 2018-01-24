@@ -150,9 +150,9 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
     private void enrichTableSchema(Table table) {
         Map<String, String> engineIdToSegmentNameMap = new HashMap<>();
         for (RatingModelContainer modelContainer : modelContainers) {
-            String segmentDisplayName = modelContainer.getEngineSummary().getSegmentDisplayName();
+            String segmentName = modelContainer.getEngineSummary().getSegmentName();
             String engineId = modelContainer.getEngineSummary().getId();
-            engineIdToSegmentNameMap.put(engineId, segmentDisplayName);
+            engineIdToSegmentNameMap.put(engineId, segmentName);
         }
         List<Attribute> attrs = table.getAttributes();
         attrs.forEach(attr -> {

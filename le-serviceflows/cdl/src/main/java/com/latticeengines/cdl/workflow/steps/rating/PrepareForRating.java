@@ -41,7 +41,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     }
 
     private void readActiveRatingModels() {
-        // TODO: need to filter based on engine status ?
         List<RatingEngineSummary> summaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
         if (CollectionUtils.isNotEmpty(summaries)) {
             List<RatingModelContainer> activeModels = summaries.stream() //

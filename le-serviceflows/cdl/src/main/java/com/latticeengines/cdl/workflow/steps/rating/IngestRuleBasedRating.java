@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -85,12 +86,15 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
             throw new IllegalStateException("Must specify RAW_RATING_TABLE_NAME in workflow context");
         }
 
-        List<RatingModelContainer> containers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        List<RatingModelContainer> containers = allContainers.stream() //
+                .filter(container -> RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType())) //
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(containers)) {
-            throw new IllegalStateException("There is no models to be rated.");
+            throw new IllegalStateException("There is no rule based models to be rated.");
         }
 
-        log.info("Ingesting ratings/indicators for " + containers.size() + " rating models.");
+        log.info("Ingesting ratings/indicators for " + containers.size() + " rule based rating models.");
         schema = generateSchema();
 
         String tableDataPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "")
