@@ -6,17 +6,20 @@ angular.module('lp.jobs.row.subjobs', [])
 
             }
             $scope.getActionType = function (subjob) {
-                if (subjob.reports && subjob.reports.length > 0) {
-                    switch (subjob.reports[0].purpose) {
-                        case 'IMPORT_DATA_SUMMARY': {
-                            return 'Import';
-                        };
-                        default: {
-                            return 'Unknown';
-                        }
+                var type = subjob.jobType;
+                switch(type){
+                    case 'cdlDataFeedImportWorkflow' : {
+                        return 'Import';
+                    };
+                    case 'cdlOperationWorkflow':{
+                        return 'Delete';
+                    };
+                    case 'metadataChange':{
+                        return 'Metadata Change';
+                    };
+                    default: {
+                        return 'Unknown';
                     }
-                } else {
-                    return 'Unknwon';
                 }
             }
             $scope.getActionName = function (subjob) {

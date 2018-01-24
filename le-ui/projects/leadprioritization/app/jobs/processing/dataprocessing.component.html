@@ -77,10 +77,17 @@
                                         limitTo: vm.pagesize" class="le-row" job="job" vm="vm" ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}">
 
             </import-job-row>
-            <div class="le-row" ng-if="vm.loading">
+            <div class="le-row info-row" ng-if="vm.loading">
                 <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
                     <span>
                         <span class="loading-small"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="le-row info-row" ng-if="vm.header.filter.filtered.length === 0 && !vm.loading">
+                <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+                    <span>
+                        There are no jobs to show at the moment
                     </span>
                 </div>
             </div>
