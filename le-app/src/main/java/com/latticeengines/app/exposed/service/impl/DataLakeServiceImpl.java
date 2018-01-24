@@ -263,7 +263,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
             Statistics statistics = container.getStatistics();
-            return removeNoBktAttrs(statistics);
+            return statistics;
+            //return removeNoBktAttrs(statistics);
         }
         return null;
     }
