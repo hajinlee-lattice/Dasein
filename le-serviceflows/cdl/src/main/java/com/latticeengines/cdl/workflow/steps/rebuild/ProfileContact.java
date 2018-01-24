@@ -88,6 +88,7 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
                 masterCount.incrementAndGet();
             }
             attr.setCategory(Category.CONTACT_ATTRIBUTES);
+            attr.setSubcategory("Other");
             attr.removeAllowedDisplayNames();
             attrs.add(attr);
         });

@@ -464,7 +464,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.AnnualRevenue.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ANNUALREVENUE", "ANNUAL REVENUE")) //
@@ -473,7 +472,6 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.NUMERIC.name()) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.NumberOfEmployees.name()) //
                 .allowedDisplayNames(Sets.newHashSet("NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES")) //
@@ -482,7 +480,6 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.NUMERIC.name()) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.SalesforceAccountID.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID")) //
@@ -1162,7 +1159,6 @@ public class SchemaRepository {
                 attrs.addAll(Arrays.asList(address1, address2));
             }
             attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
-            attrs.forEach(a -> a.setCategory(Category.LEAD_INFORMATION));
         }
         return attrs;
     }
