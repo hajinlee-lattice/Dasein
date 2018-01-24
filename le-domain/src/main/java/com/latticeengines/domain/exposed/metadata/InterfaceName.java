@@ -19,6 +19,10 @@ public enum InterfaceName {
     PeriodName, //
     Target, //
     __Revenue, //
+    NormalizedScore, //
+    PredictedRevenue, //
+    ExpectedRevenue, //
+    Probability, //
     AnalyticPurchaseState_ID, //
     Train, //
 

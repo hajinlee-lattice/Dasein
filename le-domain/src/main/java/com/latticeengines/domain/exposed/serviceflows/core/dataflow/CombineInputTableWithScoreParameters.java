@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow;
+package com.latticeengines.domain.exposed.serviceflows.core.dataflow;
 
 import java.util.List;
 
@@ -29,6 +29,9 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     @JsonProperty("score_multiplier")
     private Integer scoreMultiplier;
+
+    @JsonProperty("avg_score")
+    private Double avgScore;
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         this(scoreResultsTable, trainingTable, null);
@@ -102,8 +105,17 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
         this.scoreMultiplier = scoreMultiplier;
     }
 
+    public Double getAvgScore() {
+        return avgScore;
+    }
+
+    public void setAvgScore(Double avgScore) {
+        this.avgScore = avgScore;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 }

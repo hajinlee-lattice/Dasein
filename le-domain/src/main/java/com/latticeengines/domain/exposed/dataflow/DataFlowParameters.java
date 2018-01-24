@@ -18,11 +18,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableFilterParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.AddStandardAttributesParameters;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineMatchDebugWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.PivotScoreAndEventParameters;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow
         @JsonSubTypes.Type(value = CreateScoreTableParameters.class, name = "createScoreTableParameters"), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreParameters.class, name = "combineInputTableWithScoreParameters"), //
         @JsonSubTypes.Type(value = CombineMatchDebugWithScoreParameters.class, name = "combineMatchDebugWithScoreParameters"), //
+        @JsonSubTypes.Type(value = ScoreAggregateParameters.class, name = "scoreAggregateParameters"), //
         @JsonSubTypes.Type(value = CreateAttributeLevelSummaryParameters.class, name = "createAttributeLevelSummaryParameters"), //
         @JsonSubTypes.Type(value = DedupEventTableParameters.class, name = "dedupEventTableParameters"), //
         @JsonSubTypes.Type(value = AddStandardAttributesParameters.class, name = "addStandardAttributesParameters"), //

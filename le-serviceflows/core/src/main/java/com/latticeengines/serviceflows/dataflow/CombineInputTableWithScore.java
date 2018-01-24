@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.dataflow;
+package com.latticeengines.serviceflows.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
 
 @Component("combineInputTableWithScore")
 public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineInputTableWithScoreParameters> {
@@ -38,7 +38,7 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
             scoreWithRating = scoreTable.apply(
                     new AddRatingColumnFunction(parameters.getScoreFieldName(),
                             ScoreResultField.Rating.displayName, parameters.getBucketMetadata(),
-                            parameters.getScoreMultiplier()),
+                            parameters.getScoreMultiplier(), parameters.getAvgScore()),
                     new FieldList(parameters.getScoreFieldName()),
                     new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
         }

@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
@@ -47,28 +47,27 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private BucketedScoreService bucketedScoreService;
 
-    public ApplicationId submit(ModelSummary modelSummary, String sourceDisplayName, EventFrontEndQuery targetQuery,
-            String tableToScoreName) {
+    public ApplicationId submit(ModelSummary modelSummary, RatingEngineScoringParameters parameters) {
         String modelId = modelSummary.getId();
         log.info(String.format(
                 "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s", modelId,
-                tableToScoreName, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
+                parameters.getTableToScoreName(), MultiTenantContext.getCustomerSpace(),
+                parameters.getSourceDisplayName()));
 
         if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        RatingEngineScoreWorkflowConfiguration configuration = generateConfiguration(modelId, targetQuery,
-                tableToScoreName, sourceDisplayName);
+        RatingEngineScoreWorkflowConfiguration configuration = generateConfiguration(modelId, parameters);
         return workflowJobService.submit(configuration);
     }
 
-    public RatingEngineScoreWorkflowConfiguration generateConfiguration(String modelId, EventFrontEndQuery targetQuery,
-            String tableToScoreName, String sourceDisplayName) {
+    public RatingEngineScoreWorkflowConfiguration generateConfiguration(String modelId,
+            RatingEngineScoringParameters parameters) {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, parameters.getSourceDisplayName());
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "ratingEngineScoreWorkflow");
 
@@ -99,8 +98,8 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .inputTableName("RatingEngineTarget_" + System.currentTimeMillis()) //
-                .filterTableName(tableToScoreName) //
-                .filterQuery(targetQuery) //
+                .filterTableName(parameters.getTableToScoreName()) //
+                .filterQuery(parameters.getTargetFilterQuery()) //
                 .sourceSchemaInterpretation(summary.getSourceSchemaInterpretation()) //
                 .excludeDataCloudAttrs(summary.getModelSummaryConfiguration()
                         .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
@@ -112,15 +111,21 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchRequestSource(MatchRequestSource.SCORING) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/"
-                        + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
+                        + StringUtils.substringBeforeLast(
+                                parameters.getSourceDisplayName().replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                         + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
-                .bucketMetadata(bucketMetadataList) //
+                // .bucketMetadata(bucketMetadataList) //
+                .bucketMetadata(
+                        new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //
                 .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
+                .cdlModel(true) //
                 .setUniqueKeyColumn(InterfaceName.AnalyticPurchaseState_ID.name()) //
                 .setUseScorederivation(false) //
                 .setModelIdFromRecord(false) //
                 .setEventColumn(InterfaceName.Target.name()) //
+                .setExpectedValue(parameters.isExpectedValue()) //
+                .liftChart(parameters.isLiftChart()) //
                 .build();
     }
 }

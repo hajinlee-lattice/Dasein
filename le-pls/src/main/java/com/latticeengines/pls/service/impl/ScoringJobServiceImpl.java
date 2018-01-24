@@ -18,7 +18,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -179,13 +179,12 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public String scoreRatinggData(String modelId, String displayName, EventFrontEndQuery targetQuery,
-            String tableToScoreName) {
+    public String scoreRatinggData(String modelId, RatingEngineScoringParameters parameters) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
-        return ratingEngineScoreWorkflowSubmitter.submit(modelSummary, displayName, targetQuery, tableToScoreName)
+        return ratingEngineScoreWorkflowSubmitter.submit(modelSummary, parameters)
                 .toString();
     }
 

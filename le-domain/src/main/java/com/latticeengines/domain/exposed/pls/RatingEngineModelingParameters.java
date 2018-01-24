@@ -30,6 +30,9 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     @JsonProperty
     private boolean expectedValue;
 
+    @JsonProperty
+    private boolean liftChart = true;
+
     public String getTableName() {
         return tableName;
     }
@@ -93,4 +96,13 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     public void setExpectedValue(boolean expectedValue) {
         this.expectedValue = expectedValue;
     }
+
+    public boolean isLiftChart() {
+        return liftChart;
+    }
+
+    public void setLiftChart(boolean liftChart) {
+        this.liftChart = liftChart;
+    }
+
 }

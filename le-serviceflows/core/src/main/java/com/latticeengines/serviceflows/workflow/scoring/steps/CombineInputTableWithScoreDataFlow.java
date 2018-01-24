@@ -6,14 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("combineInputTableWithScoreDataFlow")
 public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInputTableWithScoreDataFlowConfiguration> {
-    private static final  Logger log = LoggerFactory.getLogger(CombineInputTableWithScoreDataFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(CombineInputTableWithScoreDataFlow.class);
 
     @Override
     public void execute() {
@@ -25,7 +26,23 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     private void setupDataFlow() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
                 getScoreResultTableName(), getInputTableName(), getBucketMetadata(), getModelType());
+        setupCdlParameters(params);
         configuration.setDataFlowParams(params);
+    }
+
+    private void setupCdlParameters(CombineInputTableWithScoreParameters params) {
+        if (!configuration.isCdlModel())
+            return;
+        String scoreFieldName = InterfaceName.Probability.name();
+        if (configuration.isExpectedValue())
+            scoreFieldName = InterfaceName.ExpectedRevenue.name();
+        params.setScoreFieldName(scoreFieldName);
+        Integer multiplier = null;
+        if (!configuration.isExpectedValue() && !configuration.isLiftChart())
+            multiplier = 100;
+        params.setScoreMultiplier(multiplier);
+        if (configuration.isLiftChart())
+            params.setAvgScore(getDoubleValueFromContext(SCORING_AVG_SCORE));
     }
 
     private void configureExport() {

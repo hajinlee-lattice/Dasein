@@ -108,6 +108,9 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
                 .setExpectedValue(parameters.isExpectedValue()) //
                 .setUseScorederivation(false) //
                 .setModelIdFromRecord(false) //
+                .bucketMetadata(
+                        new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //
+                .liftChart(parameters.isLiftChart()) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

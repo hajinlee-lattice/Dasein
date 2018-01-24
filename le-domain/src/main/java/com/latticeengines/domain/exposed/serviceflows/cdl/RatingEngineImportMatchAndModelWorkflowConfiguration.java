@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -17,14 +18,15 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PivotScoreAndEventConfiguration;
 
 public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -42,6 +44,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private ScoreAggregateFlowConfiguration scoreAggregate = new ScoreAggregateFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
@@ -55,6 +58,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
+            scoreAggregate.setMicroServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -72,6 +76,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            scoreAggregate.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
             return this;
         }
@@ -108,6 +113,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            scoreAggregate.setInternalResourceHostPort(internalResourceHostPort);
             pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -251,6 +257,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder cdlModel(boolean isCdlModel) {
             model.setCdlModel(isCdlModel);
+            combineInputWithScores.setCdlModel(isCdlModel);
             return this;
         }
 
@@ -266,6 +273,16 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder setActivateModelSummaryByDefault(boolean value) {
             model.setActivateModelSummaryByDefault(value);
+            return this;
+        }
+
+        public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
+            combineInputWithScores.setBucketMetadata(bucketMetadata);
+            return this;
+        }
+
+        public Builder liftChart(boolean liftChart) {
+            combineInputWithScores.setLiftChart(liftChart);
             return this;
         }
 
@@ -294,6 +311,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         public Builder setExpectedValue(boolean expectedValue) {
             model.setExpectedValue(expectedValue);
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
+            combineInputWithScores.setExpectedValue(expectedValue);
             return this;
         }
 
@@ -312,6 +330,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(score);
             configuration.add(combineInputWithScores);
+            configuration.add(scoreAggregate);
             configuration.add(pivotScoreAndEvent);
 
             return configuration;

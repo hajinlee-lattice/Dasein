@@ -24,15 +24,16 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
 
     private String scoreFieldName;
     private List<BucketMetadata> bucketMetadata = new ArrayList<>();
-
     private Integer scoreMultiplier;
+    private Double avgScore;
 
     public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName, List<BucketMetadata> bucketMetadata,
-            Integer scoreMultiplier) {
+            Integer scoreMultiplier, Double avgScore) {
         super(new Fields(ratingFieldName));
         this.scoreFieldName = scoreFieldName;
         this.bucketMetadata = bucketMetadata;
         this.scoreMultiplier = scoreMultiplier;
+        this.avgScore = avgScore;
     }
 
     @Override
@@ -40,18 +41,25 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         TupleEntry arguments = functionCall.getArguments();
         Object scoreObj = arguments.getObject(scoreFieldName);
         double score = Double.parseDouble(scoreObj.toString());
+        Double newAvgScore = avgScore;
         if (scoreMultiplier != null) {
             score *= scoreMultiplier;
+            if (newAvgScore != null) {
+                newAvgScore *= scoreMultiplier;
+            }
         }
-        Object ratingObj = bucketPercileScore(bucketMetadata, score);
+        if (newAvgScore != null) {
+            score /= newAvgScore;
+        }
+        Object ratingObj = bucketScore(bucketMetadata, score);
         functionCall.getOutputCollector().add(new Tuple(ratingObj.toString()));
         return;
     }
 
-    protected String bucketPercileScore(List<BucketMetadata> bucketMetadataList, double score) {
+    protected String bucketScore(List<BucketMetadata> bucketMetadataList, double score) {
         BucketName bucketName = null;
-        int min = BucketName.A.getDefaultUpperBound();
-        int max = BucketName.D.getDefaultLowerBound();
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
         BucketName minBucket = null;
         BucketName maxBucket = null;
         boolean withinRange = false;
@@ -73,6 +81,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
                 if (score >= rightBoundScore && score <= leftBoundScore) {
                     withinRange = true;
                     bucketName = currentBucketName;
+                    break;
                 }
             }
             if (log.isDebugEnabled()) {
@@ -83,10 +92,10 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
             }
 
             if (!withinRange && score < min) {
-                log.warn(String.format("%d is less than minimum bound, setting to %s", score, minBucket.toString()));
+                log.warn(String.format("%f is less than minimum bound, setting to %s", score, minBucket.toString()));
                 bucketName = minBucket;
             } else if (!withinRange && score > max) {
-                log.warn(String.format("%d is more than maximum bound, setting to %s", score, maxBucket.toString()));
+                log.warn(String.format("%f is more than maximum bound, setting to %s", score, maxBucket.toString()));
                 bucketName = maxBucket;
             }
         } else {
@@ -95,7 +104,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
                 log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");
             }
             if (score < BucketName.D.getDefaultLowerBound()) {
-                log.warn(String.format("%d is less than minimum bound, setting to %s", score, BucketName.D.name()));
+                log.warn(String.format("%f is less than minimum bound, setting to %s", score, BucketName.D.name()));
                 bucketName = BucketName.D;
             } else if (score >= BucketName.D.getDefaultLowerBound() && score <= BucketName.D.getDefaultUpperBound()) {
                 bucketName = BucketName.D;
@@ -106,7 +115,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
             } else if (score >= BucketName.A.getDefaultLowerBound() && score <= BucketName.A.getDefaultUpperBound()) {
                 bucketName = BucketName.A;
             } else {
-                log.warn(String.format("%d is more than maximum bound, setting to %s", score, BucketName.A.name()));
+                log.warn(String.format("%f is more than maximum bound, setting to %s", score, BucketName.A.name()));
                 bucketName = BucketName.A;
             }
         }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.pls.service.ScoringJobService;
 
 import io.swagger.annotations.Api;
@@ -66,11 +66,9 @@ public class ScoreResource {
     @ApiOperation(value = "Score the provided query. Returns the job id.")
     public String scoreRating(//
             @PathVariable String modelId, //
-            @RequestParam(value = "displayName") String displayName, //
-            @RequestParam(value = "tableToScoreName", required = false) String tableToScoreName, //
-            @RequestBody(required = false) EventFrontEndQuery targetQuery) {
+            @RequestBody RatingEngineScoringParameters parameters) {
         return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
-                scoringJobService.scoreRatinggData(modelId, displayName, targetQuery, tableToScoreName)));
+                scoringJobService.scoreRatinggData(modelId, parameters)));
 
     }
 }

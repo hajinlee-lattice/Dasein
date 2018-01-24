@@ -70,6 +70,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MODELING_SERVICE_EXECUTOR_BUILDER = "MODELING_SERVICE_EXECUTOR_BUILDER";
     protected static final String MODEL_APP_IDS = "MODEL_APP_IDS";
     protected static final String MODEL_AVG_PROBABILITY = "MODEL_AVG_PROBABILITY";
+    protected static final String SCORING_AVG_SCORE = "SCORING_AVG_SCORE";
     protected static final String SCORING_RESULT_TABLE_NAME = "SCORING_RESULT_TABLE_NAME";
     protected static final String SCORING_MODEL_ID = "SCORING_MODEL_ID";
     protected static final String SCORING_MODEL_TYPE = "SCORING_MODEL_TYPE";

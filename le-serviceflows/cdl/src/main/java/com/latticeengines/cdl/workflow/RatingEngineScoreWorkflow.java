@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.CreateCdlTargetTableFilterStep;
+import com.latticeengines.cdl.workflow.steps.ScoreAggregateFlow;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineScoreWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.listeners.SendEmailAfterScoringCompletionListener;
@@ -36,6 +37,9 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
     @Autowired
+    private ScoreAggregateFlow scoreAggregateFlow;
+
+    @Autowired
     private ExportWorkflow exportWorkflow;
 
     @Autowired
@@ -52,6 +56,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow) //
                 .next(score) //
+                .next(scoreAggregateFlow) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
                 .listener(sendEmailAfterScoringCompletionListener) //

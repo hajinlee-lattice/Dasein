@@ -15,12 +15,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })

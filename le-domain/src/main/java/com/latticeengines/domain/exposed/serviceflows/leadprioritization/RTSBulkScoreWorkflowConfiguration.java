@@ -14,13 +14,13 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 
 public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {

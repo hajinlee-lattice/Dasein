@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
+import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -101,7 +102,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     private String accountTableName = "AccountTable";
     private String accountFileName = "accountTable.avro";
 
-    private RatingEngineModelingParameters parameters;
+    private RatingEngineModelingParameters modelingParameters;
 
     @BeforeClass(groups = { "deployment.lp" })
     public void setup() throws Exception {
@@ -114,17 +115,19 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
             assertTrue(controller.exists(new Path("/EncryptionKey")));
         }
 
-        parameters = new RatingEngineModelingParameters();
-        parameters.setName("RatingEngineModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
-        parameters.setDisplayName(MODEL_DISPLAY_NAME);
-        parameters.setDescription("Test");
-        parameters.setModuleName("module");
-        parameters.setActivateModelSummaryByDefault(true);
+        modelingParameters = new RatingEngineModelingParameters();
+        modelingParameters.setName("RatingEngineModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
+        modelingParameters.setDisplayName(MODEL_DISPLAY_NAME);
+        modelingParameters.setDescription("Test");
+        modelingParameters.setModuleName("module");
+        modelingParameters.setActivateModelSummaryByDefault(true);
 
-        parameters.setTrainFilterTableName(trainFilterTableName);
-        parameters.setEventFilterTableName(eventFilterTableName);
-        parameters.setTargetFilterTableName(targetFilterTableName);
-        parameters.setExpectedValue(true);
+        modelingParameters.setTrainFilterTableName(trainFilterTableName);
+        modelingParameters.setEventFilterTableName(eventFilterTableName);
+        modelingParameters.setTargetFilterTableName(targetFilterTableName);
+
+        modelingParameters.setExpectedValue(false);
+        modelingParameters.setLiftChart(false);
 
         log.info("Test environment setup finished.");
     }
@@ -139,10 +142,15 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     }
 
     private void scoreWorkflow(ModelSummary modelSummary) {
+        RatingEngineScoringParameters scoringParameters = new RatingEngineScoringParameters();
+        scoringParameters.setTableToScoreName(targetFilterTableName);
+        scoringParameters.setSourceDisplayName("RatingEngineBulkScoring");
+        scoringParameters.setExpectedValue(modelingParameters.isExpectedValue());
+        scoringParameters.setLiftChart(modelingParameters.isLiftChart());
+
         String scoreApplicationId = restTemplate.postForObject(
-                String.format("%s/pls/scores/rating/%s?displayName=%s&tableToScoreName=%s", getRestAPIHostPort(),
-                        modelSummary.getId(), "RatingEngineBulkScoring", targetFilterTableName), //
-                null, String.class);
+                String.format("%s/pls/scores/rating/%s", getRestAPIHostPort(), modelSummary.getId()), //
+                scoringParameters, String.class);
         scoreApplicationId = StringUtils.substringBetween(scoreApplicationId.split(":")[1], "\"");
         System.out.println(String.format("Score rating data applicationId = %s", scoreApplicationId));
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, scoreApplicationId, false);
@@ -155,12 +163,12 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         String prodId = "A78DF03BAC196BE9A08508FFDB433A31";
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
         EventFrontEndQuery query = getQuery(txn);
-        parameters.setTrainFilterQuery(query);
-        parameters.setEventFilterQuery(query);
-        parameters.setTargetFilterQuery(query);
-        parameters.setTrainFilterTableName(null);
-        parameters.setEventFilterTableName(null);
-        parameters.setTargetFilterTableName(null);
+        modelingParameters.setTrainFilterQuery(query);
+        modelingParameters.setEventFilterQuery(query);
+        modelingParameters.setTargetFilterQuery(query);
+        modelingParameters.setTrainFilterTableName(null);
+        modelingParameters.setEventFilterTableName(null);
+        modelingParameters.setTargetFilterTableName(null);
         createModel();
         retrieveModelSummary();
     }
@@ -215,8 +223,8 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     }
 
     public void createModel() {
-        modelName = parameters.getName();
-        model(parameters);
+        modelName = modelingParameters.getName();
+        model(modelingParameters);
     }
 
     @SuppressWarnings("rawtypes")

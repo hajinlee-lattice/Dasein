@@ -17,13 +17,14 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 
 public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -37,6 +38,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private ScoreAggregateFlowConfiguration scoreAggregate = new ScoreAggregateFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
@@ -50,6 +52,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             match.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            scoreAggregate.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
@@ -69,6 +72,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             match.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            scoreAggregate.setInternalResourceHostPort(internalResourceHostPort);
             export.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
@@ -199,10 +203,26 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder cdlModel(boolean isCdlModel) {
+            combineInputWithScores.setCdlModel(isCdlModel);
+            return this;
+        }
+
+        public Builder setExpectedValue(boolean expectedValue) {
+            combineInputWithScores.setExpectedValue(expectedValue);
+            return this;
+        }
+
+        public Builder liftChart(boolean liftChart) {
+            combineInputWithScores.setLiftChart(liftChart);
+            return this;
+        }
+
         public RatingEngineScoreWorkflowConfiguration build() {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
+            scoreAggregate.microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);
             cdlTargetTableTupleFilter.microserviceStepConfiguration(microserviceStepConfiguration);
             cdlEventTable.microserviceStepConfiguration(microserviceStepConfiguration);
@@ -213,6 +233,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             configuration.add(matchResult);
             configuration.add(score);
             configuration.add(combineInputWithScores);
+            configuration.add(scoreAggregate);
             configuration.add(export);
 
             return configuration;

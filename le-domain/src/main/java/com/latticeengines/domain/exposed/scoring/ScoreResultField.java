@@ -2,16 +2,18 @@ package com.latticeengines.domain.exposed.scoring;
 
 import org.apache.avro.Schema.Type;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+
 public enum ScoreResultField {
 
     Percentile(Type.INT.name(), "Score", Integer.class.getSimpleName()), //
     RawScore(Type.DOUBLE.name(), "RawScore", Double.class.getSimpleName()), //
     Rating(Type.STRING.name(), "Rating", String.class.getSimpleName()), //
     ModelId(Type.STRING.name(), "__ModelId__", String.class.getSimpleName()), //
-    Probability(Type.DOUBLE.name(), "Probability", Double.class.getSimpleName()), //
-    NormalizedScore(Type.DOUBLE.name(), "NormalizedScore", Double.class.getSimpleName()), //
-    PredictedRevenue(Type.DOUBLE.name(), "PredictedRevenue", Double.class.getSimpleName()), //
-    ExpectedRevenue(Type.DOUBLE.name(), "ExpectedRevenue", Double.class.getSimpleName());
+    Probability(Type.DOUBLE.name(), InterfaceName.Probability.name(), Double.class.getSimpleName()), //
+    NormalizedScore(Type.DOUBLE.name(), InterfaceName.NormalizedScore.name(), Double.class.getSimpleName()), //
+    PredictedRevenue(Type.DOUBLE.name(), InterfaceName.PredictedRevenue.name(), Double.class.getSimpleName()), //
+    ExpectedRevenue(Type.DOUBLE.name(), InterfaceName.ExpectedRevenue.name(), Double.class.getSimpleName());
 
     public String physicalDataType;
 
