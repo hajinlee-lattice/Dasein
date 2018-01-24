@@ -95,7 +95,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy {
     @SuppressWarnings("rawtypes")
     public List<String> getRatingEngineIds(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/ids", shortenCustomerSpace(customerSpace));
-        List list = get("get rating engine ids in segment", url, List.class);
+        List list = get("get rating engine ids", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }
 

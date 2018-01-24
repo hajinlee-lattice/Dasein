@@ -1,21 +1,25 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class RefreshRatingDeploymentTestNG  extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
-    private RatingEngine ratingEngine;
+    private RatingEngine rule1;
+    private RatingEngine rule2;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -25,7 +29,8 @@ public class RefreshRatingDeploymentTestNG  extends DataIngestionEnd2EndDeployme
 
         new Thread(() -> {
             createTestSegment2();
-            ratingEngine = createRuleBasedRatingEngine();
+            rule1 = createRuleBasedRatingEngine();
+            rule2 = createRuleBasedRatingEngine();
         }).start();
 
         processAnalyze(constructRequest());
@@ -35,6 +40,14 @@ public class RefreshRatingDeploymentTestNG  extends DataIngestionEnd2EndDeployme
     private void verifyProcess() {
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion.complement());
+
+        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RuleBucketName.A, RATING_A_COUNT_1, //
+                RuleBucketName.D, RATING_D_COUNT_1, //
+                RuleBucketName.F, RATING_F_COUNT_1
+        );
+        verifyRatingEngineCount(rule1.getId(), ratingCounts);
+        verifyRatingEngineCount(rule2.getId(), ratingCounts);
     }
 
     private ProcessAnalyzeRequest constructRequest() {

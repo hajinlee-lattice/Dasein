@@ -14,7 +14,7 @@ public enum TableRoleInCollection {
     ConsolidatedDailyTransaction, //
     ConsolidatedPeriodTransaction, //
 
-    Rating, //
+    PivotedRating, //
 
     Profile, //
     ContactProfile, //
@@ -76,8 +76,8 @@ public enum TableRoleInCollection {
         CalculatedPurchaseHistory.primaryKey = InterfaceName.AccountId;
         CalculatedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
-        Rating.primaryKey = InterfaceName.AccountId;
-        Rating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        PivotedRating.primaryKey = InterfaceName.AccountId;
+        PivotedRating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }

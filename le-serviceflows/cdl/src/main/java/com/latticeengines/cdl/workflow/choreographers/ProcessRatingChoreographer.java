@@ -12,7 +12,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
-import com.latticeengines.cdl.workflow.steps.rating.IngestRatingFromRedshift;
+import com.latticeengines.cdl.workflow.steps.rating.IngestRuleBasedRating;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -29,7 +29,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private PrepareForRating prepareForRating;
 
     @Inject
-    private IngestRatingFromRedshift ingestRatingFromRedshift;
+    private IngestRuleBasedRating ingestRatingFromRedshift;
 
     @Inject
     private RedshiftPublishWorkflow redshiftPublishWorkflow;

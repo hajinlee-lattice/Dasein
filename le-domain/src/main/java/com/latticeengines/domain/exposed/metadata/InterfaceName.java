@@ -102,6 +102,12 @@ public enum InterfaceName {
     LatticeAccountId, // Id in AccountMaster
     LDC_Name,
 
+    // Rating
+    ModelId,
+    Rating,
+    ExpectedValue,
+    Likelihood,
+
     // Internal
     __Composite_Key__ // primary key for internal use
 }

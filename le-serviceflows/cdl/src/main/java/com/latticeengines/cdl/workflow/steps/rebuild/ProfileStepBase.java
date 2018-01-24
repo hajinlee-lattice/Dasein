@@ -73,7 +73,16 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
         step.setBaseTables(baseTables);
+        return configureProfileStep(step);
+    }
 
+    protected TransformationStepConfig profile(int inputStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(inputStep));
+        return configureProfileStep(step);
+    }
+
+    private TransformationStepConfig configureProfileStep(TransformationStepConfig step) {
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
@@ -92,11 +101,21 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
         step.setBaseTables(baseTables);
+        return configureBucketStep(step);
+    }
 
+    protected TransformationStepConfig bucket(int profileStep, int inputStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(profileStep, inputStep));
+        return configureBucketStep(step);
+    }
+
+    private TransformationStepConfig configureBucketStep(TransformationStepConfig step) {
         step.setTransformer(TRANSFORMER_BUCKETER);
         step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
     }
+
 
     protected TransformationStepConfig calcStats(int profileStep, int bucketStep, String statsTablePrefix,
                                                List<String> dedupFields) {

@@ -1,14 +1,24 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PIVOT_RATINGS;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileStepBase;
+import com.latticeengines.domain.exposed.datacloud.dataflow.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -24,7 +34,10 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 @Component(ProfileRating.BEAN_NAME)
 public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguration> {
 
+    public static final Logger log = LoggerFactory.getLogger(ProfileRating.class);
+
     public static final String BEAN_NAME = "profileRating";
+    private static final String ENGINE_ATTR_PREFIX = "engine_";
 
     private String ratingTablePrefix;
     private String statsTablePrefix;
@@ -42,7 +55,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
     private void initializeConfiguration() {
         BusinessEntity entity = getEntity();
         customerSpace = configuration.getCustomerSpace();
-        ratingTablePrefix = TableRoleInCollection.Rating.name();
+        ratingTablePrefix = TableRoleInCollection.PivotedRating.name();
         statsTablePrefix = entity.name() + "Stats";
 
         masterTableName = getObjectFromContext(RAW_RATING_TABLE_NAME, String.class);
@@ -57,16 +70,17 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
     @Override
     protected void onPostTransformationCompleted() {
         String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
+        String ratingTableName = TableUtils.getFullTableName(ratingTablePrefix, pipelineVersion);
 
         Table servingStoreTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                masterTableName);
+                ratingTableName);
         enrichTableSchema(servingStoreTable);
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), masterTableName, servingStoreTable);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), ratingTableName, servingStoreTable);
 
-//        updateEntityValueMapInContext(BusinessEntity.Rating, TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
-//        updateEntityValueMapInContext(BusinessEntity.Rating, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        // updateEntityValueMapInContext(BusinessEntity.Rating, TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
+        // updateEntityValueMapInContext(BusinessEntity.Rating, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
 
-        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, masterTableName, String.class);
+        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, ratingTableName, String.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 
@@ -81,13 +95,16 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         request.setEnableSlack(false);
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        int profileStep = 0;
-        int bucketStep = 1;
+        int pivotStep = 0;
+        int profileStep = 1;
+        int bucketStep = 2;
 
-        TransformationStepConfig profile = profile(masterTableName);
-        TransformationStepConfig bucket = bucket(profileStep, masterTableName);
+        TransformationStepConfig pivot = pivot();
+        TransformationStepConfig profile = profile(pivotStep);
+        TransformationStepConfig bucket = bucket(profileStep, pivotStep);
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, null);
 
+        steps.add(pivot);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
@@ -96,12 +113,70 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
+    private TransformationStepConfig pivot() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        String tableSourceName = "CustomerUniverse";
+        SourceTable sourceTable = new SourceTable(masterTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(ratingTablePrefix);
+        step.setTargetTable(targetTable);
+
+        step.setTransformer(TRANSFORMER_PIVOT_RATINGS);
+        PivotRatingsConfig conf = createPivotRatingsConfig();
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
+    private PivotRatingsConfig createPivotRatingsConfig() {
+        PivotRatingsConfig config = new PivotRatingsConfig();
+        Map<String, String> modelIdToEngineIdMap = new HashMap<>();
+        for (RatingModelContainer modelContainer : modelContainers) {
+            String engineId = modelContainer.getEngineSummary().getId();
+            String modelId = modelContainer.getModel().getId();
+            modelIdToEngineIdMap.put(modelId, ENGINE_ATTR_PREFIX + engineId);
+        }
+        config.setIdAttrsMap(modelIdToEngineIdMap);
+        return config;
+    }
+
     private void enrichTableSchema(Table table) {
+        Map<String, String> engineIdToSegmentNameMap = new HashMap<>();
+        for (RatingModelContainer modelContainer : modelContainers) {
+            String segmentDisplayName = modelContainer.getEngineSummary().getSegmentDisplayName();
+            String engineId = modelContainer.getEngineSummary().getId();
+            engineIdToSegmentNameMap.put(engineId, segmentDisplayName);
+        }
         List<Attribute> attrs = table.getAttributes();
         attrs.forEach(attr -> {
+            String engineId = parseEngineId(attr);
+            if (engineIdToSegmentNameMap.containsKey(engineId)) {
+                String segmentName = engineIdToSegmentNameMap.get(engineId);
+                attr.setSubcategory(segmentName);
+            } else {
+                attr.setSubcategory("Other");
+            }
             attr.setCategory(Category.RATING);
             attr.removeAllowedDisplayNames();
         });
+    }
+
+    private String parseEngineId(Attribute attribute) {
+        String attrName = attribute.getName();
+        if (attrName.startsWith(ENGINE_ATTR_PREFIX)) {
+            String engineId = attrName.substring(ENGINE_ATTR_PREFIX.length());
+            log.info(String.format("Parsed an engine id %s from attribute name %s", engineId, attrName));
+            return engineId;
+        } else {
+            return "";
+        }
     }
 
 }

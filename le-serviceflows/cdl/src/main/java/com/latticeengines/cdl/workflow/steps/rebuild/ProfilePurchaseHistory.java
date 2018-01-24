@@ -290,8 +290,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                     productName = product.getProductName();
                 }
                 if (StringUtils.isBlank(productName)) {
-                    System.out.println(JsonUtils.pprint(productMap));
-                    throw new IllegalArgumentException("Cannot find product name for product id " + productId);
+                    throw new IllegalArgumentException("Cannot find product name for product id " + productId
+                            + " in product map " + JsonUtils.serialize(productMap));
                 } else {
                     String periodName = TransactionMetrics.getPeriodFromAttr(attribute.getName());
                     NamedPeriod period = NamedPeriod.fromName(periodName);

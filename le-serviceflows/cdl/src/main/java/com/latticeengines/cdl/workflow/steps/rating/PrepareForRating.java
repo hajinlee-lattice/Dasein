@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
-import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
@@ -30,12 +29,11 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private RatingEngineProxy ratingEngineProxy;
 
     private String customerSpace;
-    private String rawRatingTableName;
 
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace().toString();
-        rawRatingTableName = NamingUtils.timestamp("RawRating");
+        String rawRatingTableName = NamingUtils.timestamp("RawRating");
         putObjectInContext(RAW_RATING_TABLE_NAME, rawRatingTableName);
         readActiveRatingModels();
         putObjectInContext(TABLE_GOING_TO_REDSHIFT, null);
@@ -58,7 +56,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                         }
                     }) //
                     .filter(Objects::nonNull) //
-                    .filter(model -> RatingEngineType.RULE_BASED.equals(model.getEngineSummary().getType())) //
                     .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(activeModels)) {
                 log.info("Found " + activeModels.size() + " active rating models.");

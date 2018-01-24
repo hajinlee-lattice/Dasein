@@ -89,8 +89,11 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             entityTableNames.forEach((entity, tableName) -> {
                 String servingStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive);
                 if (StringUtils.isBlank(servingStoreName)) {
-                    log.info("Removing orphan table " + tableName);
-                    metadataProxy.deleteTable(customerSpace.toString(), tableName);
+                    // TODO: always keep rating serving store for now
+                    if (!BusinessEntity.Rating.equals(entity)) {
+                        log.info("Removing orphan table " + tableName);
+                        metadataProxy.deleteTable(customerSpace.toString(), tableName);
+                    }
                 }
             });
         }

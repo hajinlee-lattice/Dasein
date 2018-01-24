@@ -24,7 +24,7 @@ public class Product implements Serializable {
     }
 
     public String getProductName() {
-        return productId;
+        return productName;
     }
 
     public void setProductName(String productName) {

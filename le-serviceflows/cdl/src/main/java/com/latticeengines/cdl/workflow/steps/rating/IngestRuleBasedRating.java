@@ -22,17 +22,19 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -52,8 +54,10 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
-@Component("ingestRatingFromRedshift")
-public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingStepConfiguration> {
+@Component("ingestRuleBasedRating")
+public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(IngestRuleBasedRating.class);
 
     @Inject
     private Configuration yarnConfiguration;
@@ -86,13 +90,8 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
             throw new IllegalStateException("There is no models to be rated.");
         }
 
-        if (containers.size() != 1) {
-            throw new UnsupportedOperationException("Cannot handle single rule based rating engine for now.");
-        }
-
         log.info("Ingesting ratings/indicators for " + containers.size() + " rating models.");
-        schema = generateSchema(containers);
-        log.info("Generated avro schema: " + schema.toString(true));
+        schema = generateSchema();
 
         String tableDataPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "")
                 .append(targetTableName).toString();
@@ -120,28 +119,20 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
         String lastModifiedKey = InterfaceName.CDLUpdatedTime.name();
         Table resultTable = MetadataConverter.getTable(yarnConfiguration, tableDataPath, primaryKey, lastModifiedKey);
         resultTable.setName(targetTableName);
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName("AccountModelIds");
+        pk.setDisplayName("AccountModelIds");
+        pk.addAttribute(InterfaceName.AccountId.name());
+        pk.addAttribute(InterfaceName.ModelId.name());
+        resultTable.setPrimaryKey(pk);
         metadataProxy.createTable(customerSpace.toString(), targetTableName, resultTable);
     }
 
-    private Schema generateSchema(List<RatingModelContainer> containers) {
+    private Schema generateSchema() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(InterfaceName.AccountId.name(), String.class));
-        containers.forEach(container -> {
-            RatingEngineType engineType;
-            try {
-                engineType = container.getEngineSummary().getType();
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Cannot determine the engine type of rating model " + JsonUtils.pprint(container));
-            }
-            if (RatingEngineType.RULE_BASED.equals(engineType)) {
-                columns.add(Pair.of(container.getModel().getId(), String.class));
-            } else if (RatingEngineType.AI_BASED.equals(engineType)) {
-                columns.add(Pair.of(container.getModel().getId(), Boolean.class));
-            } else {
-                throw new IllegalArgumentException("Unknown engine type: " + engineType);
-            }
-        });
+        columns.add(Pair.of(InterfaceName.ModelId.name(), String.class));
+        columns.add(Pair.of(InterfaceName.Rating.name(), String.class));
         columns.add(Pair.of(InterfaceName.CDLCreatedTime.name(), Long.class));
         columns.add(Pair.of(InterfaceName.CDLUpdatedTime.name(), Long.class));
         return AvroUtils.constructSchema("Rating", columns);
@@ -173,6 +164,7 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
     private class RedshiftIngest implements Callable<RatingModel> {
 
         private final int PAGE_SIZE = 10000;
+        private final int ROWS_PER_FILE = 1000_000;
         private final RatingModel ratingModel;
         private final RatingEngineSummary engineSummary;
         private final RatingEngineType engineType;
@@ -182,7 +174,6 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
         private long ingestedCount = 0L;
 
         private MetadataSegment segment;
-        private String targetFile;
 
         RedshiftIngest(RatingModelContainer container, String hdfsPath) {
             this.ratingModel = container.getModel();
@@ -198,6 +189,8 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
 
         private void ingestPageByPage() {
             boolean firstPage = true;
+            int recordsInCurrentFile = 0;
+            int fileId = 0;
             FrontEndQuery frontEndQuery = dataQuery();
             List<Map<String, Object>> data;
             do {
@@ -205,30 +198,27 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
                 DataPage dataPage = ratingProxy.getDataFromObjectApi(customerSpace.getTenantId(), frontEndQuery);
                 data = dataPage.getData();
                 if (CollectionUtils.isNotEmpty(data)) {
-                    List<GenericRecord> records = new ArrayList<>();
-                    long currentTime = System.currentTimeMillis();
-                    data.forEach(map -> {
-                        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                        map.forEach(builder::set);
-                        if (RatingEngineType.AI_BASED.equals(engineType)) {
-                            builder.set(ratingModel.getId(), true);
-                        }
-                        builder.set(InterfaceName.CDLCreatedTime.name(), currentTime);
-                        builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
-                        records.add(builder.build());
-                    });
+                    List<GenericRecord> records = dataPageToRecords(dataPage);
+                    recordsInCurrentFile += records.size();
+                    String targetFile = prepareTargetFile(hdfsPath, ratingModel.getId(), fileId);
                     if (firstPage) {
+                        log.info("Start dumping records to " + targetFile);
                         try {
                             AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, records, true);
                         } catch (IOException e) {
-                            throw new RuntimeException("Failed to write to avro file", e);
+                            throw new RuntimeException("Failed to write to avro file " + targetFile, e);
                         }
                         firstPage = false;
                     } else {
                         try {
                             AvroUtils.appendToHdfsFile(yarnConfiguration, targetFile, records, true);
                         } catch (IOException e) {
-                            throw new RuntimeException("Failed to write to avro file", e);
+                            throw new RuntimeException("Failed to append to avro file " + targetFile, e);
+                        }
+                        if (recordsInCurrentFile >= ROWS_PER_FILE) {
+                            fileId++;
+                            firstPage = true;
+                            recordsInCurrentFile = 0;
                         }
                     }
                     ingestedCount += records.size();
@@ -236,6 +226,23 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
                             ratingModel.getId()));
                 }
             } while (CollectionUtils.isNotEmpty(data));
+        }
+
+        private List<GenericRecord> dataPageToRecords(DataPage dataPage) {
+            List<Map<String, Object>> data = dataPage.getData();
+            List<GenericRecord> records = new ArrayList<>();
+            long currentTime = System.currentTimeMillis();
+            data.forEach(map -> {
+                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                String accountIdAttr = InterfaceName.AccountId.name();
+                builder.set(accountIdAttr, map.get(accountIdAttr));
+                builder.set(InterfaceName.ModelId.name(), ratingModel.getId());
+                builder.set(InterfaceName.Rating.name(), map.get(ratingModel.getId()));
+                builder.set(InterfaceName.CDLCreatedTime.name(), currentTime);
+                builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
+                records.add(builder.build());
+            });
+            return records;
         }
 
         private FrontEndQuery dataQuery() {
@@ -266,8 +273,8 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
             return frontEndQuery;
         }
 
-        private String prepareTargetFile(String hdfsPath, String modelId) {
-            String targetFile = hdfsPath + "/" + modelId + ".avro";
+        private String prepareTargetFile(String hdfsPath, String modelId, int fileId) {
+            String targetFile = String.format("%s/%s-%05d.avro", hdfsPath, modelId, fileId);
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, targetFile);
@@ -285,7 +292,6 @@ public class IngestRatingFromRedshift extends BaseWorkflowStep<GenerateRatingSte
             totalCount = totalCountInSegment();
             log.info("There are in total " + totalCount + " accounts in the segment of rating model " //
                     + ratingModel.getId());
-            targetFile = prepareTargetFile(hdfsPath, ratingModel.getId());
             ingestPageByPage();
             return ratingModel;
         }
