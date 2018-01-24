@@ -34,7 +34,7 @@ public class ExportContactFetcher {
         log.info(String.format("Requesting count for payload: %s", //
                 segmentExportContext.getContactFrontEndQuery() == null //
                         ? "null" : JsonUtils.serialize(segmentExportContext.getClonedContactFrontEndQuery())));
-        return entityProxy.getCount( //
+        return entityProxy.getCountFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
                 segmentExportContext.getClonedContactFrontEndQuery());
     }
@@ -48,7 +48,7 @@ public class ExportContactFetcher {
             contactFrontEndQuery.setPageFilter(null);
             log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
 
-            Long contactsCount = entityProxy.getCount( //
+            Long contactsCount = entityProxy.getCountFromObjectApi( //
                     segmentExportContext.getCustomerSpace().toString(), //
                     contactFrontEndQuery);
             int pages = (int) Math.ceil((contactsCount * 1.0D) / pageSize);
@@ -80,7 +80,7 @@ public class ExportContactFetcher {
 
         log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
 
-        DataPage contactPage = entityProxy.getData( //
+        DataPage contactPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
                 contactFrontEndQuery);
 
@@ -123,7 +123,7 @@ public class ExportContactFetcher {
 
         log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
 
-        DataPage contactPage = entityProxy.getData( //
+        DataPage contactPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
                 contactFrontEndQuery);
 

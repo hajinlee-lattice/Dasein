@@ -27,7 +27,7 @@ public class ExportAccountFetcher {
         log.info(String.format("Requesting count for payload: %s", //
                 segmentExportContext.getAccountFrontEndQuery() == null //
                         ? "null" : JsonUtils.serialize(segmentExportContext.getClonedAccountFrontEndQuery())));
-        return entityProxy.getCount( //
+        return entityProxy.getCountFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
                 segmentExportContext.getClonedAccountFrontEndQuery());
     }
@@ -40,7 +40,7 @@ public class ExportAccountFetcher {
 
         log.info(String.format("Account query => %s", JsonUtils.serialize(accountFrontEndQuery)));
 
-        DataPage accountPage = entityProxy.getData( //
+        DataPage accountPage = entityProxy.getDataFromObjectApi( //
                 segmentExportContext.getCustomerSpace().toString(), //
                 accountFrontEndQuery);
 

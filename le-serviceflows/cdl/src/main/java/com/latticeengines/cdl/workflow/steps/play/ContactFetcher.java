@@ -39,7 +39,7 @@ public class ContactFetcher {
             contactFrontEndQuery.setPageFilter(null);
             log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
 
-            Long contactsCount = entityProxy.getCount( //
+            Long contactsCount = entityProxy.getCountFromObjectApi( //
                     playLaunchContext.getCustomerSpace().toString(), //
                     contactFrontEndQuery);
             int pages = (int) Math.ceil((contactsCount * 1.0D) / pageSize);
@@ -71,7 +71,7 @@ public class ContactFetcher {
 
         log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
 
-        DataPage contactPage = entityProxy.getData( //
+        DataPage contactPage = entityProxy.getDataFromObjectApi( //
                 playLaunchContext.getCustomerSpace().toString(), //
                 contactFrontEndQuery);
 

@@ -156,6 +156,11 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return postWithRetries("getData", url, frontEndQuery, DataPage.class);
     }
 
+    public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/entity/data", tenantId);
+        return postWithRetries("getData", url, frontEndQuery, DataPage.class);
+    }
+
     @SuppressWarnings({ "rawtypes" })
     private Map<String, Long> getRatingCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));

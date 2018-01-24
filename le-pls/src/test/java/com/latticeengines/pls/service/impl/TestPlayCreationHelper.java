@@ -38,6 +38,7 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.controller.PlayResourceDeploymentTestNG;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -170,6 +171,25 @@ public class TestPlayCreationHelper {
 
     public RatingEngine getRatingEngine() {
         return ratingEngine;
+    }
+
+    public RatingProxy initRatingProxy() throws NoSuchFieldException, IllegalAccessException {
+
+        RatingProxy ratingProxy = new RatingProxy(null);
+
+        Field f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
+        f1.setAccessible(true);
+        f1.set(ratingProxy, 1000L);
+
+        f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("multiplier");
+        f1.setAccessible(true);
+        f1.set(ratingProxy, 2D);
+
+        f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("maxAttempts");
+        f1.setAccessible(true);
+        f1.set(ratingProxy, 10);
+
+        return ratingProxy;
     }
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {

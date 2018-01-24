@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -38,7 +38,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     private static final Logger log = LoggerFactory.getLogger(RatingEntityPreviewServiceImpl.class);
 
     @Autowired
-    private EntityProxy entityProxy;
+    private RatingProxy ratingProxy;
 
     List<String> accountFields = Arrays.asList(InterfaceName.AccountId.name(), //
             InterfaceName.SalesforceAccountID.name(), //
@@ -82,7 +82,9 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
-        DataPage cachedDataPage = entityProxy.getData( //
+        // for AI model we need to change it to EntityProxy later on as it will
+        // read rating column from redshift
+        DataPage cachedDataPage = ratingProxy.getDataFromObjectApi( //
                 tenant.getId(), //
                 entityFrontEndQuery);
 
@@ -211,7 +213,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     }
 
     @VisibleForTesting
-    void setEntityProxy(EntityProxy entityProxy) {
-        this.entityProxy = entityProxy;
+    void setRatingProxy(RatingProxy ratingProxy) {
+        this.ratingProxy = ratingProxy;
     }
 }

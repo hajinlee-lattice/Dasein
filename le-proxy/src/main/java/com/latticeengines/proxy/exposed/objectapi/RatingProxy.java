@@ -94,8 +94,8 @@ public class RatingProxy extends MicroserviceRestApiProxy {
         ratingModel.setCreated(null);
         ratingModel.setIteration(-1);
         ratingModel.setRatingEngine(null);
-       // TODO - yintao to fix this compilation issue
-       // ratingModel.setParentEngine(null);
+        // TODO - yintao to fix this compilation issue
+        // ratingModel.setParentEngine(null);
         return ratingModel;
     }
 
@@ -123,6 +123,19 @@ public class RatingProxy extends MicroserviceRestApiProxy {
     public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/entity/data", tenantId);
         return postWithRetries("getData", url, frontEndQuery, DataPage.class);
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    public Map<String, Long> getRatingCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
+        frontEndQuery.setPageFilter(null);
+        frontEndQuery.setSort(null);
+        String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
+        Map map = postWithRetries("getRatingCount", url, frontEndQuery, Map.class);
+        if (map == null) {
+            return null;
+        } else {
+            return JsonUtils.convertMap(map, String.class, Long.class);
+        }
     }
 
     @SuppressWarnings({ "rawtypes" })

@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
@@ -57,6 +58,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     private EntityProxy entityProxy;
 
+    private RatingProxy ratingProxy;
+
     private RatingEngine ratingEngine;
 
     private RatingRule ratingRule;
@@ -66,10 +69,12 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
         entityProxy = testPlayCreationHelper.initEntityProxy();
+        ratingProxy = testPlayCreationHelper.initRatingProxy();
 
         play = testPlayCreationHelper.getPlay();
 
         ((RatingCoverageServiceImpl) ratingCoverageService).setEntityProxy(entityProxy);
+        ((RatingCoverageServiceImpl) ratingCoverageService).setRatingProxy(ratingProxy);
 
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
                 play.getRatingEngine().getId());

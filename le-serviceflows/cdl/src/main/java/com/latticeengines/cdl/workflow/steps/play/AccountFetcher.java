@@ -27,7 +27,7 @@ public class AccountFetcher {
         log.info(String.format("Requesting count for payload: %s", //
                 playLaunchContext.getAccountFrontEndQuery() == null //
                         ? "null" : JsonUtils.serialize(playLaunchContext.getClonedAccountFrontEndQuery())));
-        return entityProxy.getCount( //
+        return entityProxy.getCountFromObjectApi( //
                 playLaunchContext.getCustomerSpace().toString(), //
                 playLaunchContext.getClonedAccountFrontEndQuery());
     }
@@ -40,7 +40,7 @@ public class AccountFetcher {
 
         log.info(String.format("Account query => %s", JsonUtils.serialize(accountFrontEndQuery)));
 
-        DataPage accountPage = entityProxy.getData( //
+        DataPage accountPage = entityProxy.getDataFromObjectApi(//
                 playLaunchContext.getCustomerSpace().toString(), //
                 accountFrontEndQuery);
 

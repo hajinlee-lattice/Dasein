@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
@@ -54,7 +54,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     private Play play;
 
-    private EntityProxy entityProxy;
+    private RatingProxy ratingProxy;
 
     private RatingEngine ratingEngine;
 
@@ -66,11 +66,11 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
-        entityProxy = testPlayCreationHelper.initEntityProxy();
+        ratingProxy = testPlayCreationHelper.initRatingProxy();
 
         play = testPlayCreationHelper.getPlay();
 
-        ((RatingEntityPreviewServiceImpl) ratingEntityPreviewService).setEntityProxy(entityProxy);
+        ((RatingEntityPreviewServiceImpl) ratingEntityPreviewService).setRatingProxy(ratingProxy);
 
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
                 play.getRatingEngine().getId());

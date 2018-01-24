@@ -49,6 +49,7 @@ import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("ratingCoverageService")
@@ -72,6 +73,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Autowired
     private EntityProxy entityProxy;
+
+    @Autowired
+    private RatingProxy ratingProxy;
 
     private ForkJoinPool tpForParallelStream;
 
@@ -480,8 +484,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
             accountFrontEndQuery.setRatingModels(ratingModels);
 
-            log.info("Front end queryfor Account: " + JsonUtils.serialize(accountFrontEndQuery));
-            Map<String, Long> countInfo = entityProxy.getRatingCount( //
+            log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
+            Map<String, Long> countInfo = ratingProxy.getRatingCountFromObjectApi( //
                     tenent.getId(), //
                     accountFrontEndQuery);
 
@@ -703,5 +707,10 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     @VisibleForTesting
     void setEntityProxy(EntityProxy entityProxy) {
         this.entityProxy = entityProxy;
+    }
+
+    @VisibleForTesting
+    void setRatingProxy(RatingProxy ratingProxy) {
+        this.ratingProxy = ratingProxy;
     }
 }
