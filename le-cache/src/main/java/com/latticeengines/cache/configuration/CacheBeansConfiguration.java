@@ -55,18 +55,19 @@ public class CacheBeansConfiguration implements CachingConfigurer {
     }
 
     private CacheManager redisCacheManager() {
-        long maxIdleTime = 5 * 24 * 60 * 60 * 1000;
+        long ttl = 2 * 24 * 60 * 60 * 1000;
+        long maxIdleTime = 1 * 24 * 60 * 60 * 1000;
 
-        CacheConfig dataLakeCMCacheConfig = new CacheConfig(0, maxIdleTime);
+        CacheConfig dataLakeCMCacheConfig = new CacheConfig(ttl, maxIdleTime);
         dataLakeCMCacheConfig.setMaxSize(800 * 2);
-        CacheConfig dataLakeStatsCacheConfig = new CacheConfig(0, maxIdleTime);
+        CacheConfig dataLakeStatsCacheConfig = new CacheConfig(ttl, maxIdleTime);
         dataLakeStatsCacheConfig.setMaxSize(800 * 2);
 
-        CacheConfig entityCountCacheConfig = new CacheConfig(0, maxIdleTime);
+        CacheConfig entityCountCacheConfig = new CacheConfig(ttl, maxIdleTime);
         entityCountCacheConfig.setMaxSize(3000 * 8 * 2);
-        CacheConfig entityDataCacheConfig = new CacheConfig(0, maxIdleTime);
+        CacheConfig entityDataCacheConfig = new CacheConfig(ttl, maxIdleTime);
         entityDataCacheConfig.setMaxSize(300 * 8 * 2);
-        CacheConfig entityRatingCountCacheConfig = new CacheConfig(0, maxIdleTime);
+        CacheConfig entityRatingCountCacheConfig = new CacheConfig(ttl, maxIdleTime);
         entityRatingCountCacheConfig.setMaxSize(3000 * 8 * 2);
 
         CacheConfig metadataCacheConfig = new CacheConfig(10 * 60 * 1000, 10 * 60 * 1000);
