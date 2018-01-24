@@ -155,6 +155,24 @@ public final class JobStepDisplayInfoMapping {
             "Scoring" //
     };
 
+    private static final String[] RTS_BULK_SCORE_STEPS = {
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+            "scoring_targeted_accounts", //
+    };
+
+    private static final String[] CDL_DATA_FEED_IMPORT_STEPS = {
+            "load_data", //
+            "load_data" //
+    };
+
     private static final Map<String, String[]> DISPLAY_NAME = new HashMap<>();
     private static final Map<String, String[]> DISPLAY_DESCRIPTION = new HashMap<>();
     static {
@@ -164,6 +182,8 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_NAME.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
         DISPLAY_NAME.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
+        DISPLAY_NAME.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
+        DISPLAY_NAME.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
@@ -171,6 +191,8 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_DESCRIPTION.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
         DISPLAY_DESCRIPTION.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
+        DISPLAY_DESCRIPTION.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
+        DISPLAY_DESCRIPTION.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
     }
 
     public static String getMappedName(String workflowType, int stepIndex) {
