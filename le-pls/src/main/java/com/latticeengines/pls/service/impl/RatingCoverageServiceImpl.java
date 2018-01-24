@@ -485,7 +485,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             accountFrontEndQuery.setRatingModels(ratingModels);
 
             log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
-            Map<String, Long> countInfo = ratingProxy.getRatingCountFromObjectApi( //
+            Map<String, Long> countInfo = ratingProxy.getCoverage( //
                     tenent.getId(), //
                     accountFrontEndQuery);
 

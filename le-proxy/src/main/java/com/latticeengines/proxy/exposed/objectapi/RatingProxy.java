@@ -126,19 +126,6 @@ public class RatingProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings({ "rawtypes" })
-    public Map<String, Long> getRatingCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
-        frontEndQuery.setPageFilter(null);
-        frontEndQuery.setSort(null);
-        String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
-        Map map = postWithRetries("getRatingCount", url, frontEndQuery, Map.class);
-        if (map == null) {
-            return null;
-        } else {
-            return JsonUtils.convertMap(map, String.class, Long.class);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes" })
     private Map<String, Long> getCoverageFromApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
