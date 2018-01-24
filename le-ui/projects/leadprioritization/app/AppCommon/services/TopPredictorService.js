@@ -536,7 +536,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor),
                 foundMax = false;
 
-            // console.log(bucketName);
 
             if (isNumericRange && bucket.LowerInclusive !== null) {
                 if (maxBucket === null) {
@@ -670,13 +669,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             toReturn.elementList[0].name = "Available";
         }
 
-        //
-        //
-        // Duplicate code exampkles here need to be made more efficient
-        //
-        // - Jon
-        //
-        //
+
         var foundOther = toReturn.elementList.some(function (el) {
             return el.name === "Other, Less Popular";
         });
@@ -701,13 +694,15 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     toReturn.elementList.splice(i, 1);
                 };
             }
+
             // Use variables to combine and create a new "Other, Less Popular" bucket
             newCombinedBucket = {
                 name: otherLessPopular.name,
                 lift: otherLessPopular.lift + zeroPercentTotal.lift,
-                percentTotal: otherLessPopular.percentTotal + zeroPercentTotal.percentTotal,
+                percentTotal: parseInt(otherLessPopular.percentTotal) + parseInt(zeroPercentTotal.percentTotal),
                 SortProperty: otherLessPopular.lift + zeroPercentTotal.lift
             };
+
             // Push new bucket back to list
             toReturn.elementList.push(newCombinedBucket);    
         }
