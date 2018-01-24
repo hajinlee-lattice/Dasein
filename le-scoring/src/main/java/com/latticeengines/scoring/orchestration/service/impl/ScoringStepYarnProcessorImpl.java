@@ -237,6 +237,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         }
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(cacheFiles));
         properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.FALSE.toString());
+        properties.setProperty(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(), Boolean.TRUE.toString());
         return properties;
     }
 
