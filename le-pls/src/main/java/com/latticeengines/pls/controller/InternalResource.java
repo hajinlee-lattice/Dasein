@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,6 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -195,9 +193,6 @@ public class InternalResource extends InternalResourceBase {
     private EmailService emailService;
 
     @Inject
-    private VersionManager versionManager;
-
-    @Inject
     private BucketedScoreService bucketedScoreService;
 
     @Inject
@@ -241,9 +236,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
-
-    @Value("${pls.current.stack:}")
-    private String currentStack;
 
     @RequestMapping(value = "/targetmarkets/default/"
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
@@ -968,17 +960,6 @@ public class InternalResource extends InternalResourceBase {
                 }
             }
         }
-    }
-
-    @RequestMapping(value = "/currentstack", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get current active stack")
-    public Map<String, String> getActiveStack() {
-        Map<String, String> response = new HashMap<>();
-        response.put("CurrentStack", currentStack);
-        response.put("ArtifactVersion", versionManager.getCurrentVersion());
-        response.put("SvnRevision", versionManager.getCurrentSvnRevision());
-        return response;
     }
 
     @RequestMapping(value = "/abcdbuckets/uptodate/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")

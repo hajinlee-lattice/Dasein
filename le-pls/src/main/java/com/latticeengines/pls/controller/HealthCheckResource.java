@@ -1,11 +1,17 @@
 package com.latticeengines.pls.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import com.latticeengines.pls.service.SystemStatusService;
@@ -18,8 +24,14 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/health")
 public class HealthCheckResource {
 
-    @Autowired
+    @Inject
     private SystemStatusService systemConfigService;
+
+    @Inject
+    private VersionManager versionManager;
+
+    @Value("${pls.current.stack:}")
+    private String currentStack;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -36,5 +48,16 @@ public class HealthCheckResource {
     public StatusDocument systemCheck() {
         StatusDocument status = systemConfigService.getSystemStatus();
         return status;
+    }
+
+    @RequestMapping(value = "/stackinfo", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get current active stack")
+    public Map<String, String> getStackInfo() {
+        Map<String, String> response = new HashMap<>();
+        response.put("CurrentStack", currentStack);
+        response.put("ArtifactVersion", versionManager.getCurrentVersion());
+        response.put("SvnRevision", versionManager.getCurrentSvnRevision());
+        return response;
     }
 }
