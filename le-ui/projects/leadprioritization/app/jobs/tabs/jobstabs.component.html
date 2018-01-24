@@ -1,22 +1,18 @@
 <section class="tabs interior" ng-if="vm.cdlEnabled">
     <ul>
-        <li
-            ui-sref="home.jobs.status"
-            ui-sref-active="active">
+        <li ui-sref="home.jobs.status" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Model Jobs</h2>
                 <div>
-                    <span class="count">{{vm.JobsStore.data.jobs.length - (vm.JobsStore.data.jobs | jobfilter: 'processAnalyzeWorkflow').length}}</span>
+                    <span class="count">{{vm.JobsStore.data.jobs.length}}</span>
                 </div>
             </div>
         </li>
-        <li
-            ui-sref="home.jobs.data"
-            ui-sref-active="active">
+        <li ui-sref="home.jobs.data" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Data Processing & Analysis</h2>
                 <div>
-                    <span class="count">{{(vm.JobsStore.data.jobs | jobfilter: 'processAnalyzeWorkflow').length}}</span>
+                    <span class="count">{{vm.JobsStore.data.importJobs.length}}</span>
                 </div>
             </div>
         </li>

@@ -3,7 +3,7 @@ angular.module('lp.jobs.row.subjobs', [])
     .directive('importJobRowSubJobs', [function () {
         var controller = ['$scope', 'JobsStore', function ($scope, JobsStore) {
             function init() {
-                
+
             }
             $scope.getActionType = function (subjob) {
                 if (subjob.reports && subjob.reports.length > 0) {
@@ -20,10 +20,14 @@ angular.module('lp.jobs.row.subjobs', [])
                 }
             }
             $scope.getActionName = function (subjob) {
-                return subjob.inputs['SOURCE_DISPLAY_NAME'];
+                if (subjob.inputs && subjob.inputs != null) {
+                    return subjob.inputs['SOURCE_DISPLAY_NAME'];
+                }
             }
             $scope.getActionLink = function (subjob) {
-                return subjob.inputs['SOURCE_DISPLAY_NAME'];
+                if (subjob.inputs && subjob.inputs != null) {
+                    return subjob.inputs['SOURCE_DISPLAY_NAME'];
+                }
             }
 
             $scope.getValidation = function (subjob) {

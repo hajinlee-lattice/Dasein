@@ -162,6 +162,8 @@ angular
                 var stepsCompleted = getStepsCompleted(job);
                 var stepFailed = getStepFailed(job);
                 var subJobs = gestSubJobs(job);
+                var actions = getActions(job);
+                var actionsCount = getActionsCount(job)
 
                 if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     stepRunning = "score_training_set";
@@ -174,6 +176,8 @@ angular
                         {
                             id: job.id,
                             user: job.user,
+                            actions: actions,
+                            actionsCount: actionsCount,
                             errorCode: job.errorCode,
                             errorMsg: job.errorMsg,
                             jobType: job.jobType,

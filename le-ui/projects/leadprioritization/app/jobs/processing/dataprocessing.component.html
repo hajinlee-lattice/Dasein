@@ -77,7 +77,13 @@
                                         limitTo: vm.pagesize" class="le-row" job="job" vm="vm" ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}">
 
             </import-job-row>
-
+            <div class="le-row" ng-if="vm.loading">
+                <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+                    <span>
+                        <span class="loading-small"></span>
+                    </span>
+                </div>
+            </div>
         </div>
         <div class="row" ng-init="vm.current = 1" ng-show="vm.max > 1">
             <div class="twelve columns">

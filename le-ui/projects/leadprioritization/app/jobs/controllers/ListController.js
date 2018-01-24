@@ -39,7 +39,7 @@ angular.module('lp.jobs.model', [
 
             $scope.jobs = JobsStore.data.models[modelId];
         } else {
-            $scope.jobs = $filter('filter')(JobsStore.data.jobs, { jobType: '!processAnalyzeWorkflow' }, true);//JobsStore.data.dataModelJobs;
+            $scope.jobs = $scope.jobs = JobsStore.data.jobs;//$filter('filter')(JobsStore.data.jobs, { jobType: '!processAnalyzeWorkflow' }, true);//JobsStore.data.dataModelJobs;
             if (JobsStore.data.isModelState) {
                 $scope.jobs = [];
             }

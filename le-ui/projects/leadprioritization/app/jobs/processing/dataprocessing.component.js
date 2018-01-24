@@ -28,7 +28,7 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
 
                     var tmp = browser.IEVersion();
                     if (tmp > 0) {
-                        console.log('====== Creating msGridRow =======');
+                        // console.log('====== Creating msGridRow =======');
                         var nodes = element.context.childNodes;
                         var j = 1;
                         for (var i = 0; i < nodes.length; i++) {
@@ -46,7 +46,7 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
     }])
     .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, ModalStore) {
         var vm = this;
-
+        vm.loading = false;
         vm.loadingJobs = JobsStore.data.loadingJobs;
         vm.pagesize = 10;
         vm.query = '';
@@ -134,17 +134,31 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
         }
 
         vm.init = function () {
-            // $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true);
-            vm.jobs = $filter('filter')(JobsStore.data.jobs, { jobType: 'processAnalyzeWorkflow' }, true); //JobsStore.data.jobs;
-            vm.jobs.forEach(function (element) {
-                switch (element.jobType) {
-                    case 'processAnalyzeWorkflow': {
-                        element.displayName = "Data Processing & Analysis"; break;
+            vm.loading = true;
+            JobsStore.getJobs(false).then(function(result) {
+                // console.log(result);
+                vm.jobs = JobsStore.data.importJobs;
+                // console.log(vm.jobs);
+                vm.loading = false;
+                vm.jobs.forEach(function (element) {
+                    switch (element.jobType) {
+                        case 'processAnalyzeWorkflow': {
+                            element.displayName = "Data Processing & Analysis"; break;
+                        }
                     }
-                }
+                });
+                vm.header.filter.unfiltered = vm.jobs;
+                vm.header.filter.filtered = vm.jobs;
             });
-            vm.header.filter.unfiltered = vm.jobs;
-            vm.header.filter.filtered = vm.jobs;
+            // vm.jobs.forEach(function (element) {
+            //     switch (element.jobType) {
+            //         case 'processAnalyzeWorkflow': {
+            //             element.displayName = "Data Processing & Analysis"; break;
+            //         }
+            //     }
+            // });
+            // vm.header.filter.unfiltered = vm.jobs;
+            // vm.header.filter.filtered = vm.jobs;
             vm.initModalWindow();
         }
 

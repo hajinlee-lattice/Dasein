@@ -54,6 +54,7 @@ angular.module('lp.jobs.import.row', [])
             function init() {
                 $scope.job = angular.copy($scope.job);
                 $scope.jobStatus = $scope.job.jobStatus;
+                // console.log($scope.stepscompleted);
                 $scope.vm.callback = callbackModalWindow;
             }
 

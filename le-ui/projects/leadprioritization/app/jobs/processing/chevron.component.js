@@ -10,15 +10,15 @@ angular.module('lp.jobs.chevron', [])
 
 
             function init() {
-                console.log($scope.stepsconfig);
+                // console.log($scope.stepsconfig);
                 var keys = Object.keys($scope.stepsconfig);
                 for (var i = 0; i < keys.length; i++) {
-                    console.log($scope.stepsconfig[keys[i]].position);
+                    // console.log($scope.stepsconfig[keys[i]].position);
                     vm.stepsconfig[$scope.stepsconfig[keys[i]].position - 1] = $scope.stepsconfig[keys[i]];
                 }
 
 
-                console.log(vm.stepsconfig);
+                // console.log(vm.stepsconfig);
 
             }
             init();

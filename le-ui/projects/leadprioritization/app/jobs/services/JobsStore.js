@@ -24,6 +24,7 @@ angular
 
     this.data = {
         jobs: [],
+        importJobs:[],
         loadingJobs: false,
         models: {},
         jobsMap: {},
@@ -75,7 +76,7 @@ angular
                     }
                 } else {
                     JobsStore.data.jobs.length = 0;
-
+                    JobsStore.data.importJobs = [];
                     for (var i=0; i<res.length; i++) {
                         var job = res[i];
 
@@ -94,10 +95,15 @@ angular
     };
 
     this.addJob = function(job, modelId) {
+
         if (modelId) {
             JobsStore.data.models[modelId].push(job);
         } else {
-            JobsStore.data.jobs.push(job);
+            if(job.jobType === "processAnalyzeWorkflow"){
+                JobsStore.data.importJobs.push(job);
+            }else{
+                JobsStore.data.jobs.push(job);
+            }
         }
     };
 

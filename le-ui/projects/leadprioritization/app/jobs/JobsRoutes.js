@@ -75,10 +75,10 @@ angular
                     });
                     return deferred.promise;
                 },
-                InitJobs: function(JobsStore){
-                    JobsStore.getJobs(false).then(function(result) {
-                    });
-                }
+                // InitJobs: function(JobsStore){
+                //     JobsStore.getJobs(false).then(function(result) {
+                //     });
+                // }
             },
             views: {
                 "main@": {
@@ -88,6 +88,13 @@ angular
         })
         .state('home.jobs.data', {
             url: '/status/data',
+            // resolve: {
+            //     InitJobs: function(JobsStore){
+            //         JobsStore.getJobs(false).then(function(result) {
+            //             console.log(result);
+            //         });
+            //     }
+            // },
             views: {
                 "main@": {
                     controller: 'DataProcessingComponent',
