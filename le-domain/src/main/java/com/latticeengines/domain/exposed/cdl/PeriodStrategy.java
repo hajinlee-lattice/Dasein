@@ -28,10 +28,14 @@ public class PeriodStrategy implements Serializable {
     public PeriodStrategy(Template template) {
         PeriodStrategy periodStrategy = new PeriodStrategy();
         periodStrategy.setTemplate(template);
+        periodStrategy.setName(template.name());
     }
 
     @JsonProperty("template")
     private Template template;
+
+    @JsonProperty("name")
+    private String name;
 
     @JsonProperty("stat_time")
     private String startTimeStr;
@@ -42,6 +46,14 @@ public class PeriodStrategy implements Serializable {
 
     public void setTemplate(Template template) {
         this.template = template;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getStartTimeStr() {
