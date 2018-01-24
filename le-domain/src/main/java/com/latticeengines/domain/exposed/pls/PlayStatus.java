@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public enum RatingEngineStatus {
+public enum PlayStatus {
 
     ACTIVE(0), //
     INACTIVE(1), //
@@ -14,11 +14,11 @@ public enum RatingEngineStatus {
 
     private int stautsId;
 
-    private static Map<Integer, RatingEngineStatus> statusMap = new HashMap<>();
-    private static Map<RatingEngineStatus, Collection<RatingEngineStatus>> transitionMap = new HashMap<>();
+    private static Map<Integer, PlayStatus> statusMap = new HashMap<>();
+    private static Map<PlayStatus, Collection<PlayStatus>> transitionMap = new HashMap<>();
 
     static {
-        for (RatingEngineStatus status : values()) {
+        for (PlayStatus status : values()) {
             statusMap.put(status.getStatusId(), status);
         }
         transitionMap.put(ACTIVE, Stream.of(INACTIVE).collect(Collectors.toSet()));
@@ -26,7 +26,7 @@ public enum RatingEngineStatus {
         transitionMap.put(DELETED, Stream.of(INACTIVE).collect(Collectors.toSet()));
     }
 
-    private RatingEngineStatus(int statusId) {
+    private PlayStatus(int statusId) {
         this.stautsId = statusId;
     }
 
@@ -34,15 +34,14 @@ public enum RatingEngineStatus {
         return this.stautsId;
     }
 
-    public RatingEngineStatus getRatingEngineStatus(Integer statusId) {
+    public PlayStatus getPlayStatus(Integer statusId) {
         return statusMap.get(statusId);
     }
 
-    public static boolean canTransit(RatingEngineStatus srcState, RatingEngineStatus dstState) {
+    public static boolean canTransit(PlayStatus srcState, PlayStatus dstState) {
         if (transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState)) {
             return true;
         }
         return false;
     }
-
 }

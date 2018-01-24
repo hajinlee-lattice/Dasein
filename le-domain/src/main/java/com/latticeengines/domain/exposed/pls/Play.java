@@ -9,6 +9,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -98,6 +100,11 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
+
+    @JsonProperty("status")
+    @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
+    private PlayStatus status;
 
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
@@ -205,6 +212,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public void setStatus(PlayStatus status) {
+        this.status = status;
+    }
+
+    public PlayStatus getStatus() {
+        return this.status;
     }
 
     public Date getCreated() {

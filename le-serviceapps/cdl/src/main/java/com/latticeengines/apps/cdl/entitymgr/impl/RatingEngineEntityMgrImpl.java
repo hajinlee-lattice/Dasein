@@ -167,6 +167,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             retrievedRatingEngine.setSegment(ratingEngine.getSegment());
         }
         if (ratingEngine.getStatus() != null) {
+            validateForStatusUpdate(retrievedRatingEngine, ratingEngine);
             retrievedRatingEngine.setStatus(ratingEngine.getStatus());
         }
         if (ratingEngine.getNote() != null) {
@@ -188,6 +189,21 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
         retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);
+    }
+
+    @VisibleForTesting
+    void validateForStatusUpdate(RatingEngine retrievedRatingEngine, RatingEngine ratingEngine) {
+        // Check transition diagram
+        if (!RatingEngineStatus.canTransit(retrievedRatingEngine.getStatus(), ratingEngine.getStatus())) {
+            throw new LedpException(LedpCode.LEDP_18174, new String[] { retrievedRatingEngine.getStatus().name(),
+                    ratingEngine.getStatus().name(), ratingEngine.getId() });
+        }
+
+        // Check dependency of Rating Engine
+        if (ratingEngine.getStatus() == RatingEngineStatus.DELETED) {
+            // TODO Yunlong add PlayEntity to RatingEngineEntity and check its
+            // dependencies.
+        }
     }
 
     private void createNewRatingEngine(RatingEngine ratingEngine, String tenantId) {

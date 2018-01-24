@@ -1,5 +1,8 @@
 CREATE PROCEDURE `UpdateCDLTables`()
     BEGIN
+        ALTER TABLE PLS_MultiTenant.PLAY
+        ADD COLUMN `STATUS` varchar(255) null;
+    
         ALTER TABLE PLS_MultiTenant.AI_MODEL
         ADD COLUMN `MODELING_STRATEGY` varchar(255) not null;
 
