@@ -18,6 +18,7 @@ final class RatingEngineCountUtils {
     static void updateRatingEngineCounts(final RatingEngineProxy ratingEngineProxy, final String customerSpace) {
         List<String> ratingEngineIds = ratingEngineProxy.getRatingEngineIds(customerSpace);
         if (CollectionUtils.isNotEmpty(ratingEngineIds)) {
+            log.info("Going to update " + ratingEngineIds.size() + " rating engines.");
             ratingEngineIds.forEach(engineId -> {
                 try {
                     Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace, engineId);
@@ -27,6 +28,8 @@ final class RatingEngineCountUtils {
                     log.error("Failed to update the counts of rating engine " + engineId, e);
                 }
             });
+        } else {
+            log.info("There is no rating engines to update.");
         }
     }
 

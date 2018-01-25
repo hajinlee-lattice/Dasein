@@ -54,11 +54,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     }
 
     private void verifyProcess() {
-        verifyDataFeedStatus(DataFeed.Status.Active);
-        verifyActiveVersion(initialVersion.complement());
-
-        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
-        Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
+        runCommonPAVerifications();
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
         long numContacts = CONTACT_IMPORT_SIZE_1;

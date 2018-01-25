@@ -192,7 +192,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected RatingEngine ratingEngine;;
 
-    @BeforeClass(groups = { "end2end", "precheckin" })
+    @BeforeClass(groups = { "end2end", "precheckin", "deployment" })
     public void setup() throws Exception {
         logger.info("Bootstrapping test tenants using tenant console ...");
 
@@ -843,6 +843,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info(String.format("actions=%s", actions));
         Assert.assertTrue(CollectionUtils.isNotEmpty(actions));
         Assert.assertTrue(actions.stream().allMatch(action -> action.getOwnerId() != null));
+    }
+
+    protected void runCommonPAVerifications() {
+        verifyDataFeedStatus(DataFeed.Status.Active);
+        verifyActiveVersion(initialVersion.complement());
+        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
+        Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
     }
 
 }

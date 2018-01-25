@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
@@ -141,7 +142,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         for (RatingModelContainer modelContainer : modelContainers) {
             String engineId = modelContainer.getEngineSummary().getId();
             String modelId = modelContainer.getModel().getId();
-            modelIdToEngineIdMap.put(modelId, ENGINE_ATTR_PREFIX + engineId);
+            modelIdToEngineIdMap.put(modelId, RatingEngine.toRatingAttrName(engineId));
         }
         config.setIdAttrsMap(modelIdToEngineIdMap);
         return config;
@@ -152,11 +153,11 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         for (RatingModelContainer modelContainer : modelContainers) {
             String segmentName = modelContainer.getEngineSummary().getSegmentName();
             String engineId = modelContainer.getEngineSummary().getId();
-            engineIdToSegmentNameMap.put(engineId, segmentName);
+            engineIdToSegmentNameMap.put(RatingEngine.toRatingAttrName(engineId), segmentName);
         }
         List<Attribute> attrs = table.getAttributes();
         attrs.forEach(attr -> {
-            String engineId = parseEngineId(attr);
+            String engineId = parseEngineID(attr);
             if (engineIdToSegmentNameMap.containsKey(engineId)) {
                 String segmentName = engineIdToSegmentNameMap.get(engineId);
                 attr.setSubcategory(segmentName);
@@ -168,10 +169,10 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         });
     }
 
-    private String parseEngineId(Attribute attribute) {
+    private String parseEngineID(Attribute attribute) {
         String attrName = attribute.getName();
         if (attrName.startsWith(ENGINE_ATTR_PREFIX)) {
-            String engineId = attrName.substring(ENGINE_ATTR_PREFIX.length());
+            String engineId = RatingEngine.toRatingAttrName(attrName);
             log.info(String.format("Parsed an engine id %s from attribute name %s", engineId, attrName));
             return engineId;
         } else {

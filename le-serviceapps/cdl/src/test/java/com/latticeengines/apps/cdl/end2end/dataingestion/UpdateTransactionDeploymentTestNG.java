@@ -17,10 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -60,11 +57,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
     }
 
     private void verifyProcess() {
-        verifyDataFeedStatus(DataFeed.Status.Active);
-        verifyActiveVersion(initialVersion.complement());
-
-        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
-        Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
+        runCommonPAVerifications();
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;

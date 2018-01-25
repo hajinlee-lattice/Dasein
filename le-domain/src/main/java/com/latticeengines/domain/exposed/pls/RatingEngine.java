@@ -57,8 +57,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
-    public static final String RATING_ENGINE_PREFIX = "rating_engine";
-    public static final String RATING_ENGINE_FORMAT = "%s__%s";
+    public static final String RATING_ENGINE_PREFIX = "engine";
+    public static final String RATING_ENGINE_FORMAT = "%s_%s";
     public static final String DEFAULT_NAME_PATTERN = "RATING ENGINE -- %s";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
@@ -322,7 +322,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     public static String generateIdStr() {
-        return AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
     }
 
     public RatingModel getActiveModel() {
@@ -348,5 +349,17 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         frontEndQuery.setRatingModels(Collections.singletonList(getActiveModel()));
         frontEndQuery.setMainEntity(mainEntity);
         return frontEndQuery;
+    }
+
+    public String toRatingAttrName() {
+        return toRatingAttrName(getId());
+    }
+
+    public static String toRatingAttrName(String engineId) {
+        if (engineId.startsWith(RATING_ENGINE_PREFIX)) {
+            return engineId;
+        } else {
+            return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, engineId);
+        }
     }
 }

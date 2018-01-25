@@ -6,6 +6,8 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -18,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 /**
  * Process Account, Contact and Product for a new tenant
@@ -34,6 +37,9 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
     private static final int CONTACT_IMPORT_SIZE_1_2 = 500;
     private static final int PRODUCT_IMPORT_SIZE_1_1 = 70;
     private static final int PRODUCT_IMPORT_SIZE_1_2 = 30;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -92,6 +98,7 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         verifyTestSegment2Counts(segment2Counts);
 
         RatingEngine ratingEngine = createRuleBasedRatingEngine();
+        ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), ratingEngine.getId());
         Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RuleBucketName.A, RATING_A_COUNT_1, //
                 RuleBucketName.D, RATING_D_COUNT_1, //

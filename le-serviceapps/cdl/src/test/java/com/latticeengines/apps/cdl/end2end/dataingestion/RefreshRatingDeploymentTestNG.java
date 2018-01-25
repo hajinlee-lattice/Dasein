@@ -9,12 +9,11 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class RefreshRatingDeploymentTestNG  extends DataIngestionEnd2EndDeploymentTestNGBase {
+public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
@@ -38,9 +37,11 @@ public class RefreshRatingDeploymentTestNG  extends DataIngestionEnd2EndDeployme
     }
 
     private void verifyProcess() {
-        verifyDataFeedStatus(DataFeed.Status.Active);
-        verifyActiveVersion(initialVersion.complement());
+        runCommonPAVerifications();
+        verifyRuleBasedEngines();
+    }
 
+    private void verifyRuleBasedEngines() {
         Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RuleBucketName.A, RATING_A_COUNT_1, //
                 RuleBucketName.D, RATING_D_COUNT_1, //

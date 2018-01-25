@@ -23,6 +23,7 @@ final class SegmentCountUtils {
         // no need to go parallel here
         // because the concurrency level is limited on redshift side
         if (CollectionUtils.isNotEmpty(segments)) {
+            log.info("Going to update " + segments.size() + " segments.");
             segments.forEach(segment -> {
                 // use a deep copy to avoid changing restriction format to break UI
                 MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
@@ -37,6 +38,8 @@ final class SegmentCountUtils {
                     segmentProxy.createOrUpdateSegment(customerSpace, segment);
                 }
             });
+        } else {
+            log.info("There is no segment to update.");
         }
     }
 
