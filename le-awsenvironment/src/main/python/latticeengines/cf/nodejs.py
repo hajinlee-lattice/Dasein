@@ -19,6 +19,8 @@ PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
 PARAM_INSTALL_MODE=Parameter("InstallMode", "INTERNAL or EXTERNAL")
 PARAM_LE_STACK=Parameter("LEStack", "The name of the parent LE_STACK")
 PARAM_ECS_SCALE_ROLE_ARN = ArnParameter("EcsAutoscaleRoleArn", "ECS autoscale role Arn")
+PARAM_SPLUNK_URL=Parameter("SplunkUrl", "Url of splunk collector")
+PARAM_SPLUNK_TOKEN=Parameter("SplunkToken", "Splunk token")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -32,10 +34,7 @@ def template_cli(args):
     template(args.environment, args.stackname, args.mode, args.profile, args.instances, args.upload)
 
 def template(environment, stackname, mode, profile, instances, upload=False):
-
-    port = 3000 if mode == "EXTERNAL" else 3002
-
-    stack = create_template(profile, instances, port, mode, environment)
+    stack = create_template(profile, instances, mode, environment)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -43,31 +42,59 @@ def template(environment, stackname, mode, profile, instances, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(profile, instances, port, mode, env):
+def create_template(profile, instances, mode, env):
     stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", env, use_asgroup=True, instances=instances)
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK, PARAM_ECS_SCALE_ROLE_ARN])
+    stack.add_params([
+        PARAM_DOCKER_IMAGE,
+        PARAM_DOCKER_IMAGE_TAG,
+        PARAM_MEM,
+        PARAM_INSTALL_MODE,
+        PARAM_LE_STACK,
+        PARAM_ECS_SCALE_ROLE_ARN,
+        PARAM_SPLUNK_URL,
+        PARAM_SPLUNK_TOKEN
+    ])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = express_task(env, profile_vars, port, mode)
+    task = express_task(env, profile_vars, mode)
     stack.add_resource(task)
     stack.add_service("express", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     return stack
 
-def express_task(environment, profile_vars, port, mode):
+def express_task(environment, profile_vars, mode):
+    port = 3000 if mode == "EXTERNAL" else 3002
+    app = "lpi" if mode == "EXTERNAL" else "admin-console"
     config = AwsEnvironment(environment)
     container = ContainerDefinition("express", { "Fn::Join" : [ "", [
         config.ecr_registry(), "/latticeengines/express:",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
         .hostname({ "Fn::Join" : ["-", [{ "Ref" : "AWS::StackName" }, "express"]]},) \
         .publish_port(port, 443) \
-        .set_logging({
-        "LogDriver": "awslogs",
-        "Options": {
-            "awslogs-group": { "Fn::Join": [ "-", ["lpi", PARAM_LE_STACK.ref()]] },
-            "awslogs-region": { "Ref": "AWS::Region" },
-            "awslogs-stream-prefix": "lpi" if mode == "EXTERNAL" else "admin-console"
-        }}) \
         .set_env("INSTALL_MODE", PARAM_INSTALL_MODE.ref())
+
+    # TODO: should also use splunk in DR
+    if environment != "dr":
+        container = container.set_logging({
+            "LogDriver": "splunk",
+            "Options": {
+                "splunk-url": PARAM_SPLUNK_URL.ref(),
+                "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
+                "splunk-index": "main",
+                "splunk-sourcetype": "log4j",
+                "splunk-format": "raw",
+                "splunk-gzip": "true",
+                "labels": "stack,app"
+            }}) \
+            .add_docker_label("stack", profile_vars["LE_STACK"].ref()) \
+            .add_docker_label("app", app)
+    else:
+        container = container.set_logging({
+            "LogDriver": "awslogs",
+            "Options": {
+                "awslogs-group": { "Fn::Join": [ "-", ["lpi", PARAM_LE_STACK.ref()]] },
+                "awslogs-region": { "Ref": "AWS::Region" },
+                "awslogs-stream-prefix": app
+            }})
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
@@ -101,6 +128,8 @@ def provision(environment, stackname, tgrp, profile, instance_type, mode, instan
     extra_params.append(PARAM_INSTALL_MODE.config(mode))
     extra_params.append(PARAM_LE_STACK.config(le_stack))
     extra_params.append(PARAM_ECS_SCALE_ROLE_ARN.config(config.ecs_autoscale_role_arn()))
+    extra_params.append(PARAM_SPLUNK_URL.config(config.splunk_url()))
+    extra_params.append(PARAM_SPLUNK_TOKEN.config(config.splunk_token()))
     tgrp_arn = find_tgrp_arn(tgrp)
 
     ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=instances, max_cap=instances, public=public, instance_type=instance_type, additional_params=extra_params, le_stack=le_stack)
