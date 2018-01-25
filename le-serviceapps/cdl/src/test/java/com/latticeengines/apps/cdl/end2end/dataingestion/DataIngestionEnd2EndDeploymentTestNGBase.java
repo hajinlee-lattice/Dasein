@@ -366,7 +366,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected void verifyActionRegistration() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        List<Action> actions = internalResourceProxy.findAll(customerSpace.toString());
+        List<Action> actions = internalResourceProxy.getActionsByOwnerId(customerSpace.toString(), null);
         Assert.assertEquals(actions.size(), ++actionsNumber);
     }
 
@@ -839,7 +839,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     void verifyUpdateActions() {
-        List<Action> actions = internalResourceProxy.findAll(mainTestTenant.getId());
+        List<Action> actions = internalResourceProxy.findAllActions(mainTestTenant.getId());
         logger.info(String.format("actions=%s", actions));
         Assert.assertTrue(CollectionUtils.isNotEmpty(actions));
         Assert.assertTrue(actions.stream().allMatch(action -> action.getOwnerId() != null));

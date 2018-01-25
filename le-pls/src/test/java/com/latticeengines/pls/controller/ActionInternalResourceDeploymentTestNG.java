@@ -130,7 +130,7 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
     }
 
     protected List<Action> findAll() {
-        return internalResourceRestApiProxy.findAll(CustomerSpace.parse(mainTestTenant.getId()).toString());
+        return internalResourceRestApiProxy.findAllActions(CustomerSpace.parse(mainTestTenant.getId()).toString());
     }
 
     protected List<Action> findByOwnerId(Long ownerId) {

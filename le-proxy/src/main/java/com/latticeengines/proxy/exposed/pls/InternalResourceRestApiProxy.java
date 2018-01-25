@@ -617,7 +617,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<Action> findAll(String customerSpace) {
+    public List<Action> findAllActions(String customerSpace) {
         try {
             String url = constructUrl("pls/internal/actions/all/" + customerSpace);
             List<?> listObj = restTemplate.getForObject(url, List.class);

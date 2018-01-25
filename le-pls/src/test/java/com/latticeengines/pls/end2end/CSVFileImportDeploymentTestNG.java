@@ -166,7 +166,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
-        List<Action> actions = internalResourceProxy.findAll(customerSpace);
+        List<Action> actions = internalResourceProxy.findAllActions(customerSpace);
         validateImportAction(actions);
         validateJobsPage();
 
@@ -465,8 +465,8 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(sourceFile2);
         ApplicationId applicationId2 = cdlImportService.submitCSVImport(customerSpace, sourceFile2.getName(),
                 sourceFile2.getName(), SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX);
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, ENTITY_ACCOUNT +
-                        FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
+                ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);
         Assert.assertNotNull(dataFeedTask);
         JobStatus completedStatus1 = waitForWorkflowStatus(workflowProxy, applicationId1.toString(), false);
         assertEquals(completedStatus1, JobStatus.COMPLETED);
