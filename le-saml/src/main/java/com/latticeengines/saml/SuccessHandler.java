@@ -31,11 +31,10 @@ public class SuccessHandler implements AuthenticationSuccessHandler {
 
         String email = authentication.getName();
 
-        log.info("request.getPathInfo() = " + request.getPathInfo());
-        log.info("email = " + email);
-
         String tenantId = SAMLUtils.getTenantFromAlias(request.getPathInfo());
-        log.info("tenantId = " + tenantId);
+
+        log.info(String.format("request.getPathInfo() = %s, email = %s, tenantId = %s", request.getPathInfo(), email,
+                tenantId));
 
         try (ServletOutputStream os = response.getOutputStream()) {
             response.setContentType(MediaType.APPLICATION_JSON);

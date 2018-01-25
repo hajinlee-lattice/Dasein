@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
+import com.latticeengines.saml.util.SAMLUtils;
 
 public class FailureHandler implements AuthenticationFailureHandler {
     public static final Logger log = LoggerFactory.getLogger(FailureHandler.class);
@@ -23,7 +24,13 @@ public class FailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException, ServletException {
-        log.error(String.format("Failed to authenticate: %s", exception));
+        try {
+            log.info(String.format("Failed to authenticate: %s", exception));
+            String tenantId = SAMLUtils.getTenantFromAlias(request.getPathInfo());
+            log.info(String.format("request.getPathInfo() = %s, tenantId = %s", request.getPathInfo(), tenantId));
+        } catch (Exception ex) {
+            log.info("Ignoring error during logging: ", ex);
+        }
 
         LoginValidationResponse resp = new LoginValidationResponse();
 
