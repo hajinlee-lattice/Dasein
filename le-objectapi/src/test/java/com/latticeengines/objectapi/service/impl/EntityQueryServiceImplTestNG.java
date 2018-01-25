@@ -343,7 +343,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setRestrictHasTransaction(true);
 
-        long count = entityQueryService.getCount(frontEndQuery);
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
     @Test(groups = "functional")
