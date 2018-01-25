@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -151,21 +149,12 @@ public class ScoringMapperPredictUtil {
             }
             dataFileWriter.create(schema, outputFile);
 
-            // List<String> duplicateLeadIdList = checkForDuplicateLeads(scores,
-            // totalRawScoreNumber, uuid);
-            // if (!CollectionUtils.isEmpty(duplicateLeadIdList)) {
-            // String message = String.format("The duplicate leads for model %s
-            // are: %s\n", uuid,
-            // Arrays.toString(duplicateLeadIdList.toArray()));
-            // log.warn(message);
-            // }
             Set<String> keySet = scores.keySet();
             for (String key : keySet) {
                 List<Double> rawScoreList = scores.get(key);
                 for (int i = 0; i < rawScoreList.size(); i++) {
                     Double rawScore = rawScoreList.get(i);
                     ScoreOutput result = getResult(modelInfoMap.get(uuid).getModelGuid(), key, model, rawScore);
-                    // resultList.add(result);
                     if (hasUniqueKey) {
                         GenericRecordBuilder builder = createRecordWithUniqueKey(uniqueKeyColumn, revenues, hasRevenue,
                                 schema, key, result, i);
@@ -218,8 +207,7 @@ public class ScoringMapperPredictUtil {
         String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
         String outputPath = config.get(MapReduceProperty.OUTPUT.name());
         log.info("outputDir: " + outputPath);
-        // list of HashMap<leadId: score>
-        // List<ScoreOutput> resultList = new ArrayList<ScoreOutput>();
+
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
         for (String uuid : uuidSet) {
             log.info("uuid is " + uuid);
