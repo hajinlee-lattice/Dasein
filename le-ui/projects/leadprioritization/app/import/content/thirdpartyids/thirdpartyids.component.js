@@ -40,7 +40,7 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         vm.unavailableTypes = [];
         mapping.forEach(function(item){
             //vm.unavailableFields.push(item.userField);
-            vm.unavailableTypes.push(item.mappedField);
+            vm.unavailableTypes.push(item.userField);
         });
 
         ImportWizardStore.setSaveObjects(mapping);
@@ -62,7 +62,7 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         var keys = [],
             valid = true;
         mapping.forEach(function(item) {
-            var key = item.userName + item.mappedField;
+            var key = item.mappedField + item.cdlExternalSystemType;
             valid = (keys.indexOf(key) === -1);
             keys.push(key);
         });

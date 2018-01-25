@@ -8,13 +8,13 @@
     <h3 class="{{vm.importType}}-matching">{{vm.importType + (vm.importType == 'Contacts' ? ' Fields' : ' Matching Fields')}}</h3>
     <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
     <form name="form">
-        <ul ng-init="fieldMapping = fieldMapping || {}">
+        <ul ng-init="vm.fieldMapping = vm.fieldMapping || {}; vm.checkFieldsDelay(form)">
         	<li ng-repeat="field in vm.matchingFieldsList">
         		<label>{{field.displayName || field.name}}</label>
         		<select class="form-control"
-        		    ng-model="fieldMapping[field.name].userField"
+        		    ng-model="vm.fieldMapping[field.name].userField"
                     ng-init="vm.checkValidDelay(form)"
-    			    ng-change="vm.changeLatticeField(fieldMapping, form)"
+    			    ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
                     ng-required="field.required" 
     			    ng-class="{'required': field.required}">
 
@@ -23,7 +23,7 @@
                         ng-repeat="availableField in vm.availableFields" 
                         value="{{field.name}}:{{availableField.userField}}" 
                         ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
-                        ng-init="(availableField.mappedField == field.name ? fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
+                        ng-init="(availableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
     					{{availableField.userField}}
     				</option>
 
@@ -37,8 +37,8 @@
                 <li ng-repeat="field in vm.analysisFieldsList">
                     <label>{{field.displayName || field.name}}</label>
                     <select class="form-control"
-                        ng-model="fieldMapping[field.name].userField"
-                        ng-change="vm.changeLatticeField(fieldMapping, form)"
+                        ng-model="vm.fieldMapping[field.name].userField"
+                        ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
                         ng-required="field.required" 
                         ng-class="{'required': field.required}">
 
@@ -47,7 +47,7 @@
                             ng-repeat="availableField in vm.availableFields" 
                             value="{{field.name}}:{{availableField.userField}}" 
                             ng-disabled="vm.unavailableFields.indexOf(availableField.userField) !== -1" 
-                            ng-init="(availableField.mappedField == field.name ? fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
+                            ng-init="(availableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + ':' + availableField.userField : '')">
                             {{availableField.userField}}
                         </option>
                     </select>

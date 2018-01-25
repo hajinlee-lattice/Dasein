@@ -200,7 +200,7 @@ angular.module('lp.import')
 
     this.nextSaveMapping = function(nextState) {
         this.saveObjects.forEach(function(item, index) {
-            ImportWizardStore.remapMap(item.userField, item.mappedField, item.unmap);
+            ImportWizardStore.remapMap(item.userField, item.mappedField, item.cdlExternalSystemType, item.unmap);
         });
         $state.go(nextState);
     }
@@ -309,7 +309,7 @@ angular.module('lp.import')
         return indexes;
     }
 
-    this.remapMap = function(userField, mappedField, unmap) {
+    this.remapMap = function(userField, mappedField, cdlExternalSystemType, unmap) {
         var _mappedIndexes = findIndexes(this.fieldDocument.fieldMappings, 'mappedField', mappedField), 
             userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField),
             unmappedIndexes = (unmap ? findIndexes(this.fieldDocument.fieldMappings, 'mappedField', userField) : []), // find unmapped items
@@ -321,6 +321,7 @@ angular.module('lp.import')
         });
         userIndexes.forEach(function(index) { // this maps the new fields
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedField = mappedField;
+            ImportWizardStore.fieldDocument.fieldMappings[index].cdlExternalSystemType = cdlExternalSystemType;
             ImportWizardStore.fieldDocument.fieldMappings[index].mappedToLatticeField = (mappedField ? true : false); // allows for unmapping
         });
     }

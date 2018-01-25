@@ -56,7 +56,6 @@ angular.module('lp.import.wizard.latticefields', [])
         vm.matchingFields.forEach(function(matchingField) {
             vm.matchingFieldsArr.push(matchingField.name);
         });
-
         vm.fieldMappings.forEach(function(fieldMapping) {
             if(fieldMapping.mappedField && vm.matchingFieldsArr.indexOf(fieldMapping.userField) != -1) {
                 vm.unavailableFields.push(fieldMapping.userField);
@@ -106,6 +105,17 @@ angular.module('lp.import.wizard.latticefields', [])
         ImportWizardStore.setSaveObjects(_mapping);
         vm.checkValid(form);
     };
+
+    vm.checkFieldsDelay = function(form) {
+        $timeout(function() {
+            for(var i in vm.fieldMapping) {
+                var fieldMapping = vm.fieldMapping[i],
+                    fieldObj = makeObject(fieldMapping.userField);
+
+                vm.unavailableFields.push(fieldObj.userField);
+            }
+        }, 1);
+    }
 
     vm.checkValidDelay = function(form) {
         $timeout(function() {

@@ -16,14 +16,14 @@
                     <li>
                         <input 
                             type="text" 
-                            ng-model="vm.fieldMapping[$index].userName" 
+                            ng-model="vm.fieldMapping[$index].mappedField" 
                             ng-blur="vm.changeLatticeField(vm.fieldMapping, form)" 
                             ng-init="vm.checkValidDelay(form)"
                             ng-required="true" />
                     </li>
                     <li>
                         <select
-                            ng-model="vm.fieldMapping[$index].mappedField"
+                            ng-model="vm.fieldMapping[$index].cdlExternalSystemType"
                             ng-required="true"
                             ng-change="vm.changeLatticeField(vm.fieldMapping, form)">
                             <option value="" hidden disabled>--</option>
