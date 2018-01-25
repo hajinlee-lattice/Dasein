@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.ModelingConfig;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 
 public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AIModelEntityMgrImplTestNG.class);
@@ -111,9 +112,10 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateTrainingData" })
     public void testUpdateRefineSettings() {
-        ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD, "Atmost", 1500);
-        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD, "Atmost",
-                100);
+        ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD,
+                ComparisonType.LESS_OR_EQUAL, 1500);
+        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD,
+                ComparisonType.LESS_OR_EQUAL, 100);
 
         Map<ModelingConfig, ModelingConfigFilter> configFitlers = new HashMap<>();
         configFitlers.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);

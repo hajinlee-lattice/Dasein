@@ -26,7 +26,8 @@ MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring
 PRESETS = {
     'cdl_pre_checkin': {
         'apps': ['admin', 'pls', 'microservice', 'matchapi'],
-        'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl', 'objectapi', 'dante', 'sqoop']
+        'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl',
+                    'objectapi', 'dante', 'sqoop']
     },
     'lp': {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'saml'],
@@ -34,7 +35,8 @@ PRESETS = {
     },
     'cdl': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses', 'saml'],
-        'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'lp', 'quartz', 'cdl', 'dante',
+        'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'lp',
+                    'quartz', 'cdl', 'dante',
                     'objectapi', 'sqoop']
     },
     'etl': {
@@ -47,8 +49,9 @@ PRESETS = {
                     'modelquality']
     },
     'all': {
-        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'playmaker', 'ulysses', 'saml'],
-        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop', 'datacloudapi', 'cdl', 'dante',
+        'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'ulysses', 'saml'],
+        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop',
+                    'datacloudapi', 'cdl', 'dante',
                     'objectapi']
     }
 }

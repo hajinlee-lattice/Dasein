@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
@@ -162,9 +163,10 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         // test get specific rating model
         AIModel aiModel = getSpecificRatingModel();
 
-        ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD, "Atmost", 1500);
-        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD, "Atmost",
-                100);
+        ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD,
+                ComparisonType.LESS_OR_EQUAL, 1500);
+        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD,
+                ComparisonType.LESS_OR_EQUAL, 10);
 
         Map<ModelingConfig, ModelingConfigFilter> configFitlers = new HashMap<>();
         configFitlers.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);
