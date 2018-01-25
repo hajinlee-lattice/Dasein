@@ -134,7 +134,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void deleteById(String id) {
-        ratingEngineEntityMgr.deleteById(id);
+        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
+        ratingEngineEntityMgr.deleteRatingEngine(ratingEngine);
     }
 
     @SuppressWarnings("unchecked")
