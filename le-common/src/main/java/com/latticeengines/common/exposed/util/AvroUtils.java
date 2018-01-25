@@ -231,6 +231,12 @@ public class AvroUtils {
         try {
             List<String> matches = HdfsUtils.getFilesByGlob(configuration, glob);
 
+            log.info("Counting " + matches.size() + " avro files at " + glob);
+
+            if (matches.size() == 0) {
+                throw new IllegalArgumentException("There is no file to be counted.");
+            }
+
             if (matches.size() == 1) {
                 return countOneFile(configuration, matches.get(0));
             }
