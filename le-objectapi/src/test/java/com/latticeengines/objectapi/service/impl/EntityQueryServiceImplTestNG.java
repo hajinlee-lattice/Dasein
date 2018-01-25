@@ -332,6 +332,20 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     }
 
     @Test(groups = "functional")
+    public void testLogicalOr() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("On").build();
+        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("Ca").build();
+        frontEndRestriction.setRestriction(Restriction.builder().or(restriction1, restriction2).build());
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setRestrictHasTransaction(true);
+
+        long count = entityQueryService.getCount(frontEndQuery);
+    }
+
+    @Test(groups = "functional")
     public void testScoreData() {
         RatingModel model = ruleBasedModel();
 

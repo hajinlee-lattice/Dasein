@@ -322,8 +322,9 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                                          period);
 
         return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
-                .where(aggrValPredicate.and(periodIdPredicate));
-
+                .where(aggrValPredicate.and(periodIdPredicate))
+                .where(periodIdPredicate)
+                .groupBy(accountId, periodId);
     }
 
     @SuppressWarnings("unchecked")
@@ -362,7 +363,8 @@ public class EventQueryTranslator extends TranslatorCommon {
         int expectedResult = (returnPositive) ? 1 : 0;
 
         return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
-                .where(amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate));
+                .where(amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate))
+                .groupBy(accountId, periodId);
 
     }
 

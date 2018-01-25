@@ -92,6 +92,11 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 restriction.setRelation(ComparisonType.CONTAINS);
                 restriction.setNegate(false);
             }
+            if (restriction.getRelation().equals(ComparisonType.NOT_IN_COLLECTION)) {
+                log.info("Converting [Not NOT_IN_COLLECTION] to [IN_COLLECTION]");
+                restriction.setRelation(ComparisonType.IN_COLLECTION);
+                restriction.setNegate(false);
+            }
             if (restriction.getRelation().equals(ComparisonType.IS_NOT_NULL)) {
                 log.info("Converting [Not IS_NOT_NULL] to [IS_NULL]");
                 restriction.setRelation(ComparisonType.IS_NULL);
@@ -164,6 +169,30 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     booleanExpression = lhsPath.between(rhsPaths.get(0), rhsPaths.get(1));
                 } else {
                     booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                }
+                break;
+
+            case NOT_IN_COLLECTION:
+                if (rhs instanceof SubQueryAttrLookup) {
+                    ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                    booleanExpression = lhsPaths.get(0).notIn(subselect);
+                } else {
+                    if (rhsPaths.size() > 1) {
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                            rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
+                            booleanExpression = ((StringExpression) lhsPath).toLowerCase().notIn(
+                                    rhsPaths.toArray(new ComparableExpression[0]));
+
+                        } else {
+                            booleanExpression = lhsPath.notIn(rhsPaths.toArray(new ComparableExpression[0]));
+                        }
+                    } else {
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                            booleanExpression = ((StringExpression) lhsPath).notEqualsIgnoreCase(rhsPaths.get(0));
+                        } else {
+                            booleanExpression = lhsPath.ne(rhsPaths.get(0));
+                        }
+                    }
                 }
                 break;
             case IN_COLLECTION:
@@ -326,6 +355,9 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     .collect(Collectors.toSet());
         }
         List<Integer> idList = new ArrayList<>(ids);
+        if (idList.isEmpty()) {
+            idList = vals.stream().map(x -> -1).collect(Collectors.toList());
+        }
         Collections.sort(idList);
         return new CollectionLookup(new ArrayList<>(idList));
     }

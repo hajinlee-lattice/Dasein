@@ -12,6 +12,7 @@ public enum ComparisonType {
     @Deprecated
     IN_RANGE, //
     IN_COLLECTION, //
+    NOT_IN_COLLECTION, //
     CONTAINS, //
     NOT_CONTAINS, //
     STARTS_WITH, //

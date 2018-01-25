@@ -206,6 +206,34 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder notInCollection(Collection<Object> collection) {
+        if (collection == null) {
+            throw new IllegalArgumentException("collection cannot be null");
+        }
+        if (collection.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("object in collection cannot be null.");
+        }
+        operator = ComparisonType.NOT_IN_COLLECTION;
+        negate = false;
+        rhsLookup = new CollectionLookup(collection);
+        completeConcrete();
+        return this;
+    }
+
+    public RestrictionBuilder notInCollection(SubQuery subQuery, String subQueryAttrName) {
+        if (subQuery == null) {
+            throw new IllegalArgumentException("subquery cannot be null");
+        }
+        if (subQueryAttrName == null) {
+            throw new IllegalArgumentException("subquery attribute name cannot be null");
+        }
+        operator = ComparisonType.NOT_IN_COLLECTION;
+        negate = false;
+        rhsLookup = new SubQueryAttrLookup(subQuery, subQueryAttrName);
+        completeConcrete();
+        return this;
+    }
+
     public RestrictionBuilder in(Object min, Object max) {
         if (min == null && max == null) {
             throw new RuntimeException("min and max cannot both be null.");

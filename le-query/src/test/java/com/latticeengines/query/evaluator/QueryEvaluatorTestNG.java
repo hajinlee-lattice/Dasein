@@ -129,6 +129,19 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("lower(%s.%s) = lower(?)", ACCOUNT, ATTR_ACCOUNT_NAME));
 
+        // not in collection lookup
+        Restriction notInCollection = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
+                .notInCollection(Arrays.asList('a', 'c')).build();
+        query = Query.builder().where(notInCollection).build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("lower(%s.%s) not in (?, ?)", ACCOUNT, ATTR_ACCOUNT_NAME));
+
+        Restriction notInCollection1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
+                .notInCollection(Collections.singleton('a')).build();
+        query = Query.builder().where(notInCollection1).build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("not lower(%s.%s) = lower(?)", ACCOUNT, ATTR_ACCOUNT_NAME));
+
         // range look up
         Restriction range1 = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("a", "z") //
@@ -233,23 +246,26 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         logger.info("Testing " + testCase);
         RestrictionBuilder builder = Restriction.builder();
         switch (operator) {
-            case EQUAL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(vals[0]);
-                break;
-            case NOT_EQUAL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).neq(vals[0]);
-                break;
-            case IS_NULL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNull();
-                break;
-            case IS_NOT_NULL:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
-                break;
-            case IN_COLLECTION:
-                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
-                break;
-            default:
-                throw new UnsupportedOperationException("Does not support " + operator);
+        case EQUAL:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(vals[0]);
+            break;
+        case NOT_EQUAL:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).neq(vals[0]);
+            break;
+        case IS_NULL:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNull();
+            break;
+        case IS_NOT_NULL:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
+            break;
+        case IN_COLLECTION:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
+            break;
+        case NOT_IN_COLLECTION:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notInCollection(Arrays.asList(vals));
+            break;
+        default:
+            throw new UnsupportedOperationException("Does not support " + operator);
         }
         Restriction restriction = builder.build();
         Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
@@ -257,12 +273,13 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, expectedPattern);
     }
 
-    @DataProvider(name = "bitEncodedData", parallel = true)
+    @DataProvider(name = "bitEncodedData", parallel = false)
     private Object[][] provideBitEncodedData() {
         String equalPattern = String.format("(%s.%s>>?)&? = ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         String notNullPattern = String.format("(%s.%s>>?)&? != ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         String notEqualPattern = String.format("%s and %s", notNullPattern, notNullPattern);
         String inCollectionPattern = String.format("(%s.%s>>?)&? in (?, ?)", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
+        String notInCollectionPattern = String.format("(%s.%s>>?)&? not in (?, ?)", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         return new Object[][] { //
                 { "bucket = label", ComparisonType.EQUAL, new Object[] { "Yes" }, equalPattern }, //
                 { "bucket is null", ComparisonType.EQUAL, new Object[] { null }, equalPattern }, //
@@ -271,6 +288,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 { "bucket is not null", ComparisonType.IS_NOT_NULL, null, notNullPattern }, //
                 { "bucket != label", ComparisonType.NOT_EQUAL, new Object[] { "Yes" }, notEqualPattern }, //
                 { "bucket in collection", ComparisonType.IN_COLLECTION, new Object[] { "YES", "no" }, inCollectionPattern }, //
+                {"bucket not in collection", ComparisonType.NOT_IN_COLLECTION, new Object[]{"XXX", "Nosuch"}, notInCollectionPattern} //
         };
     }
 
