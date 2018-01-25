@@ -9,7 +9,7 @@ public enum ScoreResultField {
     Percentile(Type.INT.name(), "Score", Integer.class.getSimpleName()), //
     RawScore(Type.DOUBLE.name(), "RawScore", Double.class.getSimpleName()), //
     Rating(Type.STRING.name(), "Rating", String.class.getSimpleName()), //
-    ModelId(Type.STRING.name(), "__ModelId__", String.class.getSimpleName()), //
+    ModelId(Type.STRING.name(), "MODEL_GUID", String.class.getSimpleName()), //
     Probability(Type.DOUBLE.name(), InterfaceName.Probability.name(), Double.class.getSimpleName()), //
     NormalizedScore(Type.DOUBLE.name(), InterfaceName.NormalizedScore.name(), Double.class.getSimpleName()), //
     PredictedRevenue(Type.DOUBLE.name(), InterfaceName.PredictedRevenue.name(), Double.class.getSimpleName()), //
