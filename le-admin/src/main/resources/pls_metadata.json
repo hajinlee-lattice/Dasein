@@ -1,6 +1,14 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "EnrichAttributesMaxNumber", "Data": {"Type": "number", "Required": true}}
+    { "Node": "EnrichAttributesMaxNumber", "Data": {"Type": "number", "Required": true}},
+    { "Node": "DataCloudLicense",
+      "Children" : [
+        { "Node": "MaxEnrichAttributes", "Data": {"Type": "number", "Required": false}},
+        { "Node": "HG", "Data": {"Type": "number", "Required": false}},
+        { "Node": "Bombora", "Data": {"Type": "number", "Required": false}}
+      ]
+    },
+    { "Node": "InvokeTime", "Data": {"Type": "number", "Required": false}}
   ]
 }

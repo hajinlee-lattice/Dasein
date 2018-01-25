@@ -15,6 +15,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.Base64Utils;
@@ -73,6 +74,9 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
         node = confDir.get(new Path("/ThirdPartyUserEmails"));
         node.getDocument().setData("[ ]");
+
+        node = confDir.get(new Path("/DataCloudLicense/HG"));
+        node.getDocument().setData("10");
         return confDir;
     }
 
@@ -92,8 +96,14 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         // idempotent test
         Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
                 tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, PLSComponent.componentName);
+
         try {
-            CamilleEnvironment.getCamille().delete(servicePath);
+            Camille camille = CamilleEnvironment.getCamille();
+            DocumentDirectory doc = camille.getDirectory(servicePath);
+            DocumentDirectory.Node node = doc.get("/DataCloudLicense/HG");
+            Assert.assertNotNull(node);
+            Assert.assertEquals("10", node.getDocument().getData());
+            camille.delete(servicePath);
         } catch (Exception e) {
             // ignore
         }
