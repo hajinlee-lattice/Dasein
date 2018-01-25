@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -94,8 +95,6 @@ public class RatingProxy extends MicroserviceRestApiProxy {
         ratingModel.setCreated(null);
         ratingModel.setIteration(-1);
         ratingModel.setRatingEngine(null);
-        // TODO - yintao to fix this compilation issue
-        // ratingModel.setParentEngine(null);
         return ratingModel;
     }
 
@@ -113,6 +112,16 @@ public class RatingProxy extends MicroserviceRestApiProxy {
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
     }
 
+    public Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url;
+        if (version != null) {
+            url = constructUrl("/{customerSpace}/rating/count?version={version}", tenantId, version);
+        } else {
+            url = constructUrl("/{customerSpace}/rating/count", tenantId);
+        }
+        return postWithRetries("getCount", url, frontEndQuery, Long.class);
+    }
+
     private DataPage getDataFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
@@ -121,7 +130,16 @@ public class RatingProxy extends MicroserviceRestApiProxy {
     }
 
     public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
-        String url = constructUrl("/{customerSpace}/entity/data", tenantId);
+        return getDataFromObjectApi(tenantId, frontEndQuery, null);
+    }
+
+    public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url;
+        if (version != null) {
+            url = constructUrl("/{customerSpace}/rating/data?version={version}", tenantId, version);
+        } else {
+            url = constructUrl("/{customerSpace}/rating/data", tenantId);
+        }
         return postWithRetries("getData", url, frontEndQuery, DataPage.class);
     }
 
@@ -130,8 +148,8 @@ public class RatingProxy extends MicroserviceRestApiProxy {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
-        Map map = postWithRetries("getRatingCount", url, frontEndQuery, Map.class);
+        String url = constructUrl("/{customerSpace}/rating/coverage", tenantId);
+        Map map = postWithRetries("getRatingCoverage", url, frontEndQuery, Map.class);
         if (map == null) {
             return null;
         } else {

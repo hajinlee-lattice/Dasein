@@ -5,6 +5,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -46,8 +47,12 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public AttributeRepository getAttrRepo(String customerSpace) {
+        return getAttrRepo(customerSpace, null);
+    }
+
+    public AttributeRepository getAttrRepo(String customerSpace, DataCollection.Version version) {
         initializeAttrRepoCache();
-        String key = shortenCustomerSpace(customerSpace);
+        String key = constructCacheKey(customerSpace, version);
         return attrRepoCache.getWatcherCache().get(key);
     }
 
@@ -132,7 +137,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public void unlinkTable(String customerSpace, String tableName, TableRoleInCollection role,
-                            DataCollection.Version version) {
+            DataCollection.Version version) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/{tableName}?role={role}&version={version}";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
@@ -146,7 +151,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     public void upsertStats(String customerSpace, StatisticsContainer container) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
                 shortenCustomerSpace(customerSpace));
-        evictAttrRepoCache(customerSpace);
+        evictAttrRepoCache(customerSpace, null);
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
@@ -160,9 +165,9 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    private void evictAttrRepoCache(String customerSpace) {
+    public void evictAttrRepoCache(String customerSpace, DataCollection.Version version) {
         initializeAttrRepoCache();
-        String key = shortenCustomerSpace(customerSpace);
+        String key = constructCacheKey(customerSpace, version);
         log.info("Evicting attr repo cache for key " + key);
         attrRepoCache.getCache(CacheName.AttrRepoCache.name()).evict(key);
         try {
@@ -172,10 +177,40 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    private AttributeRepository getAttrRepoViaRestCall(String customerSpace) {
+    private String constructCacheKey(String customerSpace, DataCollection.Version version) {
+        String key = shortenCustomerSpace(customerSpace);
+        if (version != null) {
+            key += "." + version.name();
+        }
+        return key;
+    }
+
+    private Pair<String, DataCollection.Version> parseCacheKey(String key) {
+        if (key.contains(".")) {
+            String[] tokens =  key.split("\\.");
+            if (tokens.length != 2) {
+                throw new RuntimeException("Cache key " + key + " has \".\" but cannot be decomposed into exactly 2 tokens.");
+            }
+            DataCollection.Version version = DataCollection.Version.valueOf(tokens[1]);
+            return Pair.of(tokens[0], version);
+        } else {
+            return Pair.of(key, null);
+        }
+    }
+
+    private AttributeRepository getAttrRepoViaRestCall(String key) {
+        Pair<String, DataCollection.Version> pair = parseCacheKey(key);
+        String customerSpace = pair.getLeft();
+        DataCollection.Version version = pair.getRight();
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo",
                 shortenCustomerSpace(customerSpace));
-        return get("get default attribute repo", url, AttributeRepository.class);
+        String method = "get default attribute repo";
+        if (version != null) {
+            url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo?version={version}",
+                    shortenCustomerSpace(customerSpace), version);
+            method = "get default attribute repo at version " + version;
+        }
+        return get(method, url, AttributeRepository.class);
     }
 
     public DataCollection.Version getActiveVersion(String customerSpace) {

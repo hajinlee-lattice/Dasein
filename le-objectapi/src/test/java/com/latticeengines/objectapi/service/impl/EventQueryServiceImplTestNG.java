@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Collections;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +122,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        eventQueryService.getScoringTuples(frontEndQuery);
+        eventQueryService.getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
     }
 
     @Test(groups = "functional")
@@ -145,7 +146,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery);
+        DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertNotNull(dataPage.getData());
         return dataPage.getData().size();
     }
@@ -166,7 +167,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
         frontEndQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
         frontEndQuery.setPeriodName("Month");
-        return eventQueryService.getScoringCount(frontEndQuery);
+        return eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
     private DataPage retrieveScoringDataByRestriction(Restriction restriction, int numTuples) {
@@ -178,7 +179,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setPageFilter(new PageFilter(0, numTuples));
         frontEndQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
         frontEndQuery.setPeriodName("Month");
-        return eventQueryService.getScoringTuples(frontEndQuery);
+        return eventQueryService.getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
     }
 
     private long countTxnBktForTraining(Bucket.Transaction txn) {
@@ -191,7 +192,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        return eventQueryService.getTrainingCount(frontEndQuery);
+        return eventQueryService.getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
     private long countTxnBktForEvent(Bucket.Transaction txn) {
@@ -204,7 +205,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        return eventQueryService.getEventCount(frontEndQuery);
+        return eventQueryService.getEventCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
     private void mockDataCollectionProxy() {

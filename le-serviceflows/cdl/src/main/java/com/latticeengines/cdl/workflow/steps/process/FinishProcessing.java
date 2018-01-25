@@ -53,6 +53,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         log.info("Switch data collection to version " + inactive);
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
+        log.info("Evict attr repo cache for inactive version " + inactive);
+        dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
         try {
             // wait for local cache clean up
             Thread.sleep(5000);

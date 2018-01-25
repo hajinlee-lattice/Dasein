@@ -22,10 +22,6 @@ public class AttrRepoUtils {
         return cm;
     }
 
-    public static EntityPath<String> getEntityPath(String tableName) {
-        return new PathBuilder<>(String.class, tableName);
-    }
-
     public static StringPath getTablePath(String tableName) {
         return Expressions.stringPath(tableName);
     }

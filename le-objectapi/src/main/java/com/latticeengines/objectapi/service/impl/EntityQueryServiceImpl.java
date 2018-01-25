@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,9 +54,9 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public long getCount(FrontEndQuery frontEndQuery) {
+    public long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
         QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
         query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
@@ -63,9 +64,9 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public DataPage getData(FrontEndQuery frontEndQuery) {
+    public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, queryEvaluatorService);
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
         QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
@@ -127,9 +128,9 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
+    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = ratingCountQuery(customerSpace, frontEndQuery);
+        Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
         List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), query).getData();
         RatingModel model = frontEndQuery.getRatingModels().get(0);
         Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
@@ -144,7 +145,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return counts;
     }
 
-    private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery) {
+    private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, DataCollection.Version version) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
         if (models != null && models.size() == 1) {
             Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
@@ -160,7 +161,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             }
             QueryTranslator queryTranslator = new QueryTranslator(
                     queryEvaluatorService.getQueryFactory(),
-                    queryEvaluatorService.getAttributeRepository(customerSpace.toString()));
+                    queryEvaluatorService.getAttributeRepository(customerSpace.toString(), version));
             Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
             query.setPageFilter(null);
             query.setSort(null);

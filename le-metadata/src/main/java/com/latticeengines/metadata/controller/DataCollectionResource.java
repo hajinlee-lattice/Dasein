@@ -35,7 +35,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "datacollection", description = "REST resource for default metadata data collection")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/datacollection")
-public class DefaultDataCollectionResource {
+public class DataCollectionResource {
 
     @Autowired
     private DataCollectionService dataCollectionService;

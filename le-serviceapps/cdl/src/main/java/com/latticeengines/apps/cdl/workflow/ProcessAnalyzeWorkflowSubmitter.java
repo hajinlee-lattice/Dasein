@@ -139,20 +139,23 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private ProcessAnalyzeRequest setRebuildEntities(String customerSpace, Pair<List<Long>, List<Long>> actionAndJobIds,
             ProcessAnalyzeRequest request) {
-
         Set<BusinessEntity> rebuildEntities = new HashSet<>();
         if (request != null && request.getRebuildEntities() != null) {
             rebuildEntities.addAll(request.getRebuildEntities());
         }
-        List<Job> deleteJobs = internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace,
-                actionAndJobIds.getLeft(), ActionType.CDL_OPERATION_WORKFLOW);
-        for (Job job : deleteJobs) {
-            String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
-            if (StringUtils.isEmpty(str)) {
-                continue;
+        try {
+            List<Job> deleteJobs = internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace,
+                    actionAndJobIds.getLeft(), ActionType.CDL_OPERATION_WORKFLOW);
+            for (Job job : deleteJobs) {
+                String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
+                if (StringUtils.isEmpty(str)) {
+                    continue;
+                }
+                List<String> entityStrs = Arrays.asList(str.substring(1, str.length() - 1).split(", "));
+                rebuildEntities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
             }
-            List<String> entityStrs = Arrays.asList(str.substring(1, str.length() - 1).split(", "));
-            rebuildEntities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
+        } catch (Exception e) {
+            log.error("Failed to set rebuild entities based on delete actions.", e);
         }
         ProcessAnalyzeRequest newRequest = new ProcessAnalyzeRequest();
         newRequest.setRebuildEntities(new ArrayList<>(rebuildEntities));

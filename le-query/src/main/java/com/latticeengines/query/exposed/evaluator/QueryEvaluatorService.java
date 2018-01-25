@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,8 @@ public class QueryEvaluatorService {
     @Autowired
     private QueryFactory queryFactory;
 
-    public AttributeRepository getAttributeRepository(String customerSpace) {
-        return dataCollectionProxy.getAttrRepo(customerSpace);
+    public AttributeRepository getAttributeRepository(String customerSpace, DataCollection.Version version) {
+        return dataCollectionProxy.getAttrRepo(customerSpace, version);
     }
 
     public QueryFactory getQueryFactory() {

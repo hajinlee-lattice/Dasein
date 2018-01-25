@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -144,7 +145,16 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     }
 
     public Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
-        String url = constructUrl("/{customerSpace}/entity/count", tenantId);
+        return getCountFromObjectApi(tenantId, frontEndQuery, null);
+    }
+
+    private Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url;
+        if (version != null) {
+            url = constructUrl("/{customerSpace}/entity/count?version={version}", tenantId, version);
+        } else {
+            url = constructUrl("/{customerSpace}/entity/count", tenantId);
+        }
         return postWithRetries("getCount", url, frontEndQuery, Long.class);
     }
 
@@ -157,7 +167,16 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     }
 
     public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
-        String url = constructUrl("/{customerSpace}/entity/data", tenantId);
+        return getDataFromObjectApi(tenantId, frontEndQuery, null);
+    }
+
+    public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url;
+        if (version != null) {
+            url = constructUrl("/{customerSpace}/entity/data?version={version}", tenantId, version);
+        } else {
+            url = constructUrl("/{customerSpace}/entity/data", tenantId);
+        }
         return postWithRetries("getData", url, frontEndQuery, DataPage.class);
     }
 

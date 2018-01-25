@@ -33,6 +33,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
@@ -51,7 +52,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -72,15 +72,14 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
     @Inject
     private RatingProxy ratingProxy;
 
-    @Inject
-    private EntityProxy entityProxy;
-
     private CustomerSpace customerSpace;
     private Schema schema;
+    private DataCollection.Version inactive;
 
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         String targetTableName = getObjectFromContext(RAW_RATING_TABLE_NAME, String.class);
         if (StringUtils.isBlank(targetTableName)) {
             throw new IllegalStateException("Must specify RAW_RATING_TABLE_NAME in workflow context");
@@ -156,7 +155,7 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
                     log.info("Finished ingesting rating model " + model.getId());
                 } catch (TimeoutException e) {
                     // ignore
-                } catch (InterruptedException|ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException("Redshift ingest thread failed.", e);
                 }
             });
@@ -188,7 +187,7 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
 
         private long totalCountInSegment() {
             FrontEndQuery frontEndQuery = segment.toFrontEndQuery(BusinessEntity.Account);
-            return entityProxy.getCountFromObjectApi(customerSpace.getTenantId(), frontEndQuery);
+            return ratingProxy.getCountFromObjectApi(customerSpace.getTenantId(), frontEndQuery, inactive);
         }
 
         private void ingestPageByPage() {
@@ -199,7 +198,8 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
             List<Map<String, Object>> data;
             do {
                 frontEndQuery.setPageFilter(new PageFilter(ingestedCount, PAGE_SIZE));
-                DataPage dataPage = ratingProxy.getDataFromObjectApi(customerSpace.getTenantId(), frontEndQuery);
+                DataPage dataPage = ratingProxy.getDataFromObjectApi(customerSpace.getTenantId(), frontEndQuery,
+                        inactive);
                 data = dataPage.getData();
                 if (CollectionUtils.isNotEmpty(data)) {
                     List<GenericRecord> records = dataPageToRecords(dataPage);

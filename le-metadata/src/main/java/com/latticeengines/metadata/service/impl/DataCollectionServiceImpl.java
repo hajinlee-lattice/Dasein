@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -24,14 +28,18 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
     private static final Logger log = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
+
+    private ExecutorService attrRepoPool = ThreadPoolUtils.getCachedThreadPool("attr-repo");
 
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
@@ -219,10 +227,29 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         List<TableRoleInCollection> roles = extractServingRoles(statistics);
         Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
-        roles.forEach(role -> {
+        Map<TableRoleInCollection, Future<Table>> futureMap = new HashMap<>();
+        if (attrRepoPool == null) {
+            attrRepoPool = ThreadPoolUtils.getFixedSizeThreadPool("attr-repo", 4);
+        }
+        Tenant tenantInContext = MultiTenantContext.getTenant();
+        roles.forEach(role -> futureMap.put(role, attrRepoPool.submit(() -> {
+            MultiTenantContext.setTenant(tenantInContext);
             List<Table> tables = getTables(customerSpace, notNullCollectionName, role, version);
             if (tables != null && !tables.isEmpty()) {
-                tableMap.put(role, tables.get(0));
+                return tables.get(0);
+            } else {
+                return null;
+            }
+        })));
+        futureMap.forEach((role, future) -> {
+            Table table;
+            try {
+                table = future.get();
+            } catch (ExecutionException|InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            if (table != null) {
+                tableMap.put(role, table);
             }
         });
         AttributeRepository attrRepo = AttributeRepository.constructRepo(statistics, tableMap,
