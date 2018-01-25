@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -43,11 +44,18 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    private WorkflowJob workflowJob;
+
+    @AfterMethod(groups = "functional")
+    public void clearup() {
+        workflowJobEntityMgr.delete(workflowJob);
+    }
+
     @Test(groups = "functional")
     public void getJobStatusForJobWithoutWorkflowIdFromDB() {
         Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
 
-        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob = new WorkflowJob();
         workflowJob.setTenant(t);
         workflowJob.setStatus(JobStatus.FAILED.name());
         workflowJob.setStartTimeInMillis(100000000L);
@@ -57,14 +65,13 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
 
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
         assertEquals(job.getStartTimestamp(), new Date(workflowJob.getStartTimeInMillis()));
-        workflowJobEntityMgr.delete(workflowJob);
     }
 
     @Test(groups = "functional", enabled = false)
     public void getJobStatusForJobWithoutWorkflowIdFromYarn() {
         Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
 
-        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob = new WorkflowJob();
         workflowJob.setTenant(t);
         workflowJob.setApplicationId("applicationid_0001");
         workflowJobEntityMgr.create(workflowJob);
@@ -87,14 +94,13 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
         assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED.name());
         assertEquals(workflowJob.getStartTimeInMillis().longValue(), 100000001L);
-
     }
 
     @Test(groups = "functional", enabled = true)
     public void getJobStatusForJobCantFindInYarn() {
         Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
 
-        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob = new WorkflowJob();
         workflowJob.setTenant(t);
         workflowJob.setApplicationId("applicationid_0001");
         workflowJobEntityMgr.create(workflowJob);
@@ -127,8 +133,8 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         BaseStepConfiguration baseConfig = new BaseStepConfiguration();
         workflowConfig.add(baseConfig);
 
-        String jobId = workflowContainerService.submitAwsWorkFlow(workflowConfig);
-        Assert.assertNotNull(jobId);
-        log.info("job id is " + jobId);
+        String applicationId = workflowContainerService.submitAwsWorkFlow(workflowConfig);
+        Assert.assertNotNull(applicationId);
+        workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
     }
 }
