@@ -658,9 +658,16 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                  if (componentsBackup[component.Component] !== undefined) {
                 	 var copy = componentsBackup[component.Component];
                 	 var update = {};
-                	 _.each(component.Nodes, function(node)  {
+                	 _.each(component.Nodes, function(node) {
                 		 if(copy[node.Node] !== undefined) {
-                		     if (copy[node.Node] !== node.Data) {
+                			 if (angular.isObject(copy[node.Node])) {
+                				 var copy2 = copy[node.Node];
+                				 _.each(node.Children, function (node2) {
+                					 if (copy2[node2.Node] !== node2.Data) {
+                						 update['/'+ node.Node + '/' + node2.Node] = angular.copy(node2.Data);
+                					 }
+                				 });
+                			 } else if (copy[node.Node] !== node.Data) {
                 		    	 update['/'+ node.Node] = angular.copy(node.Data);
                 		     }
                 		 }
@@ -695,7 +702,16 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         _.each($scope.selectedComponents, function (component) {
         	var copy = {};
         	_.each(component.Nodes, function(node)  {
-        		copy[node.Node] = angular.copy(node.Data);
+        		var copy2 = {};
+        		_.each(node.Children, function (node2) {
+		    		copy2[node2.Node] = angular.copy(node2.Data);
+		    	});
+        		if (angular.equals(copy2, {})) {
+        			copy[node.Node] = angular.copy(node.Data);
+        		} else {
+        			copy[node.Node] = copy2;
+        		}
+        		
         	});
         	componentsBackup[component.Component]=copy;
         });
@@ -707,7 +723,17 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             		var copy = componentsBackup[component.Component];
             		_.each(component.Nodes, function (node) {
             		    if (copy[node.Node] !== undefined) {
-            		    	node.Data = copy[node.Node];
+            			    var copy2 = copy[node.Node];
+            			    if (angular.isObject(copy[node.Node])) {
+            			    	_.each(node.Children, function (node2) {
+            			    		if (copy2[node2.Node] !== undefined) {
+            			    			node2.Data = copy2[node2.Node];
+            			    		}
+            			    	});
+            			    } else {
+            			    	node.Data = copy[node.Node];
+            			    }
+            		    	
             		    }
             	    });
             	}
