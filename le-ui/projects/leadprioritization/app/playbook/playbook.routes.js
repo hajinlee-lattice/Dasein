@@ -479,7 +479,7 @@ angular
                     return [
                         { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric },
                         { label: 'Targets', state: 'rating.targets' },
-                        { label: 'Insights', state: 'rating.targets.insights', nextFn: PlaybookWizardStore.nextSaveInsight },
+                        { label: 'Insights', state: 'rating.targets.insights'},
                         { label: 'Preview', state: 'rating.targets.insights.preview' },
                         { label: 'Launch', state: 'rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
                     ];

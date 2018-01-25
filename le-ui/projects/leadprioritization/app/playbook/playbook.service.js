@@ -166,15 +166,15 @@ angular.module('lp.playbook')
         }
     }
 
-    this.nextSaveInsight = function(nextState) {
-        if(PlaybookWizardStore.savedTalkingPoints && PlaybookWizardStore.savedTalkingPoints.length) {
-            CgTalkingPointStore.saveTalkingPoints(PlaybookWizardStore.savedTalkingPoints).then(function(){
-                $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
-            });
-        } else {
-            $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
-        }
-    }
+    // this.nextSaveInsight = function(nextState) {
+    //     if(PlaybookWizardStore.savedTalkingPoints && PlaybookWizardStore.savedTalkingPoints.length) {
+    //         CgTalkingPointStore.saveTalkingPoints(PlaybookWizardStore.savedTalkingPoints).then(function(){
+    //             $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
+    //         });
+    //     } else {
+    //         $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
+    //     }
+    // }
 
     this.nextLaunch = function() {
         var play = PlaybookWizardStore.currentPlay;
