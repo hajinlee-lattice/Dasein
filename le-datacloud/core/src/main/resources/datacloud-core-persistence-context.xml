@@ -4,33 +4,14 @@
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <bean name="propDataManage" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+    <bean id="propDataManage" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
         <property name="driverClass" value="${datacloud.manage.driver}"/>
         <property name="jdbcUrl" value="${datacloud.manage.url}"/>
         <property name="user" value="${datacloud.manage.user}" />
         <property name="password" value="${datacloud.manage.password.encrypted}" />
-        <property name="acquireIncrement" value="2"/>
-        <property name="maxPoolSize" value="8"/>
-        <property name="checkoutTimeout" value="10000"/>
-        <property name="idleConnectionTestPeriod" value="10"/>
-        <property name="maxIdleTime" value="30"/>
     </bean>
-
-	<!--  
-    <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="propDataManage"/>
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage, com.latticeengines.domain.exposed.datacloud.customer"/>
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">${datacloud.manage.dialect}</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-            </props>
-        </property>
-    </bean>
-    -->
     
-    	<!-- Hibernate session factory -->
+    <!-- Hibernate session factory -->
     <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
 	    <property name="entityManagerFactory" ref="entityManagerFactoryPropDataManage" />
 	</bean>

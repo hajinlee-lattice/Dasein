@@ -68,19 +68,18 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setJdbcUrl(jdbcUrl);
         cpds.setUser(user);
         cpds.setPassword(password);
-        if (minPoolSize > 0) {
-            cpds.setMinPoolSize(minPoolSize);
-        }
-        if (maxPoolSize > 0) {
-            cpds.setMinPoolSize(maxPoolSize);
-        }
-        if (acquireIncrement > 0) {
-            cpds.setAcquireIncrement(acquireIncrement);
-        }
+
+        int minPoolSize = this.minPoolSize >= 0 ? this.minPoolSize : 1;
+        int maxPoolSize = this.maxPoolSize > minPoolSize ? this.maxPoolSize : Math.max(minPoolSize, 8);
+        int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : 2;
+        cpds.setMinPoolSize(minPoolSize);
+        cpds.setInitialPoolSize(minPoolSize);
+        cpds.setMinPoolSize(maxPoolSize);
+        cpds.setAcquireIncrement(acquireIncrement);
+
         cpds.setCheckoutTimeout(60000);
         cpds.setMaxIdleTime(30);
-        cpds.setIdleConnectionTestPeriod(10);
-        cpds.setStatementCacheNumDeferredCloseThreads(1);
+        cpds.setMaxIdleTimeExcessConnections(10);
         return cpds;
     }
 
