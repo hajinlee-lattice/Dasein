@@ -186,6 +186,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
             frontEndQuery.setMainEntity(BusinessEntity.Account);
             Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
+            log.info("Updating rating engine " + ratingEngine.getId() +" counts " + JsonUtils.serialize(counts));
             ratingEngine.setCountsByMap(counts);
             createOrUpdate(ratingEngine, tenant.getId());
             return counts;

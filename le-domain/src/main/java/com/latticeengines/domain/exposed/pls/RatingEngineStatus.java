@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import com.google.common.collect.Sets;
 
 public enum RatingEngineStatus {
 
@@ -21,9 +21,9 @@ public enum RatingEngineStatus {
         for (RatingEngineStatus status : values()) {
             statusMap.put(status.getStatusId(), status);
         }
-        transitionMap.put(ACTIVE, Stream.of(INACTIVE).collect(Collectors.toSet()));
-        transitionMap.put(INACTIVE, Stream.of(ACTIVE, DELETED).collect(Collectors.toSet()));
-        transitionMap.put(DELETED, Stream.of(INACTIVE).collect(Collectors.toSet()));
+        transitionMap.put(ACTIVE, Sets.newHashSet(INACTIVE));
+        transitionMap.put(INACTIVE, Sets.newHashSet(ACTIVE, DELETED));
+        transitionMap.put(DELETED, Sets.newHashSet(INACTIVE));
     }
 
     private RatingEngineStatus(int statusId) {
@@ -39,10 +39,7 @@ public enum RatingEngineStatus {
     }
 
     public static boolean canTransit(RatingEngineStatus srcState, RatingEngineStatus dstState) {
-        if (transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState)) {
-            return true;
-        }
-        return false;
+        return srcState.equals(dstState) || transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState);
     }
 
 }

@@ -61,6 +61,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         } catch (InterruptedException e) {
             // ignore
         }
+
         // update segment and rating engine counts
         SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
         RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace.toString());

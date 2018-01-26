@@ -287,7 +287,7 @@ public enum LedpCode {
     LEDP_18171("Could not create valid session for External User {0}."), //
     LEDP_18172("Action Ids for job {0} is empty."), //
     LEDP_18173("SchemaInterpretation can only be 'DeleteAccountTemplate' or 'DeleteContactTemplate'."), //
-    LEDP_18174("Status {} cannot transit to {} for Rating Engine with Id = {}."), //
+    LEDP_18174("Status {0} cannot transit to {1} for Rating Engine with Id = {2}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
