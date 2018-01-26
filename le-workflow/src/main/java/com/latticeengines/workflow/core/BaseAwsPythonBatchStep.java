@@ -1,9 +1,13 @@
 package com.latticeengines.workflow.core;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -11,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
 
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -24,6 +31,12 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
 
     @Value("${hadoop.fs.web.defaultFS}")
     String webHdfs;
+
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
+    @Inject
+    private VersionManager versionManager;
 
     protected ApplicationContext applicationContext;
 
@@ -80,24 +93,55 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
         jobRequest.setJobDefinition("AWS-Python-Workflow-Job-Definition");
         jobRequest.setJobQueue("AWS-Python-Workflow-Job-Queue");
 
-        Map<String, String> envs = new HashMap<>();
         config.setRunInAws(false);
+        Map<String, String> envs = getRuntimeEnvs();
+        jobRequest.setEnvs(envs);
+        return jobRequest;
+    }
+
+    protected Map<String, String> getRuntimeEnvs() {
+        Map<String, String> envs = new HashMap<>();
         envs.put(WorkflowProperty.STEPFLOWCONFIG, config.toString());
         envs.put("CONDA_ENV", getCondaEnv());
         envs.put("PYTHON_APP", getPythonScript());
-         envs.put("SHDP_HD_FSWEB", webHdfs);
+        envs.put("SHDP_HD_FSWEB", webHdfs);
         // envs.put("SHDP_HD_FSWEB",
         // "http://webhdfs.lattice.local:14000/webhdfs/v1");
+        return envs;
+    }
 
-        jobRequest.setEnvs(envs);
-        return jobRequest;
+    protected File getPythonWorkspace() {
+        return new File("python_workspace");
+    }
+
+    protected void executePythonCommand(Map<String, String> envs) {
+        try {
+            ProcessExecutor executor = new ProcessExecutor().directory(getPythonWorkspace());
+            executor = executor.environment(envs) //
+                    .command("bash", "pythonlauncher.sh", getCondaEnv(), getPythonScript())
+                    .redirectOutput(System.out);
+            ProcessResult result = executor.execute();
+            int exit = result.getExitValue();
+            log.info("Exit code of python command: " + exit);
+            if (exit != 0) {
+                throw new RuntimeException("Python program did not exit with code 0, please check error above.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to execute python command.", e);
+        }
     }
 
     protected abstract String getCondaEnv();
 
     protected abstract String getPythonScript();
 
-    protected boolean executeInline() {
+    protected abstract void localizePythonScripts();
+
+    private boolean executeInline() {
+        localizePythonScripts();
+        config.setRunInAws(false);
+        Map<String, String> envs = getRuntimeEnvs();
+        executePythonCommand(envs);
         return true;
     }
 
@@ -105,6 +149,14 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
     }
 
     protected void afterComplete(AWSPythonBatchConfiguration config) {
+    }
+
+    protected String getScriptDirInHdfs() {
+        String artifactVersion = versionManager.getCurrentVersionInStack(stackName);
+        String scriptDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataplatform/scripts"
+                : "/app/" + artifactVersion + "/dataplatform/scripts";
+        log.info("Using python script dir = " + scriptDir);
+        return scriptDir;
     }
 
 }

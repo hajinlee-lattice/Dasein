@@ -82,7 +82,8 @@ $ANACONDA_HOME/bin/conda install -y \
     sqlite=3.13.0=0 \
     tk=8.5.18=0 \
     wheel=0.29.0=py27_0 \
-    zlib=1.2.8=3
+    zlib=1.2.8=3 \
+    python-snappy=0.5.1
 
 source $ANACONDA_HOME/bin/deactivate
 
@@ -119,7 +120,8 @@ $ANACONDA_HOME/bin/conda install -y \
     sqlite=3.13.0=0 \
     tk=8.5.18=0 \
     wheel=0.29.0=py27_0 \
-    zlib=1.2.8=3
+    zlib=1.2.8=3 \
+    python-snappy=0.5.1
 
 pip install sklearn-pandas==1.3.0
 pip install git+https://github.com/jpmml/sklearn2pmml.git@0.17.4

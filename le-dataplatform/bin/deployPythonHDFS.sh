@@ -28,4 +28,7 @@ cp src/main/python/evpipeline/evpipeline.py /tmp/app/playmaker/evmodel
 cp src/main/python/algorithm/*.py /tmp/app/dataplatform/scripts/algorithm
 cp src/main/scripts/pythonlauncher.sh /tmp/app/dataplatform/scripts
 
+cp ../le-serviceflows/cdl/src/test/python/apsdataloader.py /tmp/app/dataplatform/scripts
+cp ../le-serviceflows/cdl/src/test/python/apsgenerator.py /tmp/app/dataplatform/scripts
+
 hdfs dfs -copyFromLocal /tmp/app /

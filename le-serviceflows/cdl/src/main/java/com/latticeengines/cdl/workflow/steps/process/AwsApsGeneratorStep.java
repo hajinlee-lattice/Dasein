@@ -1,18 +1,22 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -35,13 +39,16 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     @Value("${cdl.aps.generate.enabled}")
     private boolean apsEnabled;
 
-    @Autowired
+    @Value("${cdl.aps.generate.in.aws}")
+    private boolean apsInAws;
+
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
+    @Inject
     protected MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private DataCollection.Version active;
@@ -70,11 +77,11 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
             log.warn("Aps generation is disabled or there's not metadata table for period aggregated table!");
             return;
         }
+        config.setRunInAws(apsInAws);
         List<String> inputPaths = getInputPaths(periodTable);
         config.setInputPaths(inputPaths);
         String hdfsPath = getOutputPath(config);
         config.setOutputPath(hdfsPath);
-
     }
 
     @Override
@@ -123,4 +130,19 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
             throw new RuntimeException(ex);
         }
     }
+
+    @Override
+    protected void localizePythonScripts() {
+        try {
+            String scriptDir = getScriptDirInHdfs();
+            InputStream is = HdfsUtils.getInputStream(yarnConfiguration,scriptDir + "/leframework.tar.gz");
+            CompressionUtils.untarInputStream(is, getPythonWorkspace().getPath());
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/pythonlauncher.sh", getPythonWorkspace().getPath() + "/pythonlauncher.sh");
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/apsdataloader.py", getPythonWorkspace().getPath() + "/apsdataloader.py");
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/apsgenerator.py", getPythonWorkspace().getPath() + "/apsgenerator.py");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to localize python scripts", e);
+        }
+    }
+
 }

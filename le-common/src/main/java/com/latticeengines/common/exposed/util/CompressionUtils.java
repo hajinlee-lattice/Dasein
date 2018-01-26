@@ -1,11 +1,19 @@
 package com.latticeengines.common.exposed.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,5 +89,42 @@ public final class CompressionUtils {
         // Get the compressed data
         return bos.toByteArray();
 
+    }
+
+    public static void untarInputStream(InputStream inputStream, String destDir) throws IOException {
+        if (!destDir.endsWith("/")) {
+            destDir += "/";
+        }
+        BufferedInputStream in = new BufferedInputStream(inputStream);
+        GzipCompressorInputStream gzIn = new GzipCompressorInputStream(in);
+        TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn);
+
+        TarArchiveEntry entry;
+        int BUFFER = 2048;
+
+        while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
+            log.info("Extracting: " + entry.getName());
+            String destPath = destDir + entry.getName();
+            if (entry.isDirectory()) {
+                File f = new File(destPath);
+                f.mkdirs();
+            } else {
+                int count;
+                byte data[] = new byte[BUFFER];
+
+                File parentDir = new File(new File(destPath).getParent());
+                parentDir.mkdirs();
+
+                FileOutputStream fos = new FileOutputStream(destPath);
+                BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+                while ((count = tarIn.read(data, 0, BUFFER)) != -1) {
+                    dest.write(data, 0, count);
+                }
+                dest.close();
+            }
+        }
+
+        tarIn.close();
+        log.info("Successfully untared into " + destDir);
     }
 }
