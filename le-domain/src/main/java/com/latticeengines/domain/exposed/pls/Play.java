@@ -104,7 +104,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @JsonProperty("status")
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
-    private PlayStatus status;
+    private PlayStatus playStatus;
 
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
@@ -214,12 +214,12 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
         this.createdBy = createdBy;
     }
 
-    public void setStatus(PlayStatus status) {
-        this.status = status;
+    public void setPlayStatus(PlayStatus playStatus) {
+        this.playStatus = playStatus;
     }
 
-    public PlayStatus getStatus() {
-        return this.status;
+    public PlayStatus getPlayStatus() {
+        return this.playStatus;
     }
 
     public Date getCreated() {

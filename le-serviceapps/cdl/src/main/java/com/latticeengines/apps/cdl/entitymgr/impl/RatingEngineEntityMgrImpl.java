@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.dao.AIModelDao;
 import com.latticeengines.apps.cdl.dao.RatingEngineDao;
 import com.latticeengines.apps.cdl.dao.RuleBasedModelDao;
+import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
@@ -31,6 +34,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.NoteOrigin;
+import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -63,6 +67,9 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private PlayEntityMgr playEntityMgr;
 
     @Override
     public BaseDao<RatingEngine> getDao() {
@@ -201,8 +208,10 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
 
         // Check dependency of Rating Engine
         if (ratingEngine.getStatus() == RatingEngineStatus.DELETED) {
-            // TODO Yunlong add PlayEntity to RatingEngineEntity and check its
-            // dependencies.
+            if (CollectionUtils.isNotEmpty(playEntityMgr.findByRatingEngineAndPlayStatusIn(retrievedRatingEngine,
+                    Arrays.asList(PlayStatus.ACTIVE, PlayStatus.INACTIVE)))) {
+                throw new LedpException(LedpCode.LEDP_18175, new String[] { retrievedRatingEngine.getId() });
+            }
         }
     }
 

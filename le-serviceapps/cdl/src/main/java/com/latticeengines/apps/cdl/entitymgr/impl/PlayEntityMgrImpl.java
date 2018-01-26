@@ -3,9 +3,10 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,21 +14,32 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.repository.PlayRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 
 @Component("playEntityMgr")
-public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEntityMgr {
+public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> implements PlayEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(PlayEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private PlayDao playDao;
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
+
+    @Inject
+    private PlayRepository playRepository;
+
+    @Override
+    public BaseJpaRepository<Play, Long> getRepository() {
+        return playRepository;
+    }
 
     @Override
     public BaseDao<Play> getDao() {
@@ -87,6 +99,9 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
         if (play.getExcludeItemsWithoutSalesforceId() != null) {
             existingPlay.setExcludeItemsWithoutSalesforceId(play.getExcludeItemsWithoutSalesforceId());
         }
+        if (play.getPlayStatus() != null) {
+            existingPlay.setPlayStatus(play.getPlayStatus());
+        }
         if (play.getRatingEngine() != null) {
             existingPlay.setRatingEngine(findRatingEngine(play));
         }
@@ -112,6 +127,12 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Play> findByRatingEngineAndPlayStatusIn(RatingEngine ratingEngine, List<PlayStatus> statusList) {
+        return playRepository.findByRatingEngineAndPlayStatusIn(ratingEngine, statusList);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Play findByName(String name) {
         return playDao.findByName(name);
     }
@@ -131,5 +152,4 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
     public void createOrUpdate(Play play) {
         createOrUpdatePlay(play);
     }
-
 }

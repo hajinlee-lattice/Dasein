@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -38,6 +40,9 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private Play play;
     private RatingEngine ratingEngine1;
     private RatingEngine ratingEngine2;
+
+    private Play retrievedPlay;
+    private String playName;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -69,6 +74,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngine1.getId());
         play.setRatingEngine(ratingEngine);
+        play.setPlayStatus(PlayStatus.INACTIVE);
         play.setTenant(mainTestTenant);
     }
 
@@ -81,16 +87,19 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testBasicOperations() {
+    public void testCreate() {
         playEntityMgr.createOrUpdatePlay(play);
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
         Play play1 = playList.get(0);
-        String playName = play1.getName();
+        playName = play1.getName();
         log.info(String.format("play1 has name %s", playName));
-        Play retrievedPlay = playEntityMgr.findByName(playName);
+        retrievedPlay = playEntityMgr.findByName(playName);
+    }
 
+    @Test(groups = "functional", dependsOnMethods = { "testCreate" })
+    public void testFind() {
         List<Play> plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine1.getPid());
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 1);
@@ -98,8 +107,18 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 0);
 
+        plays = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine1, Arrays.asList(PlayStatus.INACTIVE));
+        Assert.assertNotNull(plays);
+        Assert.assertEquals(plays.size(), 1);
+        plays = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine1, Arrays.asList(PlayStatus.ACTIVE));
+        Assert.assertEquals(plays.size(), 0);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testFind" })
+    public void testUpdate() {
         retrievedPlay.setDescription(null);
         retrievedPlay.setDisplayName(NEW_DISPLAY_NAME);
+        retrievedPlay.setPlayStatus(PlayStatus.DELETED);
         RatingEngine newRatingEngine = new RatingEngine();
         newRatingEngine.setId(ratingEngine2.getId());
         retrievedPlay.setRatingEngine(newRatingEngine);
@@ -116,15 +135,24 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(retrievedPlay.getDisplayName(), NEW_DISPLAY_NAME);
         Assert.assertNotNull(retrievedPlay.getDisplayName());
         Assert.assertNotNull(retrievedPlay.getRatingEngine());
+        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.DELETED);
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine2.getId());
         Assert.assertTrue(retrievedPlay.getExcludeItemsWithoutSalesforceId());
 
-        playList = playEntityMgr.findAll();
+        List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
 
+        playList = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine2, Arrays.asList(PlayStatus.DELETED));
+        Assert.assertEquals(playList.size(), 1);
+        playList = playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine1, Arrays.asList(PlayStatus.DELETED));
+        Assert.assertEquals(playList.size(), 0);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    public void testDelete() {
         playEntityMgr.deleteByName(playName);
-        playList = playEntityMgr.findAll();
+        List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 0);
     }

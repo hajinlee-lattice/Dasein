@@ -288,6 +288,7 @@ public enum LedpCode {
     LEDP_18172("Action Ids for job {0} is empty."), //
     LEDP_18173("SchemaInterpretation can only be 'DeleteAccountTemplate' or 'DeleteContactTemplate'."), //
     LEDP_18174("Status {0} cannot transit to {1} for Rating Engine with Id = {2}."), //
+    LEDP_18175("There are Plays associated with the current Rating Engine {1} and thus it cannot be deleted."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

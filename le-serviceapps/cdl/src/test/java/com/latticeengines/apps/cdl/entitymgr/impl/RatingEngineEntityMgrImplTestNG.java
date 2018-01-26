@@ -15,13 +15,18 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineNoteEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -35,6 +40,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImplTestNG.class);
 
+    private static final String PLAY_NAME = "PLAY HARD";
     private static final String RATING_ENGINE_NAME = "Rating Engine";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String RATING_ENGINE_NEW_NOTE = "This is a Rating Engine that covers East Asia market";
@@ -44,6 +50,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
+
+    @Inject
+    private PlayEntityMgr playEntityMgr;
 
     @Inject
     private RatingEngineNoteEntityMgr ratingEngineNoteEntityMgr;
@@ -218,6 +227,37 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineList.size(), 0);
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
+
+        // test soft delete and status transition
+        Play play = generateDefaultPlay(createdRatingEngine);
+        playEntityMgr.createOrUpdatePlay(play);
+        re = new RatingEngine();
+        re.setStatus(RatingEngineStatus.DELETED);
+        re.setId(ratingEngine.getId());
+        try {
+            createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+            Assert.fail("Should have thrown exeption due to the transition should fail");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof LedpException);
+            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18174);
+        }
+
+        re.setStatus(RatingEngineStatus.INACTIVE);
+        ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+
+        re.setStatus(RatingEngineStatus.DELETED);
+        try {
+            ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+            Assert.fail("Should have thrown exeption due to the transition should fail");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof LedpException);
+            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18175);
+        }
+
+        play.setPlayStatus(PlayStatus.DELETED);
+        playEntityMgr.createOrUpdatePlay(play);
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+        Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.DELETED);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
@@ -250,7 +290,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testFindUsedAttributes() {
         RatingEngineEntityMgrImpl r = new RatingEngineEntityMgrImpl();
-        
+
         MetadataSegment segment = new MetadataSegment();
         segment.setAccountRestriction(testSegment.getAccountRestriction());
         segment.setContactRestriction(testSegment.getContactRestriction());
@@ -277,5 +317,15 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         for (String attr : entityAttributes) {
             expectedResult.add(entity + "." + attr);
         }
+    }
+
+    private Play generateDefaultPlay(RatingEngine ratingEngine) {
+        Play play = new Play();
+        play.setDescription(PLAY_NAME);
+        play.setCreatedBy(CREATED_BY);
+        play.setRatingEngine(ratingEngine);
+        play.setPlayStatus(PlayStatus.INACTIVE);
+        play.setTenant(mainTestTenant);
+        return play;
     }
 }
