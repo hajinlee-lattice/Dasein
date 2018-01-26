@@ -38,7 +38,7 @@ public class LogJobListener extends LEJobListener {
             Date start = stepExecution.getStartTime();
             Date end = stepExecution.getEndTime();
             Long duration = end.getTime() - start.getTime();
-            output.append(String.format("Step %s : %s to %s ( %.2f sec )", stepExecution.getStepName(),
+            output.append(String.format("Step %s : %s to %s ( %.2f sec )\n", stepExecution.getStepName(),
                     dateFormat.format(start), dateFormat.format(end), duration.doubleValue() / 1000.0));
         }
         log.info(output.toString());
