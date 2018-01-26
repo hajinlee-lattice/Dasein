@@ -73,7 +73,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, //
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
-                LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER);
+                LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, //
+                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);
