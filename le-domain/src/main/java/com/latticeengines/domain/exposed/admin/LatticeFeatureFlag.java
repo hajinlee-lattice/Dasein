@@ -16,6 +16,7 @@ public enum LatticeFeatureFlag {
     LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
+    ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"),
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
