@@ -33,13 +33,16 @@ public class LogJobListener extends LEJobListener {
         for (Entry<String, JobParameter> entry : jobParameters.getParameters().entrySet()) {
             output.append("  " + entry.getKey() + "=" + entry.getValue() + "\n");
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
         for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
             Date start = stepExecution.getStartTime();
             Date end = stepExecution.getEndTime();
             Long duration = end.getTime() - start.getTime();
-            output.append(String.format("Step %s : %s to %s ( %.2f sec )\n", stepExecution.getStepName(),
-                    dateFormat.format(start), dateFormat.format(end), duration.doubleValue() / 1000.0));
+            if (duration > 1000) {
+                output.append(String.format("Step %s : %.2f sec \n", stepExecution.getStepName(),
+                        duration.doubleValue() / 1000.0));
+            } else {
+                output.append(String.format("Step %s\n", stepExecution.getStepName()));
+            }
         }
         log.info(output.toString());
     }
