@@ -1,9 +1,7 @@
 package com.latticeengines.workflow.listener;
 
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -36,11 +34,12 @@ public class LogJobListener extends LEJobListener {
             output.append("  " + entry.getKey() + "=" + entry.getValue() + "\n");
         }
         for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
-            LocalDate start = stepExecution.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate end = stepExecution.getEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            Date start = stepExecution.getStartTime();
+            Date end = stepExecution.getEndTime();
+            long duration = end.getTime() - start.getTime();
             output.append("Step " + stepExecution.getStepName() //
                     + " : " + start + " to " + end //
-                    + " ( " + Duration.between(start, end) + ")\n");
+                    + " ( " + (duration /  1000) + " sec)\n");
         }
         log.info(output.toString());
     }
