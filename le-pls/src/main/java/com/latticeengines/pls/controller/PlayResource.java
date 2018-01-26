@@ -1,19 +1,13 @@
 package com.latticeengines.pls.controller;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,23 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
-import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.service.PlayLaunchService;
-import com.latticeengines.pls.service.PlayService;
-import com.latticeengines.pls.workflow.PlayLaunchWorkflowSubmitter;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -54,17 +37,8 @@ public class PlayResource {
 
     private static final Logger log = LoggerFactory.getLogger(PlayResource.class);
 
-    @Autowired
-    private PlayService playService;
-
-    @Autowired
-    private PlayLaunchService playLaunchService;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
-    private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
+    @Inject
+    private PlayProxy playProxy;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -76,7 +50,8 @@ public class PlayResource {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
-        return playService.getAllFullPlays(shouldLoadCoverage, ratingEngineId);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
     }
 
     @RequestMapping(value = "/launches/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -100,8 +75,9 @@ public class PlayResource {
             @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending, //
             @ApiParam(value = "End date in Unix timestamp", required = false) //
             @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
-        return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max, sortby,
-                descending, endTimestamp);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.getPlayLaunchDashboard(tenant.getId(), playName, launchStates, startTimestamp, offset, max,
+                sortby, descending, endTimestamp);
     }
 
     @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -117,7 +93,8 @@ public class PlayResource {
             @RequestParam(value = "startTimestamp", required = true) Long startTimestamp, //
             @ApiParam(value = "End date in Unix timestamp", required = false) //
             @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
-        return playLaunchService.getDashboardEntriesCount(getPlayId(playName), launchStates, startTimestamp,
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.getPlayLaunchDashboardEntriesCount(tenant.getId(), playName, launchStates, startTimestamp,
                 endTimestamp);
     }
 
@@ -125,8 +102,8 @@ public class PlayResource {
     @ResponseBody
     @ApiOperation(value = "Get full play for a specific tenant based on playName")
     public Play getPlay(@PathVariable String playName, HttpServletRequest request, HttpServletResponse response) {
-        Play play = playService.getFullPlayByName(playName);
-        return play;
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.getPlay(tenant.getId(), playName);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -142,7 +119,7 @@ public class PlayResource {
         if (play == null) {
             throw new NullPointerException("Play is null");
         }
-        return playService.createOrUpdate(play, tenant.getId());
+        return playProxy.createOrUpdatePlay(tenant.getId(), play);
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -150,7 +127,8 @@ public class PlayResource {
     @ApiOperation(value = "Delete a play")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public Boolean delete(@PathVariable String playName) {
-        playService.deleteByName(playName);
+        Tenant tenant = MultiTenantContext.getTenant();
+        playProxy.deletePlay(tenant.getId(), playName);
         return true;
     }
 
@@ -162,69 +140,8 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
-        Play play = playService.getPlayByName(playName);
-        validatePlayBeforeLaunch(play);
-        validatePlayLaunchBeforeLaunch(playLaunch, play);
-        if (play != null) {
-            playLaunch.setLaunchState(LaunchState.Launching);
-            playLaunch.setPlay(play);
-            playLaunch.setTableName(createTable(playLaunch));
-            playLaunchService.create(playLaunch);
-            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
-            playLaunch.setApplicationId(appId);
-            playLaunchService.update(playLaunch);
-        } else {
-            log.error("Invalid playName: " + playName);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-        return playLaunch;
-    }
-
-    private String createTable(PlayLaunch playLaunch) {
-        CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
-
-        Table generatedRecommendationTable = new Table();
-        generatedRecommendationTable.addAttributes(Recommendation.getSchemaAttributes());
-
-        String tableName = "play_launch_"+UUID.randomUUID().toString().replaceAll("-", "_");
-        generatedRecommendationTable.setName(tableName);
-        generatedRecommendationTable.setTableType(TableType.DATATABLE);
-
-        generatedRecommendationTable.setDisplayName("Play Launch recommendation");
-        generatedRecommendationTable.setTenant(MultiTenantContext.getTenant());
-        generatedRecommendationTable.setTenantId(MultiTenantContext.getTenant().getPid());
-        generatedRecommendationTable.setMarkedForPurge(false);
-        metadataProxy.createTable(customerSpace.toString(), tableName, generatedRecommendationTable);
-
-        generatedRecommendationTable = metadataProxy.getTable(customerSpace.toString(), tableName);
-
-        return generatedRecommendationTable.getName();
-    }
-
-    private void validatePlayBeforeLaunch(Play play) {
-        if (play.getRatingEngine() == null) {
-            throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
-        } else if (play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
-            throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
-        }
-
-    }
-
-    private void validatePlayLaunchBeforeLaunch(PlayLaunch playLaunch, Play play) {
-        if (CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
-            // TODO - enable it once UI has added support for launc/relaunch
-            // workflow (PLS-4997)
-            // throw new LedpException(LedpCode.LEDP_18156, new String[] {
-            // play.getName() });
-
-            // ----------------
-
-            // TODO - remove it when (PLS-4997) if done
-            // if no buckets are specified then we default it to all buckets
-            Set<RuleBucketName> defaultBucketsToLaunch = //
-                    new TreeSet<>(Arrays.asList(RuleBucketName.values()));
-            playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
-        }
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)
@@ -232,7 +149,8 @@ public class PlayResource {
     @ApiOperation(value = "Get list of launches for a given play")
     public List<PlayLaunch> getPlayLaunches(@PathVariable("playName") String playName, //
             @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates) {
-        return playLaunchService.findByPlayId(getPlayId(playName), launchStates);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.getPlayLaunches(tenant.getId(), playName, launchStates);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)
@@ -240,7 +158,8 @@ public class PlayResource {
     @ApiOperation(value = "Get play launch for a given play and launch id")
     public PlayLaunch getPlayLaunch(@PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
-        return playLaunchService.findByLaunchId(launchId);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.getPlayLaunch(tenant.getId(), playName, launchId);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}/{action}", //
@@ -251,14 +170,9 @@ public class PlayResource {
     public PlayLaunch updatePlayLaunch(@PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @PathVariable("action") LaunchState action) {
-        PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId);
-        if (existingPlayLaunch != null) {
-            if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
-                existingPlayLaunch.setLaunchState(action);
-                return playLaunchService.update(existingPlayLaunch);
-            }
-        }
-        return existingPlayLaunch;
+        Tenant tenant = MultiTenantContext.getTenant();
+        playProxy.updatePlayLaunch(tenant.getId(), playName, launchId, action);
+        return playProxy.getPlayLaunch(tenant.getId(), playName, launchId);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.DELETE)
@@ -267,21 +181,8 @@ public class PlayResource {
     @ApiOperation(value = "Delete play launch for a given play and launch id")
     public void deletePlayLaunch(@PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
-        if (playLaunch != null) {
-            playLaunchService.deleteByLaunchId(launchId);
-        }
+        Tenant tenant = MultiTenantContext.getTenant();
+        playProxy.deletePlayLaunch(tenant.getId(), playName, launchId);
     }
 
-    private Long getPlayId(String playName) {
-        Long playId = null;
-        if (StringUtils.isNotBlank(playName)) {
-            Play play = playService.getPlayByName(playName);
-            if (play == null) {
-                throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
-            }
-            playId = play.getPid();
-        }
-        return playId;
-    }
 }

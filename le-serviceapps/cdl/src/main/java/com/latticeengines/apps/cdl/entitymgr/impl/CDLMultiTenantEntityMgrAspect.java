@@ -47,4 +47,24 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     public void allCDLExternalSystemMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayLaunchEntityMgr.find*(..))")
+    public void findPlayLaunch(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayLaunchEntityMgr.delete*(..))")
+    public void deletePlayLaunch(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayEntityMgr.find*(..))")
+    public void findPlay(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayEntityMgr.delete*(..))")
+    public void deletePlay(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
 }

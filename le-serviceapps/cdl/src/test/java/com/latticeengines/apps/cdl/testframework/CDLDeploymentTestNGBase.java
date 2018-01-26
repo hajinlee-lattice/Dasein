@@ -55,9 +55,9 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     @Value("${common.test.pls.url}")
     protected String internalResourceHostPort;
-    
+
     protected InternalResourceRestApiProxy internalResourceProxy;
-    
+
     @Inject
     private WorkflowProxy workflowProxy;
 
@@ -71,7 +71,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
-        
+
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
@@ -136,6 +136,10 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void setMainTestTenant(Tenant mainTestTenant) {
+        this.mainTestTenant = mainTestTenant;
     }
 
 }
