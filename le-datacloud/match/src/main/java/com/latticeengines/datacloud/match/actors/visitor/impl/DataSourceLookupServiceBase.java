@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,7 +128,10 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
         Map<String, Integer> res = new HashMap<>();
         res.put(MatchConstants.REQUEST_NUM, reqs.size());
         res.put(MatchConstants.ADDRESS_NUM, reqReturnAddrs.size());
-        ExecutorService executor = actorSystem.getDataSourceServiceExecutor();
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) actorSystem.getDataSourceServiceExecutor();
+        res.put(MatchConstants.ACTIVE_REQ_NUM, executor == null ? 0 : executor.getActiveCount());
+        res.put(MatchConstants.QUEUED_REQ_NUM,
+                executor == null || executor.getQueue() == null ? 0 : executor.getQueue().size());
         return res;
     }
 }

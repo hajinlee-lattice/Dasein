@@ -50,6 +50,10 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
     private DataSourceLookupService dnbDataSourceLookupService;
 
     @Autowired
+    @Resource(name = "dnbCacheLookupService")
+    private DataSourceLookupService dnbCacheDataSourceLookupService;
+
+    @Autowired
     private DynamoDBLookupService dynamoDBLookupService;
 
     @Autowired
@@ -76,54 +80,81 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
     public synchronized void monitor() {
         StringBuilder sb = new StringBuilder();
         sb.append("\n---------------- Match Service Status ----------------\n");
+
         // Memory Checking
         sb.append("RUNTIME MEMORY\n");
         Runtime runtime = Runtime.getRuntime();
-        sb.append(String.format("total memory: %d\n", runtime.totalMemory()));
-        sb.append(String.format("free memory: %d\n", runtime.freeMemory()));
+        sb.append(String.format("Total memory: %d\n", runtime.totalMemory()));
+        sb.append(String.format("Free memory: %d\n", runtime.freeMemory()));
+
+        // DnBLookupService Checking
         if (actorSystem.isBatchMode()) {
-            // DnBLookupService Checking
             Map<String, Integer> dnbUnsubmittedStats = dnbLookupService.getUnsubmittedStats();
             Map<String, Integer> dnbSubmittedStats = dnbLookupService.getSubmittedStats();
             Map<String, Integer> dnbFinishedStats = dnbLookupService.getFinishedStats();
-            Map<String, Integer> dnbTotalStats = dnbDataSourceLookupService.getTotalPendingReqStats();
-            sb.append("DNB BATCH\n");
-            sb.append(String.format("unsubmitted records in queue: %d\n",
+
+            sb.append("DNB BATCH LOOKUP\n");
+            sb.append(String.format("DnBLookupService - unsubmitted records in batch req queue: %d\n",
                     dnbUnsubmittedStats.get(MatchConstants.REQUEST_NUM)));
-            sb.append(String.format("submitted records in queue: %d (batches: %d)\n",
+            sb.append(String.format("DnBLookupService - submitted records in batch req queue: %d (batches: %d)\n",
                     dnbSubmittedStats.get(MatchConstants.REQUEST_NUM),
                     dnbSubmittedStats.get(MatchConstants.BATCH_NUM)));
-            sb.append(String.format("finished records in queue: %d (batches: %d)\n",
+            sb.append(String.format("DnBLookupService - finished records in batch req queue: %d (batches: %d)\n",
                     dnbFinishedStats.get(MatchConstants.REQUEST_NUM), dnbFinishedStats.get(MatchConstants.BATCH_NUM)));
-            sb.append(String.format(
-                    "total accepted records (include records removed from queues but still being processed): %d\n",
-                    dnbTotalStats.get(MatchConstants.REQUEST_NUM)));
-            sb.append(String.format("total cached return addrs: %d\n", dnbTotalStats.get(MatchConstants.ADDRESS_NUM)));
-        } else {
-            // DnBLookupService Checking
-            Map<String, Integer> dnbTotalStats = dnbDataSourceLookupService.getTotalPendingReqStats();
-            sb.append("DNB REALTIME\n");
-            sb.append(String.format(
-                    "total accepted records (include records removed from queues but still being processed): %d\n",
-                    dnbTotalStats.get(MatchConstants.REQUEST_NUM)));
-            sb.append(String.format("total cached return addrs: %d\n", dnbTotalStats.get(MatchConstants.ADDRESS_NUM)));
 
+        } else {
+            sb.append("DNB REALTIME LOOKUP\n");
+            Map<String, Integer> dnbRealtimeStats = dnbLookupService.getRealtimeReqStats();
+            sb.append(String.format("DnBLookupService - active records in threadpool: %d\n",
+                    dnbRealtimeStats.get(MatchConstants.ACTIVE_REQ_NUM)));
+            sb.append(String.format("DnBLookupService - queued records in threadpool: %d\n",
+                    dnbRealtimeStats.get(MatchConstants.QUEUED_REQ_NUM)));
         }
+        Map<String, Integer> dnbTotalStats = dnbDataSourceLookupService.getTotalPendingReqStats();
+        sb.append(String.format("DnBLookupActor - total accepted records: %d\n",
+                dnbTotalStats.get(MatchConstants.REQUEST_NUM)));
+        sb.append(String.format("DnBLookupActor - total cached return addrs: %d\n",
+                dnbTotalStats.get(MatchConstants.ADDRESS_NUM)));
+        sb.append(String.format("DnBLookupActor - active records in threadpool: %d\n",
+                dnbTotalStats.get(MatchConstants.ACTIVE_REQ_NUM)));
+        sb.append(String.format("DnBLookupActor - queued records in threadpool: %d\n",
+                dnbTotalStats.get(MatchConstants.QUEUED_REQ_NUM)));
+
+        // DnBCacheLookupService Checking
+        sb.append("DNB CACHE LOOKUP\n");
+        Map<String, Integer> dnbCacheTotalStats = dnbCacheDataSourceLookupService.getTotalPendingReqStats();
+        sb.append(String.format("DnBCacheLookupActor - total accepted records: %d\n",
+                dnbCacheTotalStats.get(MatchConstants.REQUEST_NUM)));
+        sb.append(String.format("DnBCacheLookupActor - total cached return addrs: %d\n",
+                dnbCacheTotalStats.get(MatchConstants.ADDRESS_NUM)));
+        sb.append(String.format("DnBCacheLookupActor - active records in threadpool: %d\n",
+                dnbCacheTotalStats.get(MatchConstants.ACTIVE_REQ_NUM)));
+        sb.append(String.format("DnBCacheLookupActor - queued records in threadpool: %d\n",
+                dnbCacheTotalStats.get(MatchConstants.QUEUED_REQ_NUM)));
+
         // DynamoLookupService Checking
         Map<String, Integer> dynamoPendingStats = dynamoDBLookupService.getPendingReqStats();
         Map<String, Integer> dynamoTotalStats = dynamoDataSourceLookupService.getTotalPendingReqStats();
-        sb.append("DYNAMO FETCH\n");
-        sb.append(String.format("pending records in queue: %d\n", dynamoPendingStats.get(MatchConstants.REQUEST_NUM)));
-        sb.append(String.format(
-                "total accepted records (include records removed from queues but still being processed): %d\n",
+        sb.append("DYNAMO LOOKUP\n");
+        sb.append(String.format("DynamoDBLookupService - pending records in queue: %d\n",
+                dynamoPendingStats.get(MatchConstants.REQUEST_NUM)));
+        sb.append(String.format("DynamoDBLookupActor - total accepted records: %d\n",
                 dynamoTotalStats.get(MatchConstants.REQUEST_NUM)));
-        sb.append(String.format("total cached return addrs: %d\n", dynamoTotalStats.get(MatchConstants.ADDRESS_NUM)));
+        sb.append(String.format("DynamoDBLookupActor - total cached return addrs: %d\n",
+                dynamoTotalStats.get(MatchConstants.ADDRESS_NUM)));
+        sb.append(String.format("DynamoDBLookupActor - active records in threadpool: %d\n",
+                dynamoTotalStats.get(MatchConstants.ACTIVE_REQ_NUM)));
+        sb.append(String.format("DynamoDBLookupActor - queued records in threadpool: %d\n",
+                dynamoTotalStats.get(MatchConstants.QUEUED_REQ_NUM)));
+
         // DomainCollectService Checking
         sb.append("DOMAIN COLLECT\n");
-        sb.append(String.format("pending domains in queue: %d\n", domainCollectService.getQueueSize()));
+        sb.append(String.format("Pending domains in queue: %d\n", domainCollectService.getQueueSize()));
+
         // DnBCacheService Checking
         sb.append("DNB CACHE DUMP\n");
-        sb.append(String.format("pending DnBCaches in queue: %d\n", dnbCacheService.getQueueSize()));
+        sb.append(String.format("Pending DnBCaches in queue: %d\n", dnbCacheService.getQueueSize()));
+
         // External Services Checking
         synchronized (externalMetrics) {
             for (String service : externalMetrics.keySet()) {

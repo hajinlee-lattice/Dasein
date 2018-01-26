@@ -219,6 +219,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             context.setDnbCode(DnBReturnCode.UNMATCH_TIMEOUT);
             readyToReturn = true;
         }
+        // Check country code
+        if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+            context.setDnbCode(DnBReturnCode.UNMATCH);
+            readyToReturn = true;
+        }
 
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setDataCloudVersion(traveler.getDataCloudVersion());
@@ -680,6 +685,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
             res.put(MatchConstants.REQUEST_NUM, requestNum);
         }
+        return res;
+    }
+
+    @Override
+    public Map<String, Integer> getRealtimeReqStats() {
+        Map<String, Integer> res = new HashMap<>();
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) dnbDataSourceServiceExecutor;
+        res.put(MatchConstants.ACTIVE_REQ_NUM, executor == null ? 0 : executor.getActiveCount());
+        res.put(MatchConstants.QUEUED_REQ_NUM,
+                executor == null || executor.getQueue() == null ? 0 : executor.getQueue().size());
         return res;
     }
 

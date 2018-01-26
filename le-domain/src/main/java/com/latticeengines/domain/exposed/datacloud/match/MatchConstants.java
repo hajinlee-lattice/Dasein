@@ -76,5 +76,6 @@ public final class MatchConstants {
     public static final String REQUEST_NUM = "RequestNum";
     public static final String BATCH_NUM = "BatchNum";
     public static final String ADDRESS_NUM = "AddressNum";
-
+    public static final String ACTIVE_REQ_NUM = "ActiveRequestNum";
+    public static final String QUEUED_REQ_NUM = "QueuedRequestNum";
 }

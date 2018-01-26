@@ -8,4 +8,6 @@ public interface DnBLookupService {
     Map<String, Integer> getSubmittedStats();
 
     Map<String, Integer> getFinishedStats();
+
+    Map<String, Integer> getRealtimeReqStats();
 }
