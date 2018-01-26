@@ -2,8 +2,8 @@
   <div class="row">
     <div class="columns twelve box-outline">
       <div class="section-header">
-        <div ui-view="wizard_header" ng-if="!vm.title"></div>
         <h4 ng-if="vm.title">{{ vm.title }}</h4>
+        <div ui-view="wizard_header"></div>
       </div>
       <hr />
       <div class="section-body with-padding row">
