@@ -50,9 +50,9 @@ public class HdfsUtils {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
     public interface HdfsFileFormat {
-        public static final String AVRO_FILE = ".*.avro";
-        public static final String AVSC_FILE = ".*.avsc";
-        public static final String JSON_FILE = ".*.json";
+        String AVRO_FILE = ".*.avro";
+        String AVSC_FILE = ".*.avsc";
+        String JSON_FILE = ".*.json";
     }
 
     public interface HdfsFilenameFilter {
@@ -63,7 +63,7 @@ public class HdfsUtils {
         boolean accept(FileStatus file);
     }
 
-    public static enum LogFileEncodingType {
+    public enum LogFileEncodingType {
         NONE, GZ;
 
         public static LogFileEncodingType getEnum(String s) {

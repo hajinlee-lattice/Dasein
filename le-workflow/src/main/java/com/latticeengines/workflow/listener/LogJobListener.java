@@ -1,6 +1,6 @@
 package com.latticeengines.workflow.listener;
 
-
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map.Entry;
 
@@ -33,13 +33,13 @@ public class LogJobListener extends LEJobListener {
         for (Entry<String, JobParameter> entry : jobParameters.getParameters().entrySet()) {
             output.append("  " + entry.getKey() + "=" + entry.getValue() + "\n");
         }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
         for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
             Date start = stepExecution.getStartTime();
             Date end = stepExecution.getEndTime();
-            long duration = end.getTime() - start.getTime();
-            output.append("Step " + stepExecution.getStepName() //
-                    + " : " + start + " to " + end //
-                    + " ( " + (duration /  1000) + " sec)\n");
+            Long duration = end.getTime() - start.getTime();
+            output.append(String.format("Step %s : %s to %s ( %.2f sec )", stepExecution.getStepName(),
+                    dateFormat.format(start), dateFormat.format(end), duration.doubleValue() / 1000.0));
         }
         log.info(output.toString());
     }
