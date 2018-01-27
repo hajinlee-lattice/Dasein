@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.querydsl.core.types.EntityPath;
@@ -83,7 +84,6 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
             return translateRestriction(queryFactory, repository, entity, txnRestriction, queryBuilder);
         }
     }
-
 
     @SuppressWarnings({"unchecked", "rawtype"})
     private SubQuery translateAllKeys(QueryFactory queryFactory, AttributeRepository repository) {
@@ -203,16 +203,125 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
     }
 
     @SuppressWarnings("unchecked")
-    private SQLQuery translateTransaction(QueryFactory queryFactory,
-                                          AttributeRepository repository,
-                                          TransactionRestriction txRestriction) {
+    private SubQuery translateSingleProductAPS(QueryFactory queryFactory,
+                                               AttributeRepository repository,
+                                               TransactionRestriction txRestriction) {
 
         TimeFilter timeFilter = txRestriction.getTimeFilter();
+        AggregationFilter spentFilter = txRestriction.getSpentFilter();
+        AggregationFilter unitFilter = txRestriction.getUnitFilter();
+
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
+
+        String txTableName = getPeriodTransactionTableName();
+        StringPath tablePath = Expressions.stringPath(txTableName);
+
+        List<Expression> productSelectList = new ArrayList<>(Arrays.asList(accountId, periodId));
+        List<Expression> apsSelectList = new ArrayList<>(Arrays.asList(keysAccountId, keysPeriodId));
+
+        productSelectList.add(amountVal.as(AMOUNT_VAL));
+        productSelectList.add(quantityVal.as(QUANTITY_VAL));
+
+        if (spentFilter != null) {
+            Expression spentWindowAgg = translateAggregateTimeWindow(
+                    keysAccountId, keysPeriodId, trxnAmountVal, timeFilter, spentFilter, false).as(amountAggr);
+            apsSelectList.add(spentWindowAgg);
+        } else {
+            apsSelectList.add(SQLExpressions.selectZero().as(amountAggr));
+        }
+
+        if (unitFilter != null) {
+            Expression unitWindowAgg = translateAggregateTimeWindow(
+                    keysAccountId, keysPeriodId, trxnQuantityVal, timeFilter, unitFilter, false).as(quantityAggr);
+            apsSelectList.add(unitWindowAgg);
+        } else {
+            apsSelectList.add(SQLExpressions.selectZero().as(quantityAggr));
+        }
+
+        SQLQuery productQuery = factory.query()
+                .select(productSelectList.toArray(new Expression[0]))
+                .from(tablePath) //
+                .where(translateProductId(txRestriction.getProductId()));
+
+        SQLQuery apsQuery = factory.query()
+                .select(apsSelectList.toArray(new Expression[0]))
+                .from(keysPath)
+                .leftJoin(productQuery, trxnPath)
+                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(periodId);
+
+        SQLQuery subQueryExpression = factory.query().select(accountId, periodId, amountAggr, quantityAggr) //
+                .from(apsQuery, apsPath) //
+                .where(periodIdPredicate);
+
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(subQueryExpression);
+        subQuery.setAlias(generateAlias(APS));
+        return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SQLQuery translateMultiProductRestriction(QueryFactory queryFactory,
+                                                      AttributeRepository repository,
+                                                      TransactionRestriction txOld,
+                                                      QueryBuilder builder) {
+
+        String[] products = txOld.getProductId().split(",");
+
+        SubQuery[] apsSubQueryList = Stream.of(products).map(product -> {
+            TransactionRestriction txNew = new TransactionRestriction(product,
+                                                                      txOld.getTimeFilter(),
+                                                                      txOld.isNegate(),
+                                                                      txOld.getSpentFilter(),
+                                                                      txOld.getUnitFilter()
+            );
+            return translateSingleProductAPS(queryFactory, repository, txNew);
+        }).toArray(SubQuery[]::new);
+
+        builder.with(apsSubQueryList);
+
+        SubQuery apsUnionAll = translateAPSUnionAll(queryFactory, repository, apsSubQueryList);
+
+        builder.with(apsUnionAll);
+
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
+        EntityPath<String> apsUnionAllPath = new PathBuilder<>(String.class, apsUnionAll.getAlias());
+        AggregationFilter spentFilter = txOld.getSpentFilter();
+        AggregationFilter unitFilter = txOld.getUnitFilter();
+
+        BooleanExpression aggrAmountPredicate =
+                (spentFilter != null) ? translateAggregatePredicate(amountAggr, spentFilter, true) : Expressions.TRUE;
+        BooleanExpression aggrQuantityPredicate =
+                (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter, true) : Expressions.TRUE;
+
+        BooleanExpression aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
+
+        if (txOld.isNegate()) {
+            aggrValPredicate = aggrValPredicate.not();
+        }
+
+        return factory.query()
+                .select(accountId, periodId)
+                .from(apsUnionAllPath) //
+                .groupBy(accountId, periodId)
+                .having(aggrValPredicate);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SQLQuery translateTransaction(QueryFactory queryFactory,
+                                          AttributeRepository repository,
+                                          TransactionRestriction txRestriction,
+                                          QueryBuilder builder) {
 
         if (txRestriction.getSpentFilter() == null && txRestriction.getUnitFilter() == null) {
             return translateHasEngaged(queryFactory, repository, txRestriction);
         }
 
+        return translateMultiProductRestriction(queryFactory, repository, txRestriction, builder);
+
+        /*
+        TimeFilter timeFilter = txRestriction.getTimeFilter();
         AggregationFilter spentFilter = txRestriction.getSpentFilter();
         AggregationFilter unitFilter = txRestriction.getUnitFilter();
 
@@ -253,9 +362,9 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
         BooleanExpression aggrAmountPredicate =
-                (spentFilter != null) ? translateAggregatePredicate(amountAggr, spentFilter) : Expressions.TRUE;
+                (spentFilter != null) ? translateAggregatePredicate(amountAggr, spentFilter, false) : Expressions.TRUE;
         BooleanExpression aggrQuantityPredicate =
-                (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter) : Expressions.TRUE;
+                (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter, false) : Expressions.TRUE;
 
         BooleanExpression aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
 
@@ -267,6 +376,7 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
 
         return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
                 .where(aggrValPredicate.and(periodIdPredicate));
+                */
 
     }
 
@@ -319,8 +429,9 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
 
     private SubQuery translateTransactionRestriction(QueryFactory queryFactory,
                                                      AttributeRepository repository,
-                                                     TransactionRestriction txRestriction) {
-        SQLQuery subQueryExpression = translateTransaction(queryFactory, repository, txRestriction);
+                                                     TransactionRestriction txRestriction,
+                                                     QueryBuilder builder) {
+        SQLQuery subQueryExpression = translateTransaction(queryFactory, repository, txRestriction, builder);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
         subQuery.setAlias(generateAlias(BusinessEntity.Transaction.name()));
@@ -387,7 +498,7 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
                 builder.with(translateAllKeys(queryFactory, repository));
             }
 
-            SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction);
+            SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, builder);
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
             ConcreteRestriction accountInRestriction = (ConcreteRestriction) Restriction.builder() //

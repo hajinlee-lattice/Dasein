@@ -20,13 +20,11 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
-@Test(groups = "functional", enabled = false)
 public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGBase {
 
     public static class EnhancedEventQueryTranslator extends EventQueryTranslator {
         @Override
         protected String getPeriodTransactionTableName(AttributeRepository repository) {
-            //return "tftest_4_transaction_2017_10_31_19_44_08_utc";
             return "tftest_8_periodtransaction_2018_01_06_00_57_09_utc";
         }
 
@@ -263,6 +261,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
     }
 
     private TransactionRestriction getAvgAmountWithinPeriod(String prodIdList) {
+        // XXX
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
@@ -430,17 +429,13 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 5966);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testHasPurchasedInCurrentPeriod() {
         // DS_Test_2
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,6B047FF03A59E42A79D1961541C1BF60,FE4D73162629DF254688CC8D553FA52A";
-        //TransactionRestriction txRestriction = getEngagedInCurrentPeriod(prodIdList);
-        TransactionRestriction tx1 = getEngagedInCurrentPeriod("3872223C9BA06C649D68E415E23A9446");
-        TransactionRestriction tx2 = getEngagedInCurrentPeriod("6B047FF03A59E42A79D1961541C1BF60");
-        TransactionRestriction tx3 = getEngagedInCurrentPeriod("FE4D73162629DF254688CC8D553FA52A");
-        Restriction logical = Restriction.builder().or(tx1, tx2, tx3).build();
+        TransactionRestriction txRestriction = getEngagedInCurrentPeriod(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, logical,
+        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
                                                           getDefaultEventFrontEndQuery(), Query.builder()).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         System.out.println("sqlQuery = " + sqlQuery);
@@ -448,17 +443,13 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 2862);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testHasNotPurchasedWithin() {
         // DS_Test_3
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,3CA17E482511F94FCEB93195D2B146DE,94842E58561D516577E4C0377F601DA3";
-        //TransactionRestriction txRestriction = getHasNotPurchasedWithin(prodIdList);
-        TransactionRestriction tx1 = getHasNotPurchasedWithin("3872223C9BA06C649D68E415E23A9446");
-        TransactionRestriction tx2 = getHasNotPurchasedWithin("3CA17E482511F94FCEB93195D2B146DE");
-        TransactionRestriction tx3 = getHasNotPurchasedWithin("94842E58561D516577E4C0377F601DA3");
-        Restriction logical = Restriction.builder().and(tx1, tx2, tx3).build();
+        TransactionRestriction txRestriction = getHasNotPurchasedWithin(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, logical,
+        Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
                                                           getDefaultEventFrontEndQuery(), Query.builder()).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         System.out.println("sqlQuery = " + sqlQuery);
@@ -480,7 +471,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 68680);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testPriorOnlyNegativeCase() {
         // DS_Test_5
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,8D6A468D2B5F99D5D2252DE0DF6F971C,A78DF03BAC196BE9A08508FFDB433A31";
@@ -494,20 +485,9 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query);
         Assert.assertEquals(count, 88959);
-
-        TransactionRestriction hasNotEngaged = getHasNotEngagedProd2(prodIdList);
-        TransactionRestriction within = getEngagedWithinSeven(prodIdList);
-        Restriction logicalRestriction = Restriction.builder().or(hasNotEngaged, within).build();
-        Query query1 = eventTranslator.translateForScoring(queryFactory, attrRepo, logicalRestriction,
-                                                           getDefaultEventFrontEndQuery(), Query.builder()).build();
-        SQLQuery sqlQuery1 = queryEvaluator.evaluate(attrRepo, query1);
-        System.out.println("sqlQuery = " + sqlQuery1);
-        long count1 = queryEvaluatorService.getCount(attrRepo, query1);
-        Assert.assertEquals(count1, 88959);
-
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testTotalAmountLessThan1M() {
         // DS_Test_6
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,40BE92E2D8ADE18DC80A3FAEC761F91A,D7B8185BB08C1AFA624B7B9BA49AA77C,6C5E5F2F07EB909FDB480F868047586C";
@@ -519,10 +499,9 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query);
         Assert.assertEquals(count, 96058);
-
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testEachAmountEver() {
         // DS_Test_7
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,64E8729DCA85D713B8BE424E6A2828E5,EBB5D5D47420FE96255F586D37FE3EB0";
@@ -537,7 +516,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 210);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAvgQuantityEver() {
         // DS_Test_8
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,56E3D7F5C674E7AC8026A61360A80769";
@@ -552,7 +531,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 13985);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testQuantityAtLeastOnce() {
         // DS_Test_9
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,B365E24EC8F2C3672684ACC2F2EE208A";
@@ -567,7 +546,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
 
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAvgAmountInCurrentPeriod() {
         // DS_Test_10
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,8D6A468D2B5F99D5D2252DE0DF6F971C,D45763A3E784654F2C17CF906F9CD295";
@@ -582,7 +561,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 3795);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testEachQuantityWithinPeriod() {
         // DS_Test_11
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,7D18DD009AC1004A4E72B66E2D8F594F,5544C27D9C475BF2B639241F65D8D26F";
@@ -597,7 +576,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 318);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAmountAtLeastOnceBetweenPeriods() {
         // DS_Test_12
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,E49000DA92C149E7BF960306185BF577,36E2AF3FC4AE03328EE407C3A3933007";
@@ -612,7 +591,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 6023);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testTotalAmountBetweenPeriods() {
         // DS_Test_13
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,1EF99C5568D3047FBD9D4A271614B008,CFF528B14A522C97F5F23964583EDB78";
@@ -627,7 +606,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 4464);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAvgAmountWithinPeriods() {
         // DS_Test_14
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
@@ -642,7 +621,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 2881);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAmountEachLessThanWithinPeriod() {
         // DS_Test_15
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
@@ -674,7 +653,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 82723);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testEachQuantityInCurrentPeriod() {
         // DS_Test_17
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,94842E58561D516577E4C0377F601DA3,CFF528B14A522C97F5F23964583EDB78";
@@ -689,7 +668,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 776);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAvgQuantityWithinPeriod() {
         // DS_Test_18
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
@@ -719,7 +698,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 95949);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAtLeastOnceQuantityBetweenPeriods() {
         // DS_Test_20
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
@@ -734,7 +713,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 97);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAtLeastOnceQuantityWithinPeriod() {
         // DS_Test_21
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,94842E58561D516577E4C0377F601DA3,A78DF03BAC196BE9A08508FFDB433A31";
@@ -749,7 +728,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 596);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testEachAmountWithinFivePeriods() {
         // DS_Test_22
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
@@ -763,7 +742,6 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         long count = queryEvaluatorService.getCount(attrRepo, query);
         Assert.assertEquals(count, 317);
     }
-
 
     //@Test(groups = "functional")
     public void testAvgQuantityBetweenPeriods() {

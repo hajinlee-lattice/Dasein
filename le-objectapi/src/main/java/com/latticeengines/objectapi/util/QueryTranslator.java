@@ -345,6 +345,28 @@ public class QueryTranslator {
     // this is only used by non-event-table translations
     private Restriction translateTransactionRestriction(BusinessEntity entity, Restriction restriction, //
                                                         QueryBuilder queryBuilder) {
+        // translate mutli-product "has engaged" to logical grouping
+        if (restriction instanceof LogicalRestriction) {
+            BreadthFirstSearch bfs = new BreadthFirstSearch();
+            bfs.run(restriction, (object, ctx) -> {
+                if (object instanceof TransactionRestriction) {
+                    TransactionRestriction txRestriction = (TransactionRestriction) object;
+                    if (TransactionRestrictionTranslator.isHasEngagedRestriction(txRestriction)) {
+                        Restriction newRestriction = TransactionRestrictionTranslator.translateHasEngagedToLogicalGroup(txRestriction);
+                        LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                        parent.getRestrictions().remove(txRestriction);
+                        parent.getRestrictions().add(newRestriction);
+                    }
+                }
+            });
+        } else if (restriction instanceof TransactionRestriction) {
+            TransactionRestriction txRestriction = (TransactionRestriction) restriction;
+
+            if (TransactionRestrictionTranslator.isHasEngagedRestriction(txRestriction)) {
+                restriction = TransactionRestrictionTranslator.translateHasEngagedToLogicalGroup(txRestriction);
+            }
+        }
+
         Restriction translated;
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();

@@ -9,9 +9,11 @@ import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.WindowFunction;
@@ -41,6 +43,38 @@ public class TranslatorUtils {
             return numberPath.loe(values.get(0).toString());
         case EQUAL:
             return numberPath.eq(values.get(0).toString());
+        default:
+            throw new UnsupportedOperationException("Unsupported comparison type " + cmp);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static BooleanExpression toAggregatedBooleanExpression(StringPath stringPath, ComparisonType cmp, List<Object> values) {
+        NumberPath numberPath = Expressions.numberPath(BigDecimal.class, stringPath.getMetadata());
+
+        switch (cmp) {
+        case GTE_AND_LTE:
+            return numberPath.sum().goe(new BigDecimal(values.get(0).toString())).and(
+                    numberPath.sum().loe(new BigDecimal(values.get(1).toString())));
+        case GT_AND_LTE:
+            return numberPath.sum().gt(new BigDecimal(values.get(0).toString())).and(
+                    numberPath.sum().loe(new BigDecimal(values.get(1).toString())));
+        case GT_AND_LT:
+            return numberPath.sum().gt(new BigDecimal(values.get(0).toString())).and(
+                    numberPath.sum().lt(new BigDecimal(values.get(1).toString())));
+        case GTE_AND_LT:
+            return numberPath.sum().goe(new BigDecimal(values.get(0).toString())).and(
+                    numberPath.sum().lt(new BigDecimal(values.get(1).toString())));
+        case GREATER_OR_EQUAL:
+            return numberPath.sum().goe(new BigDecimal(values.get(0).toString()));
+        case GREATER_THAN:
+            return numberPath.sum().gt(new BigDecimal(values.get(0).toString()));
+        case LESS_THAN:
+            return numberPath.sum().lt(new BigDecimal(values.get(0).toString()));
+        case LESS_OR_EQUAL:
+            return numberPath.sum().loe(new BigDecimal(values.get(0).toString()));
+        case EQUAL:
+            return numberPath.sum().eq(new BigDecimal(values.get(0).toString()));
         default:
             throw new UnsupportedOperationException("Unsupported comparison type " + cmp);
         }

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -64,6 +65,11 @@ public class SubQuery {
 
     public SubQuery withProjection(String attribute) {
         projections.add(attribute);
+        return this;
+    }
+
+    public SubQuery withProjections(String... attributes) {
+        projections.addAll(Arrays.asList(attributes));
         return this;
     }
 }

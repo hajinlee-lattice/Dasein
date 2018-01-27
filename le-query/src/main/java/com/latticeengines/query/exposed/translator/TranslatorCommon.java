@@ -2,6 +2,7 @@ package com.latticeengines.query.exposed.translator;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -10,14 +11,23 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.WindowFunction;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.query.exposed.factory.QueryFactory;
 
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.toBooleanExpression;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.toAggregatedBooleanExpression;
 
 public class TranslatorCommon {
     static final int NUM_ADDITIONAL_PERIOD = 2;
@@ -85,7 +95,9 @@ public class TranslatorCommon {
     static final StringPath shiftedPeriodId = Expressions.stringPath(shiftedRevenuePath, PERIOD_ID);
     static final StringPath shiftedRevenue = Expressions.stringPath(shiftedRevenuePath, REVENUE);
 
-    BooleanExpression translateAggregatePredicate(StringPath aggr, AggregationFilter aggregationFilter) {
+    BooleanExpression translateAggregatePredicate(StringPath stringPath,
+                                                  AggregationFilter aggregationFilter,
+                                                  boolean aggregate) {
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
         List<Object> values = aggregationFilter.getValues();
@@ -96,7 +108,9 @@ public class TranslatorCommon {
         case AVG:
         case AT_LEAST_ONCE:
         case EACH:
-            aggrPredicate = toBooleanExpression(aggr, cmp, values);
+            aggrPredicate = (aggregate) ?
+                    toAggregatedBooleanExpression(stringPath, cmp, values) :
+                    toBooleanExpression(stringPath, cmp, values);
             break;
         }
 
@@ -175,7 +189,6 @@ public class TranslatorCommon {
                                                 boolean ascendingPeriod) {
         NumberExpression trxnValNumber = Expressions.numberPath(BigDecimal.class, trxnVal.getMetadata());
 
-
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
         boolean isNotLessComparison = isNotLessThanOperation(cmp);
@@ -211,5 +224,49 @@ public class TranslatorCommon {
         }
 
         return translateTimeWindow(timeFilter, windowAgg);
+    }
+
+    static public boolean isHasEngagedRestriction(TransactionRestriction txRestriction) {
+        return (txRestriction.getSpentFilter() == null && txRestriction.getUnitFilter() == null);
+    }
+
+    static public Restriction translateHasEngagedToLogicalGroup(TransactionRestriction hasEngaged) {
+        // no need to translate if it's for single product
+        if (hasEngaged.getProductId().split(",").length == 1) {
+            return hasEngaged;
+        }
+
+        TransactionRestriction[] restrictionList;
+        restrictionList = Stream.of(hasEngaged.getProductId().split(","))
+                .map(prodId -> new TransactionRestriction(prodId,
+                                                          hasEngaged.getTimeFilter(),
+                                                          hasEngaged.isNegate(), null, null)
+                ).toArray(TransactionRestriction[]::new);
+
+        if (hasEngaged.isNegate()) {
+            return Restriction.builder().and(restrictionList).build();
+        } else {
+            return Restriction.builder().or(restrictionList).build();
+
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected SubQuery translateAPSUnionAll(QueryFactory queryFactory,
+                                            AttributeRepository repository,
+                                            SubQuery[] apsSubQueryList) {
+        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository);
+        SQLQuery[] apsSelectAlls = Stream.of(apsSubQueryList)
+                .map(apsQuery -> factory.query().select(SQLExpressions.all).from(
+                        new PathBuilder<>(String.class, apsQuery.getAlias())))
+                .toArray(SQLQuery[]::new);
+
+        SQLQuery unionAll = factory.query().select(SQLExpressions.all)
+                .from(SQLExpressions.unionAll(apsSelectAlls));
+
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(unionAll);
+        subQuery.setAlias(generateAlias(APS));
+        return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
     }
 }
