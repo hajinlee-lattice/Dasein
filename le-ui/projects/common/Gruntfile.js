@@ -93,7 +93,7 @@ module.exports = function(grunt) {
                 'watch:js',
                 'watch:css'
             ]
-        }
+        },
     });
 
     grunt.loadNpmTasks('grunt-contrib-sass');
@@ -105,7 +105,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask('build',[
         'concat:vendor',
-        //'uglify:vendor',
         'concat:production',
         'ngAnnotate:production',
         'uglify:production',
