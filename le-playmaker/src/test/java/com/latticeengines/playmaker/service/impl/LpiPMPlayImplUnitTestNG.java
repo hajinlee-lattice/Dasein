@@ -1,6 +1,7 @@
 package com.latticeengines.playmaker.service.impl;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -13,10 +14,9 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class LpiPMPlayImplUnitTestNG {
@@ -24,7 +24,7 @@ public class LpiPMPlayImplUnitTestNG {
     private LpiPMPlayImpl lpiPMPlayImpl;
 
     @Mock
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    private PlayProxy playProxy;
 
     private String playId;
     private List<Integer> idList;
@@ -43,7 +43,7 @@ public class LpiPMPlayImplUnitTestNG {
 
         lpiPMPlayImpl = new LpiPMPlayImpl();
 
-        lpiPMPlayImpl.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
+        lpiPMPlayImpl.setPlayProxy(playProxy);
     }
 
     @Test(groups = "unit")
@@ -65,8 +65,6 @@ public class LpiPMPlayImplUnitTestNG {
         play.setDescription("Play for business usecase");
         play.setUpdated(new Date());
         plays.add(play);
-        when(internalResourceRestApiProxy //
-                .getPlays(any(CustomerSpace.class))) //
-                        .thenReturn(plays);
+        when(playProxy.getPlays(anyString(), isNull(Boolean.class), isNull(String.class))).thenReturn(plays);
     }
 }

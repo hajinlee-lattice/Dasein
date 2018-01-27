@@ -68,7 +68,6 @@ import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
-import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -78,8 +77,6 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
-import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -102,8 +99,6 @@ import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.pls.service.PlayLaunchService;
-import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -197,12 +192,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private ModelNoteService modelNoteService;
-
-    @Inject
-    private PlayLaunchService playLaunchService;
-
-    @Inject
-    private PlayService playService;
 
     @Inject
     private MetadataSegmentService metadataSegmentService;
@@ -1194,82 +1183,6 @@ public class InternalResource extends InternalResourceBase {
         return true;
     }
 
-    @RequestMapping(value = "/plays/" + TENANT_ID_PATH, method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Get plays.")
-    public List<Play> getPlayLaunch(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug("Get plays");
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        return playService.getAllPlays();
-    }
-
-    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Get play launch.")
-    public PlayLaunch getPlayLaunch(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Get play launch %s playName %s launchId", playName, launchId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        return playLaunchService.findByLaunchId(launchId);
-    }
-
-    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PUT)
-    @ResponseBody
-    @ApiOperation(value = "Update play launch state.")
-    public PlayLaunch updatePlayLaunch(@PathVariable("tenantId") String tenantId, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId, //
-            @RequestParam("state") LaunchState state, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Update play launch state for %s playName %s launchId", playName, launchId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
-        playLaunch.setLaunchState(state);
-        return playLaunchService.update(playLaunch);
-    }
-
-    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PATCH)
-    @ResponseBody
-    @ApiOperation(value = "Update play launch state.")
-    public PlayLaunch updatePlayLaunchProgress(@PathVariable("tenantId") String tenantId,
-            @PathVariable("playName") String playName, //
-            @PathVariable("launchId") String launchId, //
-            @RequestParam("launchCompletionPercent") double launchCompletionPercent, //
-            @RequestParam("accountsSelected") long accountsSelected, //
-            @RequestParam("accountsLaunched") long accountsLaunched, //
-            @RequestParam("contactsLaunched") long contactsLaunched, //
-            @RequestParam("accountsErrored") long accountsErrored, //
-            @RequestParam("accountsSuppressed") long accountsSuppressed, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Record play launch progress for %s launchId", launchId));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
-        playLaunch.setAccountsSelected(accountsSelected);
-        playLaunch.setAccountsLaunched(accountsLaunched);
-        playLaunch.setAccountsErrored(accountsErrored);
-        playLaunch.setContactsLaunched(contactsLaunched);
-        playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
-        playLaunch.setAccountsSuppressed(accountsSuppressed);
-        return playLaunchService.update(playLaunch);
-    }
-
-    @RequestMapping(value = "/play/{playName}/customerspace/{customerSpace:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get play for a specific tenant based on playName")
-    public Play getPlay(@PathVariable String playName, @PathVariable String customerSpace, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(customerSpace);
-        log.debug(String.format("Get play with %s playName.", playName));
-        return playService.getFullPlayByName(playName);
-    }
-
     @RequestMapping(value = "/segment/{segmentName}/restriction/" + TENANT_ID_PATH, method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get segment restriction.")
@@ -1309,18 +1222,6 @@ public class InternalResource extends InternalResourceBase {
         MetadataSegmentExport metadataSegmentExport = metadataSegmentExportService.getSegmentExportByExportId(exportId);
         metadataSegmentExport.setStatus(state);
         return metadataSegmentExportService.updateSegmentExportJob(metadataSegmentExport);
-    }
-
-    @RequestMapping(value = "/plays/{playName}/talkingpoints/publish/" + TENANT_ID_PATH, method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Publish given play's Talking Points to dante.")
-    public void publishTalkinPoints(@PathVariable("playName") String playName, //
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        log.debug(String.format("Publish talking points for play: %s", playName));
-        manufactureSecurityContextForInternalAccess(tenantId);
-
-        playService.publishTalkingPoints(playName, tenantId);
     }
 
     public List<String> getTestTenantIds() {

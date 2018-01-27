@@ -192,6 +192,15 @@ public class PlayResource {
         return playLaunch;
     }
 
+    @RequestMapping(value = "/{playName}/talkingpoints/publish", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Publish Talking Points for a given play")
+    public void publishTalkingPoints( //
+            @PathVariable String customerSpace, //
+            @PathVariable("playName") String playName) {
+        playService.publishTalkingPoints(playName, customerSpace);
+    }
+
     private String createTable(PlayLaunch playLaunch) {
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
 
@@ -257,6 +266,31 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
         return playLaunchService.findByLaunchId(launchId);
+    }
+
+    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.PATCH)
+    @ResponseBody
+    @ApiOperation(value = "Update play launch progress.")
+    public PlayLaunch updatePlayLaunchProgress(//
+            @PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestParam("launchCompletionPercent") Double launchCompletionPercent, //
+            @RequestParam("accountsSelected") Long accountsSelected, //
+            @RequestParam("accountsLaunched") Long accountsLaunched, //
+            @RequestParam("contactsLaunched") Long contactsLaunched, //
+            @RequestParam("accountsErrored") Long accountsErrored, //
+            @RequestParam("accountsSuppressed") Long accountsSuppressed) {
+        log.debug(String.format("Record play launch progress for %s launchId", launchId));
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        playLaunch.setAccountsSelected(accountsSelected);
+        playLaunch.setAccountsLaunched(accountsLaunched);
+        playLaunch.setAccountsErrored(accountsErrored);
+        playLaunch.setContactsLaunched(contactsLaunched);
+        playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
+        playLaunch.setAccountsSuppressed(accountsSuppressed);
+        return playLaunchService.update(playLaunch);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}/{action}", //

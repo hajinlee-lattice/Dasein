@@ -263,6 +263,25 @@ public abstract class BaseRestApiProxy {
         });
     }
 
+    protected <T> T patch(final String method, final String url, final HttpEntity<?> entity,
+            final Class<T> returnValueClazz) {
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(context -> {
+            try {
+                log.info(String.format("Invoking %s by patching from url %s with http headers.  (Attempt=%d)", method,
+                        url, context.getRetryCount() + 1));
+                return restTemplate.patchForObject(url, entity, returnValueClazz);
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
+            }
+        });
+    }
+
     protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {

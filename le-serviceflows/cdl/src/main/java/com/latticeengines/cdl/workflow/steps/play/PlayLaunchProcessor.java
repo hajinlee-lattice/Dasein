@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
@@ -49,9 +49,9 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.service.JobService;
@@ -112,12 +112,8 @@ public class PlayLaunchProcessor {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Inject
+    private PlayProxy playProxy;
 
     public void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
         // initialize play launch context
@@ -281,8 +277,8 @@ public class PlayLaunchProcessor {
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
 
-        PlayLaunch playLaunch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
-        Play play = internalResourceRestApiProxy.findPlayByName(customerSpace, playName);
+        PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
+        Play play = playProxy.getPlay(customerSpace.toString(), playName);
         playLaunch.setPlay(play);
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 
@@ -376,7 +372,7 @@ public class PlayLaunchProcessor {
         try {
             PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
-            internalResourceRestApiProxy.updatePlayLaunchProgress(playLaunchContext.getCustomerSpace(), //
+            playProxy.updatePlayLaunchProgress(playLaunchContext.getCustomerSpace().toString(), //
                     playLaunch.getPlay().getName(), playLaunch.getLaunchId(), playLaunch.getLaunchCompletionPercent(),
                     playLaunch.getAccountsSelected(), playLaunch.getAccountsLaunched(),
                     playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
@@ -426,8 +422,8 @@ public class PlayLaunchProcessor {
     }
 
     @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    void setPlayProxy(PlayProxy playProxy) {
+        this.playProxy = playProxy;
     }
 
     @VisibleForTesting

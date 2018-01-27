@@ -3,10 +3,10 @@ package com.latticeengines.cdl.workflow.steps.play;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.yarn.exposed.service.JobService;
 
@@ -18,11 +18,11 @@ public class PlayLaunchInitStepTestHelper {
     private ContactFetcher contactFetcher;
     private FrontEndQueryCreator frontEndQueryCreator;
 
-    public PlayLaunchInitStepTestHelper(InternalResourceRestApiProxy internalResourceRestApiProxy,
-            EntityProxy entityProxy, RecommendationService recommendationService, long pageSize,
-            MetadataProxy metadataProxy, SqoopProxy sqoopProxy, RatingEngineProxy ratingEngineProxy,
-            JobService jobService, String dataDbDriver, String dataDbUrl, String dataDbUser, String dataDbPassword,
-            String dataDbDialect, String dataDbType, Configuration yarnConfiguration) {
+    public PlayLaunchInitStepTestHelper(PlayProxy playProxy, EntityProxy entityProxy,
+            RecommendationService recommendationService, long pageSize, MetadataProxy metadataProxy,
+            SqoopProxy sqoopProxy, RatingEngineProxy ratingEngineProxy, JobService jobService, String dataDbDriver,
+            String dataDbUrl, String dataDbUser, String dataDbPassword, String dataDbDialect, String dataDbType,
+            Configuration yarnConfiguration) {
         frontEndQueryCreator = new FrontEndQueryCreator();
         frontEndQueryCreator.initLookupFieldsConfiguration();
 
@@ -42,7 +42,7 @@ public class PlayLaunchInitStepTestHelper {
         playLaunchProcessor.setContactFetcher(contactFetcher);
         playLaunchProcessor.setFrontEndQueryCreator(frontEndQueryCreator);
         playLaunchProcessor.setRecommendationCreator(recommendationCreator);
-        playLaunchProcessor.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
+        playLaunchProcessor.setPlayProxy(playProxy);
         playLaunchProcessor.setMetadataProxy(metadataProxy);
         playLaunchProcessor.setSqoopProxy(sqoopProxy);
         playLaunchProcessor.setRatingEngineProxy(ratingEngineProxy);

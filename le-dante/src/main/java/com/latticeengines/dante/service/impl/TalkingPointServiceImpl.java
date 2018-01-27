@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +25,8 @@ import com.latticeengines.domain.exposed.multitenant.TalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component("talkingPointService")
 public class TalkingPointServiceImpl implements TalkingPointService {
@@ -46,6 +44,9 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     private final String oAuth2DanteAppId = "lattice.web.dante";
 
     @Autowired
+    private PlayProxy playProxy;
+
+    @Autowired
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
     @Autowired
@@ -54,16 +55,9 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     @Autowired
     private TalkingPointEntityMgr talkingPointEntityMgr;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
-    }
-
-    @PostConstruct
-    public void initialize() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    void setPlayProxy(PlayProxy playProxy) {
+        this.playProxy = playProxy;
     }
 
     @Override
@@ -83,8 +77,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
         Play play;
         try {
-            play = internalResourceRestApiProxy.findPlayByName(CustomerSpace.parse(customerSpace),
-                    tps.get(0).getPlayName());
+            play = playProxy.getPlay(CustomerSpace.parse(customerSpace).toString(), tps.get(0).getPlayName());
             if (play == null) {
                 throw new LedpException(LedpCode.LEDP_38012, new String[] { tps.get(0).getPlayName() });
             }
@@ -190,7 +183,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                 talkingPointEntityMgr.delete(tp);
             }
 
-            Play play = internalResourceRestApiProxy.findPlayByName(CustomerSpace.parse(customerSpace), playName);
+            Play play = playProxy.getPlay(CustomerSpace.parse(customerSpace).toString(), playName);
 
             for (PublishedTalkingPoint ptp : publishedTalkingPointEntityMgr.findAllByPlayName(playName)) {
                 talkingPointEntityMgr.create(convertFromPublished(ptp, play));

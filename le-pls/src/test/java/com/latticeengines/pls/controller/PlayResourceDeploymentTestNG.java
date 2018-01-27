@@ -33,8 +33,8 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -55,7 +55,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private RatingEngine ratingEngine1;
     private MetadataSegment segment;
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    @Inject
+    private PlayProxy playProxy;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -71,8 +72,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             tenant = testBed.getMainTestTenant();
         }
         switchToSuperAdmin();
-
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
 
         MetadataSegment retrievedSegment = createSegment();
 
@@ -176,10 +175,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        internalResourceRestApiProxy.updatePlayLaunch(CustomerSpace.parse(tenant.getId()), name, //
-                playLaunch.getLaunchId(), LaunchState.Launched);
-        internalResourceRestApiProxy.updatePlayLaunchProgress(CustomerSpace.parse(tenant.getId()), //
-                name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L, 0L, 2L);
+        playProxy.updatePlayLaunch(tenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launched);
+        playProxy.updatePlayLaunchProgress(tenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L, 0L,
+                2L);
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Canceled + "&launchStates="

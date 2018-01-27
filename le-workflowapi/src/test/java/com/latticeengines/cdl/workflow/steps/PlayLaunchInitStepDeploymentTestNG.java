@@ -34,10 +34,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -62,7 +62,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    @Autowired
+    private PlayProxy playProxy;
 
     @Autowired
     RecommendationService recommendationService;
@@ -128,19 +129,17 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         String playLaunchId = playLaunch.getId();
         long pageSize = 20L;
 
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-
         MockitoAnnotations.initMocks(this);
 
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
-        helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, recommendationService,
-                pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser,
+        helper = new PlayLaunchInitStepTestHelper(playProxy, entityProxy, recommendationService, pageSize,
+                metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser,
                 dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
-        playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
+        playLaunchInitStep.setPlayProxy(playProxy);
         playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
 
         customerSpace = CustomerSpace.parse(tenant.getId());
@@ -174,7 +173,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         playLaunchInitStep.execute();
 
-        PlayLaunch updatedPlayLaunch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, play.getName(),
+        PlayLaunch updatedPlayLaunch = playProxy.getPlayLaunch(customerSpace.toString(), play.getName(),
                 playLaunch.getId());
 
         Assert.assertNotNull(updatedPlayLaunch);

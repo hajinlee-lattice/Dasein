@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
@@ -40,7 +40,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
     @Autowired
     private TestPlayDao testPlayDao;
 
-    private InternalResourceRestApiProxy spiedInternalResourceRestApiProxy;
+    private PlayProxy playProxy;
 
     private static final String PLAY_DISPLAY_NAME = "Test TP Plays hard";
     private static final String SEGMENT_NAME = "testTPSegment";
@@ -50,11 +50,10 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         testPlay = createTestPlay();
-        spiedInternalResourceRestApiProxy = spy(new InternalResourceRestApiProxy("doesn't matter"));
-        ((TalkingPointServiceImpl) talkingPointService)
-                .setInternalResourceRestApiProxy(spiedInternalResourceRestApiProxy);
-        doReturn(testPlay).when(spiedInternalResourceRestApiProxy)
-                .findPlayByName(CustomerSpace.parse(mainTestTenant.getId()), testPlay.getName());
+        playProxy = spy(new PlayProxy());
+        ((TalkingPointServiceImpl) talkingPointService).setPlayProxy(playProxy);
+        doReturn(testPlay).when(playProxy).getPlay(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+                testPlay.getName());
     }
 
     @Test(groups = "functional")

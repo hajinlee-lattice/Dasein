@@ -3,6 +3,8 @@ package com.latticeengines.pls.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +31,9 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.metadata.service.SegmentService;
-import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.PlayService;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -51,10 +53,10 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     private MetadataSegment segment;
 
     @Autowired
-    private PlayService playService;
+    private PlayProxy playProxy;
 
-    @Autowired
-    private RatingEngineEntityMgr ratingEngineEntityMgr;
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
@@ -73,13 +75,13 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         ratingEngine1.setSegment(retrievedSegment);
         ratingEngine1.setCreatedBy(CREATED_BY);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
-        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine1,
-                mainTestTenant.getId());
+        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),
+                ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
 
         play = createDefaultPlay();
-        playService.createOrUpdate(play, mainTestTenant.getId());
+        playProxy.createOrUpdatePlay(mainTestTenant.getId(), play);
         switchToExternalUser();
     }
 
@@ -173,7 +175,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
                 null, String.class);
 
-        play = playService.getPlayByName(play.getName());
+        play = playProxy.getPlay(mainTestTenant.getId(), play.getName());
         Assert.assertNotNull(play.getLastTalkingPointPublishTime());
 
         restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/"
@@ -268,6 +270,6 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @AfterTest(groups = { "deployment" })
     public void teardown() throws Exception {
         MultiTenantContext.setTenant(mainTestTenant);
-        playService.deleteByName(play.getName());
+        playProxy.deletePlay(mainTestTenant.getId(), play.getName());
     }
 }

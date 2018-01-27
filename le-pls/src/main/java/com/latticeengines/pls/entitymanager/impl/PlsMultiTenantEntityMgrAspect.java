@@ -19,9 +19,9 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     private SessionFactory sessionFactory;
 
     @Autowired
-    @Qualifier(value="entityManagerFactory")
+    @Qualifier(value = "entityManagerFactory")
     private EntityManager entityManager;
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
@@ -147,36 +147,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr.update*(..))")
     public void updateMarketoMatchFieldValue(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.PlayEntityMgr.find*(..))")
-    public void findPlay(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.PlayEntityMgr.delete*(..))")
-    public void deletePlay(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.RatingEngineEntityMgr.find*(..))")
-    public void findRatingEngine(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.RatingEngineEntityMgr.delete*(..))")
-    public void deleteRatingEngine(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.PlayLaunchEntityMgr.find*(..))")
-    public void findPlayLaunch(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.PlayLaunchEntityMgr.delete*(..))")
-    public void deletePlayLaunch(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 

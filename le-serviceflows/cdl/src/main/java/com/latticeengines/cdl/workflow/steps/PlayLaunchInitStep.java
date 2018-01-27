@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -31,15 +29,11 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     @Autowired
     private PlayLaunchProcessor playLaunchProcessor;
 
+    @Autowired
+    private PlayProxy playProxy;
+
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
 
     @Override
     public void execute() {
@@ -66,12 +60,12 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private void failureUpdates(CustomerSpace customerSpace, String playName, String playLaunchId, Exception ex) {
         log.error(ex.getMessage(), ex);
-        internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+        playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Failed);
     }
 
     private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
-        internalResourceRestApiProxy.publishTalkingPoints(customerSpace, playName);
-        internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
+        playProxy.publishTalkingPoints(customerSpace.toString(), playName);
+        playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Launched);
     }
 
     @VisibleForTesting
@@ -80,8 +74,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    void setPlayProxy(PlayProxy playProxy) {
+        this.playProxy = playProxy;
     }
 
     @VisibleForTesting

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMPlay;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("lpiPMPlay")
@@ -28,17 +28,13 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Inject
+    private PlayProxy playProxy;
 
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
 
-        List<Play> plays = internalResourceRestApiProxy.getPlays(MultiTenantContext.getCustomerSpace());
+        List<Play> plays = playProxy.getPlays(MultiTenantContext.getCustomerSpace().toString(), null, null);
 
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         int skipped = 0;
@@ -116,8 +112,8 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy2) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy2;
+    void setPlayProxy(PlayProxy playProxy) {
+        this.playProxy = playProxy;
     }
 
 }

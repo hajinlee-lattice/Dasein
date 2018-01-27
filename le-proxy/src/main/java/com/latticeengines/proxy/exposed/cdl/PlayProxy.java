@@ -25,7 +25,7 @@ public class PlayProxy extends MicroserviceRestApiProxy {
 
     private static final String URL_PREFIX = "/customerspaces/{customerSpace}/plays";
 
-    protected PlayProxy() {
+    public PlayProxy() {
         super("cdl");
     }
 
@@ -123,6 +123,13 @@ public class PlayProxy extends MicroserviceRestApiProxy {
         return post("create or update play", url, play, Play.class);
     }
 
+    public void publishTalkingPoints(String customerSpace, String playName) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/talkingpoints/publish", shortenCustomerSpace(customerSpace),
+                playName);
+        log.info("url is " + url);
+        post(String.format("publish talking points for play %s", playName), url, null, Void.class);
+    }
+
     public void deletePlay(String customerSpace, String playName) {
         String url = constructUrl(URL_PREFIX + "/{playName}", shortenCustomerSpace(customerSpace), playName);
         log.info("url is " + url);
@@ -157,6 +164,38 @@ public class PlayProxy extends MicroserviceRestApiProxy {
                 playName, launchId);
         log.info("url is " + url);
         return get("get Play Launch", url, PlayLaunch.class);
+    }
+
+    public PlayLaunch updatePlayLaunchProgress(String customerSpace, String playName, String launchId,
+            Double launchCompletionPercent, Long accountsSelected, Long accountsLaunched, Long contactsLaunched,
+            Long accountsErrored, Long accountsSuppressed) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}", shortenCustomerSpace(customerSpace),
+                playName, launchId);
+        List<String> params = new ArrayList<>();
+        if (launchCompletionPercent != null) {
+            params.add("launchCompletionPercent=" + launchCompletionPercent);
+        }
+        if (accountsSelected != null) {
+            params.add("accountsSelected=" + accountsSelected);
+        }
+        if (accountsLaunched != null) {
+            params.add("accountsLaunched=" + accountsLaunched);
+        }
+        if (contactsLaunched != null) {
+            params.add("contactsLaunched=" + contactsLaunched);
+        }
+        if (accountsErrored != null) {
+            params.add("accountsErrored=" + accountsErrored);
+        }
+        if (accountsSuppressed != null) {
+            params.add("accountsSuppressed=" + accountsSuppressed);
+        }
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+        log.info("url is " + url);
+
+        return patch("update PlayLaunch Progress ", url, null, PlayLaunch.class);
     }
 
     public void updatePlayLaunch(String customerSpace, String playName, String launchId, LaunchState action) {

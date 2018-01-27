@@ -26,10 +26,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.yarn.exposed.service.JobService;
@@ -52,7 +52,8 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    @Autowired
+    private PlayProxy playProxy;
 
     @Mock
     RecommendationService partiallyBadRecommendationService;
@@ -119,8 +120,6 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
         String playLaunchId = playLaunch.getId();
         long pageSize = 20L;
 
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-
         MockitoAnnotations.initMocks(this);
 
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
@@ -131,13 +130,13 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
         // LAUNCHED in case of partial failure
         mockPartiallyBadRecommendationService();
 
-        helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy,
-                partiallyBadRecommendationService, pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService,
-                dataDbDriver, dataDbUrl, dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
+        helper = new PlayLaunchInitStepTestHelper(playProxy, entityProxy, partiallyBadRecommendationService, pageSize,
+                metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataDbDriver, dataDbUrl, dataDbUser,
+                dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
-        playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
+        playLaunchInitStep.setPlayProxy(playProxy);
         playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
 
         customerSpace = CustomerSpace.parse(tenant.getId());
@@ -159,7 +158,7 @@ public class PlayLaunchInitStepCompletedWithFailureDeploymentTestNG extends Abst
         Assert.assertEquals(playLaunch.getLaunchCompletionPercent(), 0.0D);
 
         playLaunchInitStep.execute();
-        PlayLaunch updatedPlayLaunch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, play.getName(),
+        PlayLaunch updatedPlayLaunch = playProxy.getPlayLaunch(customerSpace.toString(), play.getName(),
                 playLaunch.getId());
 
         Assert.assertNotNull(updatedPlayLaunch);

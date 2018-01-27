@@ -23,15 +23,12 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -483,87 +480,6 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
 
         return url;
-    }
-
-    public List<Play> getPlays(CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl("pls/internal/plays/", customerSpace.toString());
-
-            log.debug("Get from " + url);
-            List<?> plays = restTemplate.getForObject(url, List.class);
-            return JsonUtils.convertList(plays, Play.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getPlays: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    public PlayLaunch getPlayLaunch(CustomerSpace customerSpace, //
-            String playName, //
-            String launchId) {
-        try {
-            String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId,
-                    customerSpace.toString());
-
-            log.debug("Get from " + url);
-
-            return restTemplate.getForObject(url, PlayLaunch.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getPlayLaunch: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    public void updatePlayLaunch(CustomerSpace customerSpace, //
-            String playName, //
-            String launchId, //
-            LaunchState action) {
-        String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId, customerSpace.toString());
-        url += "?state=" + action.name();
-
-        restTemplate.put(url, null);
-    }
-
-    public void updatePlayLaunchProgress(CustomerSpace customerSpace, //
-            String playName, //
-            String launchId, //
-            Double launchCompletionPercent, //
-            Long accountsSelected, //
-            Long accountsLaunched, //
-            Long contactsLaunched, //
-            Long accountsErrored, //
-            Long accountsSuppressed) {
-        String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId, customerSpace.toString());
-        url += "?";
-        if (launchCompletionPercent != null)
-            url += "launchCompletionPercent=" + launchCompletionPercent;
-        if (accountsSelected != null)
-            url += "&accountsSelected=" + accountsSelected;
-        if (accountsLaunched != null)
-            url += "&accountsLaunched=" + accountsLaunched;
-        if (contactsLaunched != null)
-            url += "&contactsLaunched=" + contactsLaunched;
-        if (accountsErrored != null)
-            url += "&accountsErrored=" + accountsErrored;
-        if (accountsSuppressed != null)
-            url += "&accountsSuppressed=" + accountsSuppressed;
-
-        restTemplate.patchForObject(url, null, String.class);
-    }
-
-    public void publishTalkingPoints(CustomerSpace customerSpace, String playName) {
-        String url = constructUrl("pls/internal/plays/" + playName + "/talkingpoints/publish/",
-                customerSpace.toString());
-        restTemplate.postForObject(url, null, String.class);
-    }
-
-    public Play findPlayByName(CustomerSpace customerSpace, //
-            String playName) {
-        try {
-            String url = constructUrl("pls/internal/play/" + playName + "/customerspace/" + customerSpace.toString());
-            log.debug("Find Play by name (" + playName + ")" + url);
-            return restTemplate.getForObject(url, Play.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getPlay: Remote call failure: " + e.getMessage(), e);
-        }
     }
 
     public MetadataSegmentExport getMetadataSegmentExport(CustomerSpace customerSpace, //

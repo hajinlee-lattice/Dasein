@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyListOf;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.impl.LpiPMRecommendationImpl;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class LpiPMRecommendationImplUnitTestNG {
@@ -40,7 +40,7 @@ public class LpiPMRecommendationImplUnitTestNG {
     private RecommendationEntityMgr recommendationEntityMgr;
 
     @Mock
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    private PlayProxy playProxy;
 
     private String playId;
     private String playLaunchId;
@@ -69,7 +69,7 @@ public class LpiPMRecommendationImplUnitTestNG {
         lpiPMRecommendationImpl = new LpiPMRecommendationImpl();
 
         lpiPMRecommendationImpl.setRecommendationEntityMgr(recommendationEntityMgr);
-        lpiPMRecommendationImpl.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
+        lpiPMRecommendationImpl.setPlayProxy(playProxy);
     }
 
     @Test(groups = "unit")
@@ -132,9 +132,7 @@ public class LpiPMRecommendationImplUnitTestNG {
         play.setDisplayName("My Play");
         play.setDescription("Play for business usecase");
         plays.add(play);
-        when(internalResourceRestApiProxy //
-                .getPlays(any(CustomerSpace.class))) //
-                        .thenReturn(plays);
+        when(playProxy.getPlays(anyString(), isNull(Boolean.class), isNull(String.class))).thenReturn(plays);
     }
 
     private List<Map<String, Object>> createDummyRecommendationResult(int count) {

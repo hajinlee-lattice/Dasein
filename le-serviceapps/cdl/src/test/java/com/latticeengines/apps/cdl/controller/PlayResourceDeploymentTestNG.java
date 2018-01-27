@@ -35,7 +35,6 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -55,7 +54,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private RatingEngine ratingEngine1;
     private MetadataSegment segment;
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -76,7 +74,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
             setupTestEnvironment();
             tenant = testBed.getMainTestTenant();
         }
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
 
         MetadataSegment retrievedSegment = createSegment();
 
@@ -171,8 +168,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(launchList.size(), 0);
 
         playProxy.updatePlayLaunch(tenant.getId(), name, playLaunch.getLaunchId(), LaunchState.Launched);
-        internalResourceRestApiProxy.updatePlayLaunchProgress(CustomerSpace.parse(tenant.getId()), //
-                name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L, 0L, 2L);
+        playProxy.updatePlayLaunchProgress(tenant.getId(), name, playLaunch.getLaunchId(), 100.0D, 10L, 8L, 25L, 0L,
+                2L);
 
         launchList = playProxy.getPlayLaunches(tenant.getId(), name,
                 Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.Launched));

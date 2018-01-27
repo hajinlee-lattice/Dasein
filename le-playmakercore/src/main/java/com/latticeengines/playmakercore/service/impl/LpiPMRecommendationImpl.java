@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("lpiPMRecommendation")
@@ -42,12 +42,8 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Inject
+    private PlayProxy playProxy;
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum,
@@ -58,7 +54,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, int offset) {
 
-        List<Play> plays = internalResourceRestApiProxy.getPlays(MultiTenantContext.getCustomerSpace());
+        List<Play> plays = playProxy.getPlays(MultiTenantContext.getCustomerSpace().toString(), null, null);
         Map<String, Triple<Long, String, String>> playNameAndPidMap = new HashMap<>();
         for (Play play : plays) {
             playNameAndPidMap.put(play.getName(),
@@ -101,8 +97,8 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                         if (accExtRec.containsKey(PlaymakerConstants.LaunchID)) {
                             String launchName = (String) accExtRec.get(PlaymakerConstants.LaunchID);
                             if (!playLaunchNameAndPidMap.containsKey(launchName)) {
-                                PlayLaunch launch = internalResourceRestApiProxy
-                                        .getPlayLaunch(MultiTenantContext.getCustomerSpace(), playName, launchName);
+                                PlayLaunch launch = playProxy.getPlayLaunch(
+                                        MultiTenantContext.getCustomerSpace().toString(), playName, launchName);
                                 if (launch != null) {
                                     playLaunchNameAndPidMap.put(launchName, launch.getPid());
                                 }
@@ -167,7 +163,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     }
 
     @VisibleForTesting
-    public void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    public void setPlayProxy(PlayProxy playProxy) {
+        this.playProxy = playProxy;
     }
 }

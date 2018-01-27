@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -33,7 +33,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
     private RatingCoverageService ratingCoverageService;
 
     @Inject
-    private PlayService playService;
+    private PlayProxy playProxy;
 
     @Override
     public RatingEngineDashboard getRatingsDashboard(String ratingEngineId) {
@@ -56,7 +56,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         MetadataSegment segment = ratingEngine.getSegment();
 
         // get related plays
-        List<Play> plays = playService.getAllFullPlays(false, ratingEngineId);
+        List<Play> plays = playProxy.getPlays(tenant.getId(), false, ratingEngineId);
         log.info(String.format("Step 3 - Loading related plays completed for : %s", ratingEngineId));
 
         dashboard.setSummary(ratingEngineSummary);
