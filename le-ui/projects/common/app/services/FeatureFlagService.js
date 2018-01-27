@@ -1,11 +1,10 @@
-angular.module('mainApp.core.services.FeatureFlagService', [
+mod = angular.module('mainApp.core.services.FeatureFlagService', [
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.BrowserStorageUtility'
-])
-.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
+]).service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
 
     this.GetAllFlags = function(ApiHost) {
-        let deferred = $q.defer();
+        var deferred = $q.defer();
         GetAllFlagsAsync(deferred, ApiHost);
         return deferred.promise;
     };
@@ -16,20 +15,20 @@ angular.module('mainApp.core.services.FeatureFlagService', [
      * @return {boolean}
      */
     this.UserIs = function(levels){
-        let sessionDoc = BrowserStorageUtility.getClientSession(),
+        var sessionDoc = BrowserStorageUtility.getClientSession(),
             levels = levels || '',
             levelsAr = levels.split(',');
         return levelsAr.includes(sessionDoc.AccessLevel);
     };
 
-    let products = {
+    var products = {
         CG: "Customer Growth"
     };
 
     // =======================================================
     // flag schema/hash ==> must in sync with backend schema
     // =======================================================
-    let flags = {
+    var flags = {
         // ===================================
         // BEGIN: flags governed by user level
         // ===================================
@@ -93,8 +92,8 @@ angular.module('mainApp.core.services.FeatureFlagService', [
 
     this.Flags = function(){ return flags; };
 
-    let flagValues = {};
-    let purchasedProducts;
+    var flagValues = {};
+    var purchasedProducts = [];
 
     function GetAllFlagsAsync(promise, ApiHost) {
         // feature flag cached
@@ -103,13 +102,13 @@ angular.module('mainApp.core.services.FeatureFlagService', [
             return;
         }
 
-        let url = (ApiHost === '/ulysses' ? '/ulysses' : '/pls') + '/tenantconfig';
+        var url = (ApiHost === '/ulysses' ? '/ulysses' : '/pls') + '/tenantconfig';
 
         $http({
             method: 'GET',
             url: url
         }).success(function(data) {
-            for(let key in data['FeatureFlags']) {
+            for(var key in data['FeatureFlags']) {
                 flagValues[key] = data['FeatureFlags'][key];
             }
 
