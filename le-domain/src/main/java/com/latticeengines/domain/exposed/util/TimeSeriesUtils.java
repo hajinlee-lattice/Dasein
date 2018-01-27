@@ -148,9 +148,9 @@ public class TimeSeriesUtils {
                     continue;
                 }
                 if (periodBuilder != null) {
-                    period = new Integer(periodBuilder.toPeriodId(DateTimeUtils.dayPeriodToDate(period)));
+                    period = periodBuilder.toPeriodId(DateTimeUtils.dayPeriodToDate(period));
                 }
-                if ((period != null) && periods.contains(period)) {
+                if (periods.contains(period)) {
                    HdfsUtils.copyFiles(yarnConfiguration, fileName, targetDir);
                 }
             }

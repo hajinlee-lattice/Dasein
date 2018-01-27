@@ -47,7 +47,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             upsertMasterStep = 2;
             diffStep = 3;
 
-            TransformationStepConfig merge = mergeInputs(false, true, true, false);
+            TransformationStepConfig merge = mergeInputs(false, true);
             TransformationStepConfig match = match();
             TransformationStepConfig upsertMaster = mergeMaster();
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
@@ -97,7 +97,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(InterfaceName.Id.name());
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
-        config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(Collections.singleton(InterfaceName.CDLCreatedTime.name()));
         return appendEngineConf(config, heavyEngineConfig());
     }

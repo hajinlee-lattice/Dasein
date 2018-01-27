@@ -55,6 +55,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     protected void initializeConfiguration() {
         super.initializeConfiguration();
+        mergedBatchStoreName = TableRoleInCollection.ConsolidatedRawTransaction.name() + "_Merged";
         initOrClonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
         rawTable = dataCollectionProxy.getTable(customerSpace.toString(), //
                 TableRoleInCollection.ConsolidatedRawTransaction, inactive);
@@ -72,7 +73,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         dailyStep = 1;
         dayPeriodStep = 2;
 
-        TransformationStepConfig inputMerge = mergeInputs(false, false, true, true);
+        TransformationStepConfig inputMerge = mergeInputs(true, false);
         TransformationStepConfig daily = addTrxDate();
         TransformationStepConfig dayPeriods  = collectDays();
         TransformationStepConfig dailyPartition  = partitionDaily();
@@ -164,7 +165,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private Table buildPeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
-        Table table = SchemaRepository.instance().getSchema(schema);
+        Table table = SchemaRepository.instance().getSchema(schema, true);
         String tableName = NamingUtils.timestamp(role.name());
         table.setName(tableName);
         String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();

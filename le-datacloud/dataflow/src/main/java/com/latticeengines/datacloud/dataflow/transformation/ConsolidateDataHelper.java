@@ -87,7 +87,7 @@ public class ConsolidateDataHelper {
     Node addTimestampColumns(Node input) {
         Date now = new Date();
         Node output = dropReservedColumns(input);
-        output = input.addTimestamp(InterfaceName.CDLCreatedTime.name(), now);
+        output = output.addTimestamp(InterfaceName.CDLCreatedTime.name(), now);
         output = output.addTimestamp(InterfaceName.CDLUpdatedTime.name(), now);
         return output;
     }

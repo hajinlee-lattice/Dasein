@@ -832,9 +832,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         expectedCounts.forEach((bkt, count) -> {
             Assert.assertNotNull(counts.get(bkt.getName()),
                     "Cannot find count for bucket " + bkt.getName() + " in rating engine.");
-            Assert.assertEquals(counts.get(bkt.getName()), count);
-            logger.info("Rating engine count " + bkt.getName() + " expected " + counts.get(bkt.getName()) + " found "
-                    + count);
+            Assert.assertEquals(counts.get(bkt.getName()), count, "Rating engine count " + bkt.getName() + " expected "
+                    + counts.get(bkt.getName()) + " found " + count);
         });
     }
 

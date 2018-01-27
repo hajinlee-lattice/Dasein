@@ -57,7 +57,7 @@ public class SchemaRepository {
             table = getTransactionSchema();
             break;
         case PeriodTransaction:
-            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation);
+            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, false);
             break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
@@ -67,6 +67,10 @@ public class SchemaRepository {
     }
 
     public Table getSchema(SchemaInterpretation schema) {
+        return getSchema(schema, false);
+    }
+
+    public Table getSchema(SchemaInterpretation schema, boolean includeCdlTimestamps) {
         Table table = null;
         switch (schema) {
         case SalesforceAccount:
@@ -94,13 +98,13 @@ public class SchemaRepository {
             table = getTransactionSchema();
             break;
         case TransactionRaw:
-            table = getRawTransactionSchema();
+            table = getRawTransactionSchema(includeCdlTimestamps);
             break;
         case TransactionDailyAggregation:
-            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionDailyAggregation);
+            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionDailyAggregation, includeCdlTimestamps);
             break;
         case TransactionPeriodAggregation:
-            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation);
+            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, includeCdlTimestamps);
             break;
         case DeleteAccountTemplate:
             table = getDeleteAccountTemplateSchema();
@@ -730,9 +734,7 @@ public class SchemaRepository {
                 .required() //
                 .interfaceName(InterfaceName.Quantity) //
                 .logicalType(LogicalDataType.Metric) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.Amount.name()) //
                 .allowedDisplayNames(Sets.newHashSet( "AMOUNT")) //
@@ -741,16 +743,13 @@ public class SchemaRepository {
                 .required() //
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.Cost.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COST")) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.Cost) //
                 .logicalType(LogicalDataType.Metric) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
@@ -761,9 +760,7 @@ public class SchemaRepository {
                 .required() //
                 .interfaceName(InterfaceName.TransactionTime) //
                 .logicalType(LogicalDataType.Timestamp) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionType.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE")) //
@@ -771,14 +768,12 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.TransactionType) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         return table;
     }
 
-    private Table getRawTransactionSchema() {
+    private Table getRawTransactionSchema(boolean includeCdlTimestamps) {
         Table table = createTable(SchemaInterpretation.TransactionRaw);
 
         table.addAttribute(attr(InterfaceName.Id.name()) //
@@ -874,60 +869,6 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "DATE", "TRANSACTION_DATE", "TRANSACTION DATE" })) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.TransactionDate) //
-                .logicalType(LogicalDataType.Date) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
-        table.addAttribute(attr(InterfaceName.TransactionDayPeriod.name()) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "DAYPERIOD", "TRANSACTION_DAY_PERIOD", "TRANSACTION DAY PERIOD" })) //
-                .type(Schema.Type.INT) //
-                .interfaceName(InterfaceName.TransactionDayPeriod) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
-        return table;
-    }
-
-    private Table getAggregatedTransactionSchema(SchemaInterpretation schema) {
-        Table table = createTable(schema);
-        table.addAttribute(attr(InterfaceName.AccountId.name()) //
-                .allowedDisplayNames(Sets.newHashSet(
-                        "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.AccountId) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
-        table.addAttribute(attr(InterfaceName.ContactId.name()) //
-                .allowedDisplayNames(Sets.newHashSet(
-                        "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.ContactId) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
-        table.addAttribute(attr(InterfaceName.Id.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ID", "PRODUCT_ID", "PRODUCT ID")) //
-                .type(Schema.Type.STRING) //
-                .notNull() //
-                .interfaceName(InterfaceName.ProductId) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
-        table.addAttribute(attr(InterfaceName.TransactionType.name()) //
-                .allowedDisplayNames(Sets.newHashSet("TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.TransactionType) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
-        table.addAttribute(attr(InterfaceName.TransactionDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("DATE", "TRANSACTION_DATE", "TRANSACTION DATE")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionDate) //
@@ -942,18 +883,82 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        if (includeCdlTimestamps) {
+            table.addAttribute(attr(InterfaceName.CDLCreatedTime.name()) //
+                    .allowedDisplayNames(Collections.emptySet()) //
+                    .type(Schema.Type.LONG) //
+                    .notNull() //
+                    .interfaceName(InterfaceName.CDLCreatedTime) //
+                    .logicalType(LogicalDataType.Timestamp) //
+                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .build());
+            table.addAttribute(attr(InterfaceName.CDLUpdatedTime.name()) //
+                    .allowedDisplayNames(Collections.emptySet()) //
+                    .type(Schema.Type.LONG) //
+                    .notNull() //
+                    .interfaceName(InterfaceName.CDLUpdatedTime) //
+                    .logicalType(LogicalDataType.Timestamp) //
+                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .build());
+        }
+        return table;
+    }
+
+    private Table getAggregatedTransactionSchema(SchemaInterpretation schema, boolean includeCdlTimestamps) {
+        Table table = createTable(schema);
+        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.AccountId) //
+                .logicalType(LogicalDataType.Id) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.ContactId) //
+                .logicalType(LogicalDataType.Id) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Id.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ID", "PRODUCT_ID", "PRODUCT ID")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .interfaceName(InterfaceName.ProductId) //
+                .logicalType(LogicalDataType.Id) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionType.name()) //
+                .allowedDisplayNames(Sets.newHashSet("TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionType) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet("DATE", "TRANSACTION_DATE", "TRANSACTION DATE")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionDate) //
+                .logicalType(LogicalDataType.Date) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionDayPeriod.name()) //
+                .allowedDisplayNames(Sets.newHashSet("DAYPERIOD", "TRANSACTION_DAY_PERIOD", "TRANSACTION DAY PERIOD")) //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.TransactionDayPeriod) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
         table.addAttribute(attr(InterfaceName.PeriodId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("DATE", "TRANSACTION_DATE", "TRANSACTION DATE")) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.PeriodId) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.PeriodName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("PERIOD NAME")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PeriodName) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.TotalAmount.name()) //
@@ -962,7 +967,6 @@ public class SchemaRepository {
                 .notNull() //
                 .interfaceName(InterfaceName.TotalAmount) //
                 .logicalType(LogicalDataType.Metric) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
         table.addAttribute(attr(InterfaceName.TotalQuantity.name()) //
@@ -971,9 +975,26 @@ public class SchemaRepository {
                 .notNull() //
                 .interfaceName(InterfaceName.TotalQuantity) //
                 .logicalType(LogicalDataType.Metric) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
+        if (includeCdlTimestamps) {
+            table.addAttribute(attr(InterfaceName.CDLCreatedTime.name()) //
+                    .allowedDisplayNames(Collections.emptySet()) //
+                    .type(Schema.Type.LONG) //
+                    .notNull() //
+                    .interfaceName(InterfaceName.CDLCreatedTime) //
+                    .logicalType(LogicalDataType.Timestamp) //
+                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .build());
+            table.addAttribute(attr(InterfaceName.CDLUpdatedTime.name()) //
+                    .allowedDisplayNames(Collections.emptySet()) //
+                    .type(Schema.Type.LONG) //
+                    .notNull() //
+                    .interfaceName(InterfaceName.CDLUpdatedTime) //
+                    .logicalType(LogicalDataType.Timestamp) //
+                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .build());
+        }
         return table;
     }
 

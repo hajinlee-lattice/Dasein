@@ -49,10 +49,9 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         dedupeSource(config, sources, groupByKey);
         if (sources.size() <= 1) {
             result = sources.get(0);
+        } else if (config.isMergeOnly()) {
+            result = sources.get(0).merge(sources.subList(1, sources.size()));
         } else {
-            if (config.isMergeOnly()) {
-                return sources.get(0).merge(sources.subList(1, sources.size()));
-            }
             Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
             List<String> fieldToRetain = new ArrayList<>();
             Set<String> commonFields = new HashSet<>();
@@ -72,6 +71,7 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
 
             result = result.retain(new FieldList(fieldToRetain));
         }
+
         if (config.isAddTimestamps()) {
             result = consolidateHelper.addTimestampColumns(result);
         }

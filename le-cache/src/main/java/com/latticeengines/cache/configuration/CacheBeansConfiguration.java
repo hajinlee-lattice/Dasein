@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
@@ -24,7 +25,7 @@ import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.cache.annotation.CachingConfigurer;
+
 import com.latticeengines.domain.exposed.cache.CacheName;
 
 @Configuration
@@ -81,6 +82,8 @@ public class CacheBeansConfiguration implements CachingConfigurer {
         config.put(CacheName.EntityCountCache.name(), entityCountCacheConfig);
         config.put(CacheName.EntityDataCache.name(), entityDataCacheConfig);
         config.put(CacheName.EntityRatingCountCache.name(), entityRatingCountCacheConfig);
+        config.put(CacheName.RatingDataCache.name(), entityDataCacheConfig);
+        config.put(CacheName.RatingCoverageCache.name(), entityRatingCountCacheConfig);
         config.put(CacheName.MetadataCache.name(), metadataCacheConfig);
         config.put(CacheName.SessionCache.name(), sessionCacheConfig);
 
