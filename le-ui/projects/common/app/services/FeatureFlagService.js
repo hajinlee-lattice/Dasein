@@ -1,85 +1,100 @@
-var mod = angular.module('mainApp.core.services.FeatureFlagService', [
+angular.module('mainApp.core.services.FeatureFlagService', [
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.BrowserStorageUtility'
-]);
-
-mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
+])
+.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
 
     this.GetAllFlags = function(ApiHost) {
-        var deferred = $q.defer();
+        let deferred = $q.defer();
         GetAllFlagsAsync(deferred, ApiHost);
         return deferred.promise;
     };
 
     this.FlagIsEnabled = GetFlag;
 
+    /**
+     * @return {boolean}
+     */
     this.UserIs = function(levels){
-        var sessionDoc = BrowserStorageUtility.getClientSession(),
+        let sessionDoc = BrowserStorageUtility.getClientSession(),
             levels = levels || '',
             levelsAr = levels.split(',');
+        return levelsAr.includes(sessionDoc.AccessLevel);
+    };
 
-        if (levelsAr.includes(sessionDoc.AccessLevel)) {
-            return true;
-        }
-
-        return false;
-    }
+    let products = {
+        CG: "Customer Growth"
+    };
 
     // =======================================================
     // flag schema/hash ==> must in sync with backend schema
     // =======================================================
-    var flags = {
-        View_Sample_Leads : 'View_Sample_Leads',
+    let flags = {
+        // ===================================
+        // BEGIN: flags governed by user level
+        // ===================================
+        VIEW_SAMPLE_LEADS : 'View_Sample_Leads',
         VIEW_REFINE_CLONE : 'View_Refine_Clone',
         EDIT_REFINE_CLONE : 'Edit_Refine_Clone',
         VIEW_REMODEL : 'View_Remodel',
-
         CHANGE_MODEL_NAME: 'ChangeModelNames',
         DELETE_MODEL: 'DeleteModels',
-
         REVIEW_MODEL: 'ReviewModel',
         UPLOAD_JSON: 'UploadSummaryJson',
-
         USER_MGMT_PAGE: 'UserManagementPage',
         ADD_USER: 'AddUsers',
         CHANGE_USER_ACCESS: 'ChangeUserAccess',
         DELETE_USER: 'DeleteUsers',
-
         ADMIN_PAGE: 'AdminPage',
-        ADMIN_ALERTS_TAB: 'AdminAlertsTab',
-
         MODEL_HISTORY_PAGE: 'ModelCreationHistoryPage',
-        SYSTEM_SETUP_PAGE: 'SystemSetupPage',
-        ACTIVATE_MODEL_PAGE: 'ActivateModelPage',
-
-        SETUP_PAGE: 'SetupPage',
-        DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage',
-        REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage',
-        LEAD_ENRICHMENT_PAGE: 'LeadEnrichmentPage',
-
-        CAMPAIGNS_PAGE: 'EnableCampaignUI',
         JOBS_PAGE: 'JobsPage',
         MARKETO_SETTINGS_PAGE: 'MarketoSettingsPage',
         API_CONSOLE_PAGE: 'APIConsolePage',
-        LATTICE_MARKETO_PAGE: 'EnableLatticeMarketoCredentialPage',
+        // ===================================
+        // END: flags governed by user level
+        // ===================================
 
+        // ====================
+        // BEGIN: product flags
+        // ====================
+        // These are actually product flag (whether the customer has purchased the product or not)
+        ENABLE_CDL: 'EnableCdl',
+        // ====================
+        // END: product flags
+        // ====================
+
+        // ================
+        // BEGIN: LP2 flags
+        // ================
+        ADMIN_ALERTS_TAB: 'AdminAlertsTab',
+        SETUP_PAGE: 'SetupPage',
+        DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage',
+        SYSTEM_SETUP_PAGE: 'SystemSetupPage',
+        ACTIVATE_MODEL_PAGE: 'ActivateModelPage',
+        LEAD_ENRICHMENT_PAGE: 'LeadEnrichmentPage',
+        // ================
+        // END: LP2 flags
+        // ================
+
+        REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage',
         ALLOW_PIVOT_FILE:'AllowPivotFile',
+        ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes',
+        LATTICE_INSIGHTS: 'LatticeInsights',
+
+        //TODO: deprecated flags
+        CAMPAIGNS_PAGE: 'EnableCampaignUI',
         USE_ELOQUA_SETTINGS: 'UseEloquaSettings',
         USE_MARKETO_SETTINGS: 'UseMarketoSettings',
         USE_SALESFORCE_SETTINGS: 'UseSalesforceSettings',
-
-        ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes',
-        ENABLE_DATA_PROFILING_V2: 'EnableDataProfilingV2',
+        LATTICE_MARKETO_PAGE: 'EnableLatticeMarketoCredentialPage',
         ENABLE_FUZZY_MATCH: 'EnableFuzzyMatch',
-        ENABLE_CDL: 'EnableCdl',
-        //ENABLE_TALKING_POINTS: EnableTalkingPoints,
-
-        LATTICE_INSIGHTS: 'LatticeInsights'
+        ENABLE_DATA_PROFILING_V2: 'EnableDataProfilingV2',
     };
 
     this.Flags = function(){ return flags; };
 
-    var flagValues = {};
+    let flagValues = {};
+    let purchasedProducts;
 
     function GetAllFlagsAsync(promise, ApiHost) {
         // feature flag cached
@@ -87,55 +102,66 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             promise.resolve(flagValues);
             return;
         }
-        
-        var url = (ApiHost == '/ulysses' ? ApiHost + '/tenant' : '/pls' + '/config') + '/featureflags';
-        
-        // retrieve feature flag
-        if (ApiHost != '/ulysses') {
-            var sessionDoc = BrowserStorageUtility.getClientSession();
-            
-            if (sessionDoc === null || !sessionDoc.hasOwnProperty("Tenant")) {
-                promise.resolve({}); // should not attempt to get flags before logging in a tenant
-                return;
-            }
-        
-            var tenantId = sessionDoc.Tenant.Identifier;
-            url += '?tenantId=' + tenantId;
-        }
+
+        let url = (ApiHost === '/ulysses' ? '/ulysses' : '/pls') + '/tenantconfig';
 
         $http({
             method: 'GET',
             url: url
         }).success(function(data) {
-            for(var key in data) {
-                flagValues[key] = data[key];
+            for(let key in data['FeatureFlags']) {
+                flagValues[key] = data['FeatureFlags'][key];
             }
 
+            purchasedProducts = data['Products'];
+
+            SetDeprecatedFlags();
+
+            // product flags
+            SetFlag(flags.ENABLE_CDL, GetProduct(products.CG));
+
             // update user-level flags
-            if (ApiHost != '/ulysses') {
+            if (ApiHost !== '/ulysses') {
                 UpdateFlagsBasedOnRights();
             }
 
             promise.resolve(flagValues);
         }).error(function() {
             // if cannot get feature flags from backend
-            SetFlag(flags.ADMIN_ALERTS_TAB, false);
             SetFlag(flags.ALLOW_PIVOT_FILE, false);
+            SetFlag(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
+            SetFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
+
+            SetDeprecatedFlags();
+
+            // LP2
+            SetFlag(flags.ADMIN_ALERTS_TAB, false);
             SetFlag(flags.SETUP_PAGE, false);
             SetFlag(flags.ACTIVATE_MODEL_PAGE, false);
             SetFlag(flags.SYSTEM_SETUP_PAGE, false);
             SetFlag(flags.DEPLOYMENT_WIZARD_PAGE, false);
-            SetFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
             SetFlag(flags.LEAD_ENRICHMENT_PAGE, false);
-            SetFlag(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
+
+            // product flags
+            SetFlag(flags.ENABLE_CDL, false);
 
             // update user-level flags
-            if (ApiHost != '/ulysses') {
+            if (ApiHost !== '/ulysses') {
                 UpdateFlagsBasedOnRights();
             }
 
             promise.resolve(flagValues);
         });
+    }
+
+    function SetDeprecatedFlags() {
+        SetFlag(flags.CAMPAIGNS_PAGE, false);
+        SetFlag(flags.USE_SALESFORCE_SETTINGS, true);
+        SetFlag(flags.USE_MARKETO_SETTINGS, true);
+        SetFlag(flags.USE_ELOQUA_SETTINGS, true);
+        SetFlag(flags.LATTICE_MARKETO_PAGE, true);
+        SetFlag(flags.ENABLE_FUZZY_MATCH, true);
+        SetFlag(flags.ENABLE_DATA_PROFILING_V2, true);
     }
 
     function SetFlag(flag, value) { flagValues[flag] = value; }
@@ -152,6 +178,13 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
      * @return {boolean}
      */
     function GetFlag(flag) { return flagValues[flag] || false; }
+
+    /**
+     * @return {boolean}
+     */
+    function GetProduct(product) {
+        return purchasedProducts.includes(product) || false;
+    }
 
     function UpdateFlagsBasedOnRights() {
 
