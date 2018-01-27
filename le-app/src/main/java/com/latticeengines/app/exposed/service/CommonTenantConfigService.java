@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.pls.TenantConfiguration;
 
 public interface CommonTenantConfigService {
     int getMaxPremiumLeadEnrichmentAttributes(String tenantId);
@@ -14,4 +15,6 @@ public interface CommonTenantConfigService {
     TenantDocument getTenantDocument(String tenantId);
 
     FeatureFlagValueMap getFeatureFlags(String tenantId);
+
+    TenantConfiguration getTenantConfiguration();
 }

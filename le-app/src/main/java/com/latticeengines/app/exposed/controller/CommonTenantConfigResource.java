@@ -18,6 +18,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Deprecated
 @Api(value = "Tenant config", description = "REST resource for tenant config")
 @RestController
 @RequestMapping(value = "/tenant")

@@ -3,6 +3,9 @@ package com.latticeengines.app.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.pls.TenantConfiguration;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -100,6 +103,19 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
         }
 
         return ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumLeadEnrichmentAttributes);
+    }
+
+    @Override
+    public TenantConfiguration getTenantConfiguration() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        FeatureFlagValueMap featureFlagValueMap = getFeatureFlags(tenant.getId());
+        List<LatticeProduct> products = getProducts(tenant.getId());
+
+        TenantConfiguration tenantConfiguration = new TenantConfiguration();
+        tenantConfiguration.setFeatureFlagValueMap(featureFlagValueMap);
+        tenantConfiguration.setProducts(products);
+
+        return tenantConfiguration;
     }
 
     private SpaceConfiguration getSpaceConfiguration(String tenantId) {
