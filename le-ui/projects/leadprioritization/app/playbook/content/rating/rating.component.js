@@ -48,17 +48,6 @@ angular.module('lp.playbook.wizard.rating', [])
         } else {
             vm.block_user = false;
         }
-
-        PlaybookWizardStore.getRatingsCounts(Ratings).then(function(coverage){
-            vm.ratingsCounts = {};
-            if(coverage && coverage.ratingEngineIdCoverageMap) {
-                for(var i in coverage.ratingEngineIdCoverageMap) {
-                    var key = i,
-                    item = coverage.ratingEngineIdCoverageMap[key];
-                    vm.ratingsCounts[key] = item;
-                }
-            }
-        });
     }
 
     vm.saveRating = function(rating) {

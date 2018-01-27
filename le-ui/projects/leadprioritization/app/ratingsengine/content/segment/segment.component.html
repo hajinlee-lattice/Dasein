@@ -42,16 +42,15 @@
                                 <i ng-if="!vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort"></i>
                                 <i ng-if="vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                             </li>
-                            <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numAccounts'" ng-disabled="vm.loadingSupplementaryData">
-                                <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                            <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numAccounts'">
                                 Accounts
-                                <i ng-if="!vm.endsWith(vm.sortBy, 'numAccounts')" class="fa fa-sort"></i>
-                                <i ng-if="vm.endsWith(vm.sortBy, 'numAccounts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                             </li>
-                            <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numContacts'" ng-disabled="vm.loadingSupplementaryData">
+                            <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'numContacts'">
                                 Contacts 
-                                <i ng-if="!vm.endsWith(vm.sortBy, 'numContacts')" class="fa fa-sort"></i>
-                                <i ng-if="vm.endsWith(vm.sortBy, 'numContacts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                                <i ng-if="!vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
                             </li>
                         </ul>
                     </li>
@@ -72,12 +71,12 @@
                                         ng-click="vm.setSegment(segment)" />
                                 <label for="{{segment.name}}">{{segment.display_name}}</label></li>
                             <li class="accounts">
-                                <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>
-                                <span ng-if="!segment.numAccounts">0</span>
+                                <span ng-if="segment.accounts">{{segment.accounts|number}}</span>
+                                <span ng-if="!segment.accounts">0</span>
                             </li>
                             <li class="contacts">
-                                <span ng-if="segment.numContacts">{{segment.numContacts|number}}</span>
-                                <span ng-if="!segment.numContacts">0</span>
+                                <span ng-if="segment.contacts">{{segment.contacts|number}}</span>
+                                <span ng-if="!segment.contacts">0</span>
                             </li>
                         </ul>
                     </li>
