@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,12 @@ import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
@@ -69,7 +69,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                CacheName.getCdlProfileCacheGroup());
+                CacheName.getCdlCacheGroup());
         return newVersion;
     }
 
@@ -112,7 +112,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public void removeTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role,
-                            DataCollection.Version version) {
+            DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
@@ -197,7 +197,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public List<String> getTableNames(String customerSpace, String collectionName, TableRoleInCollection tableRole,
-                                     DataCollection.Version version) {
+            DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
@@ -221,11 +221,33 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (statisticsContainer == null) {
             return null;
         }
-        Statistics statistics = statisticsContainer.getStatistics();
-        if (statistics == null) {
+
+        Map<String, StatsCube> statsCubes = statisticsContainer.getStatsCubes();
+        if (MapUtils.isNotEmpty(statsCubes)) {
+            return constructAttrRepoByStatsCubes(customerSpace, notNullCollectionName, statsCubes, version);
+        } else {
             return null;
         }
-        List<TableRoleInCollection> roles = extractServingRoles(statistics);
+    }
+
+    private AttributeRepository constructAttrRepoByStatsCubes(String customerSpace, String collectionName,
+            Map<String, StatsCube> statsCubes, DataCollection.Version version) {
+        List<TableRoleInCollection> roles = extractServingRoles(statsCubes);
+        Map<TableRoleInCollection, Table> tableMap = constructRoleTableMap(customerSpace, collectionName, roles,
+                version);
+        AttributeRepository attrRepo = AttributeRepository.constructRepo(statsCubes, tableMap,
+                CustomerSpace.parse(customerSpace), collectionName);
+        List<Table> productTables = getTables(customerSpace, collectionName, BusinessEntity.Product.getServingStore(),
+                version);
+        if (productTables != null && !productTables.isEmpty()) {
+            Table productTable = productTables.get(0);
+            attrRepo.appendServingStore(BusinessEntity.Product, productTable);
+        }
+        return attrRepo;
+    }
+
+    private Map<TableRoleInCollection, Table> constructRoleTableMap(String customerSpace, String collectionName,
+            List<TableRoleInCollection> roles, DataCollection.Version version) {
         Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
         Map<TableRoleInCollection, Future<Table>> futureMap = new HashMap<>();
         if (attrRepoPool == null) {
@@ -234,7 +256,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         Tenant tenantInContext = MultiTenantContext.getTenant();
         roles.forEach(role -> futureMap.put(role, attrRepoPool.submit(() -> {
             MultiTenantContext.setTenant(tenantInContext);
-            List<Table> tables = getTables(customerSpace, notNullCollectionName, role, version);
+            List<Table> tables = getTables(customerSpace, collectionName, role, version);
             if (tables != null && !tables.isEmpty()) {
                 return tables.get(0);
             } else {
@@ -245,33 +267,24 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             Table table;
             try {
                 table = future.get();
-            } catch (ExecutionException|InterruptedException e) {
+            } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
             if (table != null) {
                 tableMap.put(role, table);
             }
         });
-        AttributeRepository attrRepo = AttributeRepository.constructRepo(statistics, tableMap,
-                CustomerSpace.parse(customerSpace), notNullCollectionName);
-        List<Table> productTables = getTables(customerSpace, notNullCollectionName,
-                BusinessEntity.Product.getServingStore(), version);
-        if (productTables != null && !productTables.isEmpty()) {
-            Table productTable = productTables.get(0);
-            attrRepo.appendServingStore(BusinessEntity.Product, productTable);
-        }
-        return attrRepo;
+        return tableMap;
     }
 
-    private List<TableRoleInCollection> extractServingRoles(Statistics statistics) {
-        Set<BusinessEntity> entitySet = statistics.getCategories().values().stream()
-                .flatMap(cat -> cat.getSubcategories().values().stream()
-                        .flatMap(subcat -> subcat.getAttributes().keySet().stream().map(AttributeLookup::getEntity))) //
-                .collect(Collectors.toSet());
+    private List<TableRoleInCollection> extractServingRoles(Map<String, StatsCube> statsCubes) {
+        Set<BusinessEntity> entitySet = statsCubes.keySet().stream() //
+                .map(BusinessEntity::valueOf).collect(Collectors.toSet());
         if (entitySet.contains(BusinessEntity.PurchaseHistory)) {
-            entitySet.remove(BusinessEntity.PurchaseHistory);
             entitySet.add(BusinessEntity.Transaction);
             entitySet.add(BusinessEntity.PeriodTransaction);
+            // TODO: do not remove after M18
+            entitySet.remove(BusinessEntity.PurchaseHistory);
         }
         return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
     }

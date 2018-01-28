@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
-import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.SERVING_STORE_IN_STATS;
 import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.TABLE_GOING_TO_REDSHIFT;
 
 import java.util.List;
@@ -20,8 +19,6 @@ import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
 import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
-import com.latticeengines.cdl.workflow.steps.process.CloneStatistics;
-import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -68,12 +65,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private AwsApsGeneratorStep awsApsGeneratorStep;
 
     @Inject
-    private CombineStatistics combineStatistics;
-
-    @Inject
-    private CloneStatistics cloneStatistics;
-
-    @Inject
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
 
     @Override
@@ -89,10 +80,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = transactionChoreographer.skipStep(step, seq);
         } else if (isApsGenerationStep(step)) {
             skip = skipApsGeneration();
-        } else if (isCombineStatsStep(step)) {
-            skip = skipCombineStatsStep();
-        } else if (isCloneStatsStep(step)) {
-            skip = skipCloneStatsStep();
         } else if (inPublishWorkflow(seq)) {
             skip = skipPublishWorkflow(step);
         } else if (isRatingStep(seq)) {
@@ -134,29 +121,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private boolean inWorkflow(int seq, AbstractWorkflow<?> workflow) {
         String namespace = getStepNamespace(seq);
         return namespace.startsWith(workflow.name());
-    }
-
-    private boolean isCombineStatsStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().equals(combineStatistics.name());
-    }
-
-    private boolean isCloneStatsStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().equals(cloneStatistics.name());
-    }
-
-    private boolean skipCombineStatsStep() {
-        Map<BusinessEntity, String> entityTableNames = combineStatistics.getMapObjectFromContext( //
-                SERVING_STORE_IN_STATS, BusinessEntity.class, String.class);
-        if (MapUtils.isEmpty(entityTableNames)) {
-            log.info("Skip combine stats step because there is no serving stores in stats");
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean skipCloneStatsStep() {
-        return !skipCombineStatsStep();
     }
 
     private boolean inPublishWorkflow(int seq) {

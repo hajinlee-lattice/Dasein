@@ -15,12 +15,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -109,14 +110,14 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         log.info("Created time is " + retrieved.getCreated().getTime());
         assertNotNull(retrieved.getUpdated());
         assertTrue(preCreateTime.before(retrieved.getUpdated()));
+        Thread.sleep(1500);
     }
 
     @Test(groups = "functional", dependsOnMethods = "createSegment")
     public void updateSegment() throws InterruptedException {
-        Thread.sleep(1500);
-
         Date preUpdateTime = new Date();
         log.info("Start create test at " + preUpdateTime.getTime());
+        Thread.sleep(1500);
 
         MetadataSegment UPDATED_SEGMENT = new MetadataSegment();
         UPDATED_SEGMENT.setPid(METADATA_SEGMENT.getPid());
@@ -143,9 +144,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         assertEquals(retrieved.getProducts(), new Long(3));
         assertFalse(retrieved.getMasterSegment());
 
-        Statistics statistics = new Statistics();
         StatisticsContainer container = new StatisticsContainer();
-        container.setStatistics(statistics);
+        container.setStatsCubes(ImmutableMap.of("Account", new StatsCube()));
         container.setVersion(dataCollectionEntityMgr.getActiveVersion());
         segmentEntityMgr.upsertStats(SEGMENT_NAME, container);
 

@@ -24,4 +24,17 @@ public class CategoryTopNTree {
     public void setSubcategories(Map<String, List<TopAttribute>> subcategories) {
         this.subcategories = subcategories;
     }
+
+    public boolean hasSubcategory(String subcategory) {
+        return subcategories.containsKey(subcategory);
+    }
+
+    public List<TopAttribute> getSubcategory(String subcategory) {
+        return subcategories.get(subcategory);
+    }
+
+    public void putSubcategory(String subcategory, List<TopAttribute> topAttributes) {
+        subcategories.put(subcategory, topAttributes);
+    }
+
 }

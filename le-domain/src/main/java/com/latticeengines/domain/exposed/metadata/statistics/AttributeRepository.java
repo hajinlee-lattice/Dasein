@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -87,18 +88,11 @@ public class AttributeRepository {
         tableNameMap.put(entity.getServingStore(), table.getName());
     }
 
-    public static AttributeRepository constructRepo(Statistics statistics, Map<TableRoleInCollection, Table> tableMap,
-            CustomerSpace customerSpace, String collectionName) {
+    public static AttributeRepository constructRepo(Map<String, StatsCube> statsCubes, Map<TableRoleInCollection, Table> tableMap,
+                                                    CustomerSpace customerSpace, String collectionName) {
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
-        Map<AttributeLookup, AttributeStats> statsMap = expandStats(statistics);
+        Map<AttributeLookup, AttributeStats> statsMap = expandStats(statsCubes);
         Map<AttributeLookup, ColumnMetadata> cmMap = expandAttrs(statsMap.keySet(), tableMap);
-        return constructRepo(statistics, tableNameMap, cmMap, customerSpace, collectionName);
-    }
-
-    private static AttributeRepository constructRepo(Statistics statistics,
-            Map<TableRoleInCollection, String> tableNameMap, Map<AttributeLookup, ColumnMetadata> cmMap,
-            CustomerSpace customerSpace, String collectionName) {
-        Map<AttributeLookup, AttributeStats> statsMap = expandStats(statistics);
         cmMap.forEach((lookup, cm) -> {
             AttributeStats stats = statsMap.get(lookup);
             cm.setStats(stats);
@@ -154,12 +148,15 @@ public class AttributeRepository {
         return attrMap;
     }
 
-    private static Map<AttributeLookup, AttributeStats> expandStats(Statistics statistics) {
+    private static Map<AttributeLookup, AttributeStats> expandStats(Map<String, StatsCube> statsCubes) {
         Map<AttributeLookup, AttributeStats> statsMap = new HashMap<>();
-        statistics.getCategories().values().forEach(cat -> //
-        cat.getSubcategories().values().forEach(subcat -> {
-            statsMap.putAll(subcat.getAttributes());
-        }));
+        statsCubes.forEach((name, cube) -> {
+            BusinessEntity entity = BusinessEntity.valueOf(name);
+            cube.getStatistics().forEach((attrName, attrStats) -> {
+                AttributeLookup attrLookup = new AttributeLookup(entity, attrName);
+                statsMap.put(attrLookup, attrStats);
+            });
+        });
         return statsMap;
     }
 

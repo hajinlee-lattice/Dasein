@@ -19,17 +19,15 @@ public interface DataLakeService {
 
     long getAttributesCount();
 
-    TopNTree getTopNTree(boolean includeTopBkt);
+    TopNTree getTopNTree();
 
-    StatsCube getStatsCube();
+    Map<String, StatsCube> getStatsCubes();
 
-    Map<BusinessEntity, StatsCube> getStatsCubes();
+    Map<String, StatsCube> getStatsCubes(String customerSpace);
 
     AttributeStats getAttributeStats(BusinessEntity entity, String attribute);
 
     List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role);
-
-    Statistics getStatistics();
 
     List<ColumnMetadata> getAttributesInPredefinedGroup(Predefined predefined);
 

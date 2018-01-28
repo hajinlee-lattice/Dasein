@@ -17,7 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonUtils {
@@ -96,6 +95,21 @@ public class JsonUtils {
         T deserializedSchema;
         try {
             deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return deserializedSchema;
+    }
+
+    public static <T> T deserialize(InputStream is, TypeReference<T> typeRef) {
+        if (is == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = getObjectMapper();
+
+        T deserializedSchema;
+        try {
+            deserializedSchema = objectMapper.readValue(is, typeRef);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

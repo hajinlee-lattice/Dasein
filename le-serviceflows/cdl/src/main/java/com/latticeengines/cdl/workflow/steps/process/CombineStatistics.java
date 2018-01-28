@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,16 +19,10 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
@@ -49,24 +42,33 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
     private DataCollectionProxy dataCollectionProxy;
 
     private Map<BusinessEntity, Table> statsTableMap = new HashMap<>();
+    private String customerSpaceStr;
+    private DataCollection.Version activeVersion;
+    private DataCollection.Version inactiveVersion;
 
     @Override
     public void execute() {
         log.info("Inside CombineStatistics execute()");
-        String customerSpaceStr = configuration.getCustomerSpace().toString();
-        Map<BusinessEntity, String> entityTableNames = getMapObjectFromContext(SERVING_STORE_IN_STATS,
-                BusinessEntity.class, String.class);
-        Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
-        entityTableNames.forEach((entity, tableName) -> {
-            Table table = metadataProxy.getTable(customerSpaceStr, tableName);
-            if (table == null) {
-                throw new IllegalStateException(
-                        "Serving store " + tableName + " for entity " + entity + " cannot be found.");
+        customerSpaceStr = configuration.getCustomerSpace().toString();
+        activeVersion = dataCollectionProxy.getActiveVersion(customerSpaceStr);
+        inactiveVersion = activeVersion.complement();
+
+        Map<String, StatsCube> cubeMap = new HashMap<>();
+        StatisticsContainer latestStatsContainer = dataCollectionProxy.getStats(customerSpaceStr, inactiveVersion);
+        DataCollection.Version latestStatsVersion = null;
+        if (latestStatsContainer == null) {
+            latestStatsContainer = dataCollectionProxy.getStats(customerSpaceStr, activeVersion);
+            if (latestStatsContainer != null) {
+                latestStatsVersion = activeVersion;
             }
-            entityTableMap.put(entity, table);
-        });
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpaceStr);
-        DataCollection.Version inactiveVersion = activeVersion.complement();
+        } else {
+            latestStatsVersion = inactiveVersion;
+        }
+        if (latestStatsContainer != null && MapUtils.isNotEmpty(latestStatsContainer.getStatsCubes())) {
+            cubeMap.putAll(latestStatsContainer.getStatsCubes());
+        }
+        log.info("Found " + cubeMap.size() + " cubes in the stats in " + latestStatsVersion);
+
         Map<BusinessEntity, String> statsTableNames = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
                 String.class);
         if (statsTableNames != null) {
@@ -80,15 +82,19 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
                 statsTableMap.put(entity, statsTable);
             });
         }
-        Map<BusinessEntity, StatsCube> cubeMap = new HashMap<>();
-        StatisticsContainer activeStatsContainer = dataCollectionProxy.getStats(customerSpaceStr);
-        Statistics activeStats = null;
-        if (activeStatsContainer != null) {
-            activeStats = removeEntities(activeStatsContainer.getStatistics(), entityTableMap.keySet());
+        if (MapUtils.isNotEmpty(statsTableMap)) {
+            log.info("Upserting " + statsTableMap.size() + " cubes into stats.");
+            statsTableMap.forEach((entity, table) -> cubeMap.put(entity.name(), getStatsCube(table, entity)));
+        } else if (MapUtils.isEmpty(statsTableMap) && inactiveVersion.equals(latestStatsVersion)) {
+            log.info("Nothing changes to inactive stats, finish the workflow step.");
+            return;
         }
-        statsTableMap.forEach((entity, table) -> cubeMap.put(entity, getStatsCube(table)));
-        StatisticsContainer statsContainer = constructStatsContainer(entityTableMap, cubeMap, activeStats);
+
+        StatisticsContainer statsContainer = new StatisticsContainer();
+        statsContainer.setName(NamingUtils.timestamp("Stats"));
+        statsContainer.setStatsCubes(cubeMap);
         statsContainer.setVersion(inactiveVersion);
+        log.info("Saving stats with " + cubeMap.size() + " cubes.");
         dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
     }
 
@@ -100,7 +106,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         });
     }
 
-    private StatsCube getStatsCube(Table targetTable) {
+    private StatsCube getStatsCube(Table targetTable, BusinessEntity entity) {
         List<Extract> extracts = targetTable.getExtracts();
         List<String> paths = new ArrayList<>();
         for (Extract extract : extracts) {
@@ -108,121 +114,18 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         }
         log.info("Checking for result file: " + StringUtils.join(paths, ", "));
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, paths);
-        return StatsCubeUtils.parseAvro(records);
-    }
-
-    private StatisticsContainer constructStatsContainer(Map<BusinessEntity, Table> entityTableMap,
-            Map<BusinessEntity, StatsCube> cubeMap, Statistics activeStats) {
-        log.info("Converting stats cube to statistics container.");
-        // hard code entity
-        Map<BusinessEntity, List<ColumnMetadata>> mdMap = new HashMap<>();
-        entityTableMap.forEach((entity, table) -> mdMap.put(entity, table.getColumnMetadata()));
-        Statistics statistics = StatsCubeUtils.constructStatistics(cubeMap, mdMap);
-        if (activeStats != null) {
-            statistics = merge(statistics, activeStats);
+        StatsCube statsCube = StatsCubeUtils.parseAvro(records);
+        if (BusinessEntity.PurchaseHistory.equals(entity)) {
+            Map<String, AttributeStats> newStatsMap = new HashMap<>();
+            statsCube.getStatistics().forEach((attrName, attrStats) -> {
+                AttributeStats newStats = StatsCubeUtils.convertPurchaseHistoryStats(attrName, attrStats);
+                if (newStats != null) {
+                    newStatsMap.put(attrName, attrStats);
+                }
+            });
+            statsCube.setStatistics(newStatsMap);
         }
-        StatisticsContainer statsContainer = new StatisticsContainer();
-        statsContainer.setStatistics(statistics);
-        statsContainer.setName(NamingUtils.timestamp("Stats"));
-        return statsContainer;
-    }
-
-    private Statistics merge(Statistics stats1, Statistics stats2) {
-        Map<Category, CategoryStatistics> catStatsMap = new HashMap<>();
-        stats1.getCategories().forEach((cat, catStats1) -> {
-            CategoryStatistics catStats2 = stats2.getCategory(cat);
-            if (catStats2 != null) {
-                CategoryStatistics catStats = merge(catStats1, catStats2);
-                catStatsMap.put(cat, catStats);
-            } else {
-                catStatsMap.put(cat, catStats1);
-            }
-        });
-        stats2.getCategories().forEach((cat, catStats2) -> {
-            if (!catStatsMap.containsKey(cat)) {
-                catStatsMap.put(cat, catStats2);
-            }
-        });
-        Statistics stats = new Statistics();
-        stats.setCategories(catStatsMap);
-        return stats;
-    }
-
-    private CategoryStatistics merge(CategoryStatistics catStats1, CategoryStatistics catStats2) {
-        Map<String, SubcategoryStatistics> subcatStatsMap = new HashMap<>();
-        catStats1.getSubcategories().forEach((subcat1, subcatStats1) ->{
-            SubcategoryStatistics subcatStats2 = catStats2.getSubcategory(subcat1);
-            if (subcatStats2 != null) {
-                SubcategoryStatistics subcatStats = merge(subcatStats1, subcatStats2);
-                subcatStatsMap.put(subcat1, subcatStats);
-            } else {
-                subcatStatsMap.put(subcat1, subcatStats1);
-            }
-        });
-        catStats2.getSubcategories().forEach((subcat2, subcatStats2) -> {
-            if (!subcatStatsMap.containsKey(subcat2)) {
-                subcatStatsMap.put(subcat2, subcatStats2);
-            }
-        });
-        CategoryStatistics catStats = new CategoryStatistics();
-        catStats.setSubcategories(subcatStatsMap);
-        return catStats;
-    }
-
-    private SubcategoryStatistics merge(SubcategoryStatistics subcatStats1, SubcategoryStatistics subcatStats2) {
-        Map<AttributeLookup, AttributeStats> attributeStatsMap = new HashMap<>();
-        attributeStatsMap.putAll(subcatStats1.getAttributes());
-        attributeStatsMap.putAll(subcatStats2.getAttributes());
-        SubcategoryStatistics subcatStats = new SubcategoryStatistics();
-        subcatStats.setAttributes(attributeStatsMap);
-        return subcatStats;
-    }
-
-    private Statistics removeEntities(Statistics statistics, Collection<BusinessEntity> entities) {
-        Map<Category, CategoryStatistics> catStatsMap = new HashMap<>();
-        statistics.getCategories().forEach((cat, catStats) -> {
-            CategoryStatistics newStats = removeEntities(catStats, entities);
-            if (newStats != null) {
-                catStatsMap.put(cat, newStats);
-            }
-        });
-        if (MapUtils.isNotEmpty(catStatsMap)) {
-            statistics.setCategories(catStatsMap);
-            return statistics;
-        } else {
-            return null;
-        }
-    }
-
-    private CategoryStatistics removeEntities(CategoryStatistics catStats, Collection<BusinessEntity> entities) {
-        Map<String, SubcategoryStatistics> subcatStatsMap = new HashMap<>();
-        catStats.getSubcategories().forEach((subcat, subcatStats) -> {
-            SubcategoryStatistics newStats = removeEntities(subcatStats, entities);
-            if (newStats != null) {
-                subcatStatsMap.put(subcat, newStats);
-            }
-        });
-        if (MapUtils.isNotEmpty(subcatStatsMap)) {
-            catStats.setSubcategories(subcatStatsMap);
-            return catStats;
-        } else {
-            return null;
-        }
-    }
-
-    private SubcategoryStatistics removeEntities(SubcategoryStatistics subcatStats, Collection<BusinessEntity> entities) {
-        Map<AttributeLookup, AttributeStats> attributeStatsMap = new HashMap<>();
-        subcatStats.getAttributes().forEach((lookup, stats) -> {
-            if (!entities.contains(lookup.getEntity())) {
-                attributeStatsMap.put(lookup, stats);
-            }
-        });
-        if (MapUtils.isNotEmpty(attributeStatsMap)) {
-            subcatStats.setAttributes(attributeStatsMap);
-            return subcatStats;
-        } else {
-            return null;
-        }
+        return statsCube;
     }
 
 }

@@ -1,6 +1,11 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.Map;
+
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -9,8 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.metadata.dao.StatisticsContainerDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
@@ -19,6 +27,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("statisticsContainerEntityMgr")
 public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<StatisticsContainer>
         implements StatisticsContainerEntityMgr {
+
+    private static final Logger log = LoggerFactory.getLogger(StatisticsContainerEntityMgrImpl.class);
 
     @Autowired
     private StatisticsContainerDao statisticsContainerDao;
@@ -46,6 +56,7 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
             return container;
         } else {
             existing.setStatistics(container.getStatistics());
+            existing.setStatsCubes(container.getStatsCubes());
             update(existing);
             return existing;
         }
@@ -65,7 +76,8 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInSegment(String segmentName, DataCollection.Version version) {
-        return statisticsContainerDao.findInSegment(segmentName, version);
+        StatisticsContainer container =  statisticsContainerDao.findInSegment(segmentName, version);
+        return copyStatisticsToStatsCubes(container);
     }
 
     @Override
@@ -73,6 +85,26 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     public StatisticsContainer findInMasterSegment(String collectionName, DataCollection.Version version) {
         collectionName = StringUtils.isBlank(collectionName)
                 ? dataCollectionEntityMgr.getOrCreateDefaultCollection().getName() : collectionName;
-        return statisticsContainerDao.findInMasterSegment(collectionName, version);
+        StatisticsContainer container = statisticsContainerDao.findInMasterSegment(collectionName, version);
+        return copyStatisticsToStatsCubes(container);
     }
+
+    //TODO: deprecating in M20
+    private StatisticsContainer copyStatisticsToStatsCubes(StatisticsContainer container) {
+        if (container == null) {
+            return null;
+        }
+        if (MapUtils.isEmpty(container.getStatsCubes())) {
+            Statistics statistics = container.getStatistics();
+            if (statistics != null) {
+                log.info("Copying statistics " + container.getName() + " to stats cube.");
+                Map<String, StatsCube> cubes = StatsCubeUtils.toStatsCubes(statistics);
+                container.setStatsCubes(cubes);
+                update(container);
+            }
+            container.setStatistics(null);
+        }
+        return container;
+    }
+
 }

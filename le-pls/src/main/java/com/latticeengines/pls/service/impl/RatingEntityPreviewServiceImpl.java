@@ -84,7 +84,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         // for AI model we need to change it to EntityProxy later on as it will
         // read rating column from redshift
-        DataPage cachedDataPage = ratingProxy.getDataFromObjectApi( //
+        DataPage cachedDataPage = ratingProxy.getData( //
                 tenant.getId(), //
                 entityFrontEndQuery);
 

@@ -19,6 +19,27 @@
       "ApprovedUsage": [],
       "Tags": [],
       "Category": "My Attributes"
+    },
+    {
+      "ColumnId": "CDLCreatedTime",
+      "ColumnName": "CDLCreatedTime",
+      "DisplayName": "CDLCreatedTime",
+      "Subcategory": "Other",
+      "FundamentalType": "date",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "My Attributes"
+    },
+    {
+      "ColumnId": "CDLUpdatedTime",
+      "ColumnName": "CDLUpdatedTime",
+      "DisplayName": "CDLUpdatedTime",
+      "Subcategory": "Other",
+      "FundamentalType": "numeric",
+      "ApprovedUsage": [],
+      "Tags": [],
+      "Category": "My Attributes",
+      "LogicalDataType": "Timestamp"
     }
   ],
   "PurchaseHistory": [

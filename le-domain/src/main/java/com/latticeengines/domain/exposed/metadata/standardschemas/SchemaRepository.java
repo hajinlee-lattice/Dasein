@@ -984,7 +984,7 @@ public class SchemaRepository {
                     .notNull() //
                     .interfaceName(InterfaceName.CDLCreatedTime) //
                     .logicalType(LogicalDataType.Timestamp) //
-                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
             table.addAttribute(attr(InterfaceName.CDLUpdatedTime.name()) //
                     .allowedDisplayNames(Collections.emptySet()) //
@@ -992,7 +992,7 @@ public class SchemaRepository {
                     .notNull() //
                     .interfaceName(InterfaceName.CDLUpdatedTime) //
                     .logicalType(LogicalDataType.Timestamp) //
-                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
         }
         return table;

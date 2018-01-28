@@ -63,6 +63,12 @@
         }
       }
     },
+    "CDLCreatedTime": {
+      "Cnt": 500
+    },
+    "CDLUpdateTime": {
+      "Cnt": 500
+    },
     "Cnt": 500
   },
   "PurchaseHistory": {

@@ -29,4 +29,16 @@ public class TopNTree {
     public void setCategories(Map<Category, CategoryTopNTree> categories) {
         this.categories = categories;
     }
+
+    public boolean hasCategory(Category category) {
+        return categories.containsKey(category);
+    }
+
+    public CategoryTopNTree getCategory(Category category) {
+        return categories.get(category);
+    }
+
+    public void putCategory(Category category, CategoryTopNTree categoryTopNTree) {
+        categories.put(category, categoryTopNTree);
+    }
 }

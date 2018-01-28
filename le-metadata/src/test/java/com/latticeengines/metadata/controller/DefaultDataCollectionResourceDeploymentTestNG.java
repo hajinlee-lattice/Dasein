@@ -13,15 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.Category;
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
@@ -94,10 +93,7 @@ public class DefaultDataCollectionResourceDeploymentTestNG extends MetadataDeplo
     @Test(groups = "deployment")
     public void testGetMainStats() throws IOException {
         StatisticsContainer statisticsContainer = new StatisticsContainer();
-
-        Statistics statistics = new Statistics();
-        statistics.getCategories().put(Category.ACCOUNT_INFORMATION, new CategoryStatistics());
-        statisticsContainer.setStatistics(statistics);
+        statisticsContainer.setStatsCubes(ImmutableMap.of("Account", new StatsCube()));
 
         DataCollection.Version version = dataCollectionProxy.getDefaultDataCollection(customerSpace1).getVersion();
         statisticsContainer.setVersion(version);

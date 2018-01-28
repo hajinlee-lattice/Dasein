@@ -13,11 +13,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.support.CompositeCacheManager;
@@ -37,19 +39,14 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -66,35 +63,33 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private static final Logger log = LoggerFactory.getLogger(DataLakeServiceImpl.class);
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
+    @Inject
     private AttributeCustomizationService attributeCustomizationService;
 
-    @Autowired
+    @Inject
     private CacheManager cacheManager;
+
+    @Inject
+    private EntityProxy entityProxy;
 
     private final DataLakeService _dataLakeService;
 
-    @Autowired
-    private EntityProxy entityProxy;
-
-    private LocalCacheManager<String, Statistics> statsCache;
+    private LocalCacheManager<String, Map<String, StatsCube>> statsCubesCache;
     private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
 
-    @Autowired
+    @Inject
     public DataLakeServiceImpl(DataLakeService dataLakeService) {
         _dataLakeService = dataLakeService;
-        statsCache = new LocalCacheManager<>(CacheName.DataLakeStatsCache, o -> {
-            String str = (String) o;
+        statsCubesCache = new LocalCacheManager<>(CacheName.DataLakeStatsCubesCache, str -> {
             String[] tokens = str.split("\\|");
             String customerSpace = tokens[0];
-            return getStatistics(customerSpace);
+            return getStatsCubes(customerSpace);
         }, 100); //
 
-        cmCache = new LocalCacheManager<>(CacheName.DataLakeCMCache, o -> {
-            String str = (String) o;
+        cmCache = new LocalCacheManager<>(CacheName.DataLakeCMCache, str -> {
             String[] tokens = str.split("\\|");
             TableRoleInCollection role = TableRoleInCollection.valueOf(tokens[1]);
             String customerSpace = tokens[0];
@@ -106,7 +101,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     private void postConstruct() {
         if (cacheManager instanceof CompositeCacheManager) {
             log.info("adding local entity cache manager to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(statsCache, cmCache));
+            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(statsCubesCache, cmCache));
         }
     }
 
@@ -158,48 +153,50 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    public StatsCube getStatsCube() {
-        Statistics statistics = _dataLakeService.getStatistics();
-        if (statistics == null) {
+    public Map<String, StatsCube> getStatsCubes() {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        Map<String, StatsCube> cubes = _dataLakeService.getStatsCubes(customerSpace);
+        if (MapUtils.isEmpty(cubes)) {
             return null;
         }
-        return StatsCubeUtils.toStatsCube(statistics, getAllAttributes());
+        return cubes;
     }
 
     @Override
-    public Map<BusinessEntity, StatsCube> getStatsCubes() {
-        Statistics statistics = _dataLakeService.getStatistics();
-        if (statistics == null) {
+    public TopNTree getTopNTree() {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        Map<String, StatsCube> cubes = _dataLakeService.getStatsCubes(customerSpace);
+        if (MapUtils.isEmpty(cubes)) {
             return null;
         }
-        return StatsCubeUtils.toStatsCubes(statistics, getAllAttributes());
-    }
-
-    @Override
-    public TopNTree getTopNTree(boolean includeTopBkt) {
-        Statistics statistics = _dataLakeService.getStatistics();
-        if (statistics == null) {
+        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
+        cubes.keySet().forEach(key -> {
+            BusinessEntity entity = BusinessEntity.valueOf(key);
+            List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, entity);
+            if (CollectionUtils.isNotEmpty(cms)) {
+                cmMap.put(key, cms);
+            }
+        });
+        if (MapUtils.isEmpty(cmMap)) {
             return null;
         }
-        return StatsCubeUtils.toTopNTree(statistics, includeTopBkt, getAllAttributes());
+        return StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
     }
 
     @Override
     public AttributeStats getAttributeStats(BusinessEntity entity, String attribute) {
-        Statistics statistics = _dataLakeService.getStatistics();
-        if (statistics == null) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        Map<String, StatsCube> cubes = _dataLakeService.getStatsCubes(customerSpace);
+        if (MapUtils.isEmpty(cubes) || !cubes.containsKey(entity.name())) {
             return null;
         }
-        AttributeLookup lookup = new AttributeLookup(entity, attribute);
-        for (CategoryStatistics catStats : statistics.getCategories().values()) {
-            for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
-                if (subCatStats.getAttributes() != null && subCatStats.getAttributes().containsKey(lookup)) {
-                    return subCatStats.getAttrStats(lookup);
-                }
-            }
+        StatsCube cube = cubes.get(entity.name());
+        if (cube.getStatistics().containsKey(attribute)) {
+            return cube.getStatistics().get(attribute);
+        } else {
+            log.warn("Did not find attribute stats for " + entity + "." + attribute);
+            return null;
         }
-        log.warn("Did not find attribute stats for " + lookup);
-        return null;
     }
 
     @Override
@@ -252,45 +249,25 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCacheName, key = "T(java.lang.String).format(\"%s|stats\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
-    public Statistics getStatistics() {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        return getStatistics(customerSpace);
+    private Set<String> getAttrsInStats(String customerSpace) {
+        Map<String, StatsCube> cubes = getStatsCubes(customerSpace);
+        Set<String> includedAttrs = new HashSet<>();
+        cubes.values().forEach(cube -> cube.getStatistics().keySet().forEach(includedAttrs::add));
+        return includedAttrs;
     }
 
-    private Statistics getStatistics(String customerSpace) {
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", "
+            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+    public Map<String, StatsCube> getStatsCubes(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
-            Statistics statistics = container.getStatistics();
-            return statistics;
-            //return removeNoBktAttrs(statistics);
+            Map<String, StatsCube> cubes = container.getStatsCubes();
+            Map<BusinessEntity, StatsCube> newCubeMap = new HashMap<>();
+            if (MapUtils.isNotEmpty(cubes)) {
+                return cubes;
+            }
         }
         return null;
-    }
-
-    private Statistics removeNoBktAttrs(Statistics statistics) {
-        for (Map.Entry<Category, CategoryStatistics> entry : statistics.getCategories().entrySet()) {
-            statistics.putCategory(entry.getKey(), removeNoBktAttrs(entry.getValue()));
-        }
-        return statistics;
-    }
-
-    private CategoryStatistics removeNoBktAttrs(CategoryStatistics catStats) {
-        for (Map.Entry<String, SubcategoryStatistics> entry : catStats.getSubcategories().entrySet()) {
-            catStats.putSubcategory(entry.getKey(), removeNoBktAttrs(entry.getValue()));
-        }
-        return catStats;
-    }
-
-    private SubcategoryStatistics removeNoBktAttrs(SubcategoryStatistics subcatStats) {
-        Map<AttributeLookup, AttributeStats> statsMap = new HashMap<>();
-        subcatStats.getAttributes().entrySet().stream()
-                .filter(entry -> entry.getValue().getBuckets() != null
-                        && !entry.getValue().getBuckets().getBucketList().isEmpty())
-                .forEach(entry -> statsMap.put(entry.getKey(), entry.getValue()));
-        subcatStats.setAttributes(statsMap);
-        return subcatStats;
     }
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
@@ -313,16 +290,6 @@ public class DataLakeServiceImpl implements DataLakeService {
             }
             return cms;
         }
-    }
-
-    private Set<String> getAttrsInStats(String customerSpace) {
-        Statistics statistics = getStatistics(customerSpace);
-        Set<String> includedAttrs = new HashSet<>();
-        statistics.getCategories().forEach((cat, catStats) -> //
-        catStats.getSubcategories().forEach((subCat, subCatStats) -> //
-        subCatStats.getAttributes().keySet().forEach(attrLookup -> //
-        includedAttrs.add(attrLookup.getAttribute()))));
-        return includedAttrs;
     }
 
 }

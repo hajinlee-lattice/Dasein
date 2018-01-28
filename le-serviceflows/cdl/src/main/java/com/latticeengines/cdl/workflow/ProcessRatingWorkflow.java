@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshift;
+import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
@@ -25,6 +26,9 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ProfileRatingWrapper profileRatingWrapper;
 
     @Inject
+    private CombineStatistics combineStatistics;
+
+    @Inject
     private ExportDataToRedshift exportDataToRedshift;
 
     @Override
@@ -33,6 +37,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
                 .next(prepareForRating) //
                 .next(generateRatingWorkflow) //
                 .next(profileRatingWrapper) //
+                .next(combineStatistics) //
                 .next(exportDataToRedshift) //
                 .build();
     }

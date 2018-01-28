@@ -27,11 +27,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 
 @Component("accountMasterColumnMetadataService")
@@ -82,14 +79,16 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     }
 
     private Pair<StatsCube, TopNTree> readStatsPairFromHdfs(String dataCloudVersion) {
-        Statistics statistics = readStatisticsFromHdfs(dataCloudVersion);
+        StatsCube statsCube = readStatisticsFromHdfs(dataCloudVersion);
         List<ColumnMetadata> cms = fromPredefinedSelection(Predefined.Enrichment, dataCloudVersion);
-        StatsCube statsCube = StatsCubeUtils.toStatsCube(statistics, cms);
-        TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, false, cms);
+        TopNTree topNTree = StatsCubeUtils.constructTopNTree( //
+                ImmutableMap.of("LatticeAccount", statsCube), //
+                ImmutableMap.of("LatticeAccount", cms), //
+                true);
         return ImmutablePair.of(statsCube, topNTree);
     }
 
-    private Statistics readStatisticsFromHdfs(String dataCloudVersion) {
+    private StatsCube readStatisticsFromHdfs(String dataCloudVersion) {
         DataCloudVersion fullVersion = versionEntityMgr.findVersion(dataCloudVersion);
         String statsVersion = fullVersion.getEnrichmentStatsVersion();
         if (StringUtils.isBlank(statsVersion)) {
@@ -99,10 +98,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         String sourceName = "AccountMasterEnrichmentStats";
         String snapshotDir = hdfsPathBuilder.constructSnapshotDir(sourceName, statsVersion).toString();
         Iterator<GenericRecord> recordIterator = AvroUtils.iterator(yarnConfiguration, snapshotDir + "/*.avro");
-        StatsCube cube = StatsCubeUtils.parseAvro(recordIterator);
-        List<ColumnMetadata> amAttrs = fromPredefinedSelection(ColumnSelection.Predefined.Enrichment, fullVersion.getVersion());
-        BusinessEntity entity = BusinessEntity.LatticeAccount;
-        return StatsCubeUtils.constructStatistics(ImmutableMap.of(entity, cube), ImmutableMap.of(entity, amAttrs));
+        return StatsCubeUtils.parseAvro(recordIterator);
     }
 
     @SuppressWarnings("unchecked")

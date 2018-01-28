@@ -11,14 +11,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -124,9 +125,8 @@ public class DataCollectionEntityMgrImplTestNG extends DataCollectionFunctionalT
         MetadataSegment masterSegment = segmentService.findMaster(customerSpace1, collectionName);
         Assert.assertNotNull(masterSegment);
 
-        Statistics statistics = new Statistics();
         StatisticsContainer statisticsContainer = new StatisticsContainer();
-        statisticsContainer.setStatistics(statistics);
+        statisticsContainer.setStatsCubes(ImmutableMap.of("Account", new StatsCube()));
         statisticsContainer.setVersion(version);
         dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, statisticsContainer);
 

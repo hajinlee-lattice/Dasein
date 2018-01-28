@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,25 +31,18 @@ public class DataLakeStatisticsResource {
         this.dataLakeService = dataLakeService;
     }
 
-    @RequestMapping(value = "/cube", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get flat attribute stats map")
-    public StatsCube getStatsCube() {
-        return dataLakeService.getStatsCube();
-    }
-
     @RequestMapping(value = "/cubes", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get (entity, stats cube) pairs")
-    public Map<BusinessEntity, StatsCube> getStatsCubes() {
+    public Map<String, StatsCube> getStatsCubes() {
         return dataLakeService.getStatsCubes();
     }
 
     @RequestMapping(value = "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get statistics")
-    public TopNTree getTopNTree(@RequestParam(value = "topbkt", required = false) Boolean includeTopBkt) {
-        return dataLakeService.getTopNTree(Boolean.TRUE.equals(includeTopBkt));
+    public TopNTree getTopNTree() {
+        return dataLakeService.getTopNTree();
     }
 
     @RequestMapping(value = "/attrs/{entity}/{attribute}", method = RequestMethod.GET, headers = "Accept=application/json")

@@ -2,7 +2,6 @@ package com.latticeengines.proxy.exposed.objectapi;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -38,23 +37,13 @@ public class RatingProxy extends MicroserviceRestApiProxy {
 
     private final CacheManager cacheManager;
 
-    private LocalCacheManager<String, DataPage> dataCache;
-
     private LocalCacheManager<String, Map<String, Long>> coverageCache;
 
     @Inject
     public RatingProxy(CacheManager cacheManager) {
         super("objectapi/customerspaces");
         this.cacheManager = cacheManager;
-
-        dataCache = new LocalCacheManager<>(CacheName.RatingDataCache, o -> {
-            String str = (String) o;
-            String[] tokens = str.split("\\|");
-            return getDataFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
-        }, 200); //
-
-        coverageCache = new LocalCacheManager<>(CacheName.RatingCoverageCache, o -> {
-            String str = (String) o;
+        coverageCache = new LocalCacheManager<>(CacheName.RatingCoverageCache, str -> {
             String[] tokens = str.split("\\|");
             return getCoverageFromApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
         }, 2000); //
@@ -64,15 +53,12 @@ public class RatingProxy extends MicroserviceRestApiProxy {
     public void addCacheManager() {
         if (cacheManager instanceof CompositeCacheManager) {
             log.info("adding local entity cache manager to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Arrays.asList(dataCache, coverageCache));
+            ((CompositeCacheManager) cacheManager).setCacheManagers(Collections.singletonList(coverageCache));
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.RatingDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
-        DataPage page = getDataFromCache(customerSpace, frontEndQuery);
-        return page;
+        return getDataFromObjectApi(shortenCustomerSpace(customerSpace), frontEndQuery, null);
     }
 
     @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
@@ -98,12 +84,6 @@ public class RatingProxy extends MicroserviceRestApiProxy {
         return ratingModel;
     }
 
-    private DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
-        return getDataFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
-    }
-
     private Map<String, Long> getCoverageFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -120,17 +100,6 @@ public class RatingProxy extends MicroserviceRestApiProxy {
             url = constructUrl("/{customerSpace}/rating/count", tenantId);
         }
         return postWithRetries("getCount", url, frontEndQuery, Long.class);
-    }
-
-    private DataPage getDataFromObjectApi(String serializedKey) {
-        String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
-        String serializedQuery = serializedKey.substring(tenantId.length() + 1);
-        FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        return getDataFromObjectApi(tenantId, frontEndQuery);
-    }
-
-    public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery) {
-        return getDataFromObjectApi(tenantId, frontEndQuery, null);
     }
 
     public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {

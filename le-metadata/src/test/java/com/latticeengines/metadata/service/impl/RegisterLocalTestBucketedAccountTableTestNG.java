@@ -6,12 +6,12 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
-import com.latticeengines.common.exposed.util.NamingUtils;
 import org.junit.Assert;
 import org.springframework.stereotype.Component;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -71,6 +71,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends MetadataFunctio
         StatisticsContainer container = om.readValue(is, StatisticsContainer.class);
         container.setName(NamingUtils.timestamp("Stats"));
         container.setVersion(collection.getVersion());
+        // container.setStatsCubes(StatisticsContainerEntityMgrImpl.toStatsCube(container.getStatistics()));
         dataCollectionService.addStats(customerSpace, collection.getName(), container);
     }
 

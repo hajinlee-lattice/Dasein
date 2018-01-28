@@ -90,7 +90,6 @@ public class SegmentResourceDeploymentTestNG extends MetadataDeploymentTestNGBas
     public void testUpsertStatsToSegment() throws IOException {
         StatisticsContainer statisticsContainer = new StatisticsContainer();
         statisticsContainer.setVersion(DataCollection.Version.Blue);
-        statisticsContainer.setStatistics(new Statistics());
 
         SimpleBooleanResponse response = segmentProxy.upsertStatsToSegment(customerSpace1, METADATA_SEGMENT_NAME,
                 statisticsContainer);

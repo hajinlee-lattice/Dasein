@@ -48,13 +48,14 @@ public class ColumnMetadata implements HasAttributeCustomizations {
     private BusinessEntity entity;
     @JsonProperty("ImportanceOrdering")
     private Integer importanceOrdering;
+    @JsonProperty("LogicalDataType")
+    private LogicalDataType logicalDataType;
 
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
     private String approvedUsage;
     private String tags;
     private String decodeStrategy;
-    private LogicalDataType logicalDataType;
 
     @JsonProperty("Groups")
     private List<ColumnSelection.Predefined> groups;

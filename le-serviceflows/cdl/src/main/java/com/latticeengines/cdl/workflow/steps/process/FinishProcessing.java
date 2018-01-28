@@ -82,7 +82,6 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void deleteOrphanTables() {
-        cleanupEntityTableMap(getMapObjectFromContext(SERVING_STORE_IN_STATS, BusinessEntity.class, String.class));
         cleanupEntityTableMap(getMapObjectFromContext(ENTITY_DIFF_TABLES, BusinessEntity.class, String.class));
         cleanupEntityTableMap(getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, String.class));
     }

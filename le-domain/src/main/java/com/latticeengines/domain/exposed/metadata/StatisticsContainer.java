@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -18,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
@@ -31,8 +33,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
@@ -62,10 +66,17 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @JsonProperty("Name")
     private String name;
 
-    @Column(name = "DATA", nullable = false)
+    //TODO: to remove after M18
+    @Column(name = "DATA", nullable = true)
     @Lob
     @JsonIgnore
     private byte[] data;
+
+    //TODO: change nullable to false after M18
+    @Column(name = "CUBES_DATA", nullable = true)
+    @Lob
+    @JsonIgnore
+    private byte[] cubesData;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -95,6 +106,7 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
         this.data = data;
     }
 
+    @Deprecated
     @JsonProperty("Statistics")
     @Transient
     public Statistics getStatistics() {
@@ -110,10 +122,12 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
         }
     }
 
+    @Deprecated
     @JsonProperty("Statistics")
     @Transient
     public void setStatistics(Statistics statistics) {
         if (statistics == null) {
+            setData(null);
             return;
         }
         String string = JsonUtils.serialize(statistics);
@@ -124,6 +138,46 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
             setData(compressedData);
         } catch (IOException e) {
             log.error("Failed to compress payload [" + statistics + "]", e);
+        }
+    }
+
+    private byte[] getCubesData() {
+        return cubesData;
+    }
+
+    private void setCubesData(byte[] cubesData) {
+        this.cubesData = cubesData;
+    }
+
+    @JsonProperty("StatsCubes")
+    @Transient
+    public Map<String, StatsCube> getStatsCubes() {
+        if (getCubesData() == null) {
+            return null;
+        }
+
+        String uncompressedData = new String(CompressionUtils.decompressByteArray(getCubesData()));
+        if (StringUtils.isNotEmpty(uncompressedData)) {
+            return JsonUtils.deserialize(uncompressedData, new TypeReference<Map<String, StatsCube>>() {});
+        } else {
+            return null;
+        }
+    }
+
+    @JsonProperty("StatsCubes")
+    @Transient
+    public void setStatsCubes(Map<String, StatsCube> cubes) {
+        if (MapUtils.isEmpty(cubes)) {
+            setCubesData(null);
+            return;
+        }
+        String string = JsonUtils.serialize(cubes);
+        byte[] payloadData = string.getBytes();
+        try {
+            byte[] compressedData = CompressionUtils.compressByteArray(payloadData);
+            setCubesData(compressedData);
+        } catch (IOException e) {
+            log.error("Failed to compress payload [" + cubes + "]", e);
         }
     }
 

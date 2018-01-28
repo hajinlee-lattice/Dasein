@@ -1,10 +1,13 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +15,10 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -29,11 +30,11 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class StatsCubeUtilsUnitTestNG {
@@ -54,35 +55,34 @@ public class StatsCubeUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testConstructStatsContainer() throws Exception {
-        ObjectMapper om = new ObjectMapper();
-        Map<BusinessEntity, List<ColumnMetadata>> cmMap = om.readValue(readResource("mdMap.json"),
-                new TypeReference<Map<BusinessEntity, List<ColumnMetadata>>>() {
-                });
-        Map<BusinessEntity, StatsCube> cubeMap = om.readValue(readResource("cubeMap.json"),
-                new TypeReference<Map<BusinessEntity, StatsCube>>() {
-                });
-        Statistics statistics = StatsCubeUtils.constructStatistics(cubeMap, cmMap);
-        Assert.assertNotNull(statistics);
-    }
-
-    @Test(groups = "unit")
     public void testTopN() throws Exception {
-        InputStream is = readResource("statistics.json.gz");
+        InputStream is = readResource("statscubes.json.gz");
         GZIPInputStream gis = new GZIPInputStream(is);
-        Statistics statistics = JsonUtils.deserialize(gis, StatisticsContainer.class).getStatistics();
-        TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics, true, prepareMockMetadata());
-        System.out.println(JsonUtils.serialize(topNTree));
-        Assert.assertTrue(MapUtils.isNotEmpty(topNTree.getCategories()));
-        StatsCube cube = StatsCubeUtils.toStatsCube(statistics, prepareMockMetadata());
+        Map<String, StatsCube> cubes = JsonUtils.deserialize(gis, new TypeReference<Map<String, StatsCube>>() {
+        });
 
+        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
+        for (BusinessEntity entity : Arrays.asList( //
+                BusinessEntity.Account, //
+                BusinessEntity.Contact, //
+                BusinessEntity.PurchaseHistory)) {
+            String role = entity.getServingStore().name();
+            is = readResource(role + ".json.gz");
+            gis = new GZIPInputStream(is);
+            Table table = JsonUtils.deserialize(gis, Table.class);
+            cmMap.put(entity.name(), table.getColumnMetadata());
+        }
+
+        TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
+        JsonUtils.serialize(topNTree, new FileOutputStream(new File("tree.json")));
+
+        verifyDateAttrInTopN(topNTree, cmMap);
+        StatsCube cube = StatsCubeUtils.retainTop5Bkts(cubes.get(BusinessEntity.Account.name()));
         verifyFirmographicsTopN(topNTree.getCategories().get(Category.FIRMOGRAPHICS), cube);
         verifyIntentTopN(topNTree.getCategories().get(Category.INTENT), cube);
         verifyTechTopN(topNTree.getCategories().get(Category.WEBSITE_PROFILE), cube);
         verifyTechTopN(topNTree.getCategories().get(Category.TECHNOLOGY_PROFILE), cube);
         verifyPurchaseHistoryTopN(topNTree.getCategories().get(Category.PRODUCT_SPEND));
-        verifyDateAttrInTopN(topNTree);
-        verifyDateAttrInCube(cube);
     }
 
     private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
@@ -104,15 +104,23 @@ public class StatsCubeUtilsUnitTestNG {
     private void verifyIntentTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
         catTopNTree.getSubcategories().values().forEach(attrs -> {
             Long previousCount = null;
+            int previousBktId = -1;
             for (TopAttribute attr : attrs) {
                 Bucket topBkt = attr.getTopBkt();
                 if (topBkt != null) {
                     Long currentCount = topBkt.getCount();
-                    if (previousCount != null) {
-                        Assert.assertTrue(currentCount <= previousCount, String.format(
-                                "Current count %d is bigger than previous count %d", currentCount, previousCount));
+                    int currentBktId = topBkt.getId().intValue();
+                    if (currentBktId != previousBktId && previousBktId != -1) {
+                        Assert.assertTrue(currentBktId < previousBktId,
+                                String.format("%s: Current bkt id %d is smaller than previous id %d.",
+                                        attr.getAttribute(), currentBktId, previousBktId));
+                    } else if (previousCount != null) {
+                        Assert.assertTrue(currentCount <= previousCount,
+                                String.format("%s: Current count %d is bigger than previous count %d",
+                                        attr.getAttribute(), currentCount, previousCount));
                     }
                     previousCount = currentCount;
+                    previousBktId = currentBktId;
 
                     AttributeStats attributeStats = cube.getStatistics().get(attr.getAttribute());
                     Buckets buckets = attributeStats.getBuckets();
@@ -122,14 +130,14 @@ public class StatsCubeUtilsUnitTestNG {
                             if (topBkt.getLabel().equals("Medium")) {
                                 long unexpectedBkts = bucketList.stream().filter(bkt -> "High".equals(bkt.getLabel()))
                                         .count();
-                                Assert.assertEquals(unexpectedBkts, 0,
-                                        "Should not have any High bkt when the top bkt is Medium");
+                                Assert.assertEquals(unexpectedBkts, 0, attr.getAttribute()
+                                        + ": Should not have any High bkt when the top bkt is Medium");
                             } else if (topBkt.getLabel().equals("Normal")) {
                                 long unexpectedBkts = bucketList.stream()
                                         .filter(bkt -> "High".equals(bkt.getLabel()) || "Medium".equals(bkt.getLabel()))
                                         .count();
-                                Assert.assertEquals(unexpectedBkts, 0,
-                                        "Should not have any High or Medium bkt when the top bkt is Normal");
+                                Assert.assertEquals(unexpectedBkts, 0, attr.getAttribute()
+                                        + ": Should not have any High or Medium bkt when the top bkt is Normal");
                             }
                         }
                     }
@@ -162,7 +170,7 @@ public class StatsCubeUtilsUnitTestNG {
                                 long unexpectedBkts = bucketList.stream().filter(bkt -> "Yes".equals(bkt.getLabel()))
                                         .count();
                                 Assert.assertEquals(unexpectedBkts, 0,
-                                        "Should not have any Yes bkt when the top bkt is No");
+                                        attr.getAttribute() + ": Should not have any Yes bkt when the top bkt is No");
                             }
                         }
                     }
@@ -204,17 +212,26 @@ public class StatsCubeUtilsUnitTestNG {
         return cms;
     }
 
-    private void verifyDateAttrInTopN(TopNTree topNTree) {
-        CategoryTopNTree opTopNTree = topNTree.getCategories().get(Category.ONLINE_PRESENCE);
-        for (List<TopAttribute> subcatTopAttrs : opTopNTree.getSubcategories().values())
-            for (TopAttribute topAttr : subcatTopAttrs) {
-                Assert.assertNotEquals(topAttr.getAttribute(), "AlexaOnlineSince");
-            }
-        CategoryTopNTree actTopNTree = topNTree.getCategories().get(Category.ACCOUNT_ATTRIBUTES);
-        for (List<TopAttribute> subcatTopAttrs : actTopNTree.getSubcategories().values())
-            for (TopAttribute topAttr : subcatTopAttrs) {
-                Assert.assertNotEquals(topAttr.getAttribute(), "LastModifiedDate");
-            }
+    private void verifyDateAttrInTopN(TopNTree topNTree, Map<String, List<ColumnMetadata>> cmMap) {
+        Map<AttributeLookup, ColumnMetadata> consolidatedCmMap = new HashMap<>();
+        cmMap.forEach((name, cms) -> {
+            BusinessEntity entity = BusinessEntity.valueOf(name);
+            cms.forEach(cm -> {
+                AttributeLookup attributeLookup = new AttributeLookup(entity, cm.getName());
+                consolidatedCmMap.put(attributeLookup, cm);
+            });
+        });
+
+        topNTree.getCategories().forEach(((category, categoryTopNTree) -> //
+        categoryTopNTree.getSubcategories().forEach((subCat, topAttrs) -> { //
+            topAttrs.forEach(topAttr -> {
+                AttributeLookup attributeLookup = new AttributeLookup(topAttr.getEntity(), topAttr.getAttribute());
+                ColumnMetadata cm = consolidatedCmMap.get(attributeLookup);
+                Assert.assertNotEquals(cm.getFundamentalType(), FundamentalType.DATE);
+                Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Timestamp);
+                Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Date);
+            });
+        })));
     }
 
     private void verifyDateAttrInCube(StatsCube cube) {

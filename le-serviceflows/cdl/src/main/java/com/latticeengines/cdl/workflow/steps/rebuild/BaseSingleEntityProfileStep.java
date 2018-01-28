@@ -70,8 +70,6 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
             dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName,
                     getEntity().getServingStore(), inactive);
         }
-
-        updateEntityValueMapInContext(SERVING_STORE_IN_STATS, servingStoreTableName, String.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 

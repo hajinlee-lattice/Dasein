@@ -10,16 +10,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.StatisticsContainerService;
@@ -47,14 +42,14 @@ public class StatisticsContainerServiceImplTestNG extends DataCollectionFunction
     @Test(groups = "functional")
     public void testCreate() {
         container = new StatisticsContainer();
-        Statistics statistics = new Statistics();
-        statistics.getCategories().put(Category.ACCOUNT_INFORMATION, new CategoryStatistics());
-        SubcategoryStatistics subcategoryStatistics = new SubcategoryStatistics();
-        subcategoryStatistics.getAttributes().put(new AttributeLookup(BusinessEntity.Account, "Foo"),
-                new AttributeStats());
-        statistics.getCategories().get(Category.ACCOUNT_INFORMATION).getSubcategories()
-                .put(ColumnMetadata.SUBCATEGORY_OTHER, subcategoryStatistics);
-        container.setStatistics(statistics);
+
+        AttributeStats attributeStats = new AttributeStats();
+        attributeStats.setNonNullCount(100L);
+        StatsCube statsCube = new StatsCube();
+        statsCube.setCount(200L);
+        statsCube.setStatistics(ImmutableMap.of("Foo", attributeStats));
+        container.setStatsCubes(ImmutableMap.of("Account", statsCube, "Contact", new StatsCube()));
+
         DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
         container.setVersion(version);
         dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container);
@@ -67,15 +62,13 @@ public class StatisticsContainerServiceImplTestNG extends DataCollectionFunction
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testRetrieve() {
         StatisticsContainer retrieved = statisticsContainerService.findByName(customerSpace1, container.getName());
-        assertEquals(retrieved.getStatistics().getCategories().size(), container.getStatistics().getCategories().size());
-        assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION));
-        CategoryStatistics categoryStatistics = retrieved.getStatistics().getCategories()
-                .get(Category.ACCOUNT_INFORMATION);
-        SubcategoryStatistics subcategoryStatistics = categoryStatistics.getSubcategories().get(
-                ColumnMetadata.SUBCATEGORY_OTHER);
-        AttributeStats attributeStatistics = subcategoryStatistics.getAttributes().get(
-                new AttributeLookup(BusinessEntity.Account, "Foo"));
-        assertNotNull(attributeStatistics);
+        assertEquals(retrieved.getStatsCubes().size(), container.getStatsCubes().size());
+        assertTrue(retrieved.getStatsCubes().containsKey("Account"));
+        assertTrue(retrieved.getStatsCubes().containsKey("Contact"));
+
+        StatsCube accountCube = retrieved.getStatsCubes().get("Account");
+        AttributeStats attributeStats = accountCube.getStatistics().get("Foo");
+        assertNotNull(attributeStats);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testRetrieve")

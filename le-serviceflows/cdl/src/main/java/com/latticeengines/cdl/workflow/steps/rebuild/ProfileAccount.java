@@ -267,7 +267,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr.setCategory(Category.ACCOUNT_ATTRIBUTES);
             }
             if (Category.ACCOUNT_ATTRIBUTES.name().equals(attr.getCategory())) {
-                attr.setSubcategory("Other");
+                attr.setSubcategory(null);
             }
             attr.removeAllowedDisplayNames();
             attrs.add(attr);

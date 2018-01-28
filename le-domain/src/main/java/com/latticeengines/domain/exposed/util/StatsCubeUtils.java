@@ -271,7 +271,7 @@ public class StatsCubeUtils {
         }
     }
 
-    private static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
+    public static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
         if (!attrName.startsWith("PH_")) {
             return attrStats;
         }
@@ -347,6 +347,25 @@ public class StatsCubeUtils {
         return bucket;
     }
 
+    public static StatsCube retainTop5Bkts(StatsCube cube) {
+        Map<String, AttributeStats> newStats = new HashMap<>();
+        cube.getStatistics().forEach((attrName, attrStats) -> newStats.put(attrName, retainTop5Bkts(attrStats)));
+        StatsCube newCube = new StatsCube();
+        newCube.setCount(cube.getCount());
+        newCube.setStatistics(newStats);
+        return newCube;
+    }
+
+    private static boolean shouldHideAttr(ColumnMetadata cm) {
+        return isDateAttribute(cm);
+    }
+
+    private static boolean isDateAttribute(ColumnMetadata cm) {
+        return FundamentalType.DATE.equals(cm.getFundamentalType())
+                || LogicalDataType.Date.equals(cm.getLogicalDataType())
+                || LogicalDataType.Timestamp.equals(cm.getLogicalDataType());
+    }
+
     public static StatsCube toStatsCube(Statistics statistics, List<ColumnMetadata> cms) {
         Map<Category, Set<String>> attrsToHide = getAttrsToHide(cms);
         StatsCube cube = new StatsCube();
@@ -410,6 +429,79 @@ public class StatsCubeUtils {
         return attributeStats;
     }
 
+    public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap,
+                                             Map<String, List<ColumnMetadata>> cmMap,
+                                             boolean includeTopBkt) {
+        TopNTree topNTree = new TopNTree();
+        for (Map.Entry<String, StatsCube> cubeEntry : cubeMap.entrySet()) {
+            String key = cubeEntry.getKey();
+            StatsCube cube = cubeEntry.getValue();
+            if (cmMap.containsKey(key)) {
+                List<ColumnMetadata> cmList = cmMap.get(key);
+                addToTopNTree(key, cube, cmList, topNTree, includeTopBkt);
+            } else {
+                log.warn("Did not provide column metadata for " + key //
+                        + ", skipping the stats for the whole cube.");
+            }
+        }
+        return topNTree;
+    }
+
+    private static void addToTopNTree(String key, StatsCube cube, List<ColumnMetadata> cmList,
+                                      TopNTree topNTree, boolean includeTopBkt) {
+        BusinessEntity entity = BusinessEntity.valueOf(key);
+        Map<String, ColumnMetadata> cmMap = new HashMap<>();
+        cmList.forEach(cm -> cmMap.put(cm.getColumnId(), cm));
+        Map<String, AttributeStats> attrStatsMap = cube.getStatistics();
+        for (String name : attrStatsMap.keySet()) {
+            ColumnMetadata cm = cmMap.get(name);
+            if (cm == null) {
+                log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity
+                        + ", skipping it.");
+                continue;
+            }
+            if (shouldHideAttr(cm)) {
+                continue;
+            }
+            AttributeStats statsInCube = attrStatsMap.get(name);
+            Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
+            String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
+            // create map entries if not there
+            if (!topNTree.hasCategory(category)) {
+                topNTree.putCategory(category, new CategoryTopNTree());
+            }
+            CategoryTopNTree categoryTopNTree = topNTree.getCategory(category);
+            if (!categoryTopNTree.hasSubcategory(subCategory)) {
+                categoryTopNTree.putSubcategory(subCategory, new ArrayList<>());
+            }
+            // update the corresponding map entry
+            List<TopAttribute> topAttributes = topNTree.getCategory(category).getSubcategory(subCategory);
+            topAttributes.add(toTopAttr(category, entity, name, statsInCube, includeTopBkt));
+        }
+        if (includeTopBkt) {
+            topNTree.getCategories().forEach((category, categoryTopNTree) -> //
+                    categoryTopNTree.getSubcategories().forEach((subCat, topAttrs) -> {
+                        Comparator<TopAttribute> comparator = getTopAttrComparatorForCategory(category);
+                        topAttrs.sort(comparator);
+                    }));
+        }
+    }
+
+    private static TopAttribute toTopAttr(Category category, BusinessEntity entity, String attrName, AttributeStats attributeStats,
+                                          boolean includeTopBkt) {
+        AttributeLookup attributeLookup = new AttributeLookup(entity, attrName);
+        TopAttribute topAttribute = new TopAttribute(attributeLookup, attributeStats.getNonNullCount());
+        if (includeTopBkt && attributeStats.getBuckets() != null) {
+            Comparator<Bucket> comparator = getBktComparatorForCategory(category);
+            Bucket topBkt = getTopBkt(attributeStats, comparator);
+            if (topBkt != null) {
+                topAttribute.setTopBkt(topBkt);
+            }
+        }
+        return topAttribute;
+    }
+
+
     public static TopNTree toTopNTree(Statistics statistics, boolean includeTopBkt, List<ColumnMetadata> cms) {
         TopNTree topNTree = new TopNTree();
         Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
@@ -427,7 +519,9 @@ public class StatsCubeUtils {
             return attrsToHide;
         }
         for (ColumnMetadata cm : cms) {
-            if (cm.getFundamentalType() == FundamentalType.DATE || cm.getLogicalDataType() == LogicalDataType.Date) {
+            if (FundamentalType.DATE.equals(cm.getFundamentalType())
+                    || LogicalDataType.Date.equals(cm.getLogicalDataType())
+                    || LogicalDataType.Timestamp.equals(cm.getLogicalDataType())) {
                 if (!attrsToHide.containsKey(cm.getCategory())) {
                     attrsToHide.put(cm.getCategory(), new HashSet<>());
                 }
@@ -459,7 +553,8 @@ public class StatsCubeUtils {
                 .collect(Collectors.toList());
     }
 
-    private static TopAttribute toTopAttr(Category category, Map.Entry<AttributeLookup, AttributeStats> entry, boolean includeTopBkt) {
+    private static TopAttribute toTopAttr(Category category, Map.Entry<AttributeLookup, AttributeStats> entry,
+            boolean includeTopBkt) {
         AttributeStats stats = entry.getValue();
         TopAttribute topAttribute = new TopAttribute(entry.getKey(), stats.getNonNullCount());
         if (includeTopBkt && stats.getBuckets() != null) {
@@ -485,15 +580,15 @@ public class StatsCubeUtils {
 
     static Comparator<Bucket> getBktComparatorForCategory(Category category) {
         switch (category) {
-            case INTENT:
-                return intentBktComparator();
-            case WEBSITE_PROFILE:
-            case TECHNOLOGY_PROFILE:
-                return techBktComparator();
-            case PRODUCT_SPEND:
-                return productBktComparator();
-            default:
-                return Comparator.comparing(Bucket::getCount).reversed();
+        case INTENT:
+            return intentBktComparator();
+        case WEBSITE_PROFILE:
+        case TECHNOLOGY_PROFILE:
+            return techBktComparator();
+        case PRODUCT_SPEND:
+            return productBktComparator();
+        default:
+            return Comparator.comparing(Bucket::getCount).reversed();
         }
     }
 
@@ -519,30 +614,39 @@ public class StatsCubeUtils {
         return bkt != null && bkt.getLabel().equalsIgnoreCase("Yes") || bkt.getLabel().equalsIgnoreCase("No");
     }
 
-    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> defaultAttrComparator() {
-        return Comparator.comparing(entry -> -entry.getValue().getNonNullCount());
+    private static Comparator<TopAttribute> defaultTopAttrComparator() {
+        return Comparator.comparing(attr -> -attr.getCount());
     }
 
-    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> getAttrComparatorForCategory(Category category) {
+    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> getAttrComparatorForCategory(
+            Category category) {
+        return (o1, o2) -> {
+            TopAttribute topAttr1 = new TopAttribute(o1.getKey(), o1.getValue().getNonNullCount());
+            TopAttribute topAttr2 = new TopAttribute(o2.getKey(), o2.getValue().getNonNullCount());
+            return getTopAttrComparatorForCategory(category).compare(topAttr1, topAttr2);
+        };
+    }
+
+    private static Comparator<TopAttribute> getTopAttrComparatorForCategory(Category category) {
         switch (category) {
             case FIRMOGRAPHICS:
-                return firmographicAttrComparator();
+                return firmographicTopAttrComparator();
             case INTENT:
-                return intentAttrComparator();
+                return intentTopAttrComparator();
             case WEBSITE_PROFILE:
             case TECHNOLOGY_PROFILE:
-                return techAttrComparator();
+                return techTopAttrComparator();
             case PRODUCT_SPEND:
-                return productAttrComparator();
+                return productTopAttrComparator();
             default:
-                return defaultAttrComparator();
+                return defaultTopAttrComparator();
         }
     }
 
-    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> firmographicAttrComparator() {
+    private static Comparator<TopAttribute> firmographicTopAttrComparator() {
         return (o1, o2) -> {
-            String attr1 = o1.getKey().getAttribute();
-            String attr2 = o2.getKey().getAttribute();
+            String attr1 = o1.getAttribute();
+            String attr2 = o2.getAttribute();
             int topIdx1 = TOP_FIRMOGRAPHIC_ATTRS.indexOf(attr1);
             int topIdx2 = TOP_FIRMOGRAPHIC_ATTRS.indexOf(attr2);
             if (topIdx1 == topIdx2) {
@@ -553,19 +657,18 @@ public class StatsCubeUtils {
         };
     }
 
-    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> intentAttrComparator() {
-        Comparator<Bucket> comparator = intentBktComparator();
+    private static Comparator<TopAttribute> intentTopAttrComparator() {
         return (o1, o2) -> {
-            Bucket topBkt1 = getTopBkt(o1.getValue(), comparator);
-            Bucket topBkt2 = getTopBkt(o2.getValue(), comparator);
+            Bucket topBkt1 = o1.getTopBkt();
+            Bucket topBkt2 = o2.getTopBkt();
             Integer bktId1 = topBkt1 != null ? topBkt1.getId().intValue() : 0;
             Integer bktId2 = topBkt2 != null ? topBkt2.getId().intValue() : 0;
             if (bktId1.equals(bktId2)) {
                 Long count1 = topBkt1 != null ? topBkt1.getCount() : 0;
                 Long count2 = topBkt2 != null ? topBkt2.getCount() : 0;
                 if (count1.equals(count2)) {
-                    String attr1 = o1.getKey().getAttribute();
-                    String attr2 = o2.getKey().getAttribute();
+                    String attr1 = o1.getAttribute();
+                    String attr2 = o2.getAttribute();
                     return attr1.compareTo(attr2);
                 } else {
                     return count2.compareTo(count1);
@@ -576,19 +679,18 @@ public class StatsCubeUtils {
         };
     }
 
-    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> techAttrComparator() {
-        Comparator<Bucket> comparator = techBktComparator();
+    private static Comparator<TopAttribute> techTopAttrComparator() {
         return (o1, o2) -> {
-            Bucket topBkt1 = getTopBkt(o1.getValue(), comparator);
-            Bucket topBkt2 = getTopBkt(o2.getValue(), comparator);
+            Bucket topBkt1 = o1.getTopBkt();
+            Bucket topBkt2 = o2.getTopBkt();
             Integer bktId1 = topBkt1 != null ? topBkt1.getId().intValue() : Integer.MAX_VALUE;
             Integer bktId2 = topBkt2 != null ? topBkt2.getId().intValue() : Integer.MAX_VALUE;
             if (bktId1.equals(bktId2)) {
                 Long count1 = topBkt1 != null ? topBkt1.getCount() : 0;
                 Long count2 = topBkt2 != null ? topBkt2.getCount() : 0;
                 if (count1.equals(count2)) {
-                    String attr1 = o1.getKey().getAttribute();
-                    String attr2 = o2.getKey().getAttribute();
+                    String attr1 = o1.getAttribute();
+                    String attr2 = o2.getAttribute();
                     return attr1.compareTo(attr2);
                 } else {
                     return count2.compareTo(count1);
@@ -599,10 +701,10 @@ public class StatsCubeUtils {
         };
     }
 
-    private static Comparator<Map.Entry<AttributeLookup, AttributeStats>> productAttrComparator() {
+    private static Comparator<TopAttribute> productTopAttrComparator() {
         return (o1, o2) -> {
-            String attr1 = o1.getKey().getAttribute();
-            String attr2 = o2.getKey().getAttribute();
+            String attr1 = o1.getAttribute();
+            String attr2 = o2.getAttribute();
             int rank1 = productAttrSuffixRank(attr1);
             int rank2 = productAttrSuffixRank(attr2);
             if (rank1 == rank2) {
@@ -615,17 +717,34 @@ public class StatsCubeUtils {
 
     private static int productAttrSuffixRank(String attr) {
         if (attr.endsWith(HASEVER_PURCHASED_SUFFIX)) {
-            return  0;
-        }
-        if (attr.endsWith("LastQuarter_Amount")) {
-            return 1;
-        }
-        if (attr.endsWith("LastQuarter_Quantity")) {
-            return 2;
-        }
-        else {
+            return 0;
+        } else {
             return Integer.MAX_VALUE;
         }
     }
+
+    public static Map<String, StatsCube> toStatsCubes(Statistics statistics) {
+        Map<BusinessEntity, Map<String, AttributeStats>> statsMap = new HashMap<>();
+        for (Map.Entry<Category, CategoryStatistics> catStatsEntry : statistics.getCategories().entrySet()) {
+            CategoryStatistics catStats = catStatsEntry.getValue();
+            for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
+                for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
+                    BusinessEntity entity = entry.getKey().getEntity();
+                    if (!statsMap.containsKey(entity)) {
+                        statsMap.put(entity, new HashMap<>());
+                    }
+                    statsMap.get(entity).put(entry.getKey().getAttribute(), entry.getValue());
+                }
+            }
+        }
+        Map<String, StatsCube> cubes = new HashMap<>();
+        statsMap.forEach((entity, stats) -> {
+            StatsCube cube = new StatsCube();
+            cube.setStatistics(stats);
+            cubes.put(entity.name(), cube);
+        });
+        return cubes;
+    }
+
 
 }

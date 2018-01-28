@@ -155,7 +155,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
-    private void initializeAttrRepoCache() {
+    private synchronized void initializeAttrRepoCache() {
         if (attrRepoCache == null) {
             attrRepoCache = new LocalCacheManager<>( //
                     CacheName.AttrRepoCache, //
