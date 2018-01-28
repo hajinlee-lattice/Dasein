@@ -12,6 +12,10 @@ CREATE PROCEDURE `UpdateCDLTables`()
         UPDATE `PLS_MultiTenant`.`AI_MODEL`
             SET PREDICTION_TYPE = CASE WHEN MODELING_METHOD IS NULL THEN 'PROPENSITY' ELSE MODELING_METHOD END;
 
+        ALTER TABLE `PLS_MultiTenant`.`METADATA_STATISTICS`
+            ADD COLUMN CUBES_DATA longblob NULL,
+            CHANGE COLUMN DATA DATA longblob NULL;
+
         --ALTER TABLE PLS_MultiTenant.AI_MODEL DROP COLUMN `MODELING_METHOD`; -- Drop after both stacks are off of the codebase using this column
     END;
 //
