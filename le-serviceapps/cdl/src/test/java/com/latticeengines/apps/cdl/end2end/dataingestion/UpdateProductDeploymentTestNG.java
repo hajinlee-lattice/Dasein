@@ -9,15 +9,13 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import java.util.Map;
@@ -83,10 +81,10 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
                 BusinessEntity.Product, numProducts);
         verifyTestSegment2Counts(segment2Counts);
-        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
-                RuleBucketName.A, RATING_A_COUNT_2, //
-                RuleBucketName.D, RATING_D_COUNT_2, //
-                RuleBucketName.F, RATING_F_COUNT_2
+        Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RatingBucketName.A, RATING_A_COUNT_2, //
+                RatingBucketName.D, RATING_D_COUNT_2, //
+                RatingBucketName.F, RATING_F_COUNT_2
         );
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }

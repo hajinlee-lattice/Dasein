@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -372,7 +372,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
             Assert.assertTrue(row.containsKey("Score"));
             String score = (String) row.get("Score");
             Assert.assertNotNull(score);
-            Assert.assertTrue(Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.C.getName()).contains(score));
+            Assert.assertTrue(Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
 
         frontEndQuery.setLookups(Arrays.asList(new AttributeLookup(BusinessEntity.Account, "AccountId"),
@@ -386,12 +386,12 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
             Assert.assertTrue(row.containsKey(model.getId()));
             String score = (String) row.get(model.getId());
             Assert.assertNotNull(score);
-            Assert.assertTrue(Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.C.getName()).contains(score));
+            Assert.assertTrue(Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
 
-        // only get scores for A+, A and B
+        // only get scores for A, B and G
         Restriction selectedScores = Restriction.builder().let(BusinessEntity.Rating, model.getId()).inCollection(
-                Arrays.asList(RuleBucketName.A_PLUS.getName(), RuleBucketName.A.getName(), RuleBucketName.B.getName()))
+                Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.B.getName(), RatingBucketName.G.getName()))
                 .build();
         Restriction restriction2 = Restriction.builder().and(restriction, selectedScores).build();
         frontEndRestriction.setRestriction(restriction2);
@@ -404,7 +404,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         data.forEach(row -> {
             Assert.assertTrue(row.containsKey(model.getId()));
             String score = (String) row.get(model.getId());
-            Assert.assertEquals(score, RuleBucketName.A.getName());
+            Assert.assertEquals(score, RatingBucketName.A.getName());
         });
     }
 
@@ -431,9 +431,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
-            if (RuleBucketName.A.getName().equals(score)) {
+            if (RatingBucketName.A.getName().equals(score)) {
                 Assert.assertEquals((long) count, 483L);
-            } else if (RuleBucketName.C.getName().equals(score)) {
+            } else if (RatingBucketName.C.getName().equals(score)) {
                 Assert.assertEquals((long) count, 99L);
             }
         });
@@ -455,14 +455,14 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("B", "G").build());
         ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).in("A", "N").build());
-        rule.getBucketToRuleMap().put(RuleBucketName.A.getName(), ruleA);
+        rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
 
         Map<String, Restriction> ruleC = new HashMap<>();
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("H", "N").build());
-        rule.getBucketToRuleMap().put(RuleBucketName.C.getName(), ruleC);
+        rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
 
-        rule.setDefaultBucketName(RuleBucketName.A.getName());
+        rule.setDefaultBucketName(RatingBucketName.A.getName());
 
         model.setRatingRule(rule);
 

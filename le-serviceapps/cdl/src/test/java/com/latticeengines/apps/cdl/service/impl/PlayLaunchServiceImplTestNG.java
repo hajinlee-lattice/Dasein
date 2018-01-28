@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -54,8 +54,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private String CREATED_BY = "lattice@lattice-engines.com";
     private Map<String, PlayLaunch> playLaunchMap;
 
-    private Set<RuleBucketName> bucketsToLaunch1;
-    private Set<RuleBucketName> bucketsToLaunch2;
+    private Set<RatingBucketName> bucketsToLaunch1;
+    private Set<RatingBucketName> bucketsToLaunch2;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -77,7 +77,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.findByName(NAME);
 
-        bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RuleBucketName.values()));
+        bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
         playLaunch1 = new PlayLaunch();
         playLaunch1.setTenant(mainTestTenant);
@@ -86,8 +86,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
 
         bucketsToLaunch2 = new TreeSet<>();
-        bucketsToLaunch2.add(RuleBucketName.A_PLUS);
-        bucketsToLaunch2.add(RuleBucketName.B);
+        bucketsToLaunch2.add(RatingBucketName.A);
+        bucketsToLaunch2.add(RatingBucketName.B);
 
         playLaunch2 = new PlayLaunch();
         playLaunch2.setTenant(mainTestTenant);
@@ -192,13 +192,13 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         Thread.sleep(2000);
     }
 
-    private void assertBucketsToLaunch(PlayLaunch launch, Set<RuleBucketName> expectedBucketsToLaunch) {
-        Set<RuleBucketName> actualBucketsToLaunch = launch.getBucketsToLaunch();
+    private void assertBucketsToLaunch(PlayLaunch launch, Set<RatingBucketName> expectedBucketsToLaunch) {
+        Set<RatingBucketName> actualBucketsToLaunch = launch.getBucketsToLaunch();
         Assert.assertNotNull(actualBucketsToLaunch);
         Assert.assertTrue(CollectionUtils.isNotEmpty(actualBucketsToLaunch));
         Assert.assertEquals(actualBucketsToLaunch.size(), expectedBucketsToLaunch.size());
 
-        for (RuleBucketName expectedBucket : expectedBucketsToLaunch) {
+        for (RatingBucketName expectedBucket : expectedBucketsToLaunch) {
             Assert.assertTrue(actualBucketsToLaunch.contains(expectedBucket));
         }
     }

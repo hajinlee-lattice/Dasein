@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
@@ -297,11 +297,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
     }
 
-    private void assertBucketsToLaunch(Set<RuleBucketName> bucketsToLaunch) {
+    private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
         Assert.assertNotNull(playLaunch.getBucketsToLaunch());
-        Set<RuleBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RuleBucketName.values()));
+        Set<RatingBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
         Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
-        for (RuleBucketName bucket : bucketsToLaunch) {
+        for (RatingBucketName bucket : bucketsToLaunch) {
             Assert.assertTrue(defaultBucketsToLaunch.contains(bucket));
         }
     }

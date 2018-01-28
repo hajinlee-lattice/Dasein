@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -95,17 +95,17 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     protected RuleBasedModel constructRuleModel() {
         RatingRule ratingRule = new RatingRule();
-        ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
+        ratingRule.setDefaultBucketName(RatingBucketName.D.getName());
 
         Bucket bktA = Bucket.valueBkt(ComparisonType.IN_COLLECTION, //
                 Arrays.asList("Mountain View", "New York", "Chicago", "Atlanta"));
         Restriction resA = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "LDC_City"), bktA);
-        ratingRule.setRuleForBucket(RuleBucketName.A, resA, null);
+        ratingRule.setRuleForBucket(RatingBucketName.A, resA, null);
 
         Bucket bktF = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("JOHN"));
         Restriction resF = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), bktF);
-        ratingRule.setRuleForBucket(RuleBucketName.F, null, resF);
+        ratingRule.setRuleForBucket(RatingBucketName.F, null, resF);
 
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setRatingRule(ratingRule);

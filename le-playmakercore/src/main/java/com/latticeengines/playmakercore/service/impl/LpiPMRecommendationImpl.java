@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -121,7 +121,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 Object bucketEnumObj = accExtRec.get(PlaymakerConstants.PriorityID);
                 if (bucketEnumObj != null && StringUtils.isNotBlank(bucketEnumObj.toString())) {
                     String bucketEnumString = bucketEnumObj.toString();
-                    RuleBucketName bucket = RuleBucketName.valueOf(bucketEnumString);
+                    RatingBucketName bucket = RatingBucketName.valueOf(bucketEnumString);
                     accExtRec.put(PlaymakerConstants.PriorityID, bucket.ordinal());
                 } else {
                     accExtRec.put(PlaymakerConstants.PriorityID, 25);

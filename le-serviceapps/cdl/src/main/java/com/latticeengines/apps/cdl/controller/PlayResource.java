@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -242,8 +242,8 @@ public class PlayResource {
 
             // TODO - remove it when (PLS-4997) if done
             // if no buckets are specified then we default it to all buckets
-            Set<RuleBucketName> defaultBucketsToLaunch = //
-                    new TreeSet<>(Arrays.asList(RuleBucketName.values()));
+            Set<RatingBucketName> defaultBucketsToLaunch = //
+                    new TreeSet<>(Arrays.asList(RatingBucketName.values()));
             playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
         }
     }

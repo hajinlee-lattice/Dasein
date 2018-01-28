@@ -48,14 +48,13 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -293,21 +292,18 @@ public class CheckpointService {
     private void verifyStatistics() {
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer);
-        Statistics statistics = statisticsContainer.getStatistics();
-        statistics.getCategories().values().forEach(catStats -> //
-        catStats.getSubcategories().values().forEach(subCatStats -> {
-            subCatStats.getAttributes().forEach(this::verifyAttrStats);
-        }));
+        Map<String, StatsCube> cubeMap = statisticsContainer.getStatsCubes();
+        cubeMap.values().forEach(cube -> cube.getStatistics().forEach(this::verifyAttrStats));
     }
 
-    private void verifyAttrStats(AttributeLookup lookup, AttributeStats attributeStats) {
+    private void verifyAttrStats(String attrName, AttributeStats attributeStats) {
         Assert.assertNotNull(attributeStats.getNonNullCount());
         Assert.assertTrue(attributeStats.getNonNullCount() >= 0);
         Buckets buckets = attributeStats.getBuckets();
         if (buckets != null) {
             Assert.assertNotNull(buckets.getType());
             Assert.assertFalse(buckets.getBucketList() == null || buckets.getBucketList().isEmpty(),
-                    "Bucket list for " + lookup + " is empty.");
+                    "Bucket list for " + attrName + " is empty.");
             Long sum = buckets.getBucketList().stream().mapToLong(Bucket::getCount).sum();
             Assert.assertEquals(sum, attributeStats.getNonNullCount());
         }

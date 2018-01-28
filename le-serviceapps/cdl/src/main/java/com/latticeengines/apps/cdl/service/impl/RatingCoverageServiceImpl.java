@@ -40,7 +40,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelIdPair;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -433,7 +433,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
 
             List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
-            for (RuleBucketName bucket : RuleBucketName.values()) {
+            for (RatingBucketName bucket : RatingBucketName.values()) {
                 Long countInBucket = 0L;
 
                 if (countInfo.containsKey(bucket.getName())) {
@@ -505,7 +505,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
 
             List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
-            for (RuleBucketName bucket : RuleBucketName.values()) {
+            for (RatingBucketName bucket : RatingBucketName.values()) {
                 Long countInBucket = 0L;
 
                 if (countInfo.containsKey(bucket.getName())) {
@@ -667,10 +667,10 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
             long totalSum = 0;
             int totalParts = 21;
-            for (RuleBucketName bucket : RuleBucketName.values()) {
+            for (RatingBucketName bucket : RatingBucketName.values()) {
                 int partsInBucket = bucket.ordinal() + 1;
                 long countInBucket = (accountCount * partsInBucket) / totalParts;
-                if (bucket == RuleBucketName.F) {
+                if (bucket == RatingBucketName.F) {
                     countInBucket = accountCount - totalSum;
                 } else {
                     totalSum += countInBucket;

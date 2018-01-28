@@ -146,6 +146,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 contactFrontEndRestriction.setRestriction(contactRestriction);
                 segment.setContactFrontEndRestriction(contactFrontEndRestriction);
                 segment.setContactRestriction(null);
+            } else {
+                segment.setContactFrontEndRestriction(emptyFrontEndRestriction());
             }
             if (Boolean.FALSE.equals(segment.getMasterSegment())) {
                 segment.setMasterSegment(null);

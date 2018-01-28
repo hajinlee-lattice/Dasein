@@ -15,7 +15,7 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -45,9 +45,9 @@ public class RatingEntityPreviewServiceImplUnitTestNG {
     public void testSetSelectedBuckets() {
         ratingEntityPreviewService.setSelectedBuckets(frontEndQuery, selectedBuckets, ratingModel);
         String restrictionStr = frontEndQuery.getAccountRestriction().getRestriction().toString();
-        Assert.assertTrue(restrictionStr.contains(RuleBucketName.A_PLUS.getName()) && //
-                restrictionStr.contains(RuleBucketName.A.getName()) && //
-                restrictionStr.contains(RuleBucketName.C.getName()));
+        Assert.assertTrue(restrictionStr.contains(RatingBucketName.A.getName()) && //
+                restrictionStr.contains(RatingBucketName.A.getName()) && //
+                restrictionStr.contains(RatingBucketName.C.getName()));
     }
 
     private FrontEndQuery createFrontEndQuery() {
@@ -72,12 +72,12 @@ public class RatingEntityPreviewServiceImplUnitTestNG {
                 Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("B", "G").build());
         ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Contact, "Title").in("A", "N").build());
-        rule.getBucketToRuleMap().put(RuleBucketName.A.getName(), ruleA);
+        rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
 
         Map<String, Restriction> ruleC = new HashMap<>();
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("H", "N").build());
-        rule.getBucketToRuleMap().put(RuleBucketName.C.getName(), ruleC);
+        rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
 
         model.setRatingRule(rule);
 
@@ -86,9 +86,9 @@ public class RatingEntityPreviewServiceImplUnitTestNG {
 
     private List<String> createSelectedBuckets() {
         List<String> selectedBuckets = new ArrayList<>();
-        selectedBuckets.add(RuleBucketName.A_PLUS.getName());
-        selectedBuckets.add(RuleBucketName.A.getName());
-        selectedBuckets.add(RuleBucketName.C.getName());
+        selectedBuckets.add(RatingBucketName.A.getName());
+        selectedBuckets.add(RatingBucketName.B.getName());
+        selectedBuckets.add(RatingBucketName.C.getName());
         return selectedBuckets;
     }
 

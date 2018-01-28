@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 
 public class RatingRule {
 
-    public static final String DEFAULT_BUCKET_NAME = RuleBucketName.A.getName();
+    public static final String DEFAULT_BUCKET_NAME = RatingBucketName.A.getName();
 
     @JsonProperty("bucketToRuleMap")
     private TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
@@ -39,7 +39,7 @@ public class RatingRule {
     }
 
     @JsonIgnore
-    public void setRuleForBucket(RuleBucketName bucket, Restriction accountRestriction, Restriction contactRestriction) {
+    public void setRuleForBucket(RatingBucketName bucket, Restriction accountRestriction, Restriction contactRestriction) {
         if (accountRestriction == null && contactRestriction == null) {
             return;
         }
@@ -54,7 +54,7 @@ public class RatingRule {
     }
 
     @JsonIgnore
-    public Map<String, Restriction> getRuleForBucket(RuleBucketName bucket) {
+    public Map<String, Restriction> getRuleForBucket(RatingBucketName bucket) {
         return bucketToRuleMap.get(bucket.getName());
     }
 
@@ -69,12 +69,12 @@ public class RatingRule {
     @VisibleForTesting
     static TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
         TreeMap<String, Map<String, Restriction>> map = new TreeMap<>();
-        map.put(RuleBucketName.A_PLUS.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.A.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.B.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.C.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.D.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.F.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RatingBucketName.A.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RatingBucketName.B.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RatingBucketName.C.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RatingBucketName.D.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RatingBucketName.F.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RatingBucketName.G.getName(), generateDefaultAccountAndContactBuckets());
         return map;
     }
 

@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -109,9 +109,9 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         Map<String, Long> ratingCounts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(ratingCounts));
-        Assert.assertEquals(ratingCounts.get(RuleBucketName.A.getName()), new Long(117));
-        Assert.assertEquals(ratingCounts.get(RuleBucketName.D.getName()), new Long(968));
-        Assert.assertEquals(ratingCounts.get(RuleBucketName.F.getName()), new Long(86));
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.A.getName()), new Long(117));
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.D.getName()), new Long(968));
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()), new Long(86));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testCreate")
@@ -151,9 +151,9 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         Map<String, Long> ratingCounts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(ratingCounts));
-        Assert.assertEquals(ratingCounts.get(RuleBucketName.A.getName()), new Long(84));
-        Assert.assertEquals(ratingCounts.get(RuleBucketName.D.getName()), new Long(664));
-        Assert.assertEquals(ratingCounts.get(RuleBucketName.F.getName()), new Long(67));
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.A.getName()), new Long(84));
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.D.getName()), new Long(664));
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()), new Long(67));
     }
 
     private RatingEngine createRuleBasedRatingEngine(MetadataSegment segment) {
@@ -172,16 +172,16 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     private RuleBasedModel constructRuleModel(String modelId) {
         RatingRule ratingRule = new RatingRule();
-        ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
+        ratingRule.setDefaultBucketName(RatingBucketName.D.getName());
 
         Bucket bktA = Bucket.valueBkt("CALIFORNIA");
         Restriction resA = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "LDC_State"), bktA);
-        ratingRule.setRuleForBucket(RuleBucketName.A, resA, null);
+        ratingRule.setRuleForBucket(RatingBucketName.A, resA, null);
 
         Bucket bktF = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("JOHN"));
         Restriction resF = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), bktF);
-        ratingRule.setRuleForBucket(RuleBucketName.F, null, resF);
+        ratingRule.setRuleForBucket(RatingBucketName.F, null, resF);
 
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setRatingRule(ratingRule);

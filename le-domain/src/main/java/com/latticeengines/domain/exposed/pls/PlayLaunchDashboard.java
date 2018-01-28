@@ -47,7 +47,7 @@ public class PlayLaunchDashboard {
 
         private Stats stats;
 
-        private Set<RuleBucketName> selectedBuckets;
+        private Set<RatingBucketName> selectedBuckets;
 
         private LaunchState launchState;
 
@@ -99,11 +99,11 @@ public class PlayLaunchDashboard {
             this.launchState = launchState;
         }
 
-        public Set<RuleBucketName> getSelectedBuckets() {
+        public Set<RatingBucketName> getSelectedBuckets() {
             return selectedBuckets;
         }
 
-        public void setSelectedBuckets(Set<RuleBucketName> selectedBuckets) {
+        public void setSelectedBuckets(Set<RatingBucketName> selectedBuckets) {
             this.selectedBuckets = selectedBuckets;
         }
     }

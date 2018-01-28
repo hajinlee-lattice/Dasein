@@ -52,13 +52,13 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -69,14 +69,13 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -185,8 +184,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
-    protected String consolidateAppId;
-    protected String profileAppId;
     protected String processAnalyzeAppId;
     protected DataCollection.Version initialVersion;
 
@@ -560,29 +557,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     void verifyStats(BusinessEntity... entities) {
         StatisticsContainer container = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(container);
-        Statistics statistics = container.getStatistics();
+        Map<String, StatsCube> cubeMap = container.getStatsCubes();
         for (BusinessEntity entity : entities) {
-            switch (entity) {
-            case Account:
-                verifyAccountStats(statistics);
-                break;
-            case Contact:
-                verifyContactStats(statistics);
-                break;
-            }
+            Assert.assertTrue(cubeMap.containsKey(entity.name()));
         }
-    }
-
-    private void verifyAccountStats(Statistics statistics) {
-        Assert.assertTrue(statistics.hasCategory(Category.ACCOUNT_ATTRIBUTES));
-        Assert.assertTrue(statistics.hasCategory(Category.FIRMOGRAPHICS));
-        Assert.assertTrue(statistics.hasCategory(Category.ONLINE_PRESENCE));
-        Assert.assertTrue(statistics.hasCategory(Category.WEBSITE_PROFILE));
-        Assert.assertTrue(statistics.hasCategory(Category.TECHNOLOGY_PROFILE));
-    }
-
-    private void verifyContactStats(Statistics statistics) {
-        Assert.assertTrue(statistics.hasCategory(Category.CONTACT_ATTRIBUTES));
     }
 
     void verifyConsolidateReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
@@ -795,16 +773,16 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     private RuleBasedModel constructRuleModel(String modelId) {
         RatingRule ratingRule = new RatingRule();
-        ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
+        ratingRule.setDefaultBucketName(RatingBucketName.D.getName());
 
         Bucket bktA = Bucket.valueBkt("CALIFORNIA");
         Restriction resA = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "LDC_State"), bktA);
-        ratingRule.setRuleForBucket(RuleBucketName.A, resA, null);
+        ratingRule.setRuleForBucket(RatingBucketName.A, resA, null);
 
         Bucket bktF = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("BOB"));
         Restriction resF = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), bktF);
-        ratingRule.setRuleForBucket(RuleBucketName.F, null, resF);
+        ratingRule.setRuleForBucket(RatingBucketName.F, null, resF);
 
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         ruleBasedModel.setRatingRule(ratingRule);
@@ -812,7 +790,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return ruleBasedModel;
     }
 
-    void verifyRatingEngineCount(String engineId, Map<RuleBucketName, Long> expectedCounts) {
+    void verifyRatingEngineCount(String engineId, Map<RatingBucketName, Long> expectedCounts) {
         RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), engineId);
         int retries = 0;
         while (ratingEngine == null && retries++ < 3) {

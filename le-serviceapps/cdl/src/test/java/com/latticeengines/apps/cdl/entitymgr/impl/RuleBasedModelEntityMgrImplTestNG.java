@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -120,7 +120,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(ruleBasedModel.getRatingEngine());
         Assert.assertEquals(ruleBasedModel.getRatingEngine().getId(), ratingEngineId);
         Assert.assertNotNull(ruleBasedModel.getRatingRule());
-        Assert.assertEquals(ruleBasedModel.getRatingRule().getDefaultBucketName(), RuleBucketName.D.getName());
+        Assert.assertEquals(ruleBasedModel.getRatingRule().getDefaultBucketName(), RatingBucketName.D.getName());
 
         Assert.assertNotNull(ruleBasedModel.getSelectedAttributes());
         Assert.assertTrue(ruleBasedModel.getSelectedAttributes().contains(ATTR1));
@@ -130,14 +130,14 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private RatingRule generateRatingRule() {
         RatingRule rr = new RatingRule();
-        rr.setDefaultBucketName(RuleBucketName.D.getName());
+        rr.setDefaultBucketName(RatingBucketName.D.getName());
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
         Map<String, Restriction> Amap = new HashMap<>();
         Map<String, Restriction> Bmap = new HashMap<>();
         Map<String, Restriction> Dmap = new HashMap<>();
-        bucketToRuleMap.put(RuleBucketName.A.getName(), Amap);
-        bucketToRuleMap.put(RuleBucketName.D.getName(), Dmap);
-        bucketToRuleMap.put(RuleBucketName.B.getName(), Bmap);
+        bucketToRuleMap.put(RatingBucketName.A.getName(), Amap);
+        bucketToRuleMap.put(RatingBucketName.D.getName(), Dmap);
+        bucketToRuleMap.put(RatingBucketName.B.getName(), Bmap);
         Amap.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 Restriction.builder().and(Collections.emptyList()).build());
         Bmap.put(FrontEndQueryConstants.CONTACT_RESTRICTION,

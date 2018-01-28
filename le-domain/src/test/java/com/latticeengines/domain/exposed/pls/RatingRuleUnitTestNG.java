@@ -22,21 +22,6 @@ public class RatingRuleUnitTestNG {
         System.out.println("ratingRule.generateDefaultBuckets() is " + RatingRule.generateDefaultBuckets());
     }
 
-    @SuppressWarnings("unused")
-    private void assertOrderOfRatingRuleString(String ratingRule) {
-        int AplusIndex = ratingRule.indexOf("\"" + RuleBucketName.A_PLUS.getName() + "\"");        
-        int Aindex = ratingRule.indexOf("\"" + RuleBucketName.A.getName() + "\"");
-        int Bindex = ratingRule.indexOf("\"" + RuleBucketName.B.getName() + "\"");
-        int Cindex = ratingRule.indexOf("\"" + RuleBucketName.C.getName() + "\"");
-        int Dindex = ratingRule.indexOf("\"" + RuleBucketName.D.getName() + "\"");
-        int Findex = ratingRule.indexOf("\"" + RuleBucketName.F.getName() + "\"");
-        Assert.assertTrue(AplusIndex < Aindex //
-                && Aindex < Bindex //
-                && Bindex < Cindex //
-                && Cindex < Dindex //
-                && Dindex < Findex);
-    }
-
     private void assertOrderOfMap(TreeMap<String, Map<String, Restriction>> map) {
         int count = 0;
         for (String key : map.keySet()) {
@@ -48,17 +33,17 @@ public class RatingRuleUnitTestNG {
     private boolean assertEachKey(String key, int count) {
         switch (count) {
         case 0:
-            return key.equals(RuleBucketName.A_PLUS.getName());
+            return key.equals(RatingBucketName.A.name());
         case 1:
-            return key.equals(RuleBucketName.A.getName());
+            return key.equals(RatingBucketName.B.name());
         case 2:
-            return key.equals(RuleBucketName.B.getName());
+            return key.equals(RatingBucketName.C.name());
         case 3:
-            return key.equals(RuleBucketName.C.getName());
+            return key.equals(RatingBucketName.D.name());
         case 4:
-            return key.equals(RuleBucketName.D.getName());
+            return key.equals(RatingBucketName.F.name());
         case 5:
-            return key.equals(RuleBucketName.F.getName());
+            return key.equals(RatingBucketName.G.name());
         default:
             return false;
         }

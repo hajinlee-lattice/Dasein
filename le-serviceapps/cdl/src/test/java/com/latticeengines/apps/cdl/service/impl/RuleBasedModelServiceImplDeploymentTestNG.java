@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -127,21 +127,21 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         Assert.assertTrue(retrievedRoleBasedModel instanceof RuleBasedModel);
         RatingRule ratingRule = ((RuleBasedModel) retrievedRoleBasedModel).getRatingRule();
         Assert.assertNotNull(ratingRule);
-        Assert.assertEquals(ratingRule.getDefaultBucketName(), RuleBucketName.D.getName());
+        Assert.assertEquals(ratingRule.getDefaultBucketName(), RatingBucketName.D.getName());
         Assert.assertTrue(MapUtils.isNotEmpty(ratingRule.getBucketToRuleMap()));
-        Assert.assertTrue(MapUtils.isNotEmpty(ratingRule.getRuleForBucket(RuleBucketName.A)));
+        Assert.assertTrue(MapUtils.isNotEmpty(ratingRule.getRuleForBucket(RatingBucketName.A)));
         Assert.assertNotNull(
-                ratingRule.getRuleForBucket(RuleBucketName.A).get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
-        Assert.assertTrue(MapUtils.isNotEmpty(ratingRule.getRuleForBucket(RuleBucketName.F)));
+                ratingRule.getRuleForBucket(RatingBucketName.A).get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
+        Assert.assertTrue(MapUtils.isNotEmpty(ratingRule.getRuleForBucket(RatingBucketName.F)));
         Assert.assertNotNull(
-                ratingRule.getRuleForBucket(RuleBucketName.F).get(FrontEndQueryConstants.CONTACT_RESTRICTION));
+                ratingRule.getRuleForBucket(RatingBucketName.F).get(FrontEndQueryConstants.CONTACT_RESTRICTION));
 
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(rbRatingEngineId, true);
         Assert.assertTrue(MapUtils.isNotEmpty(ratingEngine.getCountsAsMap()));
         System.out.println(JsonUtils.pprint(ratingEngine));
-        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RuleBucketName.A.name()), RATING_A_COUNT);
-        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RuleBucketName.D.name()), RATING_D_COUNT);
-        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RuleBucketName.F.name()), RATING_F_COUNT);
+        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RatingBucketName.A.name()), RATING_A_COUNT);
+        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RatingBucketName.D.name()), RATING_D_COUNT);
+        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RatingBucketName.F.name()), RATING_F_COUNT);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testFindAndUpdateRuleBasedModel" })

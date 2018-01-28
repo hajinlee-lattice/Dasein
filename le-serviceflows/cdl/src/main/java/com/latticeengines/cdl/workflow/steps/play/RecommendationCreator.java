@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component
@@ -83,7 +83,7 @@ public class RecommendationCreator {
 
     private Recommendation processSingleAccount(PlayLaunchContext playLaunchContext,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
-        RuleBucketName bucket = getBucketInfo(playLaunchContext, account);
+        RatingBucketName bucket = getBucketInfo(playLaunchContext, account);
         Recommendation recommendation = null;
 
         // Generate recommendation only when bucket is selected for launch
@@ -104,18 +104,13 @@ public class RecommendationCreator {
         return recommendation;
     }
 
-    private RuleBucketName getBucketInfo(PlayLaunchContext playLaunchContext, Map<String, Object> account) {
+    private RatingBucketName getBucketInfo(PlayLaunchContext playLaunchContext, Map<String, Object> account) {
         String bucketName = checkAndGet(account, playLaunchContext.getModelId());
-        RuleBucketName bucket = RuleBucketName.getRuleBucketName(bucketName);
-
-        if (bucket == null) {
-            bucket = RuleBucketName.valueOf(bucketName);
-        }
-        return bucket;
+        return RatingBucketName.valueOf(bucketName);
     }
 
     private Recommendation prepareRecommendation(PlayLaunchContext playLaunchContext, Map<String, Object> account,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, RuleBucketName bucket) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, RatingBucketName bucket) {
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         long launchTimestampMillis = playLaunchContext.getLaunchTimestampMillis();
         String playName = playLaunchContext.getPlayName();
@@ -153,7 +148,7 @@ public class RecommendationCreator {
         }
 
         recommendation.setTenantId(tenant.getPid());
-        recommendation.setLikelihood(bucket.getDefaultLikelihood());
+        recommendation.setLikelihood(getDefaultLikelihood(bucket));
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
 
         recommendation.setPriorityID(bucket);
@@ -171,4 +166,24 @@ public class RecommendationCreator {
     private String checkAndGet(Map<String, Object> account, String columnName) {
         return account.get(columnName) != null ? account.get(columnName).toString() : null;
     }
+
+    private static double getDefaultLikelihood(RatingBucketName bucket) {
+        switch (bucket) {
+            case A:
+                return 95.0D;
+            case B:
+                return 70.0D;
+            case C:
+                return 40.0D;
+            case D:
+                return 20.0D;
+            case F:
+                return 10.0D;
+            case G:
+                return 5.0D;
+            default:
+                throw new UnsupportedOperationException("Unknown bucket " + bucket);
+        }
+    }
+
 }

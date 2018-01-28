@@ -214,63 +214,6 @@ public class StatsCubeUtils {
         bucket.setComparisonType(ComparisonType.EQUAL);
     }
 
-    public static Statistics constructStatistics(Map<BusinessEntity, StatsCube> cubeMap,
-            Map<BusinessEntity, List<ColumnMetadata>> cmMap) {
-        Statistics statistics = new Statistics();
-
-        for (Map.Entry<BusinessEntity, StatsCube> cubeEntry : cubeMap.entrySet()) {
-            BusinessEntity entity = cubeEntry.getKey();
-            StatsCube cube = cubeEntry.getValue();
-            if (cmMap.containsKey(entity)) {
-                List<ColumnMetadata> cmList = cmMap.get(entity);
-                addStats(entity, cube, cmList, statistics);
-            } else {
-                log.warn("Did not provide column metadata for entity " + entity //
-                        + ", skipping the stats for the whole entity.");
-            }
-        }
-
-        return statistics;
-    }
-
-    private static void addStats(BusinessEntity entity, StatsCube cube, List<ColumnMetadata> cmList,
-            Statistics statistics) {
-        Map<String, ColumnMetadata> cmMap = new HashMap<>();
-        cmList.forEach(cm -> cmMap.put(cm.getColumnId(), cm));
-        Map<String, AttributeStats> attrStatsMap = cube.getStatistics();
-        for (String name : attrStatsMap.keySet()) {
-            ColumnMetadata cm = cmMap.get(name);
-            if (cm == null) {
-                log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity
-                        + ", skipping it.");
-                continue;
-            }
-            AttributeStats statsInCube = attrStatsMap.get(name);
-            if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                statsInCube = convertPurchaseHistoryStats(name, statsInCube);
-                if (statsInCube == null) {
-                    log.warn("No valid transaction bucket left for " + name + ", skipping it");
-                    continue;
-                }
-            }
-
-            AttributeLookup attrLookup = new AttributeLookup(entity, name);
-            Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
-            String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
-            // create map entries if not there
-            if (!statistics.hasCategory(category)) {
-                statistics.putCategory(category, new CategoryStatistics());
-            }
-            CategoryStatistics categoryStatistics = statistics.getCategory(category);
-            if (!categoryStatistics.hasSubcategory(subCategory)) {
-                categoryStatistics.putSubcategory(subCategory, new SubcategoryStatistics());
-            }
-            // update the corresponding map entry
-            SubcategoryStatistics subcategoryStatistics = statistics.getCategory(category).getSubcategory(subCategory);
-            subcategoryStatistics.putAttrStats(attrLookup, statsInCube);
-        }
-    }
-
     public static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
         if (!attrName.startsWith("PH_")) {
             return attrStats;
@@ -384,33 +327,6 @@ public class StatsCubeUtils {
         }
         cube.setStatistics(stats);
         return cube;
-    }
-
-    public static Map<BusinessEntity, StatsCube> toStatsCubes(Statistics statistics, List<ColumnMetadata> cms) {
-        Map<Category, Set<String>> attrsToHide = getAttrsToHide(cms);
-        Map<BusinessEntity, Map<String, AttributeStats>> statsMap = new HashMap<>();
-        for (Map.Entry<Category, CategoryStatistics> catStatsEntry : statistics.getCategories().entrySet()) {
-            Category cat = catStatsEntry.getKey();
-            CategoryStatistics catStats = catStatsEntry.getValue();
-            for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
-                for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
-                    BusinessEntity entity = entry.getKey().getEntity();
-                    if (!statsMap.containsKey(entity)) {
-                        statsMap.put(entity, new HashMap<>());
-                    }
-                    if (attrsToHide.get(cat) == null || !attrsToHide.get(cat).contains(entry.getKey().getAttribute())) {
-                        statsMap.get(entity).put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
-                    }
-                }
-            }
-        }
-        Map<BusinessEntity, StatsCube> cubes = new HashMap<>();
-        statsMap.forEach((entity, stats) -> {
-            StatsCube cube = new StatsCube();
-            cube.setStatistics(stats);
-            cubes.put(entity, cube);
-        });
-        return cubes;
     }
 
     private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {

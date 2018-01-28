@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
@@ -181,9 +181,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         re.setStatus(RatingEngineStatus.ACTIVE);
         re.setId(ratingEngine.getId());
         re.setCountsByMap(ImmutableMap.of( //
-                RuleBucketName.A.getName(), 1L, //
-                RuleBucketName.B.getName(), 2L, //
-                RuleBucketName.C.getName(), 3L));
+                RatingBucketName.A.getName(), 1L, //
+                RatingBucketName.B.getName(), 2L, //
+                RatingBucketName.C.getName(), 3L));
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
@@ -213,9 +213,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         log.info("Rating Engine after update is " + retrievedRatingEngine.toString());
         Map<String, Long> counts = re.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(counts));
-        Assert.assertEquals(counts.get(RuleBucketName.A.getName()), new Long(1));
-        Assert.assertEquals(counts.get(RuleBucketName.B.getName()), new Long(2));
-        Assert.assertEquals(counts.get(RuleBucketName.C.getName()), new Long(3));
+        Assert.assertEquals(counts.get(RatingBucketName.A.getName()), new Long(1));
+        Assert.assertEquals(counts.get(RatingBucketName.B.getName()), new Long(2));
+        Assert.assertEquals(counts.get(RatingBucketName.C.getName()), new Long(3));
 
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
                 RatingEngineStatus.ACTIVE.name());

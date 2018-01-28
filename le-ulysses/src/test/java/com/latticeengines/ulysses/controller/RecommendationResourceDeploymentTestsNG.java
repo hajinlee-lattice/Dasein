@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
@@ -52,7 +52,7 @@ public class RecommendationResourceDeploymentTestsNG extends UlyssesDeploymentTe
         recommendation.setTenantId(testTenant.getPid());
         recommendation.setContacts(null);
         recommendation.setSynchronizationDestination(SynchronizationDestinationEnum.SFDC.toString());
-        recommendation.setPriorityID(RuleBucketName.A);
+        recommendation.setPriorityID(RatingBucketName.A);
 
         recommendationEntityMgr.create(recommendation);
 

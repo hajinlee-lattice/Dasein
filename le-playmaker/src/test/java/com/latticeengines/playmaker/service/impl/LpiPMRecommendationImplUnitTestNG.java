@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.impl.LpiPMRecommendationImpl;
@@ -136,7 +136,7 @@ public class LpiPMRecommendationImplUnitTestNG {
     }
 
     private List<Map<String, Object>> createDummyRecommendationResult(int count) {
-        RuleBucketName[] buckets = new RuleBucketName[] { RuleBucketName.A_PLUS, RuleBucketName.A };
+        RatingBucketName[] buckets = new RatingBucketName[] { RatingBucketName.A, RatingBucketName.B };
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {

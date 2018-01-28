@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
@@ -102,7 +102,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     @Column(name = "PRIORITY_ID")
     @Enumerated(EnumType.STRING)
     @JsonProperty("priorityID")
-    private RuleBucketName priorityID;
+    private RatingBucketName priorityID;
 
     @Column(name = "PRIORITY_DISPLAY_NAME")
     @JsonProperty("priorityDisplayName")
@@ -230,11 +230,11 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
         this.sfdcAccountID = sfdcAccountID;
     }
 
-    public RuleBucketName getPriorityID() {
+    public RatingBucketName getPriorityID() {
         return priorityID;
     }
 
-    public void setPriorityID(RuleBucketName priorityID) {
+    public void setPriorityID(RatingBucketName priorityID) {
         this.priorityID = priorityID;
     }
 

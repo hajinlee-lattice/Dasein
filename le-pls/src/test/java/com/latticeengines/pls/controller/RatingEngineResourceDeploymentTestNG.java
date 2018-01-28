@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -232,14 +232,14 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         RatingRule ratingRule = new RatingRule();
-        ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
+        ratingRule.setDefaultBucketName(RatingBucketName.D.getName());
         ruleBasedModel.setRatingRule(ratingRule);
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
         rm = restTemplate.postForObject(
                 getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "/ratingmodels/" + ratingModelId,
                 ruleBasedModel, RatingModel.class);
         Assert.assertNotNull(rm);
-        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(), RuleBucketName.D.getName());
+        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(), RatingBucketName.D.getName());
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR1));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR2));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR3));

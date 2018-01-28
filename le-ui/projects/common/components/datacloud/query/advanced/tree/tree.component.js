@@ -60,7 +60,11 @@ angular
 
                         if (vm.item) {
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
-                            vm.type = vm.item.cube.Bkts.Type;
+                            if (vm.item.cube.Bkts) {
+                                vm.type = vm.item.cube.Bkts.Type;
+                            } else {
+                                //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)
+                            }
                         }
 
                         vm.label = vm.tree.bucketRestriction.bkt.Lbl;

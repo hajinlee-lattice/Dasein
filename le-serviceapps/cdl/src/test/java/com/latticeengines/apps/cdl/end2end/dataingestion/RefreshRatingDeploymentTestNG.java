@@ -11,8 +11,8 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
@@ -45,14 +45,15 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private void verifyProcess() {
         runCommonPAVerifications();
+        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, BusinessEntity.Rating);
         verifyRuleBasedEngines();
     }
 
     private void verifyRuleBasedEngines() {
-        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
-                RuleBucketName.A, RATING_A_COUNT_1, //
-                RuleBucketName.D, RATING_D_COUNT_1, //
-                RuleBucketName.F, RATING_F_COUNT_1
+        Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RatingBucketName.A, RATING_A_COUNT_1, //
+                RatingBucketName.D, RATING_D_COUNT_1, //
+                RatingBucketName.F, RATING_F_COUNT_1
         );
         verifyRatingEngineCount(rule1.getId(), ratingCounts);
         verifyRatingEngineCount(rule2.getId(), ratingCounts);

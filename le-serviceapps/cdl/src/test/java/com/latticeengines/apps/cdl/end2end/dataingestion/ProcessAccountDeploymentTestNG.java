@@ -17,8 +17,8 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
@@ -80,6 +80,8 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
 
+        verifyStats(BusinessEntity.Account, BusinessEntity.Contact);
+
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
         long numContacts = CONTACT_IMPORT_SIZE_1;
         long numProducts = PRODUCT_IMPORT_SIZE_1;
@@ -99,10 +101,10 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
 
         RatingEngine ratingEngine = createRuleBasedRatingEngine();
         ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), ratingEngine.getId());
-        Map<RuleBucketName, Long> ratingCounts = ImmutableMap.of( //
-                RuleBucketName.A, RATING_A_COUNT_1, //
-                RuleBucketName.D, RATING_D_COUNT_1, //
-                RuleBucketName.F, RATING_F_COUNT_1);
+        Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
+                RatingBucketName.A, RATING_A_COUNT_1, //
+                RatingBucketName.D, RATING_D_COUNT_1, //
+                RatingBucketName.F, RATING_F_COUNT_1);
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
         verifyUpdateActions();
     }

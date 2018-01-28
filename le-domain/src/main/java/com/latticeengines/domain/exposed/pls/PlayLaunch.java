@@ -280,16 +280,16 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.tableName = tableName;
     }
 
-    public Set<RuleBucketName> getBucketsToLaunch() {
+    public Set<RatingBucketName> getBucketsToLaunch() {
         if (StringUtils.isNotBlank(this.bucketsToLaunch)) {
             List<?> attrListIntermediate = JsonUtils.deserialize(this.bucketsToLaunch, List.class);
-            return new TreeSet<>(JsonUtils.convertList(attrListIntermediate, RuleBucketName.class));
+            return new TreeSet<>(JsonUtils.convertList(attrListIntermediate, RatingBucketName.class));
         }
 
         return new TreeSet<>();
     }
 
-    public void setBucketsToLaunch(Set<RuleBucketName> bucketsToLaunch) {
+    public void setBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
         this.bucketsToLaunch = JsonUtils.serialize(bucketsToLaunch);
     }
 

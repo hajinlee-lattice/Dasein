@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -249,31 +249,31 @@ public class TestPlayCreationHelper {
         RatingRule ratingRule = new RatingRule();
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = populateBucketToRuleMap();
         ratingRule.setBucketToRuleMap(bucketToRuleMap);
-        ratingRule.setDefaultBucketName(RuleBucketName.C.name());
+        ratingRule.setDefaultBucketName(RatingBucketName.C.name());
         return ratingRule;
     }
 
     private TreeMap<String, Map<String, Restriction>> populateBucketToRuleMap() {
         TreeMap<String, Map<String, Restriction>> bucketToRuleMap = new TreeMap<>();
-        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.A_PLUS, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.A, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 ComparisonType.GTE_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "G");
-        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.C, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.C, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 ComparisonType.GTE_AND_LTE, BusinessEntity.Account, "LDC_Name", "h", "n");
-        populateBucketInfo(bucketToRuleMap, true, RuleBucketName.D, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+        populateBucketInfo(bucketToRuleMap, true, RatingBucketName.D, FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 ComparisonType.GT_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "O");
-        populateBucketInfo(bucketToRuleMap, false, RuleBucketName.D, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
+        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.D, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
                 null, null, null, null);
-        populateBucketInfo(bucketToRuleMap, false, RuleBucketName.F, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
+        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.F, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
                 null, null, null, null);
-        populateBucketInfo(bucketToRuleMap, false, RuleBucketName.F, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
+        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.F, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
                 null, null, null, null);
 
         return bucketToRuleMap;
     }
 
     private void populateBucketInfo(TreeMap<String, Map<String, Restriction>> bucketToRuleMap,
-            boolean createConcreteRestriction, RuleBucketName bucketName, String key, ComparisonType comparisonType,
-            BusinessEntity entity, String attrName, Object min, Object max) {
+                                    boolean createConcreteRestriction, RatingBucketName bucketName, String key, ComparisonType comparisonType,
+                                    BusinessEntity entity, String attrName, Object min, Object max) {
         Map<String, Restriction> bucketInfo = bucketToRuleMap.get(bucketName.name());
         if (bucketInfo == null) {
             bucketInfo = new HashMap<>();

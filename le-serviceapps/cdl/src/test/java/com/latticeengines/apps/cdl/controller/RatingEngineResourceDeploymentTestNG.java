@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 
@@ -218,12 +218,12 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         RatingRule ratingRule = new RatingRule();
-        ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
+        ratingRule.setDefaultBucketName(RatingBucketName.D.getName());
         ruleBasedModel.setRatingRule(ratingRule);
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
         rm = ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), re1.getId(), ratingModelId, ruleBasedModel);
         Assert.assertNotNull(rm);
-        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(), RuleBucketName.D.getName());
+        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(), RatingBucketName.D.getName());
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR1));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR2));
         Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR3));

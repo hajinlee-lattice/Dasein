@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.controller;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -20,7 +19,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 

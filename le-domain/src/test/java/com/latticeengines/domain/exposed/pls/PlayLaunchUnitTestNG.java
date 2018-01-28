@@ -21,11 +21,11 @@ public class PlayLaunchUnitTestNG {
         play.setName(play.generateNameStr());
         playLaunch = new PlayLaunch();
         playLaunch.setPlay(play);
-        Set<RuleBucketName> selectedBuckets = new HashSet<>();
-        selectedBuckets.add(RuleBucketName.A_PLUS);        
-        selectedBuckets.add(RuleBucketName.A);
-        selectedBuckets.add(RuleBucketName.B);
-        selectedBuckets.add(RuleBucketName.C);
+        Set<RatingBucketName> selectedBuckets = new HashSet<>();
+        selectedBuckets.add(RatingBucketName.A);
+        selectedBuckets.add(RatingBucketName.B);
+        selectedBuckets.add(RatingBucketName.C);
+        selectedBuckets.add(RatingBucketName.D);
         playLaunch.setBucketsToLaunch(selectedBuckets);
         String playLaunchStr = playLaunch.toString();
         System.out.println(String.format("playLaunch is %s", playLaunchStr));
