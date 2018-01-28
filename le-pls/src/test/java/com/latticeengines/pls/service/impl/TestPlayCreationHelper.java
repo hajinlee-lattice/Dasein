@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -36,7 +37,7 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.controller.PlayResourceDeploymentTestNG;
-import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
@@ -58,7 +59,7 @@ public class TestPlayCreationHelper {
     private PlayResourceDeploymentTestNG playResourceDeploymentTestNG;
 
     @Autowired
-    private RatingEngineEntityMgr ratingEngineEntityMgr;
+    private RatingEngineProxy ratingEngineProxy;
     @Autowired
     private SegmentService segmentService;
 
@@ -228,7 +229,8 @@ public class TestPlayCreationHelper {
 
         try {
             log.info("Cleaning up rating engine: " + play.getRatingEngine().getId());
-            ratingEngineEntityMgr.deleteById(play.getRatingEngine().getId());
+            ratingEngineProxy.deleteRatingEngine(CustomerSpace.parse(tenantIdentifier).toString(),
+                    play.getRatingEngine().getId());
         } catch (Exception ex) {
             ignoreException(ex);
         }

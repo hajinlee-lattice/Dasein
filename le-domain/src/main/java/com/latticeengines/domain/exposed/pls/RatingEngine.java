@@ -4,10 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -118,13 +116,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
-
-    @Deprecated
-    @JsonIgnore
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE,
-            CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<RatingModel> ratingModels = new HashSet<>();
 
     @JsonIgnore
     @Column(name = "ACTIVE_MODEL_PID")
@@ -244,25 +235,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     public String getCreatedBy() {
         return this.createdBy;
-    }
-
-    @Deprecated
-    public void setRatingModels(Set<RatingModel> ratingModels) {
-        this.ratingModels = ratingModels;
-    }
-
-    @Deprecated
-    public Set<RatingModel> getRatingModels() {
-        return this.ratingModels;
-    }
-
-    @Deprecated
-    public void addRatingModel(RatingModel ratingModel) {
-        if (this.ratingModels == null) {
-            this.ratingModels = new HashSet<>();
-        }
-        ratingModel.setRatingEngine(this);
-        this.ratingModels.add(ratingModel);
     }
 
     public Date getLastRefreshedDate() {
