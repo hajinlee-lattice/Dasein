@@ -18,10 +18,15 @@ angular.module('pd.navigation.header', [
 ) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.jobs = JobsStore.data.jobs;
+    $scope.importJobs = JobsStore.data.importJobs;
 
     $scope.statusFilter = function (item) {
         return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
     };
+
+    $scope.statusImportFilter = function(item){
+        return item.jobStatus === 'Running';
+    }
 
 
     FeatureFlagService.GetAllFlags().then(function(result) {

@@ -139,9 +139,11 @@ $font-size:12px;
         -ms-grid-column-span: 12;
         grid-column: span 12;
     }
+
     .le-cell {
-        // border: 1px dotted green;
-        min-width: 20px;
+        text-overflow: ellipsis;
+        overflow: hidden; 
+        white-space: nowrap;
         height: $row-height;
         display: flex;
         align-items: center;

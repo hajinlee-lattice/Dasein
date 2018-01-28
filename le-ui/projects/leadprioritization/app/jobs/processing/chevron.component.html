@@ -6,11 +6,11 @@
                 ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
                 <div class="chevron-element">
 
-                    <span class="load-data">
+                    <span class="">
                         <span>{{step.label}} </span>
                     </span>
                     <span>
-                        <span class="loading-small" ng-if="vm.isStepRunning(1)"></span>
+                        <span class="loading-small" ng-if="vm.isStepRunning($index)"></span>
                         <i class="fa fa-check" ng-if="vm.isStepDone($index) && !vm.isStepFailed($index)"></i>
                         <i class="fa fa-exclamation-triangle" ng-if="vm.isStepFailed($index)"></i>
                     </span>

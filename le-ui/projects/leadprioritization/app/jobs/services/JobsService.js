@@ -164,6 +164,10 @@ angular
                 var subJobs = gestSubJobs(job);
                 var actions = getActions(job);
                 var actionsCount = getActionsCount(job)
+                var source = null;
+                if(job.inputs !== undefined){
+                    source = job.inputs.SOURCE_DISPLAY_NAME;
+                }
 
                 if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     stepRunning = "score_training_set";
@@ -182,6 +186,7 @@ angular
                             errorMsg: job.errorMsg,
                             jobType: job.jobType,
                             jobStatus: job.jobStatus,
+                            status: job.jobStatus,
                             startTimestamp: job.startTimestamp,
                             stepRunning: stepRunning,
                             stepsCompleted: stepsCompleted,
@@ -190,7 +195,7 @@ angular
                             completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
                             reports: job.reports,
                             applicationId: job.applicationId,
-                            source: job.inputs ? job.inputs.SOURCE_DISPLAY_NAME : null,
+                            source: source,
                             modelName: job.inputs.MODEL_DISPLAY_NAME,
                             modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
                             modelType: job.inputs ? job.inputs.MODEL_TYPE : null,

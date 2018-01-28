@@ -3,7 +3,7 @@ angular.module('lp.jobs.row.subjobs', [])
     .directive('importJobRowSubJobs', [function () {
         var controller = ['$scope', 'JobsStore', function ($scope, JobsStore) {
             function init() {
-
+                console.log('EXPANDED ======= ',$scope.subjobs);
             }
             $scope.getActionType = function (subjob) {
                 var type = subjob.jobType;

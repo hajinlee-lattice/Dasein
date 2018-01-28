@@ -70,7 +70,8 @@
                 <div class="le-cell le-col-start-10 le-col-span-3"></div>
 
             </div>
-            <import-job-row class="le-row" ng-repeat="job in vm.header.filter.filtered |
+            <import-job-row class="le-row" ng-if="!vm.loading" 
+                                        ng-repeat="job in vm.header.filter.filtered |
                                         filter: vm.query |
                                         orderBy: vm.header.sort.order + vm.header.sort.property |
                                         startFrom: (current - 1) * vm.pagesize |

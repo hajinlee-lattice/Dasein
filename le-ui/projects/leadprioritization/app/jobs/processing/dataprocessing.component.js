@@ -53,10 +53,8 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
         vm.header = {
             filter: {
                 label: 'Filter By',
-                unfiltered: [],
-                filtered: [],
-                unfiltered: [],
-                filtered: [],
+                unfiltered: JobsStore.data.importJobs,
+                filtered: JobsStore.data.importJobs,
                 items: [
                     { label: "All", action: {} },
                     { label: "Completed", action: { status: 'Completed' } },
@@ -92,7 +90,7 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
         }
 
         angular.extend(vm, {
-            jobs: [],
+            jobs: JobsStore.data.importJobs,
             successMsg: null,
             errorMsg: null,
             queuedMsg: null,
@@ -134,31 +132,16 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
         }
 
         vm.init = function () {
+
             vm.loading = true;
-            JobsStore.getJobs(false).then(function(result) {
-                // console.log(result);
+            JobsStore.getJobs(false).then(function (result) {
                 vm.jobs = JobsStore.data.importJobs;
-                // console.log(vm.jobs);
+                vm.header.filter.unfiltered = JobsStore.data.importJobs;
+                vm.header.filter.filtered = JobsStore.data.importJobs;
                 vm.loading = false;
-                vm.jobs.forEach(function (element) {
-                    switch (element.jobType) {
-                        case 'processAnalyzeWorkflow': {
-                            element.displayName = "Data Processing & Analysis"; break;
-                        }
-                    }
-                });
-                vm.header.filter.unfiltered = vm.jobs;
-                vm.header.filter.filtered = vm.jobs;
             });
-            // vm.jobs.forEach(function (element) {
-            //     switch (element.jobType) {
-            //         case 'processAnalyzeWorkflow': {
-            //             element.displayName = "Data Processing & Analysis"; break;
-            //         }
-            //     }
-            // });
-            // vm.header.filter.unfiltered = vm.jobs;
-            // vm.header.filter.filtered = vm.jobs;
+
+
             vm.initModalWindow();
         }
 
@@ -219,67 +202,6 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
                 canRun = true;
             }
             return canRun;
-        }
-        vm.showWarningRun = function (job) {
-            var actions = job.actions;
-            var allCompleted = true;
-            if (actions) {
-                for (var i = 0; i < actions.length; i++) {
-                    if (actions[i].jobStatus === 'Running') {
-                        allCompleted = false;
-                        break;
-                    }
-                }
-            }
-            return !allCompleted;
-        }
-
-        vm.showRunButton = function (job) {
-            if (job.status === 'Pending') {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        vm.showReport = function (job) {
-
-            if (job.status === 'Completed' || job.status === 'Failed') {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        vm.isJobPending = function (job) {
-            if (job.jobStatus === 'Pending') {
-                return true;
-            } else {
-                return false;
-            }
-
-        }
-        vm.isJobCompleted = function (job) {
-            if ('Completed' === job.status) {
-                return true;
-            } else {
-                return true;
-            }
-        }
-
-        vm.isJobFailed = function (job) {
-            if (job.status === 'Failed') {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        vm.isJobRunning = function (job) {
-            if (job.status === 'Running') {
-                return true;
-            } else {
-                return false;
-            }
         }
 
         vm.clearMessages = function () {

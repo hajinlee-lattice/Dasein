@@ -4,8 +4,8 @@ angular.module('lp.jobs.chevron', [])
         var controller = ['$scope', function ($scope) {
             var vm = this;
             vm.failed = false;
-            vm.jobstatus = $scope.jobstatus;
-            vm.stepscompleted = $scope.stepscompleted || [];
+            // vm.jobstatus = $scope.jobstatus;
+            // vm.stepscompleted = $scope.stepscompleted || [];
             vm.stepsconfig = [];
 
 
@@ -23,27 +23,32 @@ angular.module('lp.jobs.chevron', [])
             }
             init();
 
-            vm.getSteps = function () {
-                var tmp = [];
-            }
             vm.isStepDone = function (index) {
-                if (index <= vm.stepscompleted.length - 1) {
+                if (index <= $scope.stepscompleted.length - 1 || $scope.jobStatus == 'Completed') {
                     return true;
                 } else {
                     return false;
                 }
             }
             vm.isStepRunning = function (index) {
-                if (vm.jobstatus === 'Running' && index === (vm.stepscompleted.length - 1)) {
-                    return true;
-                } else {
+                if($scope.jobstatus === 'Running'){
+                    if($scope.stepscompleted.length === index){
+                        return true;
+                    }else {
+                        return false;
+                    }
+                } else{
                     return false;
                 }
             }
             vm.isStepFailed = function (index) {
-                if (vm.jobstatus === 'Failed' && index === vm.stepscompleted.length - 1) {
-                    return true;
-                } else {
+                if($scope.jobstatus === 'Failed'){
+                    if($scope.stepscompleted.length === index){
+                        return true;
+                    }else {
+                        return false;
+                    }
+                } else{
                     return false;
                 }
             }
