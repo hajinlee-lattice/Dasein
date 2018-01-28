@@ -38,7 +38,10 @@ angular
         var deferred = $q.defer();
 
         JobsService.getJobStatus(jobId).then(function(response) {
-            updateJobTesting(response.resultObj);
+            /**************** Only for Testing *****************************/
+            // updateJobTesting(response.resultObj);
+            /***************************************************************/
+
             deferred.resolve(response.resultObj);
         });
 
@@ -173,33 +176,23 @@ angular
         }
     }
 
-    // function updateStepTESTING(status, jobid){
-
-    //     var inMap = JobsStore.importJobsMap[jobid];
-    //     if(inMap !== undefined){
-
-    //         var oldJob = JobsStore.data.importJobs[inMap];
-    //         oldJob.jobStatus = updatedJob.jobStatus;
-    //         console.log(oldJob);
-            
-    //     }
-
-    // }
-
     function updateStateTest(job) {
+        console.log('Iteration' ,JobsStore.tmpCount);
         switch(JobsStore.tmpCount){
             case 0:
-            case 1:
             case 7:{
                 job.jobStatus = 'Pending';
                 break;
             };
+            case 1:
             case 2:
             case 3:
             case 4:
             case 5:
+            case 5:
             case 8:
-            case 9:{
+            case 9:
+           {
                 job.jobStatus = 'Running';
                 break;
             };
@@ -208,7 +201,8 @@ angular
                
                 break;
             };
-            case 10:{
+            case 10:
+            {
                 job.jobStatus = 'Failed';
                
                 break;
@@ -229,33 +223,30 @@ angular
         /******************* For testing porpouse ***********/
         console.log('Iteration' ,JobsStore.tmpCount);
         switch(JobsStore.tmpCount){
-            // case 1:{
-            //     job.jobStatus = 'Pending';
-            //     break;
-            // };
-            // case 2:{
-            //     job.jobStatus = 'Running';
-            //     break;
-            // };
+            case 1:{
+                job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud"];
+                break;
+            };
+            case 2:{
+                job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud"];
+                break;
+            };
             case 3:{
-                // job.jobStatus = 'Running';
                 job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud", 
-                                        "Merging, De-duping & matching to Lattice Data Cloud"];
+                                        "Analyzing"];
                 break;
             };
             case 4:{
-                // job.jobStatus = 'Running';
                 job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud", 
                                         "Merging, De-duping & matching to Lattice Data Cloud",
-                                    "Analyzing", "Analyzing", "Analyzing"];
+                                    "Analyzing", "Analyzing", "Publishing"];
                 break;
             };
             case 5:{
-                // job.jobStatus = 'Running';
                 job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud", 
                                         "Merging, De-duping & matching to Lattice Data Cloud",
                                     "Analyzing", "Analyzing", "Analyzing",
-                                "Publishing", "Publishing", "Publishing"];
+                                "Publishing", "Publishing", "Publishing", "Scoring"];
                 
                 break;
             };
@@ -275,12 +266,12 @@ angular
             };
             case 8:{
                 // job.jobStatus = 'R';
-                job.stepsCompleted = [];
+                job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud"];
                 break;
             };
             case 9:{
                 job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud", 
-                "Merging, De-duping & matching to Lattice Data Cloud"];
+                "Analyzing"];
                 break;
             };
             case 10:{
@@ -290,9 +281,7 @@ angular
             };
            
             case 11:{
-                JobsStore.tmpCount = 0;
                 job.stepsCompleted = [];
-                // job.jobStatus = 'Pending';
                 break;
             };
             default: {

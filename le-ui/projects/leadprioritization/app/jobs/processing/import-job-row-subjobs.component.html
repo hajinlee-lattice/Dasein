@@ -16,11 +16,12 @@
             </div>
             <div class="le-cell le-col-start-2 le-col-span-2">
                 <span>{{getActionType(subjob)}}:
-                    <a ng-href="{{getActionLink(subjob)}}">{{getActionName(subjob)}}</a>
+                    <a ng-href="{{getActionLink(subjob)}}" title="{{getActionName(subjob)}}">{{getActionName(subjob)}}</a>
                 </span>
 
             </div>
-            <div class="le-cell le-col-start-4 le-col-span-1">
+            <div class="le-cell le-col-start-4 le-col-span-1" ng-class="{'partial': getValidation(subjob) == 'Partial Success'}">
+                {{getValidation(subjob)}}
             </div>
             <div class="le-cell le-col-start-5 le-col-span-2">
                 {{getRecordFound(subjob)}}

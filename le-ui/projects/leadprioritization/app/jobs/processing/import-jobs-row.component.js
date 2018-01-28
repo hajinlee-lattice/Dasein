@@ -23,7 +23,7 @@ angular.module('lp.jobs.import.row', [])
             }
 
             function cancelInterval() {
-                console.log('STOP the timer');
+                // console.log('STOP the timer');
                 $interval.cancel(INTERVAL_ID);
             }
 
@@ -42,7 +42,7 @@ angular.module('lp.jobs.import.row', [])
 
             function updateJobData(jobUpdated) {
                 $scope.jobStatus = jobUpdated.jobStatus;
-                console.log('UPDATED ----------------> ', jobUpdated);
+                // console.log('UPDATED ----------------> ', jobUpdated);
                 // $scope.job.subJobs = jobUpdated.subJobs;
                 updateSubjobs(jobUpdated.subJobs);
                 // $scope.job.stepsCompleted = jobUpdated.stepsCompleted;
@@ -67,7 +67,7 @@ angular.module('lp.jobs.import.row', [])
             }
 
             function fetchJobData() {
-                console.log('Pinging the server');
+                // console.log('Pinging the server');
                 JobsStore.getJob($scope.job.id).then(function (ret) {
                     updateJobData(ret);
                 });
@@ -76,7 +76,7 @@ angular.module('lp.jobs.import.row', [])
             function checkIfPooling() {
                 if (($scope.job.jobStatus === 'Running' || $scope.job.jobStatus === 'Pending') && $scope.expanded) {
                     if (INTERVAL_ID === undefined) {
-                        console.log('Create the timer');
+                        // console.log('Create the timer');
                         INTERVAL_ID = $interval(fetchJobData, POOLING_INTERVAL);
                     }
                 } else {
@@ -91,7 +91,7 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
             function init() {
-                console.log('init');
+                // console.log('init');
                 $scope.vm.callback = callbackModalWindow;
                 $scope.loading = false;
                 $scope.expanded = false;
@@ -104,7 +104,11 @@ angular.module('lp.jobs.import.row', [])
                     resetCollapsedRow();
                 } else {
                     $scope.loading = true;
-                    JobsStore.getJob($scope.job.id).then(function (ret) {
+                    var jobId = $scope.job.id;
+                    if(jobId === undefined || jobId == null){
+                        jobId = 0;
+                    }
+                    JobsStore.getJob(jobId).then(function (ret) {
                         $scope.loading = false;
                         $scope.expanded = !$scope.expanded || false;
                         checkIfPooling();

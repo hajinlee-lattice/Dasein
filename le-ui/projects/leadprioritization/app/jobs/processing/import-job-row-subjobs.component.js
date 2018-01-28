@@ -3,7 +3,7 @@ angular.module('lp.jobs.row.subjobs', [])
     .directive('importJobRowSubJobs', [function () {
         var controller = ['$scope', 'JobsStore', function ($scope, JobsStore) {
             function init() {
-                console.log('EXPANDED ======= ',$scope.subjobs);
+                // console.log('EXPANDED ======= ',$scope.subjobs);
             }
             $scope.getActionType = function (subjob) {
                 var type = subjob.jobType;
@@ -34,7 +34,23 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
             $scope.getValidation = function (subjob) {
-
+                var recordFound = $scope.getRecordFound(subjob);
+                var recordUploaded = $scope.getRecordUploaded(subjob);
+                if(recordFound === '-' && recordUploaded === '-'){
+                    return 'In Progress'
+                }
+                if(recordFound > 0 && recordUploaded == 0){
+                    return 'Failed';
+                }
+                if(recordFound === recordUploaded){
+                    return 'Success';
+                }
+                if(recordFound != recordUploaded){
+                    return 'Partial Success';
+                }
+                
+                
+                
             }
             $scope.getRecordFound = function (subjob) {
                 if (subjob.reports && subjob.reports.length > 0) {

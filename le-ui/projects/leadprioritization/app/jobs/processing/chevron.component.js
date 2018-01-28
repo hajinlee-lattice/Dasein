@@ -4,27 +4,20 @@ angular.module('lp.jobs.chevron', [])
         var controller = ['$scope', function ($scope) {
             var vm = this;
             vm.failed = false;
-            // vm.jobstatus = $scope.jobstatus;
-            // vm.stepscompleted = $scope.stepscompleted || [];
             vm.stepsconfig = [];
 
 
             function init() {
-                // console.log($scope.stepsconfig);
                 var keys = Object.keys($scope.stepsconfig);
                 for (var i = 0; i < keys.length; i++) {
-                    // console.log($scope.stepsconfig[keys[i]].position);
                     vm.stepsconfig[$scope.stepsconfig[keys[i]].position - 1] = $scope.stepsconfig[keys[i]];
                 }
-
-
-                // console.log(vm.stepsconfig);
-
             }
             init();
 
             vm.isStepDone = function (index) {
-                if (index <= $scope.stepscompleted.length - 1 || $scope.jobStatus == 'Completed') {
+                console.log('Steps completed', $scope.stepscompleted, index);
+                if ((index +1 )  < $scope.stepscompleted.length  || $scope.jobstatus == 'Completed') {
                     return true;
                 } else {
                     return false;
@@ -32,7 +25,7 @@ angular.module('lp.jobs.chevron', [])
             }
             vm.isStepRunning = function (index) {
                 if($scope.jobstatus === 'Running'){
-                    if($scope.stepscompleted.length === index){
+                    if( (index + 1 ) == $scope.stepscompleted.length){
                         return true;
                     }else {
                         return false;
@@ -43,7 +36,7 @@ angular.module('lp.jobs.chevron', [])
             }
             vm.isStepFailed = function (index) {
                 if($scope.jobstatus === 'Failed'){
-                    if($scope.stepscompleted.length === index){
+                    if( (index + 1 ) == $scope.stepscompleted.length){
                         return true;
                     }else {
                         return false;
@@ -52,7 +45,6 @@ angular.module('lp.jobs.chevron', [])
                     return false;
                 }
             }
-            // init();
         }];
 
         return {
