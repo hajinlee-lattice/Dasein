@@ -42,10 +42,7 @@ angular.module('lp.jobs.import.row', [])
 
             function updateJobData(jobUpdated) {
                 $scope.jobStatus = jobUpdated.jobStatus;
-                // console.log('UPDATED ----------------> ', jobUpdated);
-                // $scope.job.subJobs = jobUpdated.subJobs;
                 updateSubjobs(jobUpdated.subJobs);
-                // $scope.job.stepsCompleted = jobUpdated.stepsCompleted;
                 updateStepsCompleted(jobUpdated.stepsCompleted);
                 if ($scope.job.jobStatus !== 'Running') {
                     cancelInterval();
@@ -101,6 +98,7 @@ angular.module('lp.jobs.import.row', [])
             $scope.expandRow = function () {
                 if ($scope.expanded) {
                     $scope.expanded = false;
+                    cancelInterval();
                     resetCollapsedRow();
                 } else {
                     $scope.loading = true;

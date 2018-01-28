@@ -16,7 +16,7 @@ angular.module('lp.jobs.chevron', [])
             init();
 
             vm.isStepDone = function (index) {
-                console.log('Steps completed', $scope.stepscompleted, index);
+                // console.log('Steps completed', $scope.stepscompleted, index);
                 if ((index +1 )  < $scope.stepscompleted.length  || $scope.jobstatus == 'Completed') {
                     return true;
                 } else {

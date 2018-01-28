@@ -196,7 +196,7 @@ angular
                             reports: job.reports,
                             applicationId: job.applicationId,
                             source: source,
-                            modelName: job.inputs.MODEL_DISPLAY_NAME,
+                            modelName: (job.inputs && job.inputs.MODEL_DISPLAY_NAME ? job.inputs.MODEL_DISPLAY_NAME : null) ,
                             modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
                             modelType: job.inputs ? job.inputs.MODEL_TYPE : null,
                             sourceFileExists: job.inputs ? job.inputs.SOURCE_FILE_EXISTS == "true" : null,

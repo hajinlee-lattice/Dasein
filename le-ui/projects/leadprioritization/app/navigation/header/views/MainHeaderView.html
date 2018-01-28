@@ -27,7 +27,7 @@
             </li-->
             <li class="jobs-nav-container">
                 <a class="jobs-nav-gear" ui-sref="home.jobs.status" title="Jobs [{{RunningJobs.length + RunningImportJobs.length}} Running]">
-                    <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0, 'fa fa-spin': (RunningImportJobs = (importJobs | filter: statusImportFilter)).length > 0}" class="ico-container">
+                    <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0 || (RunningImportJobs = (importJobs | filter: statusImportFilter)).length > 0}" class="ico-container">
                         <span class="ico ico-cog ico-black">
                             
                         </span>
