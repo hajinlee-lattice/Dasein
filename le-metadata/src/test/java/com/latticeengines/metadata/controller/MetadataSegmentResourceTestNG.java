@@ -34,9 +34,6 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
     private static final String METADATA_SEGMENT_CREATED_BY = "abc@lattice-engines.com";
     private static final Date CREATED_UPDATED_DATE = new Date();
 
-    private static final String BASE_URL_DATA_COLLECTION = "/metadata/customerspaces/%s/datacollections/";
-    private static final String BASE_URL_METADATA_SEGMENTS = "/metadata/customerspaces/%s/segments/";
-
     @Inject
     private SegmentProxy segmentProxy;
 
@@ -115,6 +112,6 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         segmentProxy.deleteSegmentByName(customerSpace1, METADATA_SEGMENT_NAME);
         segmentProxy.deleteSegmentByName(customerSpace1, METADATA_SEGMENT_NAME_2);
         List<MetadataSegment> retrieved = segmentProxy.getMetadataSegments(customerSpace1);
-        assertEquals(retrieved.size(), 0);
+        assertEquals(retrieved.size(), 1);
     }
 }

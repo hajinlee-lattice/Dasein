@@ -88,7 +88,11 @@ angular.module('lp.segments.segments', [
         $event.preventDefault();
         if ($state.current.name == 'home.segments') {
             // $state.go('home.segment.accounts', {segment: segment.name}, { reload: true } );
-            $state.go('home.segment.explorer.builder', {segment: segment.name}, { reload: true } );
+            if (segment.is_master_segment) {
+                $state.go('home.segment.explorer.attributes', {segment: "Create"}, {reload: true});
+            } else {
+                $state.go('home.segment.explorer.builder', {segment: segment.name}, {reload: true});
+            }
         } else {
             $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );
         };

@@ -50,8 +50,13 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         if (backendSegments == null) {
             return null;
         } else {
-            return segmentProxy.getMetadataSegments(customerSpace).stream() //
-                    .map(this::translateForFrontend).collect(Collectors.toList());
+            return backendSegments.stream() //
+                    .map(this::translateForFrontend)
+                    .sorted((seg1, seg2) -> Boolean.compare( //
+                            Boolean.TRUE.equals(seg1.getMasterSegment()), //
+                            Boolean.TRUE.equals(seg2.getMasterSegment()) //
+                    )) //
+                    .collect(Collectors.toList());
         }
     }
 

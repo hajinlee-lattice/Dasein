@@ -8,6 +8,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -29,6 +31,9 @@ import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalT
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(MetadataSegmentEntityMgrImplTestNG.class);
+
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
 
@@ -74,7 +79,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
     @Test(groups = "functional")
     public void createSegment() throws InterruptedException {
         Date preCreateTime = new Date();
-        System.out.println("Start create test at " + preCreateTime.getTime());
+        log.info("Start create test at " + preCreateTime.getTime());
         Thread.sleep(1000);
 
         METADATA_SEGMENT.setName(SEGMENT_NAME);
@@ -97,19 +102,21 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
         assertFalse(retrieved.getMasterSegment());
 
-        System.out.println("Finish create test at " + new Date().getTime());
+        log.info("Finish create test at " + new Date().getTime());
 
         assertNotNull(retrieved.getCreated());
         assertTrue(preCreateTime.before(retrieved.getCreated()));
+        log.info("Created time is " + retrieved.getCreated().getTime());
         assertNotNull(retrieved.getUpdated());
         assertTrue(preCreateTime.before(retrieved.getUpdated()));
     }
 
     @Test(groups = "functional", dependsOnMethods = "createSegment")
     public void updateSegment() throws InterruptedException {
+        Thread.sleep(1500);
+
         Date preUpdateTime = new Date();
-        System.out.println("Start create test at " + preUpdateTime.getTime());
-        Thread.sleep(1000);
+        log.info("Start create test at " + preUpdateTime.getTime());
 
         MetadataSegment UPDATED_SEGMENT = new MetadataSegment();
         UPDATED_SEGMENT.setPid(METADATA_SEGMENT.getPid());
@@ -145,7 +152,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
         assertNotNull(retrieved);
 
-        System.out.println("Finish update test at " + new Date().getTime());
+        log.info("Finish update test at " + new Date().getTime());
 
         assertTrue(preUpdateTime.after(retrieved.getCreated()),
                 String.format("Created time %d should be before the pre-update time %d", retrieved.getCreated().getTime(),
@@ -159,6 +166,6 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
     public void deleteSegment() {
         MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
         segmentEntityMgr.delete(retrieved);
-        assertEquals(segmentEntityMgr.findAll().size(), 0);
+        assertEquals(segmentEntityMgr.findAll().size(), 1);
     }
 }

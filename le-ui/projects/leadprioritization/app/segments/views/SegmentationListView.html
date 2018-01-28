@@ -36,7 +36,7 @@
                 >
                     <div class="tile-header" ng-if="!vm.tileStates[segment.name].editSegment">
                         <h2 title="{{segment.display_name}}">{{segment.display_name | limitTo: 44 }}{{segment.display_name.length > 44 ? '&hellip;' : ''}}</h2>
-                        <div class="edit">
+                        <div class="edit" ng-if="!segment.is_master_segment">
                             <button
                                     type="button"
                                     ng-click="vm.customMenuClick($event, segment)"

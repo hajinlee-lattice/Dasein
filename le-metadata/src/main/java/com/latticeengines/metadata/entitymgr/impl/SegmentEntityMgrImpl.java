@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -45,20 +44,21 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findByName(String name) {
-        MetadataSegment segment = segmentDao.findByField("name", name);
-        return segment;
+        return segmentDao.findByField("name", name);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<MetadataSegment> findAll() {
-        return super.findAll().stream().filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment()))
-                .collect(Collectors.toList());
+        return super.findAll().stream().collect(Collectors.toList());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void delete(MetadataSegment segment) {
+        if (Boolean.TRUE.equals(segment.getMasterSegment())) {
+            throw new IllegalArgumentException("Cannot delete master segment");
+        }
         segmentDao.update(segment);
         segmentDao.delete(segment);
     }
@@ -101,7 +101,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     public List<MetadataSegment> findAllInCollection(String collectionName) {
         return super.findAll().stream() //
                 .filter(s -> s.getDataCollection().getName().equals(collectionName)) //
-                .filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment())) //
                 .collect(Collectors.toList());
     }
 
@@ -136,15 +135,15 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     }
 
     private MetadataSegment cloneForUpdate(MetadataSegment existing, MetadataSegment incoming) {
-        existing.setAccountRestriction(incoming.getAccountRestriction());
-        existing.setContactRestriction(incoming.getContactRestriction());
-        existing.setMasterSegment(incoming.getMasterSegment());
-        existing.setDisplayName(incoming.getDisplayName());
-        existing.setDescription(incoming.getDescription());
-        existing.setMasterSegment(incoming.getMasterSegment());
         existing.setAccounts(incoming.getAccounts());
         existing.setContacts(incoming.getContacts());
         existing.setProducts(incoming.getProducts());
+        existing.setDisplayName(incoming.getDisplayName());
+        existing.setDescription(incoming.getDescription());
+        if (!Boolean.TRUE.equals(existing.getMasterSegment())) {
+            existing.setAccountRestriction(incoming.getAccountRestriction());
+            existing.setContactRestriction(incoming.getContactRestriction());
+        }
         return existing;
     }
 
