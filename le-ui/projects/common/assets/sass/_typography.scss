@@ -83,7 +83,7 @@ h2 {
 	font-size: 120%; 
 	@include media(">small") {
         font-size: 150%;
-    }
+    } 
     @include media(">medium") {
         font-size: 200%;
     }
@@ -183,6 +183,10 @@ Links
 ========================================================= */
 a {
 	text-decoration: none;
+  pointer: hand;
+  transition: none;
+  -webkit-transition: none;
+  
 	&:link, &:visited {
 		color: $saphire-three;
 	}

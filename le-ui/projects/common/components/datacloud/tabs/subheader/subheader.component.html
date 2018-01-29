@@ -15,9 +15,14 @@
     <ul class="subheader-tabs-links" ng-if="vm.checkState('contacts')">
         <li>Contacts</li>
     </ul>
+    <ul class="subheader-tabs-links" ng-if="vm.checkState('picker')">
+        <li ng-click="vm.clickBuilder()" ng-class="{'active':vm.checkState('builder')}">Back to Query Builder</li>
+        <li ng-if="vm.getPickerItem()">|</li>
+        <li>{{ vm.getPickerItem().item.DisplayName }}</li>
+    </ul>
     <ul class="subheader-tabs-buttons">
         <li class="save-segment">
-<!--             <button class="save button white-button dropdown-container" ng-click="vm.toggleExportDropdown($event)" ng-mouseover="vm.showExportDropdown=true"> 
+            <!--button class="save button white-button dropdown-container" ng-click="vm.toggleExportDropdown($event)" ng-mouseover="vm.showExportDropdown=true"> 
                 <div> 
                     Export 
                     <span class="fa fa-chevron-down" ng-class="{'fa-rotate-180' : vm.showExportDropdown}"></span>

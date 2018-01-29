@@ -15,9 +15,15 @@
     <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()" ng-options="k as v for (k, v) in vm.enum_operations">
     </select>
 
-    <select ng-model="vm.bktVals0" ng-change="vm.changeBktVal(0)">
+    <a ng-click="vm.goToEnumPicker()" href="javascript:void(0)" class="default-link">Add or Remove Values</a>
+
+    <span class="query-section-item-value" ng-model="vm.tree.bucketRestriction.bkt.Vals" ng-change="vm.changeBktVal(0)">
+        <strong ng-repeat="bucket in vm.vals">{{ vm.vals.length > 1 && $index != 0 ? ', ' : ''; }}{{ bucket }}</strong>
+    </span>
+
+    <!--select ng-model="vm.bktVals0" ng-change="vm.changeBktVal(0)">
         <option ng-repeat="bucket in vm.getCubeBktList()" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
-    </select>
+    </select-->
 </span>
 
 <span ng-if="vm.showItem('Numerical')" class="query-section-item-operation">

@@ -107,7 +107,7 @@ div.advanced-query-builder {
             cursor: default;
             z-index: 1;
             
-            & * {
+            & *:not(a) {
                 cursor: default;
             }
             
@@ -237,7 +237,7 @@ div.advanced-query-builder {
 
                     .item-bucket-data {
                         display: inline-block;
-                        max-width: 35%;
+                        max-width: 70%;
                         overflow: hidden;
                         text-overflow: ellipsis;
                         white-space: nowrap;
@@ -273,7 +273,7 @@ div.advanced-query-builder {
                             margin: 0px .25em 0;
                         }
                         
-                        * {
+                        *:not(a) {
                             cursor: default;
                         }
 
@@ -379,6 +379,10 @@ div.advanced-query-builder {
                 // .query-section-item-label strong {
                 //     visibility: hidden;
                 // }
+                
+                .query-section-item-content {
+                    border-right: transparent;
+                }
                 
                 .query-section-item-unused {
                     display: block;

@@ -1,5 +1,5 @@
-angular.module('common.datacloud.analysistabs', [])
-.controller('AnalysisTabsController', function (
+angular.module('common.datacloud.tabs.mydata', [])
+.controller('MyDataTabsController', function (
     $state, $stateParams, FeatureFlagService, DataCloudStore, QueryStore, StateHistory
 ) {
     var vm = this,
@@ -44,14 +44,13 @@ angular.module('common.datacloud.analysistabs', [])
 
     vm.checkState = function(type) {
         var map = {
-            'home.model.analysis.explorer.builder':'builder',
-            'home.segment.explorer.builder':'builder',
-            'home.model.analysis.explorer.attributes':'attributes',
             'home.segment.explorer.attributes':'attributes',
+            'home.segment.explorer.enumpicker':'attributes',
+            'home.segment.explorer.builder':'builder',
             'home.segment.accounts':'accounts',
             'home.segment.contacts':'contacts'
         };
-
+        
         return map[StateHistory.lastTo().name] == type;
     }
 

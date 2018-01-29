@@ -1,7 +1,7 @@
-angular.module('common.datacloud.explorer.subheadertabs', [])
+angular.module('common.datacloud.tabs.subheader', [])
 .controller('SubHeaderTabsController', function(
     $state, $stateParams, $timeout, FeatureFlagService, DataCloudStore, QueryStore, 
-    SegmentService, SegmentStore, HealthService
+    SegmentService, SegmentStore, HealthService, QueryTreeService
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -50,16 +50,17 @@ angular.module('common.datacloud.explorer.subheadertabs', [])
         ];
     }
 
+    vm.getPickerItem = function() {
+        return QueryTreeService.getPickerObject();
+    }
+
     vm.checkState = function(type) {
         var state = $state.current.name;
 
         var map = {
-            'home.model.analysis.explorer.builder':'builder',
-            'home.model.analysis.explorer.attributes':'attributes',
-            'home.model.analysis.accounts':'accounts',
-            'home.model.analysis.contacts':'contacts',
             'home.segment.explorer.attributes':'attributes',
             'home.segment.explorer.builder':'builder',
+            'home.segment.explorer.enumpicker':'picker',
             'home.segment.accounts':'accounts',
             'home.segment.contacts':'contacts'
         };

@@ -55,6 +55,7 @@ angular
     this.MyDataStates = [
         'home.nodata',
         'home.segment.explorer.attributes',
+        'home.segment.explorer.enumpicker',
         'home.segment.explorer.builder',
         'home.segment.accounts',
         'home.segment.contacts'

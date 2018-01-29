@@ -1,7 +1,7 @@
-angular.module('common.datacloud.explorertabs', [
+angular.module('common.datacloud.tabs.datacloud', [
     'mainApp.appCommon.utilities.ResourceUtility'
     ])
-.controller('ExplorerTabsController', function ($state, $stateParams, $scope,
+.controller('DataCloudTabsController', function ($state, $stateParams, $scope,
     FeatureFlagService, BrowserStorageUtility, ResourceUtility, DataCloudStore) {
 
     var vm = this,

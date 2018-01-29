@@ -354,10 +354,10 @@ angular.module('common.datacloud.query.service',[
         return results;
     };
 
-    this.getEntitiesCounts = function() {
+    this.getEntitiesCounts = function(query) {
         var deferred = $q.defer();
 
-        this.GetEntitiesCountsByQuery().then(function(data){
+        this.GetEntitiesCountsByQuery(query).then(function(data){
             QueryStore.setResourceTypeCount('accounts', false, data['Account']);
             QueryStore.setResourceTypeCount('contacts', false, data['Contact']);
             QueryStore.setEntitiesProperty('loading', false);
@@ -565,6 +565,7 @@ angular.module('common.datacloud.query.service',[
 })
 .service('QueryService', function($http, $q, SegmentStore) {
     this.canceler = null;
+    this.cancelerCounts = null;
 
     this.GetCountByQuery = function(resourceType, query, cancelPrevious) {
         if (this.canceler && cancelPrevious) {
@@ -596,11 +597,11 @@ angular.module('common.datacloud.query.service',[
     this.GetEntitiesCounts = function(query, cancelPrevious) {
         var deferred = $q.defer();
 
-        if (this.canceler && cancelPrevious) {
-            this.canceler.resolve("cancelled");
+        if (this.cancelerCounts && cancelPrevious) {
+            this.cancelerCounts.resolve("cancelled");
         }
         
-        this.canceler = $q.defer(); 
+        this.cancelerCounts = $q.defer(); 
 
         SegmentStore.sanitizeSegment(query);
 
@@ -608,7 +609,7 @@ angular.module('common.datacloud.query.service',[
             method: 'POST',
             url: '/pls/entities/counts',
             data: query,
-            timeout: this.canceler.promise,
+            timeout: this.cancelerCounts.promise,
             headers: {
                 'ErrorDisplayMethod': 'none'
             }

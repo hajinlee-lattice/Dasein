@@ -22,7 +22,7 @@ angular
                 root: $scope.root,
                 tree: $scope.tree,
                 parent: $scope.parent,
-                items: $scope.root.items,
+                items: $scope.items,
                 entity: $scope.entity,
                 enrichments: [],
                 enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
@@ -59,7 +59,7 @@ angular
                         }
 
                         if (vm.item) {
-                            vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
+                            vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
                             if (vm.item.cube.Bkts) {
                                 vm.type = vm.item.cube.Bkts.Type;
                             } else {
@@ -174,7 +174,7 @@ angular
                 if (vm.root.mode != 'rules') {
                     vm.records_updating = true;
 
-                    vm.root.updateBucketCount(vm.tree.bucketRestriction).then(function(data) {
+                    QueryTreeService.updateBucketCount(angular.copy(vm.tree.bucketRestriction)).then(function(data) {
                         if (typeof data == 'number') {
                             vm.tree.bucketRestriction.bkt.Cnt = data;
                         }

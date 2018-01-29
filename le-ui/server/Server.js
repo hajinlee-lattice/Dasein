@@ -91,7 +91,7 @@ class Server {
         this.app.use(compress());
 
         // helmet enables/modifies/removes http headers for security concerns
-        //this.app.use(helmet({ frameguard: false }));
+        this.app.use(helmet({ frameguard: false }));
 
         // default cookie behavior - favors security
         /* don't need this yet

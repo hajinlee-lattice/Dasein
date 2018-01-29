@@ -1,7 +1,10 @@
 angular.module('common.datacloud.query.builder.tree.service', [])
-    .service('QueryTreeService', function (QueryTreeAccountEntityService, QueryTreePurchaseHistoryService) {
+    .service('QueryTreeService', function (
+        $q, $http, QueryTreeAccountEntityService, QueryTreePurchaseHistoryService, QueryService
+    ) {
         // console.log('TEST service');
         var QueryTreeService = this;
+
         this.cmpMap = {
             "Yes": "is",
             "No": "is",
@@ -22,10 +25,12 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             'GT_AND_LTE': "is greater than and lesser or equal",
             'GT_AND_LT': "is greater than and less than",
             'IN_COLLECTION': 'in collection',
+            'NOT_IN_COLLECTION': 'is not',
             'CONTAINS': 'contains',
             'NOT_CONTAINS': 'not contains',
             'STARTS_WITH': 'starts with'
         };
+
         this.numerical_operations = {
             'EQUAL': 'Equal',
             'NOT_EQUAL': 'Not Equal',
@@ -34,18 +39,25 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             'LESS_THAN': 'Less Than',
             'LESS_OR_EQUAL': 'Lesser or Equal',
             'GTE_AND_LTE': 'Between'
-        },
-            this.enum_operations = {
-                'EQUAL': 'Is Equal To',
-                'NOT_EQUAL': 'Does Not Equal'
-            };
+        };
+
+        this.enum_operations = {
+            'EQUAL': 'is',
+            'NOT_EQUAL': 'is not',
+            'IN_COLLECTION': 'all of',
+            'NOT_IN_COLLECTION': 'none of'
+        };
+
         this.no_inputs = [
             'IS_NULL',
             'IS_NOT_NULL'
         ];
+
         this.two_inputs = [
             'GTE_AND_LTE'
         ];
+
+        this.prevBucketCountAttr = null;
 
         /**
          * Return the service based on the Entity type
@@ -159,7 +171,6 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         }
 
         this.getAttributeRules = function (bucketRestriction, bkt, bucket, isSameAttribute) {
-            
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             return service.getAttributeRules(bkt, bucket, isSameAttribute);
@@ -265,7 +276,56 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 console.warn(' getCubeBktList() Service not implemented');
             }
         }
-        
+
+        this.setPickerObject = function(attribute) {
+            this.picker_object = attribute;
+        }
+
+        this.getPickerObject = function(attribute) {
+            return this.picker_object;
+        }
+
+        this.getPickerCubeData = function(entity, fieldname) {
+            var deferred = $q.defer();
+
+            $http({
+                method: 'GET',
+                url: '/pls/datacollection/statistics/attrs/' + entity + '/' + fieldname
+            }).then(function(result) {
+                deferred.resolve(result);
+            });
+
+            return deferred.promise;
+        }
+
+        this.updateBucketCount = function(bucketRestriction) {
+            var deferred = $q.defer();
+
+            var segment = {
+                "free_form_text_search": ""
+            };
+
+            this.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
+            segment[this.treeMode + '_restriction'] = {
+                "restriction": {
+                    "bucketRestriction": angular.copy(bucketRestriction)
+                }
+            };
+            if(this.treeMode === 'purchasehistory'){
+                this.treeMode = 'account';
+            }
+            QueryService.GetCountByQuery(
+                this.treeMode + 's', 
+                segment, 
+                bucketRestriction.attr == this.prevBucketCountAttr
+            ).then(function(result) {
+                deferred.resolve(result);
+            });
+            
+            this.prevBucketCountAttr = bucketRestriction.attr;
+
+            return deferred.promise;
+        }
     })
     .service('QueryTreeAccountEntityService', function () {
 
@@ -317,11 +377,12 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             if (!bucketRestriction.bkt) {
                 return;
             }
+            var cmp = bucketRestriction.bkt.Cmp;
 
             switch (type) {
                 case 'Boolean': return cmpMap[bucketRestriction.bkt.Vals[0] || ''];
-                case 'Numerical': return cmpMap[bucketRestriction.bkt.Cmp];
-                case 'Enum': return cmpMap[bucketRestriction.bkt.Cmp];
+                case 'Numerical': return cmpMap[cmp];
+                case 'Enum': return cmp == "EQUAL" || cmp == "IN_COLLECTION" ? 'is' : 'is not';
                 default: return 'has a value of';
             }
         }

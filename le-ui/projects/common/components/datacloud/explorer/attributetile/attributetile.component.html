@@ -128,6 +128,11 @@
                     </ul>
                 </li>
             </ul>
+            <div    class="attributes-more noselect" 
+                    ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)" 
+                    ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Enum'">
+                More
+            </div>
         </div>
     </span>
     <ul class="controls noselect" ng-if="!vm.lookupMode">

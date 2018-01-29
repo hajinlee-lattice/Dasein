@@ -69,7 +69,7 @@
     <div class="query-section-operator item-operator item-operator-or">or</div>
 
     <div class="query-section-item-label">
-        <strong>{{vm.root.getBucketLabel(vm.tree)}}</strong>
+        <strong>{{vm.root.getBucketLabel(vm.tree) || '-'}}</strong>
     </div>
 
     <div    class="query-section-item-content" 
@@ -99,8 +99,7 @@
         <span class="item-edit-controls" ng-if="vm.editing && !vm.unused">
             <button class="button blue-button set-button" 
                     ng-click="vm.setBucket($event)">SET</button>
-            <button class="button gray-button unset-button" 
-                    ng-if="vm.root.mode == 'rules'"
+            <button class="button gray-button unset-button"
                     ng-click="vm.setBucket($event, true)">UNSET</button>
         </span>
     </div>

@@ -8,7 +8,7 @@ angular
             },
             templateUrl: '/components/datacloud/query/advanced/tree/tree-item-edit.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, DataCloudStore, QueryStore, QueryTreeService) {
+            controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
                 var vm = $scope.vm;
                 
                 vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
@@ -18,6 +18,7 @@ angular
 
                 vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
                 vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
+                vm.vals = vm.tree.bucketRestriction.bkt.Vals;
 
                 vm.showEmptyOption = function(){
                     return QueryTreeService.showEmptyOption(vm.tree.bucketRestriction);
@@ -59,6 +60,16 @@ angular
                 vm.changeBktVal = function(position){
                     var val = vm['bktVals'+position];
                     QueryTreeService.changeBktValue(vm.tree.bucketRestriction, val, position);
+                }
+
+                vm.goToEnumPicker = function() {
+                    // console.log('setPicker', vm, vm.tree)
+                    QueryTreeService.setPickerObject({
+                        item: vm.item, 
+                        restriction: vm.tree 
+                    });
+
+                    $state.go('home.segment.explorer.enumpicker', { entity: vm.item.Entity, fieldname: vm.item.ColumnId });
                 }
             }
         }

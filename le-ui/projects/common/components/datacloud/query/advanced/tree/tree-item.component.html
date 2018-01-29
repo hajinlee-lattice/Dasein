@@ -17,6 +17,6 @@
     </span>
 
     <span class="query-section-item-value" ng-if="vm.showItem('Enum')">
-        <strong ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ value }}</strong>
+        <strong ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getOperationValue('Enum').length > 1 && $index != 0 ? ', ' : ''; }}{{ value }}</strong>
     </span>
 </span>

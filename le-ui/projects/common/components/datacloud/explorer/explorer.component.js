@@ -1,6 +1,5 @@
 // grid view multple of 12 (24), dynamic across
 angular.module('common.datacloud.explorer', [
-    'common.datacloud.explorer.subheadertabs',
     'common.datacloud.explorer.filters',
     'common.datacloud.explorer.companyprofile',
     'common.datacloud.explorer.latticeratingcard',
@@ -1531,15 +1530,10 @@ angular.module('common.datacloud.explorer', [
             entity = enrichment.Entity,
             segmentName = $stateParams.segment;
 
-            // if(stat.Rng === undefined){
-            //     var attributeRangeKey = stat.columnId + stat.Lbl;
-            // } else {
-            //     var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
-            // }
-
         if (disable) {
             return false;
         }
+        
         if (entity === 'Transaction'){
             var entity = 'Account';
         }
@@ -1553,26 +1547,10 @@ angular.module('common.datacloud.explorer', [
             bkt: angular.copy(stat)
         });
 
-        // if (entity === 'Account' || entity === 'PurchaseHistory') {
-        //     if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-        //         QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-        //     } else {
-        //         QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-        //     }
-        // } else {
-        //     if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-        //         QueryStore.addContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-        //     } else {
-        //         QueryStore.removeContactRestriction({columnName: attributeKey, resourceType: entity, bkt: angular.copy(stat)});
-        //     }
-        // }
-
         vm.TileTableItems = {};
         if (vm.metadataSegments || QueryRestriction) {
             getExplorerSegments(vm.enrichments);
         }
-
-            // vm.setCurrentRestrictionForSaveButton(); 
 
         vm.checkSaveButtonState();
 
@@ -1662,25 +1640,6 @@ angular.module('common.datacloud.explorer', [
             });
         }
     }
-
-    // vm.getAttributeRules = function(attribute, bucket) {
-    //     var attributes = QueryStore.getDataCloudAttributes(true);
-
-    //     attributes = attributes.filter(function(item) {
-    //         var restriction = item.bucketRestriction,
-    //             isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
-    //             isSameBucket = true,
-    //             bkt = restriction.bkt;
-
-    //         if (bucket && bkt.Vals) {
-    //             isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
-    //         }
-
-    //         return isSameAttribute && isSameBucket;
-    //     });
-
-    //     return attributes;
-    // }
 
     vm.getAttributeRules = function(attribute, bucket) {
         var attributes = QueryStore.getDataCloudAttributes(true);

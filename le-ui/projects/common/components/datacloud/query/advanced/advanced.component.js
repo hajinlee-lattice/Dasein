@@ -345,7 +345,6 @@ angular.module('common.datacloud.query.builder', [
 
     vm.setCurrentSavedTree = function() {
         QueryStore.currentSavedTree = vm.mode == 'segment' ?  angular.copy([ vm.segmentInputTree ]) : angular.copy([ vm.rulesInputTree ]);
-
     }
 
     vm.getBucketLabel = function(bucket) {
@@ -370,7 +369,8 @@ angular.module('common.datacloud.query.builder', [
 
         var current = vm.mode == 'segment' ?  angular.copy([ vm.segmentInputTree ]) : angular.copy([ vm.rulesInputTree ]),
             old = angular.copy(vm.history[vm.history.length -1]) || [];
-        console.log('saveState', current);
+        
+        // console.log('saveState', current);
         if (!vm.compareTree(old, current)) {
             vm.history.push(current);
 
@@ -510,7 +510,6 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.updateCount = function() {
-        vm.prevBucketCountAttr = null;
         QueryStore.setPublicProperty('enableSaveSegmentButton', true);
 
         if (vm.mode == 'rules') {
@@ -559,35 +558,6 @@ angular.module('common.datacloud.query.builder', [
                 });
             }, 250);
         }
-    }
-
-    vm.updateBucketCount = function(bucketRestriction) {
-        var deferred = $q.defer();
-
-        var segment = {
-            "free_form_text_search": ""
-        };
-
-        vm.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
-        segment[vm.treeMode + '_restriction'] = {
-            "restriction": {
-                "bucketRestriction": angular.copy(bucketRestriction)
-            }
-        };
-        if(vm.treeMode === 'purchasehistory'){
-            vm.treeMode = 'account';
-        }
-        QueryService.GetCountByQuery(
-            vm.treeMode + 's', 
-            segment, 
-            bucketRestriction.attr == vm.prevBucketCountAttr
-        ).then(function(result) {
-            deferred.resolve(result);
-        });
-        
-        vm.prevBucketCountAttr = bucketRestriction.attr;
-
-        return deferred.promise;
     }
 
     vm.getRuleRecordCounts = function(restrictions) {

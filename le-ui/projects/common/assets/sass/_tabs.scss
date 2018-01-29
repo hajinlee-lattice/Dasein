@@ -227,16 +227,11 @@ Chunky Interior Tabs (My Data, Play List, etc...)
             &:last-child {
                 border-right: 3px solid #F9F9F9;
             }
-            &:hover {
+            &:hover:not(:active):not(.active) {
                 .tab-container {
-                    border-top-color: #457EBA;
-                    border-bottom-color: transparent;
+                    background-color: #E7E8EA;
+                    border-bottom-color: #F9F9F9;
                     z-index: 1;
-                }
-            }
-            &:active {
-                .tab-container {
-                    border-top-color: #ef6a30;
                 }
             }
             &.active {

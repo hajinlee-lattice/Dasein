@@ -2,8 +2,10 @@ angular
 .module('common.datacloud', [
     'common.datacloud.explorer',
     'common.datacloud.lookup',
-    'common.datacloud.explorertabs',
-    'common.datacloud.analysistabs',
+    'common.datacloud.valuepicker',
+    'common.datacloud.tabs.datacloud',
+    'common.datacloud.tabs.mydata',
+    'common.datacloud.tabs.subheader',
     'common.datacloud.targettabs',
     'common.datacloud.query',
     'common.datacloud.explorer.export',
@@ -132,9 +134,9 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: 'ExplorerTabsController',
+                    controller: 'DataCloudTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/datacloud/datacloud.component.html'
                 },
                 "main@": {
                     controller: 'LookupController',
@@ -168,9 +170,9 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: 'ExplorerTabsController',
+                    controller: 'DataCloudTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/datacloud/datacloud.component.html'
                 },
                 "subsummary@": {
                     controller: function(LookupResponse, LookupStore, BrowserStorageUtility) {
@@ -250,9 +252,9 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: 'ExplorerTabsController',
+                    controller: 'DataCloudTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/datacloud/datacloud.component.html'
                 },
                 "main@": {
                     controller: 'DataCloudController',
@@ -354,14 +356,14 @@ angular
             }),
             views: {
                 "summary@": {
-                    controller: 'AnalysisTabsController',
+                    controller: 'MyDataTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/analysistabs/analysistabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/mydata/mydata.component.html'
                 },
                 "subsummary@": {
                     controller: 'SubHeaderTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/explorer/subheadertabs/subheadertabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/subheader/subheader.component.html'
                 }
             },
             redirectTo: 'home.model.analysis.explorer'
@@ -417,6 +419,29 @@ angular
                     controller: 'AdvancedQueryCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
+                }
+            }
+        },
+        enumpicker: {
+            url: '/picker/:entity/:fieldname',
+            resolve: {
+                PickerBuckets: ['$q', '$stateParams', 'QueryTreeService', 'DataCloudStore', function($q, $stateParams, QueryTreeService, DataCloudStore){
+                    var deferred = $q.defer();
+                    var entity = $stateParams.entity;
+                    var fieldname = $stateParams.fieldname;
+
+                    QueryTreeService.getPickerCubeData(entity, fieldname).then(function(result) {
+                        deferred.resolve(result.data);
+                    });
+                    
+                    return deferred.promise;
+                }]
+            },
+            views: {
+                "main@": {
+                    controller: 'ValuePickerController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/picker/picker.component.html'
                 }
             }
         },
@@ -659,8 +684,9 @@ angular
                     }
                 }]
             }
-        }))
+        })) 
         .state('home.segment.explorer.builder', getState('builder'))
+        .state('home.segment.explorer.enumpicker', getState('enumpicker'))
         .state('home.nodata', getState('nodata'))
         .state('home.segment.accounts', getState('accounts'))
         .state('home.segment.contacts', getState('contacts'))
