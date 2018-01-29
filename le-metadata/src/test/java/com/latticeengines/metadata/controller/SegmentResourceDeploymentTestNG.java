@@ -8,9 +8,8 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -23,15 +22,14 @@ import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGB
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 
 public class SegmentResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(SegmentResourceDeploymentTestNG.class);
 
     private static final String METADATA_SEGMENT_NAME = "MetadataSegment_Name";
     private static final String METADATA_SEGMENT_DISPLAY_NAME = "MetadataSegment_DisplayName";
 
-    protected MetadataSegment metadataSegment;
+    private MetadataSegment metadataSegment;
 
-    @Autowired
-    protected SegmentProxy segmentProxy;
+    @Inject
+    private SegmentProxy segmentProxy;
 
     @Override
     @BeforeClass(groups = "deployment")
@@ -69,8 +67,12 @@ public class SegmentResourceDeploymentTestNG extends MetadataDeploymentTestNGBas
         List<MetadataSegment> metadataSegments = segmentProxy.getMetadataSegments(customerSpace1);
 
         assertNotNull(metadataSegments);
-        assertEquals(metadataSegments.size(), 1);
-        assertEquals(metadataSegments.get(0).getName(), METADATA_SEGMENT_NAME);
+        assertEquals(metadataSegments.size(), 2);
+        metadataSegments.forEach(segment -> {
+            if (!Boolean.TRUE.equals(segment.getMasterSegment())) {
+                assertEquals(segment.getName(), METADATA_SEGMENT_NAME);
+            }
+        });
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testGetSegments")
