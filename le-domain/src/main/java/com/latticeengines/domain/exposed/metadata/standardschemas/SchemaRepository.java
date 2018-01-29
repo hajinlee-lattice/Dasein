@@ -723,9 +723,7 @@ public class SchemaRepository {
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Timestamp) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_YEAR) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .build());
         table.addAttribute(attr(InterfaceName.Quantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet("QUANTITY")) //

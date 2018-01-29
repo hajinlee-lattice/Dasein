@@ -70,7 +70,8 @@ public class StatsCubeUtils {
             InterfaceName.LatticeAccountId.name(), //
             InterfaceName.AccountId.name(), //
             InterfaceName.ContactId.name(), //
-            InterfaceName.ProductId.name());
+            InterfaceName.ProductId.name(), //
+            InterfaceName.CustomerParentAccountID.name());
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
