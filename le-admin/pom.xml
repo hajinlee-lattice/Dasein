@@ -52,8 +52,6 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
-            <exclusions>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
