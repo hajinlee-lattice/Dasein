@@ -182,6 +182,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         for (WorkflowJob workflowJob : workflowJobs) {
+            if (workflowJob == null) {
+                log.warn("Found null workflowJob. Skip checking lastUpdateTime.");
+                continue;
+            }
+
             if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
                 continue;
             }
