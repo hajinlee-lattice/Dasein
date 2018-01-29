@@ -1,0 +1,1373 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "v01",
+    "title": "Lattice Scoring API"
+  },
+  "host": "czas9n05ji.execute-api.us-east-1.amazonaws.com",
+  "basePath": "/v01",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/enrich/record/{uuid}": {
+      "post": {
+        "operationId": "getLeadEnrichmentValues",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "EnrichRequest",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EnrichRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/EnrichResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization",
+            "integration.request.path.uuid": "method.request.path.uuid"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrich/record/{uuid}",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "POST",
+          "type": "http"
+        }
+      }
+    },
+      "/enrichment" : {
+      "get" : {
+        "tags" : [ "enrichment" ],
+        "summary" : "Get list of attributes with specified query parameters",
+        "description" : "",
+        "operationId" : "getLeadEnrichmentAttributes",
+        "parameters" : [ {
+          "name": "Authorization",
+          "in": "header",
+          "required": true,
+          "type": "string"
+        }, {
+          "name" : "attributeDisplayNameFilter",
+          "in" : "query",
+          "description" : "Get attributes with name containing specified text for attributeDisplayNameFilter",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "category",
+          "in" : "query",
+          "description" : "Get attributes with specified category",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "subcategory",
+          "in" : "query",
+          "description" : "Get attributes with specified subcategory",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "onlySelectedAttributes",
+          "in" : "query",
+          "description" : "Should get only selected attribute",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Offset for pagination of matching attributes",
+          "required" : false,
+          "type" : "integer",
+          "format" : "int32"
+        }, {
+          "name" : "max",
+          "in" : "query",
+          "description" : "Maximum number of matching attributes in page",
+          "required" : false,
+          "type" : "integer",
+          "format" : "int32"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/LeadEnrichmentAttribute"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.querystring.subcategory": "method.request.querystring.subcategory",
+            "integration.request.querystring.attributeDisplayNameFilter": "method.request.querystring.attributeDisplayNameFilter",
+            "integration.request.header.Authorization": "method.request.header.Authorization",
+            "integration.request.querystring.category": "method.request.querystring.category",
+            "integration.request.querystring.onlySelectedAttributes": "method.request.querystring.onlySelectedAttributes",
+            "integration.request.querystring.offset": "method.request.querystring.offset",
+            "integration.request.querystring.max": "method.request.querystring.max"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrichment",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/enrichment/categories": {
+      "get": {
+        "operationId": "getLeadEnrichmentCategories",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/ArrayOfEmpty"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrichment/categories",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/enrichment/count": {
+      "get": {
+        "operationId": "getLeadEnrichmentAttributesCount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "subcategory",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "attributeDisplayNameFilter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "onlySelectedAttributes",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.querystring.subcategory": "method.request.querystring.subcategory",
+            "integration.request.querystring.attributeDisplayNameFilter": "method.request.querystring.attributeDisplayNameFilter",
+            "integration.request.header.Authorization": "method.request.header.Authorization",
+            "integration.request.querystring.category": "method.request.querystring.category",
+            "integration.request.querystring.onlySelectedAttributes": "method.request.querystring.onlySelectedAttributes"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrichment/count",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/enrichment/premiumattributeslimitation": {
+      "get": {
+        "operationId": "getLeadEnrichmentPremiumAttributesLimitation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrichment/premiumattributeslimitation",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/enrichment/selectedattributes/count": {
+      "get": {
+        "operationId": "getLeadEnrichmentSelectedAttributeCount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrichment/selectedattributes/count",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/enrichment/selectedpremiumattributes/count": {
+      "get": {
+        "operationId": "getLeadEnrichmentSelectedAttributePremiumCount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrichment/selectedpremiumattributes/count",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/enrichment/subcategories": {
+      "get": {
+        "operationId": "getLeadEnrichmentSubcategories",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization",
+            "integration.request.querystring.category": "method.request.querystring.category"
+          },
+          "uri": "https://${stageVariables.integrationurl}/enrichment/subcategories",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/modeldetails": {
+      "get": {
+        "operationId": "getPaginatedModels",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "maximum",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "considerAllStatus",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "tenantIdentifier",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/ArrayOfModelDetail"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.querystring.start": "method.request.querystring.start",
+            "integration.request.header.Authorization": "method.request.header.Authorization",
+            "integration.request.querystring.maximum": "method.request.querystring.maximum",
+            "integration.request.querystring.considerAllStatus": "method.request.querystring.considerAllStatus",
+            "integration.request.querystring.tenantIdentifier": "method.request.querystring.tenantIdentifier",
+            "integration.request.querystring.offset": "method.request.querystring.offset"
+          },
+          "uri": "https://${stageVariables.integrationurl}/modeldetails",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/modeldetails/count": {
+      "get": {
+        "operationId": "getModelCount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "considerAllStatus",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "tenantIdentifier",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization",
+            "integration.request.querystring.considerAllStatus": "method.request.querystring.considerAllStatus",
+            "integration.request.querystring.tenantIdentifier": "method.request.querystring.tenantIdentifier"
+          },
+          "uri": "https://${stageVariables.integrationurl}/modeldetails/count",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/models/types/{type}": {
+      "get": {
+        "operationId": "getActiveModels",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/ArrayOfModel"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.path.type": "method.request.path.type",
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.integrationurl}/models/{type}",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/models/{modelId}/fields": {
+      "get": {
+        "operationId": "getModelFields",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "modelId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/Fields"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization",
+            "integration.request.path.modelId": "method.request.path.modelId"
+          },
+          "uri": "https://${stageVariables.integrationurl}/models/{modelId}/fields",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      }
+    },
+    "/record": {
+      "post": {
+        "operationId": "scorePercentileRecord",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "ScoreRequest",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScoreRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/ScoreResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.integrationurl}/record",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "POST",
+          "type": "http"
+        }
+      }
+    },
+    "/record/debug": {
+      "post": {
+        "operationId": "scoreProbabilityRecord",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "ScoreRequest",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScoreRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/ScoreResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.integrationurl}/record/debug",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "POST",
+          "type": "http"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "x-api-key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "ArrayOfEmpty": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Empty"
+      }
+    },
+    "EnrichResponseMetadata": {
+      "type": "object",
+      "required": [
+        "requestId",
+        "timestamp"
+      ],
+      "properties": {
+        "warnings": {
+          "type": "array",
+          "description": "Warnings",
+          "items": {
+            "$ref": "#/definitions/Warning"
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The UTC timestamp of this score in ISO8601 format"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "The unique id associated to the request"
+        }
+      }
+    },
+    "Warning": {
+      "type": "object",
+      "properties": {
+        "warning": {
+          "type": "string"
+        },
+        "warning_description": {
+          "type": "string"
+        }
+      }
+    },
+    "EnrichResponse": {
+      "type": "object",
+      "properties": {
+        "enrich_response_metadata": {
+          "$ref": "#/definitions/EnrichResponseMetadata"
+        }
+      }
+    },
+    "RecordScoreResponse": {
+      "type": "object",
+      "required": [
+        "id",
+        "latticeID",
+        "timestamp"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Record ID"
+        },
+        "latticeID": {
+          "type": "string",
+          "description": "Lattice ID for record"
+        },
+        "scoreModelTuple": {
+          "type": "array",
+          "description": "List of score and model tuple",
+          "items": {
+            "$ref": "#/definitions/ScoreModelTuple"
+          }
+        },
+        "enrichmentAttributeValues": {
+          "type": "object",
+          "description": "Enrichment attribute values",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {}
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Warning"
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The UTC timestamp of this score in ISO8601 format"
+        }
+      }
+    },
+    "ScoreRequest": {
+      "type": "object",
+      "required": [
+        "modelId",
+        "record"
+      ],
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "description": "Record ID"
+        },
+        "idType": {
+          "type": "string",
+          "description": "Type of record ID"
+        },
+        "modelId": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "description": "Name of the source system that originated this score request."
+        },
+        "performEnrichment": {
+          "type": "boolean",
+          "description": "Should perform enrichment or not"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Name of the rule that initiated this score request"
+        },
+        "record": {
+          "type": "object",
+          "description": "A record is represented as a JSON Object; ie. { \"field1\" : value1, \"field2\" : value2, .......}. At the minimum, in case of lead type model, make sure to specify 'Email' field and for non-lead type model specify either 'Website' or 'Domain' fields. If these fields are not specified then specify both 'CompanyName' and 'State' fields",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      }
+    },
+    "ArrayOfRecordScoreResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/RecordScoreResponse"
+      }
+    },
+    "ScoreResponse": {
+      "type": "object",
+      "required": [
+        "id",
+        "latticeID",
+        "timestamp"
+      ],
+      "properties": {
+        "warnings": {
+          "type": "array",
+          "description": "Warnings",
+          "items": {
+            "$ref": "#/definitions/Warning"
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The UTC timestamp of this score in ISO8601 format"
+        },
+        "id": {
+          "type": "string",
+          "description": "Record ID"
+        },
+        "latticeID": {
+          "type": "string",
+          "description": "Lattice ID for record"
+        },
+        "score": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Score"
+        },
+        "rating": {
+          "type": "string",
+          "description": "Bucket Information Based on Score"
+        },
+        "classification": {
+          "type": "string",
+          "description": "Classification"
+        },
+        "enrichmentAttributeValues": {
+          "type": "object",
+          "description": "Enrichment attribute values",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      }
+    },
+    "ScoreModelTuple": {
+      "type": "object",
+      "properties": {
+        "probability": {
+          "type": "number",
+          "format": "double"
+        },
+        "modelId": {
+          "type": "string",
+          "description": "Model ID"
+        },
+        "score": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Score"
+        },
+        "rating": {
+          "type": "string",
+          "description": "Bucket Information Based on Score"
+        },
+        "error": {
+          "type": "string",
+          "description": "Error"
+        },
+        "errorDescription": {
+          "type": "string",
+          "description": "ErrorDescription"
+        }
+      }
+    },
+    "Field": {
+      "type": "object",
+      "required": [
+        "fieldName",
+        "fieldType"
+      ],
+      "properties": {
+        "fieldName": {
+          "type": "string",
+          "description": "Name of the field"
+        },
+        "fieldType": {
+          "type": "string",
+          "description": "Data type of the field",
+          "enum": [
+            "BOOLEAN",
+            "INTEGER",
+            "FLOAT",
+            "LONG",
+            "STRING"
+          ]
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the field"
+        },
+        "isPrimary": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Empty": {
+      "type": "object",
+      "title": "Empty Schema"
+    },
+    "Fields": {
+      "type": "object",
+      "required": [
+        "fields",
+        "modelId",
+        "validationExpression"
+      ],
+      "properties": {
+        "modelId": {
+          "type": "string",
+          "description": "Unique model id"
+        },
+        "fields": {
+          "type": "array",
+          "description": "List of field",
+          "items": {
+            "$ref": "#/definitions/Field"
+          }
+        },
+        "validationExpression": {
+          "type": "string",
+          "description": "Validation Expression"
+        }
+      }
+    },
+    "JsonNode" : {
+      "type" : "object",
+      "properties" : {
+        "array" : {
+          "type" : "boolean"
+        },
+        "null" : {
+          "type" : "boolean"
+        },
+        "number" : {
+          "type" : "boolean"
+        },
+        "int" : {
+          "type" : "boolean"
+        },
+        "object" : {
+          "type" : "boolean"
+        },
+        "valueNode" : {
+          "type" : "boolean"
+        },
+        "containerNode" : {
+          "type" : "boolean"
+        },
+        "missingNode" : {
+          "type" : "boolean"
+        },
+        "pojo" : {
+          "type" : "boolean"
+        },
+        "integralNumber" : {
+          "type" : "boolean"
+        },
+        "floatingPointNumber" : {
+          "type" : "boolean"
+        },
+        "short" : {
+          "type" : "boolean"
+        },
+        "long" : {
+          "type" : "boolean"
+        },
+        "double" : {
+          "type" : "boolean"
+        },
+        "bigDecimal" : {
+          "type" : "boolean"
+        },
+        "bigInteger" : {
+          "type" : "boolean"
+        },
+        "textual" : {
+          "type" : "boolean"
+        },
+        "boolean" : {
+          "type" : "boolean"
+        },
+        "binary" : {
+          "type" : "boolean"
+        },
+        "nodeType" : {
+          "type" : "string",
+          "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
+        },
+        "float" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "LeadEnrichmentAttribute" : {
+      "type" : "object",
+      "properties" : {
+        "DisplayName" : {
+          "type" : "string"
+        },
+        "FieldName" : {
+          "type" : "string"
+        },
+        "FieldNameInTarget" : {
+          "type" : "string"
+        },
+        "FieldType" : {
+          "type" : "string"
+        },
+        "FieldJavaType" : {
+          "type" : "string"
+        },
+        "ColumnId" : {
+          "type" : "string"
+        },
+        "JavaClass" : {
+          "type" : "string"
+        },
+        "CustomerColumnName" : {
+          "type" : "string"
+        },
+        "DataSource" : {
+          "type" : "string"
+        },
+        "Description" : {
+          "type" : "string"
+        },
+        "IsSelected" : {
+          "type" : "boolean"
+        },
+        "IsPremium" : {
+          "type" : "boolean"
+        },
+        "Category" : {
+          "type" : "string"
+        },
+        "Subcategory" : {
+          "type" : "string"
+        },
+        "IsInternal" : {
+          "type" : "boolean"
+        },
+        "AttributeFlagsMap" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/JsonNode"
+          }
+        },
+        "ImportanceOrdering" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "FundamentalType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "BulkRecordScoreRequest": {
+      "type": "object",
+      "required": [
+        "records"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Name of the source system that originated this score request."
+        },
+        "records": {
+          "type": "array",
+          "description": "List of records",
+          "items": {
+            "$ref": "#/definitions/Record"
+          }
+        }
+      }
+    },
+    "ArrayOfModel": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Model"
+      }
+    },
+    "Model": {
+      "type": "object",
+      "required": [
+        "modelId",
+        "type"
+      ],
+      "properties": {
+        "modelId": {
+          "type": "string",
+          "description": "Unique model id"
+        },
+        "name": {
+          "type": "string",
+          "description": "User customizable model name"
+        },
+        "type": {
+          "type": "string",
+          "description": "Model Type",
+          "enum": [
+            "account",
+            "contact"
+          ]
+        }
+      }
+    },
+    "ModelDetail": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "description": "Model",
+          "$ref": "#/definitions/Model"
+        },
+        "status": {
+          "type": "string",
+          "description": "Model status enum (Active, Deactive, Deleted)",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "DELETED"
+          ]
+        },
+        "fields": {
+          "description": "Model fields",
+          "$ref": "#/definitions/Fields"
+        },
+        "lastModifiedTimestamp": {
+          "type": "string",
+          "description": "Last modified timestamp in ISO8601 format "
+        }
+      }
+    },
+    "Record": {
+      "type": "object",
+      "required": [
+        "modelAttributeValuesMap"
+      ],
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "description": "Record ID"
+        },
+        "idType": {
+          "type": "string",
+          "description": "Type of record ID"
+        },
+        "modelAttributeValuesMap": {
+          "type": "object",
+          "description": "Map of model ID and attributeValues. In attributeValues (Map < String, Object > ) for a corresponding model ID, field names and values should be specified. At the minimum, in case of lead type model, make sure to specify 'Email' field and for non-lead type model specify either 'Website' or 'Domain' fields. If these fields are not specified then specify both 'CompanyName' and 'State' fields",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        },
+        "performEnrichment": {
+          "type": "boolean",
+          "description": "Should perform enrichment or not"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Name of the rule that initiated score request for this record"
+        }
+      }
+    },
+    "ArrayOfModelDetail": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ModelDetail"
+      }
+    },
+    "EnrichRequest": {
+      "type": "object",
+      "required": [
+        "Domain"
+      ],
+      "properties": {
+        "Domain": {
+          "type": "string",
+          "description": "Domain"
+        },
+        "Company": {
+          "type": "string",
+          "description": "Company"
+        },
+        "State": {
+          "type": "string",
+          "description": "State"
+        },
+        "Country": {
+          "type": "string",
+          "description": "Country"
+        },
+        "source": {
+          "type": "string",
+          "description": "Name of the source system that originated this score request."
+        },
+        "DUNS": {
+          "type": "string",
+          "description": "DUNS"
+        }
+      }
+    }
+  }
+}
