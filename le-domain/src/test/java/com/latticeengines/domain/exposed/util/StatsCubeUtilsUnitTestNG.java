@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -29,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
@@ -36,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 
 public class StatsCubeUtilsUnitTestNG {
 
@@ -73,8 +73,17 @@ public class StatsCubeUtilsUnitTestNG {
             cmMap.put(entity.name(), table.getColumnMetadata());
         }
 
+        is = readResource("productData.json");
+        DataPage dataPage = JsonUtils.deserialize(is, DataPage.class);
+        Map<String, String> productMap = new HashMap<>();
+        dataPage.getData().forEach(row -> productMap.put( //
+                (String) row.get(InterfaceName.ProductId.name()), //
+                (String) row.get(InterfaceName.ProductName.name()) //
+        ));
+
         TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
-        JsonUtils.serialize(topNTree, new FileOutputStream(new File("tree.json")));
+        StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
+        // JsonUtils.serialize(topNTree, new FileOutputStream(new File("tree.json")));
 
         verifyDateAttrInTopN(topNTree, cmMap);
         StatsCube cube = StatsCubeUtils.retainTop5Bkts(cubes.get(BusinessEntity.Account.name()));
@@ -83,6 +92,8 @@ public class StatsCubeUtilsUnitTestNG {
         verifyTechTopN(topNTree.getCategories().get(Category.WEBSITE_PROFILE), cube);
         verifyTechTopN(topNTree.getCategories().get(Category.TECHNOLOGY_PROFILE), cube);
         verifyPurchaseHistoryTopN(topNTree.getCategories().get(Category.PRODUCT_SPEND));
+
+        System.out.println(JsonUtils.serialize(topNTree.getCategory(Category.PRODUCT_SPEND)));
     }
 
     private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
@@ -232,10 +243,6 @@ public class StatsCubeUtilsUnitTestNG {
                 Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Date);
             });
         })));
-    }
-
-    private void verifyDateAttrInCube(StatsCube cube) {
-        Assert.assertFalse(cube.getStatistics().containsKey("AlexaOnlineSince"));
     }
 
     private void assertSameBucket(Bucket bkt1, Bucket bkt2) {

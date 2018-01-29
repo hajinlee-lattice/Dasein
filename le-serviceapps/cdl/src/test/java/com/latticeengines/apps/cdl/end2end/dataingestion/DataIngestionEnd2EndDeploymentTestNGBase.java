@@ -673,7 +673,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 null, false);
         Bucket purchaseBkt = Bucket.txnBkt(txn);
         BucketRestriction purchaseRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyName"), purchaseBkt);
+                new AttributeLookup(BusinessEntity.Transaction, "AnyName"), purchaseBkt);
         Restriction accountRestriction = Restriction.builder().and(websiteRestriction, purchaseRestriction).build();
 
         Bucket titleBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("Buyer"));

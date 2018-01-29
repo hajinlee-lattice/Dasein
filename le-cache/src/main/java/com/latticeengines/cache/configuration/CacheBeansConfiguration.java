@@ -77,12 +77,14 @@ public class CacheBeansConfiguration implements CachingConfigurer {
 
         Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
         config.put(CacheName.DataLakeCMCache.name(), dataLakeCMCacheConfig);
+        config.put(CacheName.DataLakeTopNTreeCache.name(), dataLakeStatsCacheConfig);
         config.put(CacheName.DataLakeStatsCubesCache.name(), dataLakeStatsCacheConfig);
 
         config.put(CacheName.EntityCountCache.name(), entityCountCacheConfig);
         config.put(CacheName.EntityDataCache.name(), entityDataCacheConfig);
         config.put(CacheName.EntityRatingCountCache.name(), entityRatingCountCacheConfig);
         config.put(CacheName.RatingCoverageCache.name(), entityRatingCountCacheConfig);
+
         config.put(CacheName.MetadataCache.name(), metadataCacheConfig);
         config.put(CacheName.SessionCache.name(), sessionCacheConfig);
 

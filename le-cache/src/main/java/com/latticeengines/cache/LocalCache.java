@@ -92,7 +92,7 @@ public class LocalCache<K, V> implements Cache {
     @SuppressWarnings("unchecked")
     @Override
     public void put(Object key, Object value) {
-        cache.put((K) key, (V) value);
+        // cache.put((K) key, (V) value);
         NodeWatcher.notifyCacheWatchersAsync(cache.getCacheName(),
                 CacheUtils.getKeyOperation(CacheOperation.Put, key.toString()));
         try {

@@ -20,6 +20,8 @@ public interface DataLakeService {
 
     TopNTree getTopNTree();
 
+    TopNTree getTopNTree(String customerSpace);
+
     Map<String, StatsCube> getStatsCubes();
 
     Map<String, StatsCube> getStatsCubes(String customerSpace);

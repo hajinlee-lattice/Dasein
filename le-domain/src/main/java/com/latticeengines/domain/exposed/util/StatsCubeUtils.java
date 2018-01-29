@@ -337,6 +337,21 @@ public class StatsCubeUtils {
         return attributeStats;
     }
 
+    public static void processPurchaseHistoryCategory(TopNTree topNTree, Map<String, String> productMap) {
+        CategoryTopNTree catTopNTree = topNTree.getCategory(Category.PRODUCT_SPEND);
+        Map<String, List<TopAttribute>> subcatMap = new HashMap<>();
+        catTopNTree.getSubcategories().values().forEach(attrs -> attrs.forEach(attr -> {
+            String prodId = TransactionMetrics.getProductIdFromAttr(attr.getAttribute());
+            String prodName = productMap.get(prodId);
+            String subcategory = StringUtils.isNotBlank(prodName) ? prodName : "Other";
+            if (!subcatMap.containsKey(subcategory)) {
+                subcatMap.put(subcategory, new ArrayList<>());
+            }
+            subcatMap.get(subcategory).add(attr);
+        }));
+        catTopNTree.setSubcategories(subcatMap);
+    }
+
     public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap,
                                              Map<String, List<ColumnMetadata>> cmMap,
                                              boolean includeTopBkt) {

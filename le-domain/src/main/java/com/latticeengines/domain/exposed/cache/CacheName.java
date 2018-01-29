@@ -4,6 +4,7 @@ public enum CacheName {
 
     PLSCache(Constants.PLSCacheName), //
     DataLakeCMCache(Constants.DataLakeCMCacheName), //
+    DataLakeTopNTreeCache(Constants.DataLakeTopNTreeCache), //
     DataLakeStatsCubesCache(Constants.DataLakeStatsCubesCache), //
     EntityCountCache(Constants.EntityCountCacheName), //
     EntityDataCache(Constants.EntityDataCacheName), //
@@ -26,12 +27,20 @@ public enum CacheName {
     }
 
     public static CacheName[] getCdlCacheGroup() {
-        return new CacheName[] { DataLakeStatsCubesCache, DataLakeCMCache, EntityCountCache, EntityDataCache,
-                EntityRatingCountCache, RatingCoverageCache };
+        return new CacheName[] { //
+                DataLakeStatsCubesCache, //
+                DataLakeTopNTreeCache, //
+                DataLakeCMCache, //
+                EntityCountCache, //
+                EntityDataCache, //
+                EntityRatingCountCache, //
+                RatingCoverageCache //
+        };
     }
 
     public static class Constants {
         public static final String PLSCacheName = "PLSCache";
+        public static final String DataLakeTopNTreeCache = "DataLakeTopNTreeCache";
         public static final String DataLakeCMCacheName = "DataLakeCMCache";
         public static final String DataLakeStatsCubesCache = "DataLakeStatsCubesCache";
         public static final String EntityCountCacheName = "EntityCountCache";

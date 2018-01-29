@@ -113,7 +113,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         timeFilter.setPeriod(TimeFilter.Period.Quarter.name());
         Bucket.Transaction txn2 = new Bucket.Transaction(PRODUCT_ID, timeFilter, null, null, false);
 
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction restriction1 = new BucketRestriction(attrLookup, Bucket.txnBkt(txn1));
@@ -137,7 +137,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
     }
 
     private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
@@ -152,7 +152,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
     }
 
     private long countTxnBktForScoring(Bucket.Transaction txn) {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
         return countRestrictionForScoring(restriction);
@@ -183,7 +183,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
     }
 
     private long countTxnBktForTraining(Bucket.Transaction txn) {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Bucket bucket = Bucket.txnBkt(txn);
@@ -196,11 +196,13 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
     }
 
     private long countTxnBktForEvent(Bucket.Transaction txn) {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
+
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);

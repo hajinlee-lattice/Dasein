@@ -217,7 +217,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     }
 
     private Restriction getTxnRestriction(Bucket.Transaction txn) {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         return new BucketRestriction(attrLookup, bucket);
     }
@@ -230,7 +230,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
                 .build();
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.PurchaseHistory, "AnyThing");
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction txRestriction = new BucketRestriction(attrLookup, bucket);
         Restriction logicalRestriction = Restriction.builder().and(restriction1, txRestriction).build();
