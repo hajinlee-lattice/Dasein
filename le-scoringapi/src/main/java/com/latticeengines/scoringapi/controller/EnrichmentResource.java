@@ -91,8 +91,7 @@ public class EnrichmentResource {
     // }
     // }
 
-    @RequestMapping(value = "", //
-            method = RequestMethod.GET, //
+    @RequestMapping(method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with specified query parameters")

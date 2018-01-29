@@ -125,6 +125,56 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>3.1.6</version>
+                <configuration>
+                    <apiSources>
+                      <apiSource>
+                            <springmvc>true</springmvc>
+                            <locations>
+                                <location>com.latticeengines.scoringapi.controller</location>
+                            </locations>
+                            <schemes>https</schemes>
+                            <!--  <host>api.lattice-engines.com</host> -->
+                            <basePath>/score</basePath>
+                            <info>
+                                <title>Swagger Documentation for Lattice Scoring API</title>
+                                <version>v1</version>
+                                <description>Swagger Documentation for Lattice Scoring API</description>
+                                <termsOfService>
+                                    http://lattice-engines.com
+                                </termsOfService>
+                                <contact>
+                                    <url>http://lattice-engines.com </url>
+                                </contact>
+                            </info>
+                            <!-- 
+                            <securityDefinitions>
+	                            <securityDefinition>
+	                                <type>apiKey</type>
+	                                <name>Authorization</name>
+	                                <in>header</in>
+	                            </securityDefinition>
+                            </securityDefinitions>
+                            
+                            <templatePath>${basedir}/templates/strapdown.html.hbs</templatePath>
+                            <outputPath>${basedir}/target/swagger-gen/document.html</outputPath>
+                             -->
+                            <swaggerDirectory>target/swagger-gen</swaggerDirectory>
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
