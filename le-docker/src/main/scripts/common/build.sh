@@ -16,37 +16,37 @@ build_docker() {
 
 NO_CACHE=$1
 
-#pushd le-centos7
-#build_docker latticeengines/centos7 ${NO_CACHE}
-#popd
-#
-#pushd le-ubuntu
-#build_docker latticeengines/ubuntu ${NO_CACHE}
-#popd
-#
-#pushd le-centos
-#build_docker latticeengines/centos ${NO_CACHE}
-#popd
-#
-#pushd le-jdk
-#build_docker latticeengines/jdk ${NO_CACHE}
-#docker tag latticeengines/jdk:latest latticeengines/jdk:1.8
-#popd
-#
-#pushd le-jre
-#build_docker latticeengines/jre ${NO_CACHE}
-#docker tag latticeengines/jre:latest latticeengines/jre:1.8
-#popd
-#
-#pushd le-jre-c7
-#build_docker latticeengines/jrec7 ${NO_CACHE}
-#docker tag latticeengines/jrec7:latest latticeengines/jrec7:1.8
-#popd
-#
-#pushd le-tomcat
-#build_docker latticeengines/tomcat ${NO_CACHE}
-#docker tag latticeengines/tomcat:latest latticeengines/tomcat:8.5
-#popd
+pushd le-centos7
+build_docker latticeengines/centos7 ${NO_CACHE}
+popd
+
+pushd le-ubuntu
+build_docker latticeengines/ubuntu ${NO_CACHE}
+popd
+
+pushd le-centos
+build_docker latticeengines/centos ${NO_CACHE}
+popd
+
+pushd le-jdk
+build_docker latticeengines/jdk ${NO_CACHE}
+docker tag latticeengines/jdk:latest latticeengines/jdk:1.8
+popd
+
+pushd le-jre
+build_docker latticeengines/jre ${NO_CACHE}
+docker tag latticeengines/jre:latest latticeengines/jre:1.8
+popd
+
+pushd le-jre-c7
+build_docker latticeengines/jrec7 ${NO_CACHE}
+docker tag latticeengines/jrec7:latest latticeengines/jrec7:1.8
+popd
+
+pushd le-tomcat
+build_docker latticeengines/tomcat ${NO_CACHE}
+docker tag latticeengines/tomcat:latest latticeengines/tomcat:8.5
+popd
 
 pushd le-tomcat-c7
 build_docker latticeengines/tomcatc7 ${NO_CACHE}
