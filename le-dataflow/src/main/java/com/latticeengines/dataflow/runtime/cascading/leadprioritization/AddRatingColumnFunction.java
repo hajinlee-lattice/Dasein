@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -58,46 +59,9 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
 
     protected String bucketScore(List<BucketMetadata> bucketMetadataList, double score) {
         BucketName bucketName = null;
-        int min = Integer.MAX_VALUE;
-        int max = Integer.MIN_VALUE;
-        BucketName minBucket = null;
-        BucketName maxBucket = null;
-        boolean withinRange = false;
-        if (bucketMetadataList != null && !bucketMetadataList.isEmpty()) {
-            for (BucketMetadata bucketMetadata : bucketMetadataList) {
-                // leftBoundScore is the upper bound, and the rightBoundScore is
-                // the lower bound
-                int leftBoundScore = bucketMetadata.getLeftBoundScore();
-                int rightBoundScore = bucketMetadata.getRightBoundScore();
-                BucketName currentBucketName = bucketMetadata.getBucket();
-                if (rightBoundScore < min) {
-                    min = rightBoundScore;
-                    minBucket = currentBucketName;
-                }
-                if (leftBoundScore > max) {
-                    max = leftBoundScore;
-                    maxBucket = currentBucketName;
-                }
-                if (score >= rightBoundScore && score <= leftBoundScore) {
-                    withinRange = true;
-                    bucketName = currentBucketName;
-                    break;
-                }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("min: %d, manx: %d", min, max));
-            }
-            if (min > max) {
-                throw new RuntimeException("Bucket metadata has wrong buckets");
-            }
 
-            if (!withinRange && score < min) {
-                log.warn(String.format("%f is less than minimum bound, setting to %s", score, minBucket.toString()));
-                bucketName = minBucket;
-            } else if (!withinRange && score > max) {
-                log.warn(String.format("%f is more than maximum bound, setting to %s", score, maxBucket.toString()));
-                bucketName = maxBucket;
-            }
+        if (bucketMetadataList != null && !bucketMetadataList.isEmpty()) {
+            bucketName = BucketMetadataUtils.bucketMetadata(bucketMetadataList, score).getBucket();
         } else {
             // use default bucketing criteria
             if (log.isDebugEnabled()) {
