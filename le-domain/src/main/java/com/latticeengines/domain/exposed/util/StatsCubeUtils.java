@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
@@ -64,6 +65,12 @@ public class StatsCubeUtils {
             DataCloudConstants.ATTR_LDC_INDUSTRY //
     );
     static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s", NamedPeriod.HASEVER.getName(), "Purchased");
+
+    private static final Set<String> SYSTEM_ATTRS = Sets.newHashSet( //
+            InterfaceName.LatticeAccountId.name(), //
+            InterfaceName.AccountId.name(), //
+            InterfaceName.ContactId.name(), //
+            InterfaceName.ProductId.name());
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
@@ -300,7 +307,7 @@ public class StatsCubeUtils {
     }
 
     private static boolean shouldHideAttr(ColumnMetadata cm) {
-        return isDateAttribute(cm);
+        return isDateAttribute(cm) || isSystemAttribute(cm);
     }
 
     private static boolean isDateAttribute(ColumnMetadata cm) {
@@ -309,24 +316,8 @@ public class StatsCubeUtils {
                 || LogicalDataType.Timestamp.equals(cm.getLogicalDataType());
     }
 
-    public static StatsCube toStatsCube(Statistics statistics, List<ColumnMetadata> cms) {
-        Map<Category, Set<String>> attrsToHide = getAttrsToHide(cms);
-        StatsCube cube = new StatsCube();
-        Map<String, AttributeStats> stats = new HashMap<>();
-        for (Map.Entry<Category, CategoryStatistics> catStatsEntry : statistics.getCategories().entrySet()) {
-            Category cat = catStatsEntry.getKey();
-            CategoryStatistics catStats = catStatsEntry.getValue();
-            for (SubcategoryStatistics subCatStats : catStats.getSubcategories().values()) {
-                for (Map.Entry<AttributeLookup, AttributeStats> entry : subCatStats.getAttributes().entrySet()) {
-                    if (attrsToHide.get(cat) == null || !attrsToHide.get(cat).contains(entry.getKey().getAttribute())) {
-                        stats.put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
-                    }
-
-                }
-            }
-        }
-        cube.setStatistics(stats);
-        return cube;
+    private static boolean isSystemAttribute(ColumnMetadata cm) {
+        return SYSTEM_ATTRS.contains(cm.getName());
     }
 
     private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {
@@ -410,72 +401,6 @@ public class StatsCubeUtils {
         if (includeTopBkt && attributeStats.getBuckets() != null) {
             Comparator<Bucket> comparator = getBktComparatorForCategory(category);
             Bucket topBkt = getTopBkt(attributeStats, comparator);
-            if (topBkt != null) {
-                topAttribute.setTopBkt(topBkt);
-            }
-        }
-        return topAttribute;
-    }
-
-
-    public static TopNTree toTopNTree(Statistics statistics, boolean includeTopBkt, List<ColumnMetadata> cms) {
-        TopNTree topNTree = new TopNTree();
-        Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
-        for (Map.Entry<Category, CategoryStatistics> entry : statistics.getCategories().entrySet()) {
-            catTrees.put(entry.getKey(),
-                    toCatTopTree(entry.getKey(), entry.getValue(), includeTopBkt, getAttrsToHide(cms)));
-        }
-        topNTree.setCategories(catTrees);
-        return topNTree;
-    }
-
-    private static Map<Category, Set<String>> getAttrsToHide(List<ColumnMetadata> cms) {
-        Map<Category, Set<String>> attrsToHide = new HashMap<>();
-        if (cms == null) {
-            return attrsToHide;
-        }
-        for (ColumnMetadata cm : cms) {
-            if (FundamentalType.DATE.equals(cm.getFundamentalType())
-                    || LogicalDataType.Date.equals(cm.getLogicalDataType())
-                    || LogicalDataType.Timestamp.equals(cm.getLogicalDataType())) {
-                if (!attrsToHide.containsKey(cm.getCategory())) {
-                    attrsToHide.put(cm.getCategory(), new HashSet<>());
-                }
-                attrsToHide.get(cm.getCategory()).add(cm.getColumnId());
-            }
-        }
-        return attrsToHide;
-    }
-
-    private static CategoryTopNTree toCatTopTree(Category category, CategoryStatistics catStats, boolean includeTopBkt,
-            Map<Category, Set<String>> attrsToHide) {
-        CategoryTopNTree topNTree = new CategoryTopNTree();
-        Map<String, List<TopAttribute>> subCatTrees = new HashMap<>();
-        for (Map.Entry<String, SubcategoryStatistics> entry : catStats.getSubcategories().entrySet()) {
-            subCatTrees.put(entry.getKey(), toSubcatTopTree(category, entry.getValue(), includeTopBkt, attrsToHide));
-        }
-        topNTree.setSubcategories(subCatTrees);
-        return topNTree;
-    }
-
-    private static List<TopAttribute> toSubcatTopTree(Category category, SubcategoryStatistics catStats,
-            boolean includeTopBkt, Map<Category, Set<String>> attrsToHide) {
-        Comparator<Map.Entry<AttributeLookup, AttributeStats>> comparator = getAttrComparatorForCategory(category);
-        return catStats.getAttributes().entrySet().stream() //
-                .sorted(comparator) //
-                .map(entry -> toTopAttr(category, entry, includeTopBkt)) //
-                .filter(attr -> attrsToHide.get(category) == null
-                        || !attrsToHide.get(category).contains(attr.getAttribute()))
-                .collect(Collectors.toList());
-    }
-
-    private static TopAttribute toTopAttr(Category category, Map.Entry<AttributeLookup, AttributeStats> entry,
-            boolean includeTopBkt) {
-        AttributeStats stats = entry.getValue();
-        TopAttribute topAttribute = new TopAttribute(entry.getKey(), stats.getNonNullCount());
-        if (includeTopBkt && stats.getBuckets() != null) {
-            Comparator<Bucket> comparator = getBktComparatorForCategory(category);
-            Bucket topBkt = getTopBkt(stats, comparator);
             if (topBkt != null) {
                 topAttribute.setTopBkt(topBkt);
             }

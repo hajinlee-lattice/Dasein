@@ -78,8 +78,8 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         enrichTableSchema(servingStoreTable);
         metadataProxy.updateTable(configuration.getCustomerSpace().toString(), ratingTableName, servingStoreTable);
 
-        // updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
-        // updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
+        updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
     }
 

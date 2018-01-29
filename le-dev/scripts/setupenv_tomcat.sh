@@ -6,7 +6,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
     TOMCAT_MAJOR=8
-    TOMCAT_VERSION=8.5.24
+    TOMCAT_VERSION=8.5.27
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
@@ -26,11 +26,12 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${CATALINA_HOME}/webapps/ROOT
 fi
 
-cp ${WSHOME}/le-dev/tomcat/server.xml ${CATALINA_HOME}/conf/server.xml
-cp ${WSHOME}/le-dev/tomcat/web.xml ${CATALINA_HOME}/conf/web.xml
-cp ${WSHOME}/le-dev/tomcat/context.xml ${CATALINA_HOME}/conf/context.xml
-cp ${WSHOME}/le-dev/tomcat/catalina.properties ${CATALINA_HOME}/conf/catalina.properties
-cp ${WSHOME}/le-dev/tomcat/tomcat-users.xml ${CATALINA_HOME}/conf/tomcat-users.xml
+for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-users.xml'; do
+    cp ${CATALINA_HOME}/conf/${file} ${CATALINA_HOME}/conf/${file}.BAK
+    cp ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
+done
+
+cp ${CATALINA_HOME}/bin/catalina.sh ${CATALINA_HOME}/bin/catalina.sh.BAK
 cp ${WSHOME}/le-dev/tomcat/catalina.sh ${CATALINA_HOME}/bin/catalina.sh
 
 mkdir -p ${CATALINA_HOME}/webapps/ms || true
