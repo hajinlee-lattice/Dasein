@@ -16,6 +16,18 @@ if [ -f "/etc/ledp/ledp_keystore.jks" ]; then
     chmod 600 /etc/pki/java/cacerts
 fi
 
+if [ -f "/etc/ledp/lattice.crt" ]; then
+    echo "Copying /etc/ledp/lattice.crt to /etc/pki/tls/star.lattice.local.crt"
+    cp -f /etc/ledp/lattice.crt /etc/pki/tls/star.lattice.local.crt
+    chmod 600 /etc/pki/tls/star.lattice.local.crt
+fi
+
+if [ -f "/etc/ledp/lattice.pem" ]; then
+    echo "Copying /etc/ledp/lattice.key /etc/pki/tls/private/private.key"
+    cp -f /etc/ledp/lattice.pem /etc/pki/tls/private/private.key
+    chmod 600 /etc/pki/tls/private/private.key
+fi
+
 # mail config
 if [ "${LE_ENVIRONMENT}" = "prodcluster" ] && [ -f "/root/postfix/main.cf.production" ]; then
     echo "use production cf"
