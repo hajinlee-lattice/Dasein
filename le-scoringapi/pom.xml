@@ -91,41 +91,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.springframework.security</groupId>
-                                    <artifactId>spring-security-web</artifactId>
-                                    <version>${spring.security.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>target/classes</outputDirectory>
-                                    <includes>**/*.class,**/*.xml</includes>
-                                    <excludes>
-                                        org/springframework/security/core/authority/SimpleGrantedAuthority.class
-                                        org/springframework/security/authentication/UsernamePasswordAuthenticationToken.class
-                                    </excludes>
-                                </artifactItem>
-                            </artifactItems>
-                            <includes>**/*.java</includes>
-                            <excludes>**/*.properties</excludes>
-                            <outputDirectory>target</outputDirectory>
-                            <overWriteReleases>true</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>com.github.kongchen</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
                 <version>3.1.6</version>
@@ -266,12 +231,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.security</groupId>
-                    <artifactId>spring-security-web</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -297,13 +256,6 @@
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-evaluator</artifactId>
             <version>${jpmml.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>${spring.security.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
