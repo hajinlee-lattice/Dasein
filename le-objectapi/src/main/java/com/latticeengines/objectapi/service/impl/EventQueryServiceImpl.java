@@ -62,7 +62,7 @@ public class EventQueryServiceImpl implements EventQueryService {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
         QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
-        return queryEvaluatorService.getCount(customerSpace.toString(), query);
+        return queryEvaluatorService.getCount(attrRepo, query);
     }
 
     private DataPage getData(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
@@ -70,7 +70,7 @@ public class EventQueryServiceImpl implements EventQueryService {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
         QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
-        return queryEvaluatorService.getData(customerSpace.toString(), query);
+        return queryEvaluatorService.getData(attrRepo, query);
     }
 
 }

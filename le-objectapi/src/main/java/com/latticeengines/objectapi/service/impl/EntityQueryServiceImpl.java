@@ -9,11 +9,11 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -60,7 +60,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
         query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
-        return queryEvaluatorService.getCount(customerSpace.toString(), query);
+        return queryEvaluatorService.getCount(attrRepo, query);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
         query = preProcess(frontEndQuery.getMainEntity(), query);
-        DataPage data = queryEvaluatorService.getData(customerSpace.toString(), query);
+        DataPage data = queryEvaluatorService.getData(attrRepo, query);
         return postProcess(frontEndQuery.getMainEntity(), data);
     }
 
@@ -131,7 +131,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
-        List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), query).getData();
+        List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query).getData();
         RatingModel model = frontEndQuery.getRatingModels().get(0);
         Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
         TreeMap<String, Long> counts = new TreeMap<>();

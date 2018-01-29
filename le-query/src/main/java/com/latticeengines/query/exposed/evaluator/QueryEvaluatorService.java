@@ -44,10 +44,6 @@ public class QueryEvaluatorService {
         return queryFactory;
     }
 
-    public long getCount(String customerSpace, Query query) {
-        return getCount(dataCollectionProxy.getAttrRepo(customerSpace), query);
-    }
-
     public long getCount(AttributeRepository attrRepo, Query query) {
         long count = -1;
         if (query != null && query.getMainEntity() != null && query.getMainEntity().getServingStore() != null
@@ -61,8 +57,8 @@ public class QueryEvaluatorService {
         return count;
     }
 
-    public DataPage getData(String customerSpace, Query query) {
-        return getData(dataCollectionProxy.getAttrRepo(customerSpace), query);
+    public DataPage getData(String customerSpace, DataCollection.Version version, Query query) {
+        return getData(dataCollectionProxy.getAttrRepo(customerSpace, version), query);
     }
 
     public DataPage getData(AttributeRepository attrRepo, Query query) {

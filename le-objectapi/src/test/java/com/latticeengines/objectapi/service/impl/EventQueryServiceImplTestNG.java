@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Collections;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -210,7 +210,7 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
     private void mockDataCollectionProxy() {
         DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
-        Mockito.when(proxy.getAttrRepo(any())).thenReturn(attrRepo);
+        Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
         queryEvaluatorService.setDataCollectionProxy(proxy);
     }
 }
