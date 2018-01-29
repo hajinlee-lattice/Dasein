@@ -79,8 +79,9 @@ public class DataCollectionResource {
     @RequestMapping(value = "/tablenames", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
-    public String getTableName(@PathVariable String customerSpace, @RequestParam(value = "role") TableRoleInCollection role,
-                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
+    public String getTableName(@PathVariable String customerSpace,
+            @RequestParam(value = "role") TableRoleInCollection role,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         List<String> tables = dataCollectionService.getTableNames(customerSpace, null, role, version);
         if (CollectionUtils.isEmpty(tables)) {
@@ -133,9 +134,9 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse removeTable(@PathVariable String customerSpace, //
-                                             @PathVariable String tableName, //
-                                             @RequestParam(value = "role") TableRoleInCollection role,
-                                             @RequestParam(value = "version") DataCollection.Version version) {
+            @PathVariable String tableName, //
+            @RequestParam(value = "role") TableRoleInCollection role,
+            @RequestParam(value = "version") DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataCollectionService.removeTable(customerSpace, null, tableName, role, version);
         return SimpleBooleanResponse.successResponse();
@@ -158,6 +159,16 @@ public class DataCollectionResource {
             @RequestBody StatisticsContainer statisticsContainer) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataCollectionService.addStats(customerSpace, null, statisticsContainer);
+        return SimpleBooleanResponse.successResponse();
+    }
+
+    @RequestMapping(value = "/stats", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Remove the main statistics of the collection")
+    public SimpleBooleanResponse removeStats(@PathVariable String customerSpace,
+            @RequestParam(value = "version") DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.removeStats(customerSpace, null, version);
         return SimpleBooleanResponse.successResponse();
     }
 

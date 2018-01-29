@@ -19,6 +19,8 @@ public interface DataCollectionService {
 
     void addStats(String customerSpace, String collectionName, StatisticsContainer container);
 
+    void removeStats(String customerSpace, String collectionName, DataCollection.Version version);
+
     void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole,
             DataCollection.Version version);
 

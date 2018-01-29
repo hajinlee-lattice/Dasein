@@ -168,6 +168,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public void removeStats(String customerSpace, String collectionName, DataCollection.Version version) {
+        StatisticsContainer container = getStats(customerSpace, collectionName, version);
+        if (container != null) {
+            log.info("Removing stats in collection " + collectionName + " at version " + version);
+            statisticsContainerEntityMgr.delete(container);
+        }
+    }
+
+    @Override
     public StatisticsContainer getStats(String customerSpace, String collectionName, DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);

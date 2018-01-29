@@ -67,7 +67,8 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         if (latestStatsContainer != null && MapUtils.isNotEmpty(latestStatsContainer.getStatsCubes())) {
             cubeMap.putAll(latestStatsContainer.getStatsCubes());
         }
-        log.info("Found " + cubeMap.size() + " cubes in the stats in " + latestStatsVersion);
+        log.info("Found " + cubeMap.size() + " cubes in the stats in " + latestStatsVersion + " : " //
+                + StringUtils.join(cubeMap.keySet(), ", "));
 
         Map<BusinessEntity, String> statsTableNames = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
                 String.class);

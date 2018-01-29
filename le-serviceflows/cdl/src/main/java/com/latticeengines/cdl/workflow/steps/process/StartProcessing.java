@@ -174,6 +174,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 metadataProxy.deleteTable(customerSpace.toString(), tableName);
             }
         }
+        log.info("Removing stats in " + inactiveVersion);
+        dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
     }
 
 }

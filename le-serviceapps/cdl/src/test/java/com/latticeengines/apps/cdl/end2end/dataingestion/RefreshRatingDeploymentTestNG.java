@@ -29,15 +29,17 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
 
-        createTestSegment2();
-        rule1 = createRuleBasedRatingEngine();
-        rule2 = createRuleBasedRatingEngine();
-        ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule1.getId());
-        ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule2.getId());
-        verifyRuleBasedEngines();
+        new Thread(() -> {
+            createTestSegment2();
+            rule1 = createRuleBasedRatingEngine();
+            rule2 = createRuleBasedRatingEngine();
+            ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule1.getId());
+            ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule2.getId());
+        }).start();
 
         processAnalyze(constructRequest());
         verifyProcess();

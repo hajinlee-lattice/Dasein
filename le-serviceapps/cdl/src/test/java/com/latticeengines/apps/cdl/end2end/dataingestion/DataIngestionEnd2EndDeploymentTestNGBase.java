@@ -559,7 +559,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Assert.assertNotNull(container);
         Map<String, StatsCube> cubeMap = container.getStatsCubes();
         for (BusinessEntity entity : entities) {
-            Assert.assertTrue(cubeMap.containsKey(entity.name()));
+            Assert.assertTrue(cubeMap.containsKey(entity.name()), "Stats should contain a cube for " + entity);
         }
     }
 

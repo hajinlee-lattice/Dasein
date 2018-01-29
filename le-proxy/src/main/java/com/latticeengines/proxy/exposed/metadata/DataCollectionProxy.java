@@ -155,6 +155,15 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
+    public void removeStats(String customerSpace, DataCollection.Version version) {
+        if (version == null) {
+            throw new IllegalArgumentException("Must specify a version when removing stats.");
+        }
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/stats?version={version}";
+        String url = constructUrl(urlPattern, shortenCustomerSpace(customerSpace), version);
+        delete("remove stats", url);
+    }
+
     private synchronized void initializeAttrRepoCache() {
         if (attrRepoCache == null) {
             attrRepoCache = new LocalCacheManager<>( //
