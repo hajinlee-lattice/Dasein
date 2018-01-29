@@ -1,4 +1,4 @@
-FROM latticeengines/centos
+FROM latticeengines/centos7
 
 # gpg keys listed at https://github.com/nodejs/node
 RUN set -ex \
