@@ -307,7 +307,7 @@ public class StatsCubeUtils {
         return newCube;
     }
 
-    private static boolean shouldHideAttr(ColumnMetadata cm) {
+    public static boolean shouldHideAttr(ColumnMetadata cm) {
         return isDateAttribute(cm) || isSystemAttribute(cm);
     }
 

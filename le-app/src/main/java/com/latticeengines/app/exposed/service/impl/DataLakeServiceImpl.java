@@ -5,10 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +36,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -53,6 +50,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -140,7 +138,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         for (BusinessEntity entity : BusinessEntity.SEGMENT_ENTITIES) {
             cms.addAll(getAttributesInEntity(customerSpace, entity));
         }
-        return cms;
+        return cms.parallelStream() //
+                .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm)).collect(Collectors.toList());
     }
 
     @Override
@@ -155,24 +154,20 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Override
     public Map<String, StatsCube> getStatsCubes() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        Map<String, StatsCube> cubes = _dataLakeService.getStatsCubes(customerSpace);
-        if (MapUtils.isEmpty(cubes)) {
-            return null;
-        }
-        return cubes;
+        return _dataLakeService.getStatsCubes(customerSpace);
     }
 
     @Override
     public TopNTree getTopNTree() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        Map<String, StatsCube> cubes = _dataLakeService.getStatsCubes(customerSpace);
+        Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
             return null;
         }
         Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
         cubes.keySet().forEach(key -> {
             BusinessEntity entity = BusinessEntity.valueOf(key);
-            List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, entity);
+            List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, entity);;
             if (CollectionUtils.isNotEmpty(cms)) {
                 cmMap.put(key, cms);
             }
@@ -180,13 +175,15 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (MapUtils.isEmpty(cmMap)) {
             return null;
         }
-        return StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
+        String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
+        try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
+            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
+        }
     }
 
     @Override
     public AttributeStats getAttributeStats(BusinessEntity entity, String attribute) {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        Map<String, StatsCube> cubes = _dataLakeService.getStatsCubes(customerSpace);
+        Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes) || !cubes.containsKey(entity.name())) {
             return null;
         }
@@ -249,23 +246,12 @@ public class DataLakeServiceImpl implements DataLakeService {
                 .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
     }
 
-    private Set<String> getAttrsInStats(String customerSpace) {
-        Map<String, StatsCube> cubes = getStatsCubes(customerSpace);
-        Set<String> includedAttrs = new HashSet<>();
-        cubes.values().forEach(cube -> cube.getStatistics().keySet().forEach(includedAttrs::add));
-        return includedAttrs;
-    }
-
     @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", "
             + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
     public Map<String, StatsCube> getStatsCubes(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
-            Map<String, StatsCube> cubes = container.getStatsCubes();
-            Map<BusinessEntity, StatsCube> newCubeMap = new HashMap<>();
-            if (MapUtils.isNotEmpty(cubes)) {
-                return cubes;
-            }
+            return container.getStatsCubes();
         }
         return null;
     }
@@ -280,11 +266,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (batchTable == null) {
             return Collections.emptyList();
         } else {
-            Set<String> includedAttrs = getAttrsInStats(customerSpace);
-            List<ColumnMetadata> cms = batchTable.getAttributes().stream() //
-                    .map(Attribute::getColumnMetadata) //
-                    .filter(cm -> includedAttrs.contains(cm.getColumnId())) //
-                    .collect(Collectors.toList());
+            List<ColumnMetadata> cms = batchTable.getColumnMetadata();
             if (TableRoleInCollection.BucketedAccount.equals(role)) {
                 ImportanceOrderingUtils.addImportanceOrdering(cms);
             }
