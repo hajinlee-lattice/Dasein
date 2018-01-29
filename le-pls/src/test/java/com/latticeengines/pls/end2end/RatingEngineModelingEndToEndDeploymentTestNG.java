@@ -126,8 +126,8 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         modelingParameters.setEventFilterTableName(eventFilterTableName);
         modelingParameters.setTargetFilterTableName(targetFilterTableName);
 
-        modelingParameters.setExpectedValue(false);
-        modelingParameters.setLiftChart(false);
+        modelingParameters.setExpectedValue(true);
+        modelingParameters.setLiftChart(true);
 
         log.info("Test environment setup finished.");
     }
