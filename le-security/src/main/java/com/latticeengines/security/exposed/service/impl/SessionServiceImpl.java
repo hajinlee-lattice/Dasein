@@ -122,7 +122,10 @@ public class SessionServiceImpl implements SessionService {
     @CacheEvict(key = "#token", condition = "#result == true")
     public boolean clearCacheIfNecessary(String tenantId, String token) {
         Session session = retrieve(token);
-        Tenant tenant = session.getTenant();
+        Tenant tenant = null;
+        if (session != null) {
+            tenant = session.getTenant();
+        }
         if (tenant == null || !tenant.getId().equals(tenantId)) {
             LOGGER.info(String.format(
                     "Clearing cache for ticket %s because client thinks that tenant is %s and our cache has %s", token,
