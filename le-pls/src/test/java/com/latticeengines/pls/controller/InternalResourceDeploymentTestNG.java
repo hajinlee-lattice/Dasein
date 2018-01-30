@@ -87,7 +87,7 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDep
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
         Map<?, ?> response = restTemplate
-                .getForObject(String.format("%s/pls/internal/currentstack", getDeployedRestAPIHostPort()), Map.class);
+                .getForObject(String.format("%s/pls/health/stackinfo", getDeployedRestAPIHostPort()), Map.class);
         String revision = null;
         for (Object key : response.keySet()) {
             if (key.equals("SvnRevision")) {

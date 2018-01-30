@@ -368,7 +368,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     @SuppressWarnings("unchecked")
     public Map<String, String> getActiveStack() {
         try {
-            String url = constructUrl("pls/internal/currentstack");
+            String url = constructUrl("pls/health/stackinfo");
             return restTemplate.getForObject(url, Map.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
