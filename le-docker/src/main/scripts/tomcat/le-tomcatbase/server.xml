@@ -97,7 +97,9 @@
                sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                connectionTimeout="60000" compression="on"
                compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
-      <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
+      <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
+                       readTimeout="60000" writeTimeout="60000" compression="on"
+                       compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
       <SSLHostConfig>
         <Certificate certificateKeyFile="/etc/pki/tls/private/private.key"
                      certificateFile="/etc/pki/tls/star.lattice.local.crt"
