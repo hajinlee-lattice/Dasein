@@ -80,8 +80,8 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
 
-        play = createDefaultPlay();
-        playProxy.createOrUpdatePlay(mainTestTenant.getId(), play);
+        Play newPlay = createDefaultPlay();
+        play = playProxy.createOrUpdatePlay(mainTestTenant.getId(), newPlay);
         switchToExternalUser();
     }
 
