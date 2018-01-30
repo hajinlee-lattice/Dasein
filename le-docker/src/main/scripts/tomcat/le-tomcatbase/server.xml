@@ -95,10 +95,10 @@
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcatThreadPool"
                SSLEnabled="true" scheme="https" secure="true"
                sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
-               connectionTimeout="600000" compression="on"
+               connectionTimeout="-1" compression="on"
                compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
       <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
-                       readTimeout="600000" writeTimeout="600000" compression="on"
+                       readTimeout="-1" writeTimeout="-1" compression="on"
                        compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
       <SSLHostConfig>
         <Certificate certificateKeyFile="/etc/pki/tls/private/private.key"
