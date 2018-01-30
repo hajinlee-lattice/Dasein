@@ -1,4 +1,4 @@
-<section class="tabs interior" ng-if="vm.cdlEnabled">
+<section class="tabs interior" ng-if="vm.cdlEnabled && !vm.inJob()">
     <ul>
         <li ui-sref="home.jobs.status" ui-sref-active="active">
             <div class="tab-container">

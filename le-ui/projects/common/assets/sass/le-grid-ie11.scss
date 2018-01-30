@@ -143,7 +143,6 @@ $font-size:12px;
     .le-cell {
         text-overflow: ellipsis;
         overflow: hidden; 
-        white-space: nowrap;
         height: $row-height;
         display: flex;
         align-items: center;

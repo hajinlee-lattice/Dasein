@@ -22,4 +22,8 @@ angular.module('lp.jobs')
         cdlEnabled: FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL),
         JobsStore: JobsStore
     });
+
+    vm.inJob = function() {
+        return $state.params.jobId != undefined;
+    }
 });

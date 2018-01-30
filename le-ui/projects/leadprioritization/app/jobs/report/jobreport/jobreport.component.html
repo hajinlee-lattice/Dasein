@@ -1,0 +1,57 @@
+<div class="summary blue-fire">
+    <div class="headers">
+        <h2 class="summary-header">
+            Summary of Data
+        </h2>
+        <button class="button blue-button" >
+            Download Report
+        </button>
+    </div>
+</div>
+
+<section class="jobs-page container import-jobs-container">
+  <div class="row">
+        <div class="twelve columns">
+             <ul class="jobs-tiles">
+                <li jobs-summary-tile 
+                    ng-repeat="entity in vm.entities" class="{{entity | lowercase}}-summary-tile"
+                    report="vm.summaries[entity]" entity="entity" count="vm.counts[entity]" actions="vm.actions">
+                </li>
+
+                <li class="system-action-summary-tile">
+                    <div class="jobs-tile-body columns two panel ">
+                        <h2> System Actions </h2>
+                        <h2> 
+                            <img ng-src="/assets/images/ico-system-actions.png"/>
+                        </h2>
+                    </div>
+                    <div class="tile-body wrap-body columns ten panel">
+                        <div class="job-subactions le-row">
+                            <div class="le-col-start-1 le-col-span-12 le-grid">
+                                <div class="le-header le-header-expand le-row">
+                                    <div class="le-cell le-col-start-1 le-col-span-2">Time</div>
+                                    <div class="le-cell le-col-start-3 le-col-span-4">Type</div>
+                                </div>
+                                
+                                <div class="le-row">
+                                    <div class="le-cell le-col-start-1 le-col-span-2">
+                                        1/30/2018 4:55pm
+                                    </div>
+                                    <div class="le-cell le-col-start-3 le-col-span-4">
+                                        Automated re-scoring because of new data
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li> 
+
+
+            </ul>
+        </div>
+    </div>
+
+
+
+
+</section>

@@ -103,6 +103,28 @@ angular
                 }
             }
         })
+        .state('home.jobs.summary', {
+            url: '/:jobId/summary',
+            views: {
+                "main@": {
+                    controller: 'JobsSummaryController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/jobs/report/jobreport/jobreport.component.html'
+                }
+            }
+            ,
+            resolve: {
+                InitJob: function($q, $stateParams, JobsStore){
+                    var deferred = $q.defer();
+
+                    JobsStore.getJob($stateParams.jobId).then(function(result) {
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+                }
+            }
+
+        })
         /*
         .state('home.jobs.status.ready', {
             url: '/ready/:jobId',

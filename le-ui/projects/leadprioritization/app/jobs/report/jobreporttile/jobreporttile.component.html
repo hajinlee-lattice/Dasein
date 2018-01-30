@@ -1,0 +1,45 @@
+    <div class="jobs-tile-body columns two panel ">
+        <h2> {{vm.format(vm.entity)}} </h2>
+        <h2> 
+            <img ng-src="{{vm.entityIcon(vm.entity)}}"/>
+        </h2>
+        <h2> {{ vm.count }} </h2>
+    </div>
+    <div class="tile-body wrap-body columns ten panel">
+        <div class="row">
+            <ul class="jobs-tiles">
+                <li class="mini-tile left-aligned">
+                    <div class="jobs-tile-header">
+                        <h2 class="title"> New </h2>
+                        <h2 class="title new-count"> {{vm.newRecords}} </h2>
+                        <span class="fa fa-plus fa-lg pull-right"></span>
+                    </div> 
+                </li>
+                <li class="mini-tile">
+                    <div class="jobs-tile-header">
+                        <h2 class="title"> Updated </h2>
+                        <h2 class="title update-count"> {{vm.updatedRecords}} </h2> 
+                        <span class="fa fa-refresh fa-lg pull-right"></span>
+                        
+                    </div> 
+                </li>
+                <li class="mini-tile">
+                    <div class="jobs-tile-header">
+                        <h2 class="title">Deleted
+                        </h2>
+                        <h2 class="title delete-count"> {{vm.deletedRecords}} </h2>
+                        <span class="fa fa-trash-o fa-lg pull-right"></span>
+                    </div> 
+                </li>
+                <li class="unmatched-tile" ng-if="vm.unmatchedRecords">
+                    <div class="jobs-tile-header">
+                        <h2 class="title">Unmatched to the Datacloud
+                        </h2>
+                        <h2 class="title unmatched-count"> {{vm.unmatchedRecords}} </h2>
+                        <span class="fa fa-cloud fa-lg pull-right"></span>
+                    </div> 
+                </li>
+            </ul>
+        </div>
+        <import-job-row-sub-jobs subjobs="vm.filteredActions"></import-job-row-sub-jobs>
+    </div>

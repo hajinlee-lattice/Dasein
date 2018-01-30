@@ -31,7 +31,7 @@
         Run Now
     </button>
 
-    <a href="javascript:void(0)" ng-if="!showRunButton(job) && !isJobRunning(job) && !isJobFailed(job)">
+    <a ui-sref="home.jobs.summary({jobId: job.id})" ng-if="!showRunButton(job) && !isJobRunning(job) && !isJobFailed(job)">
         Report
     </a>
 </div>
