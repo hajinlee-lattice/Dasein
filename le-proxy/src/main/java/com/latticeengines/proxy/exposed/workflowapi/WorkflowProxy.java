@@ -38,104 +38,152 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/jobs";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        return post("submitWorkflowExecution", constructUrl(url), workflowConfig, AppSubmission.class);
+        url = constructUrl(url);
+        log.info(String.format("Sending POST requst to %s, workflowConfig=%s, customerSpace=%s",
+                url, JsonUtils.serialize(workflowConfig), customerSpace));
+        return post("submitWorkflowExecution", url, workflowConfig, AppSubmission.class);
     }
 
     public AppSubmission submitWorkflowExecution(WorkflowConfiguration workflowConfig, String ... params) {
         String baseUrl = "/jobs";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        return post("submitWorkflowExecution", constructUrl(url), workflowConfig, AppSubmission.class);
+        url = constructUrl(url);
+        log.info(String.format("Sending POST request to %s, workflowConfig=%s, params=%s",
+                url, JsonUtils.serialize(workflowConfig), JsonUtils.serialize(params)));
+        return post("submitWorkflowExecution", url, workflowConfig, AppSubmission.class);
     }
 
     public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/awsJobs";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        return post("submitAWSWorkflowExecution", constructUrl(url), workflowConfig, String.class);
+        url = constructUrl(url);
+        log.info(String.format("Sending POST request to %s, workflowConfig=%s, customerSpace=%s",
+                url, JsonUtils.serialize(workflowConfig), customerSpace));
+        return post("submitAWSWorkflowExecution", url, workflowConfig, String.class);
     }
 
     public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String ... params) {
         String baseUrl = "/awsJobs";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        return post("submitAWSWorkflowExecution", constructUrl(url), workflowConfig, String.class);
+        url = constructUrl(url);
+        log.info(String.format("Sending POST request to %s, workflowConfig=%s, params=%s",
+                url, JsonUtils.serialize(workflowConfig), JsonUtils.serialize(params)));
+        return post("submitAWSWorkflowExecution", url, workflowConfig, String.class);
     }
 
     public AppSubmission restartWorkflowExecution(String workflowId, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/job/{workflowId}/restart";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        return post("restartWorkflowExecution", constructUrl(url, workflowId), null, AppSubmission.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending POST request to %s, workflowId=%s, customerSpace=%s",
+                url, workflowId, customerSpace));
+        return post("restartWorkflowExecution", url, null, AppSubmission.class);
     }
 
     public AppSubmission restartWorkflowExecution(String workflowId, String ... params) {
         String baseUrl = "/job/{workflowId}/restart";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        return post("restartWorkflowExecution", constructUrl(url, workflowId), null, AppSubmission.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending POST request to %s, workflowId=%s, params=%s",
+                url, workflowId, JsonUtils.serialize(params)));
+        return post("restartWorkflowExecution", url, null, AppSubmission.class);
     }
 
     public void stopWorkflowExecution(String workflowId, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/job/{workflowId}/stop";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        post("stopWorkflowExecution", constructUrl(url, workflowId), null, Void.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending POST request to %s, workflowId=%s, customerSpace=%s",
+                url, workflowId, customerSpace));
+        post("stopWorkflowExecution", url, null, Void.class);
     }
 
     public void stopWorkflowExecution(String workflowId, String ... params) {
         String baseUrl = "/job/{workflowId}/stop";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        post("stopWorkflowExecution", constructUrl(url, workflowId), null, Void.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending POST request to %s, workflowId=%s, params=%s",
+                url, workflowId, JsonUtils.serialize(params)));
+        post("stopWorkflowExecution", url, null, Void.class);
     }
 
     public WorkflowExecutionId getWorkflowId(String applicationId, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/yarnapps/id/{applicationId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        return get("getWorkflowId", constructUrl(url, applicationId), WorkflowExecutionId.class);
+        url = constructUrl(url, applicationId);
+        log.info(String.format("Sending GET reqeust to %s, applicationId=%s customerSpace=%s",
+                url, applicationId, customerSpace));
+        return get("getWorkflowId", url, WorkflowExecutionId.class);
     }
 
     public WorkflowExecutionId getWorkflowId(String applicationId, String ... params) {
         String baseUrl = "/yarnapps/id/{applicationId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        return get("getWorkflowId", constructUrl(url, applicationId), WorkflowExecutionId.class);
+        url = constructUrl(url, applicationId);
+        log.info(String.format("Sending GET request to %s, applicationId=%s, params=%s",
+                url, applicationId, JsonUtils.serialize(params)));
+        return get("getWorkflowId", url, WorkflowExecutionId.class);
     }
 
     public WorkflowStatus getWorkflowStatus(String workflowId, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/status/{workflowId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        return get("getWorkflowStatus", constructUrl(url, workflowId), WorkflowStatus.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending GET request to %s, workflowId=%s, customerSpace=%s",
+                url, workflowId, customerSpace));
+        return get("getWorkflowStatus", url, WorkflowStatus.class);
     }
 
     public WorkflowStatus getWorkflowStatus(String workflowId, String ... params) {
         String baseUrl = "/status/{workflowId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        return get("getWorkflowStatus", constructUrl(url, workflowId), WorkflowStatus.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending GET request to %s, workflowId=%s, params=%s",
+                url, workflowId, JsonUtils.serialize(params)));
+        return get("getWorkflowStatus", url, WorkflowStatus.class);
     }
 
     public Job getWorkflowJobFromApplicationId(String applicationId, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/yarnapps/job/{applicationId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        return get("getJobFromApplicationId", constructUrl(url, applicationId), Job.class);
+        url = constructUrl(url, applicationId);
+        log.info(String.format("Sending GET request to %s, applicationId=%s, customerSpace=%s",
+                url, applicationId, customerSpace));
+        return get("getJobFromApplicationId", url, Job.class);
     }
 
     public Job getWorkflowJobFromApplicationId(String applicationId, String... params) {
         String baseUrl = "/yarnapps/job/{applicationId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        return get("getJobFromApplicationId", constructUrl(url, applicationId), Job.class);
+        url = constructUrl(url, applicationId);
+        log.info(String.format("Sending GET request to %s, applicationId=%s, params=%s",
+                url, applicationId, JsonUtils.serialize(params)));
+        return get("getJobFromApplicationId", url, Job.class);
     }
 
     public Job getWorkflowExecution(String workflowId, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/job/{workflowId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        return get("getJobFromWorkflowId", constructUrl(url, workflowId), Job.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending GET request to %s, workflowId=%s, customerSpace=%s",
+                url, workflowId, customerSpace));
+        return get("getJobFromWorkflowId", url, Job.class);
     }
 
     public Job getWorkflowExecution(String workflowId, String ... params) {
         String baseUrl = "/job/{workflowId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        return get("getJobFromWorkflowId", constructUrl(url, workflowId), Job.class);
+        url = constructUrl(url, workflowId);
+        log.info(String.format("Sending GET request to %s, workflowId=%s, params=%s",
+                url, workflowId, JsonUtils.serialize(params)));
+        return get("getJobFromWorkflowId", url, Job.class);
     }
 
     public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds, String customerSpace) {
@@ -148,7 +196,10 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
         url += url.contains("?customerSpace=") ? "&" : "?";
         url += buildQueryString("jobId", jobIds);
-        return JsonUtils.convertList(get("getJobs", constructUrl(url), List.class), Job.class);
+        url = constructUrl(url);
+        log.info(String.format("Sending GET request to %s, jobIds=%s, customerSpace=%s",
+                url, JsonUtils.serialize(jobIds), customerSpace));
+        return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
     public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds, String ... params) {
@@ -160,7 +211,10 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url += url.contains("?customerSpace=") ? "&" : "?";
         url += buildQueryString("jobId", jobIds);
-        return JsonUtils.convertList(get("getJobs", constructUrl(url), List.class), Job.class);
+        url = constructUrl(url);
+        log.info(String.format("Sending GET request to %s, jobIds=%s, params=%s",
+                url, JsonUtils.serialize(jobIds), JsonUtils.serialize(params)));
+        return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
     public List<Job> getWorkflowExecutionsForTenant(Tenant tenant, String ... params) {
@@ -172,14 +226,19 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         if (params != null && params.length > 0) {
             urlBuilder.append("&type=").append(params[0]);
         }
-        return JsonUtils.convertList(get("getWorkflowExecutionsForTenant",
-                constructUrl(urlBuilder.toString()), List.class), Job.class);
+        String url = constructUrl(urlBuilder.toString());
+        log.info(String.format("Sending GET request to %s, tenant=%s, params=%s",
+                url, JsonUtils.serialize(tenant), JsonUtils.serialize(params)));
+        return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
     }
 
     public List<Job> getJobs(List<String> jobIds, List<String> types, Boolean includeDetails, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/jobs";
         String url = generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, includeDetails, false);
+        log.info(String.format("Sending GET request to %s, jobIds=%s, types=%s, includeDetails=%s, customerSpace=%s",
+                url, JsonUtils.serialize(jobIds), JsonUtils.serialize(types), JsonUtils.serialize(includeDetails),
+                customerSpace));
         return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
@@ -188,9 +247,15 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         if (params != null && params.length > 0) {
             String customerSpace = params[0];
             String url = generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, includeDetails, false);
+            log.info(String.format("Sending GET request to %s, jobIds=%s, types=%s, includeDetails=%s, params=%s",
+                    url, JsonUtils.serialize(jobIds), JsonUtils.serialize(types), JsonUtils.serialize(includeDetails),
+                    JsonUtils.serialize(params)));
             return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
         } else {
             String url = generateGetWorkflowUrls(baseUrl,null, jobIds, types, includeDetails, false);
+            log.info(String.format("Sending GET request to %s, jobIds=%s, types=%s, includeDetails=%s, params=%s",
+                    url, JsonUtils.serialize(jobIds), JsonUtils.serialize(types), JsonUtils.serialize(includeDetails),
+                    JsonUtils.serialize(params)));
             return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
         }
     }
@@ -207,6 +272,8 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/jobs";
         String url = generateUpdateParentJobIdUrl(baseUrl, customerSpace, jobIds, parentJobId);
+        log.info(String.format("Sending PUT request to %s, jobIds=%s, parentJobId=%s, customerSpace=%s",
+                url, JsonUtils.serialize(jobIds), parentJobId, customerSpace));
         put("updateParentJobId", url, null);
     }
 
@@ -223,9 +290,13 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         if (params != null && params.length > 0) {
             String customerSpace = params[0];
             String url = generateUpdateParentJobIdUrl(baseUrl, customerSpace, jobIds, parentJobId);
+            log.info(String.format("Sending PUT request to %s, jobIds=%s, parentJobId=%s, params=%s",
+                    url, JsonUtils.serialize(jobIds), parentJobId, JsonUtils.serialize(params)));
             put("updateParentJobId", url, null);
         } else {
             String url = generateUpdateParentJobIdUrl(baseUrl, "", jobIds, parentJobId);
+            log.info(String.format("Sending PUT request to %s, jobIds=%s, parentJobId=%s, params=%s",
+                    url, JsonUtils.serialize(jobIds), parentJobId, JsonUtils.serialize(params)));
             put("updateParentJobId", url, null);
         }
     }
