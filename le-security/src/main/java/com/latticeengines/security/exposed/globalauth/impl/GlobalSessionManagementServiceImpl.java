@@ -145,7 +145,9 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         try {
             LOGGER.info(String.format("Attaching ticket %s against Global Auth.", ticket.toString()));
             s = attachSession(ticket, ticket.getTenants().get(0));
-            s.setTicket(ticket);
+            if (s != null) {
+                s.setTicket(ticket);
+            }
             return s;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { ticket.toString() });
@@ -161,13 +163,15 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
         if (ticketData == null) {
-            throw new Exception("Unable to find the ticket requested.");
+            LOGGER.warn("Unable to find the ticket requested.");
+            return null;
         }
 
         Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
         if ((int) (timeElapsed / (1000 * 60)) > TicketInactivityTimeoutInMinute) {
-            throw new Exception("The requested ticket has expired.");
+            LOGGER.warn("The requested ticket has expired.");
+            return null;
         }
 
         GlobalAuthUser userData = gaUserEntityMgr.findByUserId(ticketData.getUserId());
