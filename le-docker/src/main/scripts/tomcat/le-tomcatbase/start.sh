@@ -57,6 +57,7 @@ if [ -f "/etc/internaladdr.txt" ]; then
 fi
 
 export JAVA_OPTS="-Duser.timezone=US/Eastern"
+export JAVA_OPTS="${JAVA_OPTS} -Djava.library.path=/usr/local/apr/lib"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.refreshScoreArtifactCache=true"
