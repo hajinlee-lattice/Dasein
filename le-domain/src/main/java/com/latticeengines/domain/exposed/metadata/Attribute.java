@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -367,6 +368,16 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
                     .map(ColumnSelection.Predefined::getName) //
                     .collect(Collectors.toList());
             this.groups = StringUtils.join(groupNames, ",");
+        }
+    }
+
+    public void addToGroups(ColumnSelection.Predefined groupToAdd) {
+        List<ColumnSelection.Predefined> groupList = getGroupsAsList();
+        if (groupList == null || groupList.isEmpty()) {
+            setGroupsViaList(Collections.singletonList(groupToAdd));
+        } else if (!groupList.contains(ColumnSelection.Predefined.TalkingPoint)) {
+            groupList.add(ColumnSelection.Predefined.TalkingPoint);
+            setGroupsViaList(groupList);
         }
     }
 

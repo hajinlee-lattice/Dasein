@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
@@ -229,10 +228,12 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     @Override
     protected void enrichTableSchema(Table table) {
         String dataCloudVersion = columnMetadataProxy.latestVersion("").getVersion();
-        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment, dataCloudVersion);
+        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
+                dataCloudVersion);
         Map<String, ColumnMetadata> amColMap = new HashMap<>();
         amCols.forEach(cm -> amColMap.put(cm.getColumnId(), cm));
-        ColumnMetadata latticeIdCm = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
+        ColumnMetadata latticeIdCm = columnMetadataProxy
+                .columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
         Map<String, Attribute> masterAttrs = new HashMap<>();
         masterTable.getAttributes().forEach(attr -> {
             masterAttrs.put(attr.getName(), attr);
@@ -263,6 +264,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr = copyMasterAttr(masterAttrs, attr0);
                 masterCount.incrementAndGet();
             }
+            attr.addToGroups(ColumnSelection.Predefined.TalkingPoint);
             if (StringUtils.isBlank(attr.getCategory())) {
                 attr.setCategory(Category.ACCOUNT_ATTRIBUTES);
             }
