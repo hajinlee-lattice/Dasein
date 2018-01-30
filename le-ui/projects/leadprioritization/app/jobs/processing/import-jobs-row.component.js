@@ -25,6 +25,7 @@ angular.module('lp.jobs.import.row', [])
             function cancelInterval() {
                 // console.log('STOP the timer');
                 $interval.cancel(INTERVAL_ID);
+                INTERVAL_ID = null;
             }
 
             function updateSubjobs(subJobsUpdated) {
@@ -64,15 +65,18 @@ angular.module('lp.jobs.import.row', [])
             }
 
             function fetchJobData() {
-                // console.log('Pinging the server');
-                JobsStore.getJob($scope.job.id).then(function (ret) {
-                    updateJobData(ret);
-                });
+                // console.log('Pinging the server', $scope.job.id);
+                if ($scope.job.id != null) {
+                    JobsStore.getJob($scope.job.id).then(function (ret) {
+                        updateJobData(ret);
+                    });
+                }
             }
 
             function checkIfPooling() {
+                // console.log('checkIfPooling', $scope.job.jobStatus, $scope.expanded);
                 if (($scope.job.jobStatus === 'Running' || $scope.job.jobStatus === 'Pending') && $scope.expanded) {
-                    if (INTERVAL_ID === undefined) {
+                    if (INTERVAL_ID === undefined || INTERVAL_ID == null) {
                         // console.log('Create the timer');
                         INTERVAL_ID = $interval(fetchJobData, POOLING_INTERVAL);
                     }
@@ -96,24 +100,23 @@ angular.module('lp.jobs.import.row', [])
             }
 
             $scope.expandRow = function () {
-                if ($scope.expanded) {
-                    $scope.expanded = false;
-                    cancelInterval();
-                    resetCollapsedRow();
-                } else {
-                    $scope.loading = true;
-                    var jobId = $scope.job.id;
-                    if(jobId === undefined || jobId == null){
-                        jobId = 0;
-                    }
-                    JobsStore.getJob(jobId).then(function (ret) {
-                        $scope.loading = false;
-                        $scope.expanded = !$scope.expanded || false;
-                        checkIfPooling();
-                        updateJobData(ret);
-                    });
-                }
+                if ($scope.job.id != null) {
+                    if ($scope.expanded) {
+                        $scope.expanded = false;
+                        cancelInterval();
+                        resetCollapsedRow();
+                    } else {
+                        $scope.loading = true;
+                        var jobId = $scope.job.id;
 
+                        JobsStore.getJob(jobId).then(function (ret) {
+                            $scope.loading = false;
+                            $scope.expanded = !$scope.expanded || false;
+                            checkIfPooling();
+                            updateJobData(ret);
+                        });
+                    }
+                }
             };
 
             $scope.vm.run = function () {

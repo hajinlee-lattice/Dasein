@@ -22,7 +22,7 @@ angular
 .service('JobsStore', function($q, $filter, JobsService) {
     var JobsStore = this;
     /******************* For testing *********************************/
-    this.tmpCount = -1;
+    // this.tmpCount = -1;
     /*****************************************************************/
     this.importJobsMap = {};
     this.data = {
@@ -35,6 +35,14 @@ angular
         dataProcessingRunningJob: {}
 
     };
+
+    function isImportJob(job){
+        if(job.jobType === 'processAnalyzeWorkflow'){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     this.getJob = function(jobId) {
         var deferred = $q.defer();
@@ -89,17 +97,21 @@ angular
                     }
                 } else {
                     JobsStore.data.jobs.length = 0;
+                    var idNullImportJobs = false;
+
                     for (var i=0; i<res.length; i++) {
                         var job = res[i];
 
                         if (job.startTimestamp != null) {
                             JobsStore.addJobMap(job.id, job);
                             JobsStore.addJob(job, modelId);
+                            if(isImportJob(job) && job.id == null){
+                                idNullImportJobs = true;
+                            }
                         }
                     }
-                    
+                    JobsStore.synchImportJobs(idNullImportJobs, res);
                 }
-                
                 deferred.resolve(JobsStore.data.jobs);
             });
         }
@@ -112,21 +124,14 @@ angular
         if (modelId) {
             JobsStore.data.models[modelId].push(job);
         } else {
-            if(job.jobType === "processAnalyzeWorkflow"){
-                job.displayName = "Data Processing & Analysis";
-                var jobid = job.id;
-                var inMap = JobsStore.importJobsMap[jobid];
-                /************* Only for testing ******************/
-                // if(job.id === 0) {
-                //     updateStateTest(job); 
+            if(isImportJob(job)){
+                /******************** For Testing *************************/
+                // if(JobsStore.tmpCount >= 2 && JobsStore.tmpCount < 4){
+                //     job.id = null;
                 // }
-                /*************************************************/
-                if(inMap === undefined){
-                    JobsStore.data.importJobs.push(job);
-                    JobsStore.importJobsMap[jobid] = JobsStore.data.importJobs.length - 1;
-                }else {
-                    updateFieldsImportJob(job);
-                }
+                /**********************************************************/
+
+                JobsStore.addImportJob(job);
             }else{
                 JobsStore.data.jobs.push(job);
             }
@@ -159,7 +164,45 @@ angular
         return deferred.promise;
         
     };
+    this.addImportJob = function(job){
+        job.displayName = "Data Processing & Analysis";
+        var jobid = job.id;
+        // console.log('Add job id',jobid);
+        var inMap = JobsStore.importJobsMap[jobid];
+        // console.log('Is in Map',inMap);
+        /************* Only for testing ******************/
+        // if(job.id === 0 || job.id == null) {
+        //     updateStateTest(job); 
+        // }
+        /*************************************************/
+        if(inMap === undefined){
+            JobsStore.data.importJobs.push(job);
+            JobsStore.importJobsMap[jobid] = JobsStore.data.importJobs.length - 1;
+        }else {
+            updateFieldsImportJob(job);
+        }
+    }
 
+    this.synchImportJobs = function(inNullId, retApi){
+        
+        if((inNullId == true &&  JobsStore.importJobsMap[null] == undefined) || (inNullId == false && JobsStore.importJobsMap[null]) != undefined){
+            // console.log(retApi);
+            JobsStore.data.importJobs.splice(0, JobsStore.data.importJobs.length);
+            JobsStore.importJobsMap = {};
+            
+            for(var i = 0; i < retApi.length; i++){
+                if(isImportJob(retApi[i])){
+                    JobsStore.data.importJobs.push(retApi[i]);
+                    JobsStore.importJobsMap[retApi[i].id] = JobsStore.data.importJobs.length - 1;
+                }
+            }
+            // console.log('++++++++++++ After update ++++++++++++');
+            // console.log(JobsStore.data.importJobs);
+            // console.log(JobsStore.importJobsMap);
+            // console.log('++++++++++++++++++++++++++++');
+        }
+
+    }
     this.clearImportJobs = function(){
         JobsStore.data.importJobs = [];
         JobsStore.importJobsMap = {};   
@@ -175,11 +218,14 @@ angular
         var inMap = JobsStore.importJobsMap[jobid];
         if(inMap !== undefined){
             var oldJob = JobsStore.data.importJobs[inMap];
-            oldJob.jobStatus = updatedJob.jobStatus;
-
-            console.log(oldJob);
+            if(oldJob !== undefined){
+                oldJob.jobStatus = updatedJob.jobStatus;
+                // console.log(oldJob);
+            }
         }
     }
+
+    /**************************************** Methods for testing ****************************************/
 
     function updateStateTest(job) {
         console.log('Iteration' ,JobsStore.tmpCount);
@@ -220,16 +266,12 @@ angular
         }
             
     }
-    /**
-     * Import Jobs testing method
-     * @param {*} job 
-     */
+    
     function updateJobTesting(job){
-        /******************* For testing porpouse ***********/
         console.log('Iteration' ,JobsStore.tmpCount);
         switch(JobsStore.tmpCount){
             case 1:{
-                job.stepsCompleted = ["Merging, De-duping & matching to Lattice Data Cloud"];
+                job.stepsCompleted = [];
                 break;
             };
             case 2:{
