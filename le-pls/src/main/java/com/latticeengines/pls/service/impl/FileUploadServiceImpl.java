@@ -220,8 +220,8 @@ public class FileUploadServiceImpl implements FileUploadService {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("table name is: %s, file path:  %s, email: %s", sourceFile.getTableName(),
                 sourceFile.getPath(), email));
-        return cdlProxy.cleanupByUpload(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName(),
-                sourceFile.getPath(), entity, cleanupOperationType, email);
+        return cdlProxy.cleanupByUpload(MultiTenantContext.getCustomerSpace().toString(), sourceFile, entity,
+                cleanupOperationType, email);
 
     }
 }

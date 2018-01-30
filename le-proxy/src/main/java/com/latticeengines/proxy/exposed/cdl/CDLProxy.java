@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -167,11 +168,12 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<String> cleanupByUpload(String customerSpace, String tableName, String filePath,
-            BusinessEntity entity, CleanupOperationType operationType, String initiator) {
+    public ResponseDocument<String> cleanupByUpload(String customerSpace, SourceFile sourceFile, BusinessEntity entity,
+            CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
-        configuration.setTableName(tableName);
-        configuration.setFilePath(filePath);
+        configuration.setTableName(sourceFile.getTableName());
+        configuration.setFilePath(sourceFile.getPath());
+        configuration.setFileName(sourceFile.getName());
         configuration.setEntity(entity);
         configuration.setCleanupOperationType(operationType);
         configuration.setOperationInitiator(initiator);

@@ -81,11 +81,13 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         }
         String filePath = "";
         String tableName = "";
+        String fileName = null;
         if (maintenanceOperationConfiguration instanceof CleanupByUploadConfiguration) {
             log.info("Configuratin is CleanupByUpload");
             CleanupByUploadConfiguration cleanupByUploadConfiguration = ((CleanupByUploadConfiguration) maintenanceOperationConfiguration);
             filePath = cleanupByUploadConfiguration.getFilePath();
             tableName = cleanupByUploadConfiguration.getTableName();
+            fileName = cleanupByUploadConfiguration.getFileName();
         }
         return new CDLOperationWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
@@ -98,6 +100,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 .businessEntity(businessEntity)
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
                         .build())
                 .build();
     }

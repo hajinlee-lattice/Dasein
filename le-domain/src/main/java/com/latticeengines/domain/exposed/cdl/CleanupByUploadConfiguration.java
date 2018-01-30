@@ -10,6 +10,9 @@ public class CleanupByUploadConfiguration extends CleanupOperationConfiguration 
     @JsonProperty("file_path")
     private String filePath;
 
+    @JsonProperty("file_name")
+    private String fileName;
+
     public String getTableName() {
         return tableName;
     }
@@ -24,5 +27,13 @@ public class CleanupByUploadConfiguration extends CleanupOperationConfiguration 
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getFileName() {
+        return this.fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }
