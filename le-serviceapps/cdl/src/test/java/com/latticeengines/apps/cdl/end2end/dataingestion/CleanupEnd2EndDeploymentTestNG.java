@@ -102,7 +102,8 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
     }
 
     private void verifyCleanup(BusinessEntity entity) {
-        log.info("clean up all data");
+        log.info(String.format("clean up all data for entity %s, current action number is %d", entity.toString(),
+                actionsNumber));
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getBatchStore());
         DataCollection dtCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
