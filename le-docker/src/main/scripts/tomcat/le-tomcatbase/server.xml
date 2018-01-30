@@ -91,7 +91,7 @@
         </SSLHostConfig>
     </Connector>
     -->
-
+    <!--
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcatThreadPool"
                SSLEnabled="true" scheme="https" secure="true"
                sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -103,21 +103,41 @@
       <SSLHostConfig>
         <Certificate certificateKeyFile="/etc/pki/tls/private/private.key"
                      certificateFile="/etc/pki/tls/star.lattice.local.crt"
-                     protocols="all" insecureRenegotiation="true" type="RSA" />
+                     protocols="all"
+                     insecureRenegotiation="true"
+                     type="RSA" />
+      </SSLHostConfig>
+    </Connector>
+    -->
+    <Connector port="8443" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcatThreadPool"
+               SSLEnabled="true" scheme="https" secure="true"
+               sslImplementationName="org.apache.tomcat.util.net.jsse.JSSEImplementation"
+               connectionTimeout="3600000" compression="on"
+               compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+      <SSLHostConfig>
+        <Certificate certificateKeystoreFile="/etc/pki/java/tomcat.jks"
+                     certificateKeystorePassword="Lattice1"
+                     certificateVerification="optional"
+                     protocols="all"
+                     type="RSA" />
       </SSLHostConfig>
     </Connector>
 
     <!-- Define a SSL Coyote HTTP/1.1 Connector on port 8443 -->
     <!--
-    <Connector port="8443"  protocol="org.apache.coyote.http11.Http11NioProtocol"
-               executor="tomcatThreadPool"
+    <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                SSLEnabled="true" scheme="https" secure="true"
-               clientAuth="false" sslProtocol="TLS"
-               keystoreFile="/etc/pki/java/tomcat.jks"
-               keystorePass="Lattice1"
-               connectionTimeout="600000"
-               compression="on"
-               compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"/>
+               sslImplementationName="org.apache.tomcat.util.net.jsse.JSSEImplementation"
+               connectionTimeout="3600000" compression="on"
+               compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+      <SSLHostConfig>
+        <Certificate certificateKeystoreFile="/etc/pki/java/tomcat.jks"
+                     certificateKeystorePassword="Lattice1"
+                     certificateVerification="optional"
+                     protocols="all"
+                     type="RSA" />
+      </SSLHostConfig>
+    </Connector>
     -->
     <!-- Define a SSL/TLS HTTP/1.1 Connector on port 8443 with HTTP/2
          This connector uses the APR/native implementation. When using the
