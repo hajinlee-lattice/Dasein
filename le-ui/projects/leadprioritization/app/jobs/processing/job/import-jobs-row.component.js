@@ -206,7 +206,7 @@ angular.module('lp.jobs.import.row', [])
                 job: '=', vm: '='
             },
             controller: controller,
-            templateUrl: "app/jobs/processing/import-jobs-row.component.html",
+            templateUrl: "app/jobs/processing/job/import-jobs-row.component.html",
         };
     }]);
 

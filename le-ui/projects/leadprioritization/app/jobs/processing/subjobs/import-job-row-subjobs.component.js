@@ -94,7 +94,7 @@ angular.module('lp.jobs.row.subjobs', [])
                 stepscompleted: '='
             },
             controller: controller,
-            templateUrl: "app/jobs/processing/import-job-row-subjobs.component.html",
+            templateUrl: "app/jobs/processing/subjobs/import-job-row-subjobs.component.html",
         };
     }]);
 

@@ -54,7 +54,7 @@ angular.module('lp.jobs.chevron', [])
             },
             controller: controller,
             controllerAs: 'vm',
-            templateUrl: "app/jobs/processing/chevron.component.html",
+            templateUrl: "app/jobs/processing/chevron/chevron.component.html",
         };
     }]);
 
