@@ -65,6 +65,36 @@ public final class JobStepDisplayInfoMapping {
             "score_training_set" //
     };
 
+    private static final String[] RATING_IMPORT_MATCH_AND_MODEL_STEPS = { //
+            "load_data", //
+            "load_data", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+    };
+
     private static final String[] MODEL_AND_EMAIL_STEPS = { //
             "load_data", //
             "load_data", //
@@ -178,6 +208,8 @@ public final class JobStepDisplayInfoMapping {
     static {
         DISPLAY_NAME.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_NAME.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
+        DISPLAY_NAME.put("ratingEngineImportMatchAndModelWorkflow", RATING_IMPORT_MATCH_AND_MODEL_STEPS);
+        DISPLAY_NAME.put("ratingEngineScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_NAME.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_NAME.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
@@ -187,6 +219,8 @@ public final class JobStepDisplayInfoMapping {
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
+        DISPLAY_DESCRIPTION.put("ratingEngineImportMatchAndModelWorkflow", RATING_IMPORT_MATCH_AND_MODEL_STEPS);
+        DISPLAY_DESCRIPTION.put("ratingEngineScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_DESCRIPTION.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
