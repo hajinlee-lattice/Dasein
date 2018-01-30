@@ -25,7 +25,7 @@
   <Listener className="org.apache.catalina.security.SecurityListener" />
   -->
   <!--APR library loader. Documentation at /docs/apr.html -->
-  <!--<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />-->
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
   <!-- Prevent memory leaks due to use of particular java/javax APIs-->
   <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
   <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
@@ -91,7 +91,7 @@
         </SSLHostConfig>
     </Connector>
     -->
-    <!--
+
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcatThreadPool"
                SSLEnabled="true" scheme="https" secure="true"
                sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -104,8 +104,9 @@
                      protocols="all" insecureRenegotiation="true" type="RSA" />
       </SSLHostConfig>
     </Connector>
-    -->
+
     <!-- Define a SSL Coyote HTTP/1.1 Connector on port 8443 -->
+    <!--
     <Connector port="8443"  protocol="org.apache.coyote.http11.Http11NioProtocol"
                executor="tomcatThreadPool"
                SSLEnabled="true" scheme="https" secure="true"
@@ -115,6 +116,7 @@
                connectionTimeout="600000"
                compression="on"
                compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"/>
+    -->
     <!-- Define a SSL/TLS HTTP/1.1 Connector on port 8443 with HTTP/2
          This connector uses the APR/native implementation. When using the
          APR/native implementation or the OpenSSL engine with NIO or NIO2 then

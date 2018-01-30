@@ -19,14 +19,20 @@ fi
 if [ -f "/etc/ledp/lattice.crt" ]; then
     echo "Copying /etc/ledp/lattice.crt to /etc/pki/tls/star.lattice.local.crt"
     cp -f /etc/ledp/lattice.crt /etc/pki/tls/star.lattice.local.crt
-    chmod 600 /etc/pki/tls/star.lattice.local.crt
+else
+    echo "Copying /etc/pki/java/server.crt to /etc/pki/tls/star.lattice.local.crt"
+    cp /etc/pki/java/server.crt /etc/pki/tls/star.lattice.local.crt
 fi
+chmod 600 /etc/pki/tls/star.lattice.local.crt
 
 if [ -f "/etc/ledp/lattice.pem" ]; then
     echo "Copying /etc/ledp/lattice.key /etc/pki/tls/private/private.key"
     cp -f /etc/ledp/lattice.pem /etc/pki/tls/private/private.key
-    chmod 600 /etc/pki/tls/private/private.key
+else
+    echo "Copying /etc/pki/java/server.key to /etc/pki/tls/private/private.key"
+    cp /etc/pki/java/server.key /etc/pki/tls/private/private.key
 fi
+chmod 600 /etc/pki/tls/private/private.key
 
 # mail config
 if [ "${LE_ENVIRONMENT}" = "prodcluster" ] && [ -f "/root/postfix/main.cf.production" ]; then
@@ -51,7 +57,6 @@ if [ -f "/etc/internaladdr.txt" ]; then
 fi
 
 export JAVA_OPTS="-Duser.timezone=US/Eastern"
-export JAVA_OPTS="${JAVA_OPTS} -Djava.library.path=/usr/local/apr/lib"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.refreshScoreArtifactCache=true"

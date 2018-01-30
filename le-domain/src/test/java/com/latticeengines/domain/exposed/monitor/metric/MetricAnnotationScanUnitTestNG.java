@@ -11,7 +11,7 @@ import com.latticeengines.common.exposed.util.MetricUtils;
 public class MetricAnnotationScanUnitTestNG {
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "unit", enabled = false)
+    @Test(groups = "unit")
     public void testMetricDimension() {
         Reflections reflections = new Reflections("com.latticeengines.domain.exposed");
 

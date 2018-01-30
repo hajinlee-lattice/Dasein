@@ -13,17 +13,17 @@ source ../functions.sh
 
 docker run -d \
     --name ${CLUSTER}_${SERVICE} \
-    --net host \
     -h ${HOSTNAME} \
     -e LE_ENVIRONMENT=dev \
     -e LE_STACK=${LE_STACK} \
-    -e ENABLE_JACOCO=true \
+    -e ENABLE_JACOCO=false \
     -v ${WSHOME}/le-config/conf/env/dev/latticeengines.properties:/etc/ledp/latticeengines.properties \
     -v ${WSHOME}/le-docker/src/main/scripts/tomcat/jacoco:/mnt/efs/jacoco:rw \
     -v ${WSHOME}/le-docker/src/main/scripts/tomcat/logs:/opt/apache-tomcat-8.5.15/logs:rw \
     -l ${SERVICE}.group=${CLUSTER} \
     -l cluster=${CLUSTER} \
     -p 8080:8080 \
+    -p 8443:8443 \
     -p 1099:1099 \
     latticeengines/${SERVICE}
 
