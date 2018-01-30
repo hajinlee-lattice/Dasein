@@ -1,6 +1,7 @@
 angular.module('common.wizard', [
     'common.wizard.progress',
-    'common.wizard.controls'
+    'common.wizard.controls',
+    'common.wizard.header'
 ])
 .controller('ImportWizard', function(
     $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, WizardHeaderTitle, WizardContainerId
@@ -14,8 +15,8 @@ angular.module('common.wizard', [
     });
 
     vm.init = function() {
-        vm.title = WizardHeaderTitle || name;
+        vm.title = WizardHeaderTitle || name; //set WizardHeaderTitle to false to use the header component
     }
-
+ 
     vm.init();
 });

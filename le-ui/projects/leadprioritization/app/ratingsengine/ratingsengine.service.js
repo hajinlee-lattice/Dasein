@@ -189,8 +189,12 @@ angular.module('lp.ratingsengine')
 
     this.nextSaveRatingEngine = function(nextState) {
         var currentRating = RatingsEngineStore.getCurrentRating();
+        var currentSegment = RatingsEngineStore.getSegment();
 
         console.log("save engine", currentRating);
+        if (currentRating.segment != null && currentSegment != null && currentRating.segment.name != currentSegment.name) {
+            RatingsEngineStore.setRating({});
+        }
         RatingsEngineStore.saveRating(currentRating).then(function(rating) {
             $state.go(nextState, { rating_id: rating.id });
         });

@@ -202,9 +202,11 @@ angular
                 },
                 views: {
                     'summary@': {
-                        controller: function ($scope, RatingsEngineStore) {
+                        controller: function ($state, $scope, RatingsEngineStore) {
                             $scope.$on('$destroy', function () {
-                                RatingsEngineStore.clear();
+                                if (!$state.params.wizard_steps) {
+                                    RatingsEngineStore.clear();
+                                }
                             });
                         },
                         templateUrl: 'app/navigation/summary/BlankLine.html'
@@ -212,7 +214,7 @@ angular
                     'main@': {
                         resolve: {
                             WizardHeaderTitle: function () {
-                                return 'Create Rating Engine';
+                                return false;
                             },
                             WizardContainerId: function () {
                                 return 'ratingsengine';
@@ -221,6 +223,19 @@ angular
                         controller: 'ImportWizard',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/wizard.component.html'
+                    },
+                    'wizard_header@home.ratingsengine.wizard': {
+                        resolve: {
+                            WizardHeaderTitle: function () {
+                                return 'Create Rating Engine';
+                            },
+                            WizardCustomHeaderSteps: function() {
+                                return ['segment.attributes', 'segment.attributes.add', 'segment.attributes.rules'];
+                            }
+                        },
+                        controller:'WizardHeader',
+                        controllerAs:'vm',
+                        templateUrl: '/components/wizard/header/header.component.html'
                     },
                     'wizard_progress@home.ratingsengine.wizard': {
                         controller: 'ImportWizardProgress',
