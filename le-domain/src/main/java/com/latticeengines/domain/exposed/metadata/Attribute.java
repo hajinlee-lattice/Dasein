@@ -26,6 +26,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -361,7 +362,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @JsonProperty("groups")
     public void setGroupsViaList(List<ColumnSelection.Predefined> groupList) {
-        if (groupList == null || groupList.isEmpty()) {
+        if (CollectionUtils.isEmpty(groupList)) {
             this.groups = null;
         } else {
             List<String> groupNames = groupList.stream() //
@@ -373,7 +374,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     public void addToGroups(ColumnSelection.Predefined groupToAdd) {
         List<ColumnSelection.Predefined> groupList = getGroupsAsList();
-        if (groupList == null || groupList.isEmpty()) {
+        if (CollectionUtils.isEmpty(groupList)) {
             setGroupsViaList(Collections.singletonList(groupToAdd));
         } else if (!groupList.contains(ColumnSelection.Predefined.TalkingPoint)) {
             groupList.add(ColumnSelection.Predefined.TalkingPoint);
