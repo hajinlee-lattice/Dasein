@@ -153,9 +153,9 @@ angular
         JobsService.runJob(job).then(function(resp){
             
             if(resp.Success && resp.Success === true){
-                job.jobStatus = 'Running';
+                // job.jobStatus = 'Running';
             }else{
-                job.jobStatus = 'Failed';
+                // job.jobStatus = 'Failed';
                 vm.dataProcessingRunningJob = {};
             }
             deferred.resolve(job);

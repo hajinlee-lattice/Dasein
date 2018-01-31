@@ -3,10 +3,10 @@ angular.module('lp.jobs.import.row', [])
     .directive('importJobRow', [function () {
         var controller = ['$scope', '$interval', '$q', '$timeout', 'JobsStore', function ($scope, $interval, $q, $timeout, JobsStore) {
 
+            $scope.disableButton = false;
             $scope.subjobs = [];
             $scope.stepscompleted = [];
             $scope.jobStatus = '';
-            var mapSubJobs = {};
             var POOLING_INTERVAL = 15 * 1000;
             var INTERVAL_ID;
 
@@ -29,16 +29,12 @@ angular.module('lp.jobs.import.row', [])
             }
 
             function updateSubjobs(subJobsUpdated) {
+                $scope.subjobs.splice(0, $scope.subjobs.length);
                 for (var i = 0; i < subJobsUpdated.length; i++) {
-                    var jobid = subJobsUpdated[i].id;
-                    var inMap = mapSubJobs[jobid];
-                    if (inMap === undefined) {
-                        $scope.subjobs.push(subJobsUpdated[i]);
-                        mapSubJobs[jobid] = $scope.subjobs.length - 1;
-                    } else {
-                        $scope.subjobs[inMap] = subJobsUpdated[i];
-                    }
+                    $scope.subjobs.push(subJobsUpdated[i]);
                 }
+                $scope.job.subJobs = subJobsUpdated;
+                $scope.job.actions =  subJobsUpdated;
             }
 
             function updateStepsCompleted(steps) {
@@ -59,8 +55,9 @@ angular.module('lp.jobs.import.row', [])
                 // console.log('Pinging the server', $scope.job.id);
                 if ($scope.job.id != null) {
                     JobsStore.getJob($scope.job.id).then(function (ret) {
-                        $scope.job.subJobs = ret.subJobs;
-                        $scope.job.actions =  ret.subJobs;
+                        // $scope.job.subJobs = ret.subJobs;
+                        // $scope.job.actions =  ret.subJobs;
+                        updateSubjobs(ret.subJobs);
                         updateStepsCompleted(ret.stepsCompleted);
                         checkIfPooling();
                     });
@@ -100,6 +97,7 @@ angular.module('lp.jobs.import.row', [])
             }
             function callbackModalWindow(action) {
                 if (action && action.action === 'run') {
+                    $scope.disableButton = true;
                     JobsStore.runJob($scope.job).then(function (updatedJob) {
                         checkIfPooling();
                     });
@@ -126,11 +124,12 @@ angular.module('lp.jobs.import.row', [])
 
                         JobsStore.getJob(jobId).then(function (ret) {
                             // console.log('RET',ret);
-                            $scope.job.subJobs = ret.subJobs;
-                            $scope.job.actions =  ret.subJobs;
+                            // $scope.job.subJobs = ret.subJobs;
+                            // $scope.job.actions =  ret.subJobs;
                             $scope.loading = false;
                             $scope.expanded = !$scope.expanded || false;
                             console.log(ret);
+                            updateSubjobs(ret.subJobs);
                             updateStepsCompleted(ret.stepsCompleted);
                             checkIfPooling();
                             // updateJobData(ret);

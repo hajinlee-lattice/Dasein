@@ -29,7 +29,7 @@ angular.module('lp.jobs.row.subjobs', [])
             }
             $scope.getActionLink = function (subjob) {
                 if (subjob.inputs && subjob.inputs != null) {
-                    var appId = $scope.job.applicationId;
+                    var appId = $scope.applicationId;
                     var fileName = subjob.inputs['SOURCE_FILE_NAME'];
                     var auth = BrowserStorageUtility.getTokenDocument();
                     var clientSession = BrowserStorageUtility.getClientSession();
@@ -99,7 +99,8 @@ angular.module('lp.jobs.row.subjobs', [])
             restrict: 'E',
             replace: true,
             scope: {
-                job: '=',
+                subjobs: '=',
+                applicationId: '='
             },
             controller: controller,
             templateUrl: "app/jobs/processing/subjobs/import-job-row-subjobs.component.html",
