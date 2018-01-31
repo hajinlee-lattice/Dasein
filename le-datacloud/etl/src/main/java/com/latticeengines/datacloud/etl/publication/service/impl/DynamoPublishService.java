@@ -80,9 +80,17 @@ public class DynamoPublishService extends AbstractPublishService
         log.info("Target table name is " + tableName);
         switch (configuration.getPublicationStrategy()) {
         case REPLACE:
-            log.info("Delete table " + tableName + " if exists.");
-            dynamoService.deleteTable(tableName);
+            if (dynamoService.hasTable(tableName)) {
+                if (configuration.getAlias() == PublishToDynamoConfiguration.Alias.Production) {
+                    throw new RuntimeException(
+                            tableName
+                                    + " already exists in production env. Please manually delete the table before publish.");
+                }
+                log.info("Delete table " + tableName + " if exists");
+                dynamoService.deleteTable(tableName);
+            }
             createTable(dynamoService, tableName, configuration);
+            log.info("Table " + tableName + " is created");
             progress = progressService.update(progress).destination(destination).progress(0.3f).commit();
         case APPEND:
             if (PublicationConfiguration.PublicationStrategy.APPEND.equals(configuration.getPublicationStrategy())) {
@@ -95,6 +103,8 @@ public class DynamoPublishService extends AbstractPublishService
             uploadData(tableName, sourceName, sourceVersion, configuration);
             progress = progressService.update(progress).destination(progress.getDestination()).progress(0.9f).commit();
             break;
+        default:
+            throw new UnsupportedOperationException(configuration.getPublicationStrategy() + " is not supported");
         }
         resumeThroughput(dynamoService, tableName, configuration);
 

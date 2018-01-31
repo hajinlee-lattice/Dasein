@@ -281,12 +281,16 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
             case QA:
                 dynamoConfiguration.setAwsAccessKeyEncrypted(qaAwsAccessKey);
                 dynamoConfiguration.setAwsSecretKeyEncrypted(qaAwsSecretKey);
-                dynamoConfiguration.setAwsRegion("us-east-1");
+                if (StringUtils.isBlank(dynamoConfiguration.getAwsRegion())) {
+                    dynamoConfiguration.setAwsRegion(defaultAwsRegion);
+                }
                 break;
             case Production:
                 dynamoConfiguration.setAwsAccessKeyEncrypted(prodAwsAccessKey);
                 dynamoConfiguration.setAwsSecretKeyEncrypted(prodAwsSecretKey);
-                dynamoConfiguration.setAwsRegion("us-east-1");
+                if (StringUtils.isBlank(dynamoConfiguration.getAwsRegion())) {
+                    dynamoConfiguration.setAwsRegion(defaultAwsRegion);
+                }
                 break;
             default:
                 break;
