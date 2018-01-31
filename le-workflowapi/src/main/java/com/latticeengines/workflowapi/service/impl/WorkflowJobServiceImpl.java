@@ -249,8 +249,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         if (StringUtils.isNotEmpty(workflowJob.getType())) {
             job.setJobType(workflowJob.getType());
-        } else {
+        } else if (jobExecution != null) {
             job.setJobType(jobExecution.getJobInstance().getJobName());
+        } else {
+            job.setJobType(null);
         }
 
         // currently only job steps are considered as job details
