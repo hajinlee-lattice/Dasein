@@ -45,8 +45,9 @@ public class MaintenanceOperationListener extends LEJobListener {
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
+        log.info(String.format("Update job %s", jobExecution.getId()));
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        updateImportAction(job);
+        updateMaintenanceAction(job);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class MaintenanceOperationListener extends LEJobListener {
         dataFeedProxy.updateDataFeedMaintenanceMode(customerSpace, false);
     }
 
-    private void updateImportAction(WorkflowJob job) {
+    private void updateMaintenanceAction(WorkflowJob job) {
         String ActionPidStr = job.getInputContextValue(WorkflowContextConstants.Inputs.ACTION_ID);
         if (ActionPidStr != null) {
             Long pid = Long.parseLong(ActionPidStr);
