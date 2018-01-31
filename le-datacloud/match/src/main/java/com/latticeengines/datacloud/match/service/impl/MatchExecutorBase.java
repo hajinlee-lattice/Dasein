@@ -28,6 +28,7 @@ import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
@@ -222,7 +223,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
                 if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
-                    value = internalRecord.getLatticeAccountId();
+                    value = StringStandardizationUtils.getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId());
                 } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
@@ -301,7 +302,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setMatchedDduns(internalRecord.getMatchedDduns());
             outputRecord.setDnbCacheIds(internalRecord.getDnbCacheIds());
             outputRecord.setMatchedEmail(internalRecord.getMatchedEmail());
-            outputRecord.setMatchedLatticeAccountId(internalRecord.getLatticeAccountId());
+            outputRecord.setMatchedLatticeAccountId(
+                    StringStandardizationUtils.getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId()));
 
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setErrorMessages(internalRecord.getErrorMessages());

@@ -42,8 +42,8 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
-    @DataProvider(name = "latticeIDStringDataProvider")
-    Object[][] latticeIDStringDataProvider() {
+    @DataProvider(name = "inputLatticeIdStringDataProvider")
+    Object[][] inputLatticeIdStringDataProvider() {
         return new Object[][] {
                 { null, null },
                 { "", null },
@@ -76,6 +76,28 @@ public class StringStandardizationUtilsUnitTestNG {
         };
     }
 
+    @DataProvider(name = "outputLatticeIdStringDataProvider")
+    Object[][] outputLatticeIdStringDataProvider() {
+        return new Object[][] {
+                {null, null},
+                {"null", null},
+                {"     ", null},
+                {"", null},
+                {"00ABC24x3yz2", null},
+                {"00账24x号yz2", null},
+                {"23$#^2", null},
+                {"12 345    678", null},
+                {"12345\r678", null},
+                {"12345\n678", null},
+                {"12345\r\n678", null},
+                {"00000012345000000000000000", null},
+                {"12345", "0000000012345"},
+                {"0012345", "0000000012345"},
+                {"000000000000000012345", "0000000012345"},
+                {"1234500", "0000001234500"}
+        };
+    }
+
     @Test(groups = "unit", dataProvider = "locationStringDataProvider")
     public void testLocationStringStandardizeString(String input, String expectedOutput) {
         String output = LocationStringStandardizationUtils.getStandardString(input);
@@ -100,9 +122,19 @@ public class StringStandardizationUtilsUnitTestNG {
         Assert.assertEquals(output, expectedOutput);
     }
 
-    @Test(groups = "unit", dataProvider = "latticeIDStringDataProvider")
+    @Test(groups = "unit", dataProvider = "inputLatticeIdStringDataProvider")
     public void testLatticeIDStringStandardizeString(String input, String expectedOutput) {
         String output = StringStandardizationUtils.getStandardizedInputLatticeID(input);
+        Assert.assertEquals(output, expectedOutput);
+    }
+
+    @Test(groups = "unit", dataProvider = "outputLatticeIdStringDataProvider")
+    public void testStandardizeLatticeId(String input, String expectedOutput) {
+//        AlertService mockAlertService = Mockito.mock(AlertService.class);
+//        Mockito.doNothing().when(mockAlertService.triggerCriticalEvent(Mockito.anyString(), Mockito.anyString(),
+//                Mockito.anyString(), Mockito.anyIterable()));
+//        StringStandardizationUtils.setAlertService(mockAlertService);
+        String output = StringStandardizationUtils.getStandardizedOutputLatticeID(input);
         Assert.assertEquals(output, expectedOutput);
     }
 }

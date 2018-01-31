@@ -155,6 +155,22 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     }
 
     @Test(groups = "functional")
+    public void testLatticeAccountId() {
+        Object[][] data = new Object[][] {{ "chevron.com", "Chevron Corporation" }};
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data,
+                new String[] { "Domain", "Name" });
+        input.setPredefinedSelection(ColumnSelection.Predefined.ID);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        MatchOutput output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+
+        Integer pos = output.getOutputFields().indexOf("LatticeAccountId");
+        Assert.assertEquals(output.getResult().get(0).getOutput().get(pos), "0530001159335");
+        log.info(JsonUtils.serialize(output));
+    }
+
+    @Test(groups = "functional")
     public void testIsPublicDomain() {
         Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
@@ -164,6 +180,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         Integer pos = output.getOutputFields().indexOf("IsPublicDomain");
         Assert.assertTrue(Boolean.TRUE.equals(output.getResult().get(0).getOutput().get(pos)));
+        log.info(JsonUtils.serialize(output));
     }
 
     @Test(groups = "functional")
@@ -232,7 +249,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional")
     public void testStandardizedLatticeIdForInput() {
-        final String LATTICE_ID = "530001159335";
+        final String LATTICE_ID = "0530001159335";
         Object[][] data = new Object[][] {
                 { 0, LATTICE_ID },
                 { 1, "00000" + LATTICE_ID },
@@ -270,7 +287,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
             if (i < 3) {
                 Assert.assertEquals(actualId, LATTICE_ID);
             } else if (i == 3) {
-                Assert.assertEquals(actualId, "123456999000");
+                Assert.assertEquals(actualId, "0123456999000");
             } else {
                 Assert.assertNull(actualId);
             }

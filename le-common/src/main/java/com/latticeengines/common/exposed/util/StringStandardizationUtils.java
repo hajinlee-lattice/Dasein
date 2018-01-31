@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StringStandardizationUtils {
+    private static final Logger log = LoggerFactory.getLogger(StringStandardizationUtils.class);
 
     private Character[] removed = {};
     private Character[] replacedBySpace = {};
@@ -55,6 +58,40 @@ public class StringStandardizationUtils {
             String latticeIdAsString = id.toString();
             return (latticeIdAsString.length() > LATTICE_ID_LENGTH) ? null : latticeIdAsString;
         } catch (NumberFormatException exc) {
+            return null;
+        }
+    }
+
+    public static String getStandardizedOutputLatticeID(String latticeId) {
+        if (StringUtils.isBlank(latticeId)) {
+            return null;
+        }
+
+        try {
+            Long latticeIdAsLong = Long.valueOf(latticeId);
+            String latticeIdAsString = latticeIdAsLong.toString();
+            if (latticeIdAsString.length() > LATTICE_ID_LENGTH) {
+                log.error(String.format("LatticeAccountId %s is too long. Required length is less than or equals to " +
+                        "%s, but actual is %s", latticeId, String.valueOf(LATTICE_ID_LENGTH), latticeId.length()));
+                return null;
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < (LATTICE_ID_LENGTH - latticeIdAsString.length()); i++) {
+                sb.append("0");
+            }
+
+            return sb.append(latticeIdAsString).toString();
+        } catch (NumberFormatException exc) {
+            log.error(String.format("LatticeId %s is not in numeric format.", latticeId));
+//            String msg = String.format(LedpCode.LEDP_25007.getMessage() +
+//                            "Failed to standardize LatticeId [%s] in match output.", latticeId);
+//            String dedupKey = String.format(singletonUtil.getClass().getName() +
+//                    " - getStandardizedOutputLatticeID(%s)", latticeId);
+//            List<BasicNameValuePair> details = new ArrayList<>();
+//            details.add(new BasicNameValuePair("LatticeId", latticeId));
+//            details.add(new BasicNameValuePair("ExceptionMessage", exc.getMessage()));
+//            details.add(new BasicNameValuePair("ExceptionStackTrace", JsonUtils.serialize(exc.getStackTrace())));
+//            alertService.triggerCriticalEvent(msg, appTimelineWebappAddress, dedupKey, details);
             return null;
         }
     }

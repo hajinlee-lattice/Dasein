@@ -21,6 +21,7 @@ import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.PatchService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
@@ -225,7 +226,14 @@ public class PatchServiceImpl implements PatchService {
     private void verifyNeedToPatch(OutputRecord outputRecord, String latticeAccountId) {
         if (outputRecord != null && StringUtils.isNotEmpty(outputRecord.getMatchedLatticeAccountId())) {
             String matchedId = outputRecord.getMatchedLatticeAccountId();
-            if (latticeAccountId.equals(matchedId)) {
+            String standardizedLatticeAccountId =
+                    StringStandardizationUtils.getStandardizedOutputLatticeID(latticeAccountId);
+
+            if (standardizedLatticeAccountId == null) {
+                throw new LedpException(LedpCode.LEDP_25031, new String[] { latticeAccountId });
+            }
+
+            if (standardizedLatticeAccountId.equals(matchedId)) {
                 throw new LedpException(LedpCode.LEDP_25034, new String[] { matchedId });
             }
         }
