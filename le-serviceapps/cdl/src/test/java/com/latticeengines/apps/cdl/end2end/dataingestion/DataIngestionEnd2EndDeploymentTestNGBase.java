@@ -155,7 +155,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private PlsCDLImportProxy plsCDLImportProxy;
 
     @Inject
-    private ModelingFileUploadProxy fileUploadProxy;
+    protected ModelingFileUploadProxy fileUploadProxy;
 
     @Inject
     private EaiProxy eaiProxy;
@@ -238,7 +238,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
     }
 
-    String uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type, Resource source) {
+    SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type, Resource
+            source) {
         logger.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
         return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
     }

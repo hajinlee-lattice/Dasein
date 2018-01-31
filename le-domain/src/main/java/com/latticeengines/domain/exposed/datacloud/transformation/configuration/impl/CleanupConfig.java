@@ -13,8 +13,11 @@ public class CleanupConfig extends TransformerConfig {
     @JsonProperty("business_entity")
     private BusinessEntity businessEntity;
 
-    @JsonProperty("join_column")
-    private String joinColumn;
+    @JsonProperty("base_joined_columns")
+    private JoinedColumns baseJoinedColumns;
+
+    @JsonProperty("delete_joined_columns")
+    private JoinedColumns deleteJoinedColumns;
 
     public CleanupOperationType getOperationType() {
         return operationType;
@@ -32,12 +35,67 @@ public class CleanupConfig extends TransformerConfig {
         this.businessEntity = businessEntity;
     }
 
-    public String getJoinColumn() {
-        return joinColumn;
+    public JoinedColumns getBaseJoinedColumns() {
+        return baseJoinedColumns;
     }
 
-    public void setJoinColumn(String joinColumn) {
-        this.joinColumn = joinColumn;
+    public void setBaseJoinedColumns(JoinedColumns baseJoinedColumns) {
+        this.baseJoinedColumns = baseJoinedColumns;
+    }
+
+    public JoinedColumns getDeleteJoinedColumns() {
+        return deleteJoinedColumns;
+    }
+
+    public void setDeleteJoinedColumns(JoinedColumns deleteJoinedColumns) {
+        this.deleteJoinedColumns = deleteJoinedColumns;
+    }
+
+    public static class JoinedColumns {
+
+        @JsonProperty("account_id")
+        private String accountId;
+
+        @JsonProperty("contact_id")
+        private String contactId;
+
+        @JsonProperty("product_id")
+        private String productId;
+
+        @JsonProperty("transaction_time")
+        private String transactionTime;
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public void setAccountId(String accountId) {
+            this.accountId = accountId;
+        }
+
+        public String getContactId() {
+            return contactId;
+        }
+
+        public void setContactId(String contactId) {
+            this.contactId = contactId;
+        }
+
+        public String getProductId() {
+            return productId;
+        }
+
+        public void setProductId(String productId) {
+            this.productId = productId;
+        }
+
+        public String getTransactionTime() {
+            return transactionTime;
+        }
+
+        public void setTransactionTime(String transactionTime) {
+            this.transactionTime = transactionTime;
+        }
     }
 
 }

@@ -89,7 +89,7 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
     }
 
     @SuppressWarnings("unchecked")
-    public String uploadDeleteFile(boolean compressed, String csvFileName,
+    public SourceFile uploadDeleteFile(boolean compressed, String csvFileName,
             String schemaInterpretation, String cleanupOperationType,
             Resource fileResource) {
         List<Object> args = new ArrayList<>();
@@ -110,7 +110,7 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         parts.add("file", fileResource);
         ResponseDocument resp = postMultiPart("upload file", url, parts, ResponseDocument.class);
         if (resp.isSuccess()) {
-            return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), String.class);
+            return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), SourceFile.class);
         } else {
             throw new RuntimeException("Failed to upload file: " + StringUtils.join(resp.getErrors(), ","));
         }

@@ -112,6 +112,9 @@ public class SchemaRepository {
         case DeleteContactTemplate:
             table = getDeleteContactTemplateSchema();
             break;
+        case DeleteTransactionTemplate:
+            table = getDeleteTransactionTemplateSchema();
+            break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
@@ -997,11 +1000,10 @@ public class SchemaRepository {
     }
 
     private Table getDeleteAccountTemplateSchema() {
-        Table table = createTable(SchemaInterpretation.Account);
-        table.setPrimaryKey(createPrimaryKey("Id"));
+        Table table = createTable(SchemaInterpretation.DeleteAccountTemplate);
 
-        table.addAttribute(attr(InterfaceName.Id.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
+        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT_ID", "ACCOUNTID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
                 .required() //
@@ -1015,11 +1017,10 @@ public class SchemaRepository {
     }
 
     private Table getDeleteContactTemplateSchema() {
-        Table table = createTable(SchemaInterpretation.Contact);
-        table.setPrimaryKey(createPrimaryKey("Id"));
+        Table table = createTable(SchemaInterpretation.DeleteContactTemplate);
 
-        table.addAttribute(attr(InterfaceName.Id.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
+        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+                    .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "CONTACT_ID", "CONTACTID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
                 .required() //
@@ -1027,6 +1028,55 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+
+        return table;
+    }
+
+    private Table getDeleteTransactionTemplateSchema() {
+        Table table = createTable(SchemaInterpretation.DeleteTransactionTemplate);
+
+        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .interfaceName(InterfaceName.AccountId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                .type(Schema.Type.STRING) //
+                .defaultValueStr("")
+                .interfaceName(InterfaceName.ContactId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.ProductId.name()) //
+                .allowedDisplayNames(Sets
+                        .newHashSet("PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .interfaceName(InterfaceName.ProductId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
+                .allowedDisplayNames(Sets
+                        .newHashSet("TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME", "TRANSACTION TIME")) //
+                .type(Schema.Type.STRING) //
+                .notNull() //
+                .required() //
+                .interfaceName(InterfaceName.TransactionTime) //
+                .logicalType(LogicalDataType.Timestamp) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
 
         return table;

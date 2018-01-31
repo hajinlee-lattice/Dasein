@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.CDLImportService;
+import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -44,9 +44,9 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private final static Logger log = LoggerFactory.getLogger(CDLImportServiceImplDeploymentTestNG.class);
+    private final static Logger log = LoggerFactory.getLogger(CDLServiceImplDeploymentTestNG.class);
 
     public static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
@@ -61,7 +61,7 @@ public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
     private FileUploadService fileUploadService;
 
     @Autowired
-    private CDLImportService cdlImportService;
+    private CDLService cdlService;
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
@@ -110,7 +110,7 @@ public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = "deployment", enabled = false)
     public void testImportJob() throws Exception {
         long startMillis = System.currentTimeMillis();
-        ApplicationId appId = cdlImportService.submitCSVImport(CustomerSpace.parse(tenant.getName()).toString(),
+        ApplicationId appId = cdlService.submitCSVImport(CustomerSpace.parse(tenant.getName()).toString(),
                 template.getName(), data.getName(), "File", "Account", "test");
         Assert.assertNotNull(appId);
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);

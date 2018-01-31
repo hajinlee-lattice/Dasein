@@ -6,10 +6,13 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -44,5 +47,28 @@ public class CDLResource {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         ApplicationId result = cdlService.processAnalyze(customerSpace.toString());
         return ResponseDocument.successResponse(result.toString());
+    }
+
+    @RequestMapping(value = "/import/csv", method = RequestMethod.POST)
+    @ApiOperation(value = "Start import job")
+    public ResponseDocument<String> startImportCSV(@RequestParam(value = "templateFileName") String templateFileName,
+                                                   @RequestParam(value = "dataFileName") String dataFileName,
+                                                   @RequestParam(value = "source") String source, //
+                                                   @RequestParam(value = "entity") String entity, //
+                                                   @RequestParam(value = "feedType") String feedType) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName, dataFileName, source,
+                entity, feedType);
+        return ResponseDocument.successResponse(applicationId.toString());
+    }
+
+    @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
+    @ApiOperation(value = "Start cleanup job")
+    public ResponseDocument<String> cleanup(@RequestParam(value = "fileName") String fileName,
+                                            @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
+                                            @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        ApplicationId applicationId = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
+        return ResponseDocument.successResponse(applicationId.toString());
     }
 }

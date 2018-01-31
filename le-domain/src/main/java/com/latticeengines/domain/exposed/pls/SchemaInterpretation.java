@@ -18,7 +18,8 @@ public enum SchemaInterpretation {
     TransactionDailyAggregation, //
     TransactionPeriodAggregation,
     DeleteAccountTemplate,
-    DeleteContactTemplate;
+    DeleteContactTemplate,
+    DeleteTransactionTemplate;
 
     public void apply(SchemaInterpretationFunctionalInterface function) {
         InterfaceName name = null;

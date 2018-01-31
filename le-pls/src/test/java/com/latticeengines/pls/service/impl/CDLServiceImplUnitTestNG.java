@@ -14,10 +14,10 @@ import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
-public class CDLImportServiceImplUnitTestNG {
+public class CDLServiceImplUnitTestNG {
 
     @Spy
-    private CDLImportServiceImpl cdlImportServiceImpl = new CDLImportServiceImpl();
+    private CDLServiceImpl cdlServiceImpl = new CDLServiceImpl();
 
     private SourceFile sourceFile;
 
@@ -39,8 +39,8 @@ public class CDLImportServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGenerateImportConfigStr() {
-        doReturn(sourceFile).when(cdlImportServiceImpl).getSourceFile(any(String.class));
-        CSVImportConfig csvImportConfig = cdlImportServiceImpl.generateImportConfig("customerSpace", "templateName",
+        doReturn(sourceFile).when(cdlServiceImpl).getSourceFile(any(String.class));
+        CSVImportConfig csvImportConfig = cdlServiceImpl.generateImportConfig("customerSpace", "templateName",
                 "dataFileName", INITIATOR);
         Assert.assertNotNull(csvImportConfig);
         CSVToHdfsConfiguration importConfig = csvImportConfig.getCsvToHdfsConfiguration();

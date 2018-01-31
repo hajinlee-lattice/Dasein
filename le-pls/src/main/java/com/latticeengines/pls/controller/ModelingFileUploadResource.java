@@ -40,11 +40,9 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Api(value = "models/uploadfile", description = "REST resource for uploading csv files for modeling")
@@ -205,29 +203,27 @@ public class ModelingFileUploadResource {
     @RequestMapping(value = "/uploaddeletefiletemplate", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file")
-    public ResponseDocument<String> uploadDeleteFileTemplate( //
+    public ResponseDocument<SourceFile> uploadDeleteFileTemplate( //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
-            @RequestParam(value = "displayName", required = true) String csvFileName, //
-            @RequestParam(value = "schema", required = true) SchemaInterpretation schemaInterpretation, //
-            @RequestParam(value = "operationType", required = true) CleanupOperationType cleanupOperationType, //
+            @RequestParam(value = "displayName") String csvFileName, //
+            @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation, //
+            @RequestParam(value = "operationType") CleanupOperationType cleanupOperationType, //
             @RequestParam("file") MultipartFile file) {
         if (schemaInterpretation != SchemaInterpretation.DeleteAccountTemplate &&
-                schemaInterpretation != SchemaInterpretation.DeleteContactTemplate) {
-            throw new LedpException(LedpCode.LEDP_18173);
+                schemaInterpretation != SchemaInterpretation.DeleteContactTemplate &&
+                schemaInterpretation != SchemaInterpretation.DeleteTransactionTemplate) {
+            throw new LedpException(LedpCode.LEDP_18173, new String[] {schemaInterpretation.name()});
         }
 
-        BusinessEntity entity = schemaInterpretation == SchemaInterpretation.DeleteAccountTemplate ?
-                BusinessEntity.Account : BusinessEntity.Contact;
-
         ResponseDocument<SourceFile> responseDocument = uploadFile(compressed, csvFileName,
-                schemaInterpretation, entity.name(), file);
+                schemaInterpretation, "", file);
 
         if(!responseDocument.isSuccess()) {
             throw new RuntimeException("Upload delete file template failed. " +
                     StringUtils.join(responseDocument.getErrors(), ","));
         }
 
-        return fileUploadService.cleanupByUpload(responseDocument.getResult(), schemaInterpretation,
-                entity, cleanupOperationType);
+        return ResponseDocument.successResponse(fileUploadService.uploadCleanupFileTemplate(
+                        responseDocument.getResult(), schemaInterpretation, cleanupOperationType));
     }
 }

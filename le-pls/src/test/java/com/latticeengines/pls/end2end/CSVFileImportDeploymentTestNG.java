@@ -51,7 +51,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.CDLDeploymentTestNGBase;
-import com.latticeengines.pls.service.CDLImportService;
+import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -97,7 +97,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private WorkflowProxy workflowProxy;
 
     @Autowired
-    private CDLImportService cdlImportService;
+    private CDLService cdlService;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -160,7 +160,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         modelingFileMetadataService.resolveMetadata(accountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
                 feedType);
 
-        ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, accountFile.getName(),
+        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, accountFile.getName(),
                 accountFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
@@ -220,7 +220,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         modelingFileMetadataService.resolveMetadata(firstFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
                 feedType);
 
-        ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, firstFile.getName(),
+        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, firstFile.getName(),
                 firstFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
@@ -321,7 +321,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     private void startCDLImport(SourceFile sourceFile, String entity) {
-        ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, sourceFile.getName(),
+        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
                 sourceFile.getName(), SOURCE, entity, entity + FEED_TYPE_SUFFIX);
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
@@ -423,7 +423,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         sourceFile = sourceFileService.findByName(sourceFile.getName());
         Exception ex = null;
         try {
-            ApplicationId applicationId = cdlImportService.submitCSVImport(customerSpace, sourceFile.getName(),
+            ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
                     sourceFile.getName(), SOURCE, ENTITY_CONTACT, ENTITY_CONTACT + FEED_TYPE_SUFFIX);
 
             JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
@@ -458,12 +458,12 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     public void testParallelImport() {
         SourceFile sourceFile1 = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(sourceFile1);
-        ApplicationId applicationId1 = cdlImportService.submitCSVImport(customerSpace, sourceFile1.getName(),
+        ApplicationId applicationId1 = cdlService.submitCSVImport(customerSpace, sourceFile1.getName(),
                 sourceFile1.getName(), SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX);
 
         SourceFile sourceFile2 = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         Assert.assertNotNull(sourceFile2);
-        ApplicationId applicationId2 = cdlImportService.submitCSVImport(customerSpace, sourceFile2.getName(),
+        ApplicationId applicationId2 = cdlService.submitCSVImport(customerSpace, sourceFile2.getName(),
                 sourceFile2.getName(), SOURCE, ENTITY_ACCOUNT, ENTITY_ACCOUNT + FEED_TYPE_SUFFIX);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
                 ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_ACCOUNT);

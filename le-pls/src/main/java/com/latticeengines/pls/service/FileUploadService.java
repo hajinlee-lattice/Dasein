@@ -24,6 +24,6 @@ public interface FileUploadService {
 
     InputStream getImportErrorStream(String sourceFileName);
 
-    ResponseDocument<String> cleanupByUpload(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-            BusinessEntity entity, CleanupOperationType cleanupOperationType);
+    SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
+                                         CleanupOperationType cleanupOperationType);
 }

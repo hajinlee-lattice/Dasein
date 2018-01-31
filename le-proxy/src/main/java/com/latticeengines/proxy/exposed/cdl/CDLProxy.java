@@ -168,8 +168,8 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<String> cleanupByUpload(String customerSpace, SourceFile sourceFile, BusinessEntity entity,
-            CleanupOperationType operationType, String initiator) {
+    public ApplicationId cleanupByUpload(String customerSpace, SourceFile sourceFile,
+            BusinessEntity entity, CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
         configuration.setTableName(sourceFile.getTableName());
         configuration.setFilePath(sourceFile.getPath());
@@ -180,6 +180,17 @@ public class CDLProxy extends MicroserviceRestApiProxy {
 
         String url = constructUrl("/customerspaces/{customerSpace}/datacleanup", customerSpace);
 
-        return post("cleanup by upload", url, configuration, ResponseDocument.class);
+        ResponseDocument<String> responseDoc = post("cleanup by upload", url, configuration, ResponseDocument.class);
+
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 }

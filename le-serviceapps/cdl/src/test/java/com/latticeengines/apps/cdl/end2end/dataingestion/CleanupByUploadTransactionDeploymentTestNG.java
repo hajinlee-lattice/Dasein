@@ -1,0 +1,142 @@
+package com.latticeengines.apps.cdl.end2end.dataingestion;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.junit.Assert;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
+
+public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
+
+    private String customerSpace;
+    private Table masterTable;
+    private SourceFile cleanupTemplate;
+    private int originalRecordsCount;
+    private int templateSize;
+
+    private static final String CLEANUP_FILE_TEMPLATE = "Cleanup_Template_Transaction.csv";
+
+//    @Autowired
+//    private TenantService tenantService;
+//
+//    @Override
+//    @BeforeClass(groups = { "end2end", "precheckin", "deployment" })
+//    public void setup() throws Exception {
+//        mainTestTenant = tenantService.findByTenantId("LETest1517324744755.LETest1517324744755.Production");
+//        testBed.getTestTenants().add(mainTestTenant);
+//        testBed.switchToSuperAdmin(mainTestTenant);
+//        attachProtectedProxy(fileUploadProxy);
+//        //do nothing
+//    }
+
+    @Test(groups = "end2end")
+    public void runTest() throws Exception {
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+
+        customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+
+        masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+        prepareCleanupTemplate();
+        cleanupACPDAndVerify();
+        cleanupMinDateAccountAndVerify();
+        //cleanupMinDateAndVerify();
+    }
+
+    private void prepareCleanupTemplate() throws IOException {
+        List<GenericRecord> recordsBeforeDelete = getRecords(masterTable);
+        Assert.assertTrue(recordsBeforeDelete.size() > 0);
+        originalRecordsCount = recordsBeforeDelete.size();
+        templateSize = 0;
+        if (recordsBeforeDelete.size() > 100) {
+            templateSize = 100;
+        } else if (recordsBeforeDelete.size() > 10) {
+            templateSize = 10;
+        } else {
+            templateSize = 1;
+        }
+        CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(CLEANUP_FILE_TEMPLATE),
+                LECSVFormat.format.withHeader("AccountId", "ContactId", "ProductId", "TransactionTime"));
+        //get records from last
+        for(int i = recordsBeforeDelete.size() - 1; i >= recordsBeforeDelete.size() - templateSize; i--) {
+            csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
+                    recordsBeforeDelete.get(i).get("ContactId").toString(),
+                    recordsBeforeDelete.get(i).get("ProductId").toString(),
+                    recordsBeforeDelete.get(i).get("TransactionTime").toString());
+        }
+        csvPrinter.flush();
+        csvPrinter.close();
+        Resource csvResrouce = new FileSystemResource(CLEANUP_FILE_TEMPLATE);
+        cleanupTemplate = uploadDeleteCSV(CLEANUP_FILE_TEMPLATE, SchemaInterpretation.DeleteTransactionTemplate,
+                CleanupOperationType.BYUPLOAD_ACPD, csvResrouce);
+    }
+
+    private void cleanupACPDAndVerify() {
+        ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, cleanupTemplate,
+                BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_ACPD, MultiTenantContext.getEmailAddress());
+        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+        assertEquals(status, JobStatus.COMPLETED);
+        List<GenericRecord> records = getRecords(masterTable);
+        assertEquals(records.size() + templateSize, originalRecordsCount);
+        originalRecordsCount = records.size();
+    }
+
+    private void cleanupMinDateAccountAndVerify() {
+        ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, cleanupTemplate,
+                BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_MINDATEANDACCOUNT, MultiTenantContext.getEmailAddress());
+        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+        assertEquals(status, JobStatus.COMPLETED);
+        List<GenericRecord> records = getRecords(masterTable);
+        assertTrue(records.size() < originalRecordsCount);
+    }
+
+    private void cleanupMinDateAndVerify() {
+        ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, cleanupTemplate,
+                BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_MINDATE, MultiTenantContext.getEmailAddress());
+        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+        assertEquals(status, JobStatus.COMPLETED);
+        List<GenericRecord> records = getRecords(masterTable);
+        System.out.println(records.size());
+    }
+
+    private List<GenericRecord> getRecords(Table table) {
+        List<String> paths = new ArrayList<>();
+        for (Extract extract : table.getExtracts()) {
+            if (!extract.getPath().endsWith("avro")) {
+                paths.add(extract.getPath() + "/*.avro");
+            } else {
+                paths.add(extract.getPath());
+            }
+        }
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, paths);
+        return records;
+    }
+}

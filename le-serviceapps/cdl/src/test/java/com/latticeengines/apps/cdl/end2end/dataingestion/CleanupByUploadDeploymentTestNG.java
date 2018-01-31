@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.testng.annotations.Test;
@@ -20,18 +21,20 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class CleanupByUploadDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
 
     @Test(groups = "end2end")
-    public void runTest() throws Exception {
+    public void testDeleteContactByUpload() throws Exception {
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         verify();
     }
-
 
     private void verify() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
@@ -63,10 +66,12 @@ public class CleanupByUploadDeploymentTestNG extends DataIngestionEnd2EndDeploym
                 return fileName;
             }
         };
-        String appId = uploadDeleteCSV(fileName, SchemaInterpretation.DeleteContactTemplate,
+        SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.DeleteContactTemplate,
                 CleanupOperationType.BYUPLOAD_ID,
                 source);
-        JobStatus status = waitForWorkflowStatus(appId, false);
+        ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, sourceFile,
+                BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_ID, MultiTenantContext.getEmailAddress());
+        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
 
         Table table2 = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedContact);
