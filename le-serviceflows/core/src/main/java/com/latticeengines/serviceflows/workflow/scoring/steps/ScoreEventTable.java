@@ -31,7 +31,7 @@ public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {
         PrimaryKey primaryKey = table.getPrimaryKey();
         if (primaryKey == null) {
             List<Attribute> idAttrs = table.getAttributes(LogicalDataType.Id);
-            if (CollectionUtils.isNotEmpty(idAttrs)) {
+            if (CollectionUtils.isEmpty(idAttrs)) {
                 idAttrs = table.getAttributes(LogicalDataType.InternalId);
             }
             if (CollectionUtils.isNotEmpty(idAttrs)) {
