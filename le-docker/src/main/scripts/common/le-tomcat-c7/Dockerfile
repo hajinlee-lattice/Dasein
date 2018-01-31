@@ -2,17 +2,28 @@ FROM latticeengines/jrec7:1.8
 RUN groupadd -r tomcat && useradd -r -g tomcat tomcat
 WORKDIR /opt
 
-RUN yum install -y openssl-devel expat-devel && yum groupinstall -y "Development Tools" && yum clean all
+RUN yum install -y openssl-devel expat-devel jq && yum groupinstall -y "Development Tools" && yum clean all
 
 # install APR
 ENV APR_VERSION=1.6.3
 ENV APR_UTIL_VERSION=1.6.1
-RUN wget http://ftp.mirror.tw/pub/apache/apr/apr-${APR_VERSION}.tar.gz -O apr-${APR_VERSION}.tar.gz \
+RUN curl https://archive.apache.org/dist/apr/KEYS | gpg --import \
+    && gpg --keyserver pgpkeys.mit.edu --recv-key 9088F565
+
+RUN APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred') \
+    && wget ${APACHE_MIRROR}apr/apr-${APR_VERSION}.tar.gz -O apr-${APR_VERSION}.tar.gz \
+    && curl https://archive.apache.org/dist/apr/apr-${APR_VERSION}.tar.gz.asc > apr-${APR_VERSION}.tar.gz.asc \
+    && gpg --verify apr-${APR_VERSION}.tar.gz.asc apr-${APR_VERSION}.tar.gz \
     && tar -zxvf apr-${APR_VERSION}.tar.gz && rm apr-${APR_VERSION}.tar.gz \
     && cd apr-${APR_VERSION} \
     && ./configure && make && make install \
-    && cd .. && rm -rf apr-${APR_VERSION} \
-    && wget http://ftp.mirror.tw/pub/apache/apr/apr-util-${APR_UTIL_VERSION}.tar.gz -O apr-util-${APR_UTIL_VERSION}.tar.gz \
+    && cd .. && rm -rf apr-${APR_VERSION}
+
+RUN APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred') \
+    && wget ${APACHE_MIRROR}apr/apr-util-${APR_UTIL_VERSION}.tar.gz -O apr-util-${APR_UTIL_VERSION}.tar.gz \
+    && curl https://archive.apache.org/dist/apr/apr-util-${APR_UTIL_VERSION}.tar.gz.asc > apr-util-${APR_UTIL_VERSION}.tar.gz.asc \
+    && cat apr-util-${APR_UTIL_VERSION}.tar.gz.asc \
+    && gpg --verify apr-util-${APR_UTIL_VERSION}.tar.gz.asc apr-util-${APR_UTIL_VERSION}.tar.gz \
     && tar -zxvf apr-util-${APR_UTIL_VERSION}.tar.gz && rm apr-util-${APR_UTIL_VERSION}.tar.gz \
     && cd apr-util-${APR_UTIL_VERSION} \
     && ./configure --with-apr=/usr/local/apr \
