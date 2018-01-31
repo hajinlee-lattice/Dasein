@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
@@ -228,6 +229,49 @@ public class QueryTranslatorUnitTestNG {
         Restriction and1 = Restriction.builder().and(or1, b).build();
         frontEndRestriction.setRestriction(and1);
         System.out.println(JsonUtils.serialize(frontEndRestriction));
+    }
+
+    @Test(groups = "unit")
+    public void testDeletedRestrictions() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setFreeFormTextSearch("Boulder");
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+
+        BucketRestriction a = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307"),
+                Bucket.rangeBkt(0, 1));
+        BucketRestriction b = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A"),
+                Bucket.rangeBkt(10, 20));
+        BucketRestriction c = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCHECKOUT_16ED68E665"),
+                Bucket.rangeBkt(0, 5));
+        BucketRestriction d = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCHECKOUT_16ED68E665"),
+                Bucket.rangeBkt(5, 25));
+        BucketRestriction e = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C308"),
+                Bucket.rangeBkt(1, 10));
+
+        b.setDeleted(true);
+        e.setDeleted(true);
+
+        Restriction and = Restriction.builder().and(a, b).build();
+        Restriction or = Restriction.builder().or(c, d).build();
+        Restriction restriction = Restriction.builder().and(and, or).build();
+        frontEndRestriction.setRestriction(restriction);
+
+        QueryTranslator queryTranslator = new QueryTranslator(null, null);
+        Query result = queryTranslator.translate(frontEndQuery, null);
+
+        // AND1 (OR1 (AND2(OR2(C,D))), A))))
+        Restriction translated = result.getRestriction();
+        System.out.println(translated.toString());
+        Assert.assertFalse(translated.toString().contains("ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A"));
+        Assert.assertFalse(translated.toString().contains("PD_DC_FEATURETERMCREATEAFREEWEB_E93595C308"));
+
     }
 
 }

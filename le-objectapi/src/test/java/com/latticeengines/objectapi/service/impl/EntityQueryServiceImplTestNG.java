@@ -204,6 +204,34 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertEquals(count, new Long(43));
     }
 
+    @Test(groups = "functional")
+    public void testAccountContactWithDeletedTxn() {
+        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        AggregationFilter filter = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), filter, null, false);
+        BucketRestriction txnRestriction = (BucketRestriction) getTxnRestriction(txn);
+        txnRestriction.setDeleted(true);
+
+        Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name()).eq("Buyer").build();
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+
+        FrontEndRestriction accountFERestriction = new FrontEndRestriction();
+        accountFERestriction.setRestriction(Restriction.builder().and(txnRestriction, accRestriction).build());
+        frontEndQuery.setAccountRestriction(accountFERestriction);
+
+        FrontEndRestriction contactFERestriction = new FrontEndRestriction();
+        contactFERestriction.setRestriction(cntRestriction);
+        frontEndQuery.setContactRestriction(contactFERestriction);
+
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setRestrictHasTransaction(true);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(178));
+    }
+
     private long countTxnBkt(Bucket.Transaction txn) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();

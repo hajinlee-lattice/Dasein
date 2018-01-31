@@ -31,9 +31,13 @@ public class BucketRestriction extends Restriction {
     @JsonProperty("bkt")
     private Bucket bkt;
 
+    @JsonProperty("deleted")
+    private boolean deleted;
+
     public BucketRestriction(AttributeLookup attr, Bucket bkt) {
         this.attr = attr;
         this.bkt = bkt;
+        this.deleted = false;
     }
 
     public BucketRestriction() {
@@ -64,6 +68,14 @@ public class BucketRestriction extends Restriction {
     @JsonProperty("attr")
     private void setAttrViaString(String attr) {
         this.attr = AttributeLookup.fromString(attr);
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override

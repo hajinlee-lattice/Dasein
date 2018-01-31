@@ -299,22 +299,29 @@ public class QueryTranslator {
     }
 
     private Restriction translateBucketRestriction(Restriction restriction) {
-        Restriction translated;
+        Restriction translated = null;
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();
             search.run(restriction, (object, ctx) -> {
                 if (object instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) object;
-                    Restriction converted = RestrictionUtils.convertBucketRestriction(bucket);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
-                    parent.getRestrictions().remove(bucket);
-                    parent.getRestrictions().add(converted);
+
+                    if (bucket.isDeleted()) {
+                        parent.getRestrictions().remove(bucket);
+                    } else {
+                        Restriction converted = RestrictionUtils.convertBucketRestriction(bucket);
+                        parent.getRestrictions().remove(bucket);
+                        parent.getRestrictions().add(converted);
+                    }
                 }
             });
             translated = restriction;
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
-            translated = RestrictionUtils.convertBucketRestriction(bucket);
+            if (!bucket.isDeleted()) {
+                translated = RestrictionUtils.convertBucketRestriction(bucket);
+            }
         } else {
             translated = restriction;
         }
