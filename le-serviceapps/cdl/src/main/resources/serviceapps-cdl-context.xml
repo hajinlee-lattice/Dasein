@@ -16,6 +16,7 @@
     </context:component-scan>
 
     <bean id="cdlMultiTenancyAspect" class="com.latticeengines.apps.cdl.entitymgr.impl.CDLMultiTenantEntityMgrAspect"/>
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
 
 	<jpa:repositories base-package="com.latticeengines.apps.cdl.repository" base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
 		entity-manager-factory-ref="entityManagerFactory" transaction-manager-ref="transactionManager"  />

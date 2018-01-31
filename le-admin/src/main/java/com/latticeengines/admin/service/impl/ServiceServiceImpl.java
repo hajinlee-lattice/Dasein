@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
+import com.latticeengines.admin.service.ServiceConfigService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -42,6 +43,9 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Autowired
     private ServiceEntityMgr serviceEntityMgr;
+
+    @Autowired
+    private ServiceConfigService serviceConfigService;
 
     private static BatonService batonService = new BatonServiceImpl();
 
@@ -272,7 +276,10 @@ public class ServiceServiceImpl implements ServiceService {
             Path configPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), tenantId,
                     tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
             configPath = configPath.append(new Path(nodePath));
+
+            serviceConfigService.verifyInvokeTime(serviceName, nodePath, data);
             patchConfig(configPath, data);
+
             return true;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_19101,

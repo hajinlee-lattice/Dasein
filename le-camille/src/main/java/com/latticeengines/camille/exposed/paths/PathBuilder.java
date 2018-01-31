@@ -192,4 +192,8 @@ public final class PathBuilder {
     public static Path buildTriggerFilterPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.TRIGGER_FILTER_FILE);
     }
+
+    public static Path buildInvokeTimePath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.INVOKE_TIME);
+    }
 }

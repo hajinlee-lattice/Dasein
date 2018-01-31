@@ -11,7 +11,7 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 public class CDLOrchestrationJobBean extends CDLAbstractJobBean implements QuartzJobBean {
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        super.setCDLJobType(CDLJobType.ORCHESTRATION);
+        super.setCDLJobType(CDLJobType.PROCESSANALYZE);
         return super.getCallable(jobArguments);
     }
 }

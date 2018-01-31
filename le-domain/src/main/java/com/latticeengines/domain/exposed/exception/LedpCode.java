@@ -672,7 +672,8 @@ public enum LedpCode {
     LEDP_40004("Date to day period error. Error message: {0}."), //
     LEDP_40005("Table is null. CustomerSpace {0}."), //
     LEDP_40006("There are 0 or more than 1 extract in table. CustomerSpace {0}."), //
-    LEDP_40007("Cleanup operation {0} should have attribute {1} in template!")
+    LEDP_40007("Cleanup operation {0} should have attribute {1} in template!"), //
+    LEDP_40008("Invoke time should between 0 and 23.")
     ;
 
     private String message;

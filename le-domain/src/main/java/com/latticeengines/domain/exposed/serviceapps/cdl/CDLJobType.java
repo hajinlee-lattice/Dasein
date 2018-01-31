@@ -4,5 +4,6 @@ public enum CDLJobType {
     IMPORT,
     CONSOLIDATE,
     PROFILE,
-    ORCHESTRATION
+    ORCHESTRATION,
+    PROCESSANALYZE
 }

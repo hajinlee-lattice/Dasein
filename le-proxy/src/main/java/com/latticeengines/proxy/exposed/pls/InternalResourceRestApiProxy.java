@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -642,5 +643,14 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
         urlStr.append(String.format("type=%s", actionType));
         return constructUrl(urlStr.toString());
+    }
+
+    public int getInvokeTime(@NotNull CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/plscomponent/invoketime", customerSpace.toString());
+            return restTemplate.getForObject(url, Integer.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getInvokeTime: Remote call failure: " + e.getMessage(), e);
+        }
     }
 }

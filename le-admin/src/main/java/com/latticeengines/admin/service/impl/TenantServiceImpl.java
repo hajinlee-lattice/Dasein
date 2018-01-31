@@ -17,7 +17,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -28,6 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
+import com.latticeengines.admin.service.ServiceConfigService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwriter;
@@ -81,6 +81,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private DefaultConfigOverwriter overwriter;
+
+    @Autowired
+    private ServiceConfigService serviceConfigService;
 
     @Value("${common.pls.url}")
     private String plsEndHost;
@@ -147,6 +150,7 @@ public class TenantServiceImpl implements TenantService {
             props.put(serviceName, flatDir);
         }
 
+        serviceConfigService.verifyInvokeTime(props);
         preinstall(spaceConfig, configSDirs);
 
         // change components in orchestrator based on selected product
@@ -362,8 +366,10 @@ public class TenantServiceImpl implements TenantService {
             String serviceName) {
         SerializableDocumentDirectory rawDir = tenantEntityMgr.getTenantServiceConfig(contractId, tenantId,
                 serviceName);
+        rawDir = serviceConfigService.setDefaultInvokeTime(serviceName, rawDir);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadataIgnoreOptionsValidation(metaDir);
+
         return rawDir;
     }
 
