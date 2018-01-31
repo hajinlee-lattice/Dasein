@@ -126,7 +126,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.nameChanged = function(rating) {
         var tileState = vm.current.tileStates[rating.id];
-        tileState.saveEnabled = rating.displayName.length > 0;
+        tileState.saveEnabled = rating.displayName.length > 0 && rating.displayName.trim() != '';
     };
 
     vm.cancelEditRatingClicked = function($event, rating) {

@@ -69,7 +69,7 @@
                     type="text" 
                     name="SegmentResultSearch" 
                     class="form-control" 
-                    placeholder="Search {{vm.counts.accounts.value | number}} Accounts"
+                    placeholder="Search {{vm.resourceType=='accounts' ? vm.counts.accounts.value : vm.counts.contacts.value | number}} {{vm.resourceType=='accounts' ? 'Accounts' : 'Contacts'}}"
                     ng-model="vm.search"
                     ng-model-options='{ debounce: 1000 }'
                     ng-change='vm.submitQuery()'
