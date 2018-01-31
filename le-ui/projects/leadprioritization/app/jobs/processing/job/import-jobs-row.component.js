@@ -41,15 +41,6 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
 
-            function updateJobData(jobUpdated) {
-                $scope.jobStatus = jobUpdated.jobStatus;
-                updateSubjobs(jobUpdated.subJobs);
-                updateStepsCompleted(jobUpdated.stepsCompleted);
-                if ($scope.job.jobStatus !== 'Running') {
-                    cancelInterval();
-                }
-            }
-
             function updateStepsCompleted(steps) {
                 if (steps.length == 0) {
                     $scope.stepscompleted = [];
@@ -68,14 +59,37 @@ angular.module('lp.jobs.import.row', [])
                 // console.log('Pinging the server', $scope.job.id);
                 if ($scope.job.id != null) {
                     JobsStore.getJob($scope.job.id).then(function (ret) {
-                        updateJobData(ret);
+                        $scope.job.subJobs = ret.subJobs;
+                        $scope.job.actions =  ret.subJobs;
+                        updateStepsCompleted(ret.stepsCompleted);
+                        checkIfPooling();
                     });
                 }
+            }
+            
+            function areSubJobsCompleted(){
+                var subJobs = $scope.job.subJobs;
+                if(subJobs != undefined && subJobs != null){
+                    var allCompleted = true;
+                    for(var i = 0; i<subJobs.length; i++){
+                        if(subJobs[i].jobStatus != 'Completed'){
+                            allCompleted = false;
+                            break;
+                        }
+                    }
+                    // console.log('All subjobs Completed', allCompleted);
+                    return allCompleted;
+                }else{
+                    // console.log('All subjobs Completed', false);
+                    return false;
+                }
+
             }
 
             function checkIfPooling() {
                 // console.log('checkIfPooling', $scope.job.jobStatus, $scope.expanded);
-                if (($scope.job.jobStatus === 'Running' || $scope.job.jobStatus === 'Pending') && $scope.expanded) {
+                if (($scope.job.jobStatus === 'Running') && $scope.expanded || 
+                        (areSubJobsCompleted() == false && ($scope.job.jobStatus === 'Running' || $scope.job.jobStatus === 'Pending'))) {
                     if (INTERVAL_ID === undefined || INTERVAL_ID == null) {
                         // console.log('Create the timer');
                         INTERVAL_ID = $interval(fetchJobData, POOLING_INTERVAL);
@@ -92,11 +106,12 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
             function init() {
-                // console.log('init');
+                // console.log('init', $scope.job);
                 $scope.vm.callback = callbackModalWindow;
                 $scope.loading = false;
                 $scope.expanded = false;
                 $scope.jobStatus = $scope.job.jobStatus;
+                checkIfPooling();
             }
 
             $scope.expandRow = function () {
@@ -110,10 +125,15 @@ angular.module('lp.jobs.import.row', [])
                         var jobId = $scope.job.id;
 
                         JobsStore.getJob(jobId).then(function (ret) {
+                            // console.log('RET',ret);
+                            $scope.job.subJobs = ret.subJobs;
+                            $scope.job.actions =  ret.subJobs;
                             $scope.loading = false;
                             $scope.expanded = !$scope.expanded || false;
+                            console.log(ret);
+                            updateStepsCompleted(ret.stepsCompleted);
                             checkIfPooling();
-                            updateJobData(ret);
+                            // updateJobData(ret);
                         });
                     }
                 }
@@ -191,6 +211,15 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
 
+            $scope.getActionsCount = function(){
+                if($scope.job.inputs){
+                    var idsString = $scope.job.inputs.ACTION_IDS;
+                    var ids = JSON.parse(idsString);
+                    return ids.length;
+                }else{
+                    return '-';
+                }
+            }
 
             $scope.$on("$destroy", function () {
                 $interval.cancel(INTERVAL_ID);

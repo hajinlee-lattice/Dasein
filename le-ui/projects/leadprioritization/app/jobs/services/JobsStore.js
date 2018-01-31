@@ -167,7 +167,7 @@ angular
     this.addImportJob = function(job){
         job.displayName = "Data Processing & Analysis";
         var jobid = job.id;
-        // console.log('Add job id',jobid);
+        // console.log('Add job id',job);
         var inMap = JobsStore.importJobsMap[jobid];
         // console.log('Is in Map',inMap);
         /************* Only for testing ******************/
@@ -179,7 +179,10 @@ angular
             JobsStore.data.importJobs.push(job);
             JobsStore.importJobsMap[jobid] = JobsStore.data.importJobs.length - 1;
         }else {
+            // JobsStore.data.importJobs[inMap] = "qux";
+            // console.log('UPDTAING');
             updateFieldsImportJob(job);
+            
         }
     }
 
@@ -214,15 +217,17 @@ angular
      * @param {*} updatedJob 
      */
     function updateFieldsImportJob(updatedJob){
+        // console.log(updatedJob);
         var jobid = updatedJob.id;
         var inMap = JobsStore.importJobsMap[jobid];
         if(inMap !== undefined){
             var oldJob = JobsStore.data.importJobs[inMap];
             if(oldJob !== undefined){
                 oldJob.jobStatus = updatedJob.jobStatus;
-                // console.log(oldJob);
+                oldJob.inputs = updatedJob.inputs;
             }
         }
+        // console.log('************************************');
     }
 
     /**************************************** Methods for testing ****************************************/
@@ -268,7 +273,7 @@ angular
     }
     
     function updateJobTesting(job){
-        console.log('Iteration' ,JobsStore.tmpCount);
+        // console.log('Iteration' ,JobsStore.tmpCount);
         switch(JobsStore.tmpCount){
             case 1:{
                 job.stepsCompleted = [];

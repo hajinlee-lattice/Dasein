@@ -1,9 +1,9 @@
 angular.module('lp.jobs.row.subjobs', [])
 
     .directive('importJobRowSubJobs', [function () {
-        var controller = ['$scope', 'JobsStore', function ($scope, JobsStore) {
+        var controller = ['$scope', 'JobsStore', 'BrowserStorageUtility', function ($scope, JobsStore, BrowserStorageUtility) {
             function init() {
-                // console.log('EXPANDED ======= ',$scope.subjobs);
+                // console.log('EXPANDED ======= ',$scope);
             }
             $scope.getActionType = function (subjob) {
                 var type = subjob.jobType;
@@ -29,7 +29,16 @@ angular.module('lp.jobs.row.subjobs', [])
             }
             $scope.getActionLink = function (subjob) {
                 if (subjob.inputs && subjob.inputs != null) {
-                    return subjob.inputs['SOURCE_DISPLAY_NAME'];
+                    var appId = $scope.job.applicationId;
+                    var fileName = subjob.inputs['SOURCE_FILE_NAME'];
+                    var auth = BrowserStorageUtility.getTokenDocument();
+                    var clientSession = BrowserStorageUtility.getClientSession();
+                    var tenantId = clientSession.Tenant.Identifier;
+                    // {{pls}}/datafiles/sourcefile?fileName=<internalFileName of the file>
+                    var ret = '/files/datafiles/sourcefilecsv/'+appId+'?fileName='+fileName+'&Authorization='+auth+'&TenantId='+tenantId;
+                    ret = 'pls/datafiles/sourcefile?filename='+fileName;
+                    // /files/datafiles/sourcefilecsv/{{job.applicationId}}?fileName={{job.source}}&Authorization={{auth}}&TenantId={{TenantId}}
+                    return ret;//subjob.inputs['SOURCE_FILE_NAME'];
                 }
             }
 
@@ -90,8 +99,7 @@ angular.module('lp.jobs.row.subjobs', [])
             restrict: 'E',
             replace: true,
             scope: {
-                subjobs: '=',
-                stepscompleted: '='
+                job: '=',
             },
             controller: controller,
             templateUrl: "app/jobs/processing/subjobs/import-job-row-subjobs.component.html",

@@ -11,7 +11,7 @@
 </div>
 <div class="le-cell le-col-start-5 le-col-span-1">
     <span>
-        {{job.actionsCount}}
+        {{getActionsCount()}}
     </span>
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">
@@ -63,4 +63,4 @@
     </div>
 </div>
 <chevron class="le-row" stepsconfig="stepsConfig" stepscompleted="stepscompleted" jobstatus="job.jobStatus" ng-if="expanded && job.jobStatus != 'Pending'"></chevron>
-<import-job-row-sub-jobs ng-if="expanded" subjobs="subjobs"></import-job-row-sub-jobs>
+<import-job-row-sub-jobs ng-if="expanded" job="job"></import-job-row-sub-jobs>
