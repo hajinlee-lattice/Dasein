@@ -74,7 +74,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : 2;
         cpds.setMinPoolSize(minPoolSize);
         cpds.setInitialPoolSize(minPoolSize);
-        cpds.setMinPoolSize(maxPoolSize);
+        cpds.setMaxPoolSize(maxPoolSize);
         cpds.setAcquireIncrement(acquireIncrement);
 
         cpds.setCheckoutTimeout(60000);
