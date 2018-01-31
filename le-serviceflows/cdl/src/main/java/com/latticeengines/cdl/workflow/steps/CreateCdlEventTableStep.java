@@ -28,6 +28,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConfiguration> {
 
     private static Logger log = LoggerFactory.getLogger(CreateCdlEventTableStep.class);
+
     @Autowired
     private MetadataProxy metadataProxy;
 

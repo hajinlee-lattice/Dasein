@@ -62,9 +62,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processContactWorkflow) //
                 .next(processProductWorkflow) //
                 .next(processTransactionWorkflow) //
-                .next(awsApsGeneratorStep) //
                 .next(combineStatistics) //
                 .next(redshiftPublishWorkflow) //
+                .next(awsApsGeneratorStep) //
                 .next(processRatingWorkflow) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //

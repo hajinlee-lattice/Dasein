@@ -195,7 +195,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
-        // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         checkpointService.setMainTestTenant(mainTestTenant);
 
         logger.info("Test environment setup finished.");

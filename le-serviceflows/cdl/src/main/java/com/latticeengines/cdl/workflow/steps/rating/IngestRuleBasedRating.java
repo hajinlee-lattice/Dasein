@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -72,6 +74,9 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
     @Inject
     private RatingProxy ratingProxy;
 
+    @Inject
+    private CloneTableService cloneTableService;
+
     private CustomerSpace customerSpace;
     private Schema schema;
     private DataCollection.Version inactive;
@@ -80,6 +85,9 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+
+        cloneServingStores();
+
         String targetTableName = getObjectFromContext(RAW_RATING_TABLE_NAME, String.class);
         if (StringUtils.isBlank(targetTableName)) {
             throw new IllegalStateException("Must specify RAW_RATING_TABLE_NAME in workflow context");
@@ -162,6 +170,18 @@ public class IngestRuleBasedRating extends BaseWorkflowStep<GenerateRatingStepCo
             completed.forEach(futures::remove);
         }
         HdfsUtils.writeToFile(yarnConfiguration, hdfsPath + "/_SUCCESS", "");
+    }
+
+    private void cloneServingStores() {
+        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        cloneTableService.setActiveVersion(active);
+        cloneTableService.setCustomerSpace(customerSpace);
+        Arrays.stream(BusinessEntity.values()).forEach(entity -> {
+            TableRoleInCollection servingStore = entity.getServingStore();
+            if (servingStore != null) {
+                cloneTableService.cloneToInactiveTable(servingStore);
+            }
+        });
     }
 
     private class RedshiftIngest implements Callable<RatingModel> {

@@ -42,9 +42,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
+import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.testframework.exposed.proxy.admin.AdminInternalProxy;
 import com.latticeengines.testframework.exposed.proxy.admin.AdminTenantProxy;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
@@ -440,8 +440,9 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
     }
 
-    public AuthorizationHeaderHttpRequestInterceptor getPlsAuthInterceptor() {
-        return authHeaderInterceptor;
+    public void attachProtectedProxy(ProtectedRestApiProxy proxy) {
+        proxy.attachInterceptor(authHeaderInterceptor);
+        log.info("Attached pls auth interceptor to " + proxy.getClass().getSimpleName());
     }
 
 }

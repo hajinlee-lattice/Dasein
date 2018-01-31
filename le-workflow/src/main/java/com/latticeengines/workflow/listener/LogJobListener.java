@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -34,15 +35,17 @@ public class LogJobListener extends LEJobListener {
         }
         int stepSeq = 0;
         for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
+            boolean skipped = ExitStatus.NOOP.equals(stepExecution.getExitStatus());
             Date start = stepExecution.getStartTime();
             Date end = stepExecution.getEndTime();
             Long duration = end.getTime() - start.getTime();
+            String msg = String.format("Step [%02d] %s", stepSeq, stepExecution.getStepName());
             if (duration > 1000) {
-                output.append(String.format("Step [%02d] %s : %.2f sec \n", stepSeq, stepExecution.getStepName(),
-                        duration.doubleValue() / 1000.0));
-            } else {
-                output.append(String.format("Step [%02d] %s\n", stepSeq, stepExecution.getStepName()));
+                msg += String.format(" : %.2f sec", duration.doubleValue() / 1000.0);
+            } else if (skipped) {
+                msg += " : skipped";
             }
+            output.append(String.format("%s\n", msg));
             stepSeq++;
         }
         log.info(output.toString());

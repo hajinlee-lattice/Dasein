@@ -1,6 +1,5 @@
 package com.latticeengines.pls.functionalframework;
 
-import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -44,26 +43,36 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
                 : deployedHostPort;
     }
 
+    protected void setupTestEnvironmentWithExistingTenant(String tenantId)
+            throws NoSuchAlgorithmException, KeyManagementException {
+        turnOffSslChecking();
+        testBed.bootstrap(0);
+        testBed.useExistingTenantAsMain(tenantId);
+        initializeTestVariables();
+    }
+
     protected void setupTestEnvironmentWithOneTenant()
-            throws NoSuchAlgorithmException, KeyManagementException, IOException {
+            throws NoSuchAlgorithmException, KeyManagementException {
         turnOffSslChecking();
         testBed.bootstrap(1);
-        mainTestTenant = testBed.getMainTestTenant();
-        switchToSuperAdmin();
+        initializeTestVariables();
     }
 
     protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product)
-            throws NoSuchAlgorithmException, KeyManagementException, IOException {
+            throws NoSuchAlgorithmException, KeyManagementException {
         turnOffSslChecking();
         testBed.bootstrapForProduct(product);
-        mainTestTenant = testBed.getMainTestTenant();
-        switchToSuperAdmin();
+        initializeTestVariables();
     }
 
     protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product,
-            Map<String, Boolean> featureFlagMap) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+            Map<String, Boolean> featureFlagMap) throws NoSuchAlgorithmException, KeyManagementException {
         turnOffSslChecking();
         testBed.bootstrapForProduct(product, featureFlagMap);
+        initializeTestVariables();
+    }
+
+    private void initializeTestVariables() {
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
     }
@@ -75,8 +84,7 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     }
 
     protected void attachProtectedProxy(ProtectedRestApiProxy proxy) {
-        proxy.attachInterceptor(((GlobalAuthDeploymentTestBed) testBed).getPlsAuthInterceptor());
-        logger.info("Attached a " + proxy.getClass().getSimpleName() + " to pls auth interceptor.");
+        ((GlobalAuthDeploymentTestBed) testBed).attachProtectedProxy(proxy);
     }
 
     protected JobStatus waitForWorkflowStatus(WorkflowProxy workflowProxy, String applicationId, boolean running) {

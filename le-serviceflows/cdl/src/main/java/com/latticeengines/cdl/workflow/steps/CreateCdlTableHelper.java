@@ -58,6 +58,7 @@ public class CreateCdlTableHelper {
         Schema schema = getSchema(recordType, expectedValue);
         String filePath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString();
         tableName = targetTableName + tableSuffix;
+        log.info("Table Name:" + tableName);
         filePath += "/" + tableName + "/" + "/part-00000.avro";
         filterTable = runQueryToTable(customerSpace, schema, tableName, filePath, query, type, expectedValue);
         metadataProxy.updateTable(customerSpace.toString(), filterTable.getName(), filterTable);
@@ -104,7 +105,7 @@ public class CreateCdlTableHelper {
             total += rows.size();
             rowNumber += pageSize;
         }
-        log.info(type + "total filter rows=" + total);
+        log.info(type + " total filter rows=" + total);
         Table table = MetaDataTableUtils.createTable(yarnConfiguration, tableName, filePath);
         table.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
         return table;

@@ -23,9 +23,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -76,7 +76,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     }
 
     protected void attachProtectedProxy(ProtectedRestApiProxy proxy) {
-        proxy.attachInterceptor(testBed.getPlsAuthInterceptor());
+        testBed.attachProtectedProxy(proxy);
         logger.info("Attached the proxy " + proxy.getClass().getSimpleName() + " to GA testbed.");
     }
 

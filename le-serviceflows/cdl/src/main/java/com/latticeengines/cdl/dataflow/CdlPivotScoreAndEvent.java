@@ -24,15 +24,14 @@ public class CdlPivotScoreAndEvent extends TypesafeDataFlowBuilder<CdlPivotScore
 
     @Override
     public Node construct(CdlPivotScoreAndEventParameters parameters) {
-
-        Node result = normalizeProbility(parameters);
+        Node result = normalizeProbability(parameters);
         result = aggregate(parameters, result);
         result = createLift(parameters, result);
         return result;
 
     }
 
-    private Node normalizeProbility(CdlPivotScoreAndEventParameters parameters) {
+    private Node normalizeProbability(CdlPivotScoreAndEventParameters parameters) {
         Node inputTable = addSource(parameters.getScoreOutputTableName());
         Node result = inputTable.discard(new FieldList(ScoreResultField.Percentile.displayName));
         result = result.apply(

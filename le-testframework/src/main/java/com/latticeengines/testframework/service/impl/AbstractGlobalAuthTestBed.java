@@ -235,6 +235,25 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     /**
+     * add an extra test tenant with given name:
+     * tenantName.tenantName.Production
+     */
+    @Override
+    public void useExistingTenantAsMain(String tenantName) {
+        String fullTenantId = CustomerSpace.parse(tenantName).toString();
+        addExtraTestTenant(fullTenantId);
+        Tenant tenant = new Tenant(fullTenantId);
+        setMainTestTenant(tenant);
+        for (AccessLevel accessLevel : AccessLevel.values()) {
+            bootstrapUser(accessLevel, tenant);
+        }
+        if (excludedCleanupTenantIds == null) {
+            excludedCleanupTenantIds = new ArrayList<>();
+        }
+        excludedCleanupTenantIds.add(fullTenantId);
+    }
+
+    /**
      * Use an already logged in UserDocument
      * 
      * @param doc

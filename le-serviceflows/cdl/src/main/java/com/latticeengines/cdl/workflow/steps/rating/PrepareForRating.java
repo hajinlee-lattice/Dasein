@@ -11,16 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -33,9 +28,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Inject
-    private CloneTableService cloneTableService;
-
     private String customerSpace;
 
     @Override
@@ -46,7 +38,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         readActiveRatingModels();
         putObjectInContext(TABLE_GOING_TO_REDSHIFT, null);
         putObjectInContext(APPEND_TO_REDSHIFT_TABLE, null);
-        cloneServingStore();
     }
 
     private void readActiveRatingModels() {
@@ -72,14 +63,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         } else {
             log.info("There is no rating engine summaries");
         }
-    }
-
-    private void cloneServingStore() {
-        TableRoleInCollection servingStore = BusinessEntity.Rating.getServingStore();
-        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        cloneTableService.setActiveVersion(active);
-        cloneTableService.setCustomerSpace(CustomerSpace.parse(customerSpace));
-        cloneTableService.cloneToInactiveTable(servingStore);
     }
 
 }

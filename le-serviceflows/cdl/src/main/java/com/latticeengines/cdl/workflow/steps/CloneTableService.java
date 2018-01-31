@@ -56,8 +56,12 @@ public class CloneTableService {
 
     public void cloneToInactiveTable(TableRoleInCollection role) {
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
+        String inactiveTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
         if (StringUtils.isBlank(activeTableName)) {
             log.info("There is no " + role + " table in active version, skip cloning.");
+            return;
+        } else if (StringUtils.isNotBlank(inactiveTableName)) {
+            log.info("There is already " + role + " table in inactive version, skip cloning.");
             return;
         }
         log.info("Cloning " + role + " from  " + active + " to " + inactive);

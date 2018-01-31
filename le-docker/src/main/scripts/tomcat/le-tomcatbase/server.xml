@@ -113,14 +113,17 @@
     <!-- Define a SSL Coyote HTTP/1.1 Connector on port 8443 -->
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                SSLEnabled="true" scheme="https" secure="true"
-               sslImplementationName="org.apache.tomcat.util.net.jsse.JSSEImplementation"
+               sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                connectionTimeout="3600000" compression="on"
                compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+      <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
+                       readTimeout="3600000" writeTimeout="3600000" compression="on"
+                       compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
       <SSLHostConfig>
-        <Certificate certificateKeystoreFile="/etc/pki/java/tomcat.jks"
-                     certificateKeystorePassword="Lattice1"
-                     certificateVerification="optional"
+        <Certificate certificateKeyFile="/etc/pki/tls/private/private.key"
+                     certificateFile="/etc/pki/tls/star.lattice.local.crt"
                      protocols="all"
+                     insecureRenegotiation="true"
                      type="RSA" />
       </SSLHostConfig>
     </Connector>

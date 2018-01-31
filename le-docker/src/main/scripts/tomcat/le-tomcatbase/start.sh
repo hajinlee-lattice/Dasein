@@ -87,11 +87,6 @@ chmod a+w /var/log/ledp
 chmod +x /var/lib/jacocoagent.jar
 chown -R tomcat ${CATALINA_HOME}
 
-if [ "${USE_HTTP2}" == "true" ]; then
-    echo "Use HTTP/2 server.xml"
-    cp -f ${CATALINA_HOME}/conf/server-http2.xml ${CATALINA_HOME}/conf/server.xml
-fi
-
 if [ "${ENABLE_JACOCO}" == "true" ]; then
     pid=0
     export CATALINA_PID=/var/run/tomcat
