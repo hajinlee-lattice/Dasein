@@ -42,12 +42,12 @@ public class PurgeResource {
             PurgeSource src_allvers = new PurgeSource("LDCDEV_AccountMasterSample", null, hdfsPaths, hiveTables,
                     false);
             list.add(src_allvers);
-            hdfsPaths.clear();
+            hdfsPaths = new ArrayList<>();
             hdfsPaths.add(
                     "/Pods/Production/Services/PropData/Sources/LDCDEV_DnBCacheSeedSample/Snapshot/2017-10-27_03-14-49_UTC");
             hdfsPaths.add(
                     "/Pods/Production/Services/PropData/Sources/LDCDEV_DnBCacheSeedSample/Schema/2017-10-27_03-14-49_UTC");
-            hiveTables.clear();
+            hiveTables = new ArrayList<>();
             hiveTables.add("ldc_ldcdev_dnbcacheseedsample_2017_10_27_03_14_49_utc");
             PurgeSource src_singlever = new PurgeSource("ldc_ldcdev_dnbcacheseedsample_2017_10_27_03_14_49_utc",
                     null, hdfsPaths, hiveTables, true);
