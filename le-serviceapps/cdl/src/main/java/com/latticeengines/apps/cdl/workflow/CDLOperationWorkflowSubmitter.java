@@ -81,7 +81,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         }
         String filePath = "";
         String tableName = "";
-        String fileName = null;
+        String fileName = "";
         if (maintenanceOperationConfiguration instanceof CleanupByUploadConfiguration) {
             log.info("Configuratin is CleanupByUpload");
             CleanupByUploadConfiguration cleanupByUploadConfiguration = ((CleanupByUploadConfiguration) maintenanceOperationConfiguration);
