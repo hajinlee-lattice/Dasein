@@ -27,10 +27,10 @@ public class CleanupFlow extends ConfigurableFlowBase<CleanupConfig> {
     public static final String DATAFLOW_BEAN_NAME = "CleanupFlow";
     public static final String TRANSFORMER_NAME = "CleanupTransformer";
 
-    private static final String DELETE_PREFIX = "DELETE_";
+    private static final String DELETE_PREFIX = "DEL_";
     private static final String AGGREGATE_PREFIX = "AGGR_";
 
-    private static final String DUMMY_COLUMN = "DeleteDummyColumn_f8f7d5c7_ddfe_4fd8_bd51_876be6f3f7bc";
+    private static final String DUMMY_COLUMN = "DummyJoin_f8f7d5c7";
 
     private CleanupConfig config;
 
@@ -76,20 +76,17 @@ public class CleanupFlow extends ConfigurableFlowBase<CleanupConfig> {
                     resultNode = partA.merge(partC);
                     break;
                 case BYUPLOAD_MINDATE:
+                    deleteNode = deleteNode.filter(deleteColumns.get(0) + " > 0", new FieldList(deleteColumns.get(0)))
+                            .sort(deleteColumns.get(0)).limit(1);
+                    originalNode = originalNode.addColumnWithFixedValue(DUMMY_COLUMN, "dummyId", String.class);
+                    deleteNode = deleteNode.addColumnWithFixedValue(DUMMY_COLUMN, "dummyId", String.class);
+                    originalNode = originalNode.leftJoin(DUMMY_COLUMN, deleteNode, DUMMY_COLUMN);
                     log.info(String.format("Delete column name: %s, avro type: %s, java type: %s", deleteColumns.get(0),
-                            deleteNode.getSchema(deleteColumns.get(0)).getAvroType().getName(),
-                            deleteNode.getSchema(deleteColumns.get(0)).getJavaType().getName()));
+                            originalNode.getSchema(deleteColumns.get(0)).getAvroType().getName(),
+                            originalNode.getSchema(deleteColumns.get(0)).getJavaType().getName()));
                     log.info(String.format("Base column name: %s, avro type: %s, java type: %s", baseColumns.get(0),
                             originalNode.getSchema(baseColumns.get(0)).getAvroType().getName(),
                             originalNode.getSchema(baseColumns.get(0)).getJavaType().getName()));
-                    deleteNode = deleteNode
-                            .filter(deleteColumns.get(0) + " != null ", new FieldList(deleteColumns.get(0)))
-                            .sort(deleteColumns.get(0)).limit(1);
-                    originalNode = originalNode.addColumnWithFixedValue(DUMMY_COLUMN, "dummyId", String.class);
-                    deleteNode = deleteNode.addColumnWithFixedValue(DELETE_PREFIX + DUMMY_COLUMN,
-                            "dummyId", String.class);
-                    originalNode = originalNode.leftJoin(DUMMY_COLUMN, deleteNode, DELETE_PREFIX + DUMMY_COLUMN);
-//                    deleteNode = deleteNode.leftJoin(DUMMY_COLUMN, originalNode, DUMMY_COLUMN);
                     resultNode = originalNode
                             .filter( baseColumns.get(0) + " < " + deleteColumns.get(0),
                                     new FieldList(baseColumns.get(0), deleteColumns.get(0)))

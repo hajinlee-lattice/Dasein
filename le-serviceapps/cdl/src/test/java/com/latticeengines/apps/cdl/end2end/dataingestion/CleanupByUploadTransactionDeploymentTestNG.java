@@ -13,10 +13,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.junit.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -30,7 +28,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
@@ -42,19 +39,6 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
     private int templateSize;
 
     private static final String CLEANUP_FILE_TEMPLATE = "Cleanup_Template_Transaction.csv";
-
-//    @Autowired
-//    private TenantService tenantService;
-//
-//    @Override
-//    @BeforeClass(groups = { "end2end", "precheckin", "deployment" })
-//    public void setup() throws Exception {
-//        mainTestTenant = tenantService.findByTenantId("LETest1517324744755.LETest1517324744755.Production");
-//        testBed.getTestTenants().add(mainTestTenant);
-//        testBed.switchToSuperAdmin(mainTestTenant);
-//        attachProtectedProxy(fileUploadProxy);
-//        //do nothing
-//    }
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -68,7 +52,7 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
         prepareCleanupTemplate();
         cleanupACPDAndVerify();
         cleanupMinDateAccountAndVerify();
-        //cleanupMinDateAndVerify();
+        cleanupMinDateAndVerify();
     }
 
     private void prepareCleanupTemplate() throws IOException {

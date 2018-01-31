@@ -327,6 +327,17 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
         }
     }
 
+    protected void copyAvroDir(String localPath, String hdfsPath) {
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+            }
+            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, localPath, hdfsPath);
+        } catch (Exception e) {
+            Assert.fail("Failed to upload local path " + localPath, e);
+        }
+    }
+
     /**
      * Returns whether everything in test with testId exists in master using
      * masterId. Duplicates are ignored. Can't we just upgrade to Java 8
