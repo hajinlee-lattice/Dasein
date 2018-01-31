@@ -136,12 +136,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             updateJobWithModelSummary(job);
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
-            if (job.getJobType().equals("processAnalyzeWorkflow")) {
-                List<Long> actionPids = getActionIdsForJob(job);
-                List<Action> actions = getActions(actionPids);
-                List<Job> subJobs = expandActions(actions);
-                job.setSubJobs(subJobs);
-            }
+            updateJobWithSubJobsIfIsPnA(job);
         }
 
         return job;
@@ -193,7 +188,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         jobs.removeIf(job -> NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
-        updateAllJobsAndStepsWithModelSummaries(jobs);
+        updateAllJobs(jobs);
         Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
         if (unstartedPnAJob != null) {
             jobs.add(unstartedPnAJob);
@@ -289,7 +284,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         job.setDescription(job.getJobType());
     }
 
-    private void updateAllJobsAndStepsWithModelSummaries(List<Job> jobs) {
+    private void updateAllJobs(List<Job> jobs) {
         Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
         List<ModelSummary> modelSummaries = modelSummaryService.getModelSummaries("all");
         for (ModelSummary modelSummary : modelSummaries) {
@@ -299,29 +294,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         for (Job job : jobs) {
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
-            String modelId = null;
-            if (job.getInputs() != null && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
-                modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-            } else if (job.getOutputs() != null
-                    && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
-                modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-            }
-            if (modelId == null) {
-                continue;
-            }
+            updateJobWithModelSummaryInfo(job, true, modelIdToModelSummaries);
+            updateJobWithSubJobsIfIsPnA(job);
+        }
+    }
 
-            ModelSummary modelSummary = modelIdToModelSummaries.get(modelId);
-            if (modelSummary != null) {
-                if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
-                    job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
-                }
-                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
-                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE, modelSummary.getModelType());
-            } else {
-                log.warn(String.format("ModelSummary: %s for job: %s cannot be found in the database. Please check",
-                        modelId, job.getId()));
-                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
-            }
+    @VisibleForTesting
+    void updateJobWithSubJobsIfIsPnA(Job job) {
+        if (job.getJobType().equals("processAnalyzeWorkflow")) {
+            List<Long> actionPids = getActionIdsForJob(job);
+            List<Action> actions = getActions(actionPids);
+            List<Job> subJobs = expandActions(actions);
+            job.setSubJobs(subJobs);
         }
     }
 
@@ -332,6 +316,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
                 getJobSourceFileExists(job.getApplicationId()).toString());
 
+        updateJobWithModelSummaryInfo(job, false, Collections.emptyMap());
+    }
+
+    private void updateJobWithModelSummaryInfo(Job job, boolean useMap,
+            Map<String, ModelSummary> modelIdToModelSummaries) {
         String modelId = null;
         if (job.getInputs() != null && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
             modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
@@ -342,7 +331,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return;
         }
 
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = null;
+        if (useMap) {
+            modelSummary = modelIdToModelSummaries.get(modelId);
+        } else {
+            modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        }
+
         if (modelSummary != null) {
             if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
                 job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");

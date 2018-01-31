@@ -177,6 +177,17 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertEquals(jobs.size(), 3);
     }
 
+    @Test(groups = "unit")
+    public void testUpdateJobWithSubJobsIfIsPnA() {
+        Job job1 = createProcessAnalyzeJob(jobIds[0]);
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1);
+        Assert.assertNotNull(job1.getSubJobs());
+        job1 = createProcessAnalyzeJob(jobIds[0]);
+        job1.setJobType("bulkmatchworkflow");
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1);
+        Assert.assertNull(job1.getSubJobs());
+    }
+
     private void mockWorkflowProxy() {
         when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(createJob(jobIds[0]));
 
