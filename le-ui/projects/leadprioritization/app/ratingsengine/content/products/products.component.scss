@@ -1,0 +1,28 @@
+.ratingengine-products {
+    .header {
+        h2 {
+            padding-left: 0;
+            // background-image: url('/assets/images/ico-segments.png');
+        }
+    }
+    table {
+        margin-top: 20px;
+        thead th:nth-child(2), tbody td:nth-child(2) {
+            padding-left: 0;
+        }
+        thead th:nth-child(3), tbody td:nth-child(3) {
+            text-align: right;
+        }
+        tbody {
+            td:first-child {
+                width: 38px;
+                padding: 7px 0px 7px 10px;
+            }
+        }
+    }
+    .selected-total {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #717171;
+    }
+}

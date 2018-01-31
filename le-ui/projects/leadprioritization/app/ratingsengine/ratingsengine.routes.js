@@ -11,12 +11,11 @@ angular
         'lp.notes',
         'lp.ratingsengine.wizard.segment',
         'lp.ratingsengine.wizard.attributes',
+        'lp.ratingsengine.wizard.products',
+        'lp.ratingsengine.wizard.prioritization',
+        'lp.ratingsengine.wizard.training',
         'lp.ratingsengine.wizard.summary',
-        'lp.ratingsengine.ai',
-        'lp.ratingsengine.ai.prospect',
-        'lp.ratingsengine.ai.prospect.prospect-graph',
-        'lp.ratingsengine.ai.products',
-        'lp.ratingsengine.ai.refine'
+        'lp.ratingsengine.wizard.creation'
     ])
     .config(function ($stateProvider, DataCloudResolvesProvider) {
         $stateProvider
@@ -181,23 +180,20 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.wizard', {
-                url: '/wizard/:rating_id/:wizard_steps',
-                params: {
-                    wizard_steps: 'all'
-                },
+            .state('home.ratingsengine.rulesprospects', {
+                url: '/rules/:rating_id/:wizard_steps',
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
                         return RatingsEngineStore;
                     },
                     WizardProgressContext: function () {
-                        return 'ratingsengine';
+                        return 'ratingsengine.rulesprospects';
                     },
                     WizardProgressItems: function ($stateParams, RatingsEngineStore) {
-                        var rating_id = $stateParams.rating_id || '';
-                        var wizard_steps = $stateParams.wizard_steps;
+                        var rating_id = $stateParams.rating_id || '',
+                            wizard_steps = 'rulesprospects';
 
-                        return RatingsEngineStore.getWizardProgressItems(wizard_steps || 'all', rating_id);
+                        return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
                     }
                 },
                 views: {
@@ -224,7 +220,7 @@ angular
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/wizard.component.html'
                     },
-                    'wizard_header@home.ratingsengine.wizard': {
+                    'wizard_header@home.ratingsengine.rulesprospects': {
                         resolve: {
                             WizardHeaderTitle: function () {
                                 return 'Create Rating Engine';
@@ -237,13 +233,13 @@ angular
                         controllerAs:'vm',
                         templateUrl: '/components/wizard/header/header.component.html'
                     },
-                    'wizard_progress@home.ratingsengine.wizard': {
+                    'wizard_progress@home.ratingsengine.rulesprospects': {
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'
 
                     },
-                    'wizard_controls@home.ratingsengine.wizard': {
+                    'wizard_controls@home.ratingsengine.rulesprospects': {
                         resolve: {
                             WizardControlsOptions: function (RatingsEngineStore) {
                                 return {
@@ -257,10 +253,9 @@ angular
                         templateUrl: '/components/wizard/controls/controls.component.html'
                     }
                 },
-                redirectTo: 'home.ratingsengine.wizard.segment'
+                redirectTo: 'home.ratingsengine.rulesprospects.segment'
             })
-
-            .state('home.ratingsengine.wizard.segment', {
+            .state('home.ratingsengine.rulesprospects.segment', {
                 url: '/segment',
                 params: {
                     pageIcon: 'ico-model',
@@ -286,14 +281,14 @@ angular
                     }
                 },
                 views: {
-                    'wizard_content@home.ratingsengine.wizard': {
+                    'wizard_content@home.ratingsengine.rulesprospects': {
                         controller: 'RatingsEngineSegment',
                         controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
                     }
                 }
             })
-            .state('home.ratingsengine.wizard.segment.attributes', {
+            .state('home.ratingsengine.rulesprospects.segment.attributes', {
                 url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
@@ -382,14 +377,14 @@ angular
                     }
                 },
                 views: {
-                    'wizard_content@home.ratingsengine.wizard': {
+                    'wizard_content@home.ratingsengine.rulesprospects': {
                         controller: 'DataCloudController',
                         controllerAs: 'vm',
                         templateUrl: '/components/datacloud/explorer/explorer.component.html'
                     }
                 }
             })
-            .state('home.ratingsengine.wizard.segment.attributes.add', {
+            .state('home.ratingsengine.rulesprospects.segment.attributes.add', {
                 url: '/add',
                 params: {
                     pageIcon: 'ico-model',
@@ -398,14 +393,14 @@ angular
                     gotoNonemptyCategory: true
                 },
                 views: {
-                    'wizard_content@home.ratingsengine.wizard': {
+                    'wizard_content@home.ratingsengine.rulesprospects': {
                         controller: 'DataCloudController',
                         controllerAs: 'vm',
                         templateUrl: '/components/datacloud/explorer/explorer.component.html'
                     }
                 }
             })
-            .state('home.ratingsengine.wizard.segment.attributes.rules', {
+            .state('home.ratingsengine.rulesprospects.segment.attributes.rules', {
                 url: '/rules',
                 params: {
                     pageIcon: 'ico-model',
@@ -432,14 +427,14 @@ angular
                     }
                 },
                 views: {
-                    'wizard_content@home.ratingsengine.wizard': {
+                    'wizard_content@home.ratingsengine.rulesprospects': {
                         controller: 'AdvancedQueryCtrl',
                         controllerAs: 'vm',
                         templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
                     }
                 }
             })
-            .state('home.ratingsengine.wizard.segment.attributes.rules.summary', {
+            .state('home.ratingsengine.rulesprospects.segment.attributes.rules.summary', {
                 url: '/summary',
                 params: {
                     pageIcon: 'ico-model',
@@ -457,32 +452,32 @@ angular
                     }
                 },
                 views: {
-                    'wizard_content@home.ratingsengine.wizard': {
+                    'wizard_content@home.ratingsengine.rulesprospects': {
                         controller: 'RatingsEngineSummary',
                         controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/summary/summary.component.html'
                     }
                 }
             })
-            .state('home.ratingsengine.ai', {
-                url: '/ai',
+            .state('home.ratingsengine.productpurchase', {
+                url: '/product/:rating_id/:wizard_steps',
                 params: {
-                    wizard_steps: 'ai'
+                    wizard_steps: 'productpurchase'
                 },
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
                         return RatingsEngineStore;
                     },
                     WizardProgressContext: function () {
-                        return 'ratingsengine.ai';
+                        return 'ratingsengine.productpurchase';
                     },
                     WizardProgressItems: function ($stateParams, RatingsEngineStore) {
-                        var rating_id = $stateParams.rating_id || '';
-                        var wizard_steps = $stateParams.wizard_steps;
 
-                        return RatingsEngineStore.getWizardProgressItems(wizard_steps || 'ai', rating_id);
+                        var rating_id = $stateParams.rating_id || '',
+                            wizard_steps = 'productpurchase';
+
+                        return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
                     }
-
                 },
                 views: {
                     'summary@': {
@@ -499,26 +494,25 @@ angular
                                 return 'Create Rating Engine';
                             },
                             WizardContainerId: function () {
-                                return 'ratingsengine.ai';
+                                return 'ratingsengine';
                             }
                         },
                         controller: 'ImportWizard',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/wizard.component.html'
                     },
-                    'wizard_progress@home.ratingsengine.ai': {
+                    'wizard_progress@home.ratingsengine.productpurchase': {
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'
 
                     },
-                    'wizard_controls@home.ratingsengine.ai': {
+                    'wizard_controls@home.ratingsengine.productpurchase': {
                         resolve: {
                             WizardControlsOptions: function (RatingsEngineStore) {
                                 return {
-                                    suffix: '',
-                                    backState: 'home.ratingsengine.list',
-                                    nextState: 'home.ratingsengine.list'
+                                    backState: 'home.ratingsengine',
+                                    nextState: 'home.ratingsengine.dashboard'
                                 };
                             }
                         },
@@ -527,153 +521,15 @@ angular
                         templateUrl: '/components/wizard/controls/controls.component.html'
                     }
                 },
-                redirectTo: 'home.ratingsengine.ai.segment'
+                redirectTo: 'home.ratingsengine.productpurchase.segment'
             })
-            .state('home.ratingsengine.ai.segment.prospect', {
-                url: '/prospect',
-                resolve: {
-                    WizardHeaderTitle: function () {
-                        return 'Select the model to build';
-                    },
-                    Prospect: function ($q, $stateParams, RatingsEngineStore, RatingsEngineAIService, RatingsEngineAIStore) {
-                        var deferred = $q.defer();
-                        var segment_id = 15;
-
-                        RatingsEngineAIService.getProspect(segment_id).then(function (data) {
-                            deferred.resolve(data);
-                        });
-
-                        return deferred.promise;
-                    }
-                },
-                views: {
-
-                    'wizard_content@home.ratingsengine.ai': {
-                        controller: 'RatingsEngineAIProspect',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/prospect/prospect.component.html'
-                    },
-                    'prospect-graph@home.ratingsengine.ai.segment.prospect': {
-                        controller: 'RatingsEngineAIProspectGraph',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/prospect/prospect-graph.component.html'
-                    }
-                }
-            })
-            .state('home.ratingsengine.ai.segment.prospect.products', {
-                url: '/products',
-                resolve: {
-                    Products: function ($q, $stateParams, RatingsEngineAIStore) {
-                        var deferred = $q.defer();
-
-                        var params = {
-                            max: 1000,
-                            offset: 0
-                        };
-                        RatingsEngineAIStore.getProducts(params).then(function (result) {
-                            deferred.resolve(result);
-                        });
-                        return deferred.promise;
-                    }
-                },
-                views: {
-
-                    'wizard_content@home.ratingsengine.ai': {
-                        controller: 'RatingsEngineAIProducts',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/products/products.component.html'
-                    }
-                }
-            })
-            .state('home.ratingsengine.ai.segment.prospect.products.refine', {
-                url: '/refinetarget',
-                resolve: {
-                    Products: function ($q, RatingsEngineAIStore) {
-                        var deferred = $q.defer();
-                        var params = {
-                            max: 1000,
-                            offset: 0
-                        };
-
-                        RatingsEngineAIStore.getProducts(params).then(function (result) {
-                            deferred.resolve(result);
-                        });
-                        return deferred.promise;
-                    },
-                    Segments: function ($q, RatingsEngineAIStore) {
-                        var deferred = $q.defer();
-                        RatingsEngineAIStore.getSegments().then(function (result) {
-                            deferred.resolve(result);
-                        });
-                        return deferred.promise;
-                    },
-                    RefineSellOptions: function ($q, RatingsEngineAIService) {
-                        var deferred = $q.defer();
-                        // var segment_id = 15;
-
-                        RatingsEngineAIService.getSellOptions().then(function (data) {
-                            deferred.resolve(data);
-                        });
-
-                        return deferred.promise;
-                    }
-                },
-                views: {
-
-                    'wizard_content@home.ratingsengine.ai': {
-                        controller: function($scope){
-                            var vm = this;
-                            vm.inProgress = false;
-                            $scope.$on('model:inprogress', function(event,data) {
-                                if(data === true){
-                                    vm.inProgress = true;
-                                }else {
-                                    vm.inProgress = false;
-                                }
-                            });
-                           
-                            
-                        },
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine.component.html'
-                    },
-                    'refine-target@home.ratingsengine.ai.segment.prospect.products.refine': {
-                        controller: 'RatingsEngineAIRefineTarget',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-target.component.html'
-                    },
-                    'refine-model@home.ratingsengine.ai.segment.prospect.products.refine': {
-                        controller: 'RatingsEngineAIRefineModel',
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/refine/ai-refine-model.component.html'
-                    }
-                }
-            })
-
-            .state('home.ratingsengine.ai.segment.prospect.products.refine.model', {
-                url: '/model/:ai_model_job_id',
-                resolve: {
-                    AIModelJobId : function($stateParams){
-                        var aiModelId = $stateParams.ai_model_job_id || '?';
-                        return aiModelId;
-                    }
-                },
-                views: {
-
-                    'wizard_content@home.ratingsengine.ai': {
-                        controller: function (AIModelJobId, RatingsEngineStore) {
-                            var vm = this;
-                            vm.modelingJobId = AIModelJobId;
-                            RatingsEngineStore.setValidation('model', true);
-                        },
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/model/ai-model.component.html'
-                    }
-                }
-            })
-            .state('home.ratingsengine.ai.segment', {
+            .state('home.ratingsengine.productpurchase.segment', {
                 url: '/segment',
-
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Rating Engines',
+                    section: 'wizard.ratingsengine_segment'
+                },
                 resolve: {
                     Segments: function (SegmentService) {
                         return SegmentService.GetSegments();
@@ -690,29 +546,83 @@ angular
                         }
 
                         return deferred.promise;
-                    },
-                    RatingsEngineStore: function (RatingsEngineStore) {
-                        return RatingsEngineStore;
                     }
                 },
                 views: {
-                    'wizard_content@home.ratingsengine.ai': {
-
-                        controller: function ($state, RatingsEngineStore) {
-                            var vm = this;
-                            RatingsEngineStore.setValidation('segment', true);
-                            vm.goToCreateSegment = function () {
-                                $state.go('home.segment.explorer.attributes');
-                            }
-                        },
-                        controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/ai/segment/ai-segment.component.html',
-
-                    },
-                    'segment_view@home.ratingsengine.ai.segment': {
+                    'wizard_content@home.ratingsengine.productpurchase': {
                         controller: 'RatingsEngineSegment',
                         controllerAs: 'vm',
                         templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.productpurchase.segment.products', {
+                url: '/products',
+                resolve: {
+                    Products: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        var params = {
+                            max: 1000,
+                            offset: 0
+                        };
+                        RatingsEngineStore.getProducts(params).then(function (result) {
+                            deferred.resolve(result);
+                        });
+                        return deferred.promise;
+                    }
+                },
+                views: {
+
+                    'wizard_content@home.ratingsengine.productpurchase': {
+                        controller: 'RatingsEngineProducts',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/products/products.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.productpurchase.segment.products.prioritization', {
+                url: '/prioritization',
+                views: {
+                    'wizard_content@home.ratingsengine.productpurchase': {
+                        controller: 'RatingsEngineAIPrioritization',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/prioritization/prioritization.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.productpurchase.segment.products.prioritization.training', {
+                url: '/training',
+                views: {
+                    'wizard_content@home.ratingsengine.productpurchase': {
+                        controller: 'RatingsEngineAITraining',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/training/training.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.productpurchase.segment.products.prioritization.training.creation', {
+                url: '/creation',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Rating Engines',
+                },
+                resolve: {
+                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                            deferred.resolve(result)
+                        });
+
+                        return deferred.promise;
+                    }
+                },
+                views: {
+                    'wizard_content@home.ratingsengine.productpurchase': {
+                        controller: 'RatingsEngineCreation',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/creation/creation.component.html'
                     }
                 }
             });

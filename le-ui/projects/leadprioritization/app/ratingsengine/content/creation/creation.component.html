@@ -1,0 +1,27 @@
+<div class="ratingengine-creation playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
+    <div class="inner-container">
+        <div class="header">
+            <h2>The rating engine is being created.</h2>
+            <p>Your jobs will not be affected when you leave this page.</p>
+        </div>
+        <div class="content-body">
+            
+            <h3>Summary (Jon's work in progress)</h3>
+            <dl>
+                <dt>Rating Engine Type:</dt>
+                <dd>{{ vm.ratingEngine.type }}</dd>
+                <dt>Segment:</dt>
+                <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
+                <dt>Products:</dt>
+                <dd>{{ vm.ratingEngine.activeModel.AI.targetProducts }}</dd>
+                <dt>Prioritize by:</dt>
+                <dd>{{ vm.ratingEngine.activeModel.AI.predictionType }}</dd>
+                <dt>Rating Engine Settings:</dt>
+                <dd>{{ vm.ratingEngine.activeModel.AI.modelingConfigFilters }}</dd>
+            </dl>
+
+            <h3>Job Status</h3>
+            <p>Work in progress</p>
+        </div>
+    </div>
+</div>

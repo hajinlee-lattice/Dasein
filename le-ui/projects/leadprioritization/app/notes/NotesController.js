@@ -22,7 +22,6 @@ angular.module('lp.notes', [
     });
 
     vm.init = function($q) {
-        console.log(vm.notes);
 
         vm.id = vm.isRating ? $stateParams.rating_id : $stateParams.modelId;
         vm.referModelName = vm.isRating ? '' : Model.ModelDetails.Name.slice(0, -7)
@@ -76,7 +75,7 @@ angular.module('lp.notes', [
     }
 
     vm.deleteNote = function($event, noteId) {
-        console.log(noteId);
+        console.log(vm.id, noteId);
         DeleteNoteModal.show(vm.id, noteId);
 	}
 

@@ -1,41 +1,57 @@
-<section class="container ratingsengine ratingsenginetype">
+<section class="container ratingsengine-type">
   <div class="row">
     <div class="columns twelve box-outline">
+
       <div class="section-header">
-        <h4>Rating Engine Type</h4>
+        <h4>Create Rating Engine</h4>
       </div>
+
       <hr />
-      <div class="section-body with-padding row">
-        <div class="columns ten wizard-content" ui-view="wizard_content">
-            <p>
-                How would you like to create Ratings for sales Plays and marketing campaigns?
-            </p>
-            <ul class="types" ng-init="type = 'RULE_BASED'">
-                <li class="type ai" ng-mouseover="type = 'AI'" ng-click="vm.setType(type)" ng-class="{selected: type == 'AI'}">
-                    <strong>Aritifical Intelligence</strong>
+
+      <div class="section-body with-padding">
+        <div class="wizard-content" ui-view="wizard_content">
+
+            <h3>What do you want to predict?</h3>
+
+            <ul class="types">
+                <li 
+                    class="first-purchase" 
+                    ng-click="vm.setType('productpurchase', 'CROSS_SELL_FIRST_PURCHASE')">
+                    Customers That Will Purchase A Product For The First Time
                 </li>
-                <li class="type rulebased" ng-mouseover="type = 'RULE_BASED'" ng-click="vm.setType(type)" ng-class="{selected: type == 'RULE_BASED'}">
-                    <strong>Rule Based</strong>
+                <li 
+                    class="return-purchase" 
+                    ng-click="vm.setType('productpurchase', 'CROSS_SELL_RETURNING_PURCHASE')">
+                    Customers That Will Purchase Again Next Quarter
+                </li>
+                <li 
+                    class="product-prospects disabled">
+                    Prospects For My Products
+                </li>
+                <li 
+                    class="business-prospects disabled">
+                    Prospects For My Overall Business
                 </li>
             </ul>
-            <div ng-if="type == 'AI'">
-                <p>
-                    Select this option to rate your Accounts and Contacts using predictive analytics scoring.
-                </p>
-                <p>
-                    The upcoming wizard will ask you about your business goals and the artifical intellgence will do the rest.
-                </p>
-            </div>
-            <div ng-if="type == 'RULE_BASED'">
-                <p>
-                    Select this option to rate your Accounts using your business knowledge.
-                </p>
-                <p>
-                    The upcoming wizard will help you define your ratings based on your own business goals and rules.
-                </p>
-            </div>
+            <ul class="types">
+                <li 
+                    class="rules-prospects" 
+                    ng-click="vm.setType('rulesprospects', 'RULE_BASED')">
+                    Prospects Based On Specific Rules
+                </li>
+                <li 
+                    class="custom-event disabled">
+                    A Custom Event (Upload a Training File)
+                </li>
+                <li 
+                    class="import-pmml disabled">
+                    Import a Pre-Created Model (PMML File)
+                </li>
+            </ul>
+
         </div>
       </div>
+
     </div>
   </div>
 </section>

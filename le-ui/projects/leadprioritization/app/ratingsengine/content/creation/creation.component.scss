@@ -1,0 +1,32 @@
+.ratingengine-creation {
+    .header {
+        h2 {
+            padding-left: 0;
+            margin-bottom: 0px;
+            font-weight: bold;
+            // background-image: url('/assets/images/ico-ratings.png');
+        }
+    }
+    .content-body {
+        h3 {
+            border-bottom: #ddd solid 1px;
+            text-transform: none;
+            font-size: 18px;
+            font-weight: normal;
+            margin-top: 20px;
+        }
+        dl {
+            margin-top: 10px;
+        }
+        dt, dd {
+            font-size: 14px;
+            font-weight: normal;
+        }
+        dt {
+            width: 160px;
+        }
+        dd {
+            margin-left: 160px;
+        }
+    }
+}

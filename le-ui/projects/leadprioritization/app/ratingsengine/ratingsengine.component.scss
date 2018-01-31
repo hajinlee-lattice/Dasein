@@ -4,11 +4,10 @@
 @import "./content/ratingslist/ratingslist.component.scss";
 @import "./content/segment/segment.component.scss";
 @import "./content/summary/summary.component.scss";
-@import "./content/ai/segment/ai-segment.component.scss";
-@import "./content/ai/prospect/prospect.component.scss";
-@import "./content/ai/prospect/prospect-graph.component.scss";
-@import "./content/ai/products/products.component.scss";
-@import "./content/ai/refine/ai-refine.component.scss";
+@import "./content/creation/creation.component.scss";
+@import "./content/prioritization/prioritization.component.scss";
+@import "./content/products/products.component.scss";
+@import "./content/training/training.component.scss";
 
 .ratingsengine-content.container,
 section.ratingsengine.container {

@@ -12,7 +12,7 @@ angular.module('common.wizard.controls', [])
         prev: WizardControlsOptions.backState,
         next: function() {
                 var nextValue = 'home.' + WizardProgressContext;
-                if(WizardControlsOptions.suffix === undefined){
+                if(WizardControlsOptions.suffix === undefined && WizardProgressContext.includes("playbook")){
                     nextValue += '.wizard';
                 }
                 return nextValue;
@@ -30,7 +30,6 @@ angular.module('common.wizard.controls', [])
 
         vm.items.forEach(function(item) {
             var key = vm.rootState + item.state;
-            // console.log(key);
             vm.itemMap[key] = item;
         });
         vm.item = vm.itemMap[vm.toState.name];

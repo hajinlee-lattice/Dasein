@@ -3,9 +3,15 @@ angular.module('mainApp.appCommon.directives.chips', [])
     return {
         restrict: 'E',
         templateUrl: '/components/ai/chips.component.html',
-        scope: { placeholder: '@', datasource: '=', callback: '&callbackFunction', singleSelection: '=', id: '@', displayname: '@' },
+        scope: { 
+            placeholder: '@', 
+            datasource: '=', 
+            callback: '&callbackFunction', 
+            singleSelection: '=', 
+            id: '@', 
+            displayname: '@' 
+        },
         link: function (scope, element, attrs, ctrl) {
-
             scope.showClass = ''
             scope.chips = {};
             scope.positionInQueryList = 0;
@@ -89,7 +95,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
                         scope.chips[item[scope.id]] = item;
                     }
                     if(scope.singleSelection){
-                        scope.query = '';   
+                        scope.query = '';
                     }
                     scope.callCallback();
                     if(scope.singleSelection === true){
@@ -130,6 +136,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
 
             scope.setListVisibility = function (visible) {
+                console.log("setListVisibility", visible);
                 scope.showQueryList = visible;
             }
         }

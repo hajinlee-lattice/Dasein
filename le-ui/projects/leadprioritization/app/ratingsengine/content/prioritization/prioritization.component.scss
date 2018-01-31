@@ -1,0 +1,50 @@
+.ratingengine-prioritization {
+    .header {
+        h2 {
+            padding-left: 0;
+            // background-image: url('/assets/images/ico-segments.png');
+        }
+    }
+    .prediction-types {
+        @include flex-container;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-content: flex-start;
+        margin: 0;
+        li {
+            width: 40%;
+            height: auto;
+            padding: auto;
+            border: none;
+            &:hover {
+                box-shadow: none;
+            }
+            &:first-of-type {
+                margin-right: 10px;
+            }
+            &:last-child {
+                margin-left: 10px;
+            }
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 100px 10px 10px;
+            margin-bottom: 6px;
+            font-size: 20px;
+            text-align: center;
+            background: #fff;
+            border: #ddd solid 1px;
+            border-radius: 4px;
+        }        
+        li.selected button {
+            background: #457EBA;
+            border-color: #457EBA;
+            color: #fff;
+        }
+        p {
+            font-size: 14px;
+            text-align: center;
+        }
+    }
+}

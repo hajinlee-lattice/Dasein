@@ -10,6 +10,7 @@ angular
     }
 
     this.getSegments = function() {
+        console.log(this.segments);
         return this.segments;
     }
 

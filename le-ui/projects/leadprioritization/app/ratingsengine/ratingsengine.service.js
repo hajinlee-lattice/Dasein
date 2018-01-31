@@ -1,6 +1,6 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
-    $q, $state, $stateParams,  $rootScope, RatingsEngineService, DataCloudStore, RatingsEngineAIStore,
+    $q, $state, $stateParams,  $rootScope, RatingsEngineService, DataCloudStore,
     BrowserStorageUtility, SegmentStore, $timeout
 ){
     var RatingsEngineStore = this;
@@ -10,6 +10,11 @@ angular.module('lp.ratingsengine')
         tileStates: {},
         bucketCountMap: {}
     };
+
+    this.type = null;
+    this.cachedSegments = [];
+    this.cachedProducts = [];
+    this.modelingConfigFilters = null;
 
     this.init = function() {
         this.settings = {};
@@ -22,6 +27,8 @@ angular.module('lp.ratingsengine')
             summary: true,
             prospect: false,
             products: false,
+            prioritization: false,
+            training: true,
             refine: false,
             model: false
         }
@@ -33,13 +40,14 @@ angular.module('lp.ratingsengine')
         this.currentRating = {};
         this.rule = null;
         this.rating = null;
-        this.rating_id
-        this.type = null;
+        this.rating_id;
         this.coverage = {};
         this.savedSegment = "";
+        this.productsSelected = {};
+        this.predictionType = 'PROPENSITY';
 
         this.wizardProgressItems = {
-            "all": [
+            "rulesprospects": [
                 { 
                     label: 'Segment', 
                     state: 'segment', 
@@ -89,43 +97,43 @@ angular.module('lp.ratingsengine')
                     }
                 }
             ],
-            "ai": [
+            "productpurchase": [
                 { 
                     label: 'Segment', 
                     state: 'segment', 
-                    nextLabel: 'Next', 
+                    nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRatingEngineAI(nextState);
                     } 
                 },
                 { 
-                    label: 'Prospect', 
-                    state: 'segment.prospect', 
-                    nextLabel: 'Next, choose Products', 
-                    nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveTypeModel(nextState);
-                    } 
-                },
-                { 
                     label: 'Products', 
-                    state: 'segment.prospect.products', 
-                    nextLabel: 'Next, choose what to model',
+                    state: 'segment.products', 
+                    nextLabel: 'Next',
                     nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveProductToAIModel(nextState);
+                        RatingsEngineStore.nextSaveAIRatingModel(nextState);
                     } 
                 },
                 { 
-                    label: 'Refine', 
-                    state: 'segment.prospect.products.refine',
-                    nextLabel: 'Create Model',
+                    label: 'Prioritization', 
+                    state: 'segment.products.prioritization',
+                    nextLabel: 'Next',
                     nextFn: function(nextState) {
-                        RatingsEngineStore.nextSaveRefineToAIModel(nextState);
+                        RatingsEngineStore.nextSaveAIRatingModel(nextState);
                     } 
                 },
                 { 
-                    label: 'Model', 
-                    state: 'segment.prospect.products.refine.model', 
-                    nextLabel: 'Rating Engines',
+                    label: 'Training', 
+                    state: 'segment.products.prioritization.training', 
+                    nextLabel: 'Next',
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextLaunchAIModel(nextState);
+                    } 
+                },
+                { 
+                    label: 'Creation', 
+                    state: 'segment.products.prioritization.training.creation', 
+                    nextLabel: 'Next',
                     nextFn: function(nextState) {
                         $state.go('home.ratingsengine.list.ratings');
                         // RatingsEngineStore.nextSaveRatingEngine(nextState);
@@ -170,6 +178,20 @@ angular.module('lp.ratingsengine')
 
     this.getSegment = function() {
         return this.savedSegment;
+    }
+
+    this.setCachedSegments = function(segments) {
+        this.cachedSegments = segments;
+    }
+    this.getCachedSegments = function() {
+        return this.cachedSegments;
+    }
+
+    this.setCachedProducts = function(products) {
+        this.cachedProducts = products;
+    }
+    this.getCachedProducts = function() {
+        return this.cachedProducts;
     }
 
     var getRatingsEngineRule = function(RatingsEngineModels) {
@@ -437,12 +459,45 @@ angular.module('lp.ratingsengine')
     //     return deferred.promise;
     // }
 
-    this.setType = function(type) {
-        this.type = type;
+    this.setType = function(type, engineType) {
+        this.type = {
+            wizardType: type,
+            engineType: engineType
+        }
     }
-
     this.getType = function() {
         return this.type;
+    }
+
+    this.clearSelection = function () {
+        this.productsSelected = {};
+    }
+    this.getProducts = function (params) {
+        var deferred = $q.defer();
+        RatingsEngineService.getProducts(params).then(function (data) {
+            deferred.resolve(data.data);
+        });
+        return deferred.promise;
+    }
+    this.selectProduct = function (id, name) {
+        if (this.productsSelected[id]) {
+            delete this.productsSelected[id];
+        } else {
+            this.productsSelected[id] = name;
+        }
+    }
+    this.getProductsSelected = function () {
+        return this.productsSelected;
+    }
+    this.isProductSelected = function (id) {
+        if (this.productsSelected[id]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    this.getProductsSelectedCount = function () {
+        return Object.keys(this.productsSelected).length;
     }
 
     this.checkRatingsBuckets = function(map) {
@@ -489,6 +544,11 @@ angular.module('lp.ratingsengine')
         this.rating_id = $stateParams.rating_id;
     }
 
+    this.getProductsSelectedIds = function() {
+        var ids = Object.keys(this.productsSelected);
+        return ids;
+    }
+
     this.deleteRating = function(ratingId) {
         var deferred = $q.defer();
 
@@ -504,20 +564,42 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+    this.setPredictionType = function(predictionType) {
+        this.predictionType = predictionType;
+    }
+    this.getPredictionType = function() {
+        return this.predictionType;
+    }
+
+    
+    this.setModelingConfigFilters = function(modelingConfigFilters) {
+        this.modelingConfigFilters = modelingConfigFilters;
+    }
+    this.getModelingConfigFilters = function() {
+        return this.modelingConfigFilters;
+    }
+
     this.nextSaveRatingEngineAI = function(nextState){
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        var opts =  {
-            type: currentRating.type || 'AI_BASED',
-           
-        };
-        console.log("save engine AI", opts);
+
+        var type = RatingsEngineStore.getType(),
+            opts =  {
+                type: "AI_BASED",
+                activeModel: {
+                    AI: {
+                        workflowType: 'CROSS_SELL',
+                        modelingStrategy: type.engineType
+                    }
+                }
+            };
+
         RatingsEngineStore.saveRating(opts).then(function(rating) {
-            $state.go(nextState, { rating_id: currentRating.id });
+            $state.go(nextState, { rating_id: rating.id });
         });
     }
     
     this.nextSaveTypeModel = function(nextState){
         var currentRating = RatingsEngineStore.getCurrentRating();
+
         var obj = currentRating.ratingModels[0].AI;
         obj.workflowType = RatingsEngineAIStore.aiModelOptions.workflowType;//'CROSS_SELL';
         var opts = {
@@ -528,55 +610,46 @@ angular.module('lp.ratingsengine')
         });
     }
 
-    this.nextSaveProductToAIModel = function(nextState){
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        var targetProducts = RatingsEngineAIStore.getProductsSelectedIds();
-       
-        var obj = currentRating.ratingModels[0].AI;
-        obj.targetProducts  = targetProducts;
+    this.nextSaveAIRatingModel = function(nextState){
+
+        var currentRating = RatingsEngineStore.getCurrentRating(),
+            ratingId = $stateParams.rating_id,
+            targetProducts = RatingsEngineStore.getProductsSelectedIds(),
+            predictionType = RatingsEngineStore.getPredictionType(),
+            modelingConfigFilters = RatingsEngineStore.getModelingConfigFilters(),
+            obj = {};
+
+        RatingsEngineStore.getRating(ratingId).then(function(rating){
+            obj = {
+                AI: {
+                    id: rating.activeModel.AI.id,
+                    targetProducts: targetProducts,
+                    predictionType: predictionType,
+                    modelingConfigFilters: modelingConfigFilters
+                }
+            };
+            
+            RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
+                
+                console.log("Model Updated", model);
+                if(nextState) {
+                    $state.go(nextState, { rating_id: ratingId });
+                }
+            });
+        });
         
-        var opts = {
-            AI: obj
-        };
-
-        RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(model) {
-            if(nextState) {
-                $state.go(nextState, { rating_id: model.id });
-            }
-        });
-       
-
-    }
-
-    this.nextSaveRefineToAIModel = function(nextState) {
-        $rootScope.$broadcast('model:inprogress',true);
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        var obj = currentRating.ratingModels[0].AI;
-        obj.targetCustomerSet = RatingsEngineAIStore.aiModelOptions.targetCustomerSet;//"new";
-        obj.modelingMethod = RatingsEngineAIStore.aiModelOptions.modelingMethod;//"PROPENSITY";
-        obj.trainingProducts = RatingsEngineAIStore.getProdutTrainingIds();
-        var opts = {
-            AI: obj
-        };
-
-
-        RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(applicationid) {
-            console.log(applicationid);
-            RatingsEngineStore.nextLaunchAIModel(nextState);
-        });
-    }
-    
+    }    
 
     this.nextLaunchAIModel = function(nextState){
         var currentRating = RatingsEngineStore.getCurrentRating();
-        var obj = currentRating.ratingModels[0].AI;
+        var obj = currentRating.activeModel.AI;
         RatingsEngineStore.tmpId = obj.id;
         var opts = {};
         console.log('Launching the model');
         RatingsEngineService.createAIModel(currentRating.id, obj.id, opts).then(function(applicationid) {
             console.log('Application id', applicationid);
             var id = applicationid.Result;//RatingsEngineStore.tmpId;
-            var obj = currentRating.ratingModels[0].AI;
+            var obj = currentRating.activeModel.AI;
             obj.modelingJobId = id;
             var opts = {
                 AI: obj
@@ -698,6 +771,31 @@ angular.module('lp.ratingsengine')
             deferred.resolve(response.data);
         });
 
+        return deferred.promise;
+    }
+
+    this.getProducts = function (params) {
+        var deferred = $q.defer(),
+            max = params.max,
+            offset = params.offset,
+            data = [],
+            url = '/pls/products/data';
+
+        $http({
+            method: 'GET',
+            url: url,
+            params: {
+                max: params.max || 1000,
+                offset: params.offset || 0
+            },
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(function (response) {
+            deferred.resolve(response.data);
+        }, function (response) {
+            deferred.resolve(response.data);
+        });
         return deferred.promise;
     }
 

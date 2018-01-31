@@ -1,19 +1,9 @@
 angular.module('lp.ratingsengine.ratingsenginetype', [])
-.controller('RatingsEngineType', function ($q, $state, $stateParams, RatingsEngineStore) {
+.controller('RatingsEngineType', function ($state, RatingsEngineStore) {
     var vm = this;
 
-    angular.extend(vm, {
-        foo: null
-    });
-
-    vm.setType = function(type) {
-        RatingsEngineStore.setType(type);
-        var url = 'home.ratingsengine';
-        if('AI' === type) {
-            url += '.ai';
-        } else {
-            url += '.wizard';
-        }
-        $state.go(url);
+    vm.setType = function(type, engineType) {
+        RatingsEngineStore.setType(type, engineType);
+        $state.go('home.ratingsengine.' + type);
     }
 });

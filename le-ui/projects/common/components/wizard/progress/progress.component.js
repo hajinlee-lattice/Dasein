@@ -13,7 +13,8 @@ angular.module('common.wizard.progress', [
         wizard: '.wizard.',
         rootState: function() {
             var rootValue = 'home.' + WizardProgressContext + '.';
-            if(!WizardProgressContext.includes("ratingsengine.ai")){
+
+            if(WizardProgressContext.includes("playbook")){
                 rootValue += 'wizard.';
             }
             return rootValue;
@@ -22,14 +23,12 @@ angular.module('common.wizard.progress', [
     });
 
     vm.init = function() {
-        if(WizardProgressContext.includes("ratingsengine.ai")){
+        if(!WizardProgressContext.includes("playbook")){
             vm.wizard = '.';
         }
         vm.items.forEach(function(item) {
             vm.itemMap[vm.rootState + item.state.split('.').pop()] = item;
         });
-
-        //console.log('Progress component', vm.itemMap);
     }
 
     vm.click = function(state, $event) {

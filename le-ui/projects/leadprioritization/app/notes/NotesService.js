@@ -118,6 +118,7 @@ angular
 
 
     this.DeleteNote = function(id, noteId) {
+
         var deferred = $q.defer(),
             result = {},
             id = id || '',

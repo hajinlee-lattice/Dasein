@@ -1,0 +1,89 @@
+angular.module('lp.ratingsengine.wizard.products', [])
+.controller('RatingsEngineProducts', function (
+    $scope, RatingsEngineStore, RatingsEngineService, Products) {
+        var vm = this;
+        angular.extend(vm, {
+            products: Products,
+            currentPage: 1,
+            pageSize: 10,
+            productsCount: 0,
+            productsSelected: {},
+            sortBy: 'ProductName',
+            showPagination: true,
+            selectedAll: false,
+            type: RatingsEngineStore.getType()
+        });
+
+        $scope.$watch('vm.search', function(newValue, oldValue) {
+        if(vm.search || oldValue) {
+            vm.currentPage = 1;
+        }
+    });
+
+    vm.init = function () {
+
+        // console.log(vm.products);
+
+        RatingsEngineStore.setCachedProducts(vm.products);
+
+        vm.filteredProducts = vm.products.slice(0, 10);
+        vm.productsCount = vm.products.length;
+
+        vm.validateNextStep();
+
+    }
+
+    vm.getTotalProductsCount = function () {
+        return vm.productsCount;
+    }
+
+    vm.selectAll = function(){
+        if (vm.selectedAll) {
+            vm.selectedAll = true;
+            vm.products.forEach(function (product) {
+                product.Selected = vm.selectedAll;
+                RatingsEngineStore.selectProduct(product.ProductId, product.ProductName);
+            });
+        } else {
+            vm.selectedAll = false;
+            vm.products.forEach(function (product) {
+                product.Selected = vm.selectedAll;
+            });
+            RatingsEngineStore.clearSelection();
+        }
+
+        vm.productsSelected = RatingsEngineStore.getProductsSelected();
+    }
+    vm.selectProduct = function (index) {
+        vm.products[index]['Selected'] = (vm.products[index]['Selected'] == undefined ? true : !vm.products[index]['Selected']);
+        var productId = vm.products[index].ProductId;
+        RatingsEngineStore.selectProduct(productId, vm.products[index].ProductName);
+        vm.validateNextStep();
+
+        vm.productsSelected = RatingsEngineStore.getProductsSelected();
+        
+        if (RatingsEngineStore.getProductsSelectedCount() === vm.products.length) {
+            vm.selectedAll = true;
+        } else {
+            vm.selectedAll = false;
+        }
+    }
+
+    vm.getProductsSelectedCount = function () {
+        return RatingsEngineStore.getProductsSelectedCount();
+    }
+
+    vm.validateNextStep = function () {
+        if (RatingsEngineStore.getProductsSelectedCount() > 0) {
+            vm.setValidation('products', true);
+        } else {
+            vm.setValidation('products', false);
+        }
+    }
+
+    vm.setValidation = function (type, validated) {
+        RatingsEngineStore.setValidation(type, validated);
+    }
+
+    vm.init();
+});

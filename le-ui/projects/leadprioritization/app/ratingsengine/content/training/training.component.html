@@ -1,0 +1,132 @@
+<div class="ratingengine-training playbook-content container">
+    <div class="inner-container">
+        <form name="trainingForm" form-on-change="vm.formOnChange()">
+        
+            <div class="header">
+                <h2>How do you want to train the model?</h2>
+            </div>
+
+            <div class="content-body">
+
+                <ul class="checkbox-list">
+                    <li class="form-group">
+                        <input 
+                            type="checkbox"
+                            class="form-control"
+                            ng-model="checkboxModel.spend" />
+                        <div>
+                            <p>Only use successes where spend in the quarter was</p>
+                            <select 
+                                class="form-control"
+                                ng-disabled="!checkboxModel.spend"
+                                ng-model="vm.spendCriteria">
+                                <option value="GREATER_OR_EQUAL">At least</option>
+                                <option value="LESS_OR_EQUAL">At most</option>
+                            </select>
+                            <div class="input-group prepend">
+                                <span>$</span>
+                                <input 
+                                    type="text" 
+                                    class="form-control"
+                                    ng-disabled="!checkboxModel.spend"
+                                    ng-model="vm.spendValue" />
+                            </div>
+                        </div>
+                    </li>
+                    <li class="form-group">
+                        <input 
+                            type="checkbox"
+                            class="form-control"
+                            ng-model="checkboxModel.quantity" />
+                        <div>
+                            <p>Only use successes where quantity bought in the quarter was</p>
+                            <select 
+                                class="form-control"
+                                ng-disabled="!checkboxModel.quantity"
+                                ng-model="vm.quantityCriteria">
+                                <option value="GREATER_OR_EQUAL">At least</option>
+                                <option value="LESS_OR_EQUAL">At most</option>
+                            </select>
+                            <div class="input-group append">
+                                <input 
+                                    type="text" 
+                                    class="form-control"
+                                    ng-disabled="!checkboxModel.quantity"
+                                    ng-model="vm.quantityValue" />
+                                <span>Units</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="form-group">
+                        <input 
+                            type="checkbox"
+                            class="form-control"
+                            ng-model="checkboxModel.periods" />
+                        <div>
+                            <p>When modeling, only use historical records from the last</p>
+                            <div class="input-group append">
+                                <input 
+                                    type="text" 
+                                    class="form-control"
+                                    ng-disabled="!checkboxModel.periods"
+                                    ng-model="vm.periodsValue" />
+                                <span>periods</span>
+                            </div>
+                            <!-- <select class="form-control">
+                                <option>Months</option>
+                                <option>Quarters</option>
+                                <option>Years</option>
+                            </select> -->
+                        </div>
+                    </li>
+                    <li class="form-group auto-select-group">
+                        <div>
+                            <p>Let me model on a similar segment, not exactly the one I want to sell into</p>
+                            <chips
+                                placeholder="Which similar segment(s) do you want to use to model with?"
+                                datasource="vm.segments" 
+                                callback-function="vm.segmentsCallback(args)"
+                                single-selection="true"
+                                displayname="display_name"
+                                ng-disabled="checkboxModel.segments"></chips>
+                        </div>
+                    </li>
+                    <li class="form-group auto-select-group">
+                        <div>
+                            <p>Let me model on similar products, not exactly the ones I want to sell too</p>
+                            <chips
+                                placeholder="Which similar product(s) do you want to model with?" 
+                                datasource="vm.products"
+                                callback-function="vm.productsCallback(args)"
+                                single-selection="false"
+                                displayname="ProductName"
+                                ng-disabled="checkboxModel.products"></chips>
+                        </div>
+                    </li>
+                </ul><!-- End .checkbox-list -->
+                <ul class="data">
+                    <li class="stats-group">
+                        <h3>Modeling</h3>
+                        <dl class="stats">
+                            <dt>Records Selected</dt>
+                            <dd>10,345</dd>
+                        </dl>
+                        <dl class="stats">
+                            <dt>First Purchases</dt>
+                            <dd>679</dd>
+                        </dl>
+                    </li>
+                    <li class="stats-group">
+                        <h3>Scoring</h3>
+                        <dl class="stats">
+                            <dt>Accounts to be scored</dt>
+                            <dd>6,996</dd>
+                        </dl>
+                    </li>
+                </ul>
+
+            </div><!-- End .content-body -->
+
+        </form>
+    </div>
+</div>
