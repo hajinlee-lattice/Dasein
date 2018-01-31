@@ -11,6 +11,7 @@ RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
 COPY server.xml $CATALINA_HOME/conf/server.xml
+COPY server-http2.xml $CATALINA_HOME/conf/server-http2.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 
 COPY cacerts /etc/pki/java/cacerts
