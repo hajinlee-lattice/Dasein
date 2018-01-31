@@ -13,8 +13,6 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +44,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -54,6 +53,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -235,16 +235,21 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private Map<String, String> getProductMap(String customerSpace) {
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setMainEntity(BusinessEntity.Product);
-        DataPage dataPage = entityProxy.getData(customerSpace, frontEndQuery);
-        Map<String, String> productMap = new HashMap<>();
-        dataPage.getData()
-                .forEach(row -> productMap.put( //
-                        (String) row.get(InterfaceName.ProductId.name()), //
-                        (String) row.get(InterfaceName.ProductName.name()) //
-        ));
-        return productMap;
+        String tableName = dataCollectionProxy.getTableName(customerSpace, BusinessEntity.Product.getServingStore());
+        if (StringUtils.isNotBlank(tableName)) {
+            FrontEndQuery frontEndQuery = new FrontEndQuery();
+            frontEndQuery.setMainEntity(BusinessEntity.Product);
+            DataPage dataPage = entityProxy.getData(customerSpace, frontEndQuery);
+            Map<String, String> productMap = new HashMap<>();
+            dataPage.getData()
+                    .forEach(row -> productMap.put( //
+                            (String) row.get(InterfaceName.ProductId.name()), //
+                            (String) row.get(InterfaceName.ProductName.name()) //
+                    ));
+            return productMap;
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", "
@@ -258,7 +263,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         cubes.keySet().forEach(key -> {
             BusinessEntity entity = BusinessEntity.valueOf(key);
             List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, entity);
-            ;
             if (CollectionUtils.isNotEmpty(cms)) {
                 cmMap.put(key, cms);
             }
@@ -267,12 +271,19 @@ public class DataLakeServiceImpl implements DataLakeService {
             return null;
         }
         Map<String, String> productMap = getProductMap(customerSpace);
-        List<RatingEngineSummary> engineSummaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
+        List<RatingEngineSummary> engineSummaries = new ArrayList<>();
+        try {
+            engineSummaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
+        } catch (Exception e) {
+            log.warn("Failed to retrieve engine summaries.", e);
+        }
         String timerMsg = "Construct top N tree with " + cubes.size() + " cubes, " + engineSummaries.size()
                 + " rating engines and " + productMap.size() + " products.";
         try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
             TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
-            StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
+            if (MapUtils.isNotEmpty(productMap)) {
+                StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
+            }
             return topNTree;
         }
     }
