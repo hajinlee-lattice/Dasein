@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -27,8 +28,8 @@ import io.swagger.annotations.ApiOperation;
 public class AccountResource extends BaseFrontEndEntityResource {
 
     @Inject
-    public AccountResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
-        super(entityProxy, segmentProxy);
+    public AccountResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
+        super(entityProxy, segmentProxy, dataCollectionProxy);
     }
 
     @Deprecated

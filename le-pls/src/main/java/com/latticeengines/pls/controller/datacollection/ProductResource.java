@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -27,8 +28,8 @@ import io.swagger.annotations.ApiParam;
 public class ProductResource extends BaseFrontEndEntityResource {
 
     @Inject
-    public ProductResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
-        super(entityProxy, segmentProxy);
+    public ProductResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
+        super(entityProxy, segmentProxy, dataCollectionProxy);
     }
 
     @RequestMapping(value = "/data", method = RequestMethod.GET)

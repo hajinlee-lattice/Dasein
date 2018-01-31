@@ -1,28 +1,38 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public abstract class BaseFrontEndEntityResource {
 
+    private static final Logger log = LoggerFactory.getLogger(BaseFrontEndEntityResource.class);
+
     private final EntityProxy entityProxy;
 
     private final SegmentProxy segmentProxy;
 
-    BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
+    private final DataCollectionProxy dataCollectionProxy;
+
+    BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
+            DataCollectionProxy dataCollectionProxy) {
         this.entityProxy = entityProxy;
         this.segmentProxy = segmentProxy;
+        this.dataCollectionProxy = dataCollectionProxy;
     }
 
     public Long getCount(FrontEndQuery frontEndQuery) {
@@ -31,6 +41,12 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     protected Long getCount(String tenantId, FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
+        String servingTableName = dataCollectionProxy.getTableName(tenantId, mainEntity.getServingStore());
+        if (StringUtils.isBlank(servingTableName)) {
+            log.warn(String.format("%s's serving store %s does not exist, returning 0 count.", mainEntity.name(),
+                    mainEntity.getServingStore().name()));
+            return 0L;
+        }
         if (frontEndQuery == null) {
             frontEndQuery = new FrontEndQuery();
         }
@@ -40,23 +56,29 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery) {
+        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
+        String servingTableName = dataCollectionProxy.getTableName(tenantId, getMainEntity().getServingStore());
+        if (StringUtils.isBlank(servingTableName)) {
+            log.warn(String.format("%s's serving store %s does not exist, returning empty data page.",
+                    getMainEntity().name(), getMainEntity().getServingStore().name()));
+            return new DataPage();
+        }
         if (frontEndQuery == null) {
             frontEndQuery = new FrontEndQuery();
         }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
-        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getData(tenantId, frontEndQuery);
     }
 
     @Deprecated
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
+        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         if (frontEndQuery == null) {
             frontEndQuery = new FrontEndQuery();
         }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
-        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return entityProxy.getRatingCount(tenantId, frontEndQuery);
     }
 

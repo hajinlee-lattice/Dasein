@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -40,8 +41,8 @@ public class EntityResource extends BaseFrontEndEntityResource {
             ThreadPoolUtils.getFixedSizeThreadPool("entity-count", BusinessEntity.COUNT_ENTITIES.size());
 
     @Inject
-    public EntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
-        super(entityProxy, segmentProxy);
+    public EntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
+        super(entityProxy, segmentProxy, dataCollectionProxy);
 
     }
 
