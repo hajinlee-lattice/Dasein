@@ -30,7 +30,7 @@ public class CleanupFlow extends ConfigurableFlowBase<CleanupConfig> {
     private static final String DELETE_PREFIX = "DEL_";
     private static final String AGGREGATE_PREFIX = "AGGR_";
 
-    private static final String DUMMY_COLUMN = "DummyJoin_f8f7d5c7";
+    private static final String DUMMY_COLUMN = "DJ_f8f7d5c7";
 
     private CleanupConfig config;
 
@@ -76,10 +76,12 @@ public class CleanupFlow extends ConfigurableFlowBase<CleanupConfig> {
                     resultNode = partA.merge(partC);
                     break;
                 case BYUPLOAD_MINDATE:
-                    deleteNode = deleteNode.filter(deleteColumns.get(0) + " > 0", new FieldList(deleteColumns.get(0)))
-                            .sort(deleteColumns.get(0)).limit(1);
+                    deleteNode = deleteNode
+                            .filter(deleteColumns.get(0) + " != null", new FieldList(deleteColumns.get(0)))
+                            .addColumnWithFixedValue(DUMMY_COLUMN, "dummyId", String.class)
+                            .groupByAndLimit(new FieldList(DUMMY_COLUMN), new FieldList(deleteColumns.get(0)), 1,
+                                    false, true);
                     originalNode = originalNode.addColumnWithFixedValue(DUMMY_COLUMN, "dummyId", String.class);
-                    deleteNode = deleteNode.addColumnWithFixedValue(DUMMY_COLUMN, "dummyId", String.class);
                     originalNode = originalNode.leftJoin(DUMMY_COLUMN, deleteNode, DUMMY_COLUMN);
                     log.info(String.format("Delete column name: %s, avro type: %s, java type: %s", deleteColumns.get(0),
                             originalNode.getSchema(deleteColumns.get(0)).getAvroType().getName(),
