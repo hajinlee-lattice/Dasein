@@ -42,6 +42,7 @@ public class RatingProxy extends MicroserviceRestApiProxy {
     @Inject
     public RatingProxy(CacheManager cacheManager) {
         super("objectapi/customerspaces");
+        setMaxAttempts(2);
         this.cacheManager = cacheManager;
         coverageCache = new LocalCacheManager<>(CacheName.RatingCoverageCache, str -> {
             String[] tokens = str.split("\\|");

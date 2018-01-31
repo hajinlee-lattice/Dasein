@@ -47,6 +47,7 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     @Inject
     public EntityProxy(CacheManager cacheManager) {
         super("objectapi/customerspaces");
+        setMaxAttempts(2);
         this.cacheManager = cacheManager;
         countCache = new LocalCacheManager<>(CacheName.EntityCountCache, o -> {
             String str = (String) o;
