@@ -17,8 +17,8 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("action_ids")
     private List<Long> actionIds = Collections.emptyList();
-    
-    @JsonProperty("datacloud_version")
+
+    @JsonProperty("data_cloud_version")
     private String dataCloudVersion;
     
     public DataFeed.Status getInitialDataFeedStatus() {

@@ -84,8 +84,8 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @Column(name = "VERSION", nullable = false)
     private Version version;
 
-    @JsonProperty("datacloud_version")
-    @Column(name = "DATACLOUD_VERSION", nullable = true)
+    @JsonProperty("data_cloud_version")
+    @Column(name = "DATA_CLOUD_VERSION", nullable = true)
     private String dataCloudVersion;
 
     @Override
