@@ -1477,12 +1477,6 @@
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-hdfs2</artifactId>
                 <version>${camel.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- Confluent Dependencies -->
