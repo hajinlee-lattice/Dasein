@@ -140,7 +140,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     }
 
-    protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource) {
+    protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = inputTableNames;
         step.setBaseSources(baseSources);
@@ -151,7 +151,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         step.setBaseTables(baseTables);
         step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, true));
+        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly));
         if (useTargetTable) {
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);

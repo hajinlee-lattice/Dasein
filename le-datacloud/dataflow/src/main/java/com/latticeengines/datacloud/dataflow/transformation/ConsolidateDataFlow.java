@@ -29,6 +29,8 @@ import cascading.tuple.Fields;
 @Component("consolidateDataFlow")
 public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTransformerConfig> {
 
+    private static final String UUID = "__Id__";
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
 
@@ -49,9 +51,11 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         dedupeSource(config, sources, groupByKey);
         if (sources.size() <= 1) {
             result = sources.get(0);
-        } else if (config.isMergeOnly()) {
-            result = sources.get(0).merge(sources.subList(1, sources.size()));
         } else {
+            if (config.isMergeOnly()) {
+                addIdColumn(sources, UUID);
+                groupByKey = UUID;
+            }
             Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
             List<String> fieldToRetain = new ArrayList<>();
             Set<String> commonFields = new HashSet<>();
@@ -76,6 +80,16 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
             result = consolidateHelper.addTimestampColumns(result);
         }
         return result;
+    }
+
+    private void addIdColumn(List<Node> sources, String idColumn) {
+        for (int i = 0; i < sources.size(); i++) {
+            Node node = sources.get(i);
+            if (!node.getFieldNames().contains(idColumn)) {
+                node = node.addUUID(idColumn);
+                sources.set(i, node);
+            }
+        }
     }
 
     private void dedupeSource(ConsolidateDataTransformerConfig config, List<Node> sources, String groupByKey) {

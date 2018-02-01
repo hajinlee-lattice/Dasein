@@ -32,7 +32,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             upsertMasterStep = 1;
             diffStep = 2;
 
-            TransformationStepConfig merge = mergeInputs(false, true);
+            TransformationStepConfig merge = mergeInputs(false, true, false);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig report = reportDiff(diffStep);

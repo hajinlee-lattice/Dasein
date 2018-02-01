@@ -73,7 +73,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         dailyStep = 1;
         dayPeriodStep = 2;
 
-        TransformationStepConfig inputMerge = mergeInputs(true, false);
+        TransformationStepConfig inputMerge = mergeInputs(true, false, true);
         TransformationStepConfig daily = addTrxDate();
         TransformationStepConfig dayPeriods  = collectDays();
         TransformationStepConfig dailyPartition  = partitionDaily();
