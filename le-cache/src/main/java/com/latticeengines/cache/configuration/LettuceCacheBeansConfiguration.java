@@ -88,33 +88,47 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         RedisCacheConfiguration dataLakeCMCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.DataLakeCMCacheName));
         RedisCacheConfiguration dataLakeTopNTreeCache = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.DataLakeTopNTreeCache));
         RedisCacheConfiguration dataLakeStatsCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.DataLakeStatsCubesCache));
 
         RedisCacheConfiguration entityCountCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityCountCacheName));
 
         RedisCacheConfiguration entityDataCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityDataCacheName));
         RedisCacheConfiguration entityRatingCountCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityRatingCountCacheName));
 
         RedisCacheConfiguration ratingCoverageCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.RatingCoverageCacheName));
 
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
