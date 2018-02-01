@@ -1,13 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -187,7 +180,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return Collections.emptyList();
         }
 
-        jobs.removeIf(job -> NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
+        jobs.removeIf(job ->
+                (job == null) ||
+                (job.getJobType() == null) ||
+                (NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()))
+        );
         updateAllJobs(jobs);
         Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
         if (unstartedPnAJob != null) {
