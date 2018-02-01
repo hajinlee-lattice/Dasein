@@ -1,7 +1,16 @@
 .rating-list {
-  .tile-header h2 {
-    background-image: url('/assets/images/ico-model-black.png');
-  }
+	.tile-header h2 {
+		background-image: url('/assets/images/ico-model-black.png');
+	}
+	.tile-body {
+		.ai-based {
+			background-image: url('/assets/images/bkg-active-model-lead.png');
+			height: 100px;
+			background-size: 120px;
+			background-repeat: no-repeat;
+			background-position: center;
+		}
+	}
 }
 
 .creation-history {

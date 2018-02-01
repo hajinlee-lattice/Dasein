@@ -44,13 +44,21 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.init = function($q, $filter) {
 
-        // console.log(vm.current.ratings);
+        console.log(vm.current);
 
         RatingsEngineStore.clear();
 
         vm.totalLength = vm.count();
         vm.activeCount = vm.count('ACTIVE');
         vm.inactiveCount = vm.count('INACTIVE');
+
+        angular.forEach(vm.current.ratings, function(rating) {
+            if(vm.current.bucketCountMap[rating.id].bucketCoverageCounts.length === 0) {
+                rating.hasBuckets = false;
+            } else {
+                rating.hasBuckets = true;
+            }
+        });
         
         $scope.$watch('vm.current.ratings', function() {
             vm.header.filter.unfiltered = vm.current.ratings;
