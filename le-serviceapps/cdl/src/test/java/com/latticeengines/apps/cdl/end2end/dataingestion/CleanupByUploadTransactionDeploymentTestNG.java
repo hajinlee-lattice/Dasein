@@ -7,7 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVPrinter;
@@ -37,6 +39,7 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
     private SourceFile cleanupTemplate;
     private int originalRecordsCount;
     private int templateSize;
+    private int dayPeriod;
 
     private static final String CLEANUP_FILE_TEMPLATE = "Cleanup_Template_Transaction.csv";
 
@@ -69,13 +72,18 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
         }
         CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(CLEANUP_FILE_TEMPLATE),
                 LECSVFormat.format.withHeader("AccountId", "ContactId", "ProductId", "TransactionTime"));
+        Set<Integer> dayPeriods = new HashSet<>();
         //get records from last
         for(int i = recordsBeforeDelete.size() - 1; i >= recordsBeforeDelete.size() - templateSize; i--) {
             csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
                     recordsBeforeDelete.get(i).get("ContactId").toString(),
                     recordsBeforeDelete.get(i).get("ProductId").toString(),
                     recordsBeforeDelete.get(i).get("TransactionTime").toString());
+            dayPeriods.add(Integer.parseInt(recordsBeforeDelete.get(i).get("TransactionDayPeriod").toString()));
         }
+        List<Integer> sortPeriods = new ArrayList<>(dayPeriods);
+        Collections.sort(sortPeriods);
+        dayPeriod = sortPeriods.get(0);
         csvPrinter.flush();
         csvPrinter.close();
         Resource csvResrouce = new FileSystemResource(CLEANUP_FILE_TEMPLATE);
@@ -100,6 +108,7 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
         assertEquals(status, JobStatus.COMPLETED);
         List<GenericRecord> records = getRecords(masterTable);
         assertTrue(records.size() < originalRecordsCount);
+        originalRecordsCount = records.size();
     }
 
     private void cleanupMinDateAndVerify() {
@@ -108,7 +117,16 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
         List<GenericRecord> records = getRecords(masterTable);
-        System.out.println(records.size());
+        assertTrue(records.size() > 0);
+        boolean allEarlier = true;
+        for (GenericRecord record : records) {
+            int period = Integer.parseInt(record.get("TransactionDayPeriod").toString());
+            if (period >= dayPeriod) {
+                allEarlier = false;
+                break;
+            }
+        }
+        assertTrue(allEarlier);
     }
 
     private List<GenericRecord> getRecords(Table table) {

@@ -146,7 +146,7 @@ public class CleanupFlow extends ConfigurableFlowBase<CleanupConfig> {
                         result.add(prefix + joinedColumns.getTransactionTime());
                         break;
                     default:
-                        throw new RuntimeException("Transaction Cleanup does not suport type: " + type.name());
+                        throw new RuntimeException("Transaction Cleanup does not support type: " + type.name());
                 }
         }
         return result;
