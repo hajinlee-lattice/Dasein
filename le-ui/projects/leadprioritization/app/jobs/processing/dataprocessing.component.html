@@ -48,12 +48,10 @@
                     <menu-sort-by config="vm.header.sort"></menu-sort-by>
                     <search-filter query="vm.query"></search-filter>
                 </div>
-                <div class="row jobs-pagination-controls" ng-init="vm.current = 1" ng-show="vm.max > 1">
-                    <div class="twelve columns">
-                        <pd-pagination-controls current="vm.current" max="vm.max = (header.filter.filtered | filter: vm.query).length / vm.pagesize">
-                        </pd-pagination-controls>
-                    </div>
+                <div class="pull-right" ng-init="pagesize = 10; current = 1" ng-show="max > 1">
+                    <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
                 </div>
+                </pd-pagination-controls>
             </div>
         </div>
 
@@ -70,8 +68,7 @@
                 <div class="le-cell le-col-start-10 le-col-span-3"></div>
 
             </div>
-            <import-job-row class="le-row" ng-if="!vm.loading" 
-                                        ng-repeat="job in vm.header.filter.filtered |
+            <import-job-row class="le-row" ng-if="!vm.loading" ng-repeat="job in vm.header.filter.filtered |
                                         filter: vm.query |
                                         orderBy: vm.header.sort.order + vm.header.sort.property |
                                         startFrom: (current - 1) * vm.pagesize |
@@ -93,12 +90,16 @@
                 </div>
             </div>
         </div>
-        <div class="row" ng-init="vm.current = 1" ng-show="vm.max > 1">
-            <div class="twelve columns">
-                <pd-pagination-controls current="vm.current" max="vm.max = (vm.header.filter.filtered | filter: vm.query).length / vm.pagesize">
-                </pd-pagination-controls>
+
+
+        <div class="le-grid grid-footer" ng-show="max > 1">
+            <div class="le-row">
+                <div class="le-col-span-12">
+                    <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
+
+                    </pd-pagination-controls>
+                </div>
             </div>
         </div>
-
     </div>
 </section>

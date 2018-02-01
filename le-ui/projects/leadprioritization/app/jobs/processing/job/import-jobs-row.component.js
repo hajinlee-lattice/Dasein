@@ -7,7 +7,7 @@ angular.module('lp.jobs.import.row', [])
             $scope.subjobs = [];
             $scope.stepscompleted = [];
             $scope.jobStatus = '';
-            var POOLING_INTERVAL = 15 * 1000;
+            var POOLING_INTERVAL = 60 * 1000;
             var INTERVAL_ID;
 
             $scope.stepsConfig = {
@@ -55,8 +55,6 @@ angular.module('lp.jobs.import.row', [])
                 // console.log('Pinging the server', $scope.job.id);
                 if ($scope.job.id != null) {
                     JobsStore.getJob($scope.job.id).then(function (ret) {
-                        // $scope.job.subJobs = ret.subJobs;
-                        // $scope.job.actions =  ret.subJobs;
                         updateSubjobs(ret.subJobs);
                         updateStepsCompleted(ret.stepsCompleted);
                         checkIfPooling();
@@ -124,15 +122,12 @@ angular.module('lp.jobs.import.row', [])
 
                         JobsStore.getJob(jobId).then(function (ret) {
                             // console.log('RET',ret);
-                            // $scope.job.subJobs = ret.subJobs;
-                            // $scope.job.actions =  ret.subJobs;
                             $scope.loading = false;
                             $scope.expanded = !$scope.expanded || false;
-                            console.log(ret);
+                            // console.log(ret);
                             updateSubjobs(ret.subJobs);
                             updateStepsCompleted(ret.stepsCompleted);
                             checkIfPooling();
-                            // updateJobData(ret);
                         });
                     }
                 }
