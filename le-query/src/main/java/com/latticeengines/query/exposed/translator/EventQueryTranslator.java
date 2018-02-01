@@ -21,6 +21,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringExpressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
@@ -345,8 +347,16 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         builder.with(apsUnionAll);
 
+        SubQuery apsUnionAllNoNull = translateAPSUnionAllReplaceNull(queryFactory, repository, apsUnionAll.getAlias());
+
+        builder.with(apsUnionAllNoNull);
+
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
-        EntityPath<String> apsUnionAllPath = new PathBuilder<>(String.class, apsUnionAll.getAlias());
+        
+        EntityPath<String> apsUnionAllPath = (products.length == 1) ?
+                new PathBuilder<>(String.class, apsUnionAll.getAlias()) :
+                new PathBuilder<>(String.class, apsUnionAllNoNull.getAlias());
+
         AggregationFilter spentFilter = txOld.getSpentFilter();
         AggregationFilter unitFilter = txOld.getUnitFilter();
 

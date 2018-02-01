@@ -638,7 +638,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 85989);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAvgAmountBetweenPeriods() {
         // DS_Test_16
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,94842E58561D516577E4C0377F601DA3,CFF528B14A522C97F5F23964583EDB78";
@@ -683,7 +683,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 95895);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testTotalQuantityBetweenPeriods() {
         // DS_Test_19
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,CFF528B14A522C97F5F23964583EDB78";
@@ -743,7 +743,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         Assert.assertEquals(count, 317);
     }
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testAvgQuantityBetweenPeriods() {
         // DS_Test_23
         String prodIdList = "3872223C9BA06C649D68E415E23A9446,2A2A5856EC1CCB78E786DF65564DA39E,94842E58561D516577E4C0377F601DA3";

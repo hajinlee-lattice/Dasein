@@ -5,10 +5,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
@@ -95,12 +99,22 @@ public class TranslatorCommon {
     static final StringPath shiftedPeriodId = Expressions.stringPath(shiftedRevenuePath, PERIOD_ID);
     static final StringPath shiftedRevenue = Expressions.stringPath(shiftedRevenuePath, REVENUE);
 
+    @SuppressWarnings("unchecked")
     BooleanExpression translateAggregatePredicate(StringPath stringPath,
                                                   AggregationFilter aggregationFilter,
                                                   boolean aggregate) {
         AggregationType aggregateType = aggregationFilter.getAggregationType();
         ComparisonType cmp = aggregationFilter.getComparisonType();
         List<Object> values = aggregationFilter.getValues();
+
+        /*
+        CaseBuilder caseBuilder = new CaseBuilder();
+        CaseBuilder.Cases<Number, Expression<Number>> cases;
+        NumberExpression zero = Expressions.asNumber(0);
+        cases = caseBuilder.when(stringPath.isNull()).then(zero);
+        NumberPath numberPath = Expressions.numberPath(BigDecimal.class, stringPath.getMetadata());
+        cases.otherwise(numberPath);
+        */
 
         BooleanExpression aggrPredicate = null;
         switch (aggregateType) {
@@ -267,6 +281,35 @@ public class TranslatorCommon {
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(unionAll);
         subQuery.setAlias(generateAlias(APS));
+        return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected SubQuery translateAPSUnionAllReplaceNull(QueryFactory queryFactory,
+                                                       AttributeRepository repository,
+                                                       String apsTableName) {
+        SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository);
+
+        EntityPath<String> apsUnionAllPath = new PathBuilder<>(String.class, apsTableName);
+        NumberPath amountNumberPath = Expressions.numberPath(BigDecimal.class, amountAggr.getMetadata());
+        NumberPath quantityNumberPath = Expressions.numberPath(BigDecimal.class, quantityAggr.getMetadata());
+
+        NumberExpression zero = Expressions.asNumber(0);
+        CaseBuilder caseBuilder = new CaseBuilder();
+        CaseBuilder.Cases<Number, Expression<Number>> amountAggrCases =
+                caseBuilder.when(amountAggr.isNull()).then(zero);
+        Expression amountExpr = amountAggrCases.otherwise(amountNumberPath);
+        CaseBuilder.Cases<Number, Expression<Number>> quantityAggrCases =
+                caseBuilder.when(quantityAggr.isNull()).then(zero);
+        Expression quantityExpr = quantityAggrCases.otherwise(quantityNumberPath);
+
+        SQLQuery apsUnionAllNotNull = factory.query()
+                .select(accountId, periodId, amountExpr, quantityExpr)
+                .from(apsUnionAllPath);
+
+        SubQuery subQuery = new SubQuery();
+        subQuery.setAlias(generateAlias(APS));
+        subQuery.setSubQueryExpression(apsUnionAllNotNull);
         return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
     }
 }

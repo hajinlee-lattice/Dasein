@@ -285,8 +285,16 @@ public class TransactionRestrictionTranslator extends TranslatorCommon {
 
         builder.with(apsUnionAll);
 
+        SubQuery apsUnionAllNoNull = translateAPSUnionAllReplaceNull(queryFactory, repository, apsUnionAll.getAlias());
+
+        builder.with(apsUnionAllNoNull);
+
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
-        EntityPath<String> apsUnionAllPath = new PathBuilder<>(String.class, apsUnionAll.getAlias());
+
+        EntityPath<String> apsUnionAllPath = (products.length == 1) ?
+                new PathBuilder<>(String.class, apsUnionAll.getAlias()) :
+                new PathBuilder<>(String.class, apsUnionAllNoNull.getAlias());
+
         AggregationFilter spentFilter = txOld.getSpentFilter();
         AggregationFilter unitFilter = txOld.getUnitFilter();
 
