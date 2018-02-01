@@ -24,12 +24,36 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${CATALINA_HOME}/webapps/host-manager
     rm -rf ${CATALINA_HOME}/webapps/docs
     rm -rf ${CATALINA_HOME}/webapps/ROOT
+
+    if [ "${USE_HTTP2}" == "true" ]; then
+        cd $CATALINA_HOME/bin
+        tar xzf tomcat-native.tar.gz
+        cd tomcat-native-1.2.16-src/native
+        ./configure \
+            --with-java-home=$JAVA_HOME \
+            --with-apr=/usr/local/Cellar/apr/1.6.3/ \
+            --with-ssl=/usr/local/Cellar/openssl/1.0.2n \
+            --prefix=$CATALINA_HOME
+        make && make install
+    fi
 fi
 
 for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-users.xml'; do
-    cp ${CATALINA_HOME}/conf/${file} ${CATALINA_HOME}/conf/${file}.BAK
-    cp ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
+    cp -f ${CATALINA_HOME}/conf/${file} ${CATALINA_HOME}/conf/${file}.BAK
+    cp -f ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
 done
+
+
+sudo mkdir -p /etc/ledp/tls
+sudo chown -R $USER /etc/ledp/tls
+cp -f ${WSHOME}/le-dev/tomcat/server.crt /etc/ledp/tls/server.crt
+cp -f ${WSHOME}/le-dev/tomcat/server.key /etc/ledp/tls/server.key
+chmod 600 /etc/ledp/tls/server.crt
+chmod 600 /etc/ledp/tls/server.key
+
+if [ "${USE_HTTP2}" == "true" ]; then
+    cp -f ${WSHOME}/le-dev/tomcat/server-http2.xml ${CATALINA_HOME}/conf/server.xml
+fi
 
 cp ${CATALINA_HOME}/bin/catalina.sh ${CATALINA_HOME}/bin/catalina.sh.BAK
 cp ${WSHOME}/le-dev/tomcat/catalina.sh ${CATALINA_HOME}/bin/catalina.sh

@@ -15,8 +15,6 @@ try:
     import time
 except Exception:
     ENABLE_HOT_SWAP = False
-    logger.warn("Cannot import tomcat manager, hot swap functionality is disabled.")
-
 
 tomcatPid = None
 tomcatProc = None
@@ -237,7 +235,7 @@ def deploy_cli(args):
 def swap_cli(args):
     global ENABLE_HOT_SWAP
     if not ENABLE_HOT_SWAP:
-        logger.warn("Hot swap is disabled.")
+        logger.warn("Cannot import tomcat manager, hot swap functionality is disabled.")
         return
 
     apps, modules = parseApps(args)
