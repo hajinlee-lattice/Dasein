@@ -78,6 +78,8 @@ public class CheckpointService {
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
     private static final String S3_CHECKPOINTS_VERSION = "10";
+    static final String CHECKPOINT_DATASET_VDB = "vdb";
+    static final String CHECKPOINT_DATASET_CSV = "csv";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 300;
@@ -99,9 +101,6 @@ public class CheckpointService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-
-    @Inject
-    protected CDLProxy cdlProxy;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -180,7 +179,7 @@ public class CheckpointService {
         expectedCounts.forEach((role, count) -> Assert.assertEquals(countTableRole(role), count.longValue()));
     }
 
-    void resumeCheckpoint(String checkpoint) throws IOException {
+    void resumeCheckpoint(String checkpoint, String dataset) throws IOException {
         unzipCheckpoint(checkpoint);
 
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
@@ -509,7 +508,7 @@ public class CheckpointService {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpoint);
                 if (active.equals(version)) {
-                    saveRedshiftTableIfExists(role, version, checkpoint);
+                    saveRedshiftTableIfExists(role, version);
                 }
             }
 
@@ -552,8 +551,7 @@ public class CheckpointService {
         }
     }
 
-    private void saveRedshiftTableIfExists(TableRoleInCollection role, DataCollection.Version version,
-            String checkpoint) {
+    private void saveRedshiftTableIfExists(TableRoleInCollection role, DataCollection.Version version) {
         Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role, version);
         if (table != null) {
             List<String> redshiftTables = redshiftService.getTables(table.getName());

@@ -25,7 +25,7 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
 

@@ -42,7 +42,7 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
 
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
 

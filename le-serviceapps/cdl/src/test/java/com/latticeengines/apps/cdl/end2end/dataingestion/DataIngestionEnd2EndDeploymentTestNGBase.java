@@ -104,6 +104,7 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProx
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
@@ -126,7 +127,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_1_ACCOUNT_4 = 58;
     static final long SEGMENT_1_CONTACT_4 = 68;
 
-    private static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
+    static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
     static final long SEGMENT_2_ACCOUNT_1 = 24;
     static final long SEGMENT_2_CONTACT_1 = 27;
     static final long SEGMENT_2_ACCOUNT_2 = 67;
@@ -139,6 +140,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long RATING_A_COUNT_2 = 20;
     static final long RATING_D_COUNT_2 = 45;
     static final long RATING_F_COUNT_2 = 2;
+
+    static final String TARGET_PRODUCT = "A80D4770376C1226C47617C071324C0B";
 
     int actionsNumber = 0;
 
@@ -480,8 +483,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         checkpointService.verifySecondProfileCheckpoint();
     }
 
-    void resumeCheckpoint(String checkpoint) throws IOException {
-        checkpointService.resumeCheckpoint(checkpoint);
+    void resumeVdbCheckpoint(String checkpoint) throws IOException {
+        checkpointService.resumeCheckpoint(checkpoint, CheckpointService.CHECKPOINT_DATASET_VDB);
+        initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+    }
+
+    void resumeCsvCheckpoint(String checkpoint) throws IOException {
+        checkpointService.resumeCheckpoint(checkpoint, CheckpointService.CHECKPOINT_DATASET_CSV);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
     }
 
@@ -691,7 +699,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return segment;
     }
 
-    private MetadataSegment constructTestSegment2() {
+    protected MetadataSegment constructTestSegment2() {
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION,
                 Arrays.asList("CALIFORNIA", "TEXAS", "MICHIGAN", "NEW YORK"));
         BucketRestriction stateRestriction = new BucketRestriction(
@@ -748,7 +756,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     RatingEngine createRuleBasedRatingEngine() {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(constructTestSegment2());
-        ratingEngine.setCreatedBy("test@lattice-engines.com");
+        ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
 
@@ -767,8 +775,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         RuleBasedModel model = constructRuleModel(modelId);
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), modelId, model);
 
-        this.ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
-        return this.ratingEngine;
+        return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 
     private RuleBasedModel constructRuleModel(String modelId) {

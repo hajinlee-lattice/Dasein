@@ -26,9 +26,9 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("aiModelService")
 public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implements AIModelService {
 
-	@Inject
+    @Inject
     private SegmentProxy segmentProxy;
-	
+
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
@@ -36,12 +36,12 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @PostConstruct
     public void init() {
-    	    internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
-    
-	@Autowired
+
+    @Autowired
     private AIModelEntityMgr aiModelEntityMgr;
-	
+
     protected AIModelServiceImpl() {
         super(RatingEngineType.AI_BASED);
     }
@@ -58,20 +58,22 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public AIModel createOrUpdate(AIModel ratingModel, String ratingEngineId) {
-    		Tenant tenant = MultiTenantContext.getTenant();
-    		if (ratingModel.getTrainingSegment() != null) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (ratingModel.getTrainingSegment() != null) {
             String segmentName = ratingModel.getTrainingSegment().getName();
             MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
             MetadataSegment segment = segmentDTO.getMetadataSegment();
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingModel.setTrainingSegment(segment);
         }
-    		if (ratingModel.getModelSummary() != null) {
+        if (ratingModel.getModelSummary() != null) {
             String modelSummaryId = ratingModel.getModelSummary().getId();
             if (StringUtils.isBlank(modelSummaryId)) {
-            		throw new IllegalArgumentException("Cannot associate ModelSummary with AIModel as ModelSummary ID is empty.");
+                throw new IllegalArgumentException(
+                        "Cannot associate ModelSummary with AIModel as ModelSummary ID is empty.");
             }
-            ModelSummary selModelSummary = internalResourceProxy.getModelSummaryFromModelId(modelSummaryId, CustomerSpace.parse(tenant.getId()));
+            ModelSummary selModelSummary = internalResourceProxy.getModelSummaryFromModelId(modelSummaryId,
+                    CustomerSpace.parse(tenant.getId()));
             ratingModel.setModelSummary(selModelSummary);
         }
         aiModelEntityMgr.createOrUpdateAIModel(ratingModel, ratingEngineId);
@@ -80,7 +82,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public void deleteById(String id) {
-    	    aiModelEntityMgr.deleteById(id);
+        aiModelEntityMgr.deleteById(id);
     }
 
 }

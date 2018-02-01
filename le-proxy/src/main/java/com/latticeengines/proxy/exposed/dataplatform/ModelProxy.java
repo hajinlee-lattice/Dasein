@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.dataplatform;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -73,6 +74,12 @@ public class ModelProxy extends MicroserviceRestApiProxy implements ModelInterfa
     public AppSubmission createSamples(SamplingConfiguration config) {
         String url = constructUrl("/samples");
         return post("createSamples", url, config, AppSubmission.class);
+    }
+
+    public Boolean flagToDownload(String tenantId) {
+        String url = constructUrl("/downloadflags/{tenantId}/", tenantId);
+        ResponseDocument resDoc = post("flag to download models", url, null, ResponseDocument.class);
+        return resDoc != null && resDoc.isSuccess();
     }
 
 }

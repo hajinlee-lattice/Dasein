@@ -2,10 +2,11 @@ package com.latticeengines.dataplatform.controller;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.dataplatform.entitymanager.ModelDownloadFlagEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
@@ -33,8 +37,11 @@ import io.swagger.annotations.ApiOperation;
 public class ModelResource implements ModelInterface {
     private static final Logger log = LoggerFactory.getLogger(ModelResource.class);
 
-    @Autowired
+    @Inject
     private ModelingService modelingService;
+
+    @Inject
+    private ModelDownloadFlagEntityMgr modelDownloadFlagEntityMgr;
 
     public ModelResource() {
         // Need to set java.class.path in order for the Sqoop dynamic java
@@ -126,6 +133,15 @@ public class ModelResource implements ModelInterface {
     @ApiOperation(value = "Get model by modelId")
     public Model getModel(@PathVariable String modelId) {
         return modelingService.getModel(modelId);
+    }
+
+    @RequestMapping(value = "/downloadflags/{tenantId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Flag a tenant has models to download")
+    public SimpleBooleanResponse flagToDownload(@PathVariable String tenantId) {
+        String fullTenantId = CustomerSpace.parse(tenantId).toString();
+        modelDownloadFlagEntityMgr.addDownloadFlag(fullTenantId);
+        return SimpleBooleanResponse.successResponse();
     }
 
 }

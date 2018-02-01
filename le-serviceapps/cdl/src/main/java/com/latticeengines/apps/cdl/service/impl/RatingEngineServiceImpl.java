@@ -180,16 +180,21 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             log.warn("Cannot find a Tenant in MultiTenantContext, skip getting rating count.");
             return Collections.emptyMap();
         } else {
-            MetadataSegment segment = ratingEngine.getSegment();
-            FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(BusinessEntity.Account)
-                    : new FrontEndQuery();
-            frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
-            frontEndQuery.setMainEntity(BusinessEntity.Account);
-            Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
-            log.info("Updating rating engine " + ratingEngine.getId() +" counts " + JsonUtils.serialize(counts));
-            ratingEngine.setCountsByMap(counts);
-            createOrUpdate(ratingEngine, tenant.getId());
-            return counts;
+            if (RatingEngineType.RULE_BASED.equals(ratingEngine.getType())) {
+                MetadataSegment segment = ratingEngine.getSegment();
+                FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(BusinessEntity.Account)
+                        : new FrontEndQuery();
+                frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
+                frontEndQuery.setMainEntity(BusinessEntity.Account);
+                Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
+                log.info("Updating rating engine " + ratingEngine.getId() + " counts " + JsonUtils.serialize(counts));
+                ratingEngine.setCountsByMap(counts);
+                createOrUpdate(ratingEngine, tenant.getId());
+                return counts;
+            } else {
+                log.warn("Does not support AI rating engine counts yet.");
+                return Collections.emptyMap();
+            }
         }
     }
 

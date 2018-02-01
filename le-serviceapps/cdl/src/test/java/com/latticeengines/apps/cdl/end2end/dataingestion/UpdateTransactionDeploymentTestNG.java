@@ -11,6 +11,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -27,10 +28,11 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
     private static final Logger log = LoggerFactory.getLogger(UpdateTransactionDeploymentTestNG.class);
 
     static final String CHECK_POINT = "update4";
+    private RatingEngine ratingEngine;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(UpdateProductDeploymentTestNG.CHECK_POINT);
+        resumeVdbCheckpoint(UpdateProductDeploymentTestNG.CHECK_POINT);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
@@ -39,7 +41,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
         new Thread(() -> {
             createTestSegments();
-            createRuleBasedRatingEngine();
+            ratingEngine = createRuleBasedRatingEngine();
         }).start();
 
         importData();

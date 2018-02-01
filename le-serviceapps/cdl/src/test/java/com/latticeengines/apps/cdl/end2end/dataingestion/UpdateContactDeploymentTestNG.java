@@ -9,6 +9,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -25,15 +26,17 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     static final String CHECK_POINT = "update2";
 
+    private RatingEngine ratingEngine;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
+        resumeVdbCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
 
         new Thread(() -> {
             createTestSegments();
-            createRuleBasedRatingEngine();
+            ratingEngine = createRuleBasedRatingEngine();
         }).start();
 
         importData();

@@ -34,7 +34,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         Assert.assertEquals(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2, TRANSACTION_IMPORT_SIZE_1);
-        resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
+        resumeVdbCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
         importData();
         processAnalyze();
         try {

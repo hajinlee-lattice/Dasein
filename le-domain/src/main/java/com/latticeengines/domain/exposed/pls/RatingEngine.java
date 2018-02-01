@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +42,6 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -293,11 +290,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return JsonUtils.serialize(this);
     }
 
-    public static String generateIdStr() {
-        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
-        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
-    }
-
     public RatingModel getActiveModel() {
         return this.activeModel;
     }
@@ -314,17 +306,9 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.activeModelPid = pid;
     }
 
-    public FrontEndQuery toFrontEndQuery(BusinessEntity mainEntity) {
-        // get a front end query with only the latest rating model
-        MetadataSegment segment = getSegment();
-        FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(mainEntity) : new FrontEndQuery();
-        frontEndQuery.setRatingModels(Collections.singletonList(getActiveModel()));
-        frontEndQuery.setMainEntity(mainEntity);
-        return frontEndQuery;
-    }
-
-    public String toRatingAttrName() {
-        return toRatingAttrName(getId());
+    public static String generateIdStr() {
+        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
     }
 
     public static String toRatingAttrName(String engineId) {

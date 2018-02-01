@@ -86,8 +86,12 @@ public class DefaultDataCollectionResourceDeploymentTestNG extends MetadataDeplo
         log.info("Get segment");
         List<MetadataSegment> metadataSegments = dataCollectionProxy.getSegments(customerSpace1);
         assertNotNull(metadataSegments);
-        assertEquals(metadataSegments.size(), 1);
-        assertEquals(metadataSegments.get(0).getName(), METADATA_SEGMENT_NAME);
+        assertEquals(metadataSegments.size(), 2);
+        metadataSegments.forEach(segment -> {
+            if (!Boolean.TRUE.equals(segment.getMasterSegment())) {
+                assertEquals(segment.getName(), METADATA_SEGMENT_NAME);
+            }
+        });
     }
 
     @Test(groups = "deployment")
