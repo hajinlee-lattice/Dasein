@@ -51,7 +51,9 @@ public class SessionServiceImpl implements SessionService {
     public Ticket authenticate(Credentials credentials) {
         Ticket ticket = globalAuthenticationService.authenticateUser(credentials.getUsername().toLowerCase(),
                 credentials.getPassword());
-        ticket.setAuthenticationRoute(AUTH_ROUTE_GA);
+        if (ticket != null) {
+            ticket.setAuthenticationRoute(AUTH_ROUTE_GA);
+        }
         return ticket;
     }
 

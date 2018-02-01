@@ -263,6 +263,9 @@ public class UserServiceImpl implements UserService {
             Ticket ticket;
             try {
                 ticket = globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
+                if (ticket == null) {
+                    return false;
+                }
             } catch (LedpException e) {
                 throw new LoginException(e);
             }

@@ -142,6 +142,11 @@ public class AdminResource extends InternalResourceBase {
 
         if (oldPassword != null && newPassword != null) {
             Ticket ticket = globalAuthenticationService.authenticateUser(username, oldPassword);
+            if (ticket == null) {
+                return SimpleBooleanResponse.failedResponse(
+                        Collections.singletonList(
+                                String.format("The credentials %s provided for login are incorrect.", oldPassword)));
+            }
 
             Credentials oldCreds = new Credentials();
             oldCreds.setUsername(username);

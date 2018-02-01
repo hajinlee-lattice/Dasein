@@ -79,6 +79,10 @@ public class LoginResource {
         try {
             Ticket ticket = sessionService.authenticate(creds);
 
+            if (ticket == null) {
+                doc.setErrors(Collections.singletonList("The credentials provided for login are incorrect."));
+                return doc;
+            }
             doc.setRandomness(ticket.getRandomness());
             doc.setUniqueness(ticket.getUniqueness());
             doc.setSuccess(true);

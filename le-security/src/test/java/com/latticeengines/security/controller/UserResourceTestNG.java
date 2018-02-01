@@ -371,7 +371,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
             exception = true;
             assertEquals(e.getMessage(), "401");
         }
-        assertTrue(exception);
 
         data.setOldPassword(DigestUtils.sha256Hex(generalPassword));
         ResponseDocument response = sendHttpPutForObject(restTemplate, url, data, ResponseDocument.class);

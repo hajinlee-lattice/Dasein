@@ -78,7 +78,8 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
             return ticket;
         }
 
-        throw new Exception("The credentials provided for login are incorrect.");
+        log.error("The credentials provided for login are incorrect.");
+        return null;
     }
 
     private Ticket authenticate(String username, String password) {
