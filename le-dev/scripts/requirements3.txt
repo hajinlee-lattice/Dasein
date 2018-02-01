@@ -1,0 +1,9 @@
+avro
+boto3
+pexpect
+psutil
+kazoo
+zc.zk
+RBTools
+zk-shell
+tomcatmanager

@@ -55,7 +55,55 @@ alias cfgbld='bash $WSHOME/le-dev/scripts/cfgbld.sh'
 alias cfgdpl='cfgbld && cfgdplnobld'
 
 alias runtest='python $WSHOME/le-dev/scripts/runtest.py'
+alias runtest3='python3 $WSHOME/le-dev/scripts/runtest.py'
+alias cleanuptesttenants='python $WSHOME/le-dev/scripts/cleanup.py'
 alias pytests='cd $WSHOME/le-dataplatform/src/test/python && PYTHONPATH=../../main/python:../../main/python/pipeline:$PYTHONPATH $ANACONDA_HOME/envs/lattice/bin/py.test'
+
+alias runjetty='runtest -p jetty -c jetty:run'
+
+alias uibld='pushd $WSHOME/le-ui && npm install && popd'
+alias uirunlpi='cd $WSHOME/le-ui && npm run local'
+alias uirunadmin='cd $WSHOME/le-ui && npm run local_admin'
+
+alias dpltc='python $WSHOME/le-dev/scripts/tcdpl.py'
+alias dpltc3='python3 $WSHOME/le-dev/scripts/tcdpl.py'
+alias runtc='bash $WSHOME/le-dev/scripts/run-tomcat.sh'
+
+alias runoauth='mvn spring-boot:run -DOAUTH2_PROPDIR=conf/env/dev -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/ -Dserver.port=8072'
+alias runplay='mvn spring-boot:run -DOAUTH2_PROPDIR=../le-oauth2/conf/env/dev -DPLAYMAKER_PROPDIR=conf/env/dev -Dserver.port=8071 -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/'
+
+alias runsaml='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4006,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.port=8087 jetty:run'
+alias runsamlssl='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4006,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.port=8087 -Prun.ssl jetty:run'
+alias runui='pushd $WSHOME/le-ui && npm install && npm run local && popd'
+alias runadminui='pushd $WSHOME/le-ui && npm install && npm run local_admin && popd'
+
+alias dkrmi='docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2>/dev/null'
+alias dkrmc='docker rm $(docker ps -a -q) && docker ps -a 2>/dev/null'
+alias dkps='docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"'
+alias dkpull='bash $WSHOME/le-dev/scripts/docker_pull.sh'
+alias dkpush='bash $WSHOME/le-dev/scripts/docker_push.sh'
+
+alias conda-on='source $ANACONDA_HOME/bin/activate lattice'
+alias conda-off='source $ANACONDA_HOME/bin/deactivate'
+
+alias dbdiff-qa='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh qa && popd'
+alias dbdiff-prod='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh prod && popd'
+
+alias cc-clear='find . -name "*.exec" -type f -delete'
+alias cc-report='bash $WSHOME/le-dev/scripts/code_coverage.sh'
+
+alias dk-setupenv='source $WSHOME/le-dev/scripts/setup_dkenv.sh'
+alias dk-up='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml up -d --remove-orphan'
+alias dk-down='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml down'
+alias dk-start-all='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml start'
+alias dk-stop-all='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml stop'
+alias dk-restart='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml restart'
+alias dk-run='bash $WSHOME/le-dev/scripts/docker_run.sh'
+alias dk-stop='bash $WSHOME/le-dev/scripts/docker_stop.sh'
+alias dkrunui='docker run -itd --name le-ui --net=host -e LE_ENVIRONMENT=dev latticeengines/express'
+alias dkstopui='docker stop le-ui; dkrmc'
+
+alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
 alias mdstests='mvn -Pfunctional -DargLine="" verify'
 alias dftests='mvn -Pfunctional -DargLine="" verify'
 alias querytests='mvn -Pfunctional -DargLine="" verify'
@@ -93,10 +141,8 @@ alias encrtests='mvn -Pfunctional -DargLine="" verify'
 alias samldeptests='mvn -Pdeployment -DargLine="" verify'
 alias samldeptestsssl='sudo ssl/install_cert.sh $JAVA_HOME $WSHOME && mvn -Pdeployment -DargLine="" verify'
 alias recordtransformertest='MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m" mvn -Pfunctional -Djetty.port=8016 -DTENANT=tenant10 -Dtest=RecordTransformerTestNG verify &> /tmp/test.log'
-alias cleanuptesttenants='python $WSHOME/le-dev/scripts/cleanup.py'
 alias ulyssestests='mvn -Pfunctional -DargLine="" verify'
 alias ulyssesdptests='mvn -Pdeployment -DargLine="" verify'
-
 alias runjettyapi='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/etc/hadoop:$HADOOP_HOME/share/hadoop/common/hadoop-common-$HADOOP_VERSION.$HDP_VERSION.jar -Pfunctional -Pjetty jetty:run'
 alias runjettysec='rm -f /var/log/ledp/le-pls*.log && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional clean jetty:run'
 alias runjettypls='bash -c "rm -f /var/log/ledp/le-pls*.log" && runtest pls -p jetty -c jetty:run'
@@ -110,49 +156,5 @@ alias runjettyscoringapi='bash -c "rm -f /var/log/ledp/le-scoringapi*.log" && MA
 alias runjettyjobpd='source $WSHOME/le-dev/latticerc && cd $WSHOME/le-job && bash -c "rm -f /var/log/ledp/le-job*.log" && CLASSPATH=$HADOOP_CONF_DIR:$TEZ_CONF_DIR:$HADOOP_COMMON_JAR JOB_MODULE=propdata PROPDATA_MADISON_QUARTZ_ENABLED=enabled PROPDATA_COLLECTION_QUARTZ_ENABLED=enabled mvn -Ptest  -Pjetty jetty:run'
 alias runjettymatchapi='runtest matchapi -p jetty -c jetty:run'
 alias runjettyulysses='bash -c "rm -f /var/log/ledp/le-ulysses*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4007,server=y,suspend=n -Xmx4048m -XX:MaxPermSize=512m" mvn  -Pjetty -Pfunctional jetty:run'
-alias runjetty='runtest -p jetty -c jetty:run'
 alias runprecheckintest='$WSHOME/le-dev/scripts/runPreCheckInTest.sh'
 alias precheckin='runtest pls -p deployment -g precheckin -t SelfServiceModelingEndToEnd'
-
-alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
-
-alias uibld='pushd $WSHOME/le-ui && npm install && popd'
-alias uirunlpi='cd $WSHOME/le-ui && npm run local'
-alias uirunadmin='cd $WSHOME/le-ui && npm run local_admin'
-
-alias dpltc='python $WSHOME/le-dev/scripts/tcdpl.py'
-alias runtc='bash $WSHOME/le-dev/scripts/run-tomcat.sh'
-
-alias runoauth='mvn spring-boot:run -DOAUTH2_PROPDIR=conf/env/dev -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/ -Dserver.port=8072'
-alias runplay='mvn spring-boot:run -DOAUTH2_PROPDIR=../le-oauth2/conf/env/dev -DPLAYMAKER_PROPDIR=conf/env/dev -Dserver.port=8071 -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/'
-
-alias runsaml='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4006,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.port=8087 jetty:run'
-alias runsamlssl='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4006,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.port=8087 -Prun.ssl jetty:run'
-alias runui='pushd $WSHOME/le-ui && npm install && npm run local && popd'
-alias runadminui='pushd $WSHOME/le-ui && npm install && npm run local_admin && popd'
-
-alias dkrmi='docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2>/dev/null'
-alias dkrmc='docker rm $(docker ps -a -q) && docker ps -a 2>/dev/null'
-alias dkps='docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"'
-alias dkpull='bash $WSHOME/le-dev/scripts/docker_pull.sh'
-alias dkpush='bash $WSHOME/le-dev/scripts/docker_push.sh'
-
-alias conda-on='source $ANACONDA_HOME/bin/activate lattice'
-alias conda-off='source $ANACONDA_HOME/bin/deactivate'
-
-alias dbdiff-qa='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh qa && popd'
-alias dbdiff-prod='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh prod && popd'
-
-alias cc-clear='find . -name "*.exec" -type f -delete'
-alias cc-report='bash $WSHOME/le-dev/scripts/code_coverage.sh'
-
-alias dk-setupenv='source $WSHOME/le-dev/scripts/setup_dkenv.sh'
-alias dk-up='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml up -d --remove-orphan'
-alias dk-down='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml down'
-alias dk-start-all='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml start'
-alias dk-stop-all='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml stop'
-alias dk-restart='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml restart'
-alias dk-run='bash $WSHOME/le-dev/scripts/docker_run.sh'
-alias dk-stop='bash $WSHOME/le-dev/scripts/docker_stop.sh'
-alias dkrunui='docker run -itd --name le-ui --net=host -e LE_ENVIRONMENT=dev latticeengines/express'
-alias dkstopui='docker stop le-ui; dkrmc'

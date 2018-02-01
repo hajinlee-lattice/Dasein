@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 import os
 import subprocess
@@ -6,7 +8,7 @@ WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file_
 
 def chdirToProjectDir(project):
     os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/' + project)
-    print "Change to directory: " + os.getcwd()
+    print("Change to directory: ", os.getcwd())
 
 
 def propDirsOpts():
@@ -25,7 +27,7 @@ def commonOpts():
 
     sp = subprocess.Popen(["java", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     v = sp.communicate()[1]
-    if '1.8.' in v:
+    if '1.8.' in v.decode("utf-8") :
         args.append('-Dmaxpermsize=')
 
     return args
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     args = parseCliArgs()
 
     chdirToProjectDir('le-' + args.project)
-    print 'Executing [with common opts added]: ' + ' '.join(['mvn'] + testOpts(args))
+    print('Executing [with common opts added]: ', ' '.join(['mvn'] + testOpts(args)))
     my_env = os.environ
     my_env["MAVEN_OPTS"] = "-Xmx1g"
     if args.command == "jetty:run":

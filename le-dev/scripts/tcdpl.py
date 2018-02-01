@@ -1,27 +1,52 @@
 import argparse
 import atexit
+import logging
 import os
 import psutil
 import signal
 import subprocess
-import time
 from shutil import copyfile, rmtree, copytree
+
+logger = logging.getLogger(__name__)
+ENABLE_HOT_SWAP = True
+
+try:
+    import tomcatmanager as tm
+    import time
+except Exception:
+    ENABLE_HOT_SWAP = False
+    logger.warn("Cannot import tomcat manager, hot swap functionality is disabled.")
+
 
 tomcatPid = None
 tomcatProc = None
 
 WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print 'WSHOME=%s' % WSHOME
+logger.info('WSHOME=%s' % WSHOME)
 
 CATALINA_HOME = os.environ['CATALINA_HOME']
 if CATALINA_HOME is None or CATALINA_HOME == '':
     raise Error('CATALINA_HOME is not defined')
 else:
-    print 'CATALINA_HOME=%s' % CATALINA_HOME
+    logger.info('CATALINA_HOME=%s' % CATALINA_HOME)
 
 LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses', 'saml']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
               'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante', 'cdl', 'lp']
+
+APP_ROOT = "http://localhost"
+APP_URL = {
+    'microservice': "%s:8080" % APP_ROOT,
+    'pls': "%s:8081" % APP_ROOT,
+    'admin': "%s:8085" % APP_ROOT,
+    'saml': "%s:8087" % APP_ROOT,
+    'playmaker': "%s:8071" % APP_ROOT,
+    'oauth2': "%s:8072" % APP_ROOT,
+    'scoringapi': "%s:8073" % APP_ROOT,
+    'api': "%s:8074" % APP_ROOT,
+    'ulysses': "%s:8075" % APP_ROOT,
+    'matchapi': "%s:8076" % APP_ROOT
+}
 
 PRESETS = {
     'cdl_pre_checkin': {
@@ -58,33 +83,32 @@ PRESETS = {
 
 
 def cleanupWars():
-    print 'clean up existing wars ...'
+    logger.info('clean up existing wars ...')
     for dirName, subdirList, fileList in os.walk(os.path.join(CATALINA_HOME, "webapps")):
         for dir in subdirList:
             if dir == 'ROOT':
                 rmtree(dirName + "/" + dir)
         for file in fileList:
             if file[-4:] == '.war':
-                print 'removing %s from %s' % (file, dirName)
+                logger.info('removing %s from %s' % (file, dirName))
                 os.remove(dirName + "/" + file)
 
     for module in MS_MODULES:
         dirName = os.path.join(CATALINA_HOME, "webapps", "ms")
         if (os.path.isdir(dirName + "/" + module)):
-            print 'removing %s from %s' % (module, dirName)
+            logger.info('removing %s from %s' % (module, dirName))
             rmtree(dirName + "/" + module)
 
-    print 'clean up workspace ...'
+    logger.info('clean up workspace ...')
     for dir_name in os.listdir(os.path.join(CATALINA_HOME, "work")):
         dir_path = os.path.join(CATALINA_HOME, "work", dir_name)
         if os.path.isdir(dir_path):
-            print 'cleaning up working directory %s ' % dir_path
+            logger.info('cleaning up working directory %s ' % dir_path)
             rmtree(dir_path)
-    print ''
 
 
 def deployApp(app, modules):
-    print 'deploying ' + app
+    logger.info('deploying ' + app)
     if app == 'microservice':
         deployMs(modules)
         return
@@ -94,7 +118,7 @@ def deployApp(app, modules):
     for file in os.listdir(targetDir):
         if file[-4:] == '.war':
             appWar = file
-            print 'found %s in %s' % (file, targetDir)
+            logger.info('found %s in %s' % (file, targetDir))
             break
 
     if appWar is None:
@@ -115,7 +139,7 @@ def deployApp(app, modules):
     copyfile(os.path.join(targetDir, appWar), webappFile + ".copy")
     os.rename(webappFile + ".copy", webappFile)
 
-    print 'deployed %s to %s\n' % (appWar, webappFile)
+    logger.info('deployed %s to %s' % (appWar, webappFile))
 
 
 def deployMs(mods):
@@ -131,7 +155,7 @@ def deployMsModule(module):
     for fn in os.listdir(moduleDir):
         if fn[-4:] == '.war':
             moduleWar = fn
-            print 'found %s in %s' % (moduleWar, moduleDir)
+            logger.info('found %s in %s' % (moduleWar, moduleDir))
             break
 
     if moduleWar is None:
@@ -141,29 +165,134 @@ def deployMsModule(module):
     webappDir = os.path.join(CATALINA_HOME, 'webapps', 'ms', webappWar)
     copyfile(os.path.join(moduleDir, moduleWar), webappDir + ".copy")
     os.rename(webappDir + ".copy", webappDir)
-    print 'deployed %s to %s\n' % (moduleWar, webappDir)
+    logger.info('deployed %s to %s' % (moduleWar, webappDir))
+
+
+def undeployApp(app, modules):
+    global APP_URL
+    app_url = APP_URL[app]
+    mgr_url = app_url + "/manager"
+    tomcat = tm.TomcatManager()
+    logger.info("Connecting to %s's manager app at %s ..." % (app, mgr_url))
+    r = tomcat.connect(mgr_url, 'admin', 'admin')
+    if r.ok:
+        logger.info("Connected!")
+    if app == 'microservice':
+        for module in modules:
+            undeployPath(tomcat, '/%s' % module)
+    else:
+        undeployPath(tomcat, '/')
+
+
+def undeployPath(tomcat, path):
+    logger.info("Undeploying %s ..." % path)
+    r = tomcat.undeploy(path)
+    if r.ok:
+        logger.info("Successfully undeployed %s" % path)
+    else:
+        logger.info(r.status_message)
 
 
 def printWars():
-    print 'checking deployed wars ...'
+    logger.info('checking deployed wars ...')
     for dirName, subdirList, fileList in os.walk(CATALINA_HOME):
         for file in fileList:
             if file[-4:] == '.war':
-                print '%s/%s' % (dirName, file)
-    print ''
+                logger.info('%s/%s' % (dirName, file))
+
+
+def parseApps(args):
+    if args.apps or args.modules:
+        apps = args.apps.split(',') if args.apps else []
+        modules = args.modules.split(',') if args.modules else []
+    else:
+        logger.info('using preset ' + args.preset)
+        apps = PRESETS[args.preset]['apps']
+        modules = PRESETS[args.preset]['modules']
+    if len(modules) > 0 and 'microservice' not in apps:
+        apps.append('microservice')
+
+    logger.info('apps = %s' % apps)
+    logger.info('modules = %s' % modules)
+    return apps, modules
+
+
+def cleanup_cli(args):
+    cleanupWars()
+    printWars()
+
+
+def check_cli(args):
+    printWars()
+
+
+def deploy_cli(args):
+    cleanupWars()
+    apps, modules = parseApps(args)
+    for app in apps:
+        deployApp(app, modules)
+    printWars()
+
+
+def swap_cli(args):
+    global ENABLE_HOT_SWAP
+    if not ENABLE_HOT_SWAP:
+        logger.warn("Hot swap is disabled.")
+        return
+
+    apps, modules = parseApps(args)
+    for app in apps:
+        undeployApp(app, modules)
+
+    for i in range(5):
+        logger.warn('Sleep %d second ...' % (5 - i))
+        time.sleep(1)
+
+    for app in apps:
+        deployApp(app, modules)
+
+    printWars()
+
+def run_cli(args):
+    runTc()
+    waitTc()
 
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Deploy wars to local tomcat')
-    parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
-    parser.add_argument('-a', dest='apps', type=str,
+    commands = parser.add_subparsers(help="commands")
+
+    parser1 = commands.add_parser("cleanup")
+    parser1.set_defaults(func=cleanup_cli)
+
+    parser1 = commands.add_parser("check")
+    parser1.set_defaults(func=check_cli)
+
+    parser1 = commands.add_parser("deploy")
+    parser1.add_argument('-a', dest='apps', type=str,
                         help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(LE_APPS))
-    parser.add_argument('-m', dest='modules', type=str,
+    parser1.add_argument('-m', dest='modules', type=str,
                         help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(
-                                MS_MODULES))
-    parser.add_argument('-p', dest='preset', type=str, default='lp',
+                            MS_MODULES))
+    parser1.add_argument('-p', dest='preset', type=str, default='lp',
                         help='preset apps/modules, choose from [' + ', '.join(
-                                PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
+                            PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
+    parser1.set_defaults(func=deploy_cli)
+
+    parser1 = commands.add_parser("run")
+    parser1.set_defaults(func=run_cli)
+
+    parser1 = commands.add_parser("swap")
+    parser1.add_argument('-a', dest='apps', type=str,
+                         help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(LE_APPS))
+    parser1.add_argument('-m', dest='modules', type=str,
+                         help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(
+                             MS_MODULES))
+    parser1.add_argument('-p', dest='preset', type=str, default='lp',
+                         help='preset apps/modules, choose from [' + ', '.join(
+                             PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
+    parser1.set_defaults(func=swap_cli)
+
     args = parser.parse_args()
 
     return args
@@ -194,39 +323,10 @@ def killTc():
         os.kill(childPid.pid, signal.SIGKILL)
     os.kill(tomcatPid, signal.SIGKILL)
 
-
 if __name__ == '__main__':
-    print ''
+    fmt = '%(asctime)s [%(threadName)s] %(levelname)s %(lineno)d: - %(message)s'
+    dfmt = '%Y-%m-%d %H:%M:%S'
+    logging.basicConfig(format=fmt, datefmt=dfmt, level=logging.INFO)
+
     args = parseCliArgs()
-
-    if args.command in ('deploy', 'cleanup', 'run'):
-        cleanupWars()
-
-    if args.command == 'run':
-        runTc()
-        for i in xrange(10):
-            print 'wait %d sec for server to start' % (10 - i)
-            time.sleep(1)
-
-    if args.command in ('deploy', 'run'):
-        if args.apps or args.modules:
-            apps = args.apps.split(',') if args.apps else []
-            modules = args.modules.split(',') if args.modules else []
-        else:
-            print 'using preset ' + args.preset
-            apps = PRESETS[args.preset]['apps']
-            modules = PRESETS[args.preset]['modules']
-        if len(modules) > 0 and 'microservice' not in apps:
-            apps.append('microservice')
-
-        print 'apps = %s' % apps
-        print 'modules = %s\n' % modules
-
-        for app in apps:
-            deployApp(app, modules)
-
-    if args.command in ('deploy', 'cleanup', 'check', 'run'):
-        printWars()
-
-    if args.command == 'run':
-        waitTc()
+    args.func(args)
