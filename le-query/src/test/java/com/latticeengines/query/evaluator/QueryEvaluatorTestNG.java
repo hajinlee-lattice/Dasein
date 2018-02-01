@@ -288,7 +288,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 { "bucket is not null", ComparisonType.IS_NOT_NULL, null, notNullPattern }, //
                 { "bucket != label", ComparisonType.NOT_EQUAL, new Object[] { "Yes" }, notEqualPattern }, //
                 { "bucket in collection", ComparisonType.IN_COLLECTION, new Object[] { "YES", "no" }, inCollectionPattern }, //
-                {"bucket not in collection", ComparisonType.NOT_IN_COLLECTION, new Object[]{"XXX", "Nosuch"}, notInCollectionPattern} //
+                { "bucket not in collection", ComparisonType.NOT_IN_COLLECTION, new Object[]{"yes", "no"}, notInCollectionPattern} //
         };
     }
 
@@ -346,15 +346,6 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME, "Street1") //
                 .build();
-        queryEvaluator.evaluate(attrRepo, query);
-    }
-
-    @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
-    public void testNonExistBucket() {
-        Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("blah blah") //
-                .build();
-        Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         queryEvaluator.evaluate(attrRepo, query);
     }
 
