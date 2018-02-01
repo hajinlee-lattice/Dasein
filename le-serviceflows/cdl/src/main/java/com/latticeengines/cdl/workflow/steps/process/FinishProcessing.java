@@ -55,6 +55,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
+        if (StringUtils.isNotBlank(configuration.getDataCloudVersion())) {
+            dataCollectionProxy.updateDataCloudVersion(customerSpace.toString(), configuration.getDataCloudVersion());
+        }
         try {
             // wait for local cache clean up
             Thread.sleep(5000);
@@ -68,12 +71,13 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void swapMissingTableRoles() {
-        for (TableRoleInCollection role: TableRoleInCollection.values()) {
+        for (TableRoleInCollection role : TableRoleInCollection.values()) {
             String inactiveTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
             if (StringUtils.isBlank(inactiveTableName)) {
                 String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
                 if (StringUtils.isNotBlank(activeTableName)) {
-                    log.info("Swapping table " + activeTableName + " from " + active + " to " + inactive + " as " + role);
+                    log.info("Swapping table " + activeTableName + " from " + active + " to " + inactive + " as "
+                            + role);
                     dataCollectionProxy.unlinkTable(customerSpace.toString(), activeTableName, role, active);
                     dataCollectionProxy.upsertTable(customerSpace.toString(), activeTableName, role, inactive);
                 }
@@ -89,7 +93,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     private void cleanupEntityTableMap(Map<BusinessEntity, String> entityTableNames) {
         if (MapUtils.isNotEmpty(entityTableNames)) {
             entityTableNames.forEach((entity, tableName) -> {
-                String servingStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive);
+                String servingStoreName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                        entity.getServingStore(), inactive);
                 if (StringUtils.isBlank(servingStoreName)) {
                     // TODO: always keep rating serving store for now
                     if (!BusinessEntity.Rating.equals(entity)) {

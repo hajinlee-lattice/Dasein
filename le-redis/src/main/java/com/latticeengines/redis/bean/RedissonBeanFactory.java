@@ -31,7 +31,7 @@ public class RedissonBeanFactory implements FactoryBean<RedissonClient> {
                 return constructClient(2, 0, 2, 0);
             case TestClient:
             default:
-                return constructClient(1, 0, 1, 0);
+                return null;
         }
     }
 

@@ -15,7 +15,7 @@ public class CacheServiceTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "manual")
     private void clearCache() {
-        CacheServiceBase.getCacheService().refreshKeysByPattern("providename", CacheName.DataLakeCMCache);
+        CacheServiceBase.getCacheService().refreshKeysByPattern(CacheName.Constants.SessionCacheName, CacheName.SessionCache);
     }
 
 }

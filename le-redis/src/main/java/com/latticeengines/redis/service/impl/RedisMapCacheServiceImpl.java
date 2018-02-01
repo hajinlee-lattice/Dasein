@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.redis.exposed.service.RedisMapCacheService;
 
 @Component("redisMapCacheService")
-public class RedisMapCacheServiceImpl extends RedisMapServiceImpl implements RedisMapCacheService {
+public class RedisMapCacheServiceImpl implements RedisMapCacheService {
 
-    @Inject
+    //@Inject
     private RedissonClient redisson;
 
     private RMapCache<Object, Object> getMapCache(String mapName) {

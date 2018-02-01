@@ -2,7 +2,7 @@ package com.latticeengines.datacloud.core.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 
 import com.latticeengines.datacloud.core.dao.AccountMasterFactDao;

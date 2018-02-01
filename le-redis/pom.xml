@@ -43,5 +43,21 @@
             <artifactId>c3p0</artifactId>
             <version>${c3p0.version}</version>
         </dependency>
-    </dependencies>
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+            <version>5.1.0.BUILD-SNAPSHOT</version>
+            </dependency>
+         </dependencies>
+
+         <repositories>
+            <repository>
+                <id>sonatype-nexus-snapshots</id>
+                <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                <snapshots>
+                <enabled>true</enabled>
+                </snapshots>
+            </repository>
+        </repositories>
+    
 </project>

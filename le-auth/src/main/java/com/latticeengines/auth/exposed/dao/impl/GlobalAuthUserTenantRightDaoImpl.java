@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;

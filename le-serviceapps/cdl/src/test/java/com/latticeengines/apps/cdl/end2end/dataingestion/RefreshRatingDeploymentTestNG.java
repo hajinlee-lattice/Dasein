@@ -63,7 +63,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private ProcessAnalyzeRequest constructRequest() {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        request.setRebuildEntities(Collections.singletonList(BusinessEntity.Rating));
+        request.setRebuildEntities(Collections.singleton(BusinessEntity.Rating));
         return request;
     }
 

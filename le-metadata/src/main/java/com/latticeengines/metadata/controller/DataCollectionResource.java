@@ -61,6 +61,17 @@ public class DataCollectionResource {
                 version);
         return ResponseDocument.successResponse(version1);
     }
+    
+    @RequestMapping(value = "/datacloudversion/{dataCloudVersion}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Switch the version of default data collection")
+    public ResponseDocument<String> updateDataCloudVersion(@PathVariable String customerSpace,
+            @PathVariable String dataCloudVersion) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        String newDataCloudVersion = dataCollectionService.updateDataCloudVersion(customerSpace, null,
+                dataCloudVersion);
+        return ResponseDocument.successResponse(newDataCloudVersion);
+    }
 
     @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

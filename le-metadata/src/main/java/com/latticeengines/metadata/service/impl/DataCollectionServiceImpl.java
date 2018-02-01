@@ -298,4 +298,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
     }
 
+    @Override
+    public String updateDataCloudVersion(String customerSpace, String collectionName, String dataCloudVersion) {
+        DataCollection collection = getDataCollection(customerSpace, collectionName);
+        collection.setDataCloudVersion(dataCloudVersion);
+        log.info("Setting DataCloudVersion of " + collection.getName() + " in " + customerSpace + " to " + dataCloudVersion);
+        dataCollectionEntityMgr.update(collection);
+        return collection.getDataCloudVersion();
+    }
+
 }

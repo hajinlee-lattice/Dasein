@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.core.dao.impl;
 
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 

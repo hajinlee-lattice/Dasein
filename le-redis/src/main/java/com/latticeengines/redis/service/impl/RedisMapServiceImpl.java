@@ -16,7 +16,7 @@ import com.latticeengines.redis.exposed.service.RedisMapService;
 @Component("redisMapService")
 public class RedisMapServiceImpl implements RedisMapService {
 
-    @Inject
+    //@Inject
     private RedissonClient redisson;
 
     private RMap<Object, Object> getMap(String mapName) {

@@ -2,7 +2,7 @@ package com.latticeengines.datacloud.match.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class ExternalColumnDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Class<ExternalColumn> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Tags like :tag order by category asc, subcategory asc, PID asc",
                 entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<ExternalColumn> query = session.createQuery(queryStr);
         query.setParameter("tag", "%" + tag + "%");
         return query.list();
 

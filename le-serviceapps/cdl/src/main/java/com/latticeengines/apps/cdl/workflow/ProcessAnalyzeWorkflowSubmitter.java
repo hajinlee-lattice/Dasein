@@ -1,7 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -131,18 +131,26 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
         updateActions(customerSpace, actionAndJobIds.getLeft());
 
-        request = setRebuildEntities(customerSpace, actionAndJobIds, request);
+        String currentDataCloudVersion = "";
+        request.getRebuildEntities().addAll(getRebuildEntitiesOnDLVersion(dataCollection, currentDataCloudVersion));
+        request.getRebuildEntities().addAll(getRebuildEntitiesOnDeleteJob(customerSpace, actionAndJobIds));
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
-                actionAndJobIds, datafeedStatus);
+                actionAndJobIds, datafeedStatus, currentDataCloudVersion);
         return workflowJobService.submit(configuration);
     }
 
-    private ProcessAnalyzeRequest setRebuildEntities(String customerSpace, Pair<List<Long>, List<Long>> actionAndJobIds,
-            ProcessAnalyzeRequest request) {
-        Set<BusinessEntity> rebuildEntities = new HashSet<>();
-        if (request != null && request.getRebuildEntities() != null) {
-            rebuildEntities.addAll(request.getRebuildEntities());
+    private Collection<BusinessEntity> getRebuildEntitiesOnDLVersion(DataCollection dataCollection,
+            String currentVersion) {
+        if (dataCollection != null && dataCollection.getDataCloudVersion() != null
+                && !dataCollection.getDataCloudVersion().equals(currentVersion)) {
+            return Collections.singletonList(BusinessEntity.Account);
         }
+        return Collections.emptyList();
+    }
+
+    private Collection<BusinessEntity> getRebuildEntitiesOnDeleteJob(String customerSpace,
+            Pair<List<Long>, List<Long>> actionAndJobIds) {
+        Set<BusinessEntity> rebuildEntities = new HashSet<>();
         try {
             List<Job> deleteJobs = internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace,
                     actionAndJobIds.getLeft(), ActionType.CDL_OPERATION_WORKFLOW);
@@ -157,9 +165,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         } catch (Exception e) {
             log.error("Failed to set rebuild entities based on delete actions.", e);
         }
-        ProcessAnalyzeRequest newRequest = new ProcessAnalyzeRequest();
-        newRequest.setRebuildEntities(new ArrayList<>(rebuildEntities));
-        return newRequest;
+        return rebuildEntities;
     }
 
     @VisibleForTesting
@@ -214,7 +220,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
-            ProcessAnalyzeRequest request, Pair<List<Long>, List<Long>> actionAndJobIds, Status status) {
+            ProcessAnalyzeRequest request, Pair<List<Long>, List<Long>> actionAndJobIds, Status status,
+            String currentDataCloudVersion) {
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -231,6 +238,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.ACTION_IDS, actionAndJobIds.getLeft().toString()) //
                         .build()) //
                 .workflowContainerMem(workflowMemMb) //
+                .currentDataCloudVersion(currentDataCloudVersion) //
                 .build();
     }
 

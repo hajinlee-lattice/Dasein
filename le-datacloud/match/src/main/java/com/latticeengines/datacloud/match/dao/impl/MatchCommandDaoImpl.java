@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ public class MatchCommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<M
         cal.add(Calendar.DAY_OF_YEAR, retentionDays*-1);
         Date outDated = cal.getTime();
         String queryStr = String.format("from %s where LatestStatusUpdate < :value", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<MatchCommand> query = session.createQuery(queryStr);
         query.setParameter("value", outDated.toString());
         List<MatchCommand> results = query.list();
         return results;

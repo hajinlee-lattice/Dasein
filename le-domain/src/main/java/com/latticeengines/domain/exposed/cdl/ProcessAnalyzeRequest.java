@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.cdl;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,13 +15,13 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class ProcessAnalyzeRequest {
 
     @JsonProperty("RebuildEntities")
-    private List<BusinessEntity> rebuildEntities;
+    private Set<BusinessEntity> rebuildEntities = new HashSet<>();
 
-    public List<BusinessEntity> getRebuildEntities() {
+    public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
 
-    public void setRebuildEntities(List<BusinessEntity> rebuildEntities) {
+    public void setRebuildEntities(Set<BusinessEntity> rebuildEntities) {
         this.rebuildEntities = rebuildEntities;
     }
 

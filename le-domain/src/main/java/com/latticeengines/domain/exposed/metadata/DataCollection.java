@@ -13,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -20,7 +21,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -36,8 +36,9 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_DATA_COLLECTION", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "TENANT_ID", "NAME" }))
+@javax.persistence.Table(name = "METADATA_DATA_COLLECTION", //
+        indexes = { @Index(name = "IX_NAME", columnList = "NAME") }, //
+        uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
@@ -51,7 +52,6 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
-    @Index(name = "IX_NAME")
     private String name;
 
     @JsonIgnore
@@ -83,6 +83,10 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @Enumerated(EnumType.STRING)
     @Column(name = "VERSION", nullable = false)
     private Version version;
+
+    @JsonProperty("datacloud_version")
+    @Column(name = "DATACLOUD_VERSION", nullable = true)
+    private String dataCloudVersion;
 
     @Override
     public Long getPid() {
@@ -135,6 +139,14 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         this.version = version;
     }
 
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
@@ -167,11 +179,11 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
         public Version complement() {
             switch (this) {
-                case Blue:
-                    return Green;
-                case Green:
-                default:
-                    return Blue;
+            case Blue:
+                return Green;
+            case Green:
+            default:
+                return Blue;
             }
         }
 

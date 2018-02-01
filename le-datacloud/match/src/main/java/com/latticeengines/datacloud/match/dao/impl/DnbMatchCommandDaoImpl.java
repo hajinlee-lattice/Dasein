@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.dao.impl;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class DnbMatchCommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImp
         String queryStr = String.format(
                 "update %s set dnbCode = :abandoned, message = :abandonMessage where rootOperationUid = :rootOperationUid and dnbCode = :submitted",
                 getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<?> query = session.createQuery(queryStr);
         query.setParameter("abandoned", DnBReturnCode.ABANDONED);
         query.setParameter("rootOperationUid", rootOperationUid);
         query.setParameter("submitted", DnBReturnCode.SUBMITTED);

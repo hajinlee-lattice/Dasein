@@ -3,7 +3,7 @@ package com.latticeengines.metadata.dao.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +25,8 @@ public class ColumnRuleResultDaoImpl extends BaseDaoImpl<ColumnRuleResult> imple
         Session session = getSessionFactory().getCurrentSession();
         Class<ColumnRuleResult> entityClz = getEntityClass();
         String queryStr = String.format("from %s where modelId = :modelId", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("modelId", modelId);
+        Query<ColumnRuleResult> query = session.createQuery(queryStr);
+        query.setParameter("modelId", modelId);
         List<ColumnRuleResult> list = query.list();
         if (list.size() == 0) {
             return new ArrayList<>();

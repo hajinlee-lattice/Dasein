@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -104,7 +105,12 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder rebuildEntities(List<BusinessEntity> entities) {
+        public Builder currentDataCloudVersion(String currentDataCloudVersion) {
+            processStepConfiguration.setDataCloudVersion(currentDataCloudVersion);
+            return this;
+        }
+
+        public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Account)) {
                     processAccountStepConfiguration.setRebuild(true);

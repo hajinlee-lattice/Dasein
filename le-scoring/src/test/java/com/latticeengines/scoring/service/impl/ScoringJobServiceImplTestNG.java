@@ -50,7 +50,7 @@ public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelin
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
         scoringConfig.setUniqueKeyColumn("ModelingID");
         scoringConfig.setScoreInputType(ScoringInputType.Json);
-        scoringConfig.setModelIdFromRecord(false);
+        scoringConfig.setModelIdFromRecord(true);
         ApplicationId appId = scoringJobService.score(scoringConfig);
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
     }

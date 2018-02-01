@@ -38,4 +38,6 @@ public interface DataCollectionService {
     AttributeRepository getAttrRepo(String customerSpace, String collectionName, DataCollection.Version version);
 
     void resetTable(String customerSpace, String collectionName, TableRoleInCollection tableRole);
+
+    String updateDataCloudVersion(String customerSpace, String collectionName, String dataCloudVersion);
 }

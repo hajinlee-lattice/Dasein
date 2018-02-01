@@ -2,7 +2,7 @@ package com.latticeengines.metadata.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -18,7 +18,7 @@ abstract class BaseMetadataPropertyDaoImpl<T extends MetadataProperty<O>, O> ext
         Session session = getSessionFactory().getCurrentSession();
         String queryPattern = "from %s where owner = :owner";
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
+        Query<T> query = session.createQuery(queryStr);
         query.setParameter("owner", Owner);
         return query.list();
     }
