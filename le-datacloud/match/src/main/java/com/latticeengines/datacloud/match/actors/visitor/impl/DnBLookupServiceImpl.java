@@ -536,6 +536,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private void processBulkMatchResult(DnBBatchMatchContext batchContext, boolean success,
             boolean postProcessDnBContexts) {
+        log.info(String.format("Start processing DnB batch result: ServiceBatchId=%s RootOperationUID=%s",
+                batchContext.getServiceBatchId(), batchContext.getRootOperationUid()));
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
         Date finishTime = new Date();
         for (String lookupRequestId : batchContext.getContexts().keySet()) {
@@ -566,6 +568,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             dnBMatchHistories.add(new DnBMatchHistory(context));
         }
         dnbMatchCommandService.dnbMatchCommandUpdate(batchContext);
+        log.info(String.format("Start writing DnB batch result to match history: ServiceBatchId=%s RootOperationUID=%s",
+                batchContext.getServiceBatchId(), batchContext.getRootOperationUid()));
         writeDnBMatchHistory(dnBMatchHistories);
         log.info(String.format(
                 "Finished processing DnB batch: ServiceBatchId=%s RootOperationUID=%s, StartTime=%s, FinishTime=%s, Size=%d, Duration=%d mins",
