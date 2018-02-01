@@ -8,6 +8,11 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     TOMCAT_MAJOR=8
     TOMCAT_VERSION=8.5.27
 
+    if [ "${USE_HTTP2}" == "true" ]; then
+        TOMCAT_MAJOR=9
+        TOMCAT_VERSION=9.0.4
+    fi
+
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
     sudo chown -R $USER ${CATALINA_HOME} || true

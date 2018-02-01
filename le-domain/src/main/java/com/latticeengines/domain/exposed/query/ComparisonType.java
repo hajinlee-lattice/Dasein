@@ -9,8 +9,6 @@ public enum ComparisonType {
     GREATER_OR_EQUAL, //
     LESS_THAN, //
     LESS_OR_EQUAL, //
-    @Deprecated
-    IN_RANGE, //
     IN_COLLECTION, //
     NOT_IN_COLLECTION, //
     CONTAINS, //
@@ -27,7 +25,10 @@ public enum ComparisonType {
     PRIOR, //
     PRIOR_ONLY, //
     FOLLOWING,  //
-    WITHIN;
+    WITHIN, //
+
+    @Deprecated
+    IN_RANGE;
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;

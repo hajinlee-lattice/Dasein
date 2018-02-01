@@ -73,12 +73,25 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
             }
             propertiesMap.put(keyStr, valueStr);
         }
+        overwriteForHttps();
         super.processProperties(beanFactory, props);
 
     }
 
     public static String getProperty(String name) {
         return propertiesMap.get(name);
+    }
+
+    private static void overwriteForHttps() {
+        if (Boolean.TRUE.toString().equalsIgnoreCase(System.getenv("USE_HTTP2"))) {
+            propertiesMap.forEach((k, v) -> {
+                if (v.startsWith("http://localhost:8") && !v.startsWith("http://localhost:8000")) {
+                    String newUrl = v.replace("http://localhost:8", "https://localhost:9");
+                    log.info(k + ": change " + v + " to " + newUrl);
+                    propertiesMap.put(k, newUrl);
+                }
+            });
+        }
     }
 
 }

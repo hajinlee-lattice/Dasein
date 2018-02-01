@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
-import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.StringExpression;
@@ -60,7 +59,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 rhs = new ValueLookup(0);
                 isBitEncodedNullQuery = true;
             } else if (ComparisonType.IS_NOT_NULL.equals(restriction.getRelation())) {
-                // is null means bktId != 0
+                // is not null means bktId != 0
                 restriction.setRelation(ComparisonType.NOT_EQUAL);
                 rhs = new ValueLookup(0);
                 isBitEncodedNullQuery = true;
@@ -246,8 +245,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 booleanExpression = booleanExpression.not();
             }
 
-            if (isBitEncoded && !isBitEncodedNullQuery && ComparisonType.NOT_EQUAL.equals(restriction.getRelation())) {
-                // for bit encoded, make sure not equal won't return null
+            if (isBitEncoded && !isBitEncodedNullQuery && isNegativeBitEncodedLookup(restriction)) {
+                // for bit encoded, make sure not equal or not in collection won't return null
                 Restriction notNull = Restriction.builder().let(lhs).isNotNull().build();
                 BooleanExpression notNullExpn = resolve((ConcreteRestriction) notNull);
                 booleanExpression = booleanExpression.and(notNullExpn);
@@ -312,15 +311,35 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         return false;
     }
 
+    private boolean isNegativeBitEncodedLookup(ConcreteRestriction restriction) {
+        boolean negativeOperator = !Boolean.TRUE.equals(restriction.getNegate()) && ( //
+                Arrays.asList( //
+                        ComparisonType.NOT_EQUAL, //
+                        ComparisonType.NOT_CONTAINS, //
+                        ComparisonType.NOT_IN_COLLECTION //
+                ).contains(restriction.getRelation()));
+        boolean positiveOperator = Boolean.TRUE.equals(restriction.getNegate()) && ( //
+                Arrays.asList( //
+                        ComparisonType.EQUAL, //
+                        ComparisonType.CONTAINS, //
+                        ComparisonType.IN_COLLECTION //
+                ).contains(restriction.getRelation()));
+        return negativeOperator || positiveOperator;
+    }
+
     private ValueLookup convertValueLookup(Buckets buckets, String val) {
         int value = 0;
         if (val != null) {
             Bucket bkt = buckets.getBucketList().stream() //
                     .filter(b -> getBktVal(b).equals(val)) //
                     .findFirst() //
-                    .orElseThrow(
-                            () -> new QueryEvaluationException("Cannot find label [" + val + "] in statistics."));
-            value = bkt.getIdAsInt();
+                    .orElse(null);
+            if (bkt == null) {
+                log.warn("Cannot find label [" + val + "] in statistics, use dummy bkt instead.");
+                value = -1;
+            } else {
+                value = bkt.getIdAsInt();
+            }
         }
         return new ValueLookup(value);
     }
@@ -334,7 +353,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     .collect(Collectors.toList());
         }
         if (ids.isEmpty()) {
-            throw new QueryEvaluationException("Cannot find corresponding label for " + bktLbl + " in statistics.");
+            log.warn("Cannot find corresponding label for " + bktLbl + " in statistics, use -1 bkt id instead.");
+            return new ValueLookup(-1);
         }
         if (ids.size() > 1) {
             restriction.setRelation(ComparisonType.IN_COLLECTION);
@@ -356,7 +376,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         }
         List<Integer> idList = new ArrayList<>(ids);
         if (idList.isEmpty()) {
-            idList = vals.stream().map(x -> -1).collect(Collectors.toList());
+            idList = new ArrayList<>(Collections.singleton(-1));
         }
         Collections.sort(idList);
         return new CollectionLookup(new ArrayList<>(idList));

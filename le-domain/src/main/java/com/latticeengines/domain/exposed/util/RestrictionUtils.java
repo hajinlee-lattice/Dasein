@@ -77,7 +77,7 @@ public class RestrictionUtils {
         return transactionRestriction;
     }
 
-    public static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType, List<Object> values) {
+    private static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType, List<Object> values) {
         Restriction restriction = null;
         switch (comparisonType) {
         case IS_NULL:
@@ -95,7 +95,6 @@ public class RestrictionUtils {
             validateSingleValue(values);
             restriction = convertUnitaryValueComparison(attr, comparisonType, values.get(0));
             break;
-        case IN_RANGE:
         case GTE_AND_LTE:
         case GT_AND_LTE:
         case GTE_AND_LT:
@@ -105,6 +104,9 @@ public class RestrictionUtils {
             break;
         case IN_COLLECTION:
             restriction = Restriction.builder().let(attr).inCollection(values).build();
+            break;
+        case NOT_IN_COLLECTION:
+            restriction = Restriction.builder().let(attr).notInCollection(values).build();
             break;
         case CONTAINS:
             restriction = Restriction.builder().let(attr).contains(values.get(0)).build();

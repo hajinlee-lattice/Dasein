@@ -490,6 +490,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
             case CONTAINS:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).contains(value);
                 break;
+            case NOT_CONTAINS:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notcontains(value);
+                break;
             case IS_NULL:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNull();
                 break;
@@ -498,6 +501,9 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 break;
             case IN_COLLECTION:
                 builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
+                break;
+            case NOT_IN_COLLECTION:
+                builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notInCollection(Arrays.asList(vals));
                 break;
             default:
                 throw new UnsupportedOperationException("Does not support " + operator);
@@ -514,22 +520,36 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 { ComparisonType.EQUAL, new String[]{ "Yes" }, BUCKETED_YES_IN_CUSTOEMR }, //
                 { ComparisonType.EQUAL, new String[]{ "No" }, BUCKETED_NO_IN_CUSTOEMR }, //
                 { ComparisonType.EQUAL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
+                { ComparisonType.EQUAL, new String[]{ null }, BUCKETED_NULL_IN_CUSTOEMR }, //
+                { ComparisonType.EQUAL, new String[]{ "bar" }, 0L }, //
 
                 { ComparisonType.IS_NULL, null, BUCKETED_NULL_IN_CUSTOEMR }, //
                 { ComparisonType.IS_NOT_NULL, null, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
 
                 { ComparisonType.NOT_EQUAL, new String[]{ "Yes" }, BUCKETED_NO_IN_CUSTOEMR }, //
                 { ComparisonType.NOT_EQUAL, new String[]{ "No" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_EQUAL, new String[]{ "bar" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
 
+                { ComparisonType.STARTS_WITH, new String[]{ "z" }, 0L }, //
                 { ComparisonType.STARTS_WITH, new String[]{ "y" }, BUCKETED_YES_IN_CUSTOEMR }, //
                 { ComparisonType.STARTS_WITH, new String[]{ "N" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.ENDS_WITH, new String[]{ "z" }, 0L }, //
                 { ComparisonType.ENDS_WITH, new String[]{ "S" }, BUCKETED_YES_IN_CUSTOEMR }, //
                 { ComparisonType.ENDS_WITH, new String[]{ "o" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.CONTAINS, new String[]{ "Z" }, 0L }, //
                 { ComparisonType.CONTAINS, new String[]{ "e" }, BUCKETED_YES_IN_CUSTOEMR }, //
                 { ComparisonType.CONTAINS, new String[]{ "O" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_CONTAINS, new String[]{ "Z" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_CONTAINS, new String[]{ "e" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_CONTAINS, new String[]{ "O" }, BUCKETED_YES_IN_CUSTOEMR }, //
 
-                { ComparisonType.IN_COLLECTION, new String[]{ "Yes", "yes" }, BUCKETED_YES_IN_CUSTOEMR }, //
-                { ComparisonType.IN_COLLECTION, new String[]{ "YES", "no" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.IN_COLLECTION, new String[]{ "foo" }, 0L }, //
+                { ComparisonType.IN_COLLECTION, new String[]{ "Yes", "yes", "foo" }, BUCKETED_YES_IN_CUSTOEMR }, //
+                { ComparisonType.IN_COLLECTION, new String[]{ "YES", "no", "bar" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+
+                { ComparisonType.NOT_IN_COLLECTION, new String[]{ "foo" }, BUCKETED_YES_IN_CUSTOEMR + BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_IN_COLLECTION, new String[]{ "Yes", "yes", "foo" }, BUCKETED_NO_IN_CUSTOEMR }, //
+                { ComparisonType.NOT_IN_COLLECTION, new String[]{ "YES", "no", "bar" }, 0L }, //
         };
     }
 

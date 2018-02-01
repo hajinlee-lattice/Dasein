@@ -43,7 +43,7 @@
   "scripts": {
     "install": "npm run InstallDev",
     "postinstall": "npm run build",
-    "InstallProduction": "npm run InstallCommon && npm run InstallLP && npm run InstallLogin && npm run InstallInsights && npm run InstallPD",
+    "InstallProduction": "concurrently \"npm run InstallCommon\" \"npm run InstallLogin\" \"npm run InstallLP\" \"npm run InstallInsights\" \"npm run InstallPD\" \"npm run InstallAdmin\" \"npm run InstallLP2\"",
     "InstallDev": "concurrently \"npm run InstallDevCommon\" \"npm run InstallDevLogin\" \"npm run InstallDevLP\" \"npm run InstallDevInsights\" \"npm run InstallDevPD\" \"npm run InstallDevAdmin\" \"npm run InstallDevLP2\"",
     "dev": "npm run sass && concurrently -kr \"grunt dev\" \"npm run sentry\"",
     "dev_lp": "npm run commonsass && npm run lpsass && concurrently -kr \"grunt dev\" \"npm run commonsentry\" \"npm run lpsentry\" \"npm run insightssentry\"",

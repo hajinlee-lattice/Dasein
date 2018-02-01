@@ -213,7 +213,7 @@
                        resourceName="UserDatabase"/>
             </Realm>
             <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" undeployOldVersions="true"
-                  startStopThreads="4"/>
+                  startStopThreads="8"/>
         </Engine>
     </Service>
 
