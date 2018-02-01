@@ -72,4 +72,8 @@
     <bean id="customerReportDao" class="com.latticeengines.datacloud.core.dao.impl.CustomerReportDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
+    
+    <bean id="customerSourceAttributeDao" class="com.latticeengines.datacloud.core.dao.impl.CustomerSourceAttributeDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
 </beans>

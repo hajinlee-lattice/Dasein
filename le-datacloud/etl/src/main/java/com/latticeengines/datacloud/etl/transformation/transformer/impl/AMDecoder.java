@@ -108,7 +108,7 @@ public class AMDecoder extends AbstractDataflowTransformer<AMDecoderConfig, AMDe
         }
 
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes("AccountMasterDecoded",
-                "DECODE", TRANSFORMER_NAME, dataCloudVersion);
+                "DECODE", TRANSFORMER_NAME, dataCloudVersion, false);
         Map<String, SourceAttribute> sourceAttributeMap = new HashMap<>();
         for (SourceAttribute attrib : srcAttrs) {
             sourceAttributeMap.put(attrib.getAttribute(), attrib);

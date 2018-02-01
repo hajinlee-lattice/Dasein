@@ -370,7 +370,7 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
         Map<String, BucketAlgorithm> flatAttrsToCheck = getExpectedBuckAlgoForSegment();
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
                 DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER,
-                DATA_CLOUD_VERSION_MATCH);
+                DATA_CLOUD_VERSION_MATCH, true);
         Map<String, String> decAttrToEnc = new HashMap<>();
         for (SourceAttribute srcAttr : srcAttrs) {
             JsonNode arg = om.readTree(srcAttr.getArguments());
@@ -526,7 +526,8 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
             throws JsonProcessingException, IOException {
         Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForEnrich();
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
-                DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER, DATA_CLOUD_VERSION);
+                DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER, DATA_CLOUD_VERSION,
+                false);
         String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
                 "BmbrSurge_CompositeScore" };
         Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));

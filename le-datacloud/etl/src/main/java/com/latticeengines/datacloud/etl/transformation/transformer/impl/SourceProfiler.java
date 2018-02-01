@@ -255,8 +255,14 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     }
 
     private Map<String, ProfileArgument> findAMAttrsConfig(ProfileConfig config, String dataCloudVersion) {
-        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
-                config.getTransformer(), dataCloudVersion);
+        List<SourceAttribute> srcAttrs;
+        if (config.getStage() == DataCloudConstants.PROFILE_STAGE_SEGMENT) {
+            srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
+                    config.getTransformer(), dataCloudVersion, true);
+        } else {
+            srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
+                    config.getTransformer(), dataCloudVersion, false);
+        }
         if (CollectionUtils.isEmpty(srcAttrs)) {
             throw new RuntimeException("Fail to find configuration for profiling in SourceAttribute table");
         }

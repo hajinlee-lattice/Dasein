@@ -152,6 +152,13 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer,DataCloudVersion);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv' INTO TABLE `CustomerSourceAttribute`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer,DataCloudVersion);
+
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges)
 VALUES
   ('Trilogy', 'DunsDomainBased,DomainBased,DunsBased', '0', '0:1|1:2'),

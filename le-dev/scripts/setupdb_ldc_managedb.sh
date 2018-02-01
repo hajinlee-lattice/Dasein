@@ -62,6 +62,9 @@ gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterFact.csv.gz > $
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceAttribute.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceAttribute.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceAttribute.csv
 
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/CustomerSourceAttribute.csv
+
 source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true

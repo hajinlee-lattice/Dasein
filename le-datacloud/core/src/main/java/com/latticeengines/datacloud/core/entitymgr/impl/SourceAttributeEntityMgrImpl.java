@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.datacloud.core.dao.CustomerSourceAttributeDao;
 import com.latticeengines.datacloud.core.dao.SourceAttributeDao;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.manage.CustomerSourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 
 @Component("sourceAttributeEntityMgr")
@@ -17,6 +20,9 @@ public class SourceAttributeEntityMgrImpl implements SourceAttributeEntityMgr {
 
     @Autowired
     private SourceAttributeDao sourceAttributeDao;
+
+    @Autowired
+    private CustomerSourceAttributeDao customerSourceAttributeDao;
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
@@ -32,7 +38,17 @@ public class SourceAttributeEntityMgrImpl implements SourceAttributeEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<SourceAttribute> getAttributes(String source, String stage, String transform, String dataCloudVersion) {
-        return sourceAttributeDao.getAttributes(source, stage, transform, dataCloudVersion);
+    public List<SourceAttribute> getAttributes(String source, String stage, String transform, String dataCloudVersion,
+            boolean isCustomer) {
+        if (!isCustomer) {
+            return sourceAttributeDao.getAttributes(source, stage, transform, dataCloudVersion);
+        } else {
+            List<CustomerSourceAttribute> csaList = customerSourceAttributeDao.getAttributes(source, stage, transform,
+                    dataCloudVersion);
+            List<SourceAttribute> saList = new ArrayList<>();
+            csaList.stream().forEach(csa -> saList.add(csa.toSourceAttribute()));
+            return saList;
+        }
+
     }
 }

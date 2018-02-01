@@ -18,9 +18,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "SourceAttribute", uniqueConstraints = {
+@Table(name = "CustomerSourceAttribute", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "Source", "Stage", "Transformer", "Attribute", "DataCloudVersion" }) })
-public class SourceAttribute implements HasPid, Serializable {
+public class CustomerSourceAttribute implements HasPid, Serializable {
 
     private static final long serialVersionUID = 5143418326245069059L;
     @Id
@@ -28,15 +28,15 @@ public class SourceAttribute implements HasPid, Serializable {
     @Column(name = "SourceAttributeID", unique = true, nullable = false)
     private Long sourceAttributeId;
 
-    @Index(name = "IX_SOURCE_STAGE_TRANSFORMER")
+    @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER")
     @Column(name = "Source", nullable = false, length = 128)
     private String source;
 
-    @Index(name = "IX_SOURCE_STAGE_TRANSFORMER")
+    @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER")
     @Column(name = "Stage", nullable = false, length = 32)
     private String stage;
 
-    @Index(name = "IX_SOURCE_STAGE_TRANSFORMER")
+    @Index(name = "IX_CUSTOMER_SOURCE_STAGE_TRANSFORMER")
     @Column(name = "Transformer", nullable = false, length = 32)
     private String transformer;
 
@@ -49,8 +49,19 @@ public class SourceAttribute implements HasPid, Serializable {
     @Column(name = "DataCloudVersion", length = 50)
     private String dataCloudVersion;
 
-    public SourceAttribute() {
+    public CustomerSourceAttribute() {
         super();
+    }
+
+    public SourceAttribute toSourceAttribute() {
+        SourceAttribute sa = new SourceAttribute();
+        sa.setSource(source);
+        sa.setStage(stage);
+        sa.setTransformer(transformer);
+        sa.setAttribute(attribute);
+        sa.setArguments(arguments);
+        sa.setDataCloudVersion(dataCloudVersion);
+        return sa;
     }
 
     public Long getSourceAttributeId() {
@@ -82,7 +93,7 @@ public class SourceAttribute implements HasPid, Serializable {
     }
 
     public void setTransformer(String transformer) {
-        this.transformer = transformer; 
+        this.transformer = transformer;
     }
 
     public String getAttribute() {
