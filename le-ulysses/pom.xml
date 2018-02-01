@@ -27,6 +27,10 @@
             <version>${guava.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${project.version}</version>

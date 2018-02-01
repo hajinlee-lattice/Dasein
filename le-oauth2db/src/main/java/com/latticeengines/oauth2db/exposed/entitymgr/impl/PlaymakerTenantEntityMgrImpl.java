@@ -2,13 +2,13 @@ package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;

@@ -22,6 +22,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
@@ -32,7 +33,8 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(UlyssesDeploymentTestNGBase.class);
 
     protected static String CLIENT_ID = UlyssesSupportedClients.CLIENT_ID_LP;
-
+    protected static String GW_API_KEY = "TEST_GW_KEY_1";
+    
     protected static class UlyssesSupportedClients {
         public static final String CLIENT_ID_LP = "lp";
         public static final String CLIENT_ID_PM = "playmaker";
@@ -66,6 +68,15 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
         Tenant tenant = setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
+        
+        PlaymakerTenant oAuthTenant = new PlaymakerTenant();
+        oAuthTenant.setTenantName(tenant.getId());
+        oAuthTenant.setExternalId(CLIENT_ID);
+        oAuthTenant.setGwApiKey(GW_API_KEY);
+        oAuthTenant.setJdbcDriver("");
+        oAuthTenant.setJdbcUrl("");
+        oauth2RestApiProxy.createOAuthTenant(oAuthTenant);
+        
         String oneTimeKey = oauth2RestApiProxy.createAPIToken(tenant.getId());
 
         oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, tenant.getId(), oneTimeKey, CLIENT_ID);

@@ -663,6 +663,7 @@ public enum LedpCode {
 
     // le-ulysses
     LEDP_39001("No account with id {0} found for CustomerSpace {0}"), //
+    LEDP_39002("Could not find Tenant information"), //
 
     // le-cdl
     LEDP_40000("CustomerSpace in CleanupByDateRangeConfig is null."), //

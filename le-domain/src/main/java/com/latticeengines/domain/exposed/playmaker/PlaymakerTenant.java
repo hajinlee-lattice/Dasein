@@ -28,6 +28,7 @@ public class PlaymakerTenant implements HasPid {
     private String jdbcUrl;
     private String jdbcUserName;
     private String jdbcPasswordEncrypt;
+    private String gwApiKey;
 
     public PlaymakerTenant() {
         super();
@@ -145,6 +146,17 @@ public class PlaymakerTenant implements HasPid {
     public void setJdbcPasswordEncrypt(String jdbcPasswordEncrypt) {
         this.jdbcPasswordEncrypt = jdbcPasswordEncrypt;
     }
+    
+    @JsonProperty("GwApiKey")
+    @Column(name = "GW_API_KEY", nullable = true)
+    public String getGwApiKey() {
+        return gwApiKey;
+    }
+
+    @JsonProperty("GwApiKey")
+    public void setGwApiKey(String gwApiKey) {
+        this.gwApiKey = gwApiKey;
+    }
 
     public void copyFrom(PlaymakerTenant tenant) {
         if (tenant != null) {
@@ -154,6 +166,8 @@ public class PlaymakerTenant implements HasPid {
             this.jdbcUrl = tenant.getJdbcUrl();
             this.jdbcUserName = tenant.getJdbcUserName();
             this.jdbcPasswordEncrypt = tenant.getJdbcPasswordEncrypt();
+            this.gwApiKey = tenant.getGwApiKey();
         }
     }
+
 }
