@@ -1,20 +1,20 @@
 angular.module('lp.jobs.row.subjobs', [])
 
     .directive('importJobRowSubJobs', [function () {
-        var controller = ['$scope', 'JobsStore', 'BrowserStorageUtility', function ($scope, JobsStore, BrowserStorageUtility) {
+        var controller = ['$scope', 'JobsStore', 'JobsService', 'BrowserStorageUtility', function ($scope, JobsStore, JobsService, BrowserStorageUtility) {
             function init() {
                 // console.log('EXPANDED ======= ',$scope);
             }
             $scope.getActionType = function (subjob) {
                 var type = subjob.jobType;
-                switch(type){
-                    case 'cdlDataFeedImportWorkflow' : {
+                switch (type) {
+                    case 'cdlDataFeedImportWorkflow': {
                         return 'Import';
                     };
-                    case 'cdlOperationWorkflow':{
+                    case 'cdlOperationWorkflow': {
                         return 'Delete';
                     };
-                    case 'metadataChange':{
+                    case 'metadataChange': {
                         return 'Metadata Change';
                     };
                     default: {
@@ -27,39 +27,34 @@ angular.module('lp.jobs.row.subjobs', [])
                     return subjob.inputs['SOURCE_DISPLAY_NAME'];
                 }
             }
-            $scope.getActionLink = function (subjob) {
-                if (subjob.inputs && subjob.inputs != null) {
-                    var appId = $scope.applicationId;
-                    var fileName = subjob.inputs['SOURCE_FILE_NAME'];
-                    var auth = BrowserStorageUtility.getTokenDocument();
-                    var clientSession = BrowserStorageUtility.getClientSession();
-                    var tenantId = clientSession.Tenant.Identifier;
-                    // {{pls}}/datafiles/sourcefile?fileName=<internalFileName of the file>
-                    var ret = '/files/datafiles/sourcefilecsv/'+appId+'?fileName='+fileName+'&Authorization='+auth+'&TenantId='+tenantId;
-                    ret = 'pls/datafiles/sourcefile?filename='+fileName;
-                    // /files/datafiles/sourcefilecsv/{{job.applicationId}}?fileName={{job.source}}&Authorization={{auth}}&TenantId={{TenantId}}
-                    return ret;//subjob.inputs['SOURCE_FILE_NAME'];
-                }
+
+            $scope.getDownloadLink = function (subjob) {
+                var path = '/files/datafiles/sourcefile?fileName=';
+                var fileName = subjob.inputs['SOURCE_FILE_NAME'];
+                var auth = BrowserStorageUtility.getTokenDocument();
+                var clientSession = BrowserStorageUtility.getClientSession();
+                var tenantId = clientSession.Tenant.Identifier;
+                return path + fileName + '&Authorization=' + auth;
             }
 
             $scope.getValidation = function (subjob) {
                 var recordFound = $scope.getRecordFound(subjob);
                 var recordUploaded = $scope.getRecordUploaded(subjob);
-                if(recordFound === '-' && recordUploaded === '-'){
+                if (recordFound === '-' && recordUploaded === '-') {
                     return 'In Progress'
                 }
-                if(recordFound > 0 && recordUploaded == 0){
+                if (recordFound > 0 && recordUploaded == 0) {
                     return 'Failed';
                 }
-                if(recordFound === recordUploaded){
+                if (recordFound === recordUploaded) {
                     return 'Success';
                 }
-                if(recordFound != recordUploaded){
+                if (recordFound != recordUploaded) {
                     return 'Partial Success';
                 }
-                
-                
-                
+
+
+
             }
             $scope.getRecordFound = function (subjob) {
                 if (subjob.reports && subjob.reports.length > 0) {
