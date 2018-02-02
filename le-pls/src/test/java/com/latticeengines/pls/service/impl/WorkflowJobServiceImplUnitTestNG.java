@@ -124,7 +124,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertEquals(job.getNote(), WorkflowJobServiceImpl.CDLNote);
         Assert.assertEquals(job.getName(), "processAnalyzeWorkflow");
         Assert.assertEquals(job.getJobType(), "processAnalyzeWorkflow");
-        Assert.assertEquals(job.getJobStatus(), JobStatus.PENDING);
+        Assert.assertEquals(job.getJobStatus(), JobStatus.READY);
         Assert.assertEquals(job.getId(), WorkflowJobServiceImpl.UNSTARTED_PROCESS_ANALYZE_ID);
         Assert.assertNotNull(job.getInputs());
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));

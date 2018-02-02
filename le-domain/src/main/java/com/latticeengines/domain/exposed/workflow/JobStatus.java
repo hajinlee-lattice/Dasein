@@ -3,15 +3,15 @@ package com.latticeengines.domain.exposed.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
-import com.fasterxml.jackson.annotation.JsonValue;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.latticeengines.common.exposed.util.YarnUtils;
 
 public enum JobStatus {
@@ -22,7 +22,8 @@ public enum JobStatus {
     COMPLETED(2, "Completed", true), //
     FAILED(3, "Failed", true), //
     CANCELLED(4, "Cancelled", true), //
-    SKIPPED(5, "Skipped", true); //
+    SKIPPED(5, "Skipped", true), //
+    READY(6, "Ready", false); //
 
     JobStatus(int statusId, String status, boolean terminated) {
         this.statusId = statusId;
@@ -104,34 +105,34 @@ public enum JobStatus {
             }
         } else {
             switch (status) {
-                case SUCCEEDED:
-                    return JobStatus.COMPLETED;
-                case FAILED:
-                case KILLED:
-                    return JobStatus.FAILED;
-                case UNDEFINED:
-                default:
-                    return JobStatus.PENDING;
+            case SUCCEEDED:
+                return JobStatus.COMPLETED;
+            case FAILED:
+            case KILLED:
+                return JobStatus.FAILED;
+            case UNDEFINED:
+            default:
+                return JobStatus.PENDING;
             }
         }
     }
 
     private static JobStatus fromBatchStatus(BatchStatus status) {
         switch (status) {
-            case COMPLETED:
-                return JobStatus.COMPLETED;
-            case STARTING:
-            case STARTED:
-            case STOPPING:
-                return JobStatus.RUNNING;
-            case STOPPED:
-                return JobStatus.CANCELLED;
-            case ABANDONED:
-            case FAILED:
-            case UNKNOWN:
-                return JobStatus.FAILED;
-            default:
-                return JobStatus.PENDING;
+        case COMPLETED:
+            return JobStatus.COMPLETED;
+        case STARTING:
+        case STARTED:
+        case STOPPING:
+            return JobStatus.RUNNING;
+        case STOPPED:
+            return JobStatus.CANCELLED;
+        case ABANDONED:
+        case FAILED:
+        case UNKNOWN:
+            return JobStatus.FAILED;
+        default:
+            return JobStatus.PENDING;
         }
     }
 }

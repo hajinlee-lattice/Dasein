@@ -202,7 +202,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             job.setNote(CDLNote);
             job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
             job.setName("processAnalyzeWorkflow");
-            job.setJobStatus(JobStatus.PENDING);
+            job.setJobStatus(JobStatus.READY);
             job.setJobType("processAnalyzeWorkflow");
             Map<String, String> unfinishedInputContext = new HashMap<>();
             List<Long> unfinishedActionIds = actions.stream().map(Action::getPid).collect(Collectors.toList());
