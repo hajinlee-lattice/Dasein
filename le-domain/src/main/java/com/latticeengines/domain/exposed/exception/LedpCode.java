@@ -223,7 +223,7 @@ public enum LedpCode {
     LEDP_18109("Problem reading csv file header: {0}"), //
     LEDP_18110("Expected at least 1 record. Instead found 0"), //
     LEDP_18111("Copying Model {0} from tenant {1} to tenant {2} failed"), //
-    LEDP_18112("Saving of lead enrichment selection failed, maximum {0} premium attributes can be selected."), //
+    LEDP_18112("Saving of lead enrichment selection failed, maximum {0} premium attributes of {1} can be selected."), //
     LEDP_18113("Saving of lead enrichment selection failed, field name {0} occurs more than once in selection."), //
     LEDP_18114("Saving of lead enrichment selection failed, field name {0} is invalid."), //
     LEDP_18115("File Validation Failed due to: {0}"), //

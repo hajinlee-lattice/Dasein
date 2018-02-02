@@ -266,6 +266,7 @@ public class AttributePageProcessor {
         attr.setCategory(column.getCategory().getName());
         attr.setSubcategory(column.getSubcategory() == null ? null : column.getSubcategory());
         attr.setIsInternal(Boolean.TRUE.equals(column.isCanInternalEnrich()));
+        attr.setDataLicense(column.getDataLicense());
         return attr;
     }
 

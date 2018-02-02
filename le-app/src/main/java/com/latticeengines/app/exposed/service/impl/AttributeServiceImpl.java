@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
@@ -45,6 +46,7 @@ public class AttributeServiceImpl implements AttributeService {
     private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "SubCategory",
             "Description", "Data Type", "Status", "Premium");
 
+    private static final String KEY_SUFFIX = "Data_Pivoted_Source";
     @Autowired
     private SelectedAttrEntityMgr selectedAttrEntityMgr;
 
@@ -75,6 +77,60 @@ public class AttributeServiceImpl implements AttributeService {
         int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant,
                 considerInternalAttributes);
         int additionalPremiumAttrCount = 0;
+        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null,
+                considerInternalAttributes);
+
+        final List<SelectedAttribute> addAttrList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
+            for (String selectedAttrStr : attributes.getSelectedAttributes()) {
+                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes, selectedAttrStr);
+                SelectedAttribute attr = populateAttrObj(selectedAttr, tenant);
+                addAttrList.add(attr);
+                if (attr.getIsPremium()) {
+                    additionalPremiumAttrCount++;
+                }
+            }
+        }
+
+        final List<SelectedAttribute> deleteAttrList = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
+            for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
+                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes,
+                        deselectedAttrStr);
+                SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
+                deleteAttrList.add(attr);
+                if (attr.getIsPremium()) {
+                    additionalPremiumAttrCount--;
+                }
+            }
+        }
+
+        // TODO - add check for per datasource limitation as well
+        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount + additionalPremiumAttrCount) {
+            // throw exception if effective premium count crosses limitation
+            throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString(), "HG" });
+        }
+
+        DatabaseUtils.retry("saveEnrichmentAttributeSelection", MAX_SAVE_RETRY, ConstraintViolationException.class,
+                "Ignoring ConstraintViolationException exception and retrying save operation",
+                UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES, new Closure() {
+                    @Override
+                    public void execute(Object input) {
+                        selectedAttrEntityMgr.upsert(addAttrList, deleteAttrList);
+                    }
+                });
+    }
+
+    @Override
+    public void saveSelectedAttribute(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
+            Map<String, Integer> limitationMap, Boolean considerInternalAttributes) {
+        tenant = tenantEntityMgr.findByTenantId(tenant.getId());
+        checkAmbiguityInFieldNames(attributes);
+
+        Map<String, Integer> existingSelectedAttributePremiumMap = getSelectedAttributePremiumMap(tenant,considerInternalAttributes);
+        Map<String, Integer> additionalPremiumAttrMap = new HashMap<>();
+        initAdditionalAttrMap(limitationMap, additionalPremiumAttrMap);
         List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false,
                 null, null, considerInternalAttributes);
 
@@ -86,7 +142,9 @@ public class AttributeServiceImpl implements AttributeService {
                 SelectedAttribute attr = populateAttrObj(selectedAttr, tenant);
                 addAttrList.add(attr);
                 if (attr.getIsPremium()) {
-                    additionalPremiumAttrCount++;
+                    String key = selectedAttr.getDataLicense() + KEY_SUFFIX;
+                    Integer val = additionalPremiumAttrMap.get(key);
+                    additionalPremiumAttrMap.put(key, val + 1);
                 }
             }
         }
@@ -100,17 +158,36 @@ public class AttributeServiceImpl implements AttributeService {
                 SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
                 deleteAttrList.add(attr);
                 if (attr.getIsPremium()) {
-                    additionalPremiumAttrCount--;
+                    String key = deselectedAttr.getDataLicense() + KEY_SUFFIX;
+                    Integer val = additionalPremiumAttrMap.get(key);
+                    additionalPremiumAttrMap.put(key, val - 1);
                 }
             }
         }
 
         // TODO - add check for per datasource limitation as well
-        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount
-                + additionalPremiumAttrCount) {
-            // throw exception if effective premium count crosses limitation
+        Integer premiumAttributeLimitation;
+        Integer existingSelectedAttributePremiumCount;
+        Integer additionalPremiumAttrCount;
+        Integer maxExistingSelectedAttributes = 0;
+        for (String key : limitationMap.keySet()) {
+            premiumAttributeLimitation = limitationMap.get(key);
+            existingSelectedAttributePremiumCount = existingSelectedAttributePremiumMap.get(key) == null ? 0
+                    : existingSelectedAttributePremiumMap.get(key);
+            additionalPremiumAttrCount = additionalPremiumAttrMap.get(key);
+            maxExistingSelectedAttributes += existingSelectedAttributePremiumCount + additionalPremiumAttrCount;
+            if (premiumAttributeLimitation < existingSelectedAttributePremiumCount + additionalPremiumAttrCount) {
+                // throw exception if effective premium count crosses limitation
+                throw new LedpException(LedpCode.LEDP_18112,
+                        new String[] { premiumAttributeLimitation.toString(),
+                                key.substring(0, key.indexOf(KEY_SUFFIX)) });
+            }
+        }
+        Integer maxLimitation = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
+                null);
+        if (maxExistingSelectedAttributes > maxLimitation) {
             throw new LedpException(LedpCode.LEDP_18112,
-                    new String[] { premiumAttributeLimitation.toString() });
+                    new String[] { maxLimitation.toString(), "MaxEnrichAttributes" });
         }
 
         DatabaseUtils.retry("saveEnrichmentAttributeSelection", MAX_SAVE_RETRY,
@@ -200,13 +277,60 @@ public class AttributeServiceImpl implements AttributeService {
     }
 
     @Override
+    public Map<String, Integer> getSelectedAttributePremiumMap(Tenant tenant, Boolean considerInternalAttributes) {
+        return getSelectedAttrMap(tenant, Boolean.TRUE, considerInternalAttributes);
+    }
+
+    protected Map<String, Integer> getSelectedAttrMap(Tenant tenant, Boolean countOnlySelectedPremiumAttr,
+            Boolean considerInternalAttributes) {
+        DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
+        Set<String> premiumAttrs = columnMetadataProxy.premiumAttributes(dataCloudVersion.getVersion());
+
+        List<LeadEnrichmentAttribute> attributeList = getAttributes(tenant, null, null, null, null, null, null,
+                considerInternalAttributes);
+        Map<String, Integer> count = new HashMap<String, Integer>();
+        for (LeadEnrichmentAttribute attr : attributeList) {
+            if (attr.getIsSelected()) {
+                if (countOnlySelectedPremiumAttr == Boolean.TRUE) {
+                    if (premiumAttrs.contains(attr.getColumnId())) {
+                        String key = attr.getDataLicense() + KEY_SUFFIX;
+                        Integer val = count.get(key);
+                        val = val == null ? 0 : val;
+                        count.put(key, val + 1);
+                    }
+                } else {
+                    String key = attr.getDataLicense() + KEY_SUFFIX;
+                    Integer val = count.get(key);
+                    val = val == null ? 0 : val;
+                    count.put(key, val + 1);
+                }
+            }
+        }
+        return count;
+    }
+
+    @Override
     public Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant) {
         Map<String, Integer> limitationMap = new HashMap<>();
-        int premiumAttributesLimitation = appTenantConfigService
-                .getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
+        int premiumAttributesLimitation = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
         // For future use case that we might have multiple sources of premium
         // attrs. Fow now only attributes from HG are marked as premium.
         limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
+        return limitationMap;
+    }
+
+    @Override
+    public Map<String, Integer> getPremiumAttributesLimitationMap(Tenant tenant) {
+        Map<String, Integer> limitationMap = new HashMap<>();
+        for (DataLicense license : DataLicense.values()) {
+            int attributeLimitation = appTenantConfigService
+                    .getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
+                    license);
+            limitationMap.put(license.getDataLicense() + KEY_SUFFIX, attributeLimitation);
+        }
+        // For future use case that we might have multiple sources of premium
+        // attrs. Fow now only attributes from HG and Bombora are marked as
+        // premium.
         return limitationMap;
     }
 
@@ -331,6 +455,7 @@ public class AttributeServiceImpl implements AttributeService {
             Tenant tenant) {
         SelectedAttribute attr = new SelectedAttribute(leadEnrichmentAttr.getFieldName(), tenant);
         attr.setIsPremium(leadEnrichmentAttr.getIsPremium());
+        attr.setDataLicense(leadEnrichmentAttr.getDataLicense());
         return attr;
     }
 
@@ -340,6 +465,14 @@ public class AttributeServiceImpl implements AttributeService {
             totalCount += limitationMap.get(key);
         }
         return totalCount;
+    }
+
+    private void initAdditionalAttrMap(Map<String, Integer> limitationMap,
+            Map<String, Integer> additionalPremiumAttrMap) {
+
+        for (String key : limitationMap.keySet()) {
+            additionalPremiumAttrMap.put(key, new Integer(0));
+        }
     }
 
     private void checkAmbiguityInFieldNames(LeadEnrichmentAttributesOperationMap attributes) {

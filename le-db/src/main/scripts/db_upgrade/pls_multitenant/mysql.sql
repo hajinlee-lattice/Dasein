@@ -21,6 +21,13 @@ CREATE PROCEDURE `UpdateCDLTables`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateSelectedAttribute`()
+    BEGIN
+        alter table `PLS_MultiTenant`.`SELECTED_ATTRIBUTE` add column `DATA_LICENSE` varchar(255);
+        update `PLS_MultiTenant`.`SELECTED_ATTRIBUTE` SET DATA_LICENSE = 'HG' WHERE IS_PREMIUM = 1 AND DATA_LICENSE is NULL;
+    END
+//
+DELIMITER ;
 
 CREATE PROCEDURE `AddWorkflowJobUpdate`()
     BEGIN
@@ -42,6 +49,7 @@ CREATE PROCEDURE `UpdateSchema`()
         START TRANSACTION;
         CALL `UpdateCDLTables`();
         CALL `AddWorkflowJobUpdate`();
+        CALL `UpdateSelectedAttribute`();
         COMMIT;
     END;
 //

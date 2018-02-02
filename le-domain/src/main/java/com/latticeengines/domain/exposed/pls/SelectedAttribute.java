@@ -55,6 +55,10 @@ public class SelectedAttribute implements HasPid, HasTenant, Serializable {
     @Column(name = "IS_PREMIUM", nullable = false)
     private Boolean isPremium;
 
+    @JsonProperty("DataLicense")
+    @Column(name = "DATA_LICENSE")
+    private String dataLicense;
+
     @JsonIgnore
     @Column(name = "TENANT_PID", nullable = false)
     private Long tenantPid;
@@ -126,6 +130,14 @@ public class SelectedAttribute implements HasPid, HasTenant, Serializable {
 
     public void setIsPremium(Boolean isPremium) {
         this.isPremium = isPremium;
+    }
+
+    public String getDataLicense() {
+        return dataLicense;
+    }
+
+    public void setDataLicense(String dataLicense) {
+        this.dataLicense = dataLicense;
     }
 
     @Override

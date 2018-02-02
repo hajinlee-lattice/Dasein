@@ -65,6 +65,8 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
     @JsonProperty("ImportanceOrdering")
     private int importanceOrdering;
 
+    @JsonProperty("DataLicense")
+    private String dataLicense;
     public String getDisplayName() {
         return displayName;
     }
@@ -205,6 +207,14 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
 
     public void setImportanceOrdering(int importanceOrdering) {
         this.importanceOrdering = importanceOrdering;
+    }
+
+    public String getDataLicense() {
+        return dataLicense;
+    }
+
+    public void setDataLicense(String dataLicense) {
+        this.dataLicense = dataLicense;
     }
 
     @JsonProperty("FundamentalType")

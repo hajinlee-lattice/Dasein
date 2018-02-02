@@ -16,6 +16,9 @@ public interface AttributeService {
     void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap,
             Boolean considerInternalAttributes);
 
+    void saveSelectedAttribute(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
+            Map<String, Integer> limitationMap, Boolean considerInternalAttributes);
+
     List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter, Category category,
             String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes);
@@ -31,6 +34,8 @@ public interface AttributeService {
 
     Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant);
 
+    Map<String, Integer> getPremiumAttributesLimitationMap(Tenant tenant);
+
     void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType, String fileName,
             Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes);
 
@@ -39,4 +44,6 @@ public interface AttributeService {
     List<LeadEnrichmentAttribute> getAttributesBaseOnCategory(Category category);
 
     List<LeadEnrichmentAttribute> getAttributesBaseOnSubCategory(Category category, String subCategory);
+
+    public Map<String, Integer> getSelectedAttributePremiumMap(Tenant tenant, Boolean considerInternalAttributes);
 }

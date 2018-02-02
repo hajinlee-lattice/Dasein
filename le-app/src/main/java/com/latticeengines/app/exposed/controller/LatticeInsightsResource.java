@@ -116,6 +116,20 @@ public class LatticeInsightsResource {
                 considerInternalAttributes);
     }
 
+    @RequestMapping(value = INSIGHTS_PATH + "/save", //
+            method = RequestMethod.PUT, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Save lead enrichment selection")
+    public void saveInsightsSelectedAttributes(HttpServletRequest request, //
+            @ApiParam(value = "Update lead enrichment selection", required = true) //
+            @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
+        attributeService.saveSelectedAttribute(attributes, tenant, getInsightsPremiumAttributesLimitationMap(request),
+                considerInternalAttributes);
+    }
+
     @RequestMapping(value = INSIGHTS_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
@@ -220,6 +234,16 @@ public class LatticeInsightsResource {
     public Map<String, Integer> getInsightsPremiumAttributesLimitation(HttpServletRequest request) {
         Tenant tenant = MultiTenantContext.getTenant();
         return attributeService.getPremiumAttributesLimitation(tenant);
+    }
+
+    @RequestMapping(value = INSIGHTS_PATH + "/premiumattributeslimitationmap", //
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get premium attributes limitation")
+    public Map<String, Integer> getInsightsPremiumAttributesLimitationMap(HttpServletRequest request) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return attributeService.getPremiumAttributesLimitationMap(tenant);
     }
 
     @RequestMapping(value = INSIGHTS_PATH + "/selectedattributes/count", //
