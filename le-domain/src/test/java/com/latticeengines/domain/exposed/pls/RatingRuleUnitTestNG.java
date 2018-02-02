@@ -41,9 +41,9 @@ public class RatingRuleUnitTestNG {
         case 3:
             return key.equals(RatingBucketName.D.name());
         case 4:
-            return key.equals(RatingBucketName.F.name());
+            return key.equals(RatingBucketName.E.name());
         case 5:
-            return key.equals(RatingBucketName.G.name());
+            return key.equals(RatingBucketName.F.name());
         default:
             return false;
         }

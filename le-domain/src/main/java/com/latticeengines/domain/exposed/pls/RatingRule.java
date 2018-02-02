@@ -73,8 +73,8 @@ public class RatingRule {
         map.put(RatingBucketName.B.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RatingBucketName.C.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RatingBucketName.D.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RatingBucketName.E.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RatingBucketName.F.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RatingBucketName.G.getName(), generateDefaultAccountAndContactBuckets());
         return map;
     }
 

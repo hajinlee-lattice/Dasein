@@ -417,9 +417,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
             Assert.assertTrue(Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
 
-        // only get scores for A, B and G
+        // only get scores for A, B and F
         Restriction selectedScores = Restriction.builder().let(BusinessEntity.Rating, model.getId()).inCollection(
-                Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.B.getName(), RatingBucketName.G.getName()))
+                Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.B.getName(), RatingBucketName.F.getName()))
                 .build();
         Restriction restriction2 = Restriction.builder().and(restriction, selectedScores).build();
         frontEndRestriction.setRestriction(restriction2);

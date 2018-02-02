@@ -151,6 +151,23 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
+            local2: {
+                NODE_APPS: 'leui',
+                NODE_ENV: 'development',
+                ULYSSES_URL: 'https://localhost:9075',
+                API_URL: 'https://localhost:9081',
+                API_CON_URL: 'https://localhost:9073',
+                API_ADMIN_URL: 'https://localhost:9085',
+                API_MCSVC_URL: 'https://localhost:9080',
+                API_MATCHAPI_URL: 'https://localhost:9076',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
             local_admin: {
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
@@ -567,6 +584,11 @@ module.exports = function (grunt) {
 
     grunt.registerTask('local', [
         'env:local',
+        'run:node'
+    ]);
+
+    grunt.registerTask('local2', [
+        'env:local2',
         'run:node'
     ]);
 

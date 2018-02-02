@@ -11,7 +11,7 @@ public class RuleBucketNameUnitTestNG {
         Assert.assertEquals(RatingBucketName.valueOf("B"), RatingBucketName.B);
         Assert.assertEquals(RatingBucketName.valueOf("C"), RatingBucketName.C);
         Assert.assertEquals(RatingBucketName.valueOf("D"), RatingBucketName.D);
+        Assert.assertEquals(RatingBucketName.valueOf("E"), RatingBucketName.E);
         Assert.assertEquals(RatingBucketName.valueOf("F"), RatingBucketName.F);
-        Assert.assertEquals(RatingBucketName.valueOf("G"), RatingBucketName.G);
     }
 }

@@ -53,6 +53,7 @@
     "devb_admin": "npm run adminless && concurrently -kr \"grunt devb_admin\" \"npm run adminsentry\"",
     "devb": "npm run sass && concurrently -kr \"grunt devb\" \"npm run sentry\"",
     "local": "npm run sass && concurrently -kr \"grunt local\" \"npm run sentry\"",
+    "local2": "npm run sass && concurrently -kr \"grunt local2\" \"npm run sentry\"",
     "local_admin": "npm run adminless && concurrently -kr \"grunt local_admin\" \"npm run adminsentry\"",
     "newdev": "grunt newdev",
     "newdevb": "grunt newdevb",

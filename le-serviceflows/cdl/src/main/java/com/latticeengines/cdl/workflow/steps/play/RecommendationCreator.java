@@ -177,9 +177,9 @@ public class RecommendationCreator {
                 return 40.0D;
             case D:
                 return 20.0D;
-            case F:
+            case E:
                 return 10.0D;
-            case G:
+            case F:
                 return 5.0D;
             default:
                 throw new UnsupportedOperationException("Unknown bucket " + bucket);
