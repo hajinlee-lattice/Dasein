@@ -5,7 +5,6 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("playProxy")
 public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterface {
@@ -25,6 +25,10 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     private static final Logger log = LoggerFactory.getLogger(PlayProxy.class);
 
     private static final String URL_PREFIX = "/customerspaces/{customerSpace}/plays";
+
+    private static final String DASHBOARD_URL = URL_PREFIX + "/launches/dashboard";
+
+    private static final String DASHBOARD_COUNT_URL = DASHBOARD_URL + "/count";
 
     public PlayProxy() {
         super("cdl");
@@ -52,7 +56,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
             List<LaunchState> launchStates, Long startTimestamp, Long offset, Long max, String sortby,
             Boolean descending, Long endTimestamp) {
 
-        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        String url = constructUrl(DASHBOARD_URL, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotBlank(playName)) {
             params.add("play-name=" + playName);
@@ -89,7 +93,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
 
     public Long getPlayLaunchDashboardEntriesCount(String customerSpace, String playName,
             List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp) {
-        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        String url = constructUrl(DASHBOARD_COUNT_URL, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotBlank(playName)) {
             params.add("play-name=" + playName);
