@@ -1,33 +1,23 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.Map;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
-import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("finishProcessing")
@@ -46,13 +36,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     private EntityProxy entityProxy;
 
     @Inject
-    private RatingProxy ratingProxy;
-
-    @Inject
     private MetadataProxy metadataProxy;
-
-    @Inject
-    private Configuration yarnConfiguration;
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -66,7 +50,6 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         deleteOrphanTables();
         swapMissingTableRoles();
-        registerEntityCountReport();
 
         log.info("Switch data collection to version " + inactive);
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
@@ -85,37 +68,6 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         // update segment and rating engine counts
         SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
         RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace.toString());
-    }
-
-    private void registerEntityCountReport() {
-        long accountNumber = countInRedshift(BusinessEntity.Account);
-        long contactNumber = countInRedshift(BusinessEntity.Contact);
-        long transactionNumber = countRawTransactionInHdfs();
-        ObjectNode json = JsonUtils.createObjectNode();
-        json.put(BusinessEntity.Account.name(), accountNumber);
-        json.put(BusinessEntity.Contact.name(), contactNumber);
-        json.put(BusinessEntity.Transaction.name(), transactionNumber);
-        Report report = createReport(json.toString(), ReportPurpose.ENTITY_NUMBER_SUMMARY,
-                UUID.randomUUID().toString());
-        registerReport(configuration.getCustomerSpace(), report);
-    }
-
-    private long countRawTransactionInHdfs() {
-        String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedRawTransaction, inactive);
-        log.info(String.format("Found raw transaction table in inactive version %s", inactive));
-        Table rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
-        if (rawTable == null) {
-            log.warn("Cannot find raw transaction table.");
-            return 0l;
-        }
-        return AvroUtils.count(yarnConfiguration, rawTable.getExtracts().get(0).getPath());
-    }
-
-    private long countInRedshift(BusinessEntity entity) {
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setMainEntity(entity);
-        return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
     }
 
     private void swapMissingTableRoles() {
