@@ -31,19 +31,6 @@ public class DataCloudRefreshCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
-
-        try {
-            publicationService.scan();
-        } catch (Exception e) {
-            log.error("Failed to scan publication engine", e);
-        }
-
-        try {
-            transformationService.scan("");
-        } catch (Exception e) {
-            log.error("Failed to scan transformation engine", e);
-        }
-
         try {
             ingestionService.scan("");
         } catch (Exception e) {
