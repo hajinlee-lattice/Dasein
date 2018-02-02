@@ -76,12 +76,11 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return getCountFromCache(customerSpace, frontEndQuery);
+        return Long.valueOf(getCountFromCache(customerSpace, frontEndQuery));
     }
 
     @Cacheable(cacheNames = CacheName.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
@@ -116,12 +115,13 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return ratingModel;
     }
 
-    private Long getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
+    @Cacheable(cacheNames = CacheName.Constants.EntityCountCacheName, key = "T(java.lang.String).format(\"%s|%s|count\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    public String getCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return getCountFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
+        return String.valueOf(getCountFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString())));
     }
 
     private DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
