@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 public interface ServiceConfigService {
     SerializableDocumentDirectory setDefaultInvokeTime(String serviceName, SerializableDocumentDirectory rawDir);
 
-    void verifyInvokeTime(String serviceName, String nodePath, String data);
+    void verifyInvokeTime(String serviceName, boolean allowAutoSchedule, String nodePath, String data);
 
-    void verifyInvokeTime(Map<String, Map<String, String>> props);
+    void verifyInvokeTime(boolean allowAutoSchedule, Map<String, Map<String, String>> props);
 }

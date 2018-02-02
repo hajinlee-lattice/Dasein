@@ -42,6 +42,7 @@ import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Node;
@@ -150,7 +151,9 @@ public class TenantServiceImpl implements TenantService {
             props.put(serviceName, flatDir);
         }
 
-        serviceConfigService.verifyInvokeTime(props);
+        boolean allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenantId),
+                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+        serviceConfigService.verifyInvokeTime(allowAutoSchedule, props);
         preinstall(spaceConfig, configSDirs);
 
         // change components in orchestrator based on selected product

@@ -43,17 +43,17 @@ public class ServiceConfigServiceImpl implements ServiceConfigService {
     }
 
     @Override
-    public void verifyInvokeTime(String serviceName, String nodePath, String data) {
+    public void verifyInvokeTime(String serviceName, boolean allowAutoSchedule, String nodePath, String data) {
         log.info(String.format("verify invoke time. service name: %s, node path: %s, data: %s", serviceName, nodePath, data));
-        if(serviceName.equals(SERVICENAME) && nodePath.equals(INVOKETIME)) {
+        if(allowAutoSchedule && serviceName.equals(SERVICENAME) && nodePath.equals(INVOKETIME)) {
             setInvokeTimeToZK(data);
         }
     }
 
     @Override
-    public void verifyInvokeTime(Map<String, Map<String, String>> props) {
+    public void verifyInvokeTime(boolean allowAutoSchedule, Map<String, Map<String, String>> props) {
         log.info("verify invoke time");
-        if(props.containsKey(SERVICENAME) && props.get(SERVICENAME).containsKey(INVOKETIME)) {
+        if(allowAutoSchedule && props.containsKey(SERVICENAME) && props.get(SERVICENAME).containsKey(INVOKETIME)) {
             setInvokeTimeToZK(props.get(SERVICENAME).get(INVOKETIME));
         }
     }

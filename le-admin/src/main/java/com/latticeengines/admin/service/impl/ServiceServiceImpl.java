@@ -271,13 +271,13 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public Boolean patchTenantServiceConfig(String tenantId, String serviceName, String nodePath, String data) {
+    public Boolean patchTenantServiceConfig(String tenantId, String serviceName, boolean allowAutoSchedule, String nodePath, String data) {
         try {
             Path configPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), tenantId,
                     tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
             configPath = configPath.append(new Path(nodePath));
 
-            serviceConfigService.verifyInvokeTime(serviceName, nodePath, data);
+            serviceConfigService.verifyInvokeTime(serviceName, allowAutoSchedule, nodePath, data);
             patchConfig(configPath, data);
 
             return true;

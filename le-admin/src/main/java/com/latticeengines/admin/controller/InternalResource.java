@@ -26,11 +26,14 @@ import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Components.ComponentsMap;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -59,6 +62,9 @@ public class InternalResource {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BatonService batonService;
 
     @RequestMapping(value = "services/options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -183,11 +189,14 @@ public class InternalResource {
     @ResponseBody
     @ApiOperation(value = "Set components for a tenant")
     public Boolean setComponents(@PathVariable String tenantId, @RequestBody ComponentsMap components) {
+        boolean allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenantId),
+                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
         for (HashMap.Entry<String, HashMap<String, String>> entry : components.entrySet()) {
             String service = entry.getKey();
             HashMap<String, String> nodes = entry.getValue();
             for (HashMap.Entry<String, String> node : nodes.entrySet()) {
-                 serviceService.patchTenantServiceConfig(tenantId, service, node.getKey(), node.getValue());
+                 serviceService.patchTenantServiceConfig(tenantId, service, allowAutoSchedule, node.getKey(),
+                         node.getValue());
             }
         }
         return true;
