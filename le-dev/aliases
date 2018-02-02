@@ -97,3 +97,6 @@ alias dkstopui='docker stop le-ui; dkrmc'
 
 alias recordtransformertest='MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m" mvn -Pfunctional -Djetty.port=8016 -DTENANT=tenant10 -Dtest=RecordTransformerTestNG verify &> /tmp/test.log'
 alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
+
+alias runui='pushd $WSHOME/le-ui && npm install && npm run local && popd'
+alias runadminui='pushd $WSHOME/le-ui && npm install && npm run local_admin && popd'
