@@ -4,29 +4,29 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.DateTimeUtils;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -35,64 +35,37 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CleanupEnd2EndDeploymentTestNG.class);
-
-    private String avroDir;
-    private Integer period = DateTimeUtils.dateToDayPeriod("2017-3-1");
+    private String customerSpace;
 
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        importData();
-        processAnalyze();
-        verifyProfile();
+        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+
         verifyCleanupByDateRange();
 
-        verifyCleanup(BusinessEntity.Product);
-        verifyCleanup(BusinessEntity.Account);
-        verifyCleanup(BusinessEntity.Contact);
-        verifyCleanup(BusinessEntity.Transaction);
-    }
-
-    private void importData() throws Exception {
-        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        importCsvForCleanup(BusinessEntity.Product);
-        importCsvForCleanup(BusinessEntity.Account);
-        importCsvForCleanup(BusinessEntity.Contact);
-        importCsvForCleanup(BusinessEntity.Transaction);
-
-        Thread.sleep(2000);
-        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
-    }
-
-    private void verifyProfile() throws IOException {
-        try {
-            DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
-            assertNotNull(dataFeed);
-
-            Table table = dataCollectionProxy.getTable(mainTestTenant.getId(),
-                    TableRoleInCollection.ConsolidatedRawTransaction);
-            assertNotNull(table);
-            assertNotNull(table.getExtracts());
-            assertEquals(table.getExtracts().size(), 1);
-
-            avroDir = String.format("%sPeriod-%d-data.avro", table.getExtracts().get(0).getPath(), period);
-            log.info("avroDir: " + avroDir);
-
-            assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroDir));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+//        verifyCleanup(BusinessEntity.Product);
+//        verifyCleanup(BusinessEntity.Account);
+//        verifyCleanup(BusinessEntity.Contact);
+//        verifyCleanup(BusinessEntity.Transaction);
     }
 
     private void verifyCleanupByDateRange() throws IOException, ParseException {
-        Date startTime = new Date(1488211200000l); // 2017-2-28
-        Date endTime = new Date(1488384000000l); // 2017-3-2
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+        List<GenericRecord> records = getRecords(table);
+        Assert.assertTrue(records.size() > 0);
 
-        ApplicationId applicationId = cdlProxy.cleanupByTimeRange(mainTestTenant.getId(), df.format(startTime),
-                df.format(endTime), BusinessEntity.Transaction, MultiTenantContext.getEmailAddress());
+        String transactionDate = records.get(0).get("TransactionDate").toString();
+        String period = records.get(0).get("TransactionDayPeriod").toString();
+        String avroDir = String.format("%sPeriod-%s-data.avro", table.getExtracts().get(0).getPath(), period);
+        log.info("avroDir: " + avroDir);
+
+        ApplicationId applicationId = cdlProxy.cleanupByTimeRange(customerSpace, transactionDate,
+                transactionDate, BusinessEntity.Transaction, MultiTenantContext.getEmailAddress());
 
         assertNotNull(applicationId);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
@@ -104,7 +77,7 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
     private void verifyCleanup(BusinessEntity entity) {
         log.info(String.format("clean up all data for entity %s, current action number is %d", entity.toString(),
                 actionsNumber));
-        String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+
         String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getBatchStore());
         DataCollection dtCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
 
@@ -127,5 +100,18 @@ public class CleanupEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeployme
         List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, entity.name());
         assertNull(dfTasks);
         verifyActionRegistration();
+    }
+
+    private List<GenericRecord> getRecords(Table table) {
+        List<String> paths = new ArrayList<>();
+        for (Extract extract : table.getExtracts()) {
+            if (!extract.getPath().endsWith("avro")) {
+                paths.add(extract.getPath() + "/*.avro");
+            } else {
+                paths.add(extract.getPath());
+            }
+        }
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, paths);
+        return records;
     }
 }
