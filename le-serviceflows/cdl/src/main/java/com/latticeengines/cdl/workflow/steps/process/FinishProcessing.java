@@ -55,8 +55,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
-        if (StringUtils.isNotBlank(configuration.getDataCloudVersion())) {
-            dataCollectionProxy.updateDataCloudVersion(customerSpace.toString(), configuration.getDataCloudVersion());
+        if (StringUtils.isNotBlank(configuration.getDataCloudBuildNumber())) {
+            dataCollectionProxy.updateDataCloudBuildNumber(customerSpace.toString(), configuration.getDataCloudBuildNumber());
         }
         try {
             // wait for local cache clean up

@@ -18,8 +18,8 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("action_ids")
     private List<Long> actionIds = Collections.emptyList();
 
-    @JsonProperty("data_cloud_version")
-    private String dataCloudVersion;
+    @JsonProperty("data_cloud_build_number")
+    private String dataCloudBuildNumber;
     
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
@@ -45,11 +45,11 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
         this.actionIds = actionIds;
     }
 
-    public String getDataCloudVersion() {
-        return dataCloudVersion;
+    public String getDataCloudBuildNumber() {
+        return dataCloudBuildNumber;
     }
 
-    public void setDataCloudVersion(String dataCloudVersion) {
-        this.dataCloudVersion = dataCloudVersion;
+    public void setDataCloudBuildNumber(String dataCloudBuildNumber) {
+        this.dataCloudBuildNumber = dataCloudBuildNumber;
     }
 }

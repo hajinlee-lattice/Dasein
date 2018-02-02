@@ -131,18 +131,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
         updateActions(customerSpace, actionAndJobIds.getLeft());
 
-        String currentDataCloudVersion = "";
-        request.getRebuildEntities().addAll(getRebuildEntitiesOnDLVersion(dataCollection, currentDataCloudVersion));
+        String currentDataCloudBuildNumber = "";
+        request.getRebuildEntities().addAll(getRebuildEntitiesOnDLVersion(dataCollection, currentDataCloudBuildNumber));
         request.getRebuildEntities().addAll(getRebuildEntitiesOnDeleteJob(customerSpace, actionAndJobIds));
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
-                actionAndJobIds, datafeedStatus, currentDataCloudVersion);
+                actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
         return workflowJobService.submit(configuration);
     }
 
     private Collection<BusinessEntity> getRebuildEntitiesOnDLVersion(DataCollection dataCollection,
-            String currentVersion) {
-        if (dataCollection != null && dataCollection.getDataCloudVersion() != null
-                && !dataCollection.getDataCloudVersion().equals(currentVersion)) {
+            String currentBuildNumber) {
+        if (dataCollection != null && dataCollection.getDataCloudBuildNumber() != null
+                && !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber)) {
             return Collections.singletonList(BusinessEntity.Account);
         }
         return Collections.emptyList();
@@ -221,7 +221,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
             ProcessAnalyzeRequest request, Pair<List<Long>, List<Long>> actionAndJobIds, Status status,
-            String currentDataCloudVersion) {
+            String currentDataCloudBuildNumber) {
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -238,7 +238,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.ACTION_IDS, actionAndJobIds.getLeft().toString()) //
                         .build()) //
                 .workflowContainerMem(workflowMemMb) //
-                .currentDataCloudVersion(currentDataCloudVersion) //
+                .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
                 .build();
     }
 

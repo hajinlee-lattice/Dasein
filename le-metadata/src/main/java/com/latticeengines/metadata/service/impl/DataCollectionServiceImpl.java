@@ -299,12 +299,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public String updateDataCloudVersion(String customerSpace, String collectionName, String dataCloudVersion) {
+    public String updateDataCloudBuildNumber(String customerSpace, String collectionName, String dataCloudBuildNumber) {
         DataCollection collection = getDataCollection(customerSpace, collectionName);
-        collection.setDataCloudVersion(dataCloudVersion);
-        log.info("Setting DataCloudVersion of " + collection.getName() + " in " + customerSpace + " to " + dataCloudVersion);
+        collection.setDataCloudBuildNumber(dataCloudBuildNumber);
+        log.info("Setting DataCloudBuildNumber of " + collection.getName() + " in " + customerSpace + " to " + dataCloudBuildNumber);
         dataCollectionEntityMgr.update(collection);
-        return collection.getDataCloudVersion();
+        return collection.getDataCloudBuildNumber();
     }
 
 }

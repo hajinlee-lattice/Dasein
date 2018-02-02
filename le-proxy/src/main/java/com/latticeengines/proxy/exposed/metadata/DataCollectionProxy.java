@@ -46,9 +46,9 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("get default dataCollection", url, ResponseDocument.class);
     }
 
-    public void updateDataCloudVersion(String customerSpace, String dataCloudVersion) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datacloudversion/{dataCloudVersion}",
-                shortenCustomerSpace(customerSpace), dataCloudVersion);
+    public void updateDataCloudBuildNumber(String customerSpace, String dataCloudBuildNumber) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datacloudbuildnumber/{dataCloudBuildNumber}",
+                shortenCustomerSpace(customerSpace), dataCloudBuildNumber);
         put("get default dataCollection", url, ResponseDocument.class);
     }
 

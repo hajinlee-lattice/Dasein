@@ -39,5 +39,5 @@ public interface DataCollectionService {
 
     void resetTable(String customerSpace, String collectionName, TableRoleInCollection tableRole);
 
-    String updateDataCloudVersion(String customerSpace, String collectionName, String dataCloudVersion);
+    String updateDataCloudBuildNumber(String customerSpace, String collectionName, String dataCloudBuildNumber);
 }

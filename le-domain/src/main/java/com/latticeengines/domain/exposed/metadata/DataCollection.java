@@ -84,9 +84,9 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @Column(name = "VERSION", nullable = false)
     private Version version;
 
-    @JsonProperty("data_cloud_version")
-    @Column(name = "DATA_CLOUD_VERSION", nullable = true)
-    private String dataCloudVersion;
+    @JsonProperty("data_cloud_build_number")
+    @Column(name = "DATA_CLOUD_BUILD_NUMBER", nullable = true)
+    private String dataCloudBuildNumber;
 
     @Override
     public Long getPid() {
@@ -139,12 +139,12 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         this.version = version;
     }
 
-    public String getDataCloudVersion() {
-        return dataCloudVersion;
+    public String getDataCloudBuildNumber() {
+        return dataCloudBuildNumber;
     }
 
-    public void setDataCloudVersion(String dataCloudVersion) {
-        this.dataCloudVersion = dataCloudVersion;
+    public void setDataCloudBuildNumber(String dataCloudBuildNumber) {
+        this.dataCloudBuildNumber = dataCloudBuildNumber;
     }
 
     @Override

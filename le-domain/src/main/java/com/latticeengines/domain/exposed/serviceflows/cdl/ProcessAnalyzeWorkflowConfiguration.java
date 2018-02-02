@@ -105,8 +105,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder currentDataCloudVersion(String currentDataCloudVersion) {
-            processStepConfiguration.setDataCloudVersion(currentDataCloudVersion);
+        public Builder currentDataCloudBuildNumber(String currentDataCloudBuildNumber) {
+            processStepConfiguration.setDataCloudBuildNumber(currentDataCloudBuildNumber);
             return this;
         }
 
