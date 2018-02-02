@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 BOOTSTRAP_MODE=$1
+ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
-    ARTIFACT_DIR=$WSHOME/le-dev/artifacts
     TOMCAT_MAJOR=8
     TOMCAT_VERSION=8.5.27
 
@@ -43,8 +43,10 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
 
         rm ${ARTIFACT_DIR}/server.crt || true
         rm ${ARTIFACT_DIR}/server.key || true
+        rm ${ARTIFACT_DIR}/ledp_keystore.jks || true
         aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt ${ARTIFACT_DIR}/server.crt
         aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key ${ARTIFACT_DIR}/server.key
+        aws s3 cp s3://latticeengines-dev-chef/tls/ledp_keystore.jks ${ARTIFACT_DIR}/ledp_keystore.jks
 
     fi
 fi
@@ -59,8 +61,10 @@ if [ "${USE_HTTP2}" == "true" ]; then
     sudo chown -R $USER /etc/ledp/tls
     cp -f ${ARTIFACT_DIR}/server.crt /etc/ledp/tls/server.crt
     cp -f ${ARTIFACT_DIR}/server.key /etc/ledp/tls/server.key
+    cp -f ${ARTIFACT_DIR}/ledp_keystore.jks /etc/ledp/tls/ledp_keystore.jks
     chmod 600 /etc/ledp/tls/server.crt
     chmod 600 /etc/ledp/tls/server.key
+    chmod 600 /etc/ledp/tls/ledp_keystore.jks
 
     cp -f ${WSHOME}/le-dev/tomcat/server-http2.xml ${CATALINA_HOME}/conf/server.xml
 fi
