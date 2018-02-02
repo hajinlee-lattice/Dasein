@@ -47,11 +47,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
 
     List<String> accountFields = Arrays.asList( //
             "LatticeAccountId", //
-            // TODO - anoop - enable it once CDL team ensures that
-            // LastModifiedDate
-            // column is present in all tenant data
-            //
-            // "LastModifiedDate", //
+            "CDLUpdatedTime", //
             "AccountId", //
             "Website", //
             "LDC_Name", //
