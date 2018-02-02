@@ -12,7 +12,7 @@ angular.module('common.wizard.controls', [])
         prev: WizardControlsOptions.backState,
         next: function() {
                 var nextValue = 'home.' + WizardProgressContext;
-                if(WizardControlsOptions.suffix === undefined && WizardProgressContext.includes("playbook")){
+                if(WizardControlsOptions.suffix === undefined){
                     nextValue += '.wizard';
                 }
                 return nextValue;
