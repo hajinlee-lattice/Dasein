@@ -20,8 +20,8 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             'GREATER_OR_EQUAL': 'is greater than or equal to',
             'LESS_THAN': 'is less than',
             'LESS_OR_EQUAL': 'is less than or equal to',
-            'GTE_AND_LTE': 'is between',
-            'GTE_AND_LT': 'is greater or equal and less than',
+            'GTE_AND_LTE': 'is greater than or equal and lesser than or equal',
+            'GTE_AND_LT': 'is between',
             'GT_AND_LTE': "is greater than and lesser or equal",
             'GT_AND_LT': "is greater than and less than",
             'IN_COLLECTION': 'in collection',
@@ -38,7 +38,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             'GREATER_OR_EQUAL': 'Greater or Equal',
             'LESS_THAN': 'Less Than',
             'LESS_OR_EQUAL': 'Lesser or Equal',
-            'GTE_AND_LTE': 'Between'
+            'GTE_AND_LT': 'Between'
         };
 
         this.enum_operations = {
@@ -54,7 +54,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         ];
 
         this.two_inputs = [
-            'GTE_AND_LTE'
+            'GTE_AND_LT'
         ];
 
         this.prevBucketCountAttr = null;
@@ -240,9 +240,16 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
+                QueryTreeService.changeBktValsSize(bucketRestriction, value);
                 return service.changeNumericalCmpValue(bucketRestriction, value);
             } else {
                 console.warn(' changeNumericalCmpValue() Service not implemented');
+            }
+        }
+
+        this.changeBktValsSize = function(bucketRestriction, value) {
+            if (QueryTreeService.two_inputs.indexOf(value) < 0 && bucketRestriction.bkt.Vals.length == 2) {
+                bucketRestriction.bkt.Vals.splice(1,1);
             }
         }
 
