@@ -4,7 +4,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import com.latticeengines.saml.testframework.SamlTestBed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -13,6 +12,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.service.IdentityProviderService;
+import com.latticeengines.saml.testframework.SamlTestBed;
 import com.latticeengines.saml.testframework.SamlTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -44,9 +44,16 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
     }
 
     @Test(groups = "functional", expectedExceptions = LedpException.class)
-    public void testFailValidation() {
+    public void testFailValidation1() {
         IdentityProvider bad = samlFunctionalTestBed.constructIdp();
-        bad.setEntityId("bad entity id");
+        bad.setMetadata("<bad xml>");
+        identityProviderEntityMgr.create(bad);
+    }
+
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    public void testFailValidation2() {
+        IdentityProvider bad = samlFunctionalTestBed.constructIdp();
+        bad.setMetadata(null);
         identityProviderEntityMgr.create(bad);
     }
 

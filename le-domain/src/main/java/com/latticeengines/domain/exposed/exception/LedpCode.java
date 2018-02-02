@@ -289,6 +289,7 @@ public enum LedpCode {
     LEDP_18173("SchemaInterpretation {0} not supported for cleanup file template!"), //
     LEDP_18174("Status {0} cannot transit to {1} for Rating Engine with Id = {2}."), //
     LEDP_18175("There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
+    LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchble accounts."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -590,7 +591,8 @@ public enum LedpCode {
 
     // le-saml
     LEDP_33000("An identity provider with ID {0} already exists"), //
-    LEDP_33001("Validation failed for Identity Provider with Entity ID {0}: {1}"), //
+    LEDP_33001("Validation failed for Identity Provider configuration: {0}"), //
+    LEDP_33002("Tenant is already has SSO/SAML configuration. Idp entity id: {0}"), //
 
     // le-encryption
     LEDP_34000("Directory {0} already exists and is non-empty.  Encryption requires a completely new customer with "

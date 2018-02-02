@@ -13,14 +13,17 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -36,7 +39,7 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("ga_tenant")
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -46,6 +49,10 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
     @Index(name = "IX_ENTITY_ID")
     @Column(name = "ENTITY_ID", nullable = false, unique = true)
     private String entityId;
+
+    @JsonProperty("config_id")
+    @Transient
+    private String entityIdBase64;
 
     @JsonProperty("metadata")
     @Column(name = "METADATA", nullable = false)
@@ -84,6 +91,20 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
 
     public void setEntityId(String entityId) {
         this.entityId = entityId;
+    }
+
+    public String getEntityIdBase64() {
+        if (StringUtils.isEmpty(this.entityIdBase64) && !StringUtils.isEmpty(this.entityId)) {
+            this.entityIdBase64 = Base64Utils.encodeBase64(this.entityId.getBytes());
+        }
+        return entityIdBase64;
+    }
+
+    public void setEntityIdBase64(String entityIdBase64) {
+        this.entityIdBase64 = entityIdBase64;
+        if (!StringUtils.isEmpty(this.entityIdBase64) && StringUtils.isEmpty(this.entityId)) {
+            this.entityId = new String(Base64Utils.decodeBase64(this.entityIdBase64));
+        }
     }
 
     public GlobalAuthTenant getGlobalAuthTenant() {

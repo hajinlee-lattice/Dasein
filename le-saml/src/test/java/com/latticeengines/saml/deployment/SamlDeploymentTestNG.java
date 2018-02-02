@@ -1,29 +1,18 @@
 package com.latticeengines.saml.deployment;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
+import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 
 public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
-
-    @Value("${saml.failure.redirect.address}")
-    private String errorPage;
-
-    @Value("${saml.success.redirect.address}")
-    private String successPage;
 
     @Test(groups = "deployment")
     public void testIdPInitiatedAuth() throws UnsupportedEncodingException {
@@ -83,17 +72,17 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
         assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response));
     }
 
-    private void assertRedirectedToErrorPage(ResponseEntity<Void> httpResponse) {
-        List<String> inner = httpResponse.getHeaders().get("Location");
-        assertNotNull(inner);
-        assertEquals(inner.size(), 1);
-        assertTrue(inner.get(0).contains(errorPage));
+    private void assertRedirectedToErrorPage(LoginValidationResponse response) {
+        Assert.assertNotNull(response);
+        Assert.assertFalse(response.isValidated());
+        Assert.assertNull(response.getUserId());
+        Assert.assertNotNull(response.getAuthenticationException());
     }
 
-    private void assertRedirectedToSuccessPage(ResponseEntity<Void> httpResponse) {
-        List<String> inner = httpResponse.getHeaders().get("Location");
-        assertNotNull(inner);
-        assertEquals(inner.size(), 1);
-        assertTrue(inner.get(0).contains(successPage));
+    private void assertRedirectedToSuccessPage(LoginValidationResponse response) {
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.isValidated());
+        Assert.assertNotNull(response.getUserId());
+        Assert.assertNull(response.getAuthenticationException());
     }
 }

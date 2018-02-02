@@ -19,8 +19,8 @@ import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.util.SAMLUtils;
 
 @Component("identityProviderEntityMgr")
-public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityProvider> implements
-        IdentityProviderEntityMgr {
+public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityProvider>
+        implements IdentityProviderEntityMgr {
     @Autowired
     private IdentityProviderDao identityProviderDao;
 
@@ -35,12 +35,7 @@ public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityPro
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(IdentityProvider identityProvider) {
-        IdentityProvider existing = findByEntityId(identityProvider.getEntityId());
-        if (existing != null) {
-            throw new LedpException(LedpCode.LEDP_33000, new String[] { identityProvider.getEntityId() });
-        }
         validate(identityProvider);
-
         super.create(identityProvider);
     }
 
@@ -70,15 +65,21 @@ public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityPro
 
     private void validate(IdentityProvider identityProvider) {
         try {
+            if (identityProvider.getMetadata() == null) {
+                throw new LedpException(LedpCode.LEDP_33001, new String[] { "Metadata XML is empty" });
+            }
+
             EntityDescriptor descriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool,
                     identityProvider.getMetadata());
 
-            if (!descriptor.getEntityID().equals(identityProvider.getEntityId())) {
-                throw new RuntimeException("Entity ID in XML does not match provided Entity ID");
-            }
+            identityProvider.setEntityId(descriptor.getEntityID());
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_33000,
-                    new String[] { identityProvider.getEntityId(), e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_33001, new String[] { e.getMessage() });
+        }
+
+        IdentityProvider existing = findByEntityId(identityProvider.getEntityId());
+        if (existing != null) {
+            throw new LedpException(LedpCode.LEDP_33000, new String[] { identityProvider.getEntityId() });
         }
 
     }

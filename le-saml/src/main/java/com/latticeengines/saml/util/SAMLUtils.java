@@ -10,33 +10,43 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensaml.Configuration;
+import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.parse.ParserPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class SAMLUtils {
 
-    public static final String ALIAS = "/alias/";
-    public final static String LOCAL_ENTITY_ID_BASE = "app.lattice-engines.com/";
+    public static final Logger log = LoggerFactory.getLogger(SAMLUtils.class);
 
-    public static String getEntityIdFromTenantId(String tenantId) {
-        return LOCAL_ENTITY_ID_BASE + tenantId;
-    }
+    public static final String ALIAS = "/alias/";
 
     public static String getTenantIdFromLocalEntityId(String entityId) {
-        if (entityId.startsWith(LOCAL_ENTITY_ID_BASE)) {
-            return entityId.replace(LOCAL_ENTITY_ID_BASE, "");
+        log.info("entityId = " + entityId);
+        if (StringUtils.isNotEmpty(entityId) && entityId.contains("/")) {
+            entityId = entityId.endsWith("/") ? entityId.substring(0, entityId.lastIndexOf("/")) : entityId;
+            if (entityId.contains("/")) {
+                return entityId.substring(entityId.lastIndexOf("/") + 1);
+            }
         }
         return null;
     }
 
     public static XMLObject deserialize(ParserPool parser, String string) {
         try (InputStream stream = new ByteArrayInputStream(string.getBytes())) {
-            return deserialize(parser, stream);
+            EntityDescriptor descriptor = (EntityDescriptor) deserialize(parser, stream);
+
+            if (StringUtils.isEmpty(descriptor.getEntityID())) {
+                throw new RuntimeException("Entity ID is not present in Idp metadata XML");
+            }
+            return descriptor;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

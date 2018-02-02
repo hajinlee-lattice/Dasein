@@ -2,25 +2,38 @@ package com.latticeengines.saml.service.impl;
 
 import java.util.List;
 
+import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.xml.parse.ParserPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
+import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.service.IdentityProviderService;
+import com.latticeengines.saml.util.SAMLUtils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("IdentityProviderService")
 public class IdentityProviderServiceImpl implements IdentityProviderService {
+    public static final Logger log = LoggerFactory.getLogger(IdentityProviderServiceImpl.class);
+
     @Autowired
     private IdentityProviderEntityMgr identityProviderEntityMgr;
 
     @Autowired
     private GlobalAuthTenantEntityMgr globalAuthTenantEntityMgr;
+
+    @Autowired
+    private ParserPool parserPool;
 
     @Override
     public void create(IdentityProvider identityProvider) {
@@ -68,5 +81,27 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
             throw new RuntimeException("No tenant supplied in context");
         }
         return tenant;
+    }
+
+    @Override
+    public IdpMetadataValidationResponse validate(IdentityProvider identityProvider) {
+        IdpMetadataValidationResponse resp = new IdpMetadataValidationResponse();
+        resp.setValid(true);
+
+        try {
+            if (identityProvider.getMetadata() == null) {
+                throw new LedpException(LedpCode.LEDP_33001, new String[] { "Metadata XML is empty" });
+            }
+
+            EntityDescriptor descriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool,
+                    identityProvider.getMetadata());
+            resp.setEntityId(descriptor.getEntityID());
+        } catch (Exception e) {
+            resp.setValid(false);
+            Exception ex = new LedpException(LedpCode.LEDP_33001, new String[] { e.getMessage() });
+            resp.setExceptionMessage(ex.getMessage());
+            log.info(ex.getMessage(), ex);
+        }
+        return resp;
     }
 }

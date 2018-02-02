@@ -21,7 +21,7 @@ public class SamlDeploymentTestBed extends SamlTestBed {
 
     @Override
     public void registerIdentityProvider(IdentityProvider identityProvider) {
-        globalAuthDeploymentTestBed.getRestTemplate().postForObject(
-                String.format("%s/management/identityproviders", baseUrl), identityProvider, Void.class);
+        globalAuthDeploymentTestBed.getRestTemplate().postForObject(String.format("%s/saml/management/identityproviders/%s",
+                baseUrl, globalAuthDeploymentTestBed.getMainTestTenant().getId()), identityProvider, Void.class);
     }
 }

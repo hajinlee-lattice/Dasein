@@ -7,21 +7,8 @@
             http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
             http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <import resource="classpath:security-globalauth-provider-context.xml"/>
-
-    <security:authentication-manager alias="authenticationManager">
-        <security:authentication-provider ref="samlAuthProvider"/>
-    </security:authentication-manager>
-
     <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
     <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
     <mvc:annotation-driven/>
 
-    <security:http use-expressions="true"
-                   pattern="/saml/management/identityproviders/**"
-                   authentication-manager-ref="authenticationManager"
-                   entry-point-ref="restAuthenticationEntryPoint"
-                   create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-    </security:http>
 </beans>

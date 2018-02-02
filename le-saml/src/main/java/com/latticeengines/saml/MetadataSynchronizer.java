@@ -49,8 +49,8 @@ public class MetadataSynchronizer {
     @Autowired
     private ParserPool parserPool;
 
-    @Value("${saml.base.address}")
-    private String baseAddress;
+    @Value("${security.app.public.url:https://localhost:3000}")
+    private String publicBaseAddress;
 
     @Value("${saml.metadata.refresh.frequency:5000}")
     private Integer refreshFrequency;
@@ -172,7 +172,7 @@ public class MetadataSynchronizer {
 
     private String replacePlaceholders(String tenantId, String uri) {
         uri = uri.replace("___TENANT_ID___", tenantId);
-        return uri.replace("___BASE_ADDRESS___", baseAddress);
+        return uri.replace("___BASE_ADDRESS___", publicBaseAddress + "/pls");
     }
 
     private class Tenant {

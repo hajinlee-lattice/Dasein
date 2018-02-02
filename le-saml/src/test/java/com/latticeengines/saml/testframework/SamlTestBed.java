@@ -21,17 +21,16 @@ import org.opensaml.xml.signature.impl.SignatureBuilder;
 import org.opensaml.xml.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.saml.key.KeyManager;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
+import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
+import com.latticeengines.proxy.exposed.saml.SPSamlProxy;
 import com.latticeengines.saml.util.SAMLUtils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
@@ -45,8 +44,14 @@ public abstract class SamlTestBed {
     @Autowired
     private KeyManager keyManager;
 
-    @Value("${saml.base.address}")
+    @Autowired
+    private SPSamlProxy spSamlProxy;
+
+    @Value("${common.saml.url:http://localhost:8087}")
     protected String baseUrl;
+
+    @Value("${security.app.public.url:https://localhost:3000}")
+    protected String publicBaseUrl;
 
     public abstract GlobalAuthTestBed getGlobalAuthTestBed();
 
@@ -65,7 +70,8 @@ public abstract class SamlTestBed {
         try (InputStream stream = getClass().getResourceAsStream(RESOURCE_BASE + "test_response.xml")) {
             Response response = (Response) SAMLUtils.deserialize(parserPool, stream);
             response.setIssueInstant(DateTime.now());
-            response.setDestination(getSSOEndpointUrl());
+            response.setDestination(
+                    publicBaseUrl + "/pls/saml/login/" + getGlobalAuthTestBed().getMainTestTenant().getId());
             Assertion assertion = response.getAssertions().get(0);
             assertion.setIssueInstant(DateTime.now());
             assertion.getConditions().setNotOnOrAfter(DateTime.now().plus(60000));
@@ -73,11 +79,11 @@ public abstract class SamlTestBed {
             SubjectConfirmation sc = assertion.getSubject().getSubjectConfirmations().get(0);
             SubjectConfirmationData scd = sc.getSubjectConfirmationData();
             scd.setNotOnOrAfter(DateTime.now().plus(60000));
-            scd.setRecipient(getSSOEndpointUrl());
+            scd.setRecipient(publicBaseUrl + "/pls/saml/login/" + getGlobalAuthTestBed().getMainTestTenant().getId());
             assertion.getAuthnStatements().get(0).setAuthnInstant(DateTime.now());
 
             assertion.getConditions().getAudienceRestrictions().get(0).getAudiences().get(0).setAudienceURI( //
-                    SAMLUtils.getEntityIdFromTenantId(getGlobalAuthTestBed().getMainTestTenant().getId()));
+                    publicBaseUrl + "/pls/saml/" + getGlobalAuthTestBed().getMainTestTenant().getId());
             assertion.getSubject().getNameID()
                     .setValue(getGlobalAuthTestBed().getCurrentUser().getResult().getUser().getEmailAddress());
             setResponseIssuedBy(response, idp);
@@ -105,21 +111,17 @@ public abstract class SamlTestBed {
 
     private Signature getIdPSignature() {
         Signature signature = new SignatureBuilder().buildObject();
-        Credential credential = keyManager.getCredential("testidp");
+        Credential credential = keyManager.getCredential("liferaysamlspdemo");
 
         try {
             signature.setSigningCredential(credential);
-            SecurityHelper.prepareSignatureParams(signature, credential,
-                    Configuration.getGlobalSecurityConfiguration(), null);
+            SecurityHelper.prepareSignatureParams(signature, credential, Configuration.getGlobalSecurityConfiguration(),
+                    null);
         } catch (SecurityException e) {
             throw new RuntimeException("Error attempting to build signature", e);
         }
 
         return signature;
-    }
-
-    public String getSSOEndpointUrl() {
-        return baseUrl + "/SSO/alias/" + getGlobalAuthTestBed().getMainTestTenant().getId();
     }
 
     public RestTemplate getSamlRestTemplate() {
@@ -149,21 +151,18 @@ public abstract class SamlTestBed {
         }
     }
 
-    public ResponseEntity<Void> sendSamlResponse(Response response) {
+    public LoginValidationResponse sendSamlResponse(Response response) {
         return sendSamlResponse(response, true);
     }
 
-    public ResponseEntity<Void> sendSamlResponse(Response response, boolean sign) {
+    public LoginValidationResponse sendSamlResponse(Response response, boolean sign) {
         if (sign) {
             signResponse(response);
         }
         String xml = SAMLUtils.serialize(response);
         String encoded = Base64.encodeBytes(xml.getBytes());
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("SAMLResponse", encoded);
-        String url = getSSOEndpointUrl();
-        ResponseEntity<Void> httpResponse = getSamlRestTemplate().postForEntity(url, map, Void.class);
-        return httpResponse;
+
+        return spSamlProxy.validateSSOLogin(getGlobalAuthTestBed().getMainTestTenant().getId(), encoded, null);
     }
 
 }
