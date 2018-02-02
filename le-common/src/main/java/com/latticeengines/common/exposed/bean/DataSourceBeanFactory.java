@@ -69,7 +69,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setUser(user);
         cpds.setPassword(password);
 
-        int minPoolSize = this.minPoolSize >= 0 ? this.minPoolSize : 1;
+        int minPoolSize = this.minPoolSize > 0 ? this.minPoolSize : 0;
         int maxPoolSize = this.maxPoolSize > minPoolSize ? this.maxPoolSize : Math.max(minPoolSize, 8);
         int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : 2;
         cpds.setMinPoolSize(minPoolSize);

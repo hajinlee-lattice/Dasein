@@ -40,6 +40,12 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
             --with-ssl=/usr/local/Cellar/openssl/1.0.2n \
             --prefix=$CATALINA_HOME
         make && make install
+
+        rm ${ARTIFACT_DIR}/server.crt || true
+        rm ${ARTIFACT_DIR}/server.key || true
+        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt ${ARTIFACT_DIR}/server.crt
+        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key ${ARTIFACT_DIR}/server.key
+
     fi
 fi
 
@@ -48,15 +54,14 @@ for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-u
     cp -f ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
 done
 
-
-sudo mkdir -p /etc/ledp/tls
-sudo chown -R $USER /etc/ledp/tls
-cp -f ${WSHOME}/le-dev/tomcat/server.crt /etc/ledp/tls/server.crt
-cp -f ${WSHOME}/le-dev/tomcat/server.key /etc/ledp/tls/server.key
-chmod 600 /etc/ledp/tls/server.crt
-chmod 600 /etc/ledp/tls/server.key
-
 if [ "${USE_HTTP2}" == "true" ]; then
+    sudo mkdir -p /etc/ledp/tls
+    sudo chown -R $USER /etc/ledp/tls
+    cp -f ${ARTIFACT_DIR}/server.crt /etc/ledp/tls/server.crt
+    cp -f ${ARTIFACT_DIR}/server.key /etc/ledp/tls/server.key
+    chmod 600 /etc/ledp/tls/server.crt
+    chmod 600 /etc/ledp/tls/server.key
+
     cp -f ${WSHOME}/le-dev/tomcat/server-http2.xml ${CATALINA_HOME}/conf/server.xml
 fi
 

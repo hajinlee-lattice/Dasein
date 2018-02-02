@@ -71,7 +71,6 @@
         <Connector port="8076" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="MatchApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -86,7 +85,6 @@
         <Connector port="8085" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="AdminEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -101,7 +99,6 @@
         <Connector port="8071" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="PlayMakerEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -116,7 +113,6 @@
         <Connector port="8072" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="OAuthEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -131,7 +127,6 @@
         <Connector port="8073" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="ScoringApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -146,7 +141,6 @@
         <Connector port="8087" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="SAMLEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -161,7 +155,6 @@
         <Connector port="8074" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="ApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -176,7 +169,6 @@
         <Connector port="8075" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="UlyssesEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -191,7 +183,6 @@
         <Connector port="8077" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="JobEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -206,7 +197,6 @@
         <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="MicroserviceEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -221,7 +211,6 @@
         <Connector port="8081" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
         <Engine name="PlsEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
