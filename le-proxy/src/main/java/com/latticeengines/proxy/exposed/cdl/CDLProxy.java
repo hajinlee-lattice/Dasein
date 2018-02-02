@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -24,7 +25,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("cdlProxy")
-public class CDLProxy extends MicroserviceRestApiProxy {
+public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
     protected CDLProxy() {
         super("cdl");

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +33,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext.Seria
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.aws.elasticache.ElastiCacheService;
@@ -131,6 +132,13 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.RatingCoverageCacheName));
 
+        RedisCacheConfiguration ratingSummariesCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofDays(ttl)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.RatingSummariesCacheName));
+
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
         cacheConfigs.put(CacheName.Constants.SessionCacheName, sessionCacheConfig);
         cacheConfigs.put(CacheName.Constants.DataLakeCMCacheName, dataLakeCMCacheConfig);
@@ -141,6 +149,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.EntityDataCacheName, entityDataCacheConfig);
         cacheConfigs.put(CacheName.Constants.EntityRatingCountCacheName, entityRatingCountCacheConfig);
         cacheConfigs.put(CacheName.Constants.RatingCoverageCacheName, ratingCoverageCacheConfig);
+        cacheConfigs.put(CacheName.Constants.RatingSummariesCacheName, ratingSummariesCacheConfig);
 
         RedisCacheManager cacheManager = RedisCacheManager
                 .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory()))//

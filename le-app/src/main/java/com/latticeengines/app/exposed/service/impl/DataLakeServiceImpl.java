@@ -166,7 +166,10 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Override
     public TopNTree getTopNTree() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        return _dataLakeService.getTopNTree(customerSpace);
+        TopNTree topNTree = _dataLakeService.getTopNTree(customerSpace);
+        List<RatingEngineSummary> engineSummaries = getRatingSummaries(customerSpace);
+        StatsCubeUtils.processRatingCategory(topNTree, engineSummaries);
+        return topNTree;
     }
 
     @Override
@@ -226,6 +229,10 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         List<ColumnMetadata> cms = _dataLakeService.getAttributesInTableRole(customerSpace, role);
         cms.forEach(cm -> cm.setEntity(entity));
+        if (BusinessEntity.Rating.equals(entity)) {
+            List<RatingEngineSummary> engineSummaries = getRatingSummaries(customerSpace);
+            StatsCubeUtils.injectRatingEngineMetadata(cms, engineSummaries);
+        }
         return cms;
     }
 
@@ -271,14 +278,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             return null;
         }
         Map<String, String> productMap = getProductMap(customerSpace);
-        List<RatingEngineSummary> engineSummaries = new ArrayList<>();
-        try {
-            engineSummaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
-        } catch (Exception e) {
-            log.warn("Failed to retrieve engine summaries.", e);
-        }
-        String timerMsg = "Construct top N tree with " + cubes.size() + " cubes, " + engineSummaries.size()
-                + " rating engines and " + productMap.size() + " products.";
+        String timerMsg = "Construct top N tree with " + cubes.size() + " cubes and " + productMap.size() + " products.";
         try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
             TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
             if (MapUtils.isNotEmpty(productMap)) {
@@ -318,11 +318,19 @@ public class DataLakeServiceImpl implements DataLakeService {
                     String prodName = productMap.getOrDefault(prodId, "Other");
                     cm.setSubcategory(prodName);
                 });
-            } else if (BusinessEntity.Rating.getServingStore().equals(role)) {
-                List<RatingEngineSummary> engineSummaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
             }
             return cms;
         }
     }
 
+
+    private List<RatingEngineSummary> getRatingSummaries(String customerSpace) {
+        List<RatingEngineSummary> engineSummaries = new ArrayList<>();
+        try {
+            engineSummaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
+        } catch (Exception e) {
+            log.warn("Failed to retrieve engine summaries.", e);
+        }
+        return engineSummaries;
+    }
 }

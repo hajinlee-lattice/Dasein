@@ -2,6 +2,9 @@ package com.latticeengines.proxy.exposed.objectapi;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import com.latticeengines.proxy.exposed.ProxyInterface;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -9,7 +12,8 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("eventProxy")
-public class EventProxy extends MicroserviceRestApiProxy {
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
     public EventProxy() {
         super("objectapi/customerspaces");

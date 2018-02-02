@@ -2,13 +2,14 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("cdlExternalSystemProxy")
-public class CDLExternalSystemProxy extends MicroserviceRestApiProxy {
+public class CDLExternalSystemProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
     private static final String URL_PREFIX = "/customerspaces/{customerSpace}/cdlexternalsystem";
 

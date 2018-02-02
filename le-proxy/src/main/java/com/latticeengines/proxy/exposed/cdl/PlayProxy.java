@@ -5,6 +5,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("playProxy")
-public class PlayProxy extends MicroserviceRestApiProxy {
+public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
     private static final Logger log = LoggerFactory.getLogger(PlayProxy.class);
 

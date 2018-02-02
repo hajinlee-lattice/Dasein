@@ -58,7 +58,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        new Thread(this::setupAIModels).start();
+        // new Thread(this::setupAIModels).start();
 
         resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
@@ -76,10 +76,10 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
             ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule2.getId());
         }).start();
 
-        ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
-        ai1 = createAIEngine(segment, modelSummary);
-        modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
-        ai2 = createAIEngine(segment, modelSummary);
+//        ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
+//        ai1 = createAIEngine(segment, modelSummary);
+//        modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
+//        ai2 = createAIEngine(segment, modelSummary);
 
         processAnalyze(constructRequest());
         verifyProcess();

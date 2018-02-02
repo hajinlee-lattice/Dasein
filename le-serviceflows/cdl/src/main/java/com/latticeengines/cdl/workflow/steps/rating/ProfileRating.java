@@ -147,35 +147,13 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
     }
 
     private void enrichTableSchema(Table table) {
-        Map<String, String> engineIdToSegmentNameMap = new HashMap<>();
-        for (RatingModelContainer modelContainer : modelContainers) {
-            String segmentName = modelContainer.getEngineSummary().getSegmentName();
-            String engineId = modelContainer.getEngineSummary().getId();
-            engineIdToSegmentNameMap.put(RatingEngine.toRatingAttrName(engineId), segmentName);
-        }
         List<Attribute> attrs = table.getAttributes();
         attrs.forEach(attr -> {
-            String engineId = parseEngineID(attr);
-            if (engineIdToSegmentNameMap.containsKey(engineId)) {
-                String segmentName = engineIdToSegmentNameMap.get(engineId);
-                attr.setSubcategory(segmentName);
-            } else {
-                attr.setSubcategory("Other");
-            }
+            attr.setSubcategory("Other");
+            attr.setDisplayName(attr.getName());
             attr.setCategory(Category.RATING);
             attr.removeAllowedDisplayNames();
         });
-    }
-
-    private String parseEngineID(Attribute attribute) {
-        String attrName = attribute.getName();
-        if (attrName.startsWith(ENGINE_ATTR_PREFIX)) {
-            String engineId = RatingEngine.toRatingAttrName(attrName);
-            log.info(String.format("Parsed an engine id %s from attribute name %s", engineId, attrName));
-            return engineId;
-        } else {
-            return "";
-        }
     }
 
 }

@@ -4,6 +4,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
 
+import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -12,7 +13,7 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Service("periodProxy")
-public class PeriodProxy extends MicroserviceRestApiProxy {
+public class PeriodProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
     private static final String URL_PREFIX = "/customerspaces/{customerSpace}/periods";
 

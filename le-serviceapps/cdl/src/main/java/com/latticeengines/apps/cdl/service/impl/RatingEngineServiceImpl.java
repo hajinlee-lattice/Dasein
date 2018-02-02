@@ -16,7 +16,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -86,7 +90,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 Map<String, Long> counts = updateRatingCount(ratingEngine, ratingModel);
                 log.info("Updated counts for rating engine " + engineId + " using model " + ratingModel.getId() + " to "
                         + JsonUtils.serialize(counts));
-                return counts;
+                evictRatingEngineCaches();
             }
         }
         return null;
@@ -129,6 +133,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
         ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId);
         updateLastRefreshedDate(tenant.getId(), ratingEngine);
+        evictRatingEngineCaches();
         return ratingEngine;
     }
 
@@ -136,6 +141,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public void deleteById(String id) {
         RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
         ratingEngineEntityMgr.deleteRatingEngine(ratingEngine);
+        evictRatingEngineCaches();
     }
 
     @SuppressWarnings("unchecked")
@@ -171,6 +177,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             log.warn(String.format("Failed to update rating counts for rating engine %s - rating model %s: %s",
                     ratingEngineId, ratingModelId, e.getMessage()));
         }
+        evictRatingEngineCaches();
         return updatedModel;
     }
 
@@ -223,5 +230,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             throw new LedpException(LedpCode.LEDP_18154, new String[] { ratingEngineId });
         }
         return ratingEngine;
+    }
+
+    private void evictRatingEngineCaches() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(customerSpace.getTenantId(), CacheName.getRatingEnginesCacheGroup());
     }
 }

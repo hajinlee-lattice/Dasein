@@ -1,31 +1,62 @@
 package com.latticeengines.proxy.exposed.cdl;
 
+import static com.latticeengines.domain.exposed.cache.CacheName.RatingSummariesCache;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("ratingEngineProxy")
-public class RatingEngineProxy extends MicroserviceRestApiProxy {
+public class RatingEngineProxy extends MicroserviceRestApiProxy implements ProxyInterface {
+
+    private static final Logger log = LoggerFactory.getLogger(RatingEngineProxy.class);
 
     private static final String URL_PREFIX = "/customerspaces/{customerSpace}/ratingengines";
 
+    @Inject
+    private CacheManager cacheManager;
+
+    private LocalCacheManager<String, List<RatingEngineSummary>> ratingSummariesCache;
+
     protected RatingEngineProxy() {
         super("cdl");
+        ratingSummariesCache = new LocalCacheManager<>(RatingSummariesCache, //
+                o -> getRatingEngineSummaries(shortenCustomerSpace(o)), 2000);
     }
 
+    @PostConstruct
+    public void postConstruct() {
+        if (cacheManager instanceof CompositeCacheManager) {
+            log.info("use local " + RatingSummariesCache);
+            ((CompositeCacheManager) cacheManager).setCacheManagers(Collections.singletonList(ratingSummariesCache));
+        }
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.RatingSummariesCacheName, key = "T(java.lang.String).format(\"%s|ratingsummaries\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace))", sync = true)
     public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace) {
         return getRatingEngineSummaries(customerSpace, null, null);
     }

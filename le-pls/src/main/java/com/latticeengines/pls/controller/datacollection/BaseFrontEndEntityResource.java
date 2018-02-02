@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller.datacollection;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +49,10 @@ public abstract class BaseFrontEndEntityResource {
         if (frontEndQuery == null) {
             frontEndQuery = new FrontEndQuery();
         }
+        if (BusinessEntity.Product.equals(mainEntity)) {
+            frontEndQuery.setAccountRestriction(null);
+            frontEndQuery.setContactRestriction(null);
+        }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(mainEntity);
         return entityProxy.getCount(tenantId, frontEndQuery);
@@ -65,6 +68,10 @@ public abstract class BaseFrontEndEntityResource {
         }
         if (frontEndQuery == null) {
             frontEndQuery = new FrontEndQuery();
+        }
+        if (BusinessEntity.Product.equals(getMainEntity())) {
+            frontEndQuery.setAccountRestriction(null);
+            frontEndQuery.setContactRestriction(null);
         }
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());

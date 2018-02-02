@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,8 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -350,6 +353,50 @@ public class StatsCubeUtils {
             subcatMap.get(subcategory).add(attr);
         }));
         catTopNTree.setSubcategories(subcatMap);
+    }
+
+    public static void processRatingCategory(TopNTree topNTree, List<RatingEngineSummary> ratingEngineSummaries) {
+        if (CollectionUtils.isEmpty(ratingEngineSummaries)) {
+            return;
+        }
+        CategoryTopNTree catTopNTree = topNTree.getCategory(Category.RATING);
+        Map<String, RatingEngineSummary> summaryMap = new HashMap<>();
+        ratingEngineSummaries.forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
+        Map<String, List<TopAttribute>> subcatMap = new HashMap<>();
+        catTopNTree.getSubcategories().values().forEach(attrs -> attrs.forEach(attr -> {
+            String engineId =  attr.getAttribute();
+            String subcategory = "Other";
+            if (summaryMap.containsKey(engineId)) {
+                RatingEngineSummary summary = summaryMap.get(engineId);
+                if (StringUtils.isNotBlank(summary.getSegmentDisplayName())) {
+                    subcategory = summary.getSegmentDisplayName();
+                }
+            }
+            if (!subcatMap.containsKey(subcategory)) {
+                subcatMap.put(subcategory, new ArrayList<>());
+            }
+            subcatMap.get(subcategory).add(attr);
+        }));
+        catTopNTree.setSubcategories(subcatMap);
+    }
+
+    public static void injectRatingEngineMetadata(List<ColumnMetadata> cms,
+                                                  List<RatingEngineSummary> ratingEngineSummaries) {
+        if (CollectionUtils.isEmpty(ratingEngineSummaries)) {
+            return;
+        }
+        Map<String, RatingEngineSummary> summaryMap = new HashMap<>();
+        ratingEngineSummaries.forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
+        cms.forEach(cm -> {
+            String attrName = cm.getName();
+            if (summaryMap.containsKey(attrName)) {
+                String engineIdAttr = cm.getName();
+                RatingEngineSummary summary = summaryMap.get(engineIdAttr);
+                if (StringUtils.isNotBlank(summary.getDisplayName())) {
+                    cm.setDisplayName(summary.getDisplayName());
+                }
+            }
+        });
     }
 
     public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap,

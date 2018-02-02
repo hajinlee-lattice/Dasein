@@ -28,10 +28,11 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("ratingProxy")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class RatingProxy extends MicroserviceRestApiProxy {
+public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
     private static final Logger log = LoggerFactory.getLogger(RatingProxy.class);
 

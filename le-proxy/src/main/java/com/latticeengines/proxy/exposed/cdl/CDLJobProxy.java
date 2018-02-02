@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -11,7 +12,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("cdlJobProxy")
-public class CDLJobProxy extends MicroserviceRestApiProxy {
+public class CDLJobProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
     protected CDLJobProxy() {
         super("cdl");

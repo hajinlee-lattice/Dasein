@@ -86,19 +86,12 @@ public class EntityResource extends BaseFrontEndEntityResource {
 
         @Override
         public Long call() {
-            try {
-                if (BusinessEntity.Product.equals(entity)) {
-                    frontEndQuery.setAccountRestriction(null);
-                    frontEndQuery.setContactRestriction(null);
-                }
-                Long count = getCount(tenantId, frontEndQuery, entity);
-                if (count != null) {
-                    return count;
-                }
-            } catch (Exception e) {
-                log.error("Failed to get count of " + entity, e);
+            Long count = getCount(tenantId, frontEndQuery, entity);
+            if (count != null) {
+                return count;
+            } else {
+                return 0L;
             }
-            return 0L;
         }
 
     }
