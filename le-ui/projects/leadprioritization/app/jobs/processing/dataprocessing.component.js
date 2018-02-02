@@ -28,12 +28,10 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
 
                     var tmp = browser.IEVersion();
                     if (tmp > 0) {
-                        // console.log('====== Creating msGridRow =======');
                         var nodes = element.context.childNodes;
                         var j = 1;
                         for (var i = 0; i < nodes.length; i++) {
                             var className = nodes[i].className;
-                            // console.log('CLASS NAME', className);
                             if (className && className.indexOf('le-row') >= 0) {
                                 nodes[i].style['msGridRow'] = j;
                                 j++;
@@ -47,6 +45,7 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
     .controller('DataProcessingComponent', function ($q, $scope, $http, JobsStore, $filter, ModalStore) {
         var vm = this;
         vm.loading = false;
+        vm.rowStatus = {};
         vm.loadingJobs = JobsStore.data.loadingJobs;
         vm.pagesize = 10;
         vm.query = '';
@@ -126,6 +125,10 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
                 }
             }
 
+            vm.rowExpanded = function(row, state){
+                vm.rowStatus[row] = state;
+            }
+
             $scope.$on("$destroy", function () {
                 ModalStore.remove(vm.config.name);
             });
@@ -147,19 +150,6 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
 
         this.init();
 
-        function isOneActionCompleted(job) {
-            var actions = job.actions;
-            var oneCompleted = false;
-            if (actions) {
-                actions.forEach(function (element) {
-                    if (element.jobStatus === 'Completed') {
-                        oneCompleted = true;
-                        return oneCompleted;
-                    }
-                });
-            }
-            return oneCompleted;
-        }
 
         function isOneFailed() {
             var isFailed = false;
@@ -175,7 +165,7 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
         function isOneRunning() {
             var isOneRunning = false;
             vm.jobs.forEach(function (element) {
-                if (element.jobStatus === 'Running') {
+                if (element.jobStatus === 'Running' || element.jobStatus === 'Pending') {
                     isOneRunning = true;
                     return isOneRunning;
                 }
@@ -187,18 +177,8 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
             var canRun = false;
             var oneFailed = isOneFailed();
             var oneRunnig = isOneRunning();
-            var oneActionCompleted = false;
-            vm.jobs.forEach(function (element) {
-                if (isOneActionCompleted(element)) {
-                    oneActionCompleted = true;
-                    if (!oneFailed && !oneRunnig && oneActionCompleted) {
-                        canRun = true;
-                        return canRun;
-                    }
-                }
-            });
 
-            if (!oneFailed && !oneRunnig && oneActionCompleted) {
+            if (!oneFailed && !oneRunnig) {
                 canRun = true;
             }
             return canRun;

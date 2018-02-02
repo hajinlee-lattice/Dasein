@@ -12,6 +12,8 @@
 <div class="le-cell le-col-start-5 le-col-span-1">
     <span>
         {{getActionsCount()}}
+        <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="getSubJobsPartialSuccess().length > 0"></i>
+
     </span>
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">
@@ -27,7 +29,7 @@
     </span>
 </div>
 <div class="le-cell le-col-start-9 le-col-span-1">
-    <button class="button blue-button" ng-if="showRunButton(job)" ng-click="vm.run(job)" ng-disabled="!vm.canLastJobRun() || disableButton">
+    <button class="button blue-button" ng-if="showRunButton(job)" ng-click="vm.run(job)" ng-disabled="disableRunButton()">
         Run Now
     </button>
 
@@ -39,9 +41,6 @@
     <span>
         <span ng-if="isJobFailed(job)">Please Contact Lattice Support</span>
     </span>
-    <!-- <a href="javascript:void(0)" data-toggle="collapse">
-        <i class="fa fa-plus-square-o" aria-hidden="true" ng-click="add()"></i>
-    </a> -->
     <a href="javascript:void(0)" data-toggle="collapse" ng-click="expandRow()" ng-show="!expanded">
         <span>
             <i class="fa fa-angle-double-down fa-lg"></i>
@@ -62,5 +61,5 @@
         </span>
     </div>
 </div>
-<chevron class="le-row" stepsconfig="stepsConfig" stepscompleted="stepscompleted" jobstatus="job.jobStatus" ng-if="expanded && job.jobStatus != 'Pending'"></chevron>
-<import-job-row-sub-jobs ng-if="expanded" subjobs="subjobs"></import-job-row-sub-jobs>
+<chevron class="le-row" chevronconfig="chevronConfig" stepscompleted="job.steps" jobstatus="job.jobStatus" ng-if="expanded && job.jobStatus != 'Pending' && job.jobStatus != 'Ready'"></chevron>
+<import-job-row-sub-jobs ng-if="expanded" subjobs="job.subJobs"></import-job-row-sub-jobs>

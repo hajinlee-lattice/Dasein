@@ -1,15 +1,16 @@
 angular.module('lp.jobs.import.row', [])
 
     .directive('importJobRow', [function () {
-        var controller = ['$scope', '$interval', '$q', '$timeout', 'JobsStore', function ($scope, $interval, $q, $timeout, JobsStore) {
+        var controller = ['$scope', '$q', '$timeout', 'JobsStore', function ($scope, $q, $timeout, JobsStore) {
 
             $scope.disableButton = false;
-            $scope.subjobs = [];
-            $scope.stepscompleted = [];
-            $scope.jobStatus = '';
-            var POOLING_INTERVAL = 60 * 1000;
-            var INTERVAL_ID;
-
+            $scope.expanded = false;
+            $scope.chevronConfig = {
+                0: { name: 'Merging, De-duping & matching to Lattice Data Cloud', lable: 'Merging, De-duping & Matching' },
+                1: { name: 'Analyzing', lable: 'Analyzing' },
+                2: { name: 'Publishing', lable: 'Publishing' },
+                3: { name: 'Scoring', lable: 'Scoring' }
+            }
             $scope.stepsConfig = {
                 "Merging, De-duping & matching to Lattice Data Cloud": { position: 1, label: 'Merging, De-duping & Matching' },
                 'Analyzing': { position: 2, label: 'Analyzing' },
@@ -17,124 +18,79 @@ angular.module('lp.jobs.import.row', [])
                 'Scoring': { position: 4, label: 'Scoring' }
             };
 
-            function resetCollapsedRow() {
-                $scope.subjobs = [];
-                $scope.stepscompleted = [];
-            }
-
-            function cancelInterval() {
-                // console.log('STOP the timer');
-                $interval.cancel(INTERVAL_ID);
-                INTERVAL_ID = null;
-            }
-
-            function updateSubjobs(subJobsUpdated) {
-                $scope.subjobs.splice(0, $scope.subjobs.length);
-                for (var i = 0; i < subJobsUpdated.length; i++) {
-                    $scope.subjobs.push(subJobsUpdated[i]);
-                }
-                $scope.job.subJobs = subJobsUpdated;
-                $scope.job.actions =  subJobsUpdated;
-            }
-
-            function updateStepsCompleted(steps) {
-                if (steps.length == 0) {
-                    $scope.stepscompleted = [];
-                } else {
-                    for (var i = 0; i < steps.length; i++) {
-                        var step = steps[i];
-                        var stepObj = $scope.stepsConfig[step];
-                        if ($scope.stepscompleted.length < stepObj.position) {
-                            $scope.stepscompleted.push(step);
-                        }
-                    }
-                }
-            }
-
-            function fetchJobData() {
-                // console.log('Pinging the server', $scope.job.id);
-                if ($scope.job.id != null) {
-                    JobsStore.getJob($scope.job.id).then(function (ret) {
-                        updateSubjobs(ret.subJobs);
-                        updateStepsCompleted(ret.stepsCompleted);
-                        checkIfPooling();
-                    });
-                }
-            }
-            
-            function areSubJobsCompleted(){
-                var subJobs = $scope.job.subJobs;
-                if(subJobs != undefined && subJobs != null){
-                    var allCompleted = true;
-                    for(var i = 0; i<subJobs.length; i++){
-                        if(subJobs[i].jobStatus != 'Completed'){
-                            allCompleted = false;
-                            break;
-                        }
-                    }
-                    // console.log('All subjobs Completed', allCompleted);
-                    return allCompleted;
-                }else{
-                    // console.log('All subjobs Completed', false);
-                    return false;
-                }
-
-            }
-
-            function checkIfPooling() {
-                // console.log('checkIfPooling', $scope.job.jobStatus, $scope.expanded);
-                if (($scope.job.jobStatus === 'Running') && $scope.expanded || 
-                        (areSubJobsCompleted() == false && ($scope.job.jobStatus === 'Running' || $scope.job.jobStatus === 'Pending'))) {
-                    if (INTERVAL_ID === undefined || INTERVAL_ID == null) {
-                        // console.log('Create the timer');
-                        INTERVAL_ID = $interval(fetchJobData, POOLING_INTERVAL);
-                    }
-                } else {
-                    cancelInterval();
-                }
-            }
+           
             function callbackModalWindow(action) {
                 if (action && action.action === 'run') {
                     $scope.disableButton = true;
                     JobsStore.runJob($scope.job).then(function (updatedJob) {
-                        checkIfPooling();
+                        $scope.disableButton = true;
                     });
                 }
             }
             function init() {
-                // console.log('init', $scope.job);
+                
+                if($scope.vm.rowStatus[$scope.index] != undefined  && $scope.vm.rowStatus[$scope.index] == true){
+                    $scope.expanded = true;
+                }
                 $scope.vm.callback = callbackModalWindow;
                 $scope.loading = false;
-                $scope.expanded = false;
-                $scope.jobStatus = $scope.job.jobStatus;
-                checkIfPooling();
+            }
+
+            function getRecordFound(subjob) {
+                if (subjob.reports && subjob.reports.length > 0) {
+                    var json = subjob.reports[0].json.Payload;
+                    var obj = JSON.parse(json);
+                    return obj.total_rows;
+                } else {
+                    return '-';
+                }
+            }
+            
+            function getRecordUploaded(subjob) {
+                if (subjob.reports && subjob.reports.length > 0) {
+                    var json = subjob.reports[0].json.Payload;
+                    var obj = JSON.parse(json);
+                    return obj.imported_rows;
+                } else {
+                    return '-';
+                }
+            }
+
+            $scope.getSubJobsPartialSuccess = function(){
+                var listPartialSuccess = [];
+                for(var i = 0; i < $scope.job.subJobs.length; i++){
+                    var found = getRecordFound($scope.job.subJobs[i]);
+                    var uploaded = getRecordUploaded($scope.job.subJobs[i]);
+                    if(found != uploaded && $scope.job.subJobs[i].inputs != undefined){
+                        var fileName = $scope.job.subJobs[i].inputs.SOURCE_DISPLAY_NAME;
+                        listPartialSuccess.push(fileName);
+                    }
+                }
+                return listPartialSuccess;
+            }
+
+            $scope.isOneActionCompleted = function() {
+                var subJobs = $scope.job.subJobs;
+                var oneCompleted = false;
+                if (subJobs) {
+                    subJobs.forEach(function (job) {
+                        if (job.jobStatus === 'Completed') {
+                            oneCompleted = true;
+                            return oneCompleted;
+                        }
+                    });
+                }
+                return oneCompleted;
             }
 
             $scope.expandRow = function () {
-                if ($scope.job.id != null) {
-                    if ($scope.expanded) {
-                        $scope.expanded = false;
-                        cancelInterval();
-                        resetCollapsedRow();
-                    } else {
-                        $scope.loading = true;
-                        var jobId = $scope.job.id;
-
-                        JobsStore.getJob(jobId).then(function (ret) {
-                            // console.log('RET',ret);
-                            $scope.loading = false;
-                            $scope.expanded = !$scope.expanded || false;
-                            // console.log(ret);
-                            updateSubjobs(ret.subJobs);
-                            updateStepsCompleted(ret.stepsCompleted);
-                            checkIfPooling();
-                        });
-                    }
-                }
+                $scope.loading = false;
+                $scope.expanded = !$scope.expanded || false;
+                $scope.vm.rowStatus[$scope.index] = $scope.expanded;
             };
 
             $scope.vm.run = function () {
-                var show = $scope.showWarningRun($scope.job);
+                var show = $scope.showWarningRun();
                 if (show) {
                     $scope.vm.toggleModal();
 
@@ -143,12 +99,13 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
 
-            $scope.showWarningRun = function (job) {
-                var actions = job.actions;
+            $scope.showWarningRun = function () {
+                var subJobs = $scope.job.subJobs;
+               
                 var allCompleted = true;
-                if (actions) {
-                    for (var i = 0; i < actions.length; i++) {
-                        if (actions[i].jobStatus === 'Running') {
+                if (subJobs) {
+                    for (var i = 0; i < subJobs.length; i++) {
+                        if (subJobs[i].jobStatus === 'Running') {
                             allCompleted = false;
                             break;
                         }
@@ -157,8 +114,19 @@ angular.module('lp.jobs.import.row', [])
                 return !allCompleted;
             }
 
+            $scope.disableRunButton = function(){
+                var oneCompleted = $scope.isOneActionCompleted();
+                var canRun = $scope.vm.canLastJobRun();
+                var disable = false;
+                if($scope.disableButton || !canRun || !oneCompleted){
+                    disable = true;
+                }
+                return disable;
+                // disableButton || !vm.canLastJobRun() || !isOneActionCompleted()
+            }
+
             $scope.showRunButton = function (job) {
-                if (job.jobStatus === 'Pending') {
+                if (job.jobStatus === 'Ready') {
                     return true;
                 } else {
                     return false;
@@ -198,27 +166,22 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
             $scope.isJobRunning = function (job) {
-                if (job.jobStatus === 'Running') {
+                if (job.jobStatus === 'Running' || job.jobStatus === 'Pending') {
                     return true;
                 } else {
                     return false;
                 }
             }
 
-            $scope.getActionsCount = function(){
-                if($scope.job.inputs){
-                    var idsString = $scope.job.inputs.ACTION_IDS;
-                    var ids = JSON.parse(idsString);
-                    return ids.length;
-                }else{
+            $scope.getActionsCount = function () {
+                if ($scope.job.subJobs) {
+                    // var idsString = $scope.job.inputs.ACTION_IDS;
+                    // var ids = JSON.parse(idsString);
+                    return $scope.job.subJobs.length;//ids.length;
+                } else {
                     return '-';
                 }
             }
-
-            $scope.$on("$destroy", function () {
-                $interval.cancel(INTERVAL_ID);
-            });
-
             init();
 
         }];
@@ -226,7 +189,7 @@ angular.module('lp.jobs.import.row', [])
             restrict: 'E',
             transclude: false,
             scope: {
-                job: '=', vm: '='
+                job: '=', vm: '=', index: '='
             },
             controller: controller,
             templateUrl: "app/jobs/processing/job/import-jobs-row.component.html",

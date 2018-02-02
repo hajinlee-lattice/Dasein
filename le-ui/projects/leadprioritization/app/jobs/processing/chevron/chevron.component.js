@@ -4,44 +4,50 @@ angular.module('lp.jobs.chevron', [])
         var controller = ['$scope', function ($scope) {
             var vm = this;
             vm.failed = false;
-            vm.stepsconfig = [];
-
+            vm.chevronConfig = $scope.chevronconfig;
 
             function init() {
-                var keys = Object.keys($scope.stepsconfig);
-                for (var i = 0; i < keys.length; i++) {
-                    vm.stepsconfig[$scope.stepsconfig[keys[i]].position - 1] = $scope.stepsconfig[keys[i]];
-                }
             }
+            
             init();
 
+            function isStepStatusMatching(stepName, status){
+                for (var i = 0; i < $scope.stepscompleted.length; i++) {
+                    if ($scope.stepscompleted[i].name == stepName && $scope.stepscompleted[i].stepStatus == status) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
             vm.isStepDone = function (index) {
-                // console.log('Steps completed', $scope.stepscompleted, index);
-                if ((index +1 )  < $scope.stepscompleted.length  || $scope.jobstatus == 'Completed') {
+
+                if (isStepStatusMatching(vm.chevronConfig[index].name, 'Completed') || $scope.jobstatus == 'Completed') {
                     return true;
                 } else {
                     return false;
                 }
             }
             vm.isStepRunning = function (index) {
-                if($scope.jobstatus === 'Running'){
-                    if( (index + 1 ) == $scope.stepscompleted.length){
+                if ($scope.jobstatus === 'Running') {
+                    if (isStepStatusMatching(vm.chevronConfig[index].name, 'Running') ) {
                         return true;
-                    }else {
+                    } else {
                         return false;
                     }
-                } else{
+                } else {
                     return false;
                 }
             }
             vm.isStepFailed = function (index) {
-                if($scope.jobstatus === 'Failed'){
-                    if( (index + 1 ) == $scope.stepscompleted.length){
+                if ($scope.jobstatus === 'Failed') {
+                    if (isStepStatusMatching(vm.chevronConfig[index].name, 'Failed') ) {
                         return true;
-                    }else {
+                    } else {
                         return false;
                     }
-                } else{
+                } else {
                     return false;
                 }
             }
@@ -50,7 +56,7 @@ angular.module('lp.jobs.chevron', [])
         return {
             restrict: 'E',
             scope: {
-                stepscompleted: '=', jobstatus: '=', stepsconfig: '='
+                stepscompleted: '=', jobstatus: '=', chevronconfig: '='
             },
             controller: controller,
             controllerAs: 'vm',

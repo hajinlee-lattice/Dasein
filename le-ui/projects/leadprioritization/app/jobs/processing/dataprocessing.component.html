@@ -11,7 +11,7 @@
 <section class="import-jobs">
     <div class="jobs-page container import-jobs-container">
 
-        <div class="row">
+        <!-- <div class="row">
             <div class="twelve columns">
                 <div ng-if="successMsg" class="job-success-message">
                     <div>Success Message
@@ -38,7 +38,7 @@
                     <span>Please retry or wait for a fix</span>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div class="table-header">
             <div class="row list-header">
@@ -72,7 +72,8 @@
                                         filter: vm.query |
                                         orderBy: vm.header.sort.order + vm.header.sort.property |
                                         startFrom: (current - 1) * vm.pagesize |
-                                        limitTo: vm.pagesize" class="le-row" job="job" vm="vm" ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}">
+                                        limitTo: vm.pagesize" class="le-row" job="job" vm="vm" index="$index"
+                                        ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}">
 
             </import-job-row>
             <div class="le-row info-row" ng-if="vm.loading">

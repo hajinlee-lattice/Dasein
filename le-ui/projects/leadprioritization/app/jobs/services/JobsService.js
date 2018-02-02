@@ -99,14 +99,16 @@ angular
                     var stepRunning = getStepRunning(job);
                     var stepsCompleted = getStepsCompleted(job);
                     var stepFailed = getStepFailed(job);
-                    var actions = getActions(job);
-                    var actionsCount = getActionsCount(job)
+                    var subJobs = gestSubJobs(job);
+                    var steps = getSteps(job);
+                    // var actions = getActions(job);
+                    // var actionsCount = getActionsCount(job)
                     
                     return {
                         id: job.id,
                         applicationId: job.applicationId,
-                        actions: actions,
-                        actionsCount: actionsCount,
+                        // actions: actions,
+                        // actionsCount: actionsCount,
                         timestamp: job.startTimestamp,
                         errorCode: job.errorCode,
                         errorMsg: job.errorMsg,
@@ -114,6 +116,8 @@ angular
                         status: job.jobStatus,
                         inputs : job.inputs,
                         source: job.inputs ? job.inputs.SOURCE_DISPLAY_NAME : null,
+                        subJobs: subJobs,
+                        steps: steps,
                         user: job.user,
                         jobStatus: job.jobStatus,
                         modelName: job.inputs.MODEL_DISPLAY_NAME,
@@ -163,8 +167,9 @@ angular
                 var stepsCompleted = getStepsCompleted(job);
                 var stepFailed = getStepFailed(job);
                 var subJobs = gestSubJobs(job);
-                var actions = getActions(job);
-                var actionsCount = getActionsCount(job)
+                var steps = getSteps(job);
+                // var actions = getActions(job);
+                // var actionsCount = getActionsCount(job)
                 var source = null;
                 if(job.inputs !== undefined){
                     source = job.inputs.SOURCE_DISPLAY_NAME;
@@ -181,8 +186,8 @@ angular
                         {
                             id: job.id,
                             user: job.user,
-                            actions: actions,
-                            actionsCount: actionsCount,
+                            // actions: actions,
+                            // actionsCount: actionsCount,
                             errorCode: job.errorCode,
                             errorMsg: job.errorMsg,
                             jobType: job.jobType,
@@ -193,6 +198,7 @@ angular
                             stepsCompleted: stepsCompleted,
                             stepFailed: stepFailed,
                             subJobs: subJobs,
+                            steps: steps,
                             completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
                             reports: job.reports,
                             applicationId: job.applicationId,
@@ -409,26 +415,34 @@ angular
         return stepsCompleted;
     }
 
-    function getActions(job) {
-        if(job.subJobs){
+    // function getActions(job) {
+    //     if(job.subJobs){
+    //         return job.subJobs;
+    //     }else {
+    //         return [];
+    //     }
+    // }
+
+    // function getActionsCount(job) {
+    //     if(!job.inputs || !job.inputs.ACTION_IDS){
+    //         return 0;
+    //     }else {
+    //         var actions = JSON.parse(job.inputs.ACTION_IDS);
+    //         return actions.length;
+    //     }
+    // }
+    function gestSubJobs(job) {
+        if(job.subJobs != undefined){
             return job.subJobs;
-        }else {
+        } else{
             return [];
         }
     }
 
-    function getActionsCount(job) {
-        if(!job.inputs || !job.inputs.ACTION_IDS){
-            return 0;
-        }else {
-            var actions = JSON.parse(job.inputs.ACTION_IDS);
-            return actions.length;
-        }
-    }
-    function gestSubJobs(job) {
-        if(job.subJobs){
-            return job.subJobs;
-        } else{
+    function getSteps(job){
+        if(job.steps != undefined && job.steps != null){
+            return job.steps;
+        }else{
             return [];
         }
     }
