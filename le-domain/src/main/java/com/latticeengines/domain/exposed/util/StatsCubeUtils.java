@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -341,6 +342,9 @@ public class StatsCubeUtils {
     }
 
     public static void processPurchaseHistoryCategory(TopNTree topNTree, Map<String, String> productMap) {
+        if (MapUtils.isEmpty(productMap) || !topNTree.hasCategory(Category.PRODUCT_SPEND)) {
+            return;
+        }
         CategoryTopNTree catTopNTree = topNTree.getCategory(Category.PRODUCT_SPEND);
         Map<String, List<TopAttribute>> subcatMap = new HashMap<>();
         catTopNTree.getSubcategories().values().forEach(attrs -> attrs.forEach(attr -> {
@@ -356,7 +360,7 @@ public class StatsCubeUtils {
     }
 
     public static void processRatingCategory(TopNTree topNTree, List<RatingEngineSummary> ratingEngineSummaries) {
-        if (CollectionUtils.isEmpty(ratingEngineSummaries)) {
+        if (CollectionUtils.isEmpty(ratingEngineSummaries) || !topNTree.hasCategory(Category.RATING)) {
             return;
         }
         CategoryTopNTree catTopNTree = topNTree.getCategory(Category.RATING);
