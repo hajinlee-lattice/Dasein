@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,6 @@ import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.RatingCoverageService;
@@ -244,13 +244,12 @@ public class RatingEngineResource {
                 parameters.setDescription(ratingEngine.getDisplayName());
                 parameters.setModuleName("Module");
                 parameters.setUserId(MultiTenantContext.getEmailAddress());
-                EventFrontEndQuery eventQuery = EventFrontEndQuery
-                        .fromFrontEndQuery(FrontEndQuery.fromSegment(ratingEngine.getSegment()));
-                eventQuery.setTargetProductIds(((AIModel) ratingModel).getTargetProducts());
-                parameters.setTargetFilterQuery(eventQuery);
-                parameters.setTrainFilterQuery(eventQuery);
-                parameters.setEventFilterQuery(eventQuery);
-
+                parameters.setTargetFilterQuery(ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngine.getId(),
+                        ratingModel.getId(), ModelingQueryType.TARGET));
+                parameters.setTrainFilterQuery(ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngine.getId(),
+                        ratingModel.getId(), ModelingQueryType.TRAINING));
+                parameters.setEventFilterQuery(ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngine.getId(),
+                        ratingModel.getId(), ModelingQueryType.EVENT));
                 log.info(String.format("Rating Engine model called with parameters %s", parameters.toString()));
                 jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
 

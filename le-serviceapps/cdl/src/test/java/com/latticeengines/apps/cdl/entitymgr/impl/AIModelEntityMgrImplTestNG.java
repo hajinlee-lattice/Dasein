@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
 import com.latticeengines.domain.exposed.pls.ModelingConfig;
@@ -115,11 +116,17 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD,
                 ComparisonType.LESS_OR_EQUAL, 1500);
         ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD,
-                ComparisonType.LESS_OR_EQUAL, 100);
+                ComparisonType.GREATER_OR_EQUAL, 10);
+        ModelingConfigFilter trainingFilter = new ModelingConfigFilter(ModelingConfig.TRAINING_SET_PERIOD,
+                ComparisonType.WITHIN, 10);
+        ModelingConfigFilter repeatPurchaseFilter = new ModelingConfigFilter(ModelingConfig.PURCHASED_BEFORE_PERIOD,
+                ComparisonType.PRIOR, 6);
 
         Map<ModelingConfig, ModelingConfigFilter> configFitlers = new HashMap<>();
         configFitlers.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);
         configFitlers.put(ModelingConfig.QUANTITY_IN_PERIOD, quantityFilter);
+        configFitlers.put(ModelingConfig.TRAINING_SET_PERIOD, trainingFilter);
+        configFitlers.put(ModelingConfig.PURCHASED_BEFORE_PERIOD, repeatPurchaseFilter);
         aiModel.setModelingConfigFilters(configFitlers);
 
         aiModelEntityMgr.createOrUpdateAIModel(aiModel, ratingEngineId);

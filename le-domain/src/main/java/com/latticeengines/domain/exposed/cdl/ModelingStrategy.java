@@ -10,6 +10,7 @@ public enum ModelingStrategy {
 
     CROSS_SELL_REPEAT_PURCHASE("Cross-Sell-Repeat-Purchase"), //
     CROSS_SELL_FIRST_PURCHASE("Cross-Sell-First-Purchase");
+
     private String modelingStrategy;
     private static Map<String, ModelingStrategy> map = new HashMap<>();
 

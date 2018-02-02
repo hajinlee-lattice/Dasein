@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -163,6 +165,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/notes/{noteId}", shortenCustomerSpace(customerSpace),
                 ratingEngineId, noteId);
         return post("Update the content of a certain note via note id.", url, noteParams, Boolean.class);
+    }
+
+    public EventFrontEndQuery getModelingQuery(String customerSpace, String ratingEngineId, String aiModelId,
+            ModelingQueryType modelingQueryType) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
+                + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        return get("getTargetQuery", url, EventFrontEndQuery.class);
     }
 
 }

@@ -27,17 +27,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -109,11 +105,6 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         log.info("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         firstTenant = testBed.getMainTestTenant();
-        if (EncryptionGlobalState.isEnabled()) {
-            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
-                    .construct(new CustomerSpaceScope(CustomerSpace.parse(firstTenant.getId())));
-            assertTrue(controller.exists(new Path("/EncryptionKey")));
-        }
 
         modelingParameters = new RatingEngineModelingParameters();
         modelingParameters.setName("RatingEngineModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
@@ -278,13 +269,9 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         List<Object> predictors = restTemplate.getForObject(
                 String.format("%s/pls/modelsummaries/predictors/all/%s", getRestAPIHostPort(), found.getId()),
                 List.class);
-        assertTrue(Iterables.any(predictors, new Predicate<Object>() {
-
-            @Override
-            public boolean apply(@Nullable Object raw) {
-                Predictor predictor = new ObjectMapper().convertValue(raw, Predictor.class);
-                return predictor.getCategory() != null;
-            }
+        assertTrue(predictors.stream().anyMatch(x -> {
+            Predictor predictor = new ObjectMapper().convertValue(x, Predictor.class);
+            return predictor.getCategory() != null;
         }));
 
         // Look up the model summary with details
@@ -300,7 +287,8 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         JsonNode predictors = modelSummaryJson.get("Predictors");
         for (int i = 0; i < predictors.size(); ++i) {
             JsonNode predictor = predictors.get(i);
-            assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
+            assertNotEquals(predictor.get("Name"),
+                    "Activity_Count_Interesting_Moment_Webinar" + "ty_Count_Interesting_Moment_Webinar");
             if (predictor.get("Name") != null && predictor.get("Name").asText() != null) {
                 if (predictor.get("Name").asText().equals("LE_EMPLOYEE_RANGE")) {
                     JsonNode tags = predictor.get("Tags");

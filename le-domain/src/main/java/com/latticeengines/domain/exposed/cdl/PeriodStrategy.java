@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -23,7 +22,8 @@ public class PeriodStrategy implements Serializable {
         CalendarYear = new PeriodStrategy(Template.Year);
     }
 
-    private PeriodStrategy(){}
+    private PeriodStrategy() {
+    }
 
     public PeriodStrategy(Template template) {
         PeriodStrategy periodStrategy = new PeriodStrategy();
@@ -37,7 +37,7 @@ public class PeriodStrategy implements Serializable {
     @JsonProperty("name")
     private String name;
 
-    @JsonProperty("stat_time")
+    @JsonProperty("start_time")
     private String startTimeStr;
 
     public Template getTemplate() {

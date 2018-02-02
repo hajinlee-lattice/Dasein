@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,14 +18,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.service.impl.RatingModelServiceBase;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -170,6 +178,25 @@ public class RatingEngineResource {
         log.info(String.format("RatingEngineNoteId=%s update by %s", noteId, noteParams.getUserName()));
         ratingEngineNoteService.updateById(noteId, noteParams);
         return Boolean.TRUE;
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
+    public EventFrontEndQuery getModelingQuery(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId,
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
+        RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
+        RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
+
+        if (ratingEngine.getType() == RatingEngineType.AI_BASED && ratingModel instanceof AIModel) {
+            AIModelService aiModelService = (AIModelService) RatingModelServiceBase
+                    .getRatingModelService(ratingEngine.getType());
+            return aiModelService.getModelingQuery(customerSpace, ratingEngine, (AIModel) ratingModel,
+                    modelingQueryType);
+        } else {
+            throw new LedpException(LedpCode.LEDP_40009, new String[] { ratingEngineId, ratingModelId, customerSpace });
+        }
     }
 
 }

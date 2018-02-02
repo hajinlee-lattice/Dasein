@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -59,5 +60,9 @@ public class EventFrontEndQuery extends FrontEndQuery {
 
     public static EventFrontEndQuery fromFrontEndQuery(FrontEndQuery frontEndQuery) {
         return JsonUtils.deserialize(JsonUtils.serialize(frontEndQuery), EventFrontEndQuery.class);
+    }
+
+    public static EventFrontEndQuery fromSegment(MetadataSegment metadataSegment) {
+        return fromFrontEndQuery(FrontEndQuery.fromSegment(metadataSegment));
     }
 }

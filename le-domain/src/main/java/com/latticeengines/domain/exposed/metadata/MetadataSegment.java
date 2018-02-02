@@ -46,7 +46,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -291,30 +291,30 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setEntityCount(BusinessEntity entity, Long count) {
         switch (entity) {
-            case Account:
-                setAccounts(count);
-                break;
-            case Contact:
-                setContacts(count);
-                break;
-            case Product:
-                setProducts(count);
-                break;
-            default:
-                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+        case Account:
+            setAccounts(count);
+            break;
+        case Contact:
+            setContacts(count);
+            break;
+        case Product:
+            setProducts(count);
+            break;
+        default:
+            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
     public Long getEntityCount(BusinessEntity entity) {
         switch (entity) {
-            case Account:
-                return getAccounts();
-            case Contact:
-                return getContacts();
-            case Product:
-                return getProducts();
-            default:
-                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+        case Account:
+            return getAccounts();
+        case Contact:
+            return getContacts();
+        case Product:
+            return getProducts();
+        default:
+            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
@@ -328,6 +328,24 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         frontEndQuery.setAccountRestriction(accountRestriction);
         frontEndQuery.setContactRestriction(contactRestriction);
         return frontEndQuery;
+    }
+
+    @Override
+    public Object clone() {
+        MetadataSegment clone = new MetadataSegment();
+        clone.setCreated(new Date());
+        clone.setCreatedBy(this.getCreatedBy());
+        clone.setMasterSegment(this.getMasterSegment());
+        clone.setDataCollection(this.getDataCollection());
+        clone.setAccountFrontEndRestriction(this.getAccountFrontEndRestriction());
+        clone.setAccountRestriction(this.getAccountRestriction());
+        clone.setContactFrontEndRestriction(this.getContactFrontEndRestriction());
+        clone.setContactRestriction(this.getContactRestriction());
+        clone.setDisplayName(this.getDisplayName() + "_COPY");
+        clone.setDescription(this.getDescription());
+        clone.setUpdated(new Date());
+        clone.setMasterSegment(this.getMasterSegment());
+        return clone;
     }
 
 }

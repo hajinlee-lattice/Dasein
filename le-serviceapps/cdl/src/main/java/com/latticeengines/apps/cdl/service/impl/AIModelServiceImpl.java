@@ -1,10 +1,18 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.latticeengines.apps.cdl.rating.CrossSellRatingQueryBuilder;
+import com.latticeengines.apps.cdl.rating.RatingQueryBuilder;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
@@ -83,6 +92,20 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     @Override
     public void deleteById(String id) {
         aiModelEntityMgr.deleteById(id);
+    }
+
+    @Override
+    public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
+            ModelingQueryType modelingQueryType) {
+
+        if (Arrays.asList(ModelingStrategy.values()).contains(aiModel.getModelingStrategy())) {
+            RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
+                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType);
+            return ratingQueryBuilder.build();
+        } else {
+            throw new LedpException(LedpCode.LEDP_40009,
+                    new String[] { ratingEngine.getId(), aiModel.getId(), customerSpace });
+        }
     }
 
 }
