@@ -95,7 +95,9 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
                 BusinessEntity.class, String.class);
         diffTableName = diffTableNames.get(entity);
 
-        profileTableName = dataCollectionProxy.getTableName(customerSpace.toString(), profileTableRole(), inactive);
+        if (profileTableRole() != null) {
+            profileTableName = dataCollectionProxy.getTableName(customerSpace.toString(), profileTableRole(), inactive);
+        }
         sortedTablePrefix = entity.name() + "_Diff_Sorted";
     }
 
@@ -139,10 +141,6 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return step;
     }
 
-    protected TransformationStepConfig bucket(boolean heavyEngine) {
-        return bucket(-1, heavyEngine);
-    }
-
     protected TransformationStepConfig bucket(int inputStep, boolean heavyEngine) {
         TransformationStepConfig step = new TransformationStepConfig();
         String sourceName = entity.name() + "Profile";
@@ -152,11 +150,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(sourceName, sourceTable);
         step.setBaseTables(baseTables);
-        if (inputStep < 0) {
-            useDiffTableAsSource(step);
-        } else {
-            step.setInputSteps(Collections.singletonList(inputStep));
-        }
+        step.setInputSteps(Collections.singletonList(inputStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
         String confStr = heavyEngine ? emptyStepConfig(heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
         step.setConfiguration(confStr);
@@ -194,7 +188,11 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
 
     protected TransformationStepConfig sort(int diffStep, int partitions) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(diffStep));
+        if (diffStep < 0) {
+            useDiffTableAsSource(step);
+        } else {
+            step.setInputSteps(Collections.singletonList(diffStep));
+        }
         step.setTransformer(TRANSFORMER_SORTER);
 
         TargetTable targetTable = new TargetTable();

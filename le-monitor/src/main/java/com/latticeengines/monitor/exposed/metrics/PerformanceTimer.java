@@ -17,6 +17,10 @@ public class PerformanceTimer implements Closeable {
         this.timerMessage = timerMessage;
     }
 
+    public void setTimerMessage(String timerMessage) {
+        this.timerMessage = timerMessage;
+    }
+
     @Override
     public void close() {
         log.info(String.format("[Metric] %s ElapsedTime=%d ms", timerMessage, new Date().getTime() - start.getTime()));

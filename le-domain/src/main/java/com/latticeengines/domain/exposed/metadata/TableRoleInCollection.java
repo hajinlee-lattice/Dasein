@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jpmml.schema.Deprecated;
+
 import com.google.common.collect.ImmutableList;
 
 public enum TableRoleInCollection {
@@ -17,8 +19,6 @@ public enum TableRoleInCollection {
     PivotedRating, //
 
     Profile, //
-    ContactProfile, //
-    PurchaseHistoryProfile, //
 
     BucketedAccount, //
     SortedContact, //
@@ -29,7 +29,12 @@ public enum TableRoleInCollection {
 
     AnalyticPurchaseState, //
 
-    AccountMaster;
+    AccountMaster,
+
+    @Deprecated
+    ContactProfile, //
+    @Deprecated
+    PurchaseHistoryProfile;
 
     private InterfaceName primaryKey;
     private ImmutableList<InterfaceName> foreignKeys;

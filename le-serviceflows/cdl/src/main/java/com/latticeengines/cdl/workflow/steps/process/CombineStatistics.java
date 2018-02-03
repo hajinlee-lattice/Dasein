@@ -1,10 +1,12 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -43,15 +45,18 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
 
     private Map<BusinessEntity, Table> statsTableMap = new HashMap<>();
     private String customerSpaceStr;
-    private DataCollection.Version activeVersion;
-    private DataCollection.Version inactiveVersion;
 
     @Override
     public void execute() {
         log.info("Inside CombineStatistics execute()");
         customerSpaceStr = configuration.getCustomerSpace().toString();
-        activeVersion = dataCollectionProxy.getActiveVersion(customerSpaceStr);
-        inactiveVersion = activeVersion.complement();
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpaceStr);
+        DataCollection.Version inactiveVersion = activeVersion.complement();
+
+        Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        if (resetEntities == null) {
+            resetEntities = Collections.emptySet();
+        }
 
         Map<String, StatsCube> cubeMap = new HashMap<>();
         StatisticsContainer latestStatsContainer = dataCollectionProxy.getStats(customerSpaceStr, inactiveVersion);
@@ -67,8 +72,23 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         if (latestStatsContainer != null && MapUtils.isNotEmpty(latestStatsContainer.getStatsCubes())) {
             cubeMap.putAll(latestStatsContainer.getStatsCubes());
         }
-        log.info("Found " + cubeMap.size() + " cubes in the stats in " + latestStatsVersion + " : " //
-                + StringUtils.join(cubeMap.keySet(), ", "));
+
+        int originalCubes = cubeMap.size();
+        String msg = "Found " + originalCubes + " cubes in the stats in " + latestStatsVersion;
+        if (MapUtils.isNotEmpty(cubeMap)) {
+            msg += " : " + StringUtils.join(cubeMap.keySet(), ", ");
+        }
+        log.info(msg);
+
+        resetEntities.forEach(entity -> {
+            String key = entity.name();
+            if (cubeMap.containsKey(key)) {
+                cubeMap.remove(key);
+            }
+        });
+        if (cubeMap.size() != originalCubes) {
+            log.info("Removed " + (originalCubes - cubeMap.size()) + " cubes due to entity reset.");
+        }
 
         Map<BusinessEntity, String> statsTableNames = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
                 String.class);
@@ -83,6 +103,19 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
                 statsTableMap.put(entity, statsTable);
             });
         }
+
+        if (MapUtils.isNotEmpty(statsTableMap)) {
+            int originalStatsTables = statsTableMap.size();
+            resetEntities.forEach(entity -> {
+                if (statsTableMap.containsKey(entity)) {
+                    statsTableMap.remove(entity);
+                }
+            });
+            if (statsTableMap.size() != originalStatsTables) {
+                log.info("Removed " + (originalStatsTables - statsTableMap.size()) + " stats tables due to entity reset.");
+            }
+        }
+
         if (MapUtils.isNotEmpty(statsTableMap)) {
             log.info("Upserting " + statsTableMap.size() + " cubes into stats.");
             statsTableMap.forEach((entity, table) -> cubeMap.put(entity.name(), getStatsCube(table, entity)));

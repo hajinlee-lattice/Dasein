@@ -15,8 +15,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -34,8 +32,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
-
-    private static final Logger log = LoggerFactory.getLogger(ProfileStepBase.class);
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -65,14 +61,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected TransformationStepConfig profile(String masterTableName) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        String tableSourceName = "CustomerUniverse";
-        SourceTable sourceTable = new SourceTable(masterTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
         return configureProfileStep(step);
     }
 
@@ -92,15 +81,8 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected TransformationStepConfig bucket(int profileStep, String masterTableName) {
-        TransformationStepConfig step = new TransformationStepConfig();
+        TransformationStepConfig step = initStepWithInputTable(masterTableName, "CustomerUniverse");
         step.setInputSteps(Collections.singletonList(profileStep));
-        String tableSourceName = "CustomerUniverse";
-        SourceTable sourceTable = new SourceTable(masterTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
         return configureBucketStep(step);
     }
 
@@ -116,9 +98,8 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return step;
     }
 
-
     protected TransformationStepConfig calcStats(int profileStep, int bucketStep, String statsTablePrefix,
-                                               List<String> dedupFields) {
+            List<String> dedupFields) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(bucketStep, profileStep));
         step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
@@ -136,16 +117,26 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return step;
     }
 
-    protected TransformationStepConfig sort(int inputStep, String tablePrefix, String sortKey, int partitions) {
+    protected TransformationStepConfig sort(String inputTableName, String outputTablePrefix, String sortKey,
+            int partitions) {
+        TransformationStepConfig step = initStepWithInputTable(inputTableName, "Contacts");
+        return configSortStep(step, outputTablePrefix, sortKey, partitions);
+    }
+
+    protected TransformationStepConfig sort(int inputStep, String outputTablePrefix, String sortKey, int partitions) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<Integer> inputSteps = Collections.singletonList(inputStep);
         step.setInputSteps(inputSteps);
+        return configSortStep(step, outputTablePrefix, sortKey, partitions);
+    }
 
+    private TransformationStepConfig configSortStep(TransformationStepConfig step, String outputTablePrefix,
+            String sortKey, int partitions) {
         step.setTransformer(TRANSFORMER_SORTER);
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(tablePrefix);
+        targetTable.setNamePrefix(outputTablePrefix);
         targetTable.setExpandBucketedAttrs(true);
         step.setTargetTable(targetTable);
 
@@ -160,6 +151,17 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         conf.setSortingField(sortKey);
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
+        return step;
+    }
+
+    private TransformationStepConfig initStepWithInputTable(String inputTableName, String tableSourceName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        SourceTable sourceTable = new SourceTable(inputTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
         return step;
     }
 

@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
@@ -22,12 +23,16 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private RebuildAccountWorkflow rebuildAccountWorkflow;
 
+    @Inject
+    private ResetAccount resetAccount;
+
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(mergeAccountWrapper) //
                 .next(updateAccountWorkflow) //
                 .next(rebuildAccountWorkflow) //
+                .next(resetAccount) //
                 .build();
     }
 }

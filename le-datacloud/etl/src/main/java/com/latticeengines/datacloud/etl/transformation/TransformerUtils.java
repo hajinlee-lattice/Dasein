@@ -1,11 +1,16 @@
 package com.latticeengines.datacloud.etl.transformation;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
@@ -16,6 +21,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
  * Some code can be shared by transformers
  */
 public class TransformerUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(TransformerUtils.class);
 
     public static String avroPath(Source source, String version, HdfsPathBuilder hdfsPathBuilder) {
         String avroPath;
@@ -53,6 +60,21 @@ public class TransformerUtils {
                     if (!file.equals(biggestFile)) {
                         HdfsUtils.rmdir(yarnConfiguration, file);
                     }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to remove empty files", e);
+        }
+    }
+
+    public static void removeEmptyAvros(Configuration yarnConfiguration, String avroGlob) {
+        try {
+            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
+            for (String file : files) {
+                Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, file);
+                if (!iterator.hasNext()) {
+                    log.info("Removing empty avro file " + file);
+                    HdfsUtils.rmdir(yarnConfiguration, file);
                 }
             }
         } catch (IOException e) {

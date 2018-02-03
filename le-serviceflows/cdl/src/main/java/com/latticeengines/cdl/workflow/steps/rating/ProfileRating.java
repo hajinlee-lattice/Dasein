@@ -18,10 +18,10 @@ import com.latticeengines.cdl.workflow.steps.rebuild.ProfileStepBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -95,15 +95,18 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         List<TransformationStepConfig> steps = new ArrayList<>();
 
         int pivotStep = 0;
-        int profileStep = 1;
-        int bucketStep = 2;
+        int sortStep = 1;
+        int profileStep = 2;
+        int bucketStep = 3;
 
         TransformationStepConfig pivot = pivot();
-        TransformationStepConfig profile = profile(pivotStep);
-        TransformationStepConfig bucket = bucket(profileStep, pivotStep);
+        TransformationStepConfig sort = sort(pivotStep, ratingTablePrefix, InterfaceName.AccountId.name(), 200);
+        TransformationStepConfig profile = profile(sortStep);
+        TransformationStepConfig bucket = bucket(profileStep, sortStep);
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, null);
 
         steps.add(pivot);
+        steps.add(sort);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
@@ -121,12 +124,6 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
         step.setBaseTables(baseTables);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(ratingTablePrefix);
-        step.setTargetTable(targetTable);
-
         step.setTransformer(TRANSFORMER_PIVOT_RATINGS);
         PivotRatingsConfig conf = createPivotRatingsConfig();
         String confStr = appendEngineConf(conf, lightEngineConfig());

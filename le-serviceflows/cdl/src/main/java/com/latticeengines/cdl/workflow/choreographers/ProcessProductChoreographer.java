@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildProductWorkflow;
 import com.latticeengines.cdl.workflow.UpdateProductWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeProduct;
+import com.latticeengines.cdl.workflow.steps.reset.ResetProduct;
 import com.latticeengines.cdl.workflow.steps.update.CloneProduct;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -22,6 +23,9 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private CloneProduct cloneProduct;
+
+    @Inject
+    private ResetProduct resetProduct;
 
     @Inject
     private UpdateProductWorkflow updateProductWorkflow;
@@ -42,6 +46,11 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected AbstractStep cloneStep() {
         return cloneProduct;
+    }
+
+    @Override
+    protected AbstractStep resetStep() {
+        return resetProduct;
     }
 
     @Override

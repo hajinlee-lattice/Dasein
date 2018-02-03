@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -86,7 +88,13 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void swapMissingTableRoles() {
+        Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
+            BusinessEntity ownerEntity = getOwnerEntity(role);
+            if (ownerEntity != null && resetEntities.contains(ownerEntity)) {
+                // skip swap for reset entities
+                continue;
+            }
             String inactiveTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
             if (StringUtils.isBlank(inactiveTableName)) {
                 String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
@@ -111,11 +119,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                 String servingStoreName = dataCollectionProxy.getTableName(customerSpace.toString(),
                         entity.getServingStore(), inactive);
                 if (StringUtils.isBlank(servingStoreName)) {
-                    // TODO: always keep rating serving store for now
-                    if (!BusinessEntity.Rating.equals(entity)) {
-                        log.info("Removing orphan table " + tableName);
-                        metadataProxy.deleteTable(customerSpace.toString(), tableName);
-                    }
+                    log.info("Removing orphan table " + tableName);
+                    metadataProxy.deleteTable(customerSpace.toString(), tableName);
                 }
             });
         }
@@ -158,6 +163,23 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         Report report = createReport(jsonReport.toString(), ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY,
                 UUID.randomUUID().toString());
         registerReport(configuration.getCustomerSpace(), report);
+    }
+
+    private BusinessEntity getOwnerEntity(TableRoleInCollection role) {
+        BusinessEntity owner = Arrays.stream(BusinessEntity.values()).filter(entity -> //
+                role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
+                .findFirst().orElse(null);
+        if (owner == null) {
+            switch (role) {
+                case Profile:
+                    return BusinessEntity.Account;
+                case ConsolidatedRawTransaction:
+                    return BusinessEntity.Transaction;
+                default:
+                    return null;
+            }
+        }
+        return owner;
     }
 
 }

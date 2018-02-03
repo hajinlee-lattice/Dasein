@@ -3,8 +3,6 @@ package com.latticeengines.cdl.workflow.steps.update;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -15,22 +13,16 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 @Component(ProcessAccountDiff.BEAN_NAME)
 public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessAccountStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(ProcessAccountDiff.class);
-
     static final String BEAN_NAME = "processAccountDiff";
-
-    int matchStep;
-    int bucketStep;
-    int retainStep;
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("ConsolidateAccountDiff");
 
-        matchStep = 0;
-        bucketStep = 1;
-        retainStep = 2;
+        int matchStep = 0;
+        int bucketStep = 1;
+        int retainStep = 2;
 
         TransformationStepConfig matchDiff = match();
         TransformationStepConfig bucket = bucket(matchStep, true);

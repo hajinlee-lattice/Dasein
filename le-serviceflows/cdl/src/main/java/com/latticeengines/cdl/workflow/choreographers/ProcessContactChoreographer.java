@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildContactWorkflow;
 import com.latticeengines.cdl.workflow.UpdateContactWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeContact;
+import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.cdl.workflow.steps.update.CloneContact;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -22,6 +23,9 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private CloneContact cloneContact;
+
+    @Inject
+    private ResetContact resetContact;
 
     @Inject
     private UpdateContactWorkflow updateContactWorkflow;
@@ -42,6 +46,11 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected AbstractStep cloneStep() {
         return cloneContact;
+    }
+
+    @Override
+    protected AbstractStep resetStep() {
+        return resetContact;
     }
 
     @Override

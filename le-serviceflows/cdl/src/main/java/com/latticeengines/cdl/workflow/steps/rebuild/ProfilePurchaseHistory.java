@@ -67,7 +67,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     @Override
     protected TableRoleInCollection profileTableRole() {
-        return TableRoleInCollection.PurchaseHistoryProfile;
+        return null;
     }
 
     @Override
@@ -88,12 +88,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         TransformationStepConfig profile = profile();
         TransformationStepConfig bucket = bucket();
         TransformationStepConfig calc = calcStats(customerSpace, statsTablePrefix);
-        TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
         steps.add(aggregate);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
-        steps.add(sortProfile);
 
         // -----------
         request.setSteps(steps);
@@ -248,27 +246,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
         step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig sortProfile(CustomerSpace customerSpace, String profileTablePrefix) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(profileStep);
-        step.setInputSteps(inputSteps);
-        step.setTransformer(TRANSFORMER_SORTER);
-
-        SorterConfig conf = new SorterConfig();
-        conf.setPartitions(1);
-        conf.setCompressResult(true);
-        conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(profileTablePrefix);
-        step.setTargetTable(targetTable);
-
         return step;
     }
 

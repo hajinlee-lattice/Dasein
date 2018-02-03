@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.service.impl.SimpleTransformationDataFlowService;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -95,5 +98,13 @@ public class ConfigurableDataflowTransformer extends AbstractDataflowTransformer
     @Override
     public boolean validateConfig(TransformerConfig config, List<String> baseSources) {
          return true;
+    }
+
+    @Override
+    protected void postDataFlowProcessing(TransformStep step, String workflowDir, TransformationFlowParameters paramters,
+                                          TransformerConfig configuration) {
+        String wd = new Path(workflowDir).toString();
+        String avroGlob = wd + (wd.endsWith("/") ? "*.avro" : "/*.avro");
+        TransformerUtils.removeEmptyAvros(yarnConfiguration, avroGlob);
     }
 }

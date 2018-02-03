@@ -36,9 +36,11 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private boolean hasImports = false;
     private boolean hasSchemaChange = false;
     protected boolean hasActiveServingStore = false;
+    private boolean hasBatchStore = false;
 
     boolean rebuild = false;
     boolean update = false;
+    boolean reset = false;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -56,9 +58,13 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
         if (isCloneStep(step)) {
             checkSchemaChange(step);
+            reset = shouldReset();
             rebuild = shouldRebuild();
             update = shouldUpdate();
-            log.info("rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
+            log.info("reset=" + reset + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
+            if (reset && (rebuild || update)) {
+                throw new IllegalStateException("When reset, neither rebuild nor update can be true.");
+            }
             if (rebuild && update) {
                 throw new IllegalStateException("Rebuild and update cannot be both true");
             }
@@ -78,6 +84,13 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             }
         }
 
+        if (isResetStep(step)) {
+            if (!reset) {
+                log.info(msg + ", because not in reset mode.");
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -87,6 +100,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     private boolean isCloneStep(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.name().endsWith(cloneStep().name());
+    }
+
+    private boolean isResetStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(resetStep().name());
     }
 
     private boolean belongsToUpdate(int seq) {
@@ -104,6 +121,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             checkEnforcedRebuild(step);
             checkImports(step);
             checkActiveServingStore(step);
+            checkHasBatchStore(step);
             initialized = true;
         }
     }
@@ -147,11 +165,41 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
+    private void checkHasBatchStore(AbstractStep<? extends BaseStepConfiguration> step) {
+        TableRoleInCollection batchStore = mainEntity().getBatchStore();
+        if (batchStore != null) {
+            DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+            String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
+            String tableName = dataCollectionProxy.getTableName(customerSpace, batchStore, active.complement());
+            if (StringUtils.isBlank(tableName)) {
+                tableName = dataCollectionProxy.getTableName(customerSpace, batchStore, active);
+            }
+            hasBatchStore = StringUtils.isNotBlank(tableName);
+        }
+        if (hasBatchStore) {
+            log.info("Found batch store for entity " + mainEntity());
+        } else {
+            log.info("No batch store for entity " + mainEntity());
+        }
+    }
+
     private boolean shouldMerge() {
         return hasImports;
     }
 
+    private boolean shouldReset() {
+        if (!hasBatchStore && !hasImports) {
+            log.info("No batch store and no imports, going to reset entity.");
+            return true;
+        }
+        return false;
+    }
+
     protected boolean shouldRebuild() {
+        if (reset) {
+            log.info("Going to reset " + mainEntity() + ", skipping rebuild.");
+            return false;
+        }
         if (enforceRebuild) {
             log.info("Enforced to rebuild " + mainEntity());
             return true;
@@ -167,6 +215,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     private boolean shouldUpdate() {
+        if (reset) {
+            log.info("Going to reset " + mainEntity() + ", skipping update.");
+            return false;
+        }
         if (!rebuild && hasImports) {
             log.info("No going to rebuild but has imports, going to update " + mainEntity());
             return true;
@@ -178,6 +230,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected abstract AbstractStep mergeStep();
 
     protected abstract AbstractStep cloneStep();
+
+    protected abstract AbstractStep resetStep();
 
     protected abstract AbstractWorkflow updateWorkflow();
 

@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeProductWrapper;
+import com.latticeengines.cdl.workflow.steps.reset.ResetProduct;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -22,12 +23,16 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private RebuildProductWorkflow rebuildProductWorkflow;
 
+    @Inject
+    private ResetProduct resetProduct;
+
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(mergeProductWrapper) //
                 .next(updateProductWorkflow) //
                 .next(rebuildProductWorkflow) //
+                .next(resetProduct) //
                 .build();
     }
 }

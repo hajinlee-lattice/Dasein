@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
+import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -22,6 +23,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private CloneAccount cloneAccount;
+
+    @Inject
+    private ResetAccount resetAccount;
 
     @Inject
     private UpdateAccountWorkflow updateAccountWorkflow;
@@ -42,6 +46,11 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected AbstractStep cloneStep() {
         return cloneAccount;
+    }
+
+    @Override
+    protected AbstractStep resetStep() {
+        return resetAccount;
     }
 
     @Override

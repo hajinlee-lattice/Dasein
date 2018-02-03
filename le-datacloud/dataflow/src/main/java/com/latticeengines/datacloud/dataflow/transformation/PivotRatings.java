@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @Component(BEAN_NAME)
-public class PivotRatings extends ConsolidateBaseFlow<PivotRatingsConfig> {
+public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
     public static final String BEAN_NAME = "pivotRatings";
     public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_PIVOT_RATINGS;

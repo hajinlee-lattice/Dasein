@@ -5,13 +5,14 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
+import com.latticeengines.cdl.workflow.steps.EntityAwareWorkflowStep;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
-public abstract class BaseCloneEntityStep<T extends BaseProcessEntityStepConfiguration> extends BaseWorkflowStep<T> {
+public abstract class BaseCloneEntityStep<T extends BaseProcessEntityStepConfiguration>
+        extends EntityAwareWorkflowStep<T> {
 
     @Inject
     private CloneTableService cloneTableService;

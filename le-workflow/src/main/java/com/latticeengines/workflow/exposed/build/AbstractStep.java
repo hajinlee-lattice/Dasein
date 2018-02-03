@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -159,6 +160,11 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     public <V> List<V> getListObjectFromContext(String key, Class<V> clazz) {
         List<?> list = getObjectFromContext(key, List.class);
         return JsonUtils.convertList(list, clazz);
+    }
+
+    public <V> Set<V> getSetObjectFromContext(String key, Class<V> clazz) {
+        Set<?> set = getObjectFromContext(key, Set.class);
+        return JsonUtils.convertSet(set, clazz);
     }
 
     public <K, V> Map<K, V> getMapObjectFromContext(String key, Class<K> keyClazz, Class<V> valueClazz) {

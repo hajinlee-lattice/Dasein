@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -51,22 +50,20 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         request.setKeepTemp(false);
         request.setEnableSlack(false);
 
+        int sortStep = 0;
         int profileStep = 0;
         int bucketStep = 1;
 
-        TransformationStepConfig profile = profile(masterTableName);
+        TransformationStepConfig sort = sort(masterTableName, servingStoreTablePrefix, servingStoreSortKey, 200);
+        TransformationStepConfig profile = profile(sortStep);
         TransformationStepConfig bucket = bucket(profileStep, masterTableName);
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, dedupFields);
-        TransformationStepConfig sort = sort(bucketStep, servingStoreTablePrefix, servingStoreSortKey, 200);
-        TransformationStepConfig sortProfile = sort(profileStep, profileTablePrefix,
-                DataCloudConstants.PROFILE_ATTR_ATTRNAME, 1);
         // -----------
         List<TransformationStepConfig> steps = Arrays.asList( //
+                sort, //
                 profile, //
                 bucket, //
-                calc, //
-                sort, //
-                sortProfile //
+                calc //
         );
         // -----------
         request.setSteps(steps);

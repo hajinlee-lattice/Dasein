@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow;
 import javax.inject.Inject;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeContactWrapper;
+import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +23,16 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private RebuildContactWorkflow rebuildContactWorkflow;
 
+    @Inject
+    private ResetContact resetContact;
+
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(mergeContactWrapper) //
                 .next(updateContactWorkflow) //
                 .next(rebuildContactWorkflow) //
+                .next(resetContact) //
                 .build();
     }
 }

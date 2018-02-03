@@ -57,7 +57,9 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
         String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
 
-        upsertProfileTable(profileTableName, profileTableRole());
+        if (profileTableRole() != null) {
+            upsertProfileTable(profileTableName, profileTableRole());
+        }
 
         Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
         enrichTableSchema(servingStoreTable);

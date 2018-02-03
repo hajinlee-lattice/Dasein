@@ -47,6 +47,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private String podId;
 
     private static final String MODELS_RESOURCE_ROOT = "end2end/models";
+    private static final boolean ENABLE_AI_RATINS = false;
 
     private RatingEngine rule1;
     private RatingEngine rule2;
@@ -58,7 +59,9 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        // new Thread(this::setupAIModels).start();
+        if (ENABLE_AI_RATINS) {
+            new Thread(this::setupAIModels).start();
+        }
 
         resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
@@ -76,10 +79,12 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
             ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule2.getId());
         }).start();
 
-//        ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
-//        ai1 = createAIEngine(segment, modelSummary);
-//        modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
-//        ai2 = createAIEngine(segment, modelSummary);
+        if (ENABLE_AI_RATINS) {
+            ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
+            ai1 = createAIEngine(segment, modelSummary);
+            modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
+            ai2 = createAIEngine(segment, modelSummary);
+        }
 
         processAnalyze(constructRequest());
         verifyProcess();

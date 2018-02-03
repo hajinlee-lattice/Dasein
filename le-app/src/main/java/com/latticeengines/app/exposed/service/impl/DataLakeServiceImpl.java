@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -167,8 +168,10 @@ public class DataLakeServiceImpl implements DataLakeService {
     public TopNTree getTopNTree() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         TopNTree topNTree = _dataLakeService.getTopNTree(customerSpace);
-        List<RatingEngineSummary> engineSummaries = getRatingSummaries(customerSpace);
-        StatsCubeUtils.processRatingCategory(topNTree, engineSummaries);
+        if (topNTree.hasCategory(Category.RATING)) {
+            List<RatingEngineSummary> engineSummaries = getRatingSummaries(customerSpace);
+            StatsCubeUtils.processRatingCategory(topNTree, engineSummaries);
+        }
         return topNTree;
     }
 
@@ -277,11 +280,13 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (MapUtils.isEmpty(cmMap)) {
             return null;
         }
-        Map<String, String> productMap = getProductMap(customerSpace);
-        String timerMsg = "Construct top N tree with " + cubes.size() + " cubes and " + productMap.size() + " products.";
+        String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
         try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
             TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
-            if (MapUtils.isNotEmpty(productMap)) {
+            if (topNTree.hasCategory(Category.PRODUCT_SPEND)) {
+                Map<String, String> productMap = getProductMap(customerSpace);
+                timerMsg = "Construct top N tree with " + cubes.size() + " cubes and " + productMap.size() + " products.";
+                timer.setTimerMessage(timerMsg);
                 StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
             }
             return topNTree;
