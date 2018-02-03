@@ -13,23 +13,28 @@ angular.module('lp.ratingsengine.wizard.training', [
         quantityValue: 2,
         periodsCriteria: "WITHIN",
         periodsValue: 2,
-        modelingConfigFilters: {}
+        modelingConfigFilters: {},
+        trainingSegment: {},
+        trainingProducts: []
     });
 
     vm.init = function () {
 
     }
 
-    vm.segmentsCallback = function(args) {
-        console.log(args);
+    vm.segmentCallback = function(selectedSegment) {
+        vm.trainingSegment = selectedSegment[0];
     }
 
-    vm.productsCallback = function(args) {
-        console.log(args);
+    vm.productsCallback = function(selectedProducts) {
+        angular.forEach(selectedProducts, function(product){
+            vm.trainingProducts.push(product.ProductId);
+        });
+
     }
 
     vm.formOnChange = function(){
-        console.log("form changed");
+        console.log("form changed", $scope);
 
         if($scope.checkboxModel.spend) {
             vm.modelingConfigFilters.SPEND_IN_PERIOD = {
@@ -61,7 +66,19 @@ angular.module('lp.ratingsengine.wizard.training', [
             delete vm.modelingConfigFilters.TRAINING_SET_PERIOD;
         }
 
-        RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
+        if($scope.checkboxModel.spend || $scope.checkboxModel.quantity || $scope.checkboxModel.periods) {
+            RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
+        }
+
+        if($scope.trainingSegment) {
+            console.log(vm.trainingSegment);
+            RatingsEngineStore.setTrainingSegment(vm.trainingSegment);   
+        }
+        if($scope.trainingProducts) {
+            console.log(vm.trainingProducts);
+            RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
+        }
+
     };
 
     vm.init();

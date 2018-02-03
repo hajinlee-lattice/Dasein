@@ -15,6 +15,8 @@ angular.module('lp.ratingsengine')
     this.cachedSegments = [];
     this.cachedProducts = [];
     this.modelingConfigFilters = null;
+    this.trainingSegment = null;
+    this.trainingProducts = null;
 
     this.init = function() {
         this.settings = {};
@@ -579,6 +581,20 @@ angular.module('lp.ratingsengine')
         return this.modelingConfigFilters;
     }
 
+    this.setTrainingSegment = function(trainingSegment) {
+        this.trainingSegment = trainingSegment;
+    }
+    this.getTrainingSegment = function() {
+        return this.trainingSegment;
+    }
+
+    this.setTrainingProducts = function(trainingProducts) {
+        this.trainingProducts = trainingProducts;
+    }
+    this.getTrainingProducts = function() {
+        return this.trainingProducts;
+    }
+
     this.nextSaveRatingEngineAI = function(nextState){
 
         var type = RatingsEngineStore.getType(),
@@ -617,6 +633,8 @@ angular.module('lp.ratingsengine')
             targetProducts = RatingsEngineStore.getProductsSelectedIds(),
             predictionType = RatingsEngineStore.getPredictionType(),
             modelingConfigFilters = RatingsEngineStore.getModelingConfigFilters(),
+            trainingSegment = RatingsEngineStore.getTrainingSegment(),
+            trainingProducts = RatingsEngineStore.getTrainingProducts(),
             obj = {};
 
         RatingsEngineStore.getRating(ratingId).then(function(rating){
@@ -625,7 +643,9 @@ angular.module('lp.ratingsengine')
                     id: rating.activeModel.AI.id,
                     targetProducts: targetProducts,
                     predictionType: predictionType,
-                    modelingConfigFilters: modelingConfigFilters
+                    modelingConfigFilters: modelingConfigFilters,
+                    trainingSegment: trainingSegment,
+                    trainingProducts: trainingProducts
                 }
             };
             

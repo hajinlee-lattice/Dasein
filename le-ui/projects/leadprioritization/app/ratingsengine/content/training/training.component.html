@@ -85,10 +85,10 @@
                             <chips
                                 placeholder="Search for a similar segment"
                                 datasource="vm.segments" 
-                                callback-function="vm.segmentsCallback(args)"
+                                callback-function="vm.segmentCallback(args)"
                                 single-selection="true"
                                 displayname="display_name"
-                                ng-disabled="checkboxModel.segments"></chips>
+                                model="trainingSegment"></chips>
                         </div>
                     </li>
                     <li class="form-group auto-select-group">
@@ -100,7 +100,7 @@
                                 callback-function="vm.productsCallback(args)"
                                 single-selection="false"
                                 displayname="ProductName"
-                                ng-disabled="checkboxModel.products"></chips>
+                                model="trainingProducts"></chips>
                         </div>
                     </li>
                 </ul><!-- End .checkbox-list -->

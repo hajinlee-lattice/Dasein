@@ -98,7 +98,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         if(launchedStatus.hasLaunched) {
             $state.go('home.playbook.dashboard', {play_name: play.name} );
         } else {
-            $state.go('home.playbook.wizard.rating', {play_name: play.name} );
+            $state.go('home.playbook.create.rating', {play_name: play.name} );
         }
     };
 

@@ -45,7 +45,9 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
         
-        if(vm.segment != null && vm.section != 'wizard.targets'){
+        console.log(vm.accounts);
+
+        if(vm.segment != null && vm.section != 'create.targets'){
             $rootScope.$broadcast('header-back', { 
                 path: '^home.segment.accounts',
                 displayName: vm.segment.display_name,
@@ -208,7 +210,7 @@ angular.module('common.datacloud.query.results', [
                         return count;
                     };
 
-                    if (vm.section === 'wizard.targets' || vm.section === 'dashboard.targets') {
+                    if (vm.section === 'create.targets' || vm.section === 'dashboard.targets') {
                         vm.counts = { 
                             accounts: { 
                                 value: calculateCountsFromFiltered(filteredAccountsCoverage) 

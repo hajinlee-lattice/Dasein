@@ -2,22 +2,8 @@
     <div class="inner-container">
         <form name="segment_form">
             <div class="header">
-                <h2>
-                    <h2 ng-if="vm.type.engineType != 'RULE_BASED'">Which segment do you want to sell into?</h2>
-                    <h2 ng-if="vm.type.engineType === 'RULE_BASED'">Segments</h2>
-                <!--
-                    <span class="more-info">&#105;
-                        <div class="tooltip_">
-                            <div class="cover">
-                                <h3>Stuff about segments</h3>
-                                <p>
-                                    Segements stuff long text or something here
-                                </p>
-                            </div>
-                        </div>
-                    </span>
-                -->
-                </h2>
+                <h2 ng-if="vm.type.engineType != 'RULE_BASED'">Which segment do you want to sell into?</h2>
+                <h2 ng-if="vm.type.engineType === 'RULE_BASED'">Segments</h2>
             </div>
 
             <div class="content-body no-data" ng-if="!vm.hasSegments">

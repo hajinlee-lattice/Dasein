@@ -72,7 +72,7 @@
                         <div ng-if="!vm.rating.plays || vm.rating.plays.length == 0">There are <strong>no</strong> Plays using this Rating</div>
                     </div>
                     <div class="dashboard-section-footer">
-                        <button class="button blue-button" ui-sref="home.playbook.wizard.rating({rating_id: vm.rating.summary.id})" ng-disabled="!vm.status_toggle">
+                        <button class="button blue-button" ui-sref="home.playbook.create.rating({rating_id: vm.rating.summary.id})" ng-disabled="!vm.status_toggle">
                             <span>Create a new play</span>
                         </button>
                     </div>

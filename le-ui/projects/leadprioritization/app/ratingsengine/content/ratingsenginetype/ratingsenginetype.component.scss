@@ -24,7 +24,7 @@
             @include flex-container;
             flex-wrap: wrap;
             justify-content: center;
-            align-content: flex-end;
+            align-content: center;
             width: 160px;
             height: 160px;
             padding: 10px;
@@ -33,28 +33,12 @@
             line-height: 17px;
             border-radius: 4px;
             border: 1px solid #d0d0d0;
-            animation: CascadeListFadeIn .4s linear;
-            animation-fill-mode: both;
-            &:nth-child(1) {
-                animation-delay: 0;
-            }
-            &:nth-child(2) {
-                animation-delay: .05s
-            }
-            &:nth-child(3) {
-                animation-delay: .1s
-            }
-            &:nth-child(4) {
-                animation-delay: .15s
-            }
-            &:nth-child(5) {
-                animation-delay: .2s
-            }
-            &:nth-child(6) {
-                animation-delay: .25s
-            }
-            &:nth-child(7) {
-                animation-delay: .3s
+            text-align: center;
+            svg {
+                width: 40px;
+                path, polygon, rect {
+                    fill: #3f7bbd;
+                }
             }
             &:nth-child(-n + 4) {
                 order: 1;
@@ -68,11 +52,45 @@
                 -moz-box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
                 box-shadow: 0px 3px 8px 0px rgba(128, 211, 239, 0.35);
                 cursor: pointer;
+                path, polygon, rect {
+                    fill: #3f7bbd;
+                }
             }
             &.disabled {
+                border-color: #d0d0d0;
                 background: #fefefe;
                 color: #bbb;
                 pointer-events: none;
+                path, polygon, rect {
+                    fill: #bbb;
+                }
+                &:hover {
+                    path, polygon, rect {
+                        fill: #bbb;
+                    }
+                }
+            }
+            &.first-purchase svg {
+                height: 39px;
+            }
+            &.return-purchase svg {
+                height: 42px;
+            }
+            &.product-prospects svg {
+                height: 48px;
+            }
+            &.business-prospects svg {
+                height: 48px;
+            }
+            &.rules-prospects svg {
+                height: 43px;
+            }
+            &.custom-event svg {
+                height: 48px;
+            }
+            &.import-pmml svg {
+                width: 42px;
+                height: 46px;
             }
             &.ai {
                 strong {

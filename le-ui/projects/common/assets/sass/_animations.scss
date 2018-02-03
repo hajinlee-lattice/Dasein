@@ -10,7 +10,7 @@
 }
 
 .cascade li {
-    animation: CascadeListFadeIn .4s linear;
+    animation: CascadeListFadeIn .3s linear;
     animation-fill-mode: both;
     &:nth-child(1) {
         animation-delay: 0;

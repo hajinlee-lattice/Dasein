@@ -9,7 +9,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
             callback: '&callbackFunction', 
             singleSelection: '=', 
             id: '@', 
-            displayname: '@' 
+            displayname: '@' ,
+            model: '='
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -136,7 +137,6 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
 
             scope.setListVisibility = function (visible) {
-                console.log("setListVisibility", visible);
                 scope.showQueryList = visible;
             }
         }
