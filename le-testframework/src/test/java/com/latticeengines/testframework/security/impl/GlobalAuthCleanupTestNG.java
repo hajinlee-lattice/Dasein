@@ -126,8 +126,12 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             return;
         }
 
-        log.info("Clean up tenant in GA: " + tenant.getId());
-        tenantService.discardTenant(tenant);
+        try {
+            log.info("Clean up tenant in GA: " + tenant.getId());
+            tenantService.discardTenant(tenant);
+        } catch (Exception e) {
+            log.error("Failed to clean up GA tenant " + tenant.getId(), e);
+        }
     }
 
     private void cleanupZK() throws Exception {
