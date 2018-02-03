@@ -434,19 +434,21 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             Map<String, List<ProfileParameters.Attribute>> amAttrsToEnc,
             Map<String, List<ProfileParameters.Attribute>> exAttrsToEnc, ProfileConfig config,
             ProfileParameters paras) {
-        int size = result.size() + paras.getNumericAttrs().size() + amAttrsToEnc.size() + exAttrsToEnc.size();
+        int size = result.size() + paras.getNumericAttrs().size() + paras.getCatAttrs().size() + amAttrsToEnc.size()
+                + exAttrsToEnc.size();
         switch (config.getStage()) {
         case DataCloudConstants.PROFILE_STAGE_ENRICH:
             log.info(String.format(
-                    "%d numeric attrs(groupd into encode attrs and retain attrs), %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
-                    paras.getNumericAttrs().size(), amAttrsToEnc.size(), exAttrsToEnc.size(),
+                    "%d numeric attrs(grouped into encode attrs and retain attrs), %d categorical attrs(grouped into encode attrs and retain attrs), %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    paras.getNumericAttrs().size(), paras.getCatAttrs().size(), amAttrsToEnc.size(),
+                    exAttrsToEnc.size(),
                     paras.getAttrsToRetain().size()));
             break;
         case DataCloudConstants.PROFILE_STAGE_SEGMENT:
             log.info(String.format(
-                    "%d numeric attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
-                    paras.getNumericAttrs().size(), amAttrsToEnc.size(), exAttrsToEnc.size(),
-                    paras.getAttrsToRetain().size()));
+                    "%d numeric attrs, %d categorical attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    paras.getNumericAttrs().size(), paras.getCatAttrs().size(), amAttrsToEnc.size(),
+                    exAttrsToEnc.size(), paras.getAttrsToRetain().size()));
             break;
         default:
             throw new RuntimeException("Unrecognized stage " + config.getStage());
