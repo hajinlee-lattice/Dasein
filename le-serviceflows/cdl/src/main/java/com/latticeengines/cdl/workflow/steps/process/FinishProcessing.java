@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -8,11 +9,14 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -56,7 +60,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
         if (StringUtils.isNotBlank(configuration.getDataCloudBuildNumber())) {
-            dataCollectionProxy.updateDataCloudBuildNumber(customerSpace.toString(), configuration.getDataCloudBuildNumber());
+            dataCollectionProxy.updateDataCloudBuildNumber(customerSpace.toString(),
+                    configuration.getDataCloudBuildNumber());
         }
         try {
             // wait for local cache clean up
@@ -68,6 +73,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         // update segment and rating engine counts
         SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
         RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace.toString());
+        registerReport();
     }
 
     private void swapMissingTableRoles() {
@@ -104,6 +110,14 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                 }
             });
         }
+    }
+
+    private void registerReport() {
+        JsonNode jsonReport = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
+                JsonNode.class);
+        Report report = createReport(jsonReport.toString(), ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY,
+                UUID.randomUUID().toString());
+        registerReport(configuration.getCustomerSpace(), report);
     }
 
 }

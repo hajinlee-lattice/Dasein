@@ -36,7 +36,9 @@ public enum ReportPurpose {
      */
     IMPORT_DATA_SUMMARY("ImportDataSummary"), //
     EVENT_TABLE_IMPORT_SUMMARY("EventTableImportSummary"), //
-    PUBLISH_DATA_SUMMARY("PublishDataSummary");
+    PUBLISH_DATA_SUMMARY("PublishDataSummary"), //
+    ENTITIES_SUMMARY("EntitiesSummary"), //
+    SYSTEM_ACTIONS("SystemActions"); //
 
     private String key;
 

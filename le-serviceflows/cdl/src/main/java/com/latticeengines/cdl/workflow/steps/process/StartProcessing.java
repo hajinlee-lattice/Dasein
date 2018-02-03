@@ -2,11 +2,13 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -29,17 +31,19 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("startProcessing")
@@ -54,9 +58,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private DataFeedProxy dataFeedProxy;
 
     @Inject
-    private WorkflowProxy workflowProxy;
-
-    @Inject
     private MetadataProxy metadataProxy;
 
     @Inject
@@ -69,6 +70,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private DataCollection.Version activeVersion;
     private DataCollection.Version inactiveVersion;
     private InternalResourceRestApiProxy internalResourceProxy;
+    private ObjectNode reportJson;
 
     @PostConstruct
     public void init() {
@@ -96,11 +98,66 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             setEntityImportsMap(execution);
         }
 
-        List<Job> importJobs = getJobs(configuration.getImportJobIds());
-        createReport(importJobs);
+        createReportJson();
         updateActions();
+        setRebuildEntities();
         cleanupInactiveVersion();
         exportDataToRedshift.upsertToInactiveVersion();
+    }
+
+    private void setRebuildEntities() {
+        Set<BusinessEntity> rebuildEntities = new HashSet<>();
+        rebuildEntities.addAll(getRebuildEntitiesOnDLVersion());
+        rebuildEntities.addAll(getRebuildEntitiesOnDeleteJob());
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(
+                ProcessAnalyzeWorkflowConfiguration.class);
+        if (stepConfigMap.isEmpty()) {
+            log.info("stepConfigMap is Empty!!!");
+        }
+
+        stepConfigMap.entrySet().stream().filter(e -> (e.getValue() instanceof BaseProcessEntityStepConfiguration
+                && (rebuildEntities.contains(((BaseProcessEntityStepConfiguration) e.getValue()).getMainEntity()))))
+                .forEach(e -> {
+                    log.info("enabled rebuidling step of:" + e.getKey());
+                    ((BaseProcessEntityStepConfiguration) e.getValue()).setRebuild(Boolean.TRUE);
+                    putObjectInContext(e.getKey(), e.getValue());
+                });
+    }
+
+    private List<Job> getDeleteJobs() {
+        return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
+                configuration.getActionIds(), ActionType.CDL_OPERATION_WORKFLOW);
+    }
+
+    private Collection<BusinessEntity> getRebuildEntitiesOnDLVersion() {
+        String currentBuildNumber = configuration.getDataCloudBuildNumber();
+        DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
+        if (dataCollection != null && dataCollection.getDataCloudBuildNumber() != null
+                && !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber)) {
+            ArrayNode systemActionsNode = reportJson.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
+            systemActionsNode.add("Rebuild due to Data Cloud Version Changed");
+            putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
+            return Collections.singletonList(BusinessEntity.Account);
+        }
+        return Collections.emptyList();
+    }
+
+    private Collection<BusinessEntity> getRebuildEntitiesOnDeleteJob() {
+        Set<BusinessEntity> rebuildEntities = new HashSet<>();
+        try {
+            List<Job> deleteJobs = getDeleteJobs();
+            for (Job job : deleteJobs) {
+                String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
+                if (StringUtils.isEmpty(str)) {
+                    continue;
+                }
+                List<String> entityStrs = Arrays.asList(str.substring(1, str.length() - 1).split(", "));
+                rebuildEntities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
+            }
+        } catch (Exception e) {
+            log.error("Failed to set rebuild entities based on delete actions.", e);
+        }
+        return rebuildEntities;
     }
 
     private void determineVersions() {
@@ -124,14 +181,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
     }
 
-    private List<Job> getJobs(List<Long> importJobIds) {
-        if (importJobIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return workflowProxy.getWorkflowExecutionsByJobIds(
-                importJobIds.stream().map(jobId -> jobId.toString()).collect(Collectors.toList()));
-    }
-
     private void updateActions() {
         List<Long> actionIds = configuration.getActionIds();
         log.info(String.format("Updating actions=%s", Arrays.toString(actionIds.toArray())));
@@ -140,30 +189,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
     }
 
-    private void createReport(List<Job> jobs) {
-        ObjectNode json = JsonUtils.createObjectNode();
-        ArrayNode arrayNode = json.putArray(ReportPurpose.IMPORT_SUMMARY.getKey());
-        jobs.forEach(job -> {
-            String fileName = job.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
-            Report importReport = job.getReports().stream() //
-                    .filter(r -> r.getPurpose().equals(ReportPurpose.IMPORT_SUMMARY))//
-                    .findFirst().orElse(null);
-            if (importReport != null) {
-                ObjectNode importReportNode = JsonUtils.createObjectNode();
-                try {
-                    importReportNode.set(fileName,
-                            JsonUtils.getObjectMapper().readTree(importReport.getJson().getPayload()));
-                    arrayNode.add(importReportNode);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                log.info(String.format("import job %s has no report generated.", fileName));
-            }
-        });
-        Report report = createReport(json.toString(), ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY,
-                UUID.randomUUID().toString());
-        registerReport(configuration.getCustomerSpace(), report);
+    private void createReportJson() {
+        reportJson = JsonUtils.createObjectNode();
+        putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
     }
 
     private void cleanupInactiveVersion() {

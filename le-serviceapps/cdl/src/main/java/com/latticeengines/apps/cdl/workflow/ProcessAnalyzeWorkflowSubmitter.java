@@ -1,9 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,7 +11,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -37,7 +34,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -132,40 +128,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         updateActions(customerSpace, actionAndJobIds.getLeft());
 
         String currentDataCloudBuildNumber = "";
-        request.getRebuildEntities().addAll(getRebuildEntitiesOnDLVersion(dataCollection, currentDataCloudBuildNumber));
-        request.getRebuildEntities().addAll(getRebuildEntitiesOnDeleteJob(customerSpace, actionAndJobIds));
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
                 actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
         return workflowJobService.submit(configuration);
-    }
-
-    private Collection<BusinessEntity> getRebuildEntitiesOnDLVersion(DataCollection dataCollection,
-            String currentBuildNumber) {
-        if (dataCollection != null && dataCollection.getDataCloudBuildNumber() != null
-                && !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber)) {
-            return Collections.singletonList(BusinessEntity.Account);
-        }
-        return Collections.emptyList();
-    }
-
-    private Collection<BusinessEntity> getRebuildEntitiesOnDeleteJob(String customerSpace,
-            Pair<List<Long>, List<Long>> actionAndJobIds) {
-        Set<BusinessEntity> rebuildEntities = new HashSet<>();
-        try {
-            List<Job> deleteJobs = internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace,
-                    actionAndJobIds.getLeft(), ActionType.CDL_OPERATION_WORKFLOW);
-            for (Job job : deleteJobs) {
-                String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
-                if (StringUtils.isEmpty(str)) {
-                    continue;
-                }
-                List<String> entityStrs = Arrays.asList(str.substring(1, str.length() - 1).split(", "));
-                rebuildEntities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
-            }
-        } catch (Exception e) {
-            log.error("Failed to set rebuild entities based on delete actions.", e);
-        }
-        return rebuildEntities;
     }
 
     @VisibleForTesting

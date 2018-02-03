@@ -7,18 +7,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -39,7 +38,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -116,7 +114,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             Collections.reverse(inputTables);
             inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
                     : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
-                    : t.getLastModifiedKey().getLastModifiedTimestamp())
+                            : t.getLastModifiedKey().getLastModifiedTimestamp())
                     .reversed());
             for (Table table : inputTables) {
                 inputTableNames.add(table.getName());
@@ -175,27 +173,39 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         Table diffReport = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(diffReportTablePrefix, pipelineVersion));
         if (diffReport != null) {
-            Report report = retrieveReport(customerSpace, ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY);
-            String reportName = report != null ? report.getName() : UUID.randomUUID().toString();
-            String reportPayload = updateReportPayload(report, diffReport);
-            report(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY, reportName, reportPayload);
+            ObjectNode report = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
+                    ObjectNode.class);
+            updateReportPayload(report, diffReport);
+            putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), report);
             metadataProxy.deleteTable(customerSpace.toString(), diffReport.getName());
         } else {
             log.warn("Didn't find ConsolidationSummaryReport table for entity " + entity);
         }
     }
 
-    protected String updateReportPayload(Report report, Table diffReport) {
+    protected void updateReportPayload(ObjectNode report, Table diffReport) {
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            ObjectNode json = report != null && StringUtils.isNotBlank(report.getJson().getPayload())
-                    ? (ObjectNode) om.readTree(report.getJson().getPayload()) : om.createObjectNode();
             String path = diffReport.getExtracts().get(0).getPath();
             Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path);
             ObjectNode newItem = (ObjectNode) om
                     .readTree(records.next().get(InterfaceName.ConsolidateReport.name()).toString());
-            json.setAll(newItem);
-            return json.toString();
+
+            JsonNode entitiesSummaryNode = report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
+            if (entitiesSummaryNode == null) {
+                entitiesSummaryNode = report.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
+            }
+            JsonNode entityNode = entitiesSummaryNode.get(entity.name());
+            if (entityNode == null) {
+                entityNode = ((ObjectNode) entitiesSummaryNode).putObject(entity.name());
+            }
+            JsonNode consolidateSummaryNode = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+            if (consolidateSummaryNode == null) {
+                consolidateSummaryNode = ((ObjectNode) entityNode)
+                        .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+            }
+            ((ObjectNode) consolidateSummaryNode).setAll(newItem);
+
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
         }
