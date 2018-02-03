@@ -75,20 +75,23 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public JobStatus getJobStatus(String customerSpace, Long workflowId) {
         log.info(String.format("customerSpace=%s, workflowId=%s", customerSpace, Long.toString(workflowId)));
-        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId);
-        job = checkLastUpdateTime(Collections.singletonList(job)).get(0);
-        return JobStatus.fromString(job.getStatus());
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        if (workflowJob == null) {
+            return null;
+        }
+        workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
+        return JobStatus.fromString(workflowJob.getStatus());
     }
 
     @Override
     @WithCustomerSpace
     public List<JobStatus> getJobStatus(String customerSpace, List<Long> workflowIds) {
         log.info(String.format("customerSpace=%s, workflowIds=%s", customerSpace, JsonUtils.serialize(workflowIds)));
-        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
                 workflowIds, null, null);
-        jobs.removeIf(Objects::isNull);
-        jobs = checkLastUpdateTime(jobs);
-        return jobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
+        workflowJobs.removeIf(Objects::isNull);
+        workflowJobs = checkLastUpdateTime(workflowJobs);
+        return workflowJobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
     }
 
     @Override
@@ -97,6 +100,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         log.info(String.format("customerSpace=%s, workflowId=%s, includeDetails=%s",
                 customerSpace, Long.toString(workflowId), Boolean.toString(includeDetails)));
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        if (workflowJob == null) {
+            return null;
+        }
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
         return assembleJob(workflowJob, includeDetails);
     }
@@ -107,6 +113,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         log.info(String.format("customerSpace=%s, applicationId=%s, includeDetails=%s", customerSpace, applicationId,
                 Boolean.toString(includeDetails)));
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        if (workflowJob == null) {
+            return null;
+        }
         workflowJob = checkLastUpdateTime(Collections.singletonList(workflowJob)).get(0);
         return assembleJob(workflowJob, includeDetails);
     }
@@ -116,8 +125,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public List<Job> getJobs(String customerSpace, Boolean includeDetails) {
         log.info(String.format("customerSpace=%s, includeDetails=%s", customerSpace, Boolean.toString(includeDetails)));
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
+        workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkLastUpdateTime(workflowJobs);
-
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
                 .collect(Collectors.toList());
     }
@@ -141,6 +150,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     optionalWorkflowIds.orElse(null), optionalTypes.orElse(null), null);
         }
 
+        workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkLastUpdateTime(workflowJobs);
 
         return workflowJobs.stream().map(workflowJob -> assembleJob(workflowJob, includeDetails))
@@ -164,11 +174,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public void updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId) {
         log.info(String.format("customerSpace=%s, workflowIds=%s, parentJobId=%s", customerSpace,
                 JsonUtils.serialize(workflowIds), Long.toString(parentJobId)));
-        List<WorkflowJob> jobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(workflowIds,
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(workflowIds,
                 null, null);
-        jobs.removeIf(Objects::isNull);
-        jobs = checkLastUpdateTime(jobs);
-        jobs.forEach(job -> {
+        workflowJobs.removeIf(Objects::isNull);
+        workflowJobs = checkLastUpdateTime(workflowJobs);
+        workflowJobs.forEach(job -> {
             job.setParentJobId(parentJobId);
             workflowJobEntityMgr.updateParentJobId(job);
         });
