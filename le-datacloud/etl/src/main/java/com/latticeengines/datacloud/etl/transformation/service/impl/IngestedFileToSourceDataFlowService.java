@@ -109,6 +109,7 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
                         .toString();
                 log.info("SearchWildCard: " + searchWildCard);
                 convertCsvToAvro(fieldTypeMapping, searchWildCard, workflowDir, parameters);
+                HdfsUtils.rmdir(yarnConfiguration, uncompressedDir.toString());
             } else {
                 log.error("Fail to find any target files!");
             }
