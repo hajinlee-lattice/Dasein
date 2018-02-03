@@ -70,6 +70,9 @@ public class TransformerUtils {
     public static void removeEmptyAvros(Configuration yarnConfiguration, String avroGlob) {
         try {
             List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
+            if (files == null) {
+                return;
+            }
             for (String file : files) {
                 Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, file);
                 if (!iterator.hasNext()) {

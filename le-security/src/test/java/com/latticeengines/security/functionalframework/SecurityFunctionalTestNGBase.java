@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -72,12 +72,6 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
-
-    @Value("${security.test.api.hostport}")
-    private String hostPort;
-
-    @Value("${common.test.pls.url}")
-    private String plsHostPort;
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -214,11 +208,11 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     }
 
     protected String getRestAPIHostPort() {
-        return hostPort;
+        return PropertyUtils.getProperty("security.test.api.hostport");
     }
 
     protected String getPLSRestAPIHostPort() {
-        return plsHostPort;
+        return PropertyUtils.getProperty("common.test.pls.url");
     }
 
     protected void createAdminTenant() {

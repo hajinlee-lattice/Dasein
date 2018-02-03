@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -20,23 +21,26 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 @Component("transformerService")
 public class TransformerServiceImpl implements TransformerService {
 
-    @Autowired
+    @Inject
     private List<Transformer> transformerList;
 
-    @Autowired
+    @Inject
     private List<ConfigurableFlow> configurableFlows;
 
-    @Autowired
+    @Inject
     protected SimpleTransformationDataFlowService dataFlowService;
 
-    @Autowired
+    @Inject
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     private Map<String, Transformer> transformerMap;
 
@@ -59,6 +63,7 @@ public class TransformerServiceImpl implements TransformerService {
             transformer.setDataFlowService(dataFlowService);
             transformer.setHdfsSourceEntityMgr(hdfsSourceEntityMgr);
             transformer.setMetadataProxy(metadataProxy);
+            transformer.setYarnConfiguration(yarnConfiguration);
             transformerList.add(transformer);
             transformerMap.put(transformer.getName(), transformer);
         }

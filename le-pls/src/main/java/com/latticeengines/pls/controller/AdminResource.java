@@ -79,7 +79,7 @@ public class AdminResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Delete a tenant.")
     public Boolean deleteTenant(@PathVariable String tenantId,
-            @RequestParam(value = "tenantName", required = false, defaultValue = " ") String tenantName,
+            @RequestParam(value = "tenantId", required = false, defaultValue = " ") String tenantName,
             HttpServletRequest request) {
         checkHeader(request);
         Tenant tenant = new Tenant();
