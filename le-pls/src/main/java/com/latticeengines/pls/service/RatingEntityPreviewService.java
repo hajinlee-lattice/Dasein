@@ -9,7 +9,9 @@ import com.latticeengines.domain.exposed.query.DataPage;
 public interface RatingEntityPreviewService {
 
     DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
+            Boolean restrictNotNullSalesforceId, List<String> selectedBuckets);
+
+    DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
             boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets);
-
 }

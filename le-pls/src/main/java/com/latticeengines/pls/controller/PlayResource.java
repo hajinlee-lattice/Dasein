@@ -1,11 +1,13 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,11 +19,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.PlayUtils;
+import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -39,6 +49,9 @@ public class PlayResource {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private RatingEntityPreviewService ratingEntityPreviewService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -101,7 +114,7 @@ public class PlayResource {
     @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get full play for a specific tenant based on playName")
-    public Play getPlay(@PathVariable String playName, HttpServletRequest request, HttpServletResponse response) {
+    public Play getPlay(@PathVariable String playName) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlay(tenant.getId(), playName);
     }
@@ -141,6 +154,9 @@ public class PlayResource {
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
+
+        validateNonEmptyTargetsForLaunch(tenant.getId(), playName, playLaunch);
+
         return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
     }
 
@@ -185,4 +201,21 @@ public class PlayResource {
         playProxy.deletePlayLaunch(tenant.getId(), playName, launchId);
     }
 
+    private void validateNonEmptyTargetsForLaunch(String customerSpace, String playName, PlayLaunch playLaunch) {
+        Play play = getPlay(playName);
+        PlayUtils.validatePlayBeforeLaunch(play);
+        PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
+
+        RatingEngine ratingEngine = play.getRatingEngine();
+        DataPage previewDataPage = ratingEntityPreviewService.getEntityPreview( //
+                ratingEngine, 0L, 1L, BusinessEntity.Account, //
+                play.getExcludeItemsWithoutSalesforceId(), //
+                playLaunch.getBucketsToLaunch().stream() //
+                        .map(RatingBucketName::getName) //
+                        .collect(Collectors.toList()));
+
+        if (previewDataPage == null || CollectionUtils.isEmpty(previewDataPage.getData())) {
+            throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
+        }
+    }
 }

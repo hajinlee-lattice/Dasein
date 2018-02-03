@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -22,13 +23,13 @@ import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
@@ -337,7 +338,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private PlayLaunch createDefaultPlayLaunch() {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(null);
+        playLaunch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())));
         return playLaunch;
     }
 

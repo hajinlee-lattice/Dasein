@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,18 +18,19 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
@@ -166,8 +168,34 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertPlayLaunch(playLaunch);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
+    public void createPlayLaunchFail1() {
+        PlayLaunch launch = createDefaultPlayLaunch();
+        launch.setBucketsToLaunch(new HashSet<>());
+        try {
+            launch = restTemplate.postForObject(getRestAPIHostPort() + //
+                    "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
+            Assert.fail("Play launch submission should fail");
+        } catch (Exception ex) {
+            Assert.assertTrue(ex.getMessage().contains(LedpCode.LEDP_18156.name()));
+        }
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunchFail1" })
+    public void createPlayLaunchFail2() {
+        PlayLaunch launch = createDefaultPlayLaunch();
+        launch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.F)));
+        try {
+            launch = restTemplate.postForObject(getRestAPIHostPort() + //
+                    "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
+            Assert.fail("Play launch submission should fail");
+        } catch (Exception ex) {
+            Assert.assertTrue(ex.getMessage().contains(LedpCode.LEDP_18176.name()));
+        }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunchFail2" })
     private void searchPlayLaunch() {
         List<PlayLaunch> launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Failed, List.class);
@@ -354,7 +382,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private PlayLaunch createDefaultPlayLaunch() {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(null);
+        playLaunch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())));
         return playLaunch;
     }
 

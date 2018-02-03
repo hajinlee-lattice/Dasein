@@ -131,9 +131,9 @@ public class PlayLaunchProcessor {
 
         Long currentTimeMillis = System.currentTimeMillis();
 
-        String avroFileName = playLaunchContext.getPlayLaunchId() + ".avro";
+        String avroFileName = String.format("%s.avro", playLaunchContext.getPlayLaunchId());
 
-        File localFile = new File(tenant.getName() + "_" + currentTimeMillis + "_" + avroFileName);
+        File localFile = new File(String.format("%s_%s_%s", tenant.getName(), currentTimeMillis, avroFileName));
 
         if (segmentAccountsCount > 0) {
             // process accounts that exists in segment

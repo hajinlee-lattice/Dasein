@@ -1,15 +1,11 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +30,10 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
-import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -62,6 +58,9 @@ public class PlayResource {
 
     @Inject
     private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
+
+    @Inject
+    private EntityProxy entityProxy;
 
     @Inject
     public PlayResource(PlayService playService, PlayLaunchService playLaunchService, MetadataProxy metadataProxy,
@@ -175,8 +174,9 @@ public class PlayResource {
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Play play = playService.getPlayByName(playName);
-        validatePlayBeforeLaunch(play);
-        validatePlayLaunchBeforeLaunch(playLaunch, play);
+        PlayUtils.validatePlayBeforeLaunch(play);
+        PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
+
         if (play != null) {
             playLaunch.setLaunchState(LaunchState.Launching);
             playLaunch.setPlay(play);
@@ -220,32 +220,6 @@ public class PlayResource {
         generatedRecommendationTable = metadataProxy.getTable(customerSpace.toString(), tableName);
 
         return generatedRecommendationTable.getName();
-    }
-
-    private void validatePlayBeforeLaunch(Play play) {
-        if (play.getRatingEngine() == null) {
-            throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
-        } else if (play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
-            throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
-        }
-
-    }
-
-    private void validatePlayLaunchBeforeLaunch(PlayLaunch playLaunch, Play play) {
-        if (CollectionUtils.isEmpty(playLaunch.getBucketsToLaunch())) {
-            // TODO - enable it once UI has added support for launc/relaunch
-            // workflow (PLS-4997)
-            // throw new LedpException(LedpCode.LEDP_18156, new String[] {
-            // play.getName() });
-
-            // ----------------
-
-            // TODO - remove it when (PLS-4997) if done
-            // if no buckets are specified then we default it to all buckets
-            Set<RatingBucketName> defaultBucketsToLaunch = //
-                    new TreeSet<>(Arrays.asList(RatingBucketName.values()));
-            playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
-        }
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)

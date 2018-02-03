@@ -63,6 +63,13 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
+            Boolean restrictNotNullSalesforceId, List<String> selectedBuckets) {
+        return getEntityPreview(ratingEngine, offset, maximum, entityType, null, false, null, null,
+                restrictNotNullSalesforceId, null, selectedBuckets);
+    }
+
+    @Override
+    public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
             boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
         Tenant tenant = MultiTenantContext.getTenant();
