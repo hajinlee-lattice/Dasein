@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -89,6 +90,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     private void swapMissingTableRoles() {
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        if (resetEntities == null) {
+            resetEntities = Collections.emptySet();
+        }
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
             BusinessEntity ownerEntity = getOwnerEntity(role);
             if (ownerEntity != null && resetEntities.contains(ownerEntity)) {
