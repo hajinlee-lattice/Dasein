@@ -238,6 +238,10 @@ public abstract class BaseRestApiProxy {
         put(method, url, null, false);
     }
 
+    protected <B> void putWithoutLogBody(final String method, final String url, final B body) {
+        put(method, url, body, false);
+    }
+
     protected <B> void put(final String method, final String url, final B body) {
         put(method, url, body, true);
     }
