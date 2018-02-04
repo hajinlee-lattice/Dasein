@@ -13,13 +13,15 @@ DEV_KAFKA_DIR=${WSHOME}/le-dev/kafka
 echo "Starting kafka broker ..."
 ${CONFLUENT_HOME}/bin/kafka-server-start -daemon ${DEV_KAFKA_DIR}/server.properties
 
-echo "Sleep 3 sec, and check tail of broker log ..."
+echo "Sleep 3 sec, and check tail of broker log ${CONFLUENT_HOME}/logs/kafkaServer.out ..."
 sleep 3
-tail ${CONFLUENT_HOME}/logs/kafkaServer.out
+tail -n 50 ${CONFLUENT_HOME}/logs/kafkaServer.out
 
 echo "Starting schema registry ..."
 ${CONFLUENT_HOME}/bin/schema-registry-start ${DEV_KAFKA_DIR}/schema-registry.properties > ${CONFLUENT_HOME}/logs/schemaRegistry.out &
 
-echo "Sleep 3 sec, and check tail of schema registry log ..."
+echo "Sleep 3 sec, and check tail of schema registry log ${CONFLUENT_HOME}/logs/schemaRegistry.ou ..."
 sleep 3
-tail ${CONFLUENT_HOME}/logs/schemaRegistry.out
+tail -n 50 ${CONFLUENT_HOME}/logs/schemaRegistry.out
+
+echo "If you see errors in above log tails, please consider restart the servers."

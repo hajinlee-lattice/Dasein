@@ -100,3 +100,8 @@ alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
 
 alias runui='pushd $WSHOME/le-ui && npm install && npm run local && popd'
 alias runadminui='pushd $WSHOME/le-ui && npm install && npm run local_admin && popd'
+
+alias kfk-deploy='bash $WSHOME/le-dev/scripts/setupkafka.sh'
+alias kfk-start='bash $WSHOME/le-dev/scripts/start-kafka.sh'
+alias kfk-stop='bash $WSHOME/le-dev/scripts/stop-kafka.sh'
+alias kfk-connect='bash $WSHOME/le-dev/scripts/start-kafka-connect.sh'

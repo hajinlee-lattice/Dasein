@@ -22,14 +22,21 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${ARTIFACT_DIR}/confluent-${CP_VERSION} || true
     tar xzf ${ARTIFACT_DIR}/confluent-oss-${CP_VERSION}-${CP_SCALA_VERSION}.tar.gz -C ${ARTIFACT_DIR}
     cp -rf ${ARTIFACT_DIR}/confluent-${CP_VERSION}/* ${CONFLUENT_HOME}
+
+    PYTHON=${PYTHON:=python}
+    ZK_HOST="localhost:2181"
+    for node in 'kafka' 'schema_repository'; do
+        python -c "import zc.zk; zk = zc.zk.ZooKeeper('${ZK_HOST}'); zk.delete_recursive('${node}') if zk.exists('${node}') else quit();"
+    done
 fi
 
-cp ${WSHOME}/le-dev/kafka/server.properties ${CONFLUENT_HOME}/etc/kafka/server.properties
-cp ${WSHOME}/le-dev/kafka/schema-registry.properties ${CONFLUENT_HOME}/etc/schema-registry/schema-registry.properties
-cp ${WSHOME}/le-dev/kafka/connect-avro-standalone.properties ${CONFLUENT_HOME}/etc/schema-registry/connect-avro-standalone.properties
+cp -f ${WSHOME}/le-dev/kafka/server.properties ${CONFLUENT_HOME}/etc/kafka/server.properties
+cp -f ${WSHOME}/le-dev/kafka/schema-registry.properties ${CONFLUENT_HOME}/etc/schema-registry/schema-registry.properties
+cp -f ${WSHOME}/le-dev/kafka/connect-avro-standalone.properties ${CONFLUENT_HOME}/etc/schema-registry/connect-avro-standalone.properties
 
 sudo mkdir -p /var/log/kafka || true
 sudo chown ${USER} /var/log/kafka
 chmod +w /var/log/kafka
+rm -rf /var/log/kafka/*
 
 mkdir -p ${CONFLUENT_HOME}/etc/datafabric

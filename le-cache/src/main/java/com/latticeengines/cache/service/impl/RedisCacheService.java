@@ -15,6 +15,11 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -35,26 +40,46 @@ public class RedisCacheService extends CacheServiceBase {
 
     @Override
     public void refreshKeysByPattern(String pattern, CacheName... cacheNames) {
-        redisTemplate.execute(new SessionCallback<Long>() {
-            @SuppressWarnings({ "rawtypes", "unchecked" })
+        RetryTemplate retry = getRetryTemplate();
+        retry.execute(new RetryCallback<Void, RuntimeException>() {
             @Override
-            public Long execute(RedisOperations operations) throws DataAccessException {
-                List<Object> rawkeys = redisTemplate.executePipelined(new RedisCallback<Object>() {
+            public Void doWithRetry(RetryContext context) {
+                redisTemplate.execute(new SessionCallback<Long>() {
+                    @SuppressWarnings("unchecked")
                     @Override
-                    public Object doInRedis(RedisConnection connection) throws DataAccessException {
-                        for (CacheName cacheName : cacheNames) {
-                            log.info("Getting keys via pattern " + pattern + " from " + cacheName);
-                            connection.keys(String.format("*%s*", pattern).getBytes());
-                        }
-                        return null;
+                    public Long execute(RedisOperations operations) throws DataAccessException {
+                        List<Object> rawkeys = redisTemplate.executePipelined(new RedisCallback<Object>() {
+                            @Override
+                            public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                                for (CacheName cacheName : cacheNames) {
+                                    log.info("Getting keys via pattern " + pattern + " from " + cacheName);
+                                    connection.keys(String.format("*%s*", pattern).getBytes());
+                                }
+                                return null;
+                            }
+                        }, new StringRedisSerializer());
+                        Set<String> keys = rawkeys.stream().flatMap(o -> ((Set<String>) o).stream())
+                                .collect(Collectors.toSet());
+                        long cnt = operations.delete(keys);
+                        log.info("Deleted " + cnt);
+                        return cnt;
                     }
-                }, new StringRedisSerializer());
-                Set<String> keys = rawkeys.stream().flatMap(o -> ((Set<String>) o).stream())
-                        .collect(Collectors.toSet());
-                long cnt = operations.delete(keys);
-                log.info("Deleted " + cnt);
-                return cnt;
+                });
+                return null;
             }
         });
+    }
+
+    private RetryTemplate getRetryTemplate() {
+        RetryTemplate retry = new RetryTemplate();
+        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+        retryPolicy.setMaxAttempts(3);
+        retry.setRetryPolicy(retryPolicy);
+        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        backOffPolicy.setInitialInterval(1000L);
+        backOffPolicy.setMultiplier(2.0);
+        retry.setBackOffPolicy(backOffPolicy);
+        retry.setThrowLastExceptionOnExhausted(true);
+        return retry;
     }
 }
