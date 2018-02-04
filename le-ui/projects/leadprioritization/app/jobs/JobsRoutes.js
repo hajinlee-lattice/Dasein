@@ -95,6 +95,11 @@ angular
             //         });
             //     }
             // },
+            params: {
+                pageIcon: 'ico-cog',
+                pageTitle: 'Jobs',
+                jobCreationSuccess: null
+            },
             views: {
                 "main@": {
                     controller: 'DataProcessingComponent',

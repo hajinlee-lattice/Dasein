@@ -12,7 +12,17 @@
 <div class="le-cell le-col-start-5 le-col-span-1">
     <span>
         {{getActionsCount()}}
-        <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="getSubJobsPartialSuccess().length > 0"></i>
+        <span class="le-tooltip" ng-if="getSubJobsPartialSuccess().length > 0">
+            <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true">
+                <div class="tooltip-content">
+                    <h3>Partial Success</h3>
+                    <p>The following actions are partially validated and will not be taken into data processing:</p>
+                    <ol>
+                        <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess())">{{$index+1}}. {{subjob}}</li>
+                    </ol>
+                </div>
+            </i>
+        </span>
 
     </span>
 </div>
@@ -52,7 +62,7 @@
             <i class="fa fa-angle-double-up fa-lg"></i>
         </span>
     </a>
-    
+
 </div>
 <div class="le-row" ng-if="loading">
     <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
