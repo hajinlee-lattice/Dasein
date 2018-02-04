@@ -51,12 +51,12 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         request.setEnableSlack(false);
 
         int sortStep = 0;
-        int profileStep = 0;
-        int bucketStep = 1;
+        int profileStep = 1;
+        int bucketStep = 2;
 
         TransformationStepConfig sort = sort(masterTableName, servingStoreTablePrefix, servingStoreSortKey, 200);
         TransformationStepConfig profile = profile(sortStep);
-        TransformationStepConfig bucket = bucket(profileStep, masterTableName);
+        TransformationStepConfig bucket = bucket(profileStep, sortStep);
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, dedupFields);
         // -----------
         List<TransformationStepConfig> steps = Arrays.asList( //
