@@ -26,7 +26,7 @@ import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.util.MetadataUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("modelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {

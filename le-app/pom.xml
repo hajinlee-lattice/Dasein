@@ -28,6 +28,11 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
@@ -43,17 +48,6 @@
             <artifactId>le-domain</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-datafabric</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -99,8 +93,9 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-baton</artifactId>
+            <artifactId>le-testframework</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

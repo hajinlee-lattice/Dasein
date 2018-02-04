@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("selectedAttrService")
 public class AttributeServiceImpl implements AttributeService {

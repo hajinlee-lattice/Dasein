@@ -20,7 +20,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.pls.service.impl.ModelDownloaderCallable;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("modelSummaryDownloaderEntityMgr")
 public class ModelSummaryDownloaderEntityMgrImpl implements

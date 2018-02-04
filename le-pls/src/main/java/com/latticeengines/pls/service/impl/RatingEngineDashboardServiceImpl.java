@@ -19,7 +19,7 @@ import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("ratingEngineDashboardService")
 public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate implements RatingEngineDashboardService {

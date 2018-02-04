@@ -35,7 +35,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component
 public abstract class ModelServiceBase implements ModelService {

@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {

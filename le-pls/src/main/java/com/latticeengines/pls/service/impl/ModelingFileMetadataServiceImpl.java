@@ -48,7 +48,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("modelingFileMetadataService")
 public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataService {

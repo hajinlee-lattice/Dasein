@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 public class BaseExceptionHandlerTestNG extends SecurityFunctionalTestNGBase {

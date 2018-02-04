@@ -30,7 +30,6 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
 
-    protected String profileTablePrefix;
     protected String statsTablePrefix;
     protected String servingStoreTablePrefix;
     protected String servingStoreSortKey;
@@ -53,13 +52,8 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
 
     @Override
     protected void onPostTransformationCompleted() {
-        String profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
         String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
-
-        if (profileTableRole() != null) {
-            upsertProfileTable(profileTableName, profileTableRole());
-        }
 
         Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
         enrichTableSchema(servingStoreTable);
@@ -82,7 +76,6 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         entity = getEntityToBeProfiled();
 
         TableRoleInCollection servingStore = entity.getServingStore();
-        profileTablePrefix = entity.name() + "Profile";
         statsTablePrefix = entity.name() + "Stats";
         servingStoreTablePrefix = servingStore.name();
         servingStoreSortKey = servingStore.getPrimaryKey().name();
@@ -109,21 +102,6 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getTransformRequest();
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
-    }
-
-    private void upsertProfileTable(String profileTableName, TableRoleInCollection profileRole) {
-        String customerSpace = configuration.getCustomerSpace().toString();
-        Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
-        if (profileTable == null) {
-            throw new RuntimeException(
-                    "Failed to find profile table " + profileTableName + " in customer " + customerSpace);
-        }
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-        dataCollectionProxy.upsertTable(customerSpace, profileTableName, profileRole, inactiveVersion);
-        profileTable = dataCollectionProxy.getTable(customerSpace, profileRole, inactiveVersion);
-        if (profileTable == null) {
-            throw new IllegalStateException("Cannot find the upserted " + profileRole + " table in data collection.");
-        }
     }
 
     protected void enrichTableSchema(Table servingStoreTable) {
@@ -162,8 +140,6 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     protected BusinessEntity getEntity() {
         return getEntityToBeProfiled();
     }
-
-    protected abstract TableRoleInCollection profileTableRole();
 
     protected abstract PipelineTransformationRequest getTransformRequest();
 

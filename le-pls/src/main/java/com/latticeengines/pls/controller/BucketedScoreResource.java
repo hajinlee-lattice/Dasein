@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

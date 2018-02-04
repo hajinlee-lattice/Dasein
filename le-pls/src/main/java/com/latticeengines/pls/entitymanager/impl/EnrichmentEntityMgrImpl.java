@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.EnrichmentDao;
 import com.latticeengines.pls.entitymanager.EnrichmentEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("enrichmentEntityMgr")
 public class EnrichmentEntityMgrImpl extends BaseEntityMgrImpl<Enrichment>

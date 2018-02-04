@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;

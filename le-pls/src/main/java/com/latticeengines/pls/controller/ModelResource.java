@@ -46,8 +46,8 @@ import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

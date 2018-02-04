@@ -29,6 +29,11 @@
         <!-- AWS dependencies -->
         <dependency>
             <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>${aws.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>${aws.version}</version>
         </dependency>
@@ -39,17 +44,12 @@
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-osgi</artifactId>
-            <version>${aws.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk</artifactId>
-            <version>${aws.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-batch</artifactId>
+            <version>${aws.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-elasticache</artifactId>
             <version>${aws.version}</version>
         </dependency>
     </dependencies>

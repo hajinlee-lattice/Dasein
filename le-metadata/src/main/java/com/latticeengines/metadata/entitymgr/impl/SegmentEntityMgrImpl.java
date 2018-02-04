@@ -21,7 +21,7 @@ import com.latticeengines.metadata.dao.SegmentDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> implements SegmentEntityMgr {

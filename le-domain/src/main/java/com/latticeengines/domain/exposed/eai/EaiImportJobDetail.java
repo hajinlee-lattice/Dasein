@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.eai;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,7 +25,6 @@ import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.api.client.util.Lists;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -295,7 +295,7 @@ public class EaiImportJobDetail implements HasPid, Serializable {
             if (matcher.matches()) {
                 String contents = matcher.group(1);
                 if (contents.isEmpty()) {
-                    setDetailValue(key, Lists.newArrayList());
+                    setDetailValue(key, new ArrayList<>());
                 } else {
                     String[] array = contents.split(",");
                     for (int i = 0; i < array.length; ++i) {

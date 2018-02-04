@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("aiModelService")
 public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implements AIModelService {

@@ -33,7 +33,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.util.Lists;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -323,7 +322,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             if (matcher.matches()) {
                 String contents = matcher.group(1);
                 if (contents.isEmpty()) {
-                    setPropertyValue(key, Lists.newArrayList());
+                    setPropertyValue(key, new ArrayList<>());
                 } else {
                     String[] array = contents.split(",");
                     for (int i = 0; i < array.length; ++i) {

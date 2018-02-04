@@ -15,8 +15,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

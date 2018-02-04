@@ -35,8 +35,8 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
 

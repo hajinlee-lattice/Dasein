@@ -8,9 +8,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Listeners;
 
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
-import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
@@ -37,11 +35,5 @@ public class AppTestNGBase extends AbstractTestNGSpringContextTests {
     protected void setupTestEnvironmentWithOneTenant() {
         globalAuthFunctionalTestBed.bootstrap(1);
         mainTestTenant = globalAuthFunctionalTestBed.getMainTestTenant();
-    }
-
-    protected void createTable(String repository, String recordType) {
-        String tableName = DynamoDataStoreImpl.buildTableName(repository, recordType);
-        dynamoService.deleteTable(tableName);
-        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
     }
 }

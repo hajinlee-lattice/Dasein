@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.dao.ArtifactDao;
 import com.latticeengines.metadata.dao.ModuleDao;
 import com.latticeengines.metadata.entitymgr.ArtifactEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("artifactEntityMgr")
 public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implements ArtifactEntityMgr {

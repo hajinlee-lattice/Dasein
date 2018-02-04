@@ -10,10 +10,6 @@
 
     <properties>
         <component-name>le-api</component-name>
-        <le.dataplatform.version>4.3.1-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>4.3.1-SNAPSHOT</le.domain.version>
-        <le.monitor.version>4.3.1-SNAPSHOT</le.monitor.version>
-        <le.security.version>4.3.1-SNAPSHOT</le.security.version>
         <jetty.port>8074</jetty.port>
         <jett.stop.port>10974</jett.stop.port>
     </properties>
@@ -29,49 +25,49 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

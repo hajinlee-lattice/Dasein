@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -37,8 +36,8 @@ import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {

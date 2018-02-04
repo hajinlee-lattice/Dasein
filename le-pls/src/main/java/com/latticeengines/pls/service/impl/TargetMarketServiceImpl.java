@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("targetMarketService")
 public class TargetMarketServiceImpl implements TargetMarketService {

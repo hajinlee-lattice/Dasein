@@ -21,7 +21,7 @@ RUN rpm --import http://packages.confluent.io/rpm/3.2/archive.key \
 VOLUME ["/etc/kafka"]
 
 # put a random value here to invalidate docker cache
-RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
+RUN echo invalidate cache 1517713424 > /dev/null
 ADD kafka-server-stop /usr/bin/kafka-server-stop
 ADD server.properties /etc/kafka/server.properties
 ADD start.sh /start.sh

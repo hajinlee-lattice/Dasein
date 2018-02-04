@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -9,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -39,7 +37,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("cdlJobService")
 public class CDLJobServiceImpl implements CDLJobService {

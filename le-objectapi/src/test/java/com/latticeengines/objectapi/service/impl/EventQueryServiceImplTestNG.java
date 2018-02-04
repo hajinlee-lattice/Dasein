@@ -31,7 +31,7 @@ import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestN
 import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 

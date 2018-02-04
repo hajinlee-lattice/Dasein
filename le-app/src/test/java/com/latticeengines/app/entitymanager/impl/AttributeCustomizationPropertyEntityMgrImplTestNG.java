@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppTestNGBase {
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace

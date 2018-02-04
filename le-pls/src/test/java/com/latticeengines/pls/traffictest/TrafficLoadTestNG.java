@@ -40,6 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -52,9 +54,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 public class TrafficLoadTestNG extends PlsDeploymentTestNGBaseDeprecated {
 

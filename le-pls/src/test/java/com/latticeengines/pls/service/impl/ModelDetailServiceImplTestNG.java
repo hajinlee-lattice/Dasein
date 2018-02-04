@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -14,8 +13,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.CategoryObject;
 import com.latticeengines.domain.exposed.pls.ModelDetail;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -28,9 +25,9 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelDetailService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ModelDetailServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired

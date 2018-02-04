@@ -23,14 +23,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-common</artifactId>
+            <artifactId>le-common-web</artifactId>
             <version>${le.common.version}</version>
-            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

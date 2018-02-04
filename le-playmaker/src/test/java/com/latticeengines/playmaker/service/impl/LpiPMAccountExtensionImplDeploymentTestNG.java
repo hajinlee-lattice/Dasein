@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })

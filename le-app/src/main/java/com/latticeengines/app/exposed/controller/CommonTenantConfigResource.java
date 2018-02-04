@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

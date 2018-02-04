@@ -15,7 +15,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public abstract class BaseExceptionHandler {
     @Autowired

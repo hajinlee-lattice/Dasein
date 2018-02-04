@@ -207,7 +207,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}/{action}",
                 shortenCustomerSpace(customerSpace), playName, launchId, action);
         log.info("url is " + url);
-        put("update PlayLaunch ", url, null);
+        put("update PlayLaunch ", url);
     }
 
     public void deletePlayLaunch(String customerSpace, String playName, String launchId) {

@@ -9,8 +9,8 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.impl.MultiTenantEntityMgrAspect;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantEntityMgrAspect;
 
 @Aspect
 public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
@@ -115,7 +115,7 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.workflow.entitymanager.impl.ReportEntityMgrImpl.find*(..))")
+    @Before("execution(* com.latticeengines.db.entitymgr.impl.ReportEntityMgrImpl.find*(..))")
     public void findReport(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }

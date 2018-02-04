@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;

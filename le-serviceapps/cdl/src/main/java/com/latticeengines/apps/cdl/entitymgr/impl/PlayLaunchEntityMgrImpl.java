@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("playLaunchEntityMgr")
 public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> implements PlayLaunchEntityMgr {

@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 public class CleanUpEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 

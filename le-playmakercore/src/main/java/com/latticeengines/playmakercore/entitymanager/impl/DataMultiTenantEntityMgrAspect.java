@@ -6,8 +6,8 @@ import org.aspectj.lang.annotation.Before;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.impl.MultiTenantEntityMgrAspect;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantEntityMgrAspect;
 
 @Aspect
 public class DataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {

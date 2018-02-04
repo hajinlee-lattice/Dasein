@@ -28,8 +28,8 @@ import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV710;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV740;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV750;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("daoFactory")
 public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {

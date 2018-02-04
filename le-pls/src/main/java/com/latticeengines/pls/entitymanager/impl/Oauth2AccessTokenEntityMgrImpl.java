@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.Oauth2AccessTokenDao;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("oauth2AccessTokenEntityMgr")
 public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2AccessToken>

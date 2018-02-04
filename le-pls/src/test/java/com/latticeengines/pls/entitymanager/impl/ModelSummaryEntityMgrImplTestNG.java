@@ -17,6 +17,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -29,9 +31,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 

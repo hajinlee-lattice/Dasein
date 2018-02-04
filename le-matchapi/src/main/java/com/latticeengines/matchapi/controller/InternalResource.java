@@ -6,9 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +29,7 @@ public class InternalResource extends InternalResourceBase {
     @Autowired
     private DataCloudYarnService yarnService;
 
-    @RequestMapping(value = "/yarnjobs", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/yarnjobs", produces = "application/json")
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Match a block of input data in yarn container")

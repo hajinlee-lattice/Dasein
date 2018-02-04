@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.ColumnRuleResultEntityMgr;
 import com.latticeengines.metadata.entitymgr.RowRuleResultEntityMgr;
 import com.latticeengines.metadata.service.RuleResultService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("ruleResultService")
 public class RuleResultServiceImpl implements RuleResultService {

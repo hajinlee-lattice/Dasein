@@ -21,6 +21,12 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-common-web</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>

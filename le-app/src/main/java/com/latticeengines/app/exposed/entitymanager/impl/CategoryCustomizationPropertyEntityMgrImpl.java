@@ -16,8 +16,8 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("categoryCustomizationPropertyEntityMgr")
 public class CategoryCustomizationPropertyEntityMgrImpl extends BaseEntityMgrImpl<CategoryCustomizationProperty>

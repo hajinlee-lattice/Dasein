@@ -40,8 +40,8 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 

@@ -21,7 +21,7 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class MetadataSegmentExportEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 

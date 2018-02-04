@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 public class SourceFilePurgeCallable implements Callable<Boolean> {
 

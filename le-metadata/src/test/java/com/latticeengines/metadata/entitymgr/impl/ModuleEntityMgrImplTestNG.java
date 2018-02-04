@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.ArtifactService;
 import com.latticeengines.metadata.service.ModuleService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ModuleEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 

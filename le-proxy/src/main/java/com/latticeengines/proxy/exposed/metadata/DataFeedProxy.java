@@ -66,19 +66,19 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     public void updateDataFeedDrainingStatus(String customerSpace, String drainingStatus) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/drainingstatus/{drainingStatus}",
                 shortenCustomerSpace(customerSpace), drainingStatus);
-        put("updateDataFeedDrainingStatus", url, null);
+        put("updateDataFeedDrainingStatus", url);
     }
 
     public void updateDataFeedMaintenanceMode(String customerSpace, boolean maintenanceMode) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed//maintenance/{maintenanceMode}",
                 shortenCustomerSpace(customerSpace), maintenanceMode);
-        put("updateDataFeedMaintenanceMode", url, null);
+        put("updateDataFeedMaintenanceMode", url);
     }
 
     public void updateDataFeedStatus(String customerSpace, String status) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/status/{status}",
                 shortenCustomerSpace(customerSpace), status);
-        put("updateDataFeedStatus", url, null);
+        put("updateDataFeedStatus", url);
     }
 
     public DataFeedExecution retryLatestExecution(String customerSpace) {

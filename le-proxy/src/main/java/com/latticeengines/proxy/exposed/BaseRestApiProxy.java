@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.exposed;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
+import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
@@ -96,25 +98,30 @@ public abstract class BaseRestApiProxy {
         restTemplate.setErrorHandler(handler);
     }
 
+    protected <T, B> T postKryo(final String method, final String url, final B body) {
+        return postKryo(method, url, body, null);
+    }
+
+    protected <T, B> T postKryo(final String method, final String url, final B body, final Class<T> returnValueClazz) {
+        return post(method, url, body, returnValueClazz, false, true);
+    }
+
+    protected <T, B> T postWithoutLogBody(final String method, final String url, final B body, final Class<T> returnValueClazz) {
+        return post(method, url, body, returnValueClazz, false, false);
+    }
+
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
-        return post(method, url, body, returnValueClazz, true);
+        return post(method, url, body, returnValueClazz, true, false);
     }
 
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz,
-            final boolean logBody) {
+            final boolean logBody, final boolean useKryo) {
+        HttpMethod verb = HttpMethod.POST;
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                String msg;
-                if (logBody) {
-                    msg = String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
-                            body, context.getRetryCount() + 1);
-                } else {
-                    msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
-                            context.getRetryCount() + 1);
-                }
-                log.info(msg);
-                return restTemplate.postForObject(url, body, returnValueClazz);
+                logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
+                return exchange(url, verb, body, returnValueClazz, useKryo, useKryo).getBody();
             } catch (LedpException e) {
                 context.setExhaustedOnly();
                 logError(e, method);
@@ -126,26 +133,16 @@ public abstract class BaseRestApiProxy {
         });
     }
 
+    //FIXME: do not let object api return LedpException when it is a network issue, then this can be merge to normal post method
+    @Deprecated
     protected <T, B> T postWithRetries(final String method, final String url, final B body,
             final Class<T> returnValueClazz) {
-        return postWithRetries(method, url, body, returnValueClazz, true);
-    }
-
-    protected <T, B> T postWithRetries(final String method, final String url, final B body,
-            final Class<T> returnValueClazz, final boolean logBody) {
+        HttpMethod verb = HttpMethod.POST;
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                String msg;
-                if (logBody) {
-                    msg = String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
-                            body, context.getRetryCount() + 1);
-                } else {
-                    msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
-                            context.getRetryCount() + 1);
-                }
-                log.info(msg);
-                return restTemplate.postForObject(url, body, returnValueClazz);
+                logInvocation(method, url, verb, context.getRetryCount() + 1, body, true);
+                return exchange(url, verb, body, returnValueClazz, false, true).getBody();
             } catch (Exception e) {
                 logError(e, method);
                 throw e;
@@ -158,9 +155,7 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                String msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
-                        context.getRetryCount() + 1);
-                log.info(msg);
+                logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.MULTIPART_FORM_DATA);
                 HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
@@ -191,15 +186,11 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                String msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
-                        context.getRetryCount() + 1);
-                log.info(msg);
+                logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
                 String baseUrl = url.substring(0, url.indexOf("?"));
                 String params = url.substring(url.indexOf("?") + 1);
                 RestTemplate newRestTemplate = HttpClientUtils.newFormURLEncodedRestTemplate();
-
-                T response = newRestTemplate.postForObject(baseUrl, params, returnValueClazz);
-                return response;
+                return newRestTemplate.postForObject(baseUrl, params, returnValueClazz);
             } catch (LedpException e) {
                 context.setExhaustedOnly();
                 logError(e, method);
@@ -216,8 +207,7 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                log.info(String.format("Invoking %s by posting from url %s with http headers.  (Attempt=%d)", method,
-                        url, context.getRetryCount() + 1));
+                logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
                 return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
             } catch (LedpException e) {
                 context.setExhaustedOnly();
@@ -234,23 +224,38 @@ public abstract class BaseRestApiProxy {
         log.error(String.format("%s: Remote call failure", method), e);
     }
 
+    protected void put(final String method, final String url) {
+        put(method, url, null, false);
+    }
+
     protected <B> void put(final String method, final String url, final B body) {
         put(method, url, body, true);
     }
 
+    protected <B> void putKryo(final String method, final String url, final B body) {
+        put(method, url, body, null, false, true);
+    }
+
     protected <B> void put(final String method, final String url, final B body, boolean logBody) {
+        put(method, url, body, null, logBody, false);
+    }
+
+    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz) {
+        return put(method, url, body, returnClz, false, false);
+    }
+
+    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz, boolean logBody, boolean kryo) {
+        HttpMethod verb = HttpMethod.PUT;
         RetryTemplate retry = getRetryTemplate();
-        retry.execute((RetryCallback<Void, RuntimeException>) context -> {
+        return retry.execute((RetryCallback<T, RuntimeException>) context -> {
             try {
-                if (logBody) {
-                    log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
-                            body, context.getRetryCount() + 1));
+                logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
+                ResponseEntity<T> response = exchange(url, verb, body, returnClz, kryo, false);
+                if (returnClz == null || response == null) {
+                    return null;
                 } else {
-                    log.info(String.format("Invoking %s by putting to url %s.  (Attempt=%d)", method, url,
-                            context.getRetryCount() + 1));
+                    return response.getBody();
                 }
-                restTemplate.put(url, body);
-                return null;
             } catch (LedpException e) {
                 context.setExhaustedOnly();
                 logError(e, method);
@@ -259,7 +264,6 @@ public abstract class BaseRestApiProxy {
                 logError(e, method);
                 throw e;
             }
-
         });
     }
 
@@ -268,8 +272,7 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                log.info(String.format("Invoking %s by patching from url %s with http headers.  (Attempt=%d)", method,
-                        url, context.getRetryCount() + 1));
+                logInvocation(method, url, HttpMethod.PATCH, context.getRetryCount() + 1);
                 return restTemplate.patchForObject(url, entity, returnValueClazz);
             } catch (LedpException e) {
                 context.setExhaustedOnly();
@@ -283,12 +286,12 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
+        final HttpMethod verb = HttpMethod.GET;
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                log.info(String.format("Invoking %s by getting from url %s.  (Attempt=%d)", method, url,
-                        context.getRetryCount() + 1));
-                return restTemplate.getForObject(url, returnValueClazz);
+                logInvocation(method, url, verb, context.getRetryCount() + 1);
+                return exchange(url, verb, null, returnValueClazz, false, false).getBody();
             } catch (LedpException e) {
                 context.setExhaustedOnly();
                 logError(e, method);
@@ -302,12 +305,30 @@ public abstract class BaseRestApiProxy {
 
     protected <T> T get(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
+        final HttpMethod verb = HttpMethod.GET;
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                log.info(String.format("Invoking %s by getting from url %s with http headers.  (Attempt=%d)", method,
-                        url, context.getRetryCount() + 1));
+                logInvocation(method, url, verb, context.getRetryCount() + 1);
                 return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
+            }
+        });
+    }
+
+    protected <T> T getKryo(final String method, final String url, final Class<T> returnValueClazz) {
+        final HttpMethod verb = HttpMethod.GET;
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(context -> {
+            try {
+                logInvocation(method, url, verb, context.getRetryCount() + 1);
+                return exchange(url, verb, null, returnValueClazz, false, true).getBody();
             } catch (LedpException e) {
                 context.setExhaustedOnly();
                 logError(e, method);
@@ -325,8 +346,7 @@ public abstract class BaseRestApiProxy {
             @Override
             public Void doWithRetry(RetryContext context) {
                 try {
-                    log.info(String.format("Invoking %s by deleting from url %s.  (Attempt=%d)", method, url,
-                            context.getRetryCount() + 1));
+                    logInvocation(method, url, HttpMethod.DELETE, context.getRetryCount() + 1);
                     restTemplate.delete(url);
                     return null;
                 } catch (LedpException e) {
@@ -339,6 +359,44 @@ public abstract class BaseRestApiProxy {
                 }
             }
         });
+    }
+
+    private void logInvocation(String method, String url, HttpMethod verb, Integer attempt) {
+        logInvocation(method, url, verb, attempt, null, false);
+    }
+
+    private <P> void logInvocation(String method, String url, HttpMethod verb, Integer attempt, P payload, boolean logPlayload) {
+        String msg = String.format("Invoking %s by %s url %s", method, verb, url);
+        if (logPlayload) {
+            msg += String.format(" with body %s", payload == null ? "null" : payload.toString());
+        }
+        if (attempt != null) {
+            msg += String.format(".  (Attempt=%d)", attempt);
+        }
+        log.info(msg);
+    }
+
+    private <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
+                                              boolean kryoContent, boolean kryoResponse) {
+        HttpHeaders headers = new HttpHeaders();
+        if (kryoResponse) {
+            headers.setAccept(Collections.singletonList(KryoHttpMessageConverter.KRYO));
+        }
+        if (kryoContent && clz != null) {
+            headers.setContentType(KryoHttpMessageConverter.KRYO);
+        }
+        HttpEntity<P> entity;
+        if (payload == null) {
+            entity = new HttpEntity<>(headers);
+        } else {
+            entity = new HttpEntity<>(payload, headers);
+        }
+        if (clz == null) {
+            restTemplate.exchange(url, method, entity, Void.class);
+            return ResponseEntity.ok(null);
+        } else {
+            return restTemplate.exchange(url, method, entity, clz);
+        }
     }
 
     private RetryTemplate getRetryTemplate() {
@@ -411,6 +469,6 @@ public abstract class BaseRestApiProxy {
     void enforceSSLNameVerification() {
         restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
         restTemplate.setErrorHandler(new GetResponseErrorHandler());
-        setMagicAuthHeader();
+        cleanupAuthHeader();
     }
 }

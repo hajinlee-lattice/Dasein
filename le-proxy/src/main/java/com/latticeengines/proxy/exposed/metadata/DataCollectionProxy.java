@@ -5,6 +5,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -43,13 +42,13 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     public void switchVersion(String customerSpace, DataCollection.Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/version/{version}",
                 shortenCustomerSpace(customerSpace), version);
-        put("get default dataCollection", url, ResponseDocument.class);
+        put("get default dataCollection", url);
     }
 
     public void updateDataCloudBuildNumber(String customerSpace, String dataCloudBuildNumber) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datacloudbuildnumber/{dataCloudBuildNumber}",
                 shortenCustomerSpace(customerSpace), dataCloudBuildNumber);
-        put("get default dataCollection", url, ResponseDocument.class);
+        put("get default dataCollection", url);
     }
 
     public AttributeRepository getAttrRepo(String customerSpace) {
@@ -75,7 +74,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             args.add(version);
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        return get("get stats", url, StatisticsContainer.class);
+        return getKryo("get stats", url, StatisticsContainer.class);
     }
 
     public Table getTable(String customerSpace, TableRoleInCollection role) {
@@ -100,6 +99,15 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public String getTableName(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
+        List<String> tableNames = getTableNames(customerSpace, role, version);
+        if (CollectionUtils.isNotEmpty(tableNames)) {
+            return tableNames.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public List<String> getTableNames(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames?role={role}";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
@@ -109,7 +117,8 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             args.add(version);
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        return get("getTableName", url, String.class);
+        List<?> list = get("getTableNames", url, List.class);
+        return JsonUtils.convertList(list, String.class);
     }
 
     @SuppressWarnings("rawtypes")
@@ -139,7 +148,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             args.add(version);
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        post("upsertTable", url, null, DataCollection.class);
+        post("upsertTable", url, null, null);
     }
 
     public void unlinkTable(String customerSpace, String tableName, TableRoleInCollection role,
@@ -158,7 +167,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
                 shortenCustomerSpace(customerSpace));
         evictAttrRepoCache(customerSpace, null);
-        post("upsertStats", url, container, SimpleBooleanResponse.class);
+        postKryo("upsertStats", url, container);
     }
 
     public void removeStats(String customerSpace, DataCollection.Version version) {
@@ -225,7 +234,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
                     shortenCustomerSpace(customerSpace), version);
             method = "get default attribute repo at version " + version;
         }
-        return get(method, url, AttributeRepository.class);
+        return getKryo(method, url, AttributeRepository.class);
     }
 
     public DataCollection.Version getActiveVersion(String customerSpace) {

@@ -3,9 +3,10 @@ package com.latticeengines.aws.elasticache.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -17,14 +18,14 @@ import com.amazonaws.services.elasticache.model.DescribeCacheClustersRequest;
 import com.amazonaws.services.elasticache.model.DescribeCacheClustersResult;
 import com.latticeengines.aws.elasticache.ElastiCacheService;
 
-@Component("elastiCacheService")
+@Service("elastiCacheService")
 public class ElastiCacheServiceImpl implements ElastiCacheService {
 
     private AmazonElastiCache client;
 
     private String clusterName;
 
-    @Autowired
+    @Inject
     public ElastiCacheServiceImpl(AWSCredentials awsCredentials, @Value("${aws.region}") String region,
             @Value("${aws.elasticache.cluster.name}") String clusterName) {
         this.client = AmazonElastiCacheClientBuilder.standard() //

@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 

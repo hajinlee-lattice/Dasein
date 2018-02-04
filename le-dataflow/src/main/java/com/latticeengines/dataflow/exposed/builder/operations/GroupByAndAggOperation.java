@@ -1,9 +1,9 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.api.client.util.Lists;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
@@ -22,7 +22,7 @@ public class GroupByAndAggOperation extends Operation {
         groupby = new Every(groupby, aggregator, Fields.RESULTS);
 
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(prior.metadata);
+        this.metadata = new ArrayList<>(prior.metadata);
     }
 
     @SuppressWarnings("rawtypes")
@@ -36,7 +36,7 @@ public class GroupByAndAggOperation extends Operation {
         groupby = new Every(groupby, aggregator, fieldSelectStrategy);
 
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(fms);
+        this.metadata = new ArrayList<>(fms);
     }
 
     @SuppressWarnings("rawtypes")
@@ -63,7 +63,7 @@ public class GroupByAndAggOperation extends Operation {
         groupby = new Every(groupby, aggregator, Fields.REPLACE);
 
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(prior.metadata);
+        this.metadata = new ArrayList<>(prior.metadata);
     }
 
 }

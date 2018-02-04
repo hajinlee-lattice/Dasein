@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.latticeengines.monitor.exposed.metrics.MetricsAspect;
 import com.latticeengines.monitor.exposed.metrics.impl.BaseMetricsAspectImpl;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements MetricsAspect {
 

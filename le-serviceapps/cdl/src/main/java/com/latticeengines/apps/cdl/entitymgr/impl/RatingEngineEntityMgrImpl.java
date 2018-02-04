@@ -49,7 +49,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("ratingEngineEntityMgr")
 public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> implements RatingEngineEntityMgr {

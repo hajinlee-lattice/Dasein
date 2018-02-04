@@ -21,7 +21,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.pls.service.BucketedScoreService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 

@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("segmentExportInitStep")

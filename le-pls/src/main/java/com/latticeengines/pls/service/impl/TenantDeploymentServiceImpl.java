@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.TenantDeploymentEntityMgr;
 import com.latticeengines.pls.service.TenantDeploymentService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;

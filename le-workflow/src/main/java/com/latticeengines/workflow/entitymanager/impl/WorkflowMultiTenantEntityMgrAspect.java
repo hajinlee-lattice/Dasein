@@ -7,9 +7,9 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.impl.MultiTenantEntityMgrAspect;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantEntityMgrAspect;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Aspect
 public class WorkflowMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {

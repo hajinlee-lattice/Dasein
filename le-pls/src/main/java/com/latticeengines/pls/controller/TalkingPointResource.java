@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointsAttributesProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

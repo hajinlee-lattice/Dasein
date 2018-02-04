@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public abstract class WorkflowSubmitter {

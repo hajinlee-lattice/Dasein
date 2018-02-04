@@ -38,9 +38,9 @@ import com.latticeengines.pls.dao.ModelSummaryProvenancePropertyDao;
 import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.security.exposed.dao.TenantDao;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.latticeengines.workflow.exposed.dao.KeyValueDao;
+import com.latticeengines.db.exposed.dao.TenantDao;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.dao.KeyValueDao;
 
 @Component("modelSummaryEntityMgr")
 public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {

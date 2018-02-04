@@ -82,7 +82,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public void createTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
-        post("createTable", url, table, Boolean.class, false);
+        post("createTable", url, table, null);
     }
 
     public Boolean resetTables(String customerSpace) {
@@ -90,11 +90,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return post("reset", url, null, Boolean.class);
     }
 
-    // @CacheEvict(key = "T(java.lang.String).format(\"%s|%s\", #customerSpace,
-    // #tableName)")
     public void updateTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
-        put("updateTable", url, table, false);
+        put("updateTable", url, table);
     }
 
     public Table cloneTable(String customerSpace, String tableName) {
@@ -115,9 +113,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return Arrays.<String> asList(importTableNames);
     }
 
-    // @Cacheable(key = "T(java.lang.String).format(\"%s|%s\",
-    // T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace),
-    // #tableName)")
     public Table getTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         return get("getTable", url, Table.class);

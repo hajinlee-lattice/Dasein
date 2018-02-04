@@ -7,16 +7,17 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -35,6 +36,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
@@ -46,8 +48,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.impl.TenantEntityMgrImpl;
 import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -68,16 +68,16 @@ public class DataFlowApiDeploymentTestNGBase extends AbstractTestNGSpringContext
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DataFlowApiDeploymentTestNGBase.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private YarnClient defaultYarnClient;
 
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr = new TenantEntityMgrImpl();
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     protected MetadataProxy metadataProxy;
 
     protected YarnFunctionalTestNGBase platformTestBase;

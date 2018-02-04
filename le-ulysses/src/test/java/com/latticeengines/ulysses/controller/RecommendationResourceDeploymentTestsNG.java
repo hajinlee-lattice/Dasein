@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
 public class RecommendationResourceDeploymentTestsNG extends UlyssesDeploymentTestNGBase {

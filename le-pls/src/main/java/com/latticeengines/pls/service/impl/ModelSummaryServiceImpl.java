@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
+import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -33,8 +35,6 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 @DisallowConcurrentExecution
 @Component("modelSummaryService")

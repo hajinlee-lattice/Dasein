@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.ArtifactEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.ArtifactService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ArtifactEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     

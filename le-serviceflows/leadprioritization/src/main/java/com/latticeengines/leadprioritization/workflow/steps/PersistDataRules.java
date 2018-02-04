@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 

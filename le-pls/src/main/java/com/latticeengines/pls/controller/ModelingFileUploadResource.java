@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Api(value = "models/uploadfile", description = "REST resource for uploading csv files for modeling")
 @RestController

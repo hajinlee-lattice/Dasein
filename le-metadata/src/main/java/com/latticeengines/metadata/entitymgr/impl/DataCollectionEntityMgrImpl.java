@@ -32,7 +32,7 @@ import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionEntityMgr")
 public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection> implements DataCollectionEntityMgr {

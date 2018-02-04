@@ -31,8 +31,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 

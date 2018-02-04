@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("cdlExternalSystemService")
 public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {

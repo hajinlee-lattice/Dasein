@@ -26,7 +26,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
 

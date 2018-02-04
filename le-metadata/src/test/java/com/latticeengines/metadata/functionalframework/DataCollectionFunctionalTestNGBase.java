@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class DataCollectionFunctionalTestNGBase extends MetadataFunctionalTestNGBase {
 

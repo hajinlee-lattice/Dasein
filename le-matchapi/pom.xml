@@ -23,6 +23,12 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-common-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-datacloud-match</artifactId>
             <version>${project.version}</version>
         </dependency>

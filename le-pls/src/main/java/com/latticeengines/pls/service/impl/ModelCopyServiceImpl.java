@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("modelCopyService")
 public class ModelCopyServiceImpl implements ModelCopyService {

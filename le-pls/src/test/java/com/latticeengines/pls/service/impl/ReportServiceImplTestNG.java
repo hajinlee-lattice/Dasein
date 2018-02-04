@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -17,8 +18,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
-import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.db.exposed.service.ReportService;
 
 public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 

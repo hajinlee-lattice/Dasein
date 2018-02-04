@@ -8,7 +8,13 @@
     <import resource="classpath:quartzclient-context.xml"/>
     <bean class="com.latticeengines.matchapi.swagger.SwaggerConfig" />
 
-    <mvc:annotation-driven/>
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+            <bean class="com.latticeengines.common.exposed.converter.KryoHttpMessageConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
     <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />
     <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />
 

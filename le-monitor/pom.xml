@@ -26,7 +26,7 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-common</artifactId>
+            <artifactId>le-common-web</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -46,12 +46,6 @@
             <groupId>org.influxdb</groupId>
             <artifactId>influxdb-java</artifactId>
             <version>${influxdb.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-            <version>${okio.version}</version>
         </dependency>
 
     </dependencies>

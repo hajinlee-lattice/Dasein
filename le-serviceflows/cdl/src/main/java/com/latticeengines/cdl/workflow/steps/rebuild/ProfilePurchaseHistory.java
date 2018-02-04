@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_TRANSACTION_AGGREGATOR;
 
@@ -24,11 +23,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -63,11 +60,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     @Override
     protected BusinessEntity getEntityToBeProfiled() {
         return BusinessEntity.PurchaseHistory;
-    }
-
-    @Override
-    protected TableRoleInCollection profileTableRole() {
-        return null;
     }
 
     @Override

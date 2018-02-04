@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.pls.ModelNote;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.pls.service.ModelNoteService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

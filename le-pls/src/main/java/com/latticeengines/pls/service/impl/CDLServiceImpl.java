@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("cdlService")
 public class CDLServiceImpl implements CDLService {

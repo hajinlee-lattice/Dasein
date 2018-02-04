@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGBase {
 

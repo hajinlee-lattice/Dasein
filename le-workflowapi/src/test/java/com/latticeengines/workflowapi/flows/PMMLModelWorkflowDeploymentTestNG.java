@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
 public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {

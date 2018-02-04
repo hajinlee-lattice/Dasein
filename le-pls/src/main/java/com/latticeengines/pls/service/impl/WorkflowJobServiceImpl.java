@@ -1,14 +1,21 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +45,8 @@ import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {

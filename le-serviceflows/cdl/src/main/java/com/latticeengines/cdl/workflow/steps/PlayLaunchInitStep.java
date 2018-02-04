@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("playLaunchInitStep")

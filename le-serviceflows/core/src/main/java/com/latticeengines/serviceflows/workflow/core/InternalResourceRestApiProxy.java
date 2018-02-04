@@ -21,9 +21,9 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.security.exposed.util.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
-public class InternalResourceRestApiProxy extends BaseRestApiProxy {
+public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(InternalResourceRestApiProxy.class);
 

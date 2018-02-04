@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
     static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";

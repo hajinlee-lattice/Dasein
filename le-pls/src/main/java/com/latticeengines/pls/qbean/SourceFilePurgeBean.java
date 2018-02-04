@@ -11,7 +11,7 @@ import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.impl.SourceFilePurgeCallable;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("sourceFilePurge")
 public class SourceFilePurgeBean implements QuartzJobBean {

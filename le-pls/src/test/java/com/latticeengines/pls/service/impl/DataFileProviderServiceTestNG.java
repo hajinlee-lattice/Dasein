@@ -42,7 +42,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {

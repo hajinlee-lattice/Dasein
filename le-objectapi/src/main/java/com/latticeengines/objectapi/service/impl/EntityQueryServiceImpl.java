@@ -41,7 +41,7 @@ import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Service("entityQueryService")
 public class EntityQueryServiceImpl implements EntityQueryService {

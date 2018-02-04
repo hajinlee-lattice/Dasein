@@ -9,28 +9,6 @@
 
     <properties>
         <component-name>pls</component-name>
-        <le.common.version>4.3.1-SNAPSHOT</le.common.version>
-        <le.db.version>4.3.1-SNAPSHOT</le.db.version>
-        <le.domain.version>4.3.1-SNAPSHOT</le.domain.version>
-        <le.remote.version>4.3.1-SNAPSHOT</le.remote.version>
-        <le.camille.version>4.3.1-SNAPSHOT</le.camille.version>
-        <le.security.version>4.3.1-SNAPSHOT</le.security.version>
-        <le.baton.version>4.3.1-SNAPSHOT</le.baton.version>
-        <le.monitor.version>4.3.1-SNAPSHOT</le.monitor.version>
-        <le.liaison.version>4.3.1-SNAPSHOT</le.liaison.version>
-        <le.scoringapi.version>4.3.1-SNAPSHOT</le.scoringapi.version>
-        <le.swlib.version>4.3.1-SNAPSHOT</le.swlib.version>
-        <le.testfwk.version>4.3.1-SNAPSHOT</le.testfwk.version>
-        <le.workflow.version>4.3.1-SNAPSHOT</le.workflow.version>
-        <le.scheduler.version>4.3.1-SNAPSHOT</le.scheduler.version>
-        <le.serviceflows.prospectdiscovery.version>4.3.1-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
-        <le.serviceflows.leadprioritization.version>4.3.1-SNAPSHOT</le.serviceflows.leadprioritization.version>
-        <le.serviceflows.cdl.version>4.3.1-SNAPSHOT</le.serviceflows.cdl.version>
-        <le.proxy.version>4.3.1-SNAPSHOT</le.proxy.version>
-        <le.quartzclient.version>4.3.1-SNAPSHOT</le.quartzclient.version>
-        <le.encryption.version>4.3.1-SNAPSHOT</le.encryption.version>
-        <le.hadoop.version>4.3.1-SNAPSHOT</le.hadoop.version>
-        <le.app.version>4.3.1-SNAPSHOT</le.app.version>
         <jetty.port>8081</jetty.port>
         <jetty.stop.port>10981</jetty.stop.port>
         <jetty.use.test.cp>false</jetty.use.test.cp>
@@ -43,68 +21,6 @@
         <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>make-a-jar</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>${maven.install.version}</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>
-                                ${project.build.directory}/${project.artifactId}-${project.parent.version}.jar
-                            </file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven.deploy.version}</version>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                            <url>${project.distributionManagement.repository.url}</url>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -114,88 +30,81 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-quartzclient</artifactId>
-            <version>${le.quartzclient.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
-            <version>${le.baton.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scheduler</artifactId>
-            <version>${le.scheduler.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-scheduler</artifactId>
-            <version>${le.scheduler.version}</version>
-            <scope>runtime</scope>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-remote</artifactId>
-            <version>${le.remote.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-liaison</artifactId>
-            <version>${le.liaison.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
-            <version>${le.camille.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
@@ -205,45 +114,21 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-workflow</artifactId>
-            <version>${le.workflow.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-app</artifactId>
-            <version>${le.app.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-app</artifactId>
-            <version>${le.app.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-workflow</artifactId>
-            <version>${le.workflow.version}</version>
-            <scope>runtime</scope>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!-- dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>${hibernate.jpa.version}</version>
-        </dependency-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-exec</artifactId>
@@ -262,7 +147,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-hadoop</artifactId>
-            <version>${le.hadoop.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -275,33 +160,33 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-swlib</artifactId>
-            <version>${le.swlib.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scoringapi</artifactId>
-            <version>${le.scoringapi.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

@@ -10,7 +10,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOption;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
@@ -19,9 +22,6 @@ import com.latticeengines.pls.dao.TargetMarketDao;
 import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
 import com.latticeengines.pls.dao.TargetMarketReportMapDao;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 
 @Component("targetMarketEntityMgr")
 public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> implements TargetMarketEntityMgr {

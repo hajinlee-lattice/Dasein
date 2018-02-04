@@ -33,7 +33,7 @@ import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {

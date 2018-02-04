@@ -14,7 +14,7 @@ import org.testng.annotations.BeforeMethod;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.workflow.core.DataPlatformInfrastructure;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;

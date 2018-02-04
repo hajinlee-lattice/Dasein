@@ -22,7 +22,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 public class ModelNoteServiceImplTestNG extends PlsFunctionalTestNGBase {

@@ -34,7 +34,7 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 

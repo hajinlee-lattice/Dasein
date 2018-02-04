@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.hive.util.HiveUtils;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
@@ -138,7 +139,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     private void setupTables() {
         log.info("setupTables");
-
         Tenant tenant1 = tenantEntityMgr.findByTenantId(customerSpace1);
         Tenant tenant2 = tenantEntityMgr.findByTenantId(customerSpace2);
 

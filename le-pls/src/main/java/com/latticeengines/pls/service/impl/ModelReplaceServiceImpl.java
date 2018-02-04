@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelReplaceService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("modelReplaceService")
 public class ModelReplaceServiceImpl implements ModelReplaceService {

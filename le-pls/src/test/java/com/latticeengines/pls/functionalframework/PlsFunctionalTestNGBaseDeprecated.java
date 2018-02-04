@@ -31,7 +31,7 @@ import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 

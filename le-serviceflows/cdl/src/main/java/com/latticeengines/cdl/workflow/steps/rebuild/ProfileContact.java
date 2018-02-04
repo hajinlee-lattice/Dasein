@@ -18,7 +18,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
 @Component(ProfileContact.BEAN_NAME)
@@ -33,11 +32,6 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-    }
-
-    @Override
-    protected TableRoleInCollection profileTableRole() {
-        return TableRoleInCollection.ContactProfile;
     }
 
     @Override

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.ulysses.PrimaryFieldConfiguration;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.ulysses.service.AttributeService;
 
 import io.swagger.annotations.Api;

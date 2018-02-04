@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
-import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 public class MigrateReportAndOutput extends WorkflowTestNGBase {

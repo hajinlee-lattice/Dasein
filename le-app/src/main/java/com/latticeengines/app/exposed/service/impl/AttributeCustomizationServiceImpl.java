@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("attributeCustomizationService")
 public class AttributeCustomizationServiceImpl implements AttributeCustomizationService {

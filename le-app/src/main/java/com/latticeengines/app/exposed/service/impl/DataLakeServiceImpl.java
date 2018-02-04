@@ -57,7 +57,7 @@ import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataLakeService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -263,7 +263,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+            + "T(com.latticeengines.db.exposed.util.MultiTenantContext).tenant.id)")
     public TopNTree getTopNTree(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
@@ -294,7 +294,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id)")
+            + "T(com.latticeengines.db.exposed.util.MultiTenantContext).tenant.id)")
     public Map<String, StatsCube> getStatsCubes(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
@@ -304,7 +304,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
-            + "T(com.latticeengines.security.exposed.util.MultiTenantContext).tenant.id, #role)")
+            + "T(com.latticeengines.db.exposed.util.MultiTenantContext).tenant.id, #role)")
     public List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role) {
         if (role == null) {
             return Collections.emptyList();

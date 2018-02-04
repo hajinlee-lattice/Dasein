@@ -37,9 +37,9 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.security.exposed.util.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
-public class InternalResourceRestApiProxy extends BaseRestApiProxy {
+public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
 
     private static final String LOOKUP_ID_DELIM = "|";
 

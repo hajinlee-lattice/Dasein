@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 

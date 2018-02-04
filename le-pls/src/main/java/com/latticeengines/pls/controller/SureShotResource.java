@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.pls.SureShotUrls;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

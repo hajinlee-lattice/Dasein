@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
-import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;

@@ -13,8 +13,8 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.ProspectDiscoveryOptionDao;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("prospectDiscoveryOptionEntityMgr")
 public class ProspectDiscoveryOptionEntityMgrImpl extends BaseEntityMgrImpl<ProspectDiscoveryOption> implements

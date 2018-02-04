@@ -1,11 +1,11 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.api.client.util.Lists;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
@@ -23,7 +23,7 @@ public class GroupByAndBufferOperation extends Operation {
         groupby = new Every(groupby, buffer, Fields.RESULTS);
 
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(prior.metadata);
+        this.metadata = new ArrayList<>(prior.metadata);
     }
 
     @SuppressWarnings("rawtypes")
@@ -32,7 +32,7 @@ public class GroupByAndBufferOperation extends Operation {
         groupby = new Every(groupby, buffer, Fields.RESULTS);
 
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(fms);
+        this.metadata = new ArrayList<>(fms);
     }
 
     @SuppressWarnings("rawtypes")
@@ -41,7 +41,7 @@ public class GroupByAndBufferOperation extends Operation {
         groupby = new Every(groupby, buffer, Fields.RESULTS);
 
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(fms);
+        this.metadata = new ArrayList<>(fms);
     }
 
     @SuppressWarnings("rawtypes")
@@ -70,7 +70,7 @@ public class GroupByAndBufferOperation extends Operation {
         Pipe groupby = new GroupBy(prior.pipe, fields, new Fields(sortFields.getFields()), descending);
         groupby = new Every(groupby, buffer, Fields.REPLACE);
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(prior.metadata);
+        this.metadata = new ArrayList<>(prior.metadata);
     }
 
     private void init(Input prior, FieldList groupByFields, FieldList sortFields,
@@ -83,7 +83,7 @@ public class GroupByAndBufferOperation extends Operation {
         Pipe groupby = new GroupBy(prior.pipe, fields, srtFields);
         groupby = new Every(groupby, buffer, Fields.REPLACE);
         this.pipe = groupby;
-        this.metadata = Lists.newArrayList(prior.metadata);
+        this.metadata = new ArrayList<>(prior.metadata);
     }
 
 }

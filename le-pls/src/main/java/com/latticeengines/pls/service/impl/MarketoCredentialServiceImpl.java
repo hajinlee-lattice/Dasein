@@ -3,11 +3,11 @@ package com.latticeengines.pls.service.impl;
 import java.util.List;
 import java.util.Set;
 
-import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -20,7 +20,7 @@ import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("marketoCredentialService")
 public class MarketoCredentialServiceImpl implements MarketoCredentialService {

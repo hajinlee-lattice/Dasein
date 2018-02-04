@@ -41,7 +41,7 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {

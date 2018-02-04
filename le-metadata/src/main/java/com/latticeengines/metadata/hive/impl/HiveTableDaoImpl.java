@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.metadata.hive.util.HiveUtils;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("hiveTableDao")
 public class HiveTableDaoImpl implements HiveTableDao {

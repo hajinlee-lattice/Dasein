@@ -26,7 +26,6 @@ import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOp
 import com.latticeengines.dataflow.exposed.builder.operations.HashJoinOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.InsertOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.JoinOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.JythonFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.KVOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
@@ -382,12 +381,6 @@ public class Node {
     // only guarantee uniqueness, not necessarily sequential
     public Node addRowID(FieldMetadata fm) {
         return new Node(builder.addRowId(identifier, fm), builder);
-    }
-
-    public Node addJythonFunction(String packageName, String moduleName, String functionName, FieldList fieldsToApply,
-            FieldMetadata targetField) {
-        return new Node(builder.register(new JythonFunctionOperation(opInput(identifier), packageName, moduleName,
-                functionName, fieldsToApply, targetField)), builder);
     }
 
     public Node addTransformFunction(String packageName, TransformDefinition definition) {

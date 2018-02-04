@@ -14,7 +14,7 @@ import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Service("eventQueryService")
 public class EventQueryServiceImpl implements EventQueryService {

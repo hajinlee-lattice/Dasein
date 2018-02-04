@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("lpiPMRecommendation")
 public class LpiPMRecommendationImpl implements LpiPMRecommendation {

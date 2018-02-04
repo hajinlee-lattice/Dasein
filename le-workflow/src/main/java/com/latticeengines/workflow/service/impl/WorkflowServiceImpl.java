@@ -390,8 +390,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
                     workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
                     workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
-
-                    break done;
+                    break;
                 }
             } catch (Exception e) {
                 log.warn(String.format("Error while getting status for workflow %d, with error %s", workflowId.getId(),

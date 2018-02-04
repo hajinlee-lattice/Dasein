@@ -7,10 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +49,7 @@ public class MatchResource {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
-    @RequestMapping(value = "/realtime", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/realtime", produces = { "application/json", "application/x-kryo" })
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
@@ -65,7 +66,7 @@ public class MatchResource {
         }
     }
 
-    @RequestMapping(value = "/bulkrealtime", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/bulkrealtime", produces = { "application/json", "application/x-kryo" })
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
@@ -90,7 +91,7 @@ public class MatchResource {
         }
     }
 
-    @RequestMapping(value = "/bulk", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/bulk", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
             + "except using InputBuffer instead of embedding Data in json body directly. "
@@ -109,7 +110,7 @@ public class MatchResource {
         }
     }
 
-    @RequestMapping(value = "/bulkconf", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/bulkconf", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
             + "except using InputBuffer instead of embedding Data in json body directly. "
@@ -128,7 +129,7 @@ public class MatchResource {
         }
     }
 
-    @RequestMapping(value = "/bulk/{rootuid}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/bulk/{rootuid}", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "Get match status using rootuid (RootOperationUid).")
     public MatchCommand bulkMatchStatus(@PathVariable String rootuid) {

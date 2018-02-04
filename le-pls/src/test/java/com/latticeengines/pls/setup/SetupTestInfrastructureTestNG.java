@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBaseDeprecated {
     private static final Logger log = LoggerFactory.getLogger(SetupTestInfrastructureTestNG.class);

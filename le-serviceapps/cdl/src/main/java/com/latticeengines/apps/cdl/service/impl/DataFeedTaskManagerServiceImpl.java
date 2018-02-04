@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataFeedTaskManagerService")
 public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerService {

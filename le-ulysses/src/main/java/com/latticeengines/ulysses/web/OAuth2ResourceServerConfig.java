@@ -15,7 +15,7 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Configuration
 @EnableResourceServer

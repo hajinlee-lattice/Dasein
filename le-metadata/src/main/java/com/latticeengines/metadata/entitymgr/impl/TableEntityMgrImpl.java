@@ -41,8 +41,8 @@ import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("tableEntityMgr")
 public class TableEntityMgrImpl implements TableEntityMgr {

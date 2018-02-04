@@ -7,8 +7,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.jython.JythonEngine;
-
 public class ModelExtractorUnitTestNG {
     private static final String ST_PIPELINE_BINARY_P = "/STPipelineBinary.p";
     private static final String TARGETDIR = "/tmp/modelfiles";
@@ -22,12 +20,9 @@ public class ModelExtractorUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void extractModelArtifacts() throws Exception {
+    public void extractModelArtifacts() {
         ModelExtractor extractor = new ModelExtractor();
-
         extractor.extractModelArtifacts(path, TARGETDIR);
-
-        new JythonEngine(TARGETDIR);
     }
 
     @Test(groups = "unit")

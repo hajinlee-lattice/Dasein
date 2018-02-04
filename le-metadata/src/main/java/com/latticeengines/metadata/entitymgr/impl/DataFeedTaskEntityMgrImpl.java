@@ -31,7 +31,7 @@ import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("datafeedTaskEntityMgr")
 public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> implements DataFeedTaskEntityMgr {

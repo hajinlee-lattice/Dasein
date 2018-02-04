@@ -39,8 +39,8 @@ import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class WorkflowJobServiceImplUnitTestNG {
 

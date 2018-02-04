@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("plsFeatureFlagService")
 public class PlsFeatureFlagServiceImpl implements PlsFeatureFlagService {

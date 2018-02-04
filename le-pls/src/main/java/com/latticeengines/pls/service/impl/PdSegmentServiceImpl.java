@@ -21,7 +21,7 @@ import com.latticeengines.liaison.exposed.service.QueryColumn;
 import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.pls.service.PdSegmentService;
 import com.latticeengines.pls.service.TenantConfigService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 

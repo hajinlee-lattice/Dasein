@@ -25,7 +25,7 @@ import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {

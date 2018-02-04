@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("metadataFileUploadService")
 public class MetadataFileUploadServiceImpl implements MetadataFileUploadService {

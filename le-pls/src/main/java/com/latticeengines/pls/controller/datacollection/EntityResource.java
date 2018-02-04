@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

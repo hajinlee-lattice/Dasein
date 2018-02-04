@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 public class PythonScriptModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
 

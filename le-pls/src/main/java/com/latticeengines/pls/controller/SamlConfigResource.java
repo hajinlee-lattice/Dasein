@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
 import com.latticeengines.domain.exposed.saml.ServiceProviderURIInfo;
 import com.latticeengines.proxy.exposed.saml.SamlConfigProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

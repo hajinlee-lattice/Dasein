@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
 
@@ -40,7 +40,7 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         super.cleanup(workflowJob2.getWorkflowId());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testRunCompletedStepAgainWorkflow() throws Exception {
         failableStep.setFail(true);
         WorkflowConfiguration configuration = new WorkflowConfiguration();
@@ -48,7 +48,7 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         configuration.setContainerConfiguration(runCompletedStepAgainWorkflow.name(), customerSpace,
                 runCompletedStepAgainWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(configuration);
-        BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
+        BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 1000L).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
         assertTrue(stepNames.contains(runAgainWhenCompleteStep.name()));
         assertTrue(stepNames.contains(successfulStep.name()));
@@ -62,7 +62,7 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         workflowJob2.setApplicationId(appid);
         workflowJobEntityMgr.create(workflowJob2);
         WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId, workflowJob2);
-        status = workflowService.waitForCompletion(restartedWorkflowId, MAX_MILLIS_TO_WAIT).getStatus();
+        status = workflowService.waitForCompletion(restartedWorkflowId, MAX_MILLIS_TO_WAIT, 1000).getStatus();
         List<String> restartedStepNames = workflowService.getStepNames(restartedWorkflowId);
         assertTrue(restartedStepNames.contains(runAgainWhenCompleteStep.name()));
         assertFalse(restartedStepNames.contains(successfulStep.name()));

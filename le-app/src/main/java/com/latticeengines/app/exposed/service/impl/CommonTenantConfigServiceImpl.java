@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.TenantConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;

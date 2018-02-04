@@ -52,7 +52,6 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     @Column(name = "EXTERNAL_USER_EMAIL_SENT")
     private Boolean emailSent = false;
 
-
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
     private List<TargetMarket> targetMarkets;
 

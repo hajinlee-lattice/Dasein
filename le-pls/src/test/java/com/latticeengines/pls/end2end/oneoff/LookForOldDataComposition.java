@@ -24,8 +24,8 @@ import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class LookForOldDataComposition extends PlsFunctionalTestNGBase {
 

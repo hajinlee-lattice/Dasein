@@ -20,8 +20,8 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.MetadataSegmentExportDao;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("metadataSegmentExportEntityMgr")
 public class MetadataSegmentExportEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegmentExport>

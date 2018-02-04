@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttr
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
 import com.latticeengines.proxy.exposed.matchapi.MatchCustomerReportProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Service("dataCloudService")
 public class DataCloudServiceImpl implements DataCloudService {

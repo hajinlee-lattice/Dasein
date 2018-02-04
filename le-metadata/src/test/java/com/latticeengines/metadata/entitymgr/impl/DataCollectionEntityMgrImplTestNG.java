@@ -25,7 +25,7 @@ import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
 import com.latticeengines.metadata.service.SegmentService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class DataCollectionEntityMgrImplTestNG extends DataCollectionFunctionalTestNGBase {
 

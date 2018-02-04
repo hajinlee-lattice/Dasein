@@ -16,7 +16,7 @@ import com.latticeengines.pls.service.impl.FeatureImportanceParser;
 import com.latticeengines.pls.service.impl.ModelSummaryDownloadCallable;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 public abstract class ModelSummaryDownloadAbstractBean implements QuartzJobBean {
 

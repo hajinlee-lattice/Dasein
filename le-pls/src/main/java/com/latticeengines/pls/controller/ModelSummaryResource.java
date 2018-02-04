@@ -37,7 +37,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 
 import io.swagger.annotations.Api;

@@ -22,8 +22,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.MetadataService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 @Component

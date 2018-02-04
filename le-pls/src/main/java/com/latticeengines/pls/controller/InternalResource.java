@@ -113,7 +113,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.db.exposed.service.ReportService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

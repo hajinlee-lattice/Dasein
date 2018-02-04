@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctionalTestNGBase {
 

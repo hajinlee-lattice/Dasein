@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelDetail;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ModelDetailService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

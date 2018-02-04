@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.testflows.testreport.TestReportWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;

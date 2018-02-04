@@ -51,7 +51,7 @@ import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("scoringFileMetadataService")
 public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataService {

@@ -11,11 +11,18 @@ import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -24,6 +31,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiFunctionalTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputService;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 
 @Component
 public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
@@ -43,7 +51,25 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
                 { 123, "chevron.com", null, null, null, null } };
 
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
-        MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
+        restTemplate.setMessageConverters(Arrays.asList( //
+                new MappingJackson2HttpMessageConverter(), //
+                new KryoHttpMessageConverter()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(KryoHttpMessageConverter.KRYO));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<MatchInput> entity = new HttpEntity<>(input, headers);
+        ResponseEntity<MatchOutput> response = restTemplate.exchange(url, HttpMethod.POST, entity, MatchOutput.class);
+        MatchOutput output = response.getBody();
+        try (PerformanceTimer timer = new PerformanceTimer("Match via json")) {
+            ResponseEntity<MatchOutput> response1 = restTemplate.exchange(url, HttpMethod.POST, entity, MatchOutput.class);
+            MatchOutput output1 = response1.getBody();
+        }
+        try (PerformanceTimer timer = new PerformanceTimer("Match via kryo")) {
+            ResponseEntity<MatchOutput> response1 = restTemplate.exchange(url, HttpMethod.POST, entity, MatchOutput.class);
+            MatchOutput output1 = response1.getBody();
+        }
+
+        // MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);

@@ -44,7 +44,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
@@ -602,7 +601,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (log.isDebugEnabled()) {
             log.debug(String.format(
                     "Added field to realtime metadata -- Name:%s ApprovedUsage:%s LogicalDataType:%s FieldSchema:%s",
-                    Strings.nullToEmpty(attr.getName()), StringUtils.join(attr.getApprovedUsage(), ","),
+                    StringUtils.defaultIfBlank(attr.getName(), ""), StringUtils.join(attr.getApprovedUsage(), ","),
                     attr.getLogicalDataType(), JsonUtils.serialize(fieldSchema)));
         }
 

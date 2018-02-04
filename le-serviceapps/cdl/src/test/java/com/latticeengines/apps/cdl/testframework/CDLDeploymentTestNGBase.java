@@ -54,7 +54,7 @@ import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;

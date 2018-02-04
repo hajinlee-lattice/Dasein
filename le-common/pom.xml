@@ -20,26 +20,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${apache.http.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>${apache.http.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.python</groupId>
-            <artifactId>jython-standalone</artifactId>
-            <version>${jython.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-util</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.joestelmach</groupId>
             <artifactId>natty</artifactId>
             <version>${natty.version}</version>
@@ -132,13 +112,6 @@
             <artifactId>avro-mapred</artifactId>
             <version>${avro.version}</version>
             <classifier>hadoop2</classifier>
-        </dependency>
-
-        <!-- To Be Deleted -->
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client-jackson</artifactId>
-            <version>1.18.0-rc</version>
         </dependency>
     </dependencies>
 

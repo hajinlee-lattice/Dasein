@@ -17,6 +17,7 @@
         <le.monitor.version>4.3.1-SNAPSHOT</le.monitor.version>
         <le.auth.version>4.3.1-SNAPSHOT</le.auth.version>
         <jetty.port>8084</jetty.port>
+        <jetty.ssl.port>9084</jetty.ssl.port>
         <jetty.stop.port>10984</jetty.stop.port>
         <jetty.dir>test</jetty.dir>
         <jetty.use.test.cp>true</jetty.use.test.cp>
@@ -171,6 +172,14 @@
             <groupId>org.springframework.security.extensions</groupId>
             <artifactId>spring-security-saml2-core</artifactId>
             <version>${spring.saml2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common-web</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

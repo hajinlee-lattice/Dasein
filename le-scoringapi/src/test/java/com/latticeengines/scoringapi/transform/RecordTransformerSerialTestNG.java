@@ -31,7 +31,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
-import com.latticeengines.common.exposed.jython.JythonEngine;
 import com.latticeengines.common.exposed.modeling.ModelExtractor;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -197,9 +196,6 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         int transformDifferences = 0;
         int errors = 0;
         List<Map.Entry<Double, Double>> errorKeys = new ArrayList<>();
-
-        @SuppressWarnings("unused")
-        JythonEngine engine = new JythonEngine(modelExtractionDir.getAbsolutePath());
         
         for (GenericRecord record : reader) {
             Object recId = record.get(keyColumn);
@@ -221,9 +217,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 recordAsMap.put(f.name(), value);
             }
             long time9 = System.currentTimeMillis();
-            
-//            Map<String, Object> transformedFast = recordTransformer.transformJython(engine, transforms, recordAsMap);
-//            Map<String, Object> transformedFast = recordTransformer.transformJython(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
+
             Map<String, Object> transformedFast = recordTransformer.transform(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
 
             long time10 = System.currentTimeMillis();

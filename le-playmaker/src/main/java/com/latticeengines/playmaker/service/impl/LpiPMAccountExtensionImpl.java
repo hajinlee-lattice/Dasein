@@ -32,7 +32,7 @@ import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("lpiPMAccountExtension")
 public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {

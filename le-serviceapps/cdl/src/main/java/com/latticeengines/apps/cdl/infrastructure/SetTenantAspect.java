@@ -12,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.TenantToken;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Aspect
 public class SetTenantAspect {

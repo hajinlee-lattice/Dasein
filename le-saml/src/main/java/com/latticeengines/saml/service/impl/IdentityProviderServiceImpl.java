@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.saml.util.SAMLUtils;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("IdentityProviderService")
 public class IdentityProviderServiceImpl implements IdentityProviderService {

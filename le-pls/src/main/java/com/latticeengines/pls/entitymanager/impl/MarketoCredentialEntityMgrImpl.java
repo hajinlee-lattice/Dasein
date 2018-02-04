@@ -16,8 +16,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.MarketoCredentialDao;
 import com.latticeengines.pls.entitymanager.EnrichmentEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("marketoCredentialEntityMgr")
 public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCredential>

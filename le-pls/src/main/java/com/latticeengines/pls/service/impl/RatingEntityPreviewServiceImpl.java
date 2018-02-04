@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewService {

@@ -3,12 +3,13 @@ package com.latticeengines.security.exposed.util;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.latticeengines.db.exposed.util.MultiTenantContextStrategy;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.TenantToken;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
-public class GlobalAuthMultiTenantContextStrategy extends MultiTenantContextStrategy {
+public class GlobalAuthMultiTenantContextStrategy implements MultiTenantContextStrategy {
     @Override
     public Tenant getTenant() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

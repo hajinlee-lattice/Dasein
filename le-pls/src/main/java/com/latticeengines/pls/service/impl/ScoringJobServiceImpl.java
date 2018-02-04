@@ -28,8 +28,8 @@ import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RatingEngineScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("scoringJobService")
 public class ScoringJobServiceImpl implements ScoringJobService {

@@ -2,8 +2,7 @@ package com.latticeengines.proxy.exposed.matchapi;
 
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMApiUpdate;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,10 +12,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -104,7 +103,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     @Override
     public Set<String> premiumAttributes(String dataCloudVersion) {
         try {
-            return (Set<String>) premiumColumnsCache.get(dataCloudVersion);
+            return premiumColumnsCache.get(dataCloudVersion);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get premium columns from watcher cache");
         }
@@ -157,22 +156,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             url = constructUrl("/predefined/{selectName}?datacloudversion={dataCloudVersion}",
                     String.valueOf(selectName.name()), dataCloudVersion);
         }
-        List<Map<String, Object>> metadataObjs = get("columnSelection", url, List.class);
-        List<ColumnMetadata> metadataList = new ArrayList<>();
-        if (metadataObjs == null) {
+        List<ColumnMetadata> metadataList = getKryo("columnSelection", url, List.class);
+        if (CollectionUtils.isEmpty(metadataList)) {
+            return Collections.emptyList();
+        } else {
             return metadataList;
         }
-
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            for (Map<String, Object> obj : metadataObjs) {
-                ColumnMetadata metadata = mapper.treeToValue(mapper.valueToTree(obj), ColumnMetadata.class);
-                metadataList.add(metadata);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return metadataList;
     }
 
     public StatsCube getStatsCube() {
@@ -186,9 +175,9 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private Object getStatsObjectViaREST(String key) {
         switch (key) {
             case STATS_CUBE:
-                return get("get AM status cube", constructUrl("/statscube"), StatsCube.class);
+                return getKryo("get AM status cube", constructUrl("/statscube"), StatsCube.class);
             case TOPN_TREE:
-                return get("get AM top n tree", constructUrl("/topn"), TopNTree.class);
+                return getKryo("get AM top n tree", constructUrl("/topn"), TopNTree.class);
             default:
                 throw new IllegalArgumentException("Unknown cache key " + key);
         }

@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.metadata.service.TenantPurgeService;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("tenantPurgeService")
 public class TenantPurgeServiceImpl implements TenantPurgeService {

@@ -115,7 +115,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
             RatingModel ratingModel) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
-        return post("update rating model", url, ratingModel, ratingModel.getClass(), false);
+        return postWithoutLogBody("update rating model", url, ratingModel, ratingModel.getClass());
     }
 
     @SuppressWarnings("rawtypes")

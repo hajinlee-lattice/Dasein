@@ -33,7 +33,7 @@ import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("datafeedEntityMgr")
 public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implements DataFeedEntityMgr {

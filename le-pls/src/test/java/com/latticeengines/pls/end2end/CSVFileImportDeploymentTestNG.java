@@ -61,7 +61,7 @@ import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);

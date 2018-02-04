@@ -32,7 +32,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class ScoreWorkflowSubmitter extends WorkflowSubmitter {

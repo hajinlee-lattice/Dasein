@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModel
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {

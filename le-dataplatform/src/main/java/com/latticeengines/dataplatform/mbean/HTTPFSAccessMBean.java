@@ -5,8 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 
 @Component("httpFSMBean")
@@ -29,7 +30,8 @@ public class HTTPFSAccessMBean {
             String url = String.format(
                     "%s/app/%s%sconf/latticeengines.properties?user.name=yarn&op=GETFILESTATUS", webHDFS,
                     versionManager.getCurrentVersionInStack(stackName), s);
-            return "latticeengines.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
+            RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+            return "latticeengines.properties: \n" + restTemplate.getForObject(url, String.class);
         } catch (Exception e) {
             return "Failed to access latticeengines.properties from HttpFS due to: " + e.getMessage();
         }

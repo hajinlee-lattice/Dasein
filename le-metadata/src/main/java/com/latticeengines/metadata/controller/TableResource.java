@@ -3,10 +3,13 @@ package com.latticeengines.metadata.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,28 +31,28 @@ public class TableResource {
     @Autowired
     private TableResourceHelper tableResourceHelper;
 
-    @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/tables")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public List<String> getTables(@PathVariable String customerSpace) {
         return tableResourceHelper.getTables(customerSpace);
     }
 
-    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName) {
         return tableResourceHelper.getTable(customerSpace, tableName);
     }
 
-    @RequestMapping(value = "/tables/{tableName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/tables/{tableName}/metadata")
     @ResponseBody
     @ApiOperation(value = "Get table metadata by name")
     public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName) {
         return tableResourceHelper.getTableMetadata(customerSpace, tableName);
     }
 
-    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create table")
     public Boolean createTable(@PathVariable String customerSpace, //
@@ -58,7 +61,7 @@ public class TableResource {
         return tableResourceHelper.createTable(customerSpace, tableName, table);
     }
 
-    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Update table")
     public Boolean updateTable(@PathVariable String customerSpace, //
@@ -67,7 +70,7 @@ public class TableResource {
         return tableResourceHelper.updateTable(customerSpace, tableName, table);
     }
 
-    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping(value = "/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Delete table and cleanup data dir")
     public Boolean deleteTable(@PathVariable String customerSpace, //
@@ -75,7 +78,7 @@ public class TableResource {
         return tableResourceHelper.deleteTableAndCleanup(customerSpace, tableName);
     }
 
-    @RequestMapping(value = "/tables/{tableName}/clone", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/tables/{tableName}/clone")
     @ResponseBody
     @ApiOperation(value = "Clone table and underlying extracts")
     public Table cloneTable(@PathVariable String customerSpace, //
@@ -83,7 +86,7 @@ public class TableResource {
         return tableResourceHelper.cloneTable(customerSpace, tableName);
     }
 
-    @RequestMapping(value = "/tables/{tableName}/copy", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/tables/{tableName}/copy")
     @ResponseBody
     @ApiOperation(value = "Copy table and underlying extracts")
     public Table copyTable(@PathVariable String customerSpace, //
@@ -92,7 +95,7 @@ public class TableResource {
         return tableResourceHelper.copyTable(customerSpace, targetCustomerSpace, tableName);
     }
 
-    @RequestMapping(value = "/tables/{tableName}/storage", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/tables/{tableName}/storage")
     @ResponseBody
     @ApiOperation(value = "Add a storage mechanism")
     public Boolean addStorageMechanism(@PathVariable String customerSpace, //
@@ -101,14 +104,14 @@ public class TableResource {
         return true;
     }
 
-    @RequestMapping(value = "/tables/reset", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/tables/reset")
     @ResponseBody
     @ApiOperation(value = "Reset tables")
     public Boolean resetTables(@PathVariable String customerSpace) {
         return tableResourceHelper.resetTables(customerSpace);
     }
 
-    @RequestMapping(value = "/validations", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/validations")
     @ResponseBody
     @ApiOperation(value = "Validate metadata")
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //

@@ -3,12 +3,14 @@ package com.latticeengines.metadata.controller;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +45,7 @@ public class DataCollectionResource {
     @Autowired
     private SegmentService segmentService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
     public DataCollection getDataCollection(@PathVariable String customerSpace) {
@@ -51,7 +53,7 @@ public class DataCollectionResource {
         return dataCollectionService.getDataCollection(customerSpace, null);
     }
 
-    @RequestMapping(value = "/version/{version}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/version/{version}")
     @ResponseBody
     @ApiOperation(value = "Switch the version of default data collection")
     public ResponseDocument<DataCollection.Version> switchVersion(@PathVariable String customerSpace,
@@ -62,7 +64,7 @@ public class DataCollectionResource {
         return ResponseDocument.successResponse(version1);
     }
     
-    @RequestMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber}")
     @ResponseBody
     @ApiOperation(value = "Switch the version of default data collection")
     public ResponseDocument<String> updateDataCloudVersion(@PathVariable String customerSpace,
@@ -73,7 +75,7 @@ public class DataCollectionResource {
         return ResponseDocument.successResponse(newDataCloudVersion);
     }
 
-    @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/tables")
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
     public Table getTable(@PathVariable String customerSpace, @RequestParam(value = "role") TableRoleInCollection role,
@@ -87,22 +89,17 @@ public class DataCollectionResource {
         }
     }
 
-    @RequestMapping(value = "/tablenames", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/tablenames")
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
-    public String getTableName(@PathVariable String customerSpace,
+    public List<String> getTableNames(@PathVariable String customerSpace,
             @RequestParam(value = "role") TableRoleInCollection role,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        List<String> tables = dataCollectionService.getTableNames(customerSpace, null, role, version);
-        if (CollectionUtils.isEmpty(tables)) {
-            return null;
-        } else {
-            return tables.get(0);
-        }
+        return dataCollectionService.getTableNames(customerSpace, null, role, version);
     }
 
-    @RequestMapping(value = "/segments", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/segments")
     @ResponseBody
     @ApiOperation(value = "Get the all segments in the default collection.")
     public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
@@ -111,7 +108,7 @@ public class DataCollectionResource {
         return segmentService.getSegments(customerSpace, collection.getName());
     }
 
-    @RequestMapping(value = "/stats", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/stats")
     @ResponseBody
     @ApiOperation(value = "Get the main statistics of the default collection.")
     public StatisticsContainer getMainStats(@PathVariable String customerSpace,
@@ -120,7 +117,7 @@ public class DataCollectionResource {
         return dataCollectionService.getStats(customerSpace, null, version);
     }
 
-    @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/attrrepo")
     @ResponseBody
     @ApiOperation(value = "Get the attribute repository of the default collection.")
     public AttributeRepository getAttrRepo(@PathVariable String customerSpace,
@@ -129,7 +126,7 @@ public class DataCollectionResource {
         return dataCollectionService.getAttrRepo(customerSpace, null, version);
     }
 
-    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse upsertTable(@PathVariable String customerSpace, //
@@ -141,7 +138,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping(value = "/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse removeTable(@PathVariable String customerSpace, //
@@ -153,7 +150,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/reset", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/reset")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse resetTable(@PathVariable String customerSpace, //
@@ -163,7 +160,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/stats", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/stats")
     @ResponseBody
     @ApiOperation(value = "Create or update the main statistics of the collection")
     public SimpleBooleanResponse upsertStats(@PathVariable String customerSpace, //
@@ -173,7 +170,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/stats", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping(value = "/stats")
     @ResponseBody
     @ApiOperation(value = "Remove the main statistics of the collection")
     public SimpleBooleanResponse removeStats(@PathVariable String customerSpace,
@@ -183,7 +180,7 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/attributegroups", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/attributegroups")
     @ResponseBody
     @ApiOperation(value = "Get mocked metadat of attribute group for company profile and talking point")
     public List<String> getAttributeGroupsForCompanyProfileAndTalkingPoints(@PathVariable String customerSpace) {

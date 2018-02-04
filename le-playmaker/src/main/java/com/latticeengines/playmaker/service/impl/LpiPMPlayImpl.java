@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("lpiPMPlay")
 public class LpiPMPlayImpl implements LpiPMPlay {

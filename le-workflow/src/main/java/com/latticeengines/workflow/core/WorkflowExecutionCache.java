@@ -11,7 +11,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
@@ -21,13 +23,14 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
+import com.latticeengines.db.exposed.service.ReportService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -38,9 +41,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
-import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
@@ -56,19 +57,19 @@ public class WorkflowExecutionCache {
     private Cache<Long, Job> cache;
     private ExecutorService executorService;
 
-    @Autowired
+    @Inject
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
-    @Autowired
+    @Inject
     private WorkflowService workflowService;
 
-    @Autowired
+    @Inject
     private ReportService reportService;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private JobProxy jobProxy;
 
     @PostConstruct

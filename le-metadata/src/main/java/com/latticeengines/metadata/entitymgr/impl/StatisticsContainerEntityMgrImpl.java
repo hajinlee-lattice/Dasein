@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.metadata.dao.StatisticsContainerDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("statisticsContainerEntityMgr")
 public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<StatisticsContainer>

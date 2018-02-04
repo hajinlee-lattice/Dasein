@@ -38,8 +38,8 @@ import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("playService")
 public class PlayServiceImpl implements PlayService {

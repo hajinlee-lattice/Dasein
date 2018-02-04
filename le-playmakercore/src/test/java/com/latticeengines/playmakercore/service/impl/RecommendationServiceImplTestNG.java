@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-playmakercore-context.xml" })

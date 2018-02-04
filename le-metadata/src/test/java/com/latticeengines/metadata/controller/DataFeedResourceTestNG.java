@@ -31,8 +31,6 @@ public class DataFeedResourceTestNG extends DataCollectionFunctionalTestNGBase {
     @Autowired
     DataCollectionProxy dataCollectionProxy;
 
-    private static String DATAFEED_NAME;
-
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -42,7 +40,6 @@ public class DataFeedResourceTestNG extends DataCollectionFunctionalTestNGBase {
         dataCollectionProxy.upsertTable(customerSpace1, TABLE1, TableRoleInCollection.ConsolidatedAccount, version);
         dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace1);
         datafeed = dataFeedProxy.getDataFeed(customerSpace1);
-        DATAFEED_NAME = datafeed.getName();
     }
 
     @AfterClass(groups = "functional")

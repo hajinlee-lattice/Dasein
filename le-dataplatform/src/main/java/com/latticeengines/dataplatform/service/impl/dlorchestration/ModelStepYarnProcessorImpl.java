@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -278,7 +277,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         for (int percentage : calculateSamplePercentages(commandParameters.getNumSamples())) {
             AlgorithmBase algorithm;
 
-            if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmScript())) {
+            if (StringUtils.isNotBlank(commandParameters.getAlgorithmScript())) {
                 algorithm = new AlgorithmBase();
                 algorithm.setName("CUSTOM");
                 algorithm.setScript(commandParameters.getAlgorithmScript());
@@ -293,7 +292,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             algorithm.setPriority(calculatePriority(sampleIndex));
             algorithm.setContainerProperties(
                     "VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=" + priority);
-            if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmProperties())) {
+            if (StringUtils.isNotBlank(commandParameters.getAlgorithmProperties())) {
                 algorithm.setAlgorithmProperties(commandParameters.getAlgorithmProperties());
             }
             algorithm.setSampleName(constructSampleName(percentage));

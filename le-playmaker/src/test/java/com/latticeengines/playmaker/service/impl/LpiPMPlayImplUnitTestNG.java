@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class LpiPMPlayImplUnitTestNG {
 

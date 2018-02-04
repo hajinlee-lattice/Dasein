@@ -3,20 +3,20 @@ package com.latticeengines.pls.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTimeZone;
-import org.python.google.common.base.Predicate;
-import org.python.google.common.collect.Iterables;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
@@ -27,8 +27,6 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.TargetMarketService;
-import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
-import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 
 public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
@@ -179,39 +177,20 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
 
         // Ensure that the delete cascaded
         List<Report> allReports = reportEntityMgr.findAll();
-        assertFalse(Iterables.any(allReports, new Predicate<Report>() {
-            @Override
-            public boolean apply(Report report) {
-                return reportPids.contains(report.getPid());
-            }
-        }));
+        Assert.assertFalse(allReports.stream().anyMatch(report -> reportPids.contains(report.getPid())));
 
         List<KeyValue> allKeyValues = keyValueEntityMgr.findByTenantId(mainTestTenant.getPid());
-        assertFalse(Iterables.any(allKeyValues, new Predicate<KeyValue>() {
-            @Override
-            public boolean apply(KeyValue keyValue) {
-                return keyValuePids.contains(keyValue.getPid());
-            }
-        }));
+        Assert.assertFalse(allKeyValues.stream().anyMatch(keyValue -> keyValuePids.contains(keyValue.getPid())));
 
     }
 
     private void assertEquivalent(final List<TargetMarketReportMap> actual, final List<TargetMarketReportMap> expected) {
         assertEquals(actual.size(), expected.size());
-        assertTrue(Iterables.all(actual, new Predicate<TargetMarketReportMap>() {
-            @Override
-            public boolean apply(final TargetMarketReportMap actualReportMap) {
-                return Iterables.any(expected, new Predicate<TargetMarketReportMap>() {
-
-                    @Override
-                    public boolean apply(TargetMarketReportMap expectedReportMap) {
-                        String expectedReportName = expectedReportMap.getReportName();
-                        String actualReportName = actualReportMap.getReportName();
-                        return expectedReportName != null && actualReportName != null
-                                && expectedReportName.equals(actualReportName);
-                    }
-                });
-            }
-        }));
+        Assert.assertTrue(actual.stream().allMatch(actualReportMap -> expected.stream().anyMatch(expectedReportMap -> {
+            String expectedReportName = expectedReportMap.getReportName();
+            String actualReportName = actualReportMap.getReportName();
+            return expectedReportName != null && actualReportName != null
+                    && expectedReportName.equals(actualReportName);
+        })));
     }
 }

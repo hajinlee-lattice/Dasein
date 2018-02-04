@@ -3,7 +3,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.latticeengines</groupId>
     <artifactId>le-web-parent</artifactId>
     <packaging>pom</packaging>
     <version>4.3.1-SNAPSHOT</version>
@@ -20,6 +19,8 @@
         <jetty.dir>main</jetty.dir>
         <jetty.stop.port>10999</jetty.stop.port>
         <jetty.use.test.cp>false</jetty.use.test.cp>
+        <jetty.ks.path>/etc/ledp/tls/ledp_keystore.jks</jetty.ks.path>
+        <jetty.ks.password>Lattice1</jetty.ks.password>
     </properties>
 
     <profiles>
@@ -32,6 +33,14 @@
                         <artifactId>jetty-maven-plugin</artifactId>
                         <version>${jetty.version}</version>
                         <configuration>
+                            <!--
+                            <jettyXml>
+                                ../le-parent/jetty.xml,
+                                ../le-parent/jetty-ssl.xml,
+                                ../le-parent/jetty-ssl-context.xml,
+                                ../le-parent/jetty-https.xml
+                            </jettyXml>
+                            -->
                             <httpConnector>
                                 <port>${jetty.port}</port>
                             </httpConnector>
@@ -47,6 +56,18 @@
                                 <systemProperty>
                                     <name>com.latticeengines.registerBootstrappers</name>
                                     <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jetty.ssl.port</name>
+                                    <value>${jetty.ssl.port}</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jetty.sslContext.keyStorePath</name>
+                                    <value>${jetty.ks.path}</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jetty.sslContext.keyStorePassword</name>
+                                    <value>${jetty.ks.password}</value>
                                 </systemProperty>
                             </systemProperties>
                             <webXml>${basedir}/src/${jetty.dir}/webapp/WEB-INF/web.xml</webXml>

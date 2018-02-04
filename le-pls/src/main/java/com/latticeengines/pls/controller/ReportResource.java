@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.db.exposed.service.ReportService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

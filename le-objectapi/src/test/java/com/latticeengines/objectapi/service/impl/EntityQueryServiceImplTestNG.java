@@ -46,7 +46,7 @@ import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 

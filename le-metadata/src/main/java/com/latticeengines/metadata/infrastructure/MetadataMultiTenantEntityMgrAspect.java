@@ -1,28 +1,30 @@
 package com.latticeengines.metadata.infrastructure;
 
-import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.entitymanager.impl.MultiTenantEntityMgrAspect;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
+import com.latticeengines.security.exposed.util.MultiTenantEntityMgrAspect;
 
 @Aspect
 public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
+
     private static final Logger log = LoggerFactory.getLogger(MetadataMultiTenantEntityMgrAspect.class);
 
-    @Autowired
+    @Inject
     private SessionFactory sessionFactory;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private TableTypeHolder tableTypeHolder;
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.TableEntityMgrImpl.*(..))")
@@ -31,7 +33,6 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
         log.info("Table type = " + tableTypeHolder.getTableType());
         sessionFactory.getCurrentSession().enableFilter("typeFilter").setParameter("typeFilterId", //
                 tableTypeHolder.getTableType().getCode());
-
     }
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.ArtifactEntityMgrImpl.*(..))")

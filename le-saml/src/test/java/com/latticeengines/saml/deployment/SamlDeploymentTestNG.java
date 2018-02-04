@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 
 public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {

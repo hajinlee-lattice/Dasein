@@ -225,7 +225,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/jobs";
         String url = generateUpdateParentJobIdUrl(baseUrl, customerSpace, jobIds, parentJobId);
-        put("updateParentJobId", url, null);
+        put("updateParentJobId", url);
     }
 
     public void updateParentJobId(List<String> jobIds, String parentJobId, String ... params) {
@@ -241,10 +241,10 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         if (params != null && params.length > 0) {
             String customerSpace = params[0];
             String url = generateUpdateParentJobIdUrl(baseUrl, customerSpace, jobIds, parentJobId);
-            put("updateParentJobId", url, null);
+            put("updateParentJobId", url);
         } else {
             String url = generateUpdateParentJobIdUrl(baseUrl, "", jobIds, parentJobId);
-            put("updateParentJobId", url, null);
+            put("updateParentJobId", url);
         }
     }
 

@@ -18,6 +18,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -31,10 +34,7 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 
 public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {

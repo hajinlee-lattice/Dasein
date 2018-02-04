@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.RatingCoverageService;
@@ -44,7 +43,7 @@ import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.pls.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

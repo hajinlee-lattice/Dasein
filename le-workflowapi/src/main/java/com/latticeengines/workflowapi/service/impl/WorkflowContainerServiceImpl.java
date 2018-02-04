@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;

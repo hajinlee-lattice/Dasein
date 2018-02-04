@@ -27,11 +27,6 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
     private String masterTableName;
 
     @Override
-    protected TableRoleInCollection profileTableRole() {
-        return null;
-    }
-
-    @Override
     protected void onPostTransformationCompleted() {
         String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
         updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, servingStoreTableName, String.class);

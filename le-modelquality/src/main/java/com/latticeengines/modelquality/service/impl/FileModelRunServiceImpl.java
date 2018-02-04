@@ -44,7 +44,7 @@ import com.latticeengines.modelquality.entitymgr.ModelSummaryMetricsEntityMgr;
 import com.latticeengines.modelquality.metrics.ModelQualityMetrics;
 import com.latticeengines.modelquality.metrics.ModelingMeasurement;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("fileModelRunService")
 public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
