@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.dao.ReportDao;
+import com.latticeengines.db.exposed.entitymgr.KeyValueEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.ReportEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.db.repository.KeyValueRepository;
 import com.latticeengines.db.repository.ReportRepository;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 @Component("reportEntityMgr")
 public class ReportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Report, Long> implements ReportEntityMgr {
 
-    private final KeyValueRepository keyValueRepository;
+    private final KeyValueEntityMgr keyValueEntityMgr;
 
     private final ReportRepository reportRepository;
 
@@ -34,9 +34,9 @@ public class ReportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Report, Lon
     private final ReportDao reportDao;
 
     @Inject
-    public ReportEntityMgrImpl(KeyValueRepository keyValueRepository, ReportRepository reportRepository,
+    public ReportEntityMgrImpl(KeyValueEntityMgr keyValueEntityMgr, ReportRepository reportRepository,
             TenantEntityMgr tenantEntityMgr, ReportDao reportDao) {
-        this.keyValueRepository = keyValueRepository;
+        this.keyValueEntityMgr = keyValueEntityMgr;
         this.reportRepository = reportRepository;
         this.tenantEntityMgr = tenantEntityMgr;
         this.reportDao = reportDao;
@@ -73,7 +73,7 @@ public class ReportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Report, Lon
             report.setJson(json);
         }
         json.setTenantId(report.getTenantId());
-        keyValueRepository.save(json);
+        keyValueEntityMgr.create(json);
         getDao().create(report);
     }
 

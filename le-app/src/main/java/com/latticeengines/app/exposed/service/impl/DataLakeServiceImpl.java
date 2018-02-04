@@ -30,6 +30,7 @@ import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -40,7 +41,6 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
@@ -56,8 +56,8 @@ import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataLakeService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -67,6 +67,9 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Inject
     private AttributeCustomizationService attributeCustomizationService;
@@ -309,11 +312,11 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (role == null) {
             return Collections.emptyList();
         }
-        Table batchTable = dataCollectionProxy.getTable(customerSpace, role);
-        if (batchTable == null) {
+        String batchTableName= dataCollectionProxy.getTableName(customerSpace, role);
+        if (StringUtils.isBlank(batchTableName)) {
             return Collections.emptyList();
         } else {
-            List<ColumnMetadata> cms = batchTable.getColumnMetadata();
+            List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, batchTableName);
             if (BusinessEntity.Account.getServingStore().equals(role)) {
                 ImportanceOrderingUtils.addImportanceOrdering(cms);
             } else if (BusinessEntity.PurchaseHistory.getServingStore().equals(role)) {

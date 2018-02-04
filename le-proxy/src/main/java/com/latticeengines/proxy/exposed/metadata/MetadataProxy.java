@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -116,6 +117,12 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public Table getTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         return get("getTable", url, Table.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<ColumnMetadata> getTableColumns(String customerSpace, String tableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/columns/", customerSpace, tableName);
+        return getKryo("get table columns", url, List.class);
     }
 
     public List<Table> getTables(String customerSpace) {

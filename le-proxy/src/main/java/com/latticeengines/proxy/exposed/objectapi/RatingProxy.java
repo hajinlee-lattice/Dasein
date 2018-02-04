@@ -52,7 +52,7 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
     }
 
     @PostConstruct
-    public void addCacheManager() {
+    public void postConstruct() {
         if (cacheManager instanceof CompositeCacheManager) {
             log.info("adding local entity cache manager to composite cache manager");
             ((CompositeCacheManager) cacheManager).setCacheManagers(Collections.singletonList(coverageCache));
@@ -74,7 +74,12 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         // normalize rating model to increase cache hit
         RatingModel ratingModel = normalizeRatingModel(frontEndQuery.getRatingModels().get(0));
         frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
-        return getCoverageFromCache(customerSpace, frontEndQuery);
+
+        optimizeRestrictions(frontEndQuery);
+        frontEndQuery.setPageFilter(null);
+        frontEndQuery.setSort(null);
+        return getCoverageFromApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
     }
 
     private RatingModel normalizeRatingModel(RatingModel ratingModel) {
@@ -84,14 +89,6 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         ratingModel.setIteration(-1);
         ratingModel.setRatingEngine(null);
         return ratingModel;
-    }
-
-    private Map<String, Long> getCoverageFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
-        frontEndQuery.setPageFilter(null);
-        frontEndQuery.setSort(null);
-        return getCoverageFromApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
     }
 
     public Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
@@ -114,18 +111,13 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return postWithRetries("getData", url, frontEndQuery, DataPage.class);
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private Map<String, Long> getCoverageFromApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/rating/coverage", tenantId);
-        Map map = postWithRetries("getRatingCoverage", url, frontEndQuery, Map.class);
-        if (map == null) {
-            return null;
-        } else {
-            return JsonUtils.convertMap(map, String.class, Long.class);
-        }
+        return postWithRetries("getRatingCoverage", url, frontEndQuery, Map.class);
     }
 
     private void optimizeRestrictions(FrontEndQuery frontEndQuery) {

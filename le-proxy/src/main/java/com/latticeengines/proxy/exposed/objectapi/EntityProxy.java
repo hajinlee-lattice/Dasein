@@ -86,8 +86,8 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     @Cacheable(cacheNames = CacheName.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
-        DataPage page = getDataFromCache(customerSpace, frontEndQuery);
-        return page;
+        return getDataFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
     }
 
     @Cacheable(cacheNames = CacheName.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
@@ -103,7 +103,11 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         RatingModel ratingModel = normalizeRatingModel(frontEndQuery.getRatingModels().get(0));
         frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
 
-        return getRatingCountFromCache(customerSpace, frontEndQuery);
+        optimizeRestrictions(frontEndQuery);
+        frontEndQuery.setPageFilter(null);
+        frontEndQuery.setSort(null);
+        return getRatingCountFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
     }
 
     private RatingModel normalizeRatingModel(RatingModel ratingModel) {
@@ -122,20 +126,6 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         frontEndQuery.setSort(null);
         return String.valueOf(getCountFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString())));
-    }
-
-    private DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
-        return getDataFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
-    }
-
-    private Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
-        frontEndQuery.setPageFilter(null);
-        frontEndQuery.setSort(null);
-        return getRatingCountFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
     }
 
     private Long getCountFromObjectApi(String serializedKey) {
@@ -181,18 +171,13 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         return postWithRetries("getData", url, frontEndQuery, DataPage.class);
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private Map<String, Long> getRatingCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
-        Map map = postWithRetries("getRatingCount", url, frontEndQuery, Map.class);
-        if (map == null) {
-            return null;
-        } else {
-            return JsonUtils.convertMap(map, String.class, Long.class);
-        }
+        return postWithRetries("getRatingCount", url, frontEndQuery, Map.class);
     }
 
     private void optimizeRestrictions(FrontEndQuery frontEndQuery) {

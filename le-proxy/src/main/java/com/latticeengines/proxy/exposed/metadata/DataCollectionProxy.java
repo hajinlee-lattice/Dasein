@@ -148,7 +148,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             args.add(version);
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
-        post("upsertTable", url, null, null);
+        postKryo("upsertTable", url, null, null);
     }
 
     public void unlinkTable(String customerSpace, String tableName, TableRoleInCollection role,

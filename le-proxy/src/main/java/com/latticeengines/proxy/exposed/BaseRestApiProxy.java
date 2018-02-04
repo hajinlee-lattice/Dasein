@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,7 +25,9 @@ import org.springframework.web.util.UriTemplate;
 
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
@@ -38,18 +39,14 @@ public abstract class BaseRestApiProxy {
     private String hostport;
     private String rootpath;
 
-    @Value("${proxy.retry.initialwaitmsec:1000}")
-    private long initialWaitMsec;
-
-    @Value("${proxy.retry.multiplier:2}")
-    private double multiplier;
-
-    @Value("${proxy.retry.maxAttempts:10}")
-    private int maxAttempts;
+    private long initialWaitMsec = 1000;
+    private double multiplier = 2;
+    private int maxAttempts = 10;
 
     // Used to call external API because there is no standardized error handler
     protected BaseRestApiProxy() {
         this.restTemplate = HttpClientUtils.newRestTemplate();
+        initialConfig();
     }
 
     protected BaseRestApiProxy(String hostport) {
@@ -62,6 +59,19 @@ public abstract class BaseRestApiProxy {
         this.restTemplate = HttpClientUtils.newRestTemplate();
         this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
         setMagicAuthHeader();
+        initialConfig();
+    }
+
+    private void initialConfig() {
+        if (StringUtils.isNotBlank(PropertyUtils.getProperty("proxy.retry.maxAttempts"))) {
+            this.maxAttempts = Integer.valueOf(PropertyUtils.getProperty("proxy.retry.maxAttempts"));
+        }
+        if (StringUtils.isNotBlank(PropertyUtils.getProperty("proxy.retry.multiplier"))) {
+            this.multiplier = Double.valueOf(PropertyUtils.getProperty("proxy.retry.multiplier"));
+        }
+        if (StringUtils.isNotBlank(PropertyUtils.getProperty("proxy.retry.initialwaitmsec"))) {
+            this.initialWaitMsec = Long.valueOf(PropertyUtils.getProperty("proxy.retry.initialwaitmsec"));
+        }
     }
 
     void setMagicAuthHeader() {
@@ -463,7 +473,7 @@ public abstract class BaseRestApiProxy {
 
     protected void setMaxAttempts(int maxAttempts) {
         this.maxAttempts = maxAttempts;
-        log.info("set " + getClass().getSimpleName() + " maxattemps to " + maxAttempts);
+        log.info("set " + getClass().getSimpleName() + " maxattemps to " + this.maxAttempts);
     }
 
     void enforceSSLNameVerification() {

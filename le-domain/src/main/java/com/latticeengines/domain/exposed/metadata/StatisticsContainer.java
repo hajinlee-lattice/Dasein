@@ -19,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
@@ -240,5 +241,13 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
 
     public void setVersion(DataCollection.Version version) {
         this.version = version;
+    }
+
+    public StatisticsContainer detachHibernate() {
+        StatisticsContainer container = new StatisticsContainer();
+        container.setName(getName());
+        container.setVersion(getVersion());
+        container.setCubesData(getCubesData());
+        return container;
     }
 }

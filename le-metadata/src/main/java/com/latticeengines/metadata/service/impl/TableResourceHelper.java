@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.MetadataService;
 
 @Component("tableResourceHelper")
@@ -30,6 +33,9 @@ public class TableResourceHelper {
 
     @Autowired
     private MetadataService mdService;
+
+    @Inject
+    private TableEntityMgr tableEntityMgr;
 
     public List<String> getTables(String customerSpace) {
         log.info(String.format("getTables(%s)", customerSpace));

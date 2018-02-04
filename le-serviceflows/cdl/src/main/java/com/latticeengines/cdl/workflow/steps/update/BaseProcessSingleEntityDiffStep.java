@@ -141,6 +141,10 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return step;
     }
 
+    protected TransformationStepConfig bucket(boolean heavyEngine) {
+        return bucket(-1, heavyEngine);
+    }
+
     protected TransformationStepConfig bucket(int inputStep, boolean heavyEngine) {
         TransformationStepConfig step = new TransformationStepConfig();
         String sourceName = entity.name() + "Profile";
@@ -150,7 +154,11 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(sourceName, sourceTable);
         step.setBaseTables(baseTables);
-        step.setInputSteps(Collections.singletonList(inputStep));
+        if (inputStep < 0) {
+            useDiffTableAsSource(step);
+        } else {
+            step.setInputSteps(Collections.singletonList(inputStep));
+        }
         step.setTransformer(TRANSFORMER_BUCKETER);
         String confStr = heavyEngine ? emptyStepConfig(heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
         step.setConfiguration(confStr);

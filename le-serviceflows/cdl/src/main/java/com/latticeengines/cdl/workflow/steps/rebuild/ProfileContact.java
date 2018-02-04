@@ -12,12 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
 @Component(ProfileContact.BEAN_NAME)
@@ -35,6 +37,11 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
     }
 
     @Override
+    protected TableRoleInCollection profileTableRole() {
+        return TableRoleInCollection.ContactProfile;
+    }
+
+    @Override
     protected PipelineTransformationRequest getTransformRequest() {
         String masterTableName = masterTable.getName();
 
@@ -44,20 +51,22 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         request.setKeepTemp(false);
         request.setEnableSlack(false);
 
-        int sortStep = 0;
-        int profileStep = 1;
-        int bucketStep = 2;
+        int profileStep = 0;
+        int bucketStep = 1;
 
-        TransformationStepConfig sort = sort(masterTableName, servingStoreTablePrefix, servingStoreSortKey, 200);
-        TransformationStepConfig profile = profile(sortStep);
-        TransformationStepConfig bucket = bucket(profileStep, sortStep);
+        TransformationStepConfig profile = profile(masterTableName);
+        TransformationStepConfig bucket = bucket(profileStep, masterTableName);
         TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, dedupFields);
+        TransformationStepConfig sort = sort(bucketStep, servingStoreTablePrefix, servingStoreSortKey, 200);
+        TransformationStepConfig sortProfile = sort(profileStep, profileTablePrefix,
+                DataCloudConstants.PROFILE_ATTR_ATTRNAME, 1);
         // -----------
         List<TransformationStepConfig> steps = Arrays.asList( //
-                sort, //
                 profile, //
                 bucket, //
-                calc //
+                calc, //
+                sort, //
+                sortProfile //
         );
         // -----------
         request.setSteps(steps);

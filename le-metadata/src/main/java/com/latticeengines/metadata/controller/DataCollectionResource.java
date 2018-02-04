@@ -112,9 +112,10 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get the main statistics of the default collection.")
     public StatisticsContainer getMainStats(@PathVariable String customerSpace,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+                                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getStats(customerSpace, null, version);
+        StatisticsContainer container = dataCollectionService.getStats(customerSpace, null, version);
+        return container == null ?  null : container.detachHibernate();
     }
 
     @GetMapping(value = "/attrrepo")

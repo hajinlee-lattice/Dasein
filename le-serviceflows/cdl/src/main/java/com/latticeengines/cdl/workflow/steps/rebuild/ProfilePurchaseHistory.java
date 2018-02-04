@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_TRANSACTION_AGGREGATOR;
 
@@ -23,9 +24,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -63,6 +66,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     }
 
     @Override
+    protected TableRoleInCollection profileTableRole() {
+        return TableRoleInCollection.PurchaseHistoryProfile;
+    }
+
+    @Override
     protected PipelineTransformationRequest getTransformRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("CalculatePurchaseHistory");
@@ -80,10 +88,12 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         TransformationStepConfig profile = profile();
         TransformationStepConfig bucket = bucket();
         TransformationStepConfig calc = calcStats(customerSpace, statsTablePrefix);
+        TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
         steps.add(aggregate);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
+        steps.add(sortProfile);
 
         // -----------
         request.setSteps(steps);
@@ -238,6 +248,27 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
         step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig sortProfile(CustomerSpace customerSpace, String profileTablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(profileStep);
+        step.setInputSteps(inputSteps);
+        step.setTransformer(TRANSFORMER_SORTER);
+
+        SorterConfig conf = new SorterConfig();
+        conf.setPartitions(1);
+        conf.setCompressResult(true);
+        conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(profileTablePrefix);
+        step.setTargetTable(targetTable);
+
         return step;
     }
 

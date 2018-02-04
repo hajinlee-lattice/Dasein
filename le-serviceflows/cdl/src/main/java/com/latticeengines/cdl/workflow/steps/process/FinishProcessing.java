@@ -177,6 +177,10 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             switch (role) {
                 case Profile:
                     return BusinessEntity.Account;
+                case ContactProfile:
+                    return BusinessEntity.Contact;
+                case PurchaseHistoryProfile:
+                    return BusinessEntity.PurchaseHistory;
                 case ConsolidatedRawTransaction:
                     return BusinessEntity.Transaction;
                 default:

@@ -17,6 +17,7 @@
 
     <properties>
         <jetty.dir>main</jetty.dir>
+        <jetty.conf.dir>../le-parent/jetty</jetty.conf.dir>
         <jetty.stop.port>10999</jetty.stop.port>
         <jetty.use.test.cp>false</jetty.use.test.cp>
         <jetty.ks.path>/etc/ledp/tls/ledp_keystore.jks</jetty.ks.path>
@@ -35,10 +36,11 @@
                         <configuration>
                             <!--
                             <jettyXml>
-                                ../le-parent/jetty.xml,
-                                ../le-parent/jetty-ssl.xml,
-                                ../le-parent/jetty-ssl-context.xml,
-                                ../le-parent/jetty-https.xml
+                                ${jetty.conf.dir}/jetty.xml,
+                                ${jetty.conf.dir}/jetty-env.xml,
+                                ${jetty.conf.dir}/jetty-ssl.xml,
+                                ${jetty.conf.dir}/jetty-ssl-context.xml,
+                                ${jetty.conf.dir}/jetty-https.xml
                             </jettyXml>
                             -->
                             <httpConnector>

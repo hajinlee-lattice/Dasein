@@ -70,15 +70,15 @@
     <Service name="MatchAPI">
         <Connector port="8076" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9076" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -100,15 +100,15 @@
     <Service name="Admin">
         <Connector port="8085" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9085" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -130,15 +130,15 @@
     <Service name="PlayMaker">
         <Connector port="8071" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9071"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9071" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -160,15 +160,15 @@
     <Service name="OAuth">
         <Connector port="8072" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9072"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9072" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -190,15 +190,15 @@
     <Service name="ScoringAPI">
         <Connector port="8073" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9073"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9073" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -220,15 +220,15 @@
     <Service name="SAML">
         <Connector port="8087" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9087"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9087" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -250,15 +250,15 @@
     <Service name="API">
         <Connector port="8074" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9074"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9074" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -280,15 +280,15 @@
     <Service name="Ulysses">
         <Connector port="8075" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9075"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9075" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -310,7 +310,7 @@
     <Service name="Job">
         <Connector port="8077" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Engine name="JobEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -324,15 +324,15 @@
     <Service name="MS">
         <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9080"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9080" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"
@@ -354,15 +354,15 @@
     <Service name="PLS">
         <Connector port="8081" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9081"
                    compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json,application/x-kryo"/>
         <Connector port="9081" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="20000" compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" >
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" >
             <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"
                              readTimeout="20000" writeTimeout="20000" compression="on"
-                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json" />
+                             compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/x-kryo" />
             <SSLHostConfig>
                 <Certificate certificateKeyFile="/etc/ledp/tls/server.key"
                              certificateFile="/etc/ledp/tls/server.crt"

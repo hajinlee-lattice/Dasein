@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
@@ -41,7 +42,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -49,7 +49,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component(ProfileAccount.BEAN_NAME)
@@ -63,22 +62,12 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     private static int profileStep;
     private static int bucketStep;
 
-    private String profileTablePrefix;
-
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
-    protected void initializeConfiguration() {
-        super.initializeConfiguration();
-        profileTablePrefix = entity.name() + "Profile";
-    }
-
-    @Override
-    protected void onPostTransformationCompleted() {
-        super.onPostTransformationCompleted();
-        String profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
-        upsertProfileTable(profileTableName, TableRoleInCollection.Profile);
+    protected TableRoleInCollection profileTableRole() {
+        return TableRoleInCollection.Profile;
     }
 
     @Override
@@ -240,12 +229,10 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     @Override
     protected void enrichTableSchema(Table table) {
         String dataCloudVersion = columnMetadataProxy.latestVersion("").getVersion();
-        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
-                dataCloudVersion);
+        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment, dataCloudVersion);
         Map<String, ColumnMetadata> amColMap = new HashMap<>();
         amCols.forEach(cm -> amColMap.put(cm.getColumnId(), cm));
-        ColumnMetadata latticeIdCm = columnMetadataProxy
-                .columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
+        ColumnMetadata latticeIdCm = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
         Map<String, Attribute> masterAttrs = new HashMap<>();
         masterTable.getAttributes().forEach(attr -> {
             masterAttrs.put(attr.getName(), attr);
@@ -276,7 +263,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr = copyMasterAttr(masterAttrs, attr0);
                 masterCount.incrementAndGet();
             }
-            attr.addToGroups(ColumnSelection.Predefined.TalkingPoint);
             if (StringUtils.isBlank(attr.getCategory())) {
                 attr.setCategory(Category.ACCOUNT_ATTRIBUTES);
             }
@@ -296,21 +282,6 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
             return str.replaceAll("\\P{Print}", "");
         } else {
             return str;
-        }
-    }
-
-    private void upsertProfileTable(String profileTableName, TableRoleInCollection profileRole) {
-        String customerSpace = configuration.getCustomerSpace().toString();
-        Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
-        if (profileTable == null) {
-            throw new RuntimeException(
-                    "Failed to find profile table " + profileTableName + " in customer " + customerSpace);
-        }
-        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
-        dataCollectionProxy.upsertTable(customerSpace, profileTableName, profileRole, inactiveVersion);
-        profileTable = dataCollectionProxy.getTable(customerSpace, profileRole, inactiveVersion);
-        if (profileTable == null) {
-            throw new IllegalStateException("Cannot find the upserted " + profileRole + " table in data collection.");
         }
     }
 
