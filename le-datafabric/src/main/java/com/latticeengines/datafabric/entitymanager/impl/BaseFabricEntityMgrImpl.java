@@ -121,7 +121,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (store != null) {
             try {
                 dataStore = dataService.constructDataStore(store, repository, recordType, schema);
-                if (STORE_DYNAMO.endsWith(store)) {
+                if (STORE_DYNAMO.equalsIgnoreCase(store)) {
                     ((DynamoDataStoreImpl) dataStore).useRemoteDynamo(enforceRemoteDynamo);
                 }
             } catch (Exception e) {

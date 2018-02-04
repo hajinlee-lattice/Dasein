@@ -28,11 +28,11 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.datafabric.entitymanager.impl.SampleEntity;
-import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
+import com.latticeengines.datafabric.functionalframework.DataFabricConnectFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
-public class GenericSinkTaskFunctionalTestNG extends DataFabricFunctionalTestNGBase {
+public class GenericSinkTaskFunctionalTestNG extends DataFabricConnectFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(GenericSinkTaskFunctionalTestNG.class);

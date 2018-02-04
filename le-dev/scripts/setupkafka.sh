@@ -5,11 +5,12 @@ printf "%s\n" "${CONFLUENT_HOME:?Must set CONFLUENT_HOME to your root dir for co
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
 
 echo "Compile datafabric connect shaded jar"
-pushd ${WSHOME}/le-datafabric && \
-mvn -f pom-connect-shaded.xml -DskipTests package && \
+pushd ${WSHOME}/le-datafabric-connect && \
+mvn -DskipTests package && \
 popd
 
 echo "Copy datafabric connect shaded jar to confluent home"
 mkdir -p ${CONFLUENT_HOME}/connectors
-cp ${WSHOME}/le-datafabric/target/le-datafabric-connect-*-shaded.jar ${CONFLUENT_HOME}/connectors
-ls -al ${CONFLUENT_HOME}/connectors
+rm -rf ${CONFLUENT_HOME}/connectors/le-datafabric-connect-*-shaded.jar
+cp ${WSHOME}/le-datafabric-connect/target/le-datafabric-connect-*-shaded.jar ${CONFLUENT_HOME}/connectors
+ls -ahl ${CONFLUENT_HOME}/connectors

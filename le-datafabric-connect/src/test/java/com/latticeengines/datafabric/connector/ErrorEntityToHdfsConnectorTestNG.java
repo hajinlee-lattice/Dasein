@@ -10,20 +10,19 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
+import com.latticeengines.datafabric.functionalframework.DataFabricConnectFunctionalTestNGBase;
 import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
 import com.latticeengines.datafabric.service.message.FabricMessageProducer;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImplFunctionalTestNG;
 import com.latticeengines.datafabric.service.message.impl.SampleStreamProc;
 import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
-public class ErrorEntityToHdfsConnectorTestNG extends DataFabricFunctionalTestNGBase {
+public class ErrorEntityToHdfsConnectorTestNG extends DataFabricConnectFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(FabricMessageServiceImplFunctionalTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ErrorEntityToHdfsConnectorTestNG.class);
 
     private String topic;
     private String recordType;

@@ -16,9 +16,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.datafabric.entitymanager.impl.SampleEntity;
-import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
+import com.latticeengines.datafabric.functionalframework.DataFabricConnectFunctionalTestNGBase;
 
-public class GenericSinkConnectorFunctionalTestNG extends DataFabricFunctionalTestNGBase {
+public class GenericSinkConnectorFunctionalTestNG extends DataFabricConnectFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(GenericSinkConnectorFunctionalTestNG.class);
