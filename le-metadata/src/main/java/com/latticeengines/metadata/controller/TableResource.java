@@ -47,9 +47,9 @@ public class TableResource {
         return tableResourceHelper.getTable(customerSpace, tableName);
     }
 
-    @GetMapping(value = "/table/{tableName}/columns/")
+    @GetMapping(value = "/tables/{tableName}/columns")
     @ResponseBody
-    @ApiOperation(value = "Get table by name")
+    @ApiOperation(value = "Get table columns by name")
     public List<ColumnMetadata> getTableColumns(@PathVariable String customerSpace, @PathVariable String tableName) {
         Table table = tableResourceHelper.getTable(customerSpace, tableName);
         if (table != null) {
