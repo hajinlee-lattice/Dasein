@@ -15,7 +15,7 @@
                         <span class="fa fa-plus fa-lg pull-right"></span>
                     </div> 
                 </li>
-                <li class="mini-tile">
+                <li class="mini-tile" ng-if="vm.showUpdateTile()">
                     <div class="jobs-tile-header">
                         <h2 class="title"> Updated </h2>
                         <h2 class="title update-count"> {{vm.updatedRecords}} </h2> 
@@ -31,7 +31,7 @@
                         <span class="fa fa-trash-o fa-lg pull-right"></span>
                     </div> 
                 </li>
-                <li class="unmatched-tile" ng-if="vm.unmatchedRecords">
+                <li class="unmatched-tile" ng-if="vm.showUnmatchTile()">
                     <div class="jobs-tile-header">
                         <h2 class="title">Unmatched to the Datacloud
                         </h2>

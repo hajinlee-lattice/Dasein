@@ -83,6 +83,14 @@ angular
 			vm.parsePayload = function(action, key) {
 				return JSON.parse(action.reports[0]['json']['Payload'])[key];
 			}
+
+            vm.showUpdateTile = function() {
+                return vm.entity != 'Transaction';
+            }
+
+            vm.showUnmatchTile = function() {
+                return vm.unmatchedRecords && vm.entity == 'Account';
+            }
         	
 
         	vm.init();
