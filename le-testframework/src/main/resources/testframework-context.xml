@@ -28,12 +28,4 @@
         <constructor-arg index="0" ref="awsCredentials" />
     </bean>
 
-    <bean id="setGAMultiTenantStrategyInTest" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="targetClass" value="com.latticeengines.db.exposed.util.MultiTenantContext" />
-        <property name="targetMethod" value="setStrategy" />
-        <property name="arguments">
-            <bean class="com.latticeengines.security.exposed.util.GlobalAuthMultiTenantContextStrategy" />
-        </property>
-    </bean>
-
 </beans>

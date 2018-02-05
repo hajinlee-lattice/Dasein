@@ -18,5 +18,13 @@
     <context:component-scan base-package="com.latticeengines.common.exposed.rest"/>
     <context:component-scan base-package="com.latticeengines.transform"/>
 
+    <bean id="setGAMultiTenantStrategy" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.db.exposed.util.MultiTenantContext" />
+        <property name="targetMethod" value="setStrategy" />
+        <property name="arguments">
+            <bean class="com.latticeengines.security.exposed.util.GlobalAuthMultiTenantContextStrategy" />
+        </property>
+    </bean>
+
 
 </beans>
