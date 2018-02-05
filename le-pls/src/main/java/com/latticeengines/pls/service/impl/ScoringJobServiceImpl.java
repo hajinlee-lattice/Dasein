@@ -67,6 +67,10 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid);
         List<Job> ret = new ArrayList<>();
         for (Job job : jobs) {
+            if (job.getJobType() == null) {
+                continue;
+            }
+
             if (job.getJobType().equals("scoreWorkflow") || job.getJobType().equals("importMatchAndScoreWorkflow")
                     || job.getJobType().equals("rtsBulkScoreWorkflow")
                     || job.getJobType().equals("importAndRTSBulkScoreWorkflow")) {
