@@ -197,7 +197,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
                 elastiCacheService.getNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder().readFrom(ReadFrom.SLAVE)//
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder().readFrom(ReadFrom.SLAVE_PREFERRED)//
                 .commandTimeout(Duration.ofSeconds(2))//
                 .shutdownTimeout(Duration.ZERO) //
                 .useSsl() //
