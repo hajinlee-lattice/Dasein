@@ -89,7 +89,6 @@
             <artifactId>javax.el</artifactId>
             <version>${javax.el.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>

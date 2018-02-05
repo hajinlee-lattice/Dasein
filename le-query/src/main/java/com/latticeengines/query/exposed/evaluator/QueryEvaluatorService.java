@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
@@ -79,7 +79,7 @@ public class QueryEvaluatorService {
         query.setLookups(filteredLookups);
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         try (PerformanceTimer timer = new PerformanceTimer(timerMessage("getData", attrRepo, sqlQuery))) {
-            List<Map<String, Object>> results = queryEvaluator.run(sqlQuery, attrRepo, query).getData();
+            List<Map<String, Object>> results = queryEvaluator.run(sqlQuery, query).getData();
             dataPage = new DataPage(results);
         }
 

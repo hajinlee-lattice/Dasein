@@ -40,7 +40,11 @@
             <artifactId>jetty-util</artifactId>
             <version>${jetty.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.projectreactor.ipc</groupId>
+            <artifactId>reactor-netty</artifactId>
+            <version>0.7.3.RELEASE</version>
+        </dependency>
     </dependencies>
 
 </project>

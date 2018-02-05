@@ -3,16 +3,17 @@ package com.latticeengines.query.exposed.evaluator;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -20,10 +21,16 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.querydsl.sql.SQLQuery;
 
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
+
 @Component("queryEvaluator")
 public class QueryEvaluator {
 
+    private static final Logger log = LoggerFactory.getLogger(QueryEvaluator.class);
+
     public static final String SCORE = "Score";
+    private static final int MAX_CARDINALITY = 1_000_000;
 
     @Autowired
     private QueryProcessor processor;
@@ -35,13 +42,13 @@ public class QueryEvaluator {
         return processor.process(repository, query);
     }
 
-    public DataPage run(AttributeRepository repository, Query query) {
-        SQLQuery<?> sqlquery = evaluate(repository, query);
-        return run(sqlquery, repository, query);
+    DataPage run(SQLQuery<?> sqlquery, Query query) {
+        Flux<Map<String, Object>> flux = pipe(sqlquery, query);
+        List<Map<String, Object>> data = flux.toStream().collect(Collectors.toList());
+        return new DataPage(data);
     }
 
-    DataPage run(SQLQuery<?> sqlquery, AttributeRepository repository, Query query) {
-        List<Map<String, Object>> data = new ArrayList<>();
+    private Flux<Map<String, Object>> pipe(SQLQuery<?> sqlquery, Query query) {
         final Map<String, String> attrNames = new HashMap<>();
         query.getLookups().forEach(l -> {
             if (l instanceof AttributeLookup) {
@@ -56,28 +63,59 @@ public class QueryEvaluator {
             offset = query.getPageFilter().getRowOffset();
             limit = query.getPageFilter().getNumRows();
         }
-        try (ResultSet results = sqlquery.getResults()) {
+
+        final long finalOffset = offset;
+        final long finalLimit = limit;
+        AtomicLong iter = new AtomicLong(0);
+        Flux<Map<String, Object>> flux = Flux.generate(() -> {
+            ResultSet results = sqlquery.getResults();
             ResultSetMetaData metadata = results.getMetaData();
-            while (results.next()) {
-                if (limit > 0 && data.size() >= limit) {
-                    break;
+            int fetchSize = getFetchSize(metadata.getColumnCount());
+            results.setFetchSize(fetchSize);
+            return results;
+        }, (results, sink) -> {
+            try {
+                if (finalLimit > 0 && iter.get() >= finalOffset + finalLimit) {
+                    results.close();
+                    sink.complete();
+                } else {
+                    while (iter.get() < finalOffset) {
+                        if (!results.next()) {
+                            results.close();
+                            sink.complete();
+                        }
+                        iter.incrementAndGet();
+                    }
+                    if (results.next()) {
+                        Map<String, Object> row = readRow(attrNames, results);
+                        sink.next(row);
+                        iter.getAndIncrement();
+                    } else {
+                        results.close();
+                        sink.complete();
+                    }
                 }
-                if (offset-- > 0) {
-                    continue;
-                }
-                Map<String, Object> row = new HashMap<>();
-                for (int i = 1; i <= metadata.getColumnCount(); ++i) {
-                    String columnName = metadata.getColumnName(i);
-                    Object value = results.getObject(columnName);
-                    String attrName = attrNames.get(columnName);
-                    columnName = (attrName == null) ? columnName : attrName;
-                    row.put(columnName, value);
-                }
-                data.add(row);
+            } catch (SQLException e) {
+                sink.error(e);
             }
-            return new DataPage(data);
-        } catch (SQLException e) {
-            throw new LedpException(LedpCode.LEDP_37012, new String[] { repository.getIdentifier() });
+            return results;
+        });
+        return flux.subscribeOn(Schedulers.newSingle("fetch-redshift"));
+    }
+
+    private static Map<String, Object> readRow(Map<String, String> attrNames, ResultSet results) throws SQLException {
+        Map<String, Object> row = new HashMap<>();
+        for (int i = 1; i <= results.getMetaData().getColumnCount(); ++i) {
+            String columnName = results.getMetaData().getColumnName(i);
+            Object value = results.getObject(columnName);
+            String attrName = attrNames.get(columnName);
+            columnName = (attrName == null) ? columnName : attrName;
+            row.put(columnName, value);
         }
+        return row;
+    }
+
+    private static int getFetchSize(int columnCount) {
+        return Math.max(10, MAX_CARDINALITY / columnCount);
     }
 }

@@ -50,6 +50,13 @@
             <version>${c3p0.version}</version>
         </dependency>
 
+        <!-- Reactor Dependencies -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>${reactor.version}</version>
+        </dependency>
+
         <!-- Hadoop Dependencies -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>

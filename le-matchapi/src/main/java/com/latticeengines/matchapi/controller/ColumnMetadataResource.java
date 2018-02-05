@@ -37,7 +37,7 @@ public class ColumnMetadataResource {
     @Autowired
     private DataCloudVersionService dataCloudVersionService;
 
-    @GetMapping(value = "/predefined/{selectName}", produces = { "application/json", "application/x-kryo" })
+    @GetMapping(value = "/predefined/{selectName}")
     @ResponseBody
     @ApiOperation(value = "Available choices for selectName are LeadEnrichment, DerivedColumns and Model (case-sensitive)")
     public List<ColumnMetadata> columnSelection(@PathVariable Predefined selectName,
@@ -50,14 +50,14 @@ public class ColumnMetadataResource {
         }
     }
 
-    @GetMapping(value = "/versions", headers = "Accept=application/json")
+    @GetMapping(value = "/versions")
     @ResponseBody
     @ApiOperation(value = "Get all known data cloud versions")
     public List<DataCloudVersion> getVersions() {
         return dataCloudVersionService.allVerions();
     }
 
-    @GetMapping(value = "/versions/latest", headers = "Accept=application/json")
+    @GetMapping(value = "/versions/latest")
     @ResponseBody
     @ApiOperation(value = "Get latest approved data cloud version. If query parameter compatibleto is provided. "
             + "Will return latest approved version under the same major version.")
@@ -69,7 +69,7 @@ public class ColumnMetadataResource {
         return dataCloudVersionService.latestApprovedForMajorVersion(compatibleToVersion);
     }
 
-    @GetMapping(value = "/", produces = { "application/json", "application/x-kryo" })
+    @GetMapping(value = "/")
     @ResponseBody
     @ApiOperation(value = "Get all columns belong to a data cloud version")
     public List<ColumnMetadata> getAllColumns(
@@ -80,7 +80,7 @@ public class ColumnMetadataResource {
     }
 
     @ApiIgnore
-    @GetMapping(value = "/statscube", produces = { "application/json", "application/x-kryo" })
+    @GetMapping(value = "/statscube")
     @ApiOperation(value = "Get enrichment stats cube.")
     public StatsCube getStatsCube(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         if (StringUtils.isBlank(dataCloudVersion)){
@@ -91,7 +91,7 @@ public class ColumnMetadataResource {
     }
 
     @ApiIgnore
-    @GetMapping(value = "/topn", produces = { "application/json", "application/x-kryo" })
+    @GetMapping(value = "/topn")
     @ApiOperation(value = "Get enrichment topn tree.")
     public TopNTree getTopNTree(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         if (StringUtils.isBlank(dataCloudVersion)){

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -272,7 +273,7 @@ public class Query implements GraphNode {
     }
 
     public boolean containEntityForExists() {
-        return entitiesForExists != null && entitiesForExists.size() != 0;
+        return CollectionUtils.isNotEmpty(entitiesForExists);
     }
 
     public List<JoinSpecification> getLookupJoins() {
