@@ -1253,8 +1253,19 @@
 	            <groupId>org.springframework.data</groupId>
 	            <artifactId>spring-data-jpa</artifactId>
 	            <version>${spring.data.jpa.version}</version>
-        		</dependency>
-        
+            </dependency>
+            <dependency>
+                <groupId>org.bitcoinj</groupId>
+                <artifactId>bitcoinj-core</artifactId>
+                <version>${bitcoinj.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.squareup.okhttp</groupId>
+                        <artifactId>okhttp</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-web</artifactId>
@@ -1631,6 +1642,10 @@
                     <exclusion>
                         <groupId>asm</groupId>
                         <artifactId>asm</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.squareup.okhttp</groupId>
+                        <artifactId>okhttp</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
