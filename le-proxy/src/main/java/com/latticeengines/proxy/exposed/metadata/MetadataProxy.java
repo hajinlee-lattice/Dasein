@@ -121,7 +121,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     @SuppressWarnings("unchecked")
     public List<ColumnMetadata> getTableColumns(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/columns/", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/columns", customerSpace, tableName);
         return getKryo("get table columns", url, List.class);
     }
 

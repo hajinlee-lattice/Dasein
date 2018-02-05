@@ -3,12 +3,14 @@ package com.latticeengines.pls.provisioning;
 import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
@@ -37,14 +40,20 @@ public class PLSComponentManager {
 
     private static final String DEFAULT_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private TenantConfigService tenantConfigService;
+
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
@@ -117,6 +126,15 @@ public class PLSComponentManager {
         }
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails);
+
+        if (batonService.hasProduct(space, LatticeProduct.CG)) {
+            try {
+                dataFeedProxy.getDataFeed(space.toString());
+            } catch (Exception e) {
+                LOGGER.warn("Error when bootstrapping data feed for a new CG tenant " + tenant.getId(), e);
+            }
+        }
+
     }
 
     public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,

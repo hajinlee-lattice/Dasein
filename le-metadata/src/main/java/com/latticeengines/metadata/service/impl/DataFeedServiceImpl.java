@@ -79,7 +79,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public DataFeed getOrCreateDataFeed(String customerSpace) {
+    public synchronized DataFeed getOrCreateDataFeed(String customerSpace) {
         dataCollectionService.getOrCreateDefaultCollection(customerSpace);
         DataFeed dataFeed = datafeedEntityMgr.findDefaultFeed();
         return findDataFeedByName(customerSpace, dataFeed.getName());
