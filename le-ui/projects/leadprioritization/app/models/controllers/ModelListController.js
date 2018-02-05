@@ -18,6 +18,7 @@ angular.module('lp.models.list', [
         models: ModelList || [],
         filteredItems: [],
         query: '',
+        currentPage: 1,
         header: {
             sort: {
                 label: 'Sort By',

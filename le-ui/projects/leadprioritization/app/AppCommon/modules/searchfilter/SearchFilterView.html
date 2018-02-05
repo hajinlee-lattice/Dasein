@@ -5,6 +5,7 @@
         placeholder="Search" 
         ng-model="query" 
         ng-show="visible"
+        ng-change="resetCurrentPage()"
         autofocus
     />
     <a class="button icon-button white-button" ng-click="clickToggle()">

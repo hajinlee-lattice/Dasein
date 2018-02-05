@@ -4,7 +4,8 @@ angular
     return {
         restrict: 'EA',
         scope: {
-            query:'='
+            query:'=',
+            current: '='
         },
         templateUrl: 'app/AppCommon/modules/searchfilter/SearchFilterView.html',
         controller: function ($scope) {
@@ -21,9 +22,17 @@ angular
                         setTimeout(function() {
                             $('div.select-menu input.form-control').focus();
                         }, 250);
+                    } else {
+                        $scope.current = 1;
                     }
 
                     $scope.query = '';
+                },
+                resetCurrentPage: function() {
+                    if ($scope.query) {
+                        $scope.current = 1;
+                    }
+
                 }
             });
 

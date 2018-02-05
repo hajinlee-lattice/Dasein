@@ -16,6 +16,7 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         lockLaunching: false,
         ceil: window.Math.ceil,
         query: '',
+        currentPage: 1,
         header: {
             sort: {
                 label: 'Sort By',

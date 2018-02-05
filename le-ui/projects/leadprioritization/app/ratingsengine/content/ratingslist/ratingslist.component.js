@@ -14,6 +14,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         query: '',
         ceil: window.Math.ceil,
         createRatingState: 'home.ratingsengine.ratingsenginetype',
+        currentPage: 1,
         header: {
             sort: {
                 label: 'Sort By',

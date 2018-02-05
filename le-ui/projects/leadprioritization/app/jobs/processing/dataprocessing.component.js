@@ -49,6 +49,7 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
         vm.loadingJobs = JobsStore.data.loadingJobs;
         vm.pagesize = 10;
         vm.query = '';
+        vm.currentPage = 1;
         vm.header = {
             filter: {
                 label: 'Filter By',

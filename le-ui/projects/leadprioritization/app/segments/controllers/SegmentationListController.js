@@ -15,6 +15,7 @@ angular.module('lp.segments.segments', [
         tileStates: {},
         inEditing: {},
         query: '',
+        currentPage: 1,
         header: {
             sort: {
                 label: 'Sort By',
