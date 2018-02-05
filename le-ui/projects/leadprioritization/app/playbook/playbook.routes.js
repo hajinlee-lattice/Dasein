@@ -462,8 +462,8 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard', {
-            url: '/wizard/:play_name',
+        .state('home.playbook.create', {
+            url: '/create/:play_name',
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Playbook'
@@ -473,7 +473,7 @@ angular
                     return PlaybookWizardStore;
                 },
                 WizardProgressContext: function() {
-                    return 'playbook';
+                    return 'playbook.create';
                 },
                 WizardProgressItems: function(PlaybookWizardStore) {
                     return [
@@ -507,12 +507,12 @@ angular
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/wizard.component.html'
                 },
-                'wizard_progress@home.playbook.wizard': {
+                'wizard_progress@home.playbook.create': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
-                'wizard_controls@home.playbook.wizard': {
+                'wizard_controls@home.playbook.create': {
                     resolve: {
                         WizardControlsOptions: function() {
                             return { backState: 'home.playbook', nextState: 'home.playbook' };
@@ -523,9 +523,9 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.playbook.wizard.rating'
+            redirectTo: 'home.playbook.create.rating'
         })
-        .state('home.playbook.wizard.rating', {
+        .state('home.playbook.create.rating', {
             url: '/rating/:rating_id',
             params: {
                 pageIcon: 'ico-playbook',
@@ -537,14 +537,14 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook.wizard': {
+                'wizard_content@home.playbook.create': {
                     controller: 'PlaybookWizardRating',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/rating/rating.component.html'
                 }
             }
         })
-        .state('home.playbook.wizard.rating.targets', {
+        .state('home.playbook.create.rating.targets', {
             url: '/targets',
             params: {
                 section: 'wizard.targets',
@@ -651,14 +651,14 @@ angular
                 }]
             },
             views: {
-                "wizard_content@home.playbook.wizard": {
+                "wizard_content@home.playbook.create": {
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
         })
-        .state('home.playbook.wizard.rating.targets.insights', {
+        .state('home.playbook.create.rating.targets.insights', {
             url: '/insights',
             params: {
                 section: 'wizard.insights',
@@ -684,14 +684,14 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook.wizard': {
+                'wizard_content@home.playbook.create': {
                     controller: 'PlaybookWizardInsights',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/insights/insights.component.html'
                 }
             }
         })
-        .state('home.playbook.wizard.rating.targets.insights.preview', {
+        .state('home.playbook.create.rating.targets.insights.preview', {
             url: '/preview',
             params: {
                 pageIcon: 'ico-playbook',
@@ -706,17 +706,17 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook.wizard': {
+                'wizard_content@home.playbook.create': {
                     controller: 'PlaybookWizardPreview',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/preview/preview.component.html'
                 }
             }
         })
-        .state('home.playbook.wizard.rating.targets.insights.preview.launch', {
+        .state('home.playbook.create.rating.targets.insights.preview.launch', {
             url: '/launch',
             views: {
-                'wizard_content@home.playbook.wizard': {
+                'wizard_content@home.playbook.create': {
                     templateUrl: 'app/playbook/content/launch/launch.component.html'
                 }
             }

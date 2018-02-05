@@ -10,22 +10,14 @@ angular.module('common.wizard.progress', [
     angular.extend(vm, {
         items: WizardProgressItems,
         context: WizardProgressContext,
-        wizard: '.wizard.',
+        wizard: '.',
         rootState: function() {
-            var rootValue = 'home.' + WizardProgressContext + '.';
-
-            if(WizardProgressContext.includes("playbook")){
-                rootValue += 'wizard.';
-            }
-            return rootValue;
+            return 'home.' + WizardProgressContext + '.';
         }(),//'home.' + WizardProgressContext + '.wizard.',
         itemMap: {}
     });
 
     vm.init = function() {
-        if(!WizardProgressContext.includes("playbook")){
-            vm.wizard = '.';
-        }
         vm.items.forEach(function(item) {
             vm.itemMap[vm.rootState + item.state.split('.').pop()] = item;
         });
