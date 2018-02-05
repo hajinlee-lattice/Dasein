@@ -12,6 +12,10 @@ fi
 
 pip install awscli --upgrade --user
 
+if [ `which pip3` != "" ]; then
+    pip3 install awscli --upgrade --user
+fi
+
 AWS_HOME="${HOME}/.aws"
 if [ ! -d "${AWS_HOME}" ]; then
     mkdir -p ${AWS_HOME}
