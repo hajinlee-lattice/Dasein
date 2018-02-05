@@ -7,8 +7,6 @@
       http://www.springframework.org/schema/context
       http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <context:component-scan base-package="com.latticeengines.security.exposed.entitymanager"/>
-    <context:component-scan base-package="com.latticeengines.security.exposed.dao"/>
     <context:component-scan base-package="com.latticeengines.workflowapi"/>
 
     <import resource="classpath:pls-context.xml"/>
