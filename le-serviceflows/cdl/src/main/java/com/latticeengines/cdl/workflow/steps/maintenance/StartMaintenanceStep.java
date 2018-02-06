@@ -1,11 +1,15 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -31,6 +35,9 @@ public class StartMaintenanceStep extends BaseWorkflowStep<StartMaintenanceConfi
         saveOutputValue(WorkflowContextConstants.Outputs.DATAFEED_STATUS, startStatus.getName());
         if (configuration.getEntity() != null) {
             saveOutputValue(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES, configuration.getEntity().name());
+        } else {
+            saveOutputValue(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
+                    String.join(",", configuration.getEntityList()));
         }
     }
 
