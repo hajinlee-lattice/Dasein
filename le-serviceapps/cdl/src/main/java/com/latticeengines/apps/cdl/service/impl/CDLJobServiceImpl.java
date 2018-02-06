@@ -103,8 +103,14 @@ public class CDLJobServiceImpl implements CDLJobService {
             Tenant tenant = dataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
             log.debug(String.format("tenant: %s", tenant.getId()));
-            if(dataFeed != null && runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs &&
-                    batonService.isEnabled(CustomerSpace.parse(tenant.getId()), LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE)) {
+            Boolean allowAutoSchedule = false;
+            try {
+                allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
+                        LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+            } catch (Exception e) {
+                log.error("get 'allow auto schedule' value failed.", e);
+            }
+            if(dataFeed != null && runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs && allowAutoSchedule) {
                 int invokeHour = internalResourceRestApiProxy.getInvokeTime(CustomerSpace.parse(tenant.getId()));
                 log.info(String.format("configured invoke hour: %d", invokeHour));
 
