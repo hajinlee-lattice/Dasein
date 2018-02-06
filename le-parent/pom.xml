@@ -48,6 +48,9 @@
         <maven.keytool.version>1.5</maven.keytool.version>
         <maven.rpm.version>2.1.5</maven.rpm.version> <!-- upgrade ? -->
 
+        <!-- release trains -->
+        <reactor.release.train>Bismuth-SR5</reactor.release.train>
+
         <!-- dependencies with rigid version interlock, hard to upgrade -->
         <hadoop.version>2.7.1.2.3.6.0-3796</hadoop.version>
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
@@ -1148,6 +1151,7 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- isolated dependencies -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -1538,6 +1542,15 @@
                 </exclusions>
             </dependency>
 
+            <!-- Project Reactor Dependencies -->
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-bom</artifactId>
+                <version>${reactor.release.train}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- Spring Framework Dependencies -->
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -1584,11 +1597,6 @@
                 <groupId>org.springframework.batch</groupId>
                 <artifactId>spring-batch-infrastructure</artifactId>
                 <version>${spring.batch.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webflux</artifactId>
-                <version>${spring.version}</version>
             </dependency>
 
             <!-- Hadoop Dependencies -->
