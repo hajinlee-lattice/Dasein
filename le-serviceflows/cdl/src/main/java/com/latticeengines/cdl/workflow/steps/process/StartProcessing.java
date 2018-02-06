@@ -107,8 +107,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void setRebuildEntities() {
         Set<BusinessEntity> rebuildEntities = new HashSet<>();
-        rebuildEntities.addAll(getRebuildEntitiesOnDLVersion());
-        rebuildEntities.addAll(getRebuildEntitiesOnDeleteJob());
+        RebuildDecoratorProvider.decorate(this, rebuildEntities);
         Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(
                 ProcessAnalyzeWorkflowConfiguration.class);
         if (stepConfigMap.isEmpty()) {
@@ -127,38 +126,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private List<Job> getDeleteJobs() {
         return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
                 configuration.getActionIds(), ActionType.CDL_OPERATION_WORKFLOW);
-    }
-
-    private Collection<BusinessEntity> getRebuildEntitiesOnDLVersion() {
-        String currentBuildNumber = configuration.getDataCloudBuildNumber();
-        DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
-        if (dataCollection != null && dataCollection.getDataCloudBuildNumber() != null
-                && !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber)) {
-            ArrayNode systemActionsNode = reportJson.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
-            systemActionsNode.add("Rebuild due to Data Cloud Version Changed");
-            putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
-            return Collections.singletonList(BusinessEntity.Account);
-        }
-        return Collections.emptyList();
-    }
-
-    private Collection<BusinessEntity> getRebuildEntitiesOnDeleteJob() {
-        Set<BusinessEntity> rebuildEntities = new HashSet<>();
-        try {
-            List<Job> deleteJobs = getDeleteJobs();
-            for (Job job : deleteJobs) {
-                String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
-                if (StringUtils.isEmpty(str)) {
-                    continue;
-                }
-                log.info("Attempting to parse deleted entities from " + str);
-                List<String> entityStrs = Arrays.asList(str.split(", "));
-                rebuildEntities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
-            }
-        } catch (Exception e) {
-            log.error("Failed to set rebuild entities based on delete actions.", e);
-        }
-        return rebuildEntities;
     }
 
     private void determineVersions() {
@@ -207,4 +174,77 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
     }
 
+    public static class RebuildDecoratorProvider {
+
+        public static void decorate(StartProcessing st, Set<BusinessEntity> entities) {
+            Collection<Class<? extends RebuildDecorator>> decrators = Arrays.asList(RebuildOnDLVersionDecorator.class,
+                    RebuildOnDeleteJobDecorator.class);
+            for (Class<? extends RebuildDecorator> c : decrators) {
+                try {
+                    ((RebuildDecorator) c.getDeclaredConstructor(StartProcessing.class, Set.class).newInstance(st,
+                            entities)).decorate();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    abstract class RebuildDecorator {
+        protected Set<BusinessEntity> entities;
+
+        public RebuildDecorator(Set<BusinessEntity> entities) {
+            this.entities = entities;
+        }
+
+        public void decorate() {
+            log.info(String.format("after decoration: %s", entities.toString()));
+        }
+    }
+
+    class RebuildOnDLVersionDecorator extends RebuildDecorator {
+
+        public RebuildOnDLVersionDecorator(Set<BusinessEntity> entities) {
+            super(entities);
+        }
+
+        @Override
+        public void decorate() {
+            String currentBuildNumber = configuration.getDataCloudBuildNumber();
+            DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
+            if (dataCollection != null && dataCollection.getDataCloudBuildNumber() != null
+                    && !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber)) {
+                ArrayNode systemActionsNode = reportJson.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
+                systemActionsNode.add("Rebuild due to Data Cloud Version Changed");
+                putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
+                entities.add(BusinessEntity.Account);
+            }
+            super.decorate();
+        }
+    }
+
+    class RebuildOnDeleteJobDecorator extends RebuildDecorator {
+
+        public RebuildOnDeleteJobDecorator(Set<BusinessEntity> entities) {
+            super(entities);
+        }
+
+        @Override
+        public void decorate() {
+            try {
+                List<Job> deleteJobs = getDeleteJobs();
+                for (Job job : deleteJobs) {
+                    String str = job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES);
+                    if (StringUtils.isEmpty(str)) {
+                        continue;
+                    }
+                    List<String> entityStrs = Arrays.asList(str.split(","));
+                    entities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
+                }
+                super.decorate();
+            } catch (Exception e) {
+                log.error("Failed to set rebuild entities based on delete actions.", e);
+            }
+        }
+    }
 }
