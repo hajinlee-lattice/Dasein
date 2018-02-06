@@ -160,6 +160,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                     $event.preventDefault();
                 }
                 if (!$scope.nameStatus.editing && !data.Incomplete) {
+
+                    console.log(data);
+
+                    // $scope.$on(ModelDetailNavEvent
+
                     $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
                 } else if (!$scope.nameStatus.editing && data.Incomplete && $scope.data.ModelFileType != "PmmlModel") {
                     StaleModelModal.show($scope.data.Id);

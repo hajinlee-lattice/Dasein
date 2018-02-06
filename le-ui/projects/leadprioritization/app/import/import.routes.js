@@ -89,9 +89,12 @@ angular
                 WizardProgressContext: function() {
                     return 'import.data';
                 },
-                WizardProgressItems: function($stateParams, ImportWizardStore) {
-                    console.log($stateParams.wizard_steps);
-                    var wizard_steps = $stateParams.wizard_steps;
+                WizardProgressItems: function($stateParams, ImportWizardStore) {                    
+                    var entityType = ImportWizardStore.getEntityType(),
+                        wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
+
+                    console.log(wizard_steps);
+
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'account');
                 }
             },
@@ -237,11 +240,15 @@ angular
                     return ImportWizardStore;
                 },
                 WizardProgressContext: function() {
-                    return 'import';
+                    return 'import.data';
                 },
                 WizardProgressItems: function($stateParams, ImportWizardStore) {
-                    var wizard_steps = $stateParams.wizard_steps;
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contacts');
+                    var entityType = ImportWizardStore.getEntityType(),
+                        wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
+
+                    console.log(wizard_steps);
+
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contact');
                 }
             },
             views: {
@@ -360,11 +367,13 @@ angular
                     return ImportWizardStore;
                 },
                 WizardProgressContext: function() {
-                    return 'import';
+                    return 'import.data';
                 },
                 WizardProgressItems: function($stateParams, ImportWizardStore) {
-                    var wizard_steps = $stateParams.wizard_steps;
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product_purchases');
+                    var entityType = ImportWizardStore.getEntityType(),
+                        wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
+
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'transaction');
                 }
             },
             views: {
@@ -464,11 +473,15 @@ angular
                     return ImportWizardStore;
                 },
                 WizardProgressContext: function() {
-                    return 'import';
+                    return 'import.data';
                 },
                 WizardProgressItems: function($stateParams, ImportWizardStore) {
-                    var wizard_steps = $stateParams.wizard_steps;
-                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product_bundles');
+                    var entityType = ImportWizardStore.getEntityType(),
+                        wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
+
+                        console.log(wizard_steps);
+
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product');
                 }
             },
             views: {

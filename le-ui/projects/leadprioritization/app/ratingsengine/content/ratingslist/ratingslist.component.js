@@ -1,10 +1,11 @@
 angular.module('lp.ratingsengine.ratingslist', [
     'mainApp.ratingsengine.deleteratingmodal',
-    'mainApp.appCommon.directives.barchart'
+    'mainApp.appCommon.directives.barchart',
+    'mainApp.core.utilities.NavUtility'
 ])
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $element, $state, $stateParams, $filter, $interval, 
-    RatingsEngineStore, RatingsEngineService, DeleteRatingModal
+    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility
 ) {
     var vm = this;
 
@@ -118,16 +119,21 @@ angular.module('lp.ratingsengine.ratingslist', [
             url = 'home.ratingsengine.dashboard';
 
         if(tileState.editRating !== true){
-
             if (rating.type === 'AI_BASED') {
-                url = 'home.ratingsengine.productpurchase.segment'
+                if (rating.activeModelId) {
+                    console.log(rating);
+                    // $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);    
+                } else {
+                    url = 'home.ratingsengine.productpurchase.segment'
+                }
+                console.log(rating);
             } else if (rating.type === 'RULE_BASED') {
                 url = RatingsEngineStore.hasRules(rating) 
                     ? 'home.ratingsengine.dashboard'
                     : 'home.ratingsengine.rulesprospects.segment';
-            }
 
-            $state.go(url, { rating_id: rating.id }); 
+                $state.go(url, { rating_id: rating.id });
+            } 
         }
     };
 

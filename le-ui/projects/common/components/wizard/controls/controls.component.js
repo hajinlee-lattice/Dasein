@@ -12,8 +12,7 @@ angular.module('common.wizard.controls', [])
         prev: WizardControlsOptions.backState,
         next: function() {
             return 'home.' + WizardProgressContext;
-        }() ,
-        
+        }(),
         valid: false,
         toState: $state.current,
         nextDisabled: false
@@ -54,7 +53,6 @@ angular.module('common.wizard.controls', [])
 
     vm.go = function(state, isPrev, params) {
         var current = vm.itemMap[$state.current.name];
-
         vm.nextDisabled = true;
 
         if (current.nextFn && !isPrev) {

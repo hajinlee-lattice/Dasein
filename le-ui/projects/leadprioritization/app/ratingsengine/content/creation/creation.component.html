@@ -18,9 +18,28 @@
                 <dd ng-if="vm.products.length > 1">{{ vm.products.length }} selected
 
                 <dt>Prioritize by:</dt>
-                <dd>{{ vm.ratingEngine.activeModel.AI.predictionType }}</dd>
+                <dd>{{ vm.prioritizeBy }}</dd>
+
                 <dt>Rating Engine Settings:</dt>
-                <dd>{{ vm.ratingEngine.activeModel.AI.modelingConfigFilters }}</dd>
+                <dd>
+                    <ul>
+                        <li>
+                            Spend in the quarter was at least $1500
+                        </li>
+                        <li>
+                            Quantity bought was at least 10 units
+                        </li>
+                        <li>
+                            2 months of historical records
+                        </li>
+                        <li>
+                            Model with similar segment: SegmentName
+                        </li>
+                        <li>
+                            Model with similar product(s): ProductName or number selected
+                        </li>
+                    </ul>
+                </dd>
             </dl>
 
             <h3>Job Status</h3>
