@@ -21,8 +21,6 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.StringExpressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
@@ -196,17 +194,22 @@ public class EventQueryTranslator extends TranslatorCommon {
 
     }
 
-    private SQLQuery translateMaxPeriodId(QueryFactory queryFactory,
-                                          AttributeRepository repository,
-                                          String period) {
+    private Expression translateEvaluationPeriodId(QueryFactory queryFactory,
+                                                   AttributeRepository repository,
+                                                   String periodNameStr,
+                                                   int evaluationPeriodId) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
         String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath periodId = Expressions.stringPath(PERIOD_ID);
 
-        return factory.query().from(tablePath) //
-                .where(periodName.eq(period)) //
-                .select(periodId.max().as(MAX_PID));
+        if (evaluationPeriodId < 0) {
+            return factory.query().from(tablePath) //
+                    .where(periodName.eq(periodNameStr)) //
+                    .select(periodId.max().as(MAX_PID));
+        } else {
+            return Expressions.constant(String.valueOf(evaluationPeriodId));
+        }
     }
 
     private BooleanExpression translateProductId(String productIdStr) {
@@ -217,11 +220,11 @@ public class EventQueryTranslator extends TranslatorCommon {
     private BooleanExpression translatePeriodRestriction(QueryFactory queryFactory,
                                                          AttributeRepository repository,
                                                          boolean isScoring,
-                                                         StringPath periodId,
-                                                         String periodName) {
+                                                         String periodName,
+                                                         int evaluationPeriodId) {
         return (isScoring)
-                ? periodId.eq(translateMaxPeriodId(queryFactory, repository, periodName))
-                : periodId.lt(translateMaxPeriodId(queryFactory, repository, periodName));
+                ? periodId.eq(translateEvaluationPeriodId(queryFactory, repository, periodName, evaluationPeriodId))
+                : periodId.lt(translateEvaluationPeriodId(queryFactory, repository, periodName, evaluationPeriodId));
     }
 
     @SuppressWarnings("unchecked")
@@ -229,13 +232,14 @@ public class EventQueryTranslator extends TranslatorCommon {
                                             AttributeRepository repository,
                                             String accountViewAlias,
                                             String periodName,
+                                            int evaluationPeriodId,
                                             boolean isScoring) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
 
         EntityPath<String> accountViewPath = new PathBuilder<>(String.class, accountViewAlias);
         StringPath qualifiedAccountId = Expressions.stringPath(accountViewPath, ACCOUNT_ID);
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
-                periodName);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring,
+                                                                         periodName, evaluationPeriodId);
         return factory.query().select(keysAccountId, keysPeriodId)
                 .from(keysPath)
                 .join(accountViewPath)
@@ -262,6 +266,7 @@ public class EventQueryTranslator extends TranslatorCommon {
     private SubQuery translateSingleProductAPS(QueryFactory queryFactory,
                                                AttributeRepository repository,
                                                TransactionRestriction txRestriction,
+                                               int evaluationPeriodId,
                                                boolean isScoring) {
 
         TimeFilter timeFilter = txRestriction.getTimeFilter();
@@ -309,8 +314,8 @@ public class EventQueryTranslator extends TranslatorCommon {
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
 
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
-                                                                         period);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, period,
+                                                                         evaluationPeriodId);
 
         SQLQuery subQueryExpression = factory.query().select(accountId, periodId, amountAggr, quantityAggr) //
                 .from(apsQuery, apsPath) //
@@ -326,6 +331,7 @@ public class EventQueryTranslator extends TranslatorCommon {
     private SQLQuery translateMultiProductRestriction(QueryFactory queryFactory,
                                                       AttributeRepository repository,
                                                       TransactionRestriction txOld,
+                                                      int evaluationPeriodId,
                                                       boolean isScoring,
                                                       QueryBuilder builder) {
 
@@ -338,7 +344,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                                       txOld.getSpentFilter(),
                                                                       txOld.getUnitFilter()
             );
-            return translateSingleProductAPS(queryFactory, repository, txNew, isScoring);
+            return translateSingleProductAPS(queryFactory, repository, txNew, evaluationPeriodId, isScoring);
         }).toArray(SubQuery[]::new);
 
         builder.with(apsSubQueryList);
@@ -352,7 +358,7 @@ public class EventQueryTranslator extends TranslatorCommon {
         builder.with(apsUnionAllNoNull);
 
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository);
-        
+
         EntityPath<String> apsUnionAllPath = (products.length == 1) ?
                 new PathBuilder<>(String.class, apsUnionAll.getAlias()) :
                 new PathBuilder<>(String.class, apsUnionAllNoNull.getAlias());
@@ -382,20 +388,23 @@ public class EventQueryTranslator extends TranslatorCommon {
     private SQLQuery translateTransaction(QueryFactory queryFactory,
                                           AttributeRepository repository,
                                           TransactionRestriction txRestriction,
+                                          int evaluationPeriodId,
                                           boolean isScoring,
                                           QueryBuilder builder) {
 
         if (txRestriction.getSpentFilter() == null && txRestriction.getUnitFilter() == null) {
-            return translateHasEngaged(queryFactory, repository, txRestriction, isScoring);
+            return translateHasEngaged(queryFactory, repository, txRestriction, evaluationPeriodId, isScoring);
         }
 
-        return translateMultiProductRestriction(queryFactory, repository, txRestriction, isScoring, builder);
+        return translateMultiProductRestriction(queryFactory, repository, txRestriction, evaluationPeriodId,
+                                                isScoring, builder);
     }
 
     @SuppressWarnings("unchecked")
     private SQLQuery translateHasEngaged(QueryFactory queryFactory,
                                          AttributeRepository repository,
                                          TransactionRestriction txRestriction,
+                                         int evaluationPeriodId,
                                          boolean isScoring) {
 
         TimeFilter timeFilter = txRestriction.getTimeFilter();
@@ -422,8 +431,8 @@ public class EventQueryTranslator extends TranslatorCommon {
                 .from(keysPath).leftJoin(productQuery, trxnPath)
                 .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, periodId,
-                                                                         period);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, period,
+                                                                         evaluationPeriodId);
 
         int expectedResult = (returnPositive) ? 1 : 0;
 
@@ -480,12 +489,14 @@ public class EventQueryTranslator extends TranslatorCommon {
     private SubQuery translateTransactionRestriction(QueryFactory queryFactory,
                                                      AttributeRepository repository,
                                                      TransactionRestriction txRestriction,
+                                                     int evaluationPeriodId,
                                                      boolean isScoring,
                                                      QueryBuilder builder) {
         if (StringUtils.isEmpty(txRestriction.getProductId())) {
             throw new RuntimeException("Invalid transaction restriction, no product specified");
         }
-        SQLQuery subQueryExpression = translateTransaction(queryFactory, repository, txRestriction, isScoring, builder);
+        SQLQuery subQueryExpression = translateTransaction(queryFactory, repository, txRestriction, evaluationPeriodId,
+                                                           isScoring, builder);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
         subQuery.setAlias(generateAlias(BusinessEntity.Transaction.name()));
@@ -496,8 +507,10 @@ public class EventQueryTranslator extends TranslatorCommon {
                                                            AttributeRepository repository,
                                                            String accountViewAlias,
                                                            String period,
+                                                           int evaluationPeriodId,
                                                            boolean isScoring) {
-        SQLQuery subQueryExpression = joinAccountWithPeriods(queryFactory, repository, accountViewAlias, period, isScoring);
+        SQLQuery subQueryExpression = joinAccountWithPeriods(queryFactory, repository, accountViewAlias, period,
+                                                             evaluationPeriodId, isScoring);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
         subQuery.setAlias(generateAlias(BusinessEntity.Account.name()));
@@ -580,6 +593,7 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         final String periodName = frontEndQuery.getPeriodName();
         final int periodCount = frontEndQuery.getPeriodCount();
+        final int evaluationPeriodId = frontEndQuery.getEvaluationPeriodId();
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
@@ -675,6 +689,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                 } else if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
                     SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction,
+                                                                        evaluationPeriodId,
                                                                         isScoring, builder);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
@@ -685,7 +700,8 @@ public class EventQueryTranslator extends TranslatorCommon {
                     SubQuery accountViewSubquery = translateAccountView(concreteRestriction);
                     builder.with(accountViewSubquery);
                     SubQuery subQuery = translateAccountViewWithJoinedPeriods(queryFactory, repository,
-                                                                              accountViewSubquery.getAlias(), period,
+                                                                              accountViewSubquery.getAlias(),
+                                                                              period, evaluationPeriodId,
                                                                               isScoring);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
@@ -695,7 +711,9 @@ public class EventQueryTranslator extends TranslatorCommon {
             });
         } else if (rootRestriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
-            SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction, isScoring,
+            SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction,
+                                                                evaluationPeriodId,
+                                                                isScoring,
                                                                 builder);
             builder.with(subQuery);
             SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias());
@@ -708,7 +726,8 @@ public class EventQueryTranslator extends TranslatorCommon {
             SubQuery accountViewSubquery = translateAccountView(concreteRestriction);
             builder.with(accountViewSubquery);
             SubQuery subQuery = translateAccountViewWithJoinedPeriods(queryFactory, repository,
-                                                                      accountViewSubquery.getAlias(), period,
+                                                                      accountViewSubquery.getAlias(),
+                                                                      period, evaluationPeriodId,
                                                                       isScoring);
             builder.with(subQuery);
             String selectAllAlias;

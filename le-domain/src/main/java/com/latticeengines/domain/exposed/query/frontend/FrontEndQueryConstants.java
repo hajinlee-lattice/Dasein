@@ -13,6 +13,8 @@ public class FrontEndQueryConstants {
 
     public static final String PERIOD_COUNT = "period_count";
 
+    public static final String EVALUATION_PERIOD_ID = "evaluation_period_id";
+
     public static final String CALCULATE_PRODUCT_REVENUE = "calculate_product_revenue";
 
     public static final String RESTRICT_WITH_SFDCID = "restrict_with_sfdcid";

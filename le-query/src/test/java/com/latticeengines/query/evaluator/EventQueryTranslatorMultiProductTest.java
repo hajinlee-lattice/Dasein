@@ -143,6 +143,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
     private EventFrontEndQuery getDefaultEventFrontEndQuery() {
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         frontEndQuery.setPeriodName("Month");
+        frontEndQuery.setEvaluationPeriodId(10);
         return frontEndQuery;
     }
 
