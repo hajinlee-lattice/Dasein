@@ -91,4 +91,21 @@ public class ProbabilityScoreNormalizer implements ScoreNormalizer {
         }
     }
 
+    public double getMinimumScore() {
+        return minimumScore;
+    }
+
+    public double getMaximumScore() {
+        return maximumScore;
+    }
+
+    public double getMinimumProbability() {
+        return minimumProbability;
+    }
+
+    public double getMaximumProbability() {
+        return maximumProbability;
+    }
+    
+
 }

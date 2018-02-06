@@ -29,16 +29,16 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
     }
 
     @Override
-    public double normalize(double predictedRevenue, InterpolationFunctionType interpFunction) {
-        if (predictedRevenue <= minimumExpectedRevenue) {
+    public double normalize(double expectedRevenue, InterpolationFunctionType interpFunction) {
+        if (expectedRevenue <= minimumExpectedRevenue) {
             return minimumExpectedRevenue == 0 ? 0
-                    : minimumScore * Math.max(0, predictedRevenue) / minimumExpectedRevenue;
+                    : minimumScore * Math.max(0, expectedRevenue) / minimumExpectedRevenue;
         }
-        if (predictedRevenue >= maximumExpectedRevenue) {
-            return 100 - (100 - minimumScore) * Math.exp(-1 * predictedRevenue / maximumExpectedRevenue);
+        if (expectedRevenue >= maximumExpectedRevenue) {
+            return 100 - (100 - minimumScore) * Math.exp(-1 * expectedRevenue / maximumExpectedRevenue);
         }
 
-        int bisectionIndex = NormalizationUtils.findBisectionIndex(predictedRevenue, normalizationBuckets);
+        int bisectionIndex = NormalizationUtils.findBisectionIndex(expectedRevenue, normalizationBuckets);
         double startPercentile;
         if (bisectionIndex > 0)
             startPercentile = normalizationBuckets.get(bisectionIndex - 1).getCumulativePercentage();
@@ -46,7 +46,7 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
             startPercentile = 0.0;
         double rawScorePercentile = normalizationBuckets.get(bisectionIndex).getCumulativePercentage()
                 - startPercentile;
-        double percentileToUse = (predictedRevenue - startExpectedRevenues.get(bisectionIndex))
+        double percentileToUse = (expectedRevenue - startExpectedRevenues.get(bisectionIndex))
                 / (endExpectedRevenues.get(bisectionIndex) - startExpectedRevenues.get(bisectionIndex))
                 * rawScorePercentile + startPercentile;
         return NormalizationUtils.percentileScoreFunction(percentileToUse, minimumScore, maximumScore);
@@ -77,7 +77,38 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
                     "Failed to Create ExpectedRevenue Score Normalizer, NormalizationBucket values all equal");
 
         }
+    }
 
+    public double getMinimumScore() {
+        return minimumScore;
+    }
+
+    public void setMinimumScore(double minimumScore) {
+        this.minimumScore = minimumScore;
+    }
+
+    public double getMaximumScore() {
+        return maximumScore;
+    }
+
+    public void setMaximumScore(double maximumScore) {
+        this.maximumScore = maximumScore;
+    }
+
+    public double getMinimumExpectedRevenue() {
+        return minimumExpectedRevenue;
+    }
+
+    public void setMinimumExpectedRevenue(double minimumExpectedRevenue) {
+        this.minimumExpectedRevenue = minimumExpectedRevenue;
+    }
+
+    public double getMaximumExpectedRevenue() {
+        return maximumExpectedRevenue;
+    }
+
+    public void setMaximumExpectedRevenue(double maximumExpectedRevenue) {
+        this.maximumExpectedRevenue = maximumExpectedRevenue;
     }
 
 }

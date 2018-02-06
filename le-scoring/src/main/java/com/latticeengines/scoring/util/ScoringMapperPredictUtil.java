@@ -186,21 +186,26 @@ public class ScoringMapperPredictUtil {
         builder.set(ScoreResultField.RawScore.name(), result.getRawScore());
         if (cdl) {
             builder.set(ScoreResultField.Probability.name(), result.getProbability());
-            builder.set(ScoreResultField.NormalizedScore.name(), createNormalizedScore(result, normalizer));
-            if (hasRevenue) {
+            if (!hasRevenue) {
+                builder.set(ScoreResultField.NormalizedScore.name(),
+                        createNormalizedScore(result.getRawScore(), normalizer));
+            } else {
                 double predictedRevenue = 0D;
                 if (revenues.get(key).size() > i) {
                     predictedRevenue = revenues.get(key).get(i);
                 }
                 builder.set(ScoreResultField.PredictedRevenue.name(), predictedRevenue);
-                builder.set(ScoreResultField.ExpectedRevenue.name(), predictedRevenue * result.getProbability());
+                double expectedRevenue = predictedRevenue * result.getProbability();
+                builder.set(ScoreResultField.ExpectedRevenue.name(), expectedRevenue);
+                builder.set(ScoreResultField.NormalizedScore.name(),
+                        createNormalizedScore(expectedRevenue, normalizer));
             }
         }
         return builder;
     }
 
-    private static double createNormalizedScore(ScoreOutput result, ScoreNormalizer normalizer) {
-        return normalizer.normalize(result.getRawScore(), InterpolationFunctionType.Linear);
+    private static double createNormalizedScore(Double score, ScoreNormalizer normalizer) {
+        return normalizer.normalize(score, InterpolationFunctionType.PositiveConvex);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
