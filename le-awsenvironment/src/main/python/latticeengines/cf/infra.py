@@ -293,7 +293,6 @@ def create_load_balancers(tg_map, stack):
 
     # listener rules
     resources.append(create_listener_rule(private_lsnr, tg_map["matchapi"], "/match/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["saml"], "/saml/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["admin"], "/admin/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["workflowapi"], "/workflowapi/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["dataflowapi"], "/dataflowapi/*"))
