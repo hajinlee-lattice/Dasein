@@ -140,7 +140,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         workflowJob.setType(workflowConfig.getWorkflowName());
         workflowJobEntityMgr.create(workflowJob);
 
-        Long workflowPid = workflowJobEntityMgr.findByApplicationId(appId).getPid();
+        Long workflowPid = workflowJob.getPid();
         WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
         jobUpdate.setWorkflowPid(workflowPid);
         jobUpdate.setLastUpdateTime(currentTime);
