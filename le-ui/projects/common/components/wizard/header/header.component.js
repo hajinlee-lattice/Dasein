@@ -18,7 +18,7 @@ angular.module('common.wizard.header', [])
 
     vm.showCustomHeader = function() {
     	var check = false;
-    	var wizardState = 'home.' + WizardProgressContext + '.wizard.';
+    	var wizardState = 'home.' + WizardProgressContext;
 
     	WizardCustomHeaderSteps.forEach(function(step) {
     		if ($state.current.name == wizardState + step) {

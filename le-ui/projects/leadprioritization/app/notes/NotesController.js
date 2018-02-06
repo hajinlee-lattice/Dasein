@@ -74,6 +74,12 @@ angular.module('lp.notes', [
         });
     }
 
+    vm.cancelNoteEdit = function(content) {
+        console.log(content);
+        $scope.NotesContents = content;
+
+    }
+
     vm.deleteNote = function($event, noteId) {
         console.log(vm.id, noteId);
         DeleteNoteModal.show(vm.id, noteId);

@@ -13,7 +13,7 @@ angular.module('common.wizard.progress', [
         wizard: '.',
         rootState: function() {
             return 'home.' + WizardProgressContext + '.';
-        }(),//'home.' + WizardProgressContext + '.wizard.',
+        }(),
         itemMap: {}
     });
 
@@ -24,6 +24,7 @@ angular.module('common.wizard.progress', [
     }
 
     vm.click = function(state, $event) {
+
         var split = state.split('.'),
             selected = split.pop(),
             validation = WizardValidationStore.validation,
@@ -31,8 +32,7 @@ angular.module('common.wizard.progress', [
 
         for (var i=0; i<split.length; i++) {
             var section = split[i],
-                vsection = validation[section];
-            
+                vsection = validation[section];            
             if (!vsection) {
                 not_validated.push(section);
             }
@@ -51,7 +51,6 @@ angular.module('common.wizard.progress', [
         } else {
             var nextState = vm.rootState + state,
                 current = vm.itemMap[vm.rootState + $state.current.name.split('.').pop()];
-
             if (current.nextFn) {
                 current.nextFn(nextState);
             } else {

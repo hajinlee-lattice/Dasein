@@ -490,8 +490,17 @@ angular
                     },
                     'main@': {
                         resolve: {
-                            WizardHeaderTitle: function () {
-                                return 'Create Rating Engine';
+                            WizardHeaderTitle: function (RatingsEngineStore) {
+                                var ratingEngine = RatingsEngineStore.getType(),
+                                    title = '';
+
+                                if (ratingEngine.engineType === 'CROSS_SELL_FIRST_PURCHASE') {
+                                    title = 'Create Rating Engine: Customers that will purchase a product for the first time';
+                                } else if (ratingEngine.engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
+                                    title = 'Create Rating Engine: Customers that will purchase again next quarter';
+                                }
+
+                                return title;
                             },
                             WizardContainerId: function () {
                                 return 'ratingsengine';

@@ -113,13 +113,19 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
-        var tileState = vm.current.tileStates[rating.id];
+        
+        var tileState = vm.current.tileStates[rating.id],
+            url = 'home.ratingsengine.dashboard';
+
         if(tileState.editRating !== true){
 
-            // go to dashboard if there are rules in ratingModels
-            var url = RatingsEngineStore.hasRules(rating) || rating.type === 'AI_BASED' 
-                ? 'home.ratingsengine.dashboard'
-                : 'home.ratingsengine.wizard.segment';
+            if (rating.type === 'AI_BASED') {
+                url = 'home.ratingsengine.productpurchase.segment'
+            } else if (rating.type === 'RULE_BASED') {
+                url = RatingsEngineStore.hasRules(rating) 
+                    ? 'home.ratingsengine.dashboard'
+                    : 'home.ratingsengine.rulesprospects.segment';
+            }
 
             $state.go(url, { rating_id: rating.id }); 
         }

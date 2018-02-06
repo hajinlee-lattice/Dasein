@@ -9,11 +9,14 @@
             <h3>Summary (Jon's work in progress)</h3>
             <dl>
                 <dt>Rating Engine Type:</dt>
-                <dd>{{ vm.ratingEngine.type }}</dd>
+                <dd>{{ vm.ratingEngineType }}</dd>
                 <dt>Segment:</dt>
                 <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
+                
                 <dt>Products:</dt>
-                <dd>{{ vm.ratingEngine.activeModel.AI.targetProducts }}</dd>
+                <dd ng-if="vm.products.length === 1">{{ vm.productName }}</dd>
+                <dd ng-if="vm.products.length > 1">{{ vm.products.length }} selected
+
                 <dt>Prioritize by:</dt>
                 <dd>{{ vm.ratingEngine.activeModel.AI.predictionType }}</dd>
                 <dt>Rating Engine Settings:</dt>
@@ -21,7 +24,12 @@
             </dl>
 
             <h3>Job Status</h3>
-            <p>Work in progress</p>
+            <div class="meter bar">
+                <span class="indeterminate"></span>
+            </div>
+            <div>
+                <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed' && !isPMMLJob"></i> Running{{jobStatus}}</p>
+            </div>
             
         </div>
     </div>

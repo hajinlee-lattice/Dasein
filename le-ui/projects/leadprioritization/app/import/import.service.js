@@ -40,7 +40,7 @@ angular.module('lp.import')
     }
 
     this.wizardProgressItems = {
-        "all": [
+        "account": [
             { 
                 label: 'Account IDs', 
                 state: 'accounts.ids', 
@@ -84,7 +84,7 @@ angular.module('lp.import')
                 }
             }
         ],
-        "contacts": [
+        "contact": [
             { 
                 label: 'Contact IDs', 
                 state: 'contacts.ids',
@@ -121,7 +121,7 @@ angular.module('lp.import')
                 }
             }
         ],
-        "product_purchases": [
+        "transaction": [
             { 
                 label: 'Transaction IDs', 
                 state: 'product_purchases.ids', 
@@ -151,7 +151,7 @@ angular.module('lp.import')
                 }
             }
         ],
-        "product_bundles": [
+        "product": [
             { 
                 label: 'Product ID', 
                 state: 'product_bundles.ids', 
@@ -183,7 +183,7 @@ angular.module('lp.import')
     }
 
     this.getWizardProgressItems = function(step) {
-        return this.wizardProgressItems[(step || 'all')];
+        return this.wizardProgressItems[(step || 'account')];
     }
 
     this.getValidation = function(type) {

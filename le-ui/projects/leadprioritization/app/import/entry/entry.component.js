@@ -37,6 +37,8 @@ angular.module('lp.import.entry', [
     vm.changeEntityType = function(type, goState) {
         vm.goState = goState || type.toLowerCase();
         ImportWizardStore.setEntityType(type);
+        $stateParams.wizard_steps = type.toLowerCase();
+        console.log($stateParams.wizard_steps);
     }
 
     vm.fileLoad = function(headers) {
@@ -95,7 +97,7 @@ angular.module('lp.import.entry', [
     }
 
     vm.click = function() {
-        $state.go('home.import.wizard.' + vm.goState + '.ids');
+        $state.go('home.import.data.' + vm.goState + '.ids');
     }
 
     vm.init();

@@ -60,7 +60,7 @@
                         <button 
                             type="button" 
                             class="button icon-button white-button"
-                            ng-click="editingNote = !editingNote"
+                            ng-click="vm.cancelNoteEdit(note.NotesContents); editingNote = !editingNote"
                             ng-show="editingNote">
                             <i class="fa fa-remove"></i>
                         </button>
@@ -82,7 +82,7 @@
                         <button 
                             type="button" 
                             class="button white-button"
-                            ng-click="editingNote = !editingNote">
+                            ng-click="vm.cancelNoteEdit(note.NotesContents); editingNote = !editingNote">
                             {{vm.ResourceUtility.getString('BUTTON_CANCEL_CHANGES_LABEL')}}
                         </button>
                         <button 
