@@ -3,6 +3,7 @@ package com.latticeengines.query.exposed.evaluator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,13 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.sql.SQLQuery;
 
+import reactor.core.publisher.Flux;
+
 @Component("queryEvaluatorService")
 public class QueryEvaluatorService {
 
     private static final Logger log = LoggerFactory.getLogger(QueryEvaluatorService.class);
+    private static final int MAX_RETRIES = 2;
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy; // attr repo cached in this
@@ -79,11 +83,33 @@ public class QueryEvaluatorService {
         query.setLookups(filteredLookups);
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         try (PerformanceTimer timer = new PerformanceTimer(timerMessage("getData", attrRepo, sqlQuery))) {
-            List<Map<String, Object>> results = queryEvaluator.run(sqlQuery, query).getData();
+            List<Map<String, Object>> results = queryEvaluator.pipe(sqlQuery, query).toStream() //
+                    .collect(Collectors.toList());
             dataPage = new DataPage(results);
         }
 
         return dataPage;
+    }
+
+    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query) {
+        List<Lookup> filteredLookups = new ArrayList<>();
+        for (Lookup lookup : query.getLookups()) {
+            if (lookup instanceof AttributeLookup) {
+                AttributeLookup attrLookup = (AttributeLookup) lookup;
+                if (BusinessEntity.Rating.equals(attrLookup.getEntity()) || attrRepo.hasAttribute(attrLookup)) {
+                    filteredLookups.add(lookup);
+                } else {
+                    log.warn("Cannot find metadata for attribute lookup " + lookup.toString() + ", skip it.");
+                }
+            } else {
+                filteredLookups.add(lookup);
+            }
+        }
+        query.setLookups(filteredLookups);
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        try (PerformanceTimer timer = new PerformanceTimer(timerMessage("getData", attrRepo, sqlQuery))) {
+            return queryEvaluator.pipe(sqlQuery, query);
+        }
     }
 
     private String timerMessage(String method, AttributeRepository attrRepo, SQLQuery<?> sqlQuery) {
@@ -95,4 +121,5 @@ public class QueryEvaluatorService {
     public void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
     }
+
 }

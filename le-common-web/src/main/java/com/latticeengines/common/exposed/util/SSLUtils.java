@@ -5,12 +5,19 @@ import java.io.OutputStream;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 public class SSLUtils {
 
@@ -48,6 +55,18 @@ public class SSLUtils {
             return new SSLConnectionSocketFactory(sf, (hostname, session) -> true);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create a trust-everything connection manager ", e);
+        }
+    }
+
+    static ClientHttpConnector newSslBlindHttpConnector() {
+        try {
+            SslContext sslContext = SslContextBuilder
+                    .forClient()
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                    .build();
+            return new ReactorClientHttpConnector(opt -> opt.sslContext(sslContext));
+        } catch (SSLException e) {
+            throw new IllegalStateException("Cannot construct ssl blind http connectors.", e);
         }
     }
 

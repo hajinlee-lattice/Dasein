@@ -161,7 +161,7 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
 
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setPredefinedSelection(null);
-        input.setLogLevel(Level.DEBUG);
+        input.setLogLevelEnum(Level.DEBUG);
         input.setUseRemoteDnB(true);
         input.setCustomSelection(testMatchInputService.enrichmentSelection());
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);

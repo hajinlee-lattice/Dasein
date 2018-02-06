@@ -10,6 +10,7 @@ import com.latticeengines.security.exposed.TenantToken;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
 public class GlobalAuthMultiTenantContextStrategy implements MultiTenantContextStrategy {
+
     @Override
     public Tenant getTenant() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

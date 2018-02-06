@@ -11,6 +11,12 @@ def chdirToProjectDir(project):
     print("Change to directory: ", os.getcwd())
 
 
+def pomOpts(command, project):
+    if command == "jetty:run" and project == "proxy":
+        return [ "-f", "web-pom.xml" ]
+    else:
+        return []
+
 def propDirsOpts():
     if 'LE_ENVIRONMENT' not in os.environ or os.environ['LE_ENVIRONMENT'] == '':
         le_env = "dev"
@@ -49,7 +55,11 @@ def testOpts(args):
         testng_xml = '-Dtestng.xml=src/test/resources/testng/%s.xml' % args.xml
         extra_opts = [ testng_xml ]
         profile_opts = ['-P%s' % p for p in profiles]
-    return profile_opts + group_opts + extra_opts + [testPattern, 'clean'] + args.command.split(',')
+    if args.command == "verify":
+        return profile_opts + group_opts + extra_opts + [testPattern, 'clean'] + args.command.split(',')
+    else:
+        return profile_opts + args.command.split(',')
+
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')
@@ -68,11 +78,11 @@ def parseCliArgs():
 
 if __name__ == "__main__":
     args = parseCliArgs()
-
     chdirToProjectDir('le-' + args.project)
-    print('Executing [with common opts added]: ', ' '.join(['mvn'] + testOpts(args)))
     my_env = os.environ
     my_env["MAVEN_OPTS"] = "-Xmx1g"
     if args.command == "jetty:run":
         my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
-    subprocess.call(['mvn'] + propDirsOpts() + commonOpts() + testOpts(args), env=my_env)
+    commands = ['mvn'] + pomOpts(args.command, args.project) + propDirsOpts() + commonOpts() + testOpts(args)
+    print('Executing [with common opts added]: ', ' '.join(commands))
+    subprocess.call(commands, env=my_env)

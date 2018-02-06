@@ -127,7 +127,7 @@ public class FuzzyMatchHelper implements DbHelper {
     @Override
     public void fetchIdResult(MatchContext context) {
         try {
-            fuzzyMatchService.fetchIdResult(context.getInternalResults(), context.getInput().getLogLevel(),
+            fuzzyMatchService.fetchIdResult(context.getInternalResults(), context.getInput().getLogLevelEnum(),
                     context.getFuturesResult());
         } catch (Exception ex) {
             throw new RuntimeException("Failed to process match result!", ex);

@@ -18,9 +18,11 @@ import org.apache.http.message.BasicHeader;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 
@@ -32,7 +34,16 @@ public class HttpClientUtils {
             SSL_BLIND_CONNECTION_MGR);
     private static final HttpComponentsClientHttpRequestFactory SSL_ENFORCED_HC_FACTORY = constructHttpRequestFactory(
             constructPoolingConnectionMgr(SSLConnectionSocketFactory.getSocketFactory()));
+    private static final ClientHttpConnector SSL_BLINK_HTTP_CONNECTOR = SSLUtils.newSslBlindHttpConnector();
     private static final List<ClientHttpRequestInterceptor> DEFAULT_INTERCEPTORS = defaultInterceptors();
+
+    /**
+     * gives a reactive web client using connection pool and IGNORE ssl name
+     * verification.
+     */
+    public static WebClient newWebClient() {
+        return WebClient.builder().clientConnector(SSL_BLINK_HTTP_CONNECTOR).build();
+    }
 
     /**
      * gives a rest template using connection pool and IGNORE ssl name
@@ -40,7 +51,6 @@ public class HttpClientUtils {
      */
     public static RestTemplate newRestTemplate() {
         RestTemplate restTemplate = new RestTemplate(SSL_BLIND_HC_FACTORY);
-        restTemplate.setInterceptors(DEFAULT_INTERCEPTORS);
         appendKryoMessageConverters(restTemplate);
         return restTemplate;
     }
@@ -60,9 +70,7 @@ public class HttpClientUtils {
      * verification.
      */
     public static RestTemplate newSSLEnforcedRestTemplate() {
-        RestTemplate restTemplate = new RestTemplate(SSL_ENFORCED_HC_FACTORY);
-        restTemplate.setInterceptors(DEFAULT_INTERCEPTORS);
-        return restTemplate;
+        return new RestTemplate(SSL_ENFORCED_HC_FACTORY);
     }
 
     /**

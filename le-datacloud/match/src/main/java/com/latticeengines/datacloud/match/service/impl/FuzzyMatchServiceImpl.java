@@ -57,8 +57,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
         checkRecordType(matchRecords);
-        Level logLevel = setLogLevel(matchInput.getLogLevel());
-        matchInput.setLogLevel(logLevel);
+        Level logLevel = setLogLevel(matchInput.getLogLevelEnum());
+        matchInput.setLogLevelEnum(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, matchInput);
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
@@ -66,8 +66,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, MatchInput matchInput)
             throws Exception {
-        Level logLevel = setLogLevel(matchInput.getLogLevel());
-        matchInput.setLogLevel(logLevel);
+        Level logLevel = setLogLevel(matchInput.getLogLevelEnum());
+        matchInput.setLogLevelEnum(logLevel);
         return callMatchInternal(matchRecords, matchInput);
     }
 

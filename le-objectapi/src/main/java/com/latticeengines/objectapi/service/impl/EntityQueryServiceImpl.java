@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -41,7 +42,8 @@ import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+
+import reactor.core.publisher.Flux;
 
 @Service("entityQueryService")
 public class EntityQueryServiceImpl implements EntityQueryService {
@@ -75,6 +77,20 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         query = preProcess(frontEndQuery.getMainEntity(), query);
         DataPage data = queryEvaluatorService.getData(attrRepo, query);
         return postProcess(frontEndQuery.getMainEntity(), data);
+    }
+
+    @Override
+    public Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
+        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
+        Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
+        if (query.getLookups() == null || query.getLookups().isEmpty()) {
+            query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+        }
+        query = preProcess(frontEndQuery.getMainEntity(), query);
+        return queryEvaluatorService.getDataFlux(attrRepo, query) //
+                .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
     }
 
     private Query preProcess(BusinessEntity entity, Query query) {
@@ -125,6 +141,23 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             data.setData(processed);
         }
         return data;
+    }
+
+    private Map<String, Object> postProcess(BusinessEntity entity, Map<String, Object> result) {
+        if (result.containsKey(InterfaceName.CompanyName.toString())
+                && result.containsKey(InterfaceName.LDC_Name.toString())) {
+            Map<String, Object> processed = new HashMap<>();
+            result.forEach(processed::put);
+            String companyName = (String) processed.get(InterfaceName.CompanyName.toString());
+            String ldcName = (String) processed.get(InterfaceName.LDC_Name.toString());
+            String consolidatedName = (ldcName != null) ? ldcName : companyName;
+            if (consolidatedName != null) {
+                processed.put(InterfaceName.CompanyName.toString(), consolidatedName);
+            }
+            return processed;
+        } else {
+            return result;
+        }
     }
 
     @Override

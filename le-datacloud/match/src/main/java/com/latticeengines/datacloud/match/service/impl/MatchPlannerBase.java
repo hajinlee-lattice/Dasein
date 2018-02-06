@@ -16,11 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
@@ -50,6 +52,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
+
+    void setDataCloudVersion(MatchInput input) {
+        if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
+            log.warn("Found a match request against deprecated RTS source, using input="
+                    + JsonUtils.serialize(input));
+            input.setDataCloudVersion("1.0.0");
+        }
+    }
 
     void setDecisionGraph(MatchInput input) {
         String decisionGraph = input.getDecisionGraph();

@@ -65,7 +65,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         if (StringUtils.isNotEmpty(matchInput.getDecisionGraph())) {
             setDecisionGraph(matchInput.getDecisionGraph());
         }
-        setLogLevel(matchInput.getLogLevel());
+        setLogLevel(matchInput.getLogLevelEnum());
         setDataCloudVersion(matchInput.getDataCloudVersion());
     }
 

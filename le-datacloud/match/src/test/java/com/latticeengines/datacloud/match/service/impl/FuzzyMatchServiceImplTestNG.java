@@ -94,7 +94,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
     private MatchInput prepareMatchInput() {
         MatchInput matchInput = new MatchInput();
-        matchInput.setLogLevel(Level.DEBUG);
+        matchInput.setLogLevelEnum(Level.DEBUG);
         matchInput.setDecisionGraph("Trilogy");
         matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         matchInput.setRootOperationUid(UUID.randomUUID().toString());

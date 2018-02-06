@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -22,12 +22,10 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 @Component("realTimeMatchService")
 public class RealTimeMatchServiceImpl implements RealTimeMatchService {
 
-    @Autowired
-    @Qualifier("realTimeMatchPlanner")
-    protected MatchPlanner matchPlanner;
+    @Resource(name = "realTimeMatchPlanner")
+    private MatchPlanner matchPlanner;
 
-    @Autowired
-    @Qualifier("realTimeMatchExecutor")
+    @Resource(name = "realTimeMatchExecutor")
     private MatchExecutor matchExecutor;
 
     @MatchStep(threshold = 0L)

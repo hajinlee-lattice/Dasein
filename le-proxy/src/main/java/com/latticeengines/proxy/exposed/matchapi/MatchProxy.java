@@ -24,6 +24,11 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
         return postKryo("realtime_match", url, input, MatchOutput.class);
     }
 
+    public BulkMatchOutput matchRealTime(BulkMatchInput input) {
+        String url = constructUrl("/bulkrealtime");
+        return postKryo("bulkrealtime_match", url, input, BulkMatchOutput.class);
+    }
+
     public MatchCommand matchBulk(MatchInput matchInput, String hdfsPod) {
         String url = constructUrl("/bulk?podid={pod}", hdfsPod);
         return post("bulk_match", url, matchInput, MatchCommand.class);
@@ -37,11 +42,6 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
     public MatchCommand bulkMatchStatus(String rootuid) {
         String url = constructUrl("/bulk/{rootuid}", rootuid);
         return get("bulk_status", url, MatchCommand.class);
-    }
-
-    public BulkMatchOutput matchRealTime(BulkMatchInput input) {
-        String url = constructUrl("/bulkrealtime");
-        return postKryo("bulkrealtime_match", url, input, BulkMatchOutput.class);
     }
 
 }

@@ -92,7 +92,12 @@ public class EntityProxy extends MicroserviceRestApiProxy {
 
     @Cacheable(cacheNames = CacheName.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
+        frontEndQuery = getRatingCountQuery(frontEndQuery);
+        return getRatingCountFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+    }
+
+    private FrontEndQuery getRatingCountQuery(FrontEndQuery frontEndQuery) {
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
         if (CollectionUtils.isEmpty(frontEndQuery.getRatingModels()) || frontEndQuery.getRatingModels().size() != 1) {
@@ -106,9 +111,9 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return getRatingCountFromObjectApi(
-                String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
+        return frontEndQuery;
     }
+
 
     private RatingModel normalizeRatingModel(RatingModel ratingModel) {
         ratingModel.setId("RatingEngine");

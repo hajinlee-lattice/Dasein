@@ -306,7 +306,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         for (Map.Entry<String, Object[]> entry : provider.entrySet()) {
             Object[][] data = new Object[][] { (Object[]) entry.getValue()[1] };
             MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, (String[]) entry.getValue()[0]);
-            input.setLogLevel(Level.DEBUG);
+            input.setLogLevelEnum(Level.DEBUG);
             input.setDataCloudVersion("2.0.7");
             if (entry.getKey().equals("Key_Loc_Data_Loc_CacheMiss")) {
                 removeDnBCacheForCacheMiss((Object[]) entry.getValue()[1]);

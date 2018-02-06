@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class MatchInput implements Fact, Dimension {
 
     public static final String DEFAULT_DATACLOUD_VERSION = "1.0.0";
@@ -43,8 +45,8 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("DecisionGraph")
     private String decisionGraph;
 
-    @JsonIgnore
-    private Level logLevel;
+    @JsonProperty("LogLevel")
+    private String logLevel;
 
     @JsonProperty("RootOperationUid")
     private String rootOperationUid;
@@ -232,27 +234,29 @@ public class MatchInput implements Fact, Dimension {
     }
 
     @JsonIgnore
-    public Level getLogLevel() {
-        return logLevel;
+    public Level getLogLevelEnum() {
+        if (StringUtils.isNotEmpty(logLevel)) {
+            return Level.toLevel(logLevel);
+        } else {
+            return null;
+        }
     }
 
     @JsonIgnore
-    public void setLogLevel(Level logLevel) {
-        this.logLevel = logLevel;
-    }
-
-    @JsonProperty("LogLevel")
-    private String getLogLevelAsString() {
-        return logLevel != null ? logLevel.toString() : null;
-    }
-
-    @JsonProperty("LogLevel")
-    private void setLogLevelByString(String logLevel) {
-        if (StringUtils.isNotEmpty(logLevel)) {
-            this.logLevel = Level.toLevel(logLevel);
-        } else {
+    public void setLogLevelEnum(Level logLevel) {
+        if (logLevel == null) {
             this.logLevel = null;
+        } else {
+            this.logLevel = logLevel.toString();
         }
+    }
+
+    private String getLogLevel() {
+        return logLevel;
+    }
+
+    private void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
     }
 
     public Map<MatchKey, List<String>> getKeyMap() {

@@ -25,6 +25,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     @MatchStep
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         validate(input);
+        setDataCloudVersion(input);
         setDecisionGraph(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();

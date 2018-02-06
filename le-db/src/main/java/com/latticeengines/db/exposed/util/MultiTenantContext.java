@@ -14,8 +14,12 @@ public final class MultiTenantContext {
     private static MultiTenantContextStrategy strategy = new ThreadLocalMultiTenantContextStrategy();
 
     public static void setStrategy(MultiTenantContextStrategy s) {
-        log.info("Changing MultiTenantContextStrategy to " + s.getClass().getSimpleName());
-        strategy = s;
+        if (ThreadLocalMultiTenantContextStrategy.class.getSimpleName().equalsIgnoreCase(strategy.getClass().getSimpleName())) {
+            log.info("Changing MultiTenantContextStrategy to " + s.getClass().getSimpleName());
+            strategy = s;
+        } else {
+            log.warn("Cannot change MultiTenantContextStrategy " + strategy.getClass().getSimpleName() + " to " + s.getClass().getSimpleName());
+        }
     }
 
     public static Tenant getTenant() {

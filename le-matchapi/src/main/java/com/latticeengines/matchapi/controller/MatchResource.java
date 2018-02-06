@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -49,7 +50,7 @@ public class MatchResource {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
-    @PostMapping(value = "/realtime", produces = { "application/json", "application/x-kryo" })
+    @PostMapping(value = "/realtime")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
@@ -58,21 +59,16 @@ public class MatchResource {
 
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
-        try {
-            matchMonitorService.precheck(input.getDataCloudVersion());
-            return realTimeMatchService.match(input);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
-        }
+        matchMonitorService.precheck(input.getDataCloudVersion());
+        return realTimeMatchService.match(input);
     }
 
-    @PostMapping(value = "/bulkrealtime", produces = { "application/json", "application/x-kryo" })
+    @PostMapping(value = "/bulkrealtime")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
             + "Domain can be anything that can be parsed to a domain, such as website, email, etc. "
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
-
     )
     public BulkMatchOutput bulkMatchRealTime(@RequestBody BulkMatchInput input) {
         long time = System.currentTimeMillis();

@@ -48,9 +48,13 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
 
     @Override
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
-        List<E> metadataColumns = getMetadataColumnService()
-                .getMetadataColumns(selection.getColumnIds(), dataCloudVersion);
-        return toColumnMetadata(metadataColumns);
+        try {
+            List<E> metadataColumns = getMetadataColumnService()
+                    .getMetadataColumns(selection.getColumnIds(), dataCloudVersion);
+            return toColumnMetadata(metadataColumns);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get column metadata from column selection", e);
+        }
     }
 
     abstract protected MetadataColumnService<E> getMetadataColumnService();

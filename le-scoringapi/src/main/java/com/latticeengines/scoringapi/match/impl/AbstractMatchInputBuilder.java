@@ -104,7 +104,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         matchInput.setFetchOnly(performFetchOnlyForMatching);
         matchInput.setRootOperationUid(requestId);
         if (isDebugMode) {
-            matchInput.setLogLevel(Level.DEBUG);
+            matchInput.setLogLevelEnum(Level.DEBUG);
         }
 
         if (enforceFuzzyMatch) {

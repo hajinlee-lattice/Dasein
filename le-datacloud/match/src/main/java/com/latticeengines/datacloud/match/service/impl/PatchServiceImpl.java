@@ -243,7 +243,7 @@ public class PatchServiceImpl implements PatchService {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));
         matchInput.setUseRemoteDnB(true);
-        matchInput.setLogLevel(Level.DEBUG);
+        matchInput.setLogLevelEnum(Level.DEBUG);
         matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         List<Object> row = Arrays.asList(keyTuple.getDomain(), keyTuple.getName(), keyTuple.getCity(),

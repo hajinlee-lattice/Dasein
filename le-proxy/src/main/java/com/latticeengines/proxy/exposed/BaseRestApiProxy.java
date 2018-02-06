@@ -1,12 +1,19 @@
 package com.latticeengines.proxy.exposed;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
+import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,21 +28,30 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriTemplate;
 
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
+
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public abstract class BaseRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(BaseRestApiProxy.class);
+    private static final String MONO = "mono";
+    private static final String FLUX = "flux";
+
     private RestTemplate restTemplate;
+    private WebClient webClient;
     private String hostport;
     private String rootpath;
 
@@ -43,9 +59,12 @@ public abstract class BaseRestApiProxy {
     private double multiplier = 2;
     private int maxAttempts = 10;
 
+    private ConcurrentMap<String, String> headers = new ConcurrentHashMap<>();
+
     // Used to call external API because there is no standardized error handler
     protected BaseRestApiProxy() {
         this.restTemplate = HttpClientUtils.newRestTemplate();
+        this.webClient = HttpClientUtils.newWebClient();
         initialConfig();
     }
 
@@ -58,6 +77,7 @@ public abstract class BaseRestApiProxy {
         this.rootpath = StringUtils.isEmpty(rootpath) ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
         this.restTemplate = HttpClientUtils.newRestTemplate();
         this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        this.webClient = HttpClientUtils.newWebClient();
         setMagicAuthHeader();
         initialConfig();
     }
@@ -79,6 +99,7 @@ public abstract class BaseRestApiProxy {
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
+        headers.put(Constants.INTERNAL_SERVICE_HEADERNAME, Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(interceptors);
     }
 
@@ -375,29 +396,21 @@ public abstract class BaseRestApiProxy {
         });
     }
 
-    private void logInvocation(String method, String url, HttpMethod verb, Integer attempt) {
-        logInvocation(method, url, verb, attempt, null, false);
-    }
-
-    private <P> void logInvocation(String method, String url, HttpMethod verb, Integer attempt, P payload, boolean logPlayload) {
-        String msg = String.format("Invoking %s by %s url %s", method, verb, url);
-        if (logPlayload) {
-            msg += String.format(" with body %s", payload == null ? "null" : payload.toString());
-        }
-        if (attempt != null) {
-            msg += String.format(".  (Attempt=%d)", attempt);
-        }
-        log.info(msg);
-    }
 
     private <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
                                               boolean kryoContent, boolean kryoResponse) {
         HttpHeaders headers = new HttpHeaders();
-        if (kryoResponse) {
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
+        if (kryoResponse && clz != null) {
             headers.setAccept(Collections.singletonList(KryoHttpMessageConverter.KRYO));
+        } else {
+            headers.set(org.apache.http.HttpHeaders.ACCEPT_ENCODING, "gzip");
         }
-        if (kryoContent && clz != null) {
+        if (kryoContent && payload != null) {
             headers.setContentType(KryoHttpMessageConverter.KRYO);
+        }
+        if (kryoContent || kryoResponse) {
+            log.info("Headers: " + headers.toSingleValueMap());
         }
         HttpEntity<P> entity;
         if (payload == null) {
@@ -410,6 +423,67 @@ public abstract class BaseRestApiProxy {
             return ResponseEntity.ok(null);
         } else {
             return restTemplate.exchange(url, method, entity, clz);
+        }
+    }
+
+    /**
+     * Reactive api won't start fetching right away.
+     * Data transmission starts when the flux is first time subscribed.
+     * Retry should handle retry in callers, because it may be an infinite stream
+     */
+    protected <K, V, P> Flux<Map<K, V>> postMapFlux(String channel, String url, P payload) {
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
+        Flux<Map<K, V>> flux = request.retrieve().bodyToFlux(new ParameterizedTypeReference<Map<K, V>>() {});
+        return appendLogInterceptors(flux, channel, url);
+    }
+
+    protected <K, V, P> Mono<Map<K, V>> postMapMono(String channel, String url, P payload) {
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, true);
+        Mono<Map<K, V>> mono = request.retrieve().bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {});
+        return appendLogInterceptors(mono, channel, url);
+    }
+
+    private <T> Flux<T> appendLogInterceptors(Flux<T> flux, String channel, String url) {
+        return flux //
+                .doOnSubscribe(subscription -> //
+                        log.info(String.format("Start reading %s flux from %s", channel, url)))
+                .doOnComplete(() ->
+                        log.info(String.format("Finish reading %s flux from %s", channel, url)))
+                .doOnCancel(() ->
+                        log.info(String.format("Cancel reading %s flux from %s", channel, url)))
+                .doOnError(throwable ->
+                        log.error(String.format("Failed to read %s flux from %s", channel, url), throwable));
+    }
+
+    private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {
+        //TODO: need to enhance error handling
+        return mono //
+                .doOnSubscribe(subscription -> //
+                        log.info(String.format("Start reading %s mono from %s", channel, url)))
+                .doOnCancel(() ->
+                        log.info(String.format("Cancel reading %s mono from %s", channel, url)))
+                .doOnError(throwable ->
+                        log.error(String.format("Failed to read %s mono from %s", channel, url), throwable));
+    }
+
+    private <P> WebClient.RequestHeadersSpec prepareReactiveRequest(String url, HttpMethod method, P payload,
+                                                                    boolean useKryo) {
+        WebClient.RequestHeadersSpec request;
+
+        if (payload != null) {
+            request = webClient.method(method).uri(url).syncBody(payload);
+        } else {
+            request = webClient.method(method).uri(url);
+        }
+
+        for(Map.Entry<String, String> header: headers.entrySet()) {
+            request = request.header(header.getKey(), header.getValue());
+        }
+
+        if (useKryo) {
+            return request.accept(KryoHttpMessageConverter.KRYO);
+        } else {
+            return request.accept((MediaType.APPLICATION_JSON));
         }
     }
 
@@ -484,5 +558,44 @@ public abstract class BaseRestApiProxy {
         restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
         restTemplate.setErrorHandler(new GetResponseErrorHandler());
         cleanupAuthHeader();
+    }
+
+    private void logInvocation(String method, String url, HttpMethod verb, Integer attempt) {
+        logInvocation(method, url, verb, attempt, null, false);
+    }
+
+    private <P> void logInvocation(String method, String url, HttpMethod verb, Integer attempt, P payload,
+                                   boolean logPlayload) {
+        String msg = String.format("Invoking %s by %s url %s", method, verb, url);
+        if (logPlayload) {
+            msg += String.format(" with body %s", payload == null ? "null" : payload.toString());
+        }
+        if (attempt != null) {
+            msg += String.format(".  (Attempt=%d)", attempt);
+        }
+        log.info(msg);
+    }
+
+    private <K, V> BaseSubscriber<Map<K, V>> getMapSubscriber(String mode, String channel, String url) {
+        return new BaseSubscriber<Map<K, V>>() {
+
+            AtomicBoolean requested = new AtomicBoolean(false);
+
+            @Override
+            protected void hookOnSubscribe(Subscription subscription) {
+                log.info(String.format("Start reading %s %s from %s", channel, mode, url));
+                request(1);
+            }
+
+            @Override
+            protected void hookOnComplete() {
+                log.info(String.format("Complete reading %s %s from %s", channel, mode, url));
+            }
+
+            @Override
+            protected void hookOnNext(Map<K, V> value) {
+                request(1);
+            }
+        };
     }
 }

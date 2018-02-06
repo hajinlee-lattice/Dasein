@@ -151,7 +151,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 if (StringUtils.isEmpty(str)) {
                     continue;
                 }
-                List<String> entityStrs = Arrays.asList(str.substring(1, str.length() - 1).split(", "));
+                log.info("Attempting to parse deleted entities from " + str);
+                List<String> entityStrs = Arrays.asList(str.split(", "));
                 rebuildEntities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
             }
         } catch (Exception e) {

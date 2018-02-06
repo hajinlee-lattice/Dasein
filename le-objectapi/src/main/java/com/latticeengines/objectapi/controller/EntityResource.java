@@ -4,9 +4,9 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +31,7 @@ public class EntityResource {
         this.entityQueryService = entityQueryService;
     }
 
-    @RequestMapping(value = "/count", method = RequestMethod.POST)
+    @PostMapping(value = "/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
@@ -39,7 +39,7 @@ public class EntityResource {
         return entityQueryService.getCount(frontEndQuery, version);
     }
 
-    @RequestMapping(value = "/data", method = RequestMethod.POST)
+    @PostMapping(value = "/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
@@ -47,7 +47,7 @@ public class EntityResource {
         return entityQueryService.getData(frontEndQuery, version);
     }
 
-    @RequestMapping(value = "/ratingcount", method = RequestMethod.POST)
+    @PostMapping(value = "/ratingcount")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,

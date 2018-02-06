@@ -4,10 +4,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.querydsl.sql.SQLQuery;
@@ -42,13 +39,7 @@ public class QueryEvaluator {
         return processor.process(repository, query);
     }
 
-    DataPage run(SQLQuery<?> sqlquery, Query query) {
-        Flux<Map<String, Object>> flux = pipe(sqlquery, query);
-        List<Map<String, Object>> data = flux.toStream().collect(Collectors.toList());
-        return new DataPage(data);
-    }
-
-    private Flux<Map<String, Object>> pipe(SQLQuery<?> sqlquery, Query query) {
+    Flux<Map<String, Object>> pipe(SQLQuery<?> sqlquery, Query query) {
         final Map<String, String> attrNames = new HashMap<>();
         query.getLookups().forEach(l -> {
             if (l instanceof AttributeLookup) {

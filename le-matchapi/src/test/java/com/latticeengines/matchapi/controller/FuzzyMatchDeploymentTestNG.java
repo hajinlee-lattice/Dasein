@@ -28,7 +28,6 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -195,7 +194,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         MatchInput input = new MatchInput();
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         input.setDecisionGraph("DragonClaw");
-        input.setLogLevel(Level.DEBUG);
+        input.setLogLevelEnum(Level.DEBUG);
         input.setTenant(new Tenant("PD_Test"));
         input.setUseDnBCache(useDnBCache);
         input.setCustomSelection(prepareColumnSelection());

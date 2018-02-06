@@ -79,7 +79,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         matchInput.setUseRemoteDnB(enforceFuzzyMatch);
         matchInput.setDataCloudVersion(dataCloudVersion);
-        matchInput.setLogLevel(Level.DEBUG);
+        matchInput.setLogLevelEnum(Level.DEBUG);
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
