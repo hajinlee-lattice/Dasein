@@ -26,8 +26,7 @@ public class PlayLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 .customer(getCustomerSpace()) //
                 .workflow("playLaunchWorkflow") //
                 .inputProperties(inputProperties) //
-                .playName(playLaunch.getPlay().getName()) //
-                .playLaunchId(playLaunch.getLaunchId()) //
+                .playLaunch(playLaunch) //
                 .build();
         return workflowJobService.submit(configuration);
     }

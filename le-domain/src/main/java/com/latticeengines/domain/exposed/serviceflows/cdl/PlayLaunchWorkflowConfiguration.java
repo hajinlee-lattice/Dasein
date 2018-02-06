@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 
 public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -17,13 +18,10 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             return this;
         }
 
-        public Builder playName(String playName) {
-            initStepConf.setPlayName(playName);
-            return this;
-        }
-
-        public Builder playLaunchId(String playLaunchId) {
-            initStepConf.setPlayLaunchId(playLaunchId);
+        public Builder playLaunch(PlayLaunch playLaunch) {
+            initStepConf.setPlayName(playLaunch.getPlay().getName());
+            initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
+            configuration.setUserId(playLaunch.getPlay().getCreatedBy());
             return this;
         }
 

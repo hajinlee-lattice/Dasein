@@ -52,6 +52,7 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
                 MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
             operationExecuteConfiguration.setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
             cleanupByUploadWrapperConfiguration.setMaintenanceOperationConfiguration(maintenanceOperationConfiguration);
+            configuration.setUserId(maintenanceOperationConfiguration.getOperationInitiator());
             return this;
         }
 

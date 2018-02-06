@@ -11,13 +11,13 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
     }
 
     public static class Builder {
-        private CDLDataFeedImportWorkflowConfiguration configuration = new
-                CDLDataFeedImportWorkflowConfiguration();
+        private CDLDataFeedImportWorkflowConfiguration configuration = new CDLDataFeedImportWorkflowConfiguration();
 
         private ImportDataFeedTaskConfiguration importDataFeedTaskConfiguration = new ImportDataFeedTaskConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace, "cdlDataFeedImportWorkflow");
+            configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace,
+                    "cdlDataFeedImportWorkflow");
             importDataFeedTaskConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
@@ -40,6 +40,11 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder importConfig(String importConfig) {
             importDataFeedTaskConfiguration.setImportConfig(importConfig);
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            configuration.setUserId(userId);
             return this;
         }
 

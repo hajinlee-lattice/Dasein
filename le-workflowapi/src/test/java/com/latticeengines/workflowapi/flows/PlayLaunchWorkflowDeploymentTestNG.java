@@ -82,8 +82,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
                 .customer(mainTestCustomerSpace) //
                 .workflow("playLaunchWorkflow") //
                 .inputProperties(inputProperties) //
-                .playName(play.getName()) //
-                .playLaunchId(playLaunch.getLaunchId()) //
+                .playLaunch(playLaunch) //
                 .build();
     }
 

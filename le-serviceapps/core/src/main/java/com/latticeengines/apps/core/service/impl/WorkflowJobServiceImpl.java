@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
@@ -39,9 +38,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public ApplicationId submit(WorkflowConfiguration configuration) {
-        String userId = MultiTenantContext.getEmailAddress();
-        configuration.setUserId(userId);
-
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);
 
