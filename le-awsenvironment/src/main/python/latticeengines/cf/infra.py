@@ -36,7 +36,6 @@ TOMCAT_APP_HEALTH_MAP = {
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
-    "saml": "/saml/health",
     "ulysses": "/ulysses/health",
     "oauth2": "/oauth2/health",
     "playmaker": "/api/health",
