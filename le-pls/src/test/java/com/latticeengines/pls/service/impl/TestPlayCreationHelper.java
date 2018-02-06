@@ -17,15 +17,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -41,8 +43,6 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
@@ -102,10 +102,14 @@ public class TestPlayCreationHelper {
         Restriction contactRestriction = createContactRestriction();
         RatingRule ratingRule = createRatingRule();
 
+        log.info("Tenant = " + tenant.getId());
         segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
+        log.info("Tenant = " + tenant.getId());
         ratingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
 
+        log.info("Tenant = " + tenant.getId());
         playResourceDeploymentTestNG.getCrud();
+        log.info("Tenant = " + tenant.getId());
         playResourceDeploymentTestNG.createPlayLaunch();
 
         play = playResourceDeploymentTestNG.getPlay();
@@ -274,8 +278,8 @@ public class TestPlayCreationHelper {
     }
 
     private void populateBucketInfo(TreeMap<String, Map<String, Restriction>> bucketToRuleMap,
-                                    boolean createConcreteRestriction, RatingBucketName bucketName, String key, ComparisonType comparisonType,
-                                    BusinessEntity entity, String attrName, Object min, Object max) {
+            boolean createConcreteRestriction, RatingBucketName bucketName, String key, ComparisonType comparisonType,
+            BusinessEntity entity, String attrName, Object min, Object max) {
         Map<String, Restriction> bucketInfo = bucketToRuleMap.get(bucketName.name());
         if (bucketInfo == null) {
             bucketInfo = new HashMap<>();

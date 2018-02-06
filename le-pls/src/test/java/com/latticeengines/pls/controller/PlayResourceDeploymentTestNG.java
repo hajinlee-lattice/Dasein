@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -40,6 +42,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 @Component
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(PlayResourceDeploymentTestNG.class);
 
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
@@ -123,6 +126,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = "deployment")
     public void getCrud() {
+        logInterceptor();
+
         List<Play> playList = (List) restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
         int existingPlays = playList == null ? 0 : playList.size();
         Play createdPlay1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
@@ -162,6 +167,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
     public void createPlayLaunch() {
+        logInterceptor();
+
         playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches", createDefaultPlayLaunch(), PlayLaunch.class);
 
@@ -394,5 +401,13 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     public RatingEngine getRatingEngine() {
         return this.ratingEngine1;
+    }
+
+    private void logInterceptor() {
+        log.info("Tenant = " + tenant.getId());
+        log.info("restTemplate = " + restTemplate);
+        restTemplate.getInterceptors().stream() //
+                .forEach(
+                        in -> log.info(String.format("interceptor Obj = %s, class = %s", in, in.getClass().getName())));
     }
 }
