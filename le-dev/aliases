@@ -59,7 +59,7 @@ alias runtest3='python3 $WSHOME/le-dev/scripts/runtest.py'
 alias cleanuptesttenants='python $WSHOME/le-dev/scripts/cleanup.py'
 alias pytests='cd $WSHOME/le-dataplatform/src/test/python && PYTHONPATH=../../main/python:../../main/python/pipeline:$PYTHONPATH $ANACONDA_HOME/envs/lattice/bin/py.test'
 
-alias runjetty='USE_HTTP2=false runtest -p jetty -c jetty:run'
+alias runjetty='runtest -p jetty -c jetty:run'
 
 alias uibld='pushd $WSHOME/le-ui && npm install && popd'
 alias uirunlpi='cd $WSHOME/le-ui && npm run local'
