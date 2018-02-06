@@ -259,13 +259,24 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             switch (entity) {
             case Account:
                 importTemplate.getAttributes()
-                        .forEach(attr -> attr.setGroupsViaList(Arrays.asList( //
+                        .forEach(attr -> {
+                            attr.setGroupsViaList(Arrays.asList( //
                                 ColumnSelection.Predefined.TalkingPoint, //
-                                ColumnSelection.Predefined.CompanyProfile)));
+                                ColumnSelection.Predefined.CompanyProfile));
+                            if (attr.getName().equals("Id") || attr.getName().equals("AccountId")) {
+                                attr.setInterfaceName(InterfaceName.AccountId);
+                            }
+                        });
                 importTemplate.setName(SchemaInterpretation.Account.name());
                 break;
             case Contact:
                 importTemplate.setName(SchemaInterpretation.Contact.name());
+                importTemplate.getAttributes()
+                        .forEach(attr -> {
+                            if (attr.getName().equals("Id") || attr.getName().equals("ContactId")) {
+                                attr.setInterfaceName(InterfaceName.ContactId);
+                            }
+                        });
                 break;
             case Product:
                 importTemplate.setName(SchemaInterpretation.Product.name());

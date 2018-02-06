@@ -87,7 +87,7 @@ public class CleanupByUploadDeploymentTestNG extends DataIngestionEnd2EndDeploym
                 CleanupOperationType.BYUPLOAD_ID,
                 source);
         ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, sourceFile,
-                BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_ID, MultiTenantContext.getEmailAddress());
+                BusinessEntity.Contact, CleanupOperationType.BYUPLOAD_ID, MultiTenantContext.getEmailAddress());
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         Assert.assertEquals(JobStatus.COMPLETED, status);
     }
