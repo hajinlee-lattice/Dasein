@@ -1,22 +1,29 @@
 package com.latticeengines.eai.runtime.service;
 
 import java.lang.reflect.ParameterizedType;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.eai.service.EaiImportJobDetailService;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
@@ -30,6 +37,9 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
 
     @Autowired
     private WorkflowProxy workflowProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @SuppressWarnings("unchecked")
     public EaiRuntimeService() {
@@ -97,6 +107,31 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
             jobDetail.setStatus(ImportStatus.WAITINGREGISTER);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);
         }
+    }
+
+    public String createTempTable(String customerSpace, Table template, List<String> pathList,
+                                  List<String> processedRecords) {
+        Table tempTable = TableUtils.clone(template, NamingUtils.uuid("TempTable"));
+        for (int i = 0; i < pathList.size(); i++) {
+            tempTable.addExtract(createExtract(pathList.get(i), Long.parseLong(processedRecords.get(i))));
+        }
+        metadataProxy.createTable(customerSpace, tempTable.getName(), tempTable);
+        return tempTable.getName();
+    }
+
+    private Extract createExtract(String path, long processedRecords) {
+        Extract e = new Extract();
+        e.setName(StringUtils.substringAfterLast(path, "/"));
+        e.setPath(PathUtils.stripoutProtocol(path));
+        e.setProcessedRecords(processedRecords);
+        String dateTime = StringUtils.substringBetween(path, "/Extracts/", "/");
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        try {
+            e.setExtractionTimestamp(f.parse(dateTime).getTime());
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return e;
     }
 
     public String getTaskIdFromJobId(Long jobDetailId) {

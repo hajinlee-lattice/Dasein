@@ -82,19 +82,21 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         String filePath = "";
         String tableName = "";
         String fileName = "";
+        boolean isUseDLData = false;
         if (maintenanceOperationConfiguration instanceof CleanupByUploadConfiguration) {
             log.info("Configuratin is CleanupByUpload");
             CleanupByUploadConfiguration cleanupByUploadConfiguration = ((CleanupByUploadConfiguration) maintenanceOperationConfiguration);
             filePath = cleanupByUploadConfiguration.getFilePath();
             tableName = cleanupByUploadConfiguration.getTableName();
             fileName = cleanupByUploadConfiguration.getFileName();
+            isUseDLData = cleanupByUploadConfiguration.isUseDLData();
         }
         return new CDLOperationWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microserviceHostPort) //
                 .maintenanceOperationConfiguration(maintenanceOperationConfiguration) //
-                .isCleanupByUpload(isCleanupByUpload) //
+                .isCleanupByUpload(isCleanupByUpload, isUseDLData) //
                 .filePath(filePath) //
                 .tableName(tableName) //
                 .businessEntity(businessEntity)

@@ -1,8 +1,26 @@
 package com.latticeengines.domain.exposed.eai;
 
 public enum ImportVdbTableMergeRule {
-    APPEND,
-    REPLACE;
+    APPEND(false),
+    REPLACE(false),
+    UPSERT_ID(true),
+    UPSERT_ACPD(true),
+    UPSERT_MINDATE(true),
+    UPSERT_MINDATEANDACCOUNT(true);
+
+    boolean needTempTable;
+
+    ImportVdbTableMergeRule(boolean needTempTable) {
+        this.needTempTable = needTempTable;
+    }
+
+    public boolean isNeedTempTable() {
+        return needTempTable;
+    }
+
+    public void setNeedTempTable(boolean needTempTable) {
+        this.needTempTable = needTempTable;
+    }
 
     public static ImportVdbTableMergeRule getByName(String mergeRule) {
         for (ImportVdbTableMergeRule importVdbTableMergeRule : values()) {

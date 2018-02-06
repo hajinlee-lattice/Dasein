@@ -194,4 +194,32 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
                     "Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId cleanupByUpload(String customerSpace, String tableName,
+                                         BusinessEntity entity, CleanupOperationType operationType, String initiator) {
+        CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
+        configuration.setTableName(tableName);
+        configuration.setUseDLData(true);
+        configuration.setFilePath("");
+        configuration.setFileName("VisiDB_Import");
+        configuration.setEntity(entity);
+        configuration.setCleanupOperationType(operationType);
+        configuration.setOperationInitiator(initiator);
+
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup", customerSpace);
+
+        ResponseDocument<String> responseDoc = post("cleanup by upload", url, configuration, ResponseDocument.class);
+
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
 }

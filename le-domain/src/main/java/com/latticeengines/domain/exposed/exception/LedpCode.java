@@ -110,6 +110,7 @@ public enum LedpCode {
     LEDP_17015("Import table data error! {0}"), //
     LEDP_17016("Failed to get data from DL!"), //
     LEDP_17017("The id {0} is duplicated."),
+    LEDP_17018("Entity {0} cannot apply merge rule {1}!"),
 
     // le-pls 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //

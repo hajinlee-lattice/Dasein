@@ -66,8 +66,8 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
-        public Builder isCleanupByUpload(boolean cleanupByUpload) {
-            deleteFileUploadStepConfiguration.setSkipStep(!cleanupByUpload);
+        public Builder isCleanupByUpload(boolean cleanupByUpload, boolean useDLData) {
+            deleteFileUploadStepConfiguration.setSkipStep(!cleanupByUpload || useDLData);
             cleanupByUploadWrapperConfiguration.setSkipStep(!cleanupByUpload);
             operationExecuteConfiguration.setSkipStep(cleanupByUpload);
             return this;

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
@@ -28,10 +29,13 @@ import com.latticeengines.domain.exposed.eai.VdbToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
 @Component("vdbToHdfsService")
@@ -47,6 +51,9 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
 
     @Autowired
     private CDLProxy cdlProxy;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -89,6 +96,10 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 }
                 ImportVdbTableMergeRule mergeRule = importVdbTableConfigurationMap.entrySet().iterator().next()
                         .getValue().getMergeRule();
+                if (!checkMergeRule(config.getBusinessEntity(), mergeRule)) {
+                    throw new LedpException(LedpCode.LEDP_17018, new String [] {config.getBusinessEntity().name(),
+                            mergeRule.name()});
+                }
 
                 try {
                     log.info("Initialize import job detail record");
@@ -107,14 +118,10 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                             vdbConnectorConfiguration);
 
                     log.info("Finalize import job detail record");
-                    finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
+                    List<String> tempTables = finalizeJobDetail(vdbConnectorConfiguration, tableTemplates,
+                            importContext, mergeRule, customerSpace);
 
-                    if (mergeRule == ImportVdbTableMergeRule.REPLACE) {
-                        ApplicationId applicationId = cdlProxy.cleanupAllData(config.getCustomerSpace().toString(),
-                                config.getBusinessEntity(), CDLConstants.DEFAULT_VISIDB_USER);
-
-                        waitForWorkflowStatus(applicationId.toString(), false);
-                    }
+                    applyMergeRule(customerSpace, mergeRule, config.getBusinessEntity(), tempTables);
 
                 } catch (Exception e) {
                     throw e;
@@ -140,6 +147,84 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         }
 
     }
+
+    private boolean checkMergeRule(BusinessEntity entity, ImportVdbTableMergeRule mergeRule) {
+        switch (mergeRule) {
+            case APPEND:
+            case REPLACE:
+                return true;
+            case UPSERT_ID:
+                return entity == BusinessEntity.Account || entity == BusinessEntity.Contact;
+            case UPSERT_ACPD:
+            case UPSERT_MINDATE:
+            case UPSERT_MINDATEANDACCOUNT:
+                return entity == BusinessEntity.Transaction;
+            default:
+                throw new RuntimeException("Unknown mergeRule: " + mergeRule.name());
+        }
+    }
+
+    private void applyMergeRule(String customerSpace, ImportVdbTableMergeRule mergeRule, BusinessEntity entity,
+                                List<String> tempTables) {
+        log.info("Apply merge rule: " + mergeRule.name());
+        if (tempTables != null && tempTables.size() > 0) {
+            log.info("Temp table names: " + String.join(",", tempTables));
+        }
+        Table masterTable = null;
+        if (entity == BusinessEntity.Transaction) {
+            masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+        } else {
+            masterTable = dataCollectionProxy.getTable(customerSpace, entity.getBatchStore());
+        }
+        if (masterTable == null) {
+            log.warn("Master table is null, skip cleanup!");
+            return;
+        }
+        ApplicationId applicationId = null;
+        switch (mergeRule) {
+            case APPEND:
+                return;
+            case REPLACE:
+                applicationId = cdlProxy.cleanupAllData(customerSpace, entity,
+                        CDLConstants.DEFAULT_VISIDB_USER);
+                break;
+            case UPSERT_ID:
+            case UPSERT_ACPD:
+            case UPSERT_MINDATE:
+            case UPSERT_MINDATEANDACCOUNT:
+                applicationId = cdlProxy.cleanupByUpload(customerSpace, tempTables.get(0), entity,
+                        getCleanupTypeFromMergeRule(mergeRule), CDLConstants.DEFAULT_VISIDB_USER);
+                break;
+            default:
+                throw new RuntimeException("Unknown merge rule from Vdb: " + mergeRule.name());
+        }
+        if (applicationId != null) {
+            waitForWorkflowStatus(applicationId.toString(), false);
+        }
+    }
+
+    private CleanupOperationType getCleanupTypeFromMergeRule(ImportVdbTableMergeRule mergeRule) {
+        CleanupOperationType cleanupOperationType = null;
+        switch (mergeRule) {
+            case REPLACE:
+                cleanupOperationType = CleanupOperationType.ALLDATA;
+                break;
+            case UPSERT_ID:
+                cleanupOperationType = CleanupOperationType.BYUPLOAD_ID;
+                break;
+            case UPSERT_ACPD:
+                cleanupOperationType = CleanupOperationType.BYUPLOAD_ACPD;
+                break;
+            case UPSERT_MINDATE:
+                cleanupOperationType = CleanupOperationType.BYUPLOAD_MINDATE;
+                break;
+            case UPSERT_MINDATEANDACCOUNT:
+                cleanupOperationType = CleanupOperationType.BYUPLOAD_MINDATEANDACCOUNT;
+                break;
+        }
+        return cleanupOperationType;
+    }
+
 
     private HashMap<Long, Table> getTableMap(String customerSpace, List<Long> jobDetailIds) {
         HashMap<Long, Table> tables = new HashMap<>();
@@ -177,8 +262,9 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     }
 
     @SuppressWarnings("unchecked")
-    private void finalizeJobDetail(VdbConnectorConfiguration config, HashMap<Long, Table> tableMetaData,
-            ImportContext importContext) {
+    private List<String> finalizeJobDetail(VdbConnectorConfiguration config, HashMap<Long, Table> tableMetaData,
+            ImportContext importContext, ImportVdbTableMergeRule mergeRule, String customerSpace) {
+        List<String> tempTable = new ArrayList<>();
         Map<String, Boolean> multipleExtractMap = importContext.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class);
         Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
         Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
@@ -211,6 +297,9 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 }
                 updateJobDetailExtractInfo(entry.getKey(), table.getName(), multipleTargets.get(table.getName()),
                         recordList, totalRows, ignoredRows, duplicateRows);
+                if (mergeRule.isNeedTempTable()) {
+                    tempTable.add(createTempTable(customerSpace, table, multipleTargets.get(table.getName()), recordList));
+                }
             } else {
                 Long ignoredRows = ignoredRecord.get(table.getName());
                 Long duplicateRows = duplicateRecord.get(table.getName());
@@ -218,8 +307,13 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                         Arrays.asList(targetPathsMap.get(table.getName())),
                         Arrays.asList(processedRecordsMap.get(table.getName()).toString()), totalRows, ignoredRows,
                         duplicateRows);
+                if (mergeRule.isNeedTempTable()) {
+                    tempTable.add(createTempTable(customerSpace, table,
+                            Arrays.asList(targetPathsMap.get(table.getName())),
+                            Arrays.asList(processedRecordsMap.get(table.getName()).toString())));
+                }
             }
         }
-
+        return tempTable;
     }
 }
