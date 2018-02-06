@@ -299,6 +299,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                     TransactionMetrics metric = TransactionMetrics.fromName(metricName);
                     attribute.setDisplayName(getDisplayName(period, metric));
                 }
+                attribute.setSubcategory(productName);
             }
             attribute.removeAllowedDisplayNames();
         }
