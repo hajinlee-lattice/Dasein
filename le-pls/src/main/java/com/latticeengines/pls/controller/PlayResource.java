@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -33,7 +34,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,6 +50,9 @@ public class PlayResource {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private RatingEntityPreviewService ratingEntityPreviewService;
@@ -207,6 +211,9 @@ public class PlayResource {
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
 
         RatingEngine ratingEngine = play.getRatingEngine();
+        ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, ratingEngine.getId());
+        play.setRatingEngine(ratingEngine);
+
         DataPage previewDataPage = ratingEntityPreviewService.getEntityPreview( //
                 ratingEngine, 0L, 1L, BusinessEntity.Account, //
                 play.getExcludeItemsWithoutSalesforceId(), //
