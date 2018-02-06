@@ -4,7 +4,7 @@ import sys
 SPECIAL_CONTEXT_PATH = {
     "scoringapi": "score",
     "matchapi": "match",
-    "playmaker": "api"
+    "oauth2": "oauth"
 }
 
 def generate_options(options):
