@@ -31,6 +31,7 @@
         <reflections.version>0.9.9</reflections.version>
         <c3p0.version>0.9.5.2</c3p0.version>
         <slf4j.version>1.7.25</slf4j.version>
+        <reactor.version>3.1.3.RELEASE</reactor.version>
 
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
         <java.version>1.8</java.version>
@@ -84,9 +85,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-common</artifactId>
+            <artifactId>le-common-web</artifactId>
             <version>${project.version}</version>
-            <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>commons-lang</groupId>
@@ -308,6 +308,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
             <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>${reactor.version}</version>
         </dependency>
 
     </dependencies>
