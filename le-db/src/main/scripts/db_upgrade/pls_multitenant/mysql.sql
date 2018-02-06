@@ -16,6 +16,9 @@ CREATE PROCEDURE `UpdateCDLTables`()
             ADD COLUMN CUBES_DATA longblob NULL,
             CHANGE COLUMN DATA DATA longblob NULL;
 
+        ALTER TABLE `PLS_MultiTenant`.`METADATA_DATA_COLLECTION`
+            ADD COLUMN `DATA_CLOUD_VERSION` VARCHAR(255);
+
         --ALTER TABLE PLS_MultiTenant.AI_MODEL DROP COLUMN `MODELING_METHOD`; -- Drop after both stacks are off of the codebase using this column
     END;
 //
