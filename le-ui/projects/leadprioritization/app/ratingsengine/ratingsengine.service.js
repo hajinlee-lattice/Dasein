@@ -160,7 +160,10 @@ angular.module('lp.ratingsengine')
     }
 
     this.getWizardProgressItems = function(step) {
-        return this.wizardProgressItems[(step || 'all')];
+
+        console.log(step);
+
+        return this.wizardProgressItems[(step || 'rulesprospects')];
     }
 
     this.setSettings = function(obj) {

@@ -69,6 +69,9 @@ angular.module('lp.ratingsengine.dashboard', [
 
     vm.init = function() {
         vm.initModalWindow();
+
+        console.log(vm.StateHistory);
+
     }
 
     /**

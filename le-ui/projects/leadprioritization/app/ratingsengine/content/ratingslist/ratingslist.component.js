@@ -132,6 +132,8 @@ angular.module('lp.ratingsengine.ratingslist', [
                     ? 'home.ratingsengine.dashboard'
                     : 'home.ratingsengine.rulesprospects.segment';
 
+                console.log(rating.id);
+
                 $state.go(url, { rating_id: rating.id });
             } 
         }

@@ -632,7 +632,7 @@ angular.module('common.datacloud.query.builder', [
 
     vm.goAttributes = function() {
         if (vm.mode == 'rules') {
-            var state = 'home.ratingsengine.wizard.segment.attributes.add';
+            var state = 'home.ratingsengine.rulesprospects.segment.attributes.add';
         } else {
             var state = vm.inModel
                     ? 'home.model.analysis.explorer.attributes'
