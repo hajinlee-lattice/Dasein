@@ -137,11 +137,13 @@ public class ScoringMapperPredictUtil {
             Schema schema = null;
             boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.Id.name())
                     || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name());
+            boolean cdl = false;
             if (hasUniqueKey) {
                 userDatumWriter = new GenericDatumWriter<GenericRecord>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
                 Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, hasRevenue);
                 schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
+                cdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name());
             } else {
                 userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
@@ -149,6 +151,7 @@ public class ScoringMapperPredictUtil {
             }
             dataFileWriter.create(schema, outputFile);
 
+            ScoreNormalizer normalizer = NormalizationUtils.getScoreNormalizer(hasRevenue, cdl, model);
             Set<String> keySet = scores.keySet();
             for (String key : keySet) {
                 List<Double> rawScoreList = scores.get(key);
@@ -156,8 +159,8 @@ public class ScoringMapperPredictUtil {
                     Double rawScore = rawScoreList.get(i);
                     ScoreOutput result = getResult(modelInfoMap.get(uuid).getModelGuid(), key, model, rawScore);
                     if (hasUniqueKey) {
-                        GenericRecordBuilder builder = createRecordWithUniqueKey(uniqueKeyColumn, revenues, hasRevenue,
-                                schema, key, result, i);
+                        GenericRecordBuilder builder = createRecordWithUniqueKey(uniqueKeyColumn, cdl, revenues,
+                                hasRevenue, schema, key, result, i, model, normalizer);
                         builder.set(ScoreResultField.ModelId.displayName, modelInfoMap.get(uuid).getModelGuid());
                         dataFileWriter.append(builder.build());
                     } else {
@@ -168,34 +171,36 @@ public class ScoringMapperPredictUtil {
             dataFileWriter.close();
             HdfsUtils.copyLocalToHdfs(config, fileName, outputPath + "/" + fileName);
         }
-
     }
 
-    private static GenericRecordBuilder createRecordWithUniqueKey(String uniqueKeyColumn,
+    private static GenericRecordBuilder createRecordWithUniqueKey(String uniqueKeyColumn, boolean cdl,
             Map<String, List<Double>> revenues, boolean hasRevenue, Schema schema, String key, ScoreOutput result,
-            int i) {
-        boolean isCdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name());
+            int i, JsonNode model, ScoreNormalizer normalizer) {
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        if (isCdl) {
+        if (cdl) {
             builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
         } else {
             builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));
         }
         builder.set(ScoreResultField.Percentile.displayName, result.getPercentile());
         builder.set(ScoreResultField.RawScore.name(), result.getRawScore());
-        if (isCdl) {
+        if (cdl) {
             builder.set(ScoreResultField.Probability.name(), result.getProbability());
-            builder.set(ScoreResultField.NormalizedScore.name(), 0.0D); // TODO:
-        }
-        if (hasRevenue) {
-            double predictedRevenue = 0D;
-            if (revenues.get(key).size() > i) {
-                predictedRevenue = revenues.get(key).get(i);
+            builder.set(ScoreResultField.NormalizedScore.name(), createNormalizedScore(result, normalizer));
+            if (hasRevenue) {
+                double predictedRevenue = 0D;
+                if (revenues.get(key).size() > i) {
+                    predictedRevenue = revenues.get(key).get(i);
+                }
+                builder.set(ScoreResultField.PredictedRevenue.name(), predictedRevenue);
+                builder.set(ScoreResultField.ExpectedRevenue.name(), predictedRevenue * result.getProbability());
             }
-            builder.set(ScoreResultField.PredictedRevenue.name(), predictedRevenue);
-            builder.set(ScoreResultField.ExpectedRevenue.name(), predictedRevenue * result.getProbability());
         }
         return builder;
+    }
+
+    private static double createNormalizedScore(ScoreOutput result, ScoreNormalizer normalizer) {
+        return normalizer.normalize(result.getRawScore(), InterpolationFunctionType.Linear);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

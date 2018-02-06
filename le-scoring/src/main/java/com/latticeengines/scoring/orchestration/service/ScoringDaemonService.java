@@ -14,6 +14,13 @@ public interface ScoringDaemonService {
     public static final String MODEL_SCRIPT = "Script";
     public static final String SCORING_SCRIPT_NAME = "scoringengine.py";
 
+    public static final String NORMALIZATION_BUCKETS = "NormalizationBuckets";
+    public static final String NORMALIZATION_PROBABILITY = "Probability";
+    public static final String NORMALIZATION_EXPECTEDREVENUE = "ExpectedRevenue";
+    public static final String NORMALIZATION_START = "Start";
+    public static final String NORMALIZATION_END = "End";
+    public static final String NORMALIZATION_CUMULATIVEPERCENTAGE = "CumulativePercentage";
+
     public static final String CALIBRATION = "Calibration";
     public static final String CALIBRATION_MAXIMUMSCORE = "MaximumScore";
     public static final String CALIBRATION_MINIMUMSCORE = "MinimumScore";
