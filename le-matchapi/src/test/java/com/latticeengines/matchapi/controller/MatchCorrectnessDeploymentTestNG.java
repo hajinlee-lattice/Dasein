@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -90,8 +89,9 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         realtimeResult = new ArrayList<>();
     }
 
-    @Test(groups = "deployment", dataProvider = "versions")
-    public void testMatchCorrectness(String dataCloudVersion) {
+    @Test(groups = "deployment")
+    public void testMatchCorrectness() {
+        String dataCloudVersion  = dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
         Integer numGoodAccounts = new Double(numRecords * 0.8).intValue();
         Integer numBadAccounts = numRecords - numGoodAccounts;
 
@@ -117,11 +117,6 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         executor.shutdown();
 
         compareResults();
-    }
-
-    @DataProvider(name = "versions")
-    public Object[][] versionsToTest() {
-        return new Object[][] { { null }, { dataCloudVersionEntityMgr.currentApprovedVersion().getVersion() } };
     }
 
     private void compareResults() {
@@ -207,9 +202,12 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         for (String field : allFields) {
             Object bulkValue = bulkRecord.get(field);
             Object realtimeValue = realtimeRecord.get(field);
-            if ((bulkValue == null && realtimeValue == null) || (bulkValue != null && realtimeValue != null
-                    && String.valueOf(bulkValue).equals(String.valueOf(realtimeValue)))) {
-                continue;
+            if ((bulkValue == null && realtimeValue == null) || (bulkValue != null && realtimeValue != null)) {
+                if (String.valueOf(bulkValue).equals(String.valueOf(realtimeValue))) {
+                    continue;
+                } else {
+                    log.info(String.format("%s: %s != %s", field, String.valueOf(bulkValue), String.valueOf(realtimeValue)));
+                }
             }
             Map<String, Object> map = new HashMap<>();
             map.put(BULK_VALUE, bulkValue);
