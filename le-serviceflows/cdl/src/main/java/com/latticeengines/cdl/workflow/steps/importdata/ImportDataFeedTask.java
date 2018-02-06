@@ -59,9 +59,15 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
         waitForAppId(applicationId);
         EaiImportJobDetail jobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
+        Long totalFailed = 0L;
+        totalFailed += jobDetail.getIgnoredRows() == null ? 0L : jobDetail.getIgnoredRows();
+        totalFailed += jobDetail.getDedupedRows() == null ? 0L : jobDetail.getDedupedRows();
         getJson().put(dataFeedTask.getEntity(), jobDetail.getProcessedRecords())
-                .put("total_rows", jobDetail.getTotalRows()).put("ignored_rows", jobDetail.getIgnoredRows())
-                .put("imported_rows", jobDetail.getProcessedRecords()).put("deduped_rows", jobDetail.getDedupedRows());
+                .put("total_rows", jobDetail.getTotalRows())
+                .put("ignored_rows", jobDetail.getIgnoredRows())
+                .put("imported_rows", jobDetail.getProcessedRecords())
+                .put("deduped_rows", jobDetail.getDedupedRows())
+                .put("total_failed_rows", totalFailed);
     }
 
     private ImportConfiguration setupConfiguration(String taskUniqueId, DataFeedTask dataFeedTask) {
