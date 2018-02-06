@@ -766,8 +766,7 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.TransactionType.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE")) //
                 .type(Schema.Type.STRING) //
-                .notNull() //
-                .required() //
+                .defaultValueStr("Purchase")
                 .interfaceName(InterfaceName.TransactionType) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
