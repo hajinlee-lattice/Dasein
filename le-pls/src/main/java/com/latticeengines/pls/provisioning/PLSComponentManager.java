@@ -127,8 +127,9 @@ public class PLSComponentManager {
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails);
 
-        if (batonService.hasProduct(space, LatticeProduct.CG)) {
+        if (products.contains(LatticeProduct.CG)) {
             try {
+                LOGGER.info("Bootstrapping data feed for a new CG tenant.");
                 dataFeedProxy.getDataFeed(space.toString());
             } catch (Exception e) {
                 LOGGER.warn("Error when bootstrapping data feed for a new CG tenant " + tenant.getId(), e);

@@ -2,7 +2,6 @@ package com.latticeengines.proxy.exposed.objectapi;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("eventProxy")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -19,17 +19,17 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
         super("objectapi/customerspaces");
     }
 
-    public long getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
+    public Long getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/event/count/scoring", shortenCustomerSpace(customerSpace));
         return post("getScoringCount", url, frontEndQuery, Long.class);
     }
 
-    public long getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
+    public Long getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/event/count/training", shortenCustomerSpace(customerSpace));
         return post("getTrainingCount", url, frontEndQuery, Long.class);
     }
 
-    public long getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
+    public Long getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/event/count/event", shortenCustomerSpace(customerSpace));
         return post("getEventCount", url, frontEndQuery, Long.class);
     }

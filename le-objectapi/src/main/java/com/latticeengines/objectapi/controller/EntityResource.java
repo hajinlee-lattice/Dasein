@@ -34,7 +34,7 @@ public class EntityResource {
     @PostMapping(value = "/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
+    public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return entityQueryService.getCount(frontEndQuery, version);
     }
