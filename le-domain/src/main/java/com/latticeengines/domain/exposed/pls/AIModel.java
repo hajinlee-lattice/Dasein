@@ -84,6 +84,7 @@ public class AIModel extends RatingModel {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_MODEL_SUMMARY_ID")
     @JsonProperty("modelSummary")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private ModelSummary modelSummary;
 
     @JsonIgnore
