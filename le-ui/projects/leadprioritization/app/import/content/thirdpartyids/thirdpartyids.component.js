@@ -10,6 +10,7 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         fieldMappings: FieldDocument.fieldMappings,
         fieldMapping: ImportWizardStore.getThirdpartyidFields().map,
         fields: ImportWizardStore.getThirdpartyidFields().fields,
+        savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         availableFields: [],
         unavailableFields: [],
         unavailableTypes: [],
@@ -41,6 +42,7 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         mapping.forEach(function(item){
             //vm.unavailableFields.push(item.userField);
             vm.unavailableTypes.push(item.userField);
+            item.append = true;
         });
 
         ImportWizardStore.setSaveObjects(mapping);

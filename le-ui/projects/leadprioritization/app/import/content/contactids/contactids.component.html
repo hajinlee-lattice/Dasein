@@ -1,7 +1,7 @@
 <div class="import-accountid container file-import-content">
     <p>Please provide unique identifier attribute Lattice platform should use to de-duplicate your contact records and match the contact records to your accounts.  The data provided in this file will override the existing data.</p>
     <form name="form">
-        <div class="id-options">
+        <div class="id-options" ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">
                 <div>
                     <label for="dedupeField">Unique Contact Identifier</label>

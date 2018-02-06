@@ -18,6 +18,9 @@ angular.module('lp.import.wizard.transactionids', [])
             account: 'AccountId',
         },
         UnmappedFieldsMappingsMap: {},
+        savedFields: ImportWizardStore.getSaveObjects($state.current.name),
+        initialMapping: {},
+        keyMap: {}
     });
 
     vm.init = function() {
@@ -35,22 +38,49 @@ angular.module('lp.import.wizard.transactionids', [])
                 }
             }
         });
+        if(vm.savedFields) {
+            vm.savedFields.forEach(function(fieldMapping, index) {
+                vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
+                vm.AvailableFields.push(fieldMapping);
+                for(var i in vm.mappedFieldMap) {
+                    if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
+                        vm.fieldMapping[i] = fieldMapping.userField
+                    }
+                }
+            });
+        }
     };
 
     vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
-        vm.unavailableFields = [];
         for(var i in mapping) {
             var key = i,
-                item = mapping[key],
-                map = {userField: item, mappedField: vm.mappedFieldMap[key]};
-
+                userField = mapping[key],
+                map = {
+                    userField: userField, 
+                    mappedField: vm.mappedFieldMap[key],
+                    originalUserField: vm.keyMap[vm.mappedFieldMap[key]],
+                    originalMappedField: vm.mappedFieldMap[key],
+                    append: true
+                };
             mapped.push(map);
-            vm.unavailableFields.push(item)
         }
-        ImportWizardStore.setSaveObjects(mapped);
+        ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form);
     };
+
+    vm.checkFieldsDelay = function(form) {
+        var mapped = [];
+        $timeout(function() {
+            for(var i in vm.fieldMapping) {
+                var key = i,
+                    userField = vm.fieldMapping[key];
+
+                vm.keyMap[vm.mappedFieldMap[key]] = userField;
+                vm.initialMapping[key] = userField;
+            }
+        }, 1);
+    }
 
     vm.checkValidDelay = function(form) {
         $timeout(function() {

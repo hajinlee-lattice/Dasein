@@ -36,6 +36,9 @@ angular.module('lp.import.wizard.latticefields', [])
         analysisFieldMappings: {},
         availableFields: [],
         unavailableFields: [],
+        savedFields: ImportWizardStore.getSaveObjects($state.current.name),
+        initialMapping: {},
+        keyMap: {}
     });
 
 
@@ -56,12 +59,21 @@ angular.module('lp.import.wizard.latticefields', [])
         vm.matchingFields.forEach(function(matchingField) {
             vm.matchingFieldsArr.push(matchingField.name);
         });
-        vm.fieldMappings.forEach(function(fieldMapping) {
-            if(fieldMapping.mappedField && vm.matchingFieldsArr.indexOf(fieldMapping.userField) != -1) {
-                vm.unavailableFields.push(fieldMapping.userField);
-            }
-            vm.availableFields.push(fieldMapping);
-        });
+        if(vm.savedFields) {
+            vm.savedFields.forEach(function(fieldMapping) {
+                if(fieldMapping.mappedField && vm.matchingFieldsArr.indexOf(fieldMapping.userField) != -1) {
+                    vm.unavailableFields.push(fieldMapping.userField);
+                }
+                vm.availableFields.push(fieldMapping);
+            });
+        } else {
+            vm.fieldMappings.forEach(function(fieldMapping) {
+                if(fieldMapping.mappedField && vm.matchingFieldsArr.indexOf(fieldMapping.userField) != -1) {
+                    vm.unavailableFields.push(fieldMapping.userField);
+                }
+                vm.availableFields.push(fieldMapping);
+            });
+        }
     };
 
     var makeObject = function(string, delimiter) {
@@ -109,6 +121,12 @@ angular.module('lp.import.wizard.latticefields', [])
     vm.checkFieldsDelay = function(form) {
         $timeout(function() {
             for(var i in vm.fieldMapping) {
+                var key = i,
+                    userField = vm.fieldMapping[key];
+
+                vm.keyMap[key] = userField;
+                vm.initialMapping[key] = userField;
+
                 var fieldMapping = vm.fieldMapping[i],
                     fieldObj = makeObject(fieldMapping.userField);
 

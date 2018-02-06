@@ -1,7 +1,7 @@
 <div class="import-accountid container file-import-content">
     <p>Please provide the following attributes Lattice platform should use to aggregate &amp; match your customer purchase records to your accounts &amp; contacts.  The data provided in this file will append existing data.</p>
     <form name="form">
-        <div class="id-options" ng-if="!vm.state.accountDedupeField">
+        <div class="id-options" ng-if="!vm.state.accountDedupeField"  ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">
                 <div>
                     <label for="dedupeField">Unique Product Identifier</label>

@@ -11,7 +11,11 @@ angular.module('common.wizard.controls', [])
         state: $state.current.name,
         prev: WizardControlsOptions.backState,
         next: function() {
-            return 'home.' + WizardProgressContext;
+            var nextValue = 'home.' + WizardProgressContext;
+            if(WizardControlsOptions.suffix === undefined){
+                nextValue += '.wizard';
+            }
+            return nextValue;
         }(),
         valid: false,
         toState: $state.current,
