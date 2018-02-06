@@ -20,6 +20,11 @@ CREATE PROCEDURE `UpdateCDLTables`()
             ADD COLUMN `DATA_CLOUD_VERSION` VARCHAR(255);
 
         --ALTER TABLE PLS_MultiTenant.AI_MODEL DROP COLUMN `MODELING_METHOD`; -- Drop after both stacks are off of the codebase using this column
+
+        ALTER TABLE PLS_MultiTenant.`AI_MODEL` DROP FOREIGN KEY `FKgenp90xodrrj475g7g7xcxoti`;
+
+        ALTER TABLE PLS_MultiTenant.`AI_MODEL` ADD CONSTRAINT `FKgenp90xodrrj475g7g7xcxoti` FOREIGN KEY (`FK_MODEL_SUMMARY_ID`) REFERENCES `MODEL_SUMMARY` (`PID`) ON DELETE CASCADE;
+
     END;
 //
 DELIMITER ;
