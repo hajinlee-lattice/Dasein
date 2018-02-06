@@ -51,6 +51,9 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
     @Value("${datacloud.yarn.container.vcores.actors}")
     private int yarnContainerVCoresActors;
 
+    @Value("${dataplatform.trustore.jks}")
+    private String trustStoreJks;
+
     @Override
     public ApplicationId submitPropDataJob(DataCloudJobConfiguration jobConfiguration) {
         Job propDataJob = createJob(jobConfiguration);
@@ -108,6 +111,10 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
         containerProperties.put(ContainerProperty.PRIORITY.name(), "2");
 
         JacocoUtils.setJacoco(containerProperties, "datacloud");
+
+        if (StringUtils.isNotBlank(trustStoreJks)) {
+            containerProperties.put(ContainerProperty.TRUST_STORE.name(), trustStoreJks);
+        }
 
         propDataJob.setAppMasterPropertiesObject(appMasterProperties);
         propDataJob.setContainerPropertiesObject(containerProperties);

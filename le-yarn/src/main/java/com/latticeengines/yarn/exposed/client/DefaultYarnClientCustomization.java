@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
@@ -192,6 +193,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "-Dlog4j.debug", //
                 "-Dlog4j.configuration=file:log4j.properties", //
                 getJacocoOpt(containerProperties), //
+                getTrustStoreOpts(containerProperties), //
                 getXmxSetting(containerProperties), //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
@@ -207,6 +209,14 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
             return String.format(" -javaagent:%s=destfile=%s,append=true,includes=com.*",
                     properties.getProperty(ContainerProperty.JACOCO_AGENT_FILE.name()),
                     properties.getProperty(ContainerProperty.JACOCO_DEST_FILE.name()));
+        }
+        return "";
+    }
+
+    private String getTrustStoreOpts(Properties properties) {
+        if (StringUtils.isNotBlank(properties.getProperty(ContainerProperty.TRUST_STORE.name()))) {
+            return String.format(" -Djavax.net.ssl.trustStore=%s",
+                    properties.getProperty(ContainerProperty.TRUST_STORE.name()));
         }
         return "";
     }

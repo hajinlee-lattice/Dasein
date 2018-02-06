@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.BaseContext;
@@ -23,6 +24,9 @@ public class EaiYarnServiceImpl implements EaiYarnService {
     @Autowired
     private JobEntityMgr jobEntityMgr;
 
+    @Value("${dataplatform.trustore.jks}")
+    private String trustStoreJks;
+
     @Override
     public ApplicationId submitSingleYarnContainerJob(EaiJobConfiguration eaiJobConfig) {
         EaiJob eaiJob = createJob(eaiJobConfig);
@@ -41,5 +45,10 @@ public class EaiYarnServiceImpl implements EaiYarnService {
     @Override
     public ApplicationId submitMRJob(String mrJobName, Properties props) {
         return jobService.submitMRJob(mrJobName, props);
+    }
+
+    @Override
+    public String getTrustStoreJks() {
+        return trustStoreJks;
     }
 }

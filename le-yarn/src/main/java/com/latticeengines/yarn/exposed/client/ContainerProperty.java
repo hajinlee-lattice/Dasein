@@ -12,6 +12,7 @@ public enum ContainerProperty {
     RUNTIME_CONFIG, //
     JACOCO_AGENT_FILE, //
     JACOCO_DEST_FILE, //
+    TRUST_STORE, //
     JOB_TYPE,   //
     SWLIB_PKG;
 }

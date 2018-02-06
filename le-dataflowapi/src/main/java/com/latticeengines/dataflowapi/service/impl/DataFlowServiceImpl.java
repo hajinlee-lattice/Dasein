@@ -40,6 +40,9 @@ public class DataFlowServiceImpl implements DataFlowService {
     @Value("${dataflowapi.flink.local.mem}")
     private Integer flinkLocalMemory;
 
+    @Value("${dataplatform.trustore.jks}")
+    private String trustStoreJks;
+
     @Override
     public ApplicationId submitDataFlow(DataFlowConfiguration dataFlowConfig) {
         DataFlowJob dataFlowJob = createJob(dataFlowConfig);
@@ -83,6 +86,10 @@ public class DataFlowServiceImpl implements DataFlowService {
         }
 
         JacocoUtils.setJacoco(containerProperties, "dataflowapi");
+
+        if (StringUtils.isNotBlank(trustStoreJks)) {
+            containerProperties.put(ContainerProperty.TRUST_STORE.name(), trustStoreJks);
+        }
 
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);
         dataFlowJob.setContainerPropertiesObject(containerProperties);

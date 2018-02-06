@@ -13,6 +13,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -69,8 +70,12 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     @Autowired
     private BatchService batchService;
+
     @Autowired
     private JobNameService jobNameService;
+
+    @Value("${dataplatform.trustore.jks}")
+    private String trustStoreJks;
 
     @Override
     public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig) {
@@ -183,6 +188,10 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
 
         JacocoUtils.setJacoco(containerProperties, "workflowapi");
+
+        if (StringUtils.isNotBlank(trustStoreJks)) {
+            containerProperties.put(ContainerProperty.TRUST_STORE.name(), trustStoreJks);
+        }
 
         job.setAppMasterPropertiesObject(appMasterProperties);
         job.setContainerPropertiesObject(containerProperties);

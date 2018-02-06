@@ -2,6 +2,7 @@ package com.latticeengines.eai.service;
 
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.common.exposed.util.JacocoUtils;
@@ -37,10 +38,16 @@ public interface EaiYarnService {
 
         JacocoUtils.setJacoco(containerProperties, "eai");
 
+        if (StringUtils.isNotBlank(getTrustStoreJks())) {
+            containerProperties.put(ContainerProperty.TRUST_STORE.name(), getTrustStoreJks());
+        }
+
         eaiJob.setAppMasterPropertiesObject(appMasterProperties);
         eaiJob.setContainerPropertiesObject(containerProperties);
         return eaiJob;
     }
+
+    String getTrustStoreJks();
 
     void submitSingleYarnContainerJob(EaiJobConfiguration eaiJobConfig, BaseContext context);
 
