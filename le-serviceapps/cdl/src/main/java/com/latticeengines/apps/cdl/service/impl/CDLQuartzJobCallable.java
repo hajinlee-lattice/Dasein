@@ -24,7 +24,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        log.debug(String.format("Calling with job type: %s", cdlJobType.name()));
+        log.info(String.format("Calling with job type: %s", cdlJobType.name()));
         return cdlJobService.submitJob(cdlJobType, jobArguments);
     }
 

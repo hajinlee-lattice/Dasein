@@ -77,9 +77,13 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Override
     public boolean submitJob(CDLJobType cdlJobType, String jobArguments) {
+        log.info("starting submit job");
         if (cdlJobType == CDLJobType.IMPORT) {
+            log.info("starting submit import job");
             submitImportJob(jobArguments);
+            log.info("end submit import job");
         } else if (cdlJobType == CDLJobType.PROCESSANALYZE) {
+            log.info("starting submit process analyze job");
             int runningProcessAnalyzeJobs = checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
                 orchestrateJob(runningProcessAnalyzeJobs);
@@ -87,7 +91,9 @@ public class CDLJobServiceImpl implements CDLJobService {
                 log.error(e.getMessage());
                 throw e;
             }
+            log.info("end submit process analyze job");
         }
+        log.info("end submit job");
         return true;
     }
 
@@ -184,6 +190,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private int checkAndUpdateJobStatus(CDLJobType cdlJobType) {
+        log.info("start check and update job status");
         List<CDLJobDetail> details =cdlJobDetailEntityMgr.listAllRunningJobByJobType(cdlJobType);
         int runningJobs = details.size();
         for (CDLJobDetail cdlJobDetail : details) {
@@ -196,6 +203,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
+        log.info("end check and update job status");
         return runningJobs;
     }
 
