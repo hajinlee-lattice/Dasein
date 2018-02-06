@@ -12,15 +12,15 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("data_feed_status")
     private DataFeed.Status datafeedStatus;
 
-    @JsonProperty("import_job_ids")
-    private List<Long> importJobIds = Collections.emptyList();
+    @JsonProperty("importa_and_delete_job_ids")
+    private List<Long> importAndDeleteJobIds = Collections.emptyList();
 
     @JsonProperty("action_ids")
     private List<Long> actionIds = Collections.emptyList();
 
     @JsonProperty("data_cloud_build_number")
     private String dataCloudBuildNumber;
-    
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -29,12 +29,12 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
         this.datafeedStatus = initialDataFeedStatus;
     }
 
-    public List<Long> getImportJobIds() {
-        return importJobIds;
+    public List<Long> getImportAndDeleteJobIds() {
+        return importAndDeleteJobIds;
     }
 
-    public void setImportJobIds(List<Long> importJobIds) {
-        this.importJobIds = importJobIds;
+    public void setImportAndDeleteJobIds(List<Long> importAndDeleteJobIds) {
+        this.importAndDeleteJobIds = importAndDeleteJobIds;
     }
 
     public List<Long> getActionIds() {

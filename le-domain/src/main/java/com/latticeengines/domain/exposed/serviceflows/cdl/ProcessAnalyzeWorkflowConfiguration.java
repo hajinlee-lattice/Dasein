@@ -95,8 +95,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder importJobIds(List<Long> importJobIds) {
-            processStepConfiguration.setImportJobIds(importJobIds);
+        public Builder importAndDeleteJobIds(List<Long> importJobIds) {
+            processStepConfiguration.setImportAndDeleteJobIds(importJobIds);
             return this;
         }
 

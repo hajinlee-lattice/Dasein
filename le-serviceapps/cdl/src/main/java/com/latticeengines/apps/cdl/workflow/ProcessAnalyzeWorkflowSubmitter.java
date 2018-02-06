@@ -193,7 +193,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .initialDataFeedStatus(status) //
-                .importJobIds(actionAndJobIds.getRight()) //
+                .importAndDeleteJobIds(actionAndJobIds.getRight()) //
                 .actionIds(actionAndJobIds.getLeft()) //
                 .rebuildEntities(request.getRebuildEntities()) //
                 .inputProperties(ImmutableMap.<String, String> builder() //
