@@ -104,7 +104,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 throw new RuntimeException(
                         "We can't launch a process and analyze workflow now as there is one still running.");
             }
-            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()));
+            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
             JobStatus status = job.getJobStatus();
             if (!status.isTerminated()) {
                 throw new RuntimeException(
