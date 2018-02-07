@@ -400,14 +400,22 @@ public abstract class BaseRestApiProxy {
     private <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
                                               boolean kryoContent, boolean kryoResponse) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
-        if (kryoResponse && clz != null) {
-            headers.setAccept(Collections.singletonList(KryoHttpMessageConverter.KRYO));
-        } else {
-            headers.set(org.apache.http.HttpHeaders.ACCEPT_ENCODING, "gzip");
+        if (clz != null) {
+            // set headers for response
+            if (kryoResponse) {
+                headers.setAccept(Collections.singletonList(KryoHttpMessageConverter.KRYO));
+            } else {
+                headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
+                headers.set(org.apache.http.HttpHeaders.ACCEPT_ENCODING, "gzip");
+            }
         }
-        if (kryoContent && payload != null) {
-            headers.setContentType(KryoHttpMessageConverter.KRYO);
+        if (payload != null) {
+            // set headers for request
+            if (kryoContent) {
+                headers.setContentType(KryoHttpMessageConverter.KRYO);
+            } else {
+                headers.setContentType(MediaType.APPLICATION_JSON);
+            }
         }
         if (kryoContent || kryoResponse) {
             log.info("Headers: " + headers.toSingleValueMap());
