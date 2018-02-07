@@ -2,6 +2,7 @@
     var stompClient = null;
     var reconnecting = false;
     var connected = false;
+    var authToken = null;
 
     function setConnected(val) {
         connected = val;
@@ -22,8 +23,13 @@
         stompClient.connect({}, function (frame) {
             setConnected(true);
             reconnecting = false;
-            showMessage("Connected.")
+            showMessage("Connected.");
             console.log('Connected: ' + frame);
+
+            if ( authToken !== null ) {
+                authenticate()
+            }
+
             stompClient.subscribe('/topic/greetings', function (greeting) {
                 showMessage(JSON.parse(greeting.body).content);
             });
@@ -48,14 +54,15 @@
             stompClient.disconnect();
         }
         setConnected(false);
+        authToken = null;
         $("#messages").html("");
-        console.log("Disconnected");
+        console.log("Disconnected.");
     }
 
-    function sendToken() {
-        var token = $("#token").val();
-        console.log('Sending token ' + token + ' to authenticate the webscoket session.');
-        stompClient.send("/app/authenticate", {}, JSON.stringify({'Token': token}));
+    function authenticate() {
+        authToken = $("#token").val();
+        console.log('Sending token ' + authToken + ' to authenticate the webscoket session.');
+        stompClient.send("/app/authenticate", {}, JSON.stringify({'Token': authToken}));
     }
 
     function showMessage(message) {
@@ -68,7 +75,7 @@
         });
         $( "#connect" ).click(function() { connect(); });
         $( "#disconnect" ).click(function() { disconnect(); });
-        $( "#send" ).click(function() { sendToken(); });
+        $( "#send" ).click(function() { authenticate(); });
     })
 
 }).call(this);
