@@ -29,7 +29,6 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         UNAME=`uname`
         if [[ "${UNAME}" == 'Darwin' ]]; then
             echo "You are on Mac"
-            brew install -y apr openssl
             APR_VERSION=`brew list apr | head -n 1 | cut -d / -f 6`
             echo "You installed apr ${APR_VERSION}"
             OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
@@ -46,7 +45,6 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
             popd
         else
             echo "You are on ${UNAME}"
-            sudo apt-get install -y make gcc libssl-dev libapr1-dev
             pushd $CATALINA_HOME/bin
             tar xzf tomcat-native.tar.gz
             cd tomcat-native-*-src/native
