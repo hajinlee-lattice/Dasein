@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -98,7 +99,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private InputStream getResultFile(String workflowJobId, String resultFileType) {
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
@@ -125,7 +127,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public String getResultScoreFileName(String workflowJobId) {
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
@@ -144,7 +147,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public String getResultPivotScoreFileName(String workflowJobId) {
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
@@ -215,7 +219,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public InputStream getScoringErrorStream(String workflowJobId) {
-        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId, customerSpace != null ? customerSpace.toString() : null);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
